@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.10 2002/05/07 03:38:46 vbalaji Exp $
+% $Id: DistGrid_req.tex,v 1.11 2002/05/08 13:36:53 wsawyer Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -25,8 +25,8 @@ ESMF permits 1D domain decomposition, i.e. the distribution of a
 (possibly multidimensional) array over a 1D PE layout.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes] probably can be treated as a special case of 2D with no
@@ -43,9 +43,14 @@ etc).
 \item[Priority]
 \item[Source] get detailed list of sources here for different index
   orders: full generality is potentially a lot of work.
+ CAM-FV: (XY, XYZ, XZY).  Consistently decomposed blockwise in Y.
 \item[Status]
 \item[Verification]
-\item[Notes]
+\item[Notes]  In CAM-FV dynamics, 4D tracer areas are XYZT or
+	possibly XZTY, where T is the tracer dimension.  In the physics
+	there are cases of T in the second dimension.  The CAM
+	chunking mechanism brings up several additional indexing
+	orders (needs to be documented by other teams)
 \end{reqlist}
 
 \sreq{2D decomposition}
@@ -54,11 +59,13 @@ ESMF permits 2D domain decomposition, i.e. the distribution of a
 (2- or more dimensional) array over a 2D PE layout.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes] should NOT be treated as a special case of 3D!
+	CAM-FV has been extended for 2D decomposition, but 
+	it is not used by default.
 \end{reqlist}
 
 \ssreq{Index order}
@@ -68,14 +75,35 @@ dimensions, on data arrays specified in any index order (XYZ, XZY,
 etc).
 
 \begin{reqlist}
-\item[Priority]
+\item[Priority] 1
 \item[Source] get detailed list of sources here for different index
   orders: full generality is potentially a lot of work.
+  CAM-FV  (XYZ, XZY, XYZT, perhaps XZTY, others for chunked physics);
+  The decomposition is blockwise in X-Y for physics and blockwise in 
+  Y-Z for dynamics.
 \item[Status]
 \item[Verification]
 \item[Notes]
 \end{reqlist}
 
+<<<<<<< DistGrid_req.tex
+\ssreq{1D distributed arrays associated with a 2D decompsition}
+
+Within a 2D decomposition, it must be possible for arrays to be
+distributed along a single axis of distribution.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV (2D decomposition)
+\item[Status]
+\item[Verification]
+\item[Notes] i.e given a 2D decompsition in \texttt{(i,j)}, it must be
+  possible to have arrays that are functions of \texttt{(i,j)},
+  \texttt{(i,j,k)}, etc but also \emph{(j,k)}.  CAM-FV: needed for
+  2D decomposition, which not the default.
+\end{reqlist}
+
+=======
 \ssreq{1D distributed arrays associated with a 2D decompsition}
 
 Within a 2D decomposition, it must be possible for arrays to be
@@ -91,6 +119,7 @@ distributed along a single axis of distribution.
   \texttt{(i,j,k)}, etc but also \emph{(j,k)}.
 \end{reqlist}
 
+>>>>>>> 1.10
 \sreq{3D decomposition}
 
 ESMF permits 3D domain decomposition, i.e. the distribution of a
@@ -101,7 +130,7 @@ ESMF permits 3D domain decomposition, i.e. the distribution of a
 \item[Source] Anyone?
 \item[Status]
 \item[Verification]
-\item[Notes] and no 4D!
+\item[Notes] and no 4D!    Not foreseen for CAM-FV at this time.
 \end{reqlist}
 
 \sreq{Generation of a computational domain decomposition}
@@ -110,9 +139,15 @@ Given a global domain and a PE layout, there will be methods to assign
 each point in the domain to one PE for computation. 
 
 \begin{reqlist}
+<<<<<<< DistGrid_req.tex
+\item[Priority] 
+\item[Source] Requirements for specific flags to control the
+  decomposition must be added here.
+=======
 \item[Priority]
 \item[Source] Requirements for specific flags to control the
   decomposition must be added here.
+>>>>>>> 1.10
 \item[Status]
 \item[Verification]
 \item[Notes] in multi-threaded applications, the PE assignment is done
@@ -140,15 +175,16 @@ domain decomposition above by direct user specification of domain
 extents.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
-\item[Notes]  WS: Is it really necessary to mention this? There will
-be different methods to create decompositions, some more automated
-(``distributed a 3-D XYZ array over a 2-D PE layout in a block-block
-manner'') and others which are more user-specified (``map the global domain
-to the following PE and local indices'').
+\item[Notes] WS:  there will there be a fairly wide spectrum 
+of decomposition create methods, with varying degrees of user
+specification, e.g. less specific ``distributed a 3-D XYZ array 
+over a 2-D PE layout in a block-cyclic manner''), or more 
+user-specified (``map the global domain to the following PE 
+and local indices'').
 
 \end{reqlist}
 
@@ -178,15 +214,11 @@ synchronization of computational domains across a distributed grid.
 
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
-\item[Notes] WS:  "topology" (BLACS terminology) implies process layout.
-Can we use ``communication pattern''?
-
-VB: I still prefer grid topology. This only sets up connectivities:
-there may be no actual communication.
+\item[Notes] 
 
 \end{reqlist}
 
@@ -203,8 +235,8 @@ a particular kind of topological feature. It will be possible to
 specify this as input information for grid topology generation.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes] it is natural to treat this as a \textbf{DistGrid}
@@ -223,8 +255,8 @@ It shall be possible to retrieve the size of a computational domain
 along each axis of decomposition.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -236,8 +268,8 @@ It shall be possible to retrieve the beginning and ending indices of a
 computational domain along each axis of decomposition.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -249,8 +281,8 @@ It shall be possible to retrieve the maximum size along each axis of
 decomposition of all the computational domains in the \textbf{DistGrid}. 
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 
+\item[Source] 
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -262,6 +294,132 @@ ESMF methods will be provided to retrieve the list of computational
 domains associated with each PE of a  \textbf{DistGrid}.
 
 \begin{reqlist}
+\item[Priority] 
+\item[Source]
+\item[Status]
+\item[Verification]
+<<<<<<< DistGrid_req.tex
+\item[Notes] Besides being able to retrieve one's own domain
+  information, the full list of domains is also required for certain
+  operations.
+=======
+\item[Notes] it is natural to treat this as a \textbf{DistGrid}
+  feature, rather than having separate edge detection code in
+  applications. There is more than one way to treat LBCs in a
+  \textbf{DistGrid}: these will be spelt out anon.
+>>>>>>> 1.10
+\end{reqlist}
+
+<<<<<<< DistGrid_req.tex
+\sreq{Data domain retrieval}
+
+\ssreq{Domain extents}
+=======
+\req{Grid information retrieval}
+>>>>>>> 1.10
+
+<<<<<<< DistGrid_req.tex
+It shall be possible to retrieve the size of a data domain
+along each axis of decomposition.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+=======
+\sreq{Computational domain retrieval}
+>>>>>>> 1.10
+
+<<<<<<< DistGrid_req.tex
+\ssreq{Domain begin and end indices}
+=======
+\ssreq{Domain extents}
+>>>>>>> 1.10
+
+<<<<<<< DistGrid_req.tex
+It shall be possible to retrieve the beginning and ending indices of a
+data domain along each axis of decomposition.
+=======
+It shall be possible to retrieve the size of a computational domain
+along each axis of decomposition.
+>>>>>>> 1.10
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+<<<<<<< DistGrid_req.tex
+\ssreq{Maximum domain extent}
+=======
+\ssreq{Domain begin and end indices}
+>>>>>>> 1.10
+
+<<<<<<< DistGrid_req.tex
+It shall be possible to retrieve the maximum size along each axis of
+decomposition of all the data domains in the \textbf{DistGrid}. 
+=======
+It shall be possible to retrieve the beginning and ending indices of a
+computational domain along each axis of decomposition.
+>>>>>>> 1.10
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+<<<<<<< DistGrid_req.tex
+\ssreq{Index translation for globally non-conformant data domains}
+=======
+\ssreq{Maximum domain extent}
+>>>>>>> 1.10
+
+<<<<<<< DistGrid_req.tex
+Where the local array allocation is not globally-conformant, 
+ESMF will have methods to translate the local indices to
+globally-conformant indices.
+=======
+It shall be possible to retrieve the maximum size along each axis of
+decomposition of all the computational domains in the \textbf{DistGrid}. 
+>>>>>>> 1.10
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] It is possible (using array lower bound specifications)
+  to generate a \emph{globally conformant} array allocation: such that
+  if Madras is point (80,13) in the global grid, it will be (80,13) on
+  the data domain of any decomposition. Where this is not done, there
+  must be methods to translate local indices to globally conformant
+  indices.  CAM-FV should be globally conformant.
+\end{reqlist}
+
+<<<<<<< DistGrid_req.tex
+\ssreq{Data domain list}
+=======
+\ssreq{Computational domain list}
+>>>>>>> 1.10
+
+<<<<<<< DistGrid_req.tex
+ESMF methods will be provided to retrieve the list of data
+domains associated with each PE of a  \textbf{DistGrid}.
+=======
+ESMF methods will be provided to retrieve the list of computational
+domains associated with each PE of a  \textbf{DistGrid}.
+>>>>>>> 1.10
+
+\begin{reqlist}
 \item[Priority]
 \item[Source]
 \item[Status]
@@ -271,8 +429,14 @@ domains associated with each PE of a  \textbf{DistGrid}.
   operations.
 \end{reqlist}
 
-\sreq{Data domain retrieval}
+\sreq{Global domain retrieval}
 
+\ssreq{Domain extents}
+
+<<<<<<< DistGrid_req.tex
+It shall be possible to retrieve the size of a global domain
+along each axis of decomposition.
+=======
 \ssreq{Domain extents}
 
 It shall be possible to retrieve the size of a data domain
@@ -290,15 +454,20 @@ along each axis of decomposition.
 
 It shall be possible to retrieve the beginning and ending indices of a
 data domain along each axis of decomposition.
+>>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes]
+\item[Notes] CAM-FV: the size of the global domain is known
+a priori and does not need to be retrieved.
 \end{reqlist}
 
+<<<<<<< DistGrid_req.tex
+\ssreq{Domain begin and end indices}
+=======
 \ssreq{Maximum domain extent}
 
 It shall be possible to retrieve the maximum size along each axis of
@@ -347,22 +516,47 @@ domains associated with each PE of a  \textbf{DistGrid}.
 \end{reqlist}
 
 \sreq{Global domain retrieval}
+>>>>>>> 1.10
 
+<<<<<<< DistGrid_req.tex
+It shall be possible to retrieve the beginning and ending indices of the
+domain domain along each axis of decomposition.
+=======
 \ssreq{Domain extents}
 
 It shall be possible to retrieve the size of a global domain
 along each axis of decomposition.
+>>>>>>> 1.10
 
 \begin{reqlist}
 \item[Priority]
 \item[Source]
 \item[Status]
 \item[Verification]
+<<<<<<< DistGrid_req.tex
+\item[Notes] CAM-FV: the size of the global domain begin and end
+indices are known a priori and does not need to be retrieved.
+\end{reqlist}
+
+\sreq{PE layout retrieval}
+
+ESMF methods will be provided to publish and retrieve the PE layout
+associated with a distributed grid.
+=======
 \item[Notes]
 \end{reqlist}
 
 \ssreq{Domain begin and end indices}
+>>>>>>> 1.10
 
+<<<<<<< DistGrid_req.tex
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+=======
 It shall be possible to retrieve the beginning and ending indices of the
 domain domain along each axis of decomposition.
 
@@ -385,6 +579,7 @@ associated with a distributed grid.
 \item[Status]
 \item[Verification]
 \item[Notes]
+>>>>>>> 1.10
 \end{reqlist}
 
 \sreq{Grid topology retrieval}
@@ -400,7 +595,7 @@ ESMF methods will be provided to query the PE associated with (i.e
 distributed grid.
 
 \begin{reqlist}
-\item[Priority]
+\item[Priority] 
 \item[Source]
 \item[Status]
 \item[Verification]
@@ -431,10 +626,28 @@ operations listed above.
 It shall be possible to state if two distributed grids share the same
 global domain.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+
 \sreq{Equality of domain decomposition}
 
 It shall be possible to state if two distributed grids sharing a
 global domain are identically decomposed.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 
 \sreq{Equality of PE assignment}
 
@@ -450,8 +663,8 @@ ESMF shall provide an unblocked halo update: where the underlying
 data transfer may not be complete when the call returns.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
@@ -478,8 +691,8 @@ ESMF shall provide a method to wait for the completion of a previously
 issued unblocked halo update.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -517,7 +730,7 @@ data arrays where each array element is a derived data type.
 \begin{reqlist}
 \item[Priority]
 \item[Source]
-\item[Status]
+\item[Status] Rejected -- arrays only should suffice
 \item[Verification]
 \item[Notes] I hope this isn't required, but see
   Section~\ref{DG:Unstructured} below.
@@ -531,8 +744,8 @@ ESMF shall provide an unblocked data transpose: where the underlying
 data transfer may not be complete when the call returns.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV (2D decomposition)
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
@@ -559,8 +772,8 @@ ESMF shall provide a method to wait for the completion of a previously
 issued unblocked data transpose.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV (2D decomposition)
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -574,7 +787,7 @@ data arrays where each array element is a derived data type.
 \begin{reqlist}
 \item[Priority]
 \item[Source]
-\item[Status]
+\item[Status] Rejected -- arrays only should suffice
 \item[Verification]
 \item[Notes] I hope this isn't required, but see
   Section~\ref{DG:Unstructured} below.
@@ -585,25 +798,73 @@ data arrays where each array element is a derived data type.
 It shall be possible to create a copy on any PE of the entire global
 array from a distributed array.
 
+<<<<<<< DistGrid_req.tex
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] All
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
+
 \sreq{Allgather}
 
 It shall be possible to create a copy on all PEs of the associated
 PElist of the entire global array from a distributed array.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
+
+=======
+\sreq{Allgather}
+
+It shall be possible to create a copy on all PEs of the associated
+PElist of the entire global array from a distributed array.
+
+>>>>>>> 1.10
 \sreq{Partial gather} \label{DG:PartGather}
 
 In a 2D decomposition, it shall be possible to perform a gather along
 either axis.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV (2D decomposition)
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
 
 \req{Scatter}
 
 It shall be possible to create a distributed array across a PElist
 from a copy on any PE of the entire global array.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] All
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
+
 \sreq{Partial scatter}
 
 In a 2D decomposition, it shall be possible to perform a scatter along
 either axis.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV (2D decomposition)
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
 
 \req{Bundling}
 
@@ -611,8 +872,8 @@ ESMF shall provide a method to bundle multiple data arrays on the same
 distribution for aggregate data transfer.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes] Note that all arrays in a bundle must share the same
@@ -632,14 +893,22 @@ distribution for aggregate data transfer.
 It must be possible to initiate any number of instances of a bundle on
 a distributed grid.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{Add an array}
 
 It must be possible to add any array on a conformant \textbf{DistGrid}
 to a bundle.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes] Mix-and-match data types allowed? Could be tricky... if
@@ -652,7 +921,7 @@ It must be possible to delete any array from a bundle.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source]
+\item[Source] 
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -678,14 +947,23 @@ It must be possible to merge bundles sharing a \textbf{DistGrid}.
 ESMF shall provide methods to compute the global sum of a distributed
 integer array.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes] 
+\end{reqlist}
+
+
 \sreq{FP and complex global sum}
 
 ESMF shall provide methods to compute the global sum of a distributed
 floating-point or complex array.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -711,8 +989,8 @@ ESMF shall provide methods to compute the global sum of a 2D-decomposed
 floating-point or complex array along either axis of decomposition.
 
 \begin{reqlist}
-\item[Priority]
-\item[Source]
+\item[Priority] 1
+\item[Source] CAM-FV (2D decomposition)
 \item[Status]
 \item[Verification]
 \item[Notes] required for computing zonal means.
@@ -725,7 +1003,7 @@ ESMF shall provide methods to compute the global sum of a
 bitwise identical on different decompositions.
 
 \begin{reqlist}
-\item[Priority]
+\item[Priority] 1
 \item[Source] trace to GR.
 \item[Status]
 \item[Verification]
@@ -813,20 +1091,56 @@ distributed floating-point or complex array.
 ESMF shall provide methods to compute the global maximum of a
 distributed integer or FP array.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+
 \ssreq{Location of global maximum}
 
 The location of this maximum on the distributed grid is also
 retrievable.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 
 \sreq{Global minimum of integer or FP data}
 
 ESMF shall provide methods to compute the global minimum of a
 distributed integer or FP array.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+
 \ssreq{Location of global minimum}
 
 The location of this minimum on the distributed grid is also
 retrievable.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 
 \req{Grid staggering}
 
@@ -848,6 +1162,14 @@ ESMF will support a \agrid stencil: where the vector
 component array locations $u_{ij}$ and $v_{ij}$ are located at the
 cell center $(i,j)$.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{\bgrid}
 
 ESMF will support a \bgrid stencil: where the vector component array
@@ -861,12 +1183,28 @@ locations $u_{ij}$ and $v_{ij}$ are located on the N and E faces
 $(i+\frac12,j)$ and $(i,j+\frac12)$ respectively. Both NE and SW
 flavors are supported.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{\dgrid}
 
 ESMF will support a \dgrid stencil: where the vector component array
 locations $u_{ij}$ and $v_{ij}$ are located on the E and N faces
 $(i,j+\frac12)$ and $(i+\frac12,j)$ respectively. Both NE and SW
 flavors are supported.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] CAM-FV
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \part{Requirements for specific grid types} \label{DG:gridtypes}
 
@@ -966,6 +1304,14 @@ a data transpose in~\ref{DG:transpose}.
 See \cite{art:heikes+:geodesic,art:majewski+:gme} for extensive
 discussions on these grids.
 
+\begin{reqlist}
+\item[Priority] 3
+\item[Source] FV
+\item[Status]
+\item[Verification]
+\item[Notes] Envisioned for FV, but not a milestone.
+\end{reqlist}
+
 \req{Reduced grids}
 
 \req{Nested grids}
@@ -998,6 +1344,75 @@ nested grid.
 
 \req{Unstructured grids and ungridded data} \label{DG:Unstructured}.
 
+<<<<<<< DistGrid_req.tex
+Unstructured grids and ungridded location streams will come associated
+with an underlying background grid (see~\ref{DG:terms}). Requirements
+in this section use the background grid to define operations on
+unstructured grids and ungridded location streams. For the purpose of
+\emph{DistGrid}, unstructured grids and ungridded location streams are
+aligned on a single axis, each index of which is associated with a
+background grid cell.
+
+\sreq{Grid association}
+
+It shall be possible to associate a structured grid with unstructured
+grids and ungridded location streams.
+
+\begin{reqlist}
+\item[Priority] 3
+\item[Source] PSAS
+\item[Status]
+\item[Verification]
+\item[Notes] The method to generate the background grid requires
+  location information, and belongs to \textbf{PhysGrid}.  Needed
+  for PSAS, but not a milestone.
+\end{reqlist}
+
+\sreq{Domain decomposition}
+
+It shall be possible to apply domain decomposition to unstructured
+grids and ungridded location streams, using the background grid.
+
+\begin{reqlist}
+\item[Priority] 3
+\item[Source] PSAS
+\item[Status] 
+\item[Verification]
+\item[Notes]  Needed for PSAS, but not a milestone.
+\end{reqlist}
+
+\sreq{Halos and halo updates}
+
+It shall be possible to apply halos and halo update operations as
+defined in~\ref{DG:halo} to unstructured grids and ungridded location
+streams, using the background grid.
+
+\begin{reqlist}
+\item[Priority] 3
+\item[Source] PSAS
+\item[Status]
+\item[Verification]
+\item[Notes] Needed for PSAS, but not a milestone.
+\end{reqlist}
+
+\sreq{Data transpose}
+
+It shall be possible to apply data transposes as defined
+in~\ref{DG:transpose} to unstructured grids and ungridded location
+streams, using the background grid.
+
+\begin{reqlist}
+\item[Priority] 3
+\item[Source] PSAS
+\item[Status]
+\item[Verification]
+\item[Notes] Needed for PSAS, but not a milestone.
+\end{reqlist}
+
+
+
+
+=======
 Unstructured grids and ungridded location streams will come associated
 with an underlying background grid (see~\ref{DG:terms}). Requirements
 in this section use the background grid to define operations on
@@ -1060,5 +1475,6 @@ streams, using the background grid.
 \item[Verification]
 \item[Notes]
 \end{reqlist}
+>>>>>>> 1.10
 
 
