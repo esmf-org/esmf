@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.48 2004/02/19 21:31:46 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.49 2004/02/20 21:31:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.48 2004/02/19 21:31:46 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.49 2004/02/20 21:31:21 jwolfe Exp $'
 
 !==============================================================================
 
@@ -261,6 +261,12 @@
                                       total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
+      ! just do this to get a recDomainList with the right rank -- could be
+      ! different using arrays
+      tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
+                                            recvDomainList, total=.false., &
+                                            rc=status)
+      ! but this is the one we want to use for gathering grid data
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
                                             recvDomainListTot, total=.true., &
                                             rc=status)
