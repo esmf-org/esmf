@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.2 2003/05/07 14:14:37 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.3 2003/05/07 14:56:13 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -24,28 +24,28 @@
 !  system of units assumed by the component -- it is up to the user to
 !  ensure dimensional consistency.
 !
-! {\sm Semi-compressible flow equations
+! {\small Semi-compressible flow equations
 !
-!mass:  \[\frac{\partial \rho}{\partial t} + \frac{\partial \rho u}{\partial x}
-!+ \frac{\partial \rho v}{\partial y} = 0\]
+!$\frac{\partial \rho}{\partial t} + \frac{\partial \rho u}{\partial x}
+!+ \frac{\partial \rho v}{\partial y} = 0 $
 !
-!momemtum:  \[\frac{\partial \rho u}{\partial t} + \frac{\partial \rho u^{2}}{\partial x} 
-!+ \frac{\partial \rho u v}{\partial y} = - \frac{\partial(p + q)}{\partial x}\]
+!$\frac{\partial \rho u}{\partial t} + \frac{\partial \rho u^{2}}{\partial x} 
+!+ \frac{\partial \rho u v}{\partial y} = - \frac{\partial(p + q)}{\partial x}$
 !
-!\[\frac{\partial \rho v}{\partial t} + \frac{\partial \rho u v}{\partial x} 
-!+ \frac{\partial \rho v^{2}}{\partial y} = - \frac{\partial(p + q)}{\partial y}\]
+!$\frac{\partial \rho v}{\partial t} + \frac{\partial \rho u v}{\partial x} 
+!+ \frac{\partial \rho v^{2}}{\partial y} = - \frac{\partial(p + q)}{\partial y}$
 !
-!energy:  \[\frac{\partial p I}{\partial t} + \frac{\partial \rho u I}{\partial x} +
+!$\frac{\partial p I}{\partial t} + \frac{\partial \rho u I}{\partial x} +
 !\frac{\partial \rho v I}{\partial y} = -(p + q)\left(\frac{\partial u}
 !{\partial x} + \frac{\partial v}{\partial y}\right) + \frac{k}{b}\left(
-!\frac{\partial^{2}I}{\partial x^{2}} + \frac{\partial^{2}I}{\partial y^{2}}\right)\]
+!\frac{\partial^{2}I}{\partial x^{2}} + \frac{\partial^{2}I}{\partial y^{2}}\right)$
 !
-!state:  \[p = (\gamma - 1)\rho I\]
+!$p = (\gamma - 1)\rho I$
 !
-!viscosity:  \[q = -q_{o}\rho u_{in}(dx^{2} + dy^{2})^{1/2} \left(\frac{\partial u}
-!{\partial x} + \frac{\partial v}{\partial y}\right)\]
+!$q = -q_{o}\rho u_{in}(dx^{2} + dy^{2})^{1/2} \left(\frac{\partial u}
+!{\partial x} + \frac{\partial v}{\partial y}\right)$
 !
-!\[if q < 0 set q = 0\]
+!$if q < 0 set q = 0$
 !
 Where
 !\begin{tabular}{ll}
