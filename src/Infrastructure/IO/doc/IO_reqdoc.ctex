@@ -1,4 +1,4 @@
-% $Id: IO_reqdoc.ctex,v 1.6 2003/07/24 20:43:26 cdeluca Exp $
+% $Id: IO_reqdoc.ctex,v 1.7 2003/07/24 20:49:23 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -120,7 +120,7 @@ Mark Iredell}
 %\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
-\bibliography{IO}
+\bibliography{ESMF}
 \bibliographystyle{plain} 
 \addcontentsline{toc}{section}{References}
 #endif
