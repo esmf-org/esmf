@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.32 2005/01/28 22:47:11 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.33 2005/02/03 22:04:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -518,16 +518,14 @@ extern "C" {
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendvmid()"
-    (*ptr)->ESMC_VMSendVMId(*vmid, *dest);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    *rc = (*ptr)->ESMC_VMSendVMId(*vmid, *dest);
   }
 
   void FTN(c_esmc_vmrecvvmid)(ESMC_VM **ptr, ESMC_VMId **vmid, int *source,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecvvmid()"
-    (*ptr)->ESMC_VMRecvVMId(*vmid, *source);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+    *rc = (*ptr)->ESMC_VMRecvVMId(*vmid, *source);
   }
     
 };
