@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.118 2004/12/20 18:46:15 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.119 2004/12/21 17:07:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.118 2004/12/20 18:46:15 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.119 2004/12/21 17:07:57 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -750,8 +750,8 @@ static int maxroutes = 10;
     
     //printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
 
-    //printf("Ready to run Route on PET %d, commtable count = %d:\n", mypet, ccount);
-    //ESMC_RoutePrint("");
+    //printf("Ready to run Route on PET %d, commtable count = %d:\n", mypet, ccount);  
+    // ESMC_RoutePrint("");
     
     
     int req=0; // reset request counter
@@ -910,7 +910,8 @@ static int maxroutes = 10;
               //delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
               //  (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
               //   mypet, theirdeid, ESMF_TRUE);
- //printf("dispatching sendrecv request %d, PET = %d\n", req, mypet);
+ // printf("dispatching sendrecv req %d, PET=%d, them=%d, srcbytes=%d, rcvbytes=%d\n", 
+ //             req, mypet, theirpet, srctcount*nbytes, rcvtcount*nbytes);
               vm->vmk_sendrecv(srcbufstart[req], srctcount*nbytes, theirpet,
                 rcvbufstart[req], rcvtcount*nbytes, theirpet, &handle[req]);
 //              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirpet,
@@ -1013,7 +1014,7 @@ static int maxroutes = 10;
            else
 	      rcvbuf = rcvbufstart[req];
     
- //printf("waiting for sendrecv request %d, PET = %d\n", req, mypet);
+  //printf("waiting for sendrecv req %d, PET=%d\n", req, mypet);
            vm->vmk_wait(&handle[req]);
            
            // copy out of the recv buffer
