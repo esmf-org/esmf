@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.4 2003/06/11 23:08:29 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.5 2003/06/12 17:52:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.4 2003/06/11 23:08:29 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.5 2003/06/12 17:52:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -522,6 +522,9 @@
         !TODO
         !destroy route regrid%gather
         nullify(regrid%gather)
+
+        ! blithly assume the world is a good place
+        rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
 
