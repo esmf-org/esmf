@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.82 2003/08/27 16:44:36 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.83 2003/08/27 23:09:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.82 2003/08/27 16:44:36 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.83 2003/08/27 23:09:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1970,9 +1970,9 @@
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(in), optional :: physgridId
       type(ESMF_RelLoc), intent(in), optional :: relloc
-      type(ESMF_LocalArray), pointer, optional :: center_coord
-      type(ESMF_LocalArray), pointer, optional :: corner_coord
-      type(ESMF_LocalArray), pointer, optional :: face_coord
+      type(ESMF_LocalArray), optional :: center_coord
+      type(ESMF_LocalArray), optional :: corner_coord
+      type(ESMF_LocalArray), optional :: face_coord
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2119,13 +2119,14 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, MyDE, local_cell_count, global_start, &
-                                ai_global, rc)
+      subroutine ESMF_GridGetDE(grid, MyDE, local_cell_count, &
+                                local_axis_length, global_start, ai_global, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: local_cell_count
+      integer, dimension(:), intent(inout), optional :: local_axis_length
       integer, dimension(:,:), intent(inout), optional :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
                         optional :: ai_global
@@ -2142,6 +2143,8 @@
 !          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[local\_cell\_count]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
+!     \item[{[local\_axis\_length]}]
+!          Local (on this {\tt ESMF\_DE}) number of cells per axis.
 !     \item[{[global\_start]}]
 !          Global index of starting counts for each dimension.
 !     \item[{[ai\_global]}]
@@ -2165,7 +2168,8 @@
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
       call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, local_cell_count, &
-                              global_start, ai_global, status)
+                              local_axis_length, global_start, ai_global, &
+                              status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
         return
@@ -4030,6 +4034,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: i, j, rank, nDEs, num_domains
+      integer :: size, totalSize
       integer :: counts(ESMF_MAXGRIDDIM)
       real, dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai
@@ -4082,8 +4087,11 @@
 
       domainList = ESMF_DomainListCreate(num_domains)
 
-      ! now fill in the domain list  TODO: only one loop
+      ! now fill in the domain list  TODO: only one loop instead of two, one that
+      ! figures the number of domains and one that fills it in
+      ! TODO: move some of this code to Base and add a DomainList method
       num_domains = 0
+      totalSize  = 0
       do j = 1,nDEs
         if ((local_min(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
             (local_max(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
@@ -4092,10 +4100,14 @@
         num_domains = num_domains + 1
         domainList%domains(num_domains)%DE   = j
         domainList%domains(num_domains)%rank = rank
+        size = 1
         do i = 1,rank
           domainList%domains(num_domains)%ai(i) = grid_ai(j,i)
+          size = size * (grid_ai(j,i)%max - grid_ai(j,i)%min + 1)
         enddo
+        totalSize = totalSize + size
       enddo
+      domainList%total_size = totalSize
 
       ! TODO:  the code below is taken from Phil's regrid routines and needs
       !        to be incorporated at some point
