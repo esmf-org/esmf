@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.19 2005/03/23 02:57:45 theurich Exp $
+# $Id: build_rules.mk,v 1.20 2005/04/01 00:22:10 jwolfe Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -83,7 +83,7 @@ ifndef MPI_HOME
   export MPI_HOME := /usr/local
  endif
 endif
-MPI_LIB        = -L${MPI_HOME}/lib -lmpich
+MPI_LIB        = -L${MPI_HOME}/lib -lpmpich++ -lmpich
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
 MPIRUN         = ${MPI_HOME}/bin/mpirun
 endif
