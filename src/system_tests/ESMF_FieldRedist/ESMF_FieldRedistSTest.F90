@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.24 2004/05/26 22:06:43 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.25 2004/05/27 17:52:29 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -249,8 +249,8 @@
         ifld = i+hWidth
         compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                        + 2.0*sin(coordY(i,j)/50.0*pi)
-        if (resdata(ifld,jfld) .ne. compval) then
-        !if (srcdata(ifld,jfld) .ne. resdata(ifld,jfld)) then
+        if ((srcdata(ifld,jfld) .ne. resdata(ifld,jfld)) .OR. &
+            (abs(resdata(ifld,jfld)-compval).ge.1.0d-12)) then
           print *, "array contents do not match at: (", i,j, ") on DE ", &
                    my_de, ".  src=", srcdata(ifld,jfld), "dst=", &
                    resdata(ifld,jfld), "realval=", compval
