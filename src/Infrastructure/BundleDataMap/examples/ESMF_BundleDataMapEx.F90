@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapEx.F90,v 1.2 2004/06/11 17:56:10 svasquez Exp $
+! $Id: ESMF_BundleDataMapEx.F90,v 1.3 2004/06/15 11:41:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
       ! local variables 
       type(ESMF_BundleDataMap) :: bundleDM
-      type(ESMF_BundleInterleave) :: il
+      type(ESMF_InterleaveFlag) :: il
 
 
       ! return code
@@ -97,7 +97,7 @@
       call ESMF_BundleDataMapGet(bundleDM, bundleInterleave = il, rc=rc)
       if (il .eq. ESMF_INTERLEAVE_BY_ITEM) then
         print *, "Interleaved by individual data items"
-      else if (il .eq. ESMF_INTERLEAVE_BY_FIELD) then
+      else if (il .eq. ESMF_INTERLEAVE_BY_BLOCK) then
         print *, "Interleaved by fields"
       endif
 !EOC
