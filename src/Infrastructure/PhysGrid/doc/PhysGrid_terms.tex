@@ -1,4 +1,4 @@
-% $Id: PhysGrid_terms.tex,v 1.3 2002/03/21 22:29:55 rhallberg Exp $
+% $Id: PhysGrid_terms.tex,v 1.4 2002/04/02 01:28:10 rhallberg Exp $
 
 \begin{description}
 
@@ -6,12 +6,20 @@
 its extent (vertices) and a nominal central location.  Cells are basic to the
 discrete description of continuous fields in a finite volume formulation.
 
+\item [Global physical grid] \label{glos:GlobGrid} A grid containing physical
+information about the entire, undecomposed domain.  No DistGrid need be
+associated with a global physical grid.
+
 \item [Grid] An ESMF Grid. This is an ESMF General Design Element
 (Dsgn\_GENn.m), discussed in its own Requirements and  Design documents. It
 contains all physical grid (via the PhysGrid facilty) and memory organization
 and layout information (via the DistGrid facility) required to manipulate
 consistently defined Gridded Fields, as well as to create and operate with Grid
 Transforms.
+
+\item [Location stream] \label{glos:LocStream} A structure containing a list of
+locations with no assumed relationship between these locations, save that the
+types of information in each element of the list is similar.
 
 \item [Logically rectangular grid] \label{glos:RecGrid} A grid in which
 physically adjacent points have sequential indices, and in which the extent of
