@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.66 2005/01/10 23:47:33 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.67 2005/01/13 00:59:38 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -629,7 +629,7 @@ end subroutine ESMF_LogGet
     ESMF_LogDefault%fIndex = 1
     i = ESMF_LogDefault%petnum
     if (ESMF_LogDefault%logtype .eq. ESMF_LOG_SINGLE) then
-        ESMF_LogDefault%nameLogErrFile=trim(filename)
+        fname=trim(filename)
     else
         if (i .le. 9) then
 	    write(fnum,10) i
@@ -644,9 +644,9 @@ end subroutine ESMF_LogGet
         else 
             write(fnum,*) i
         endif
-        fname = "pet" // trim(fnum) // "." // trim(filename)
-        ESMF_LogDefault%nameLogErrFile=fname
+        fname = "PET" // trim(fnum) // "." // trim(filename)
     endif
+    ESMF_LogDefault%nameLogErrFile=fname
  10     format(I1.1)
  20     format(I2.2)
  30     format(I3.3)
@@ -679,7 +679,7 @@ end subroutine ESMF_LogGet
     endif
     ESMF_LogDefault%LOG_ENTRY => localbuf
     
-    call c_ESMC_LogInitialize(filename,rc2)
+    call c_ESMC_LogInitialize(filename,i,rc2)
     if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize
