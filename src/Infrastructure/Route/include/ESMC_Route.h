@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.38 2004/04/28 23:12:09 cdeluca Exp $
+// $Id: ESMC_Route.h,v 1.39 2004/10/05 22:57:01 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,7 +130,8 @@
                        int *global_count_snd, ESMC_DELayout *delayout_snd);
     int ESMC_RoutePrecomputeDomList(int rank, int my_DE, 
                        ESMC_DomainList *sendDomainList,
-                       ESMC_DomainList *recvDomainList);
+                       ESMC_DomainList *recvDomainList,
+                       ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData);
 
     // execute the communication routines set up in this route object
     int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk);
