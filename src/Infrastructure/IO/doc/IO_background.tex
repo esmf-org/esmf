@@ -1,10 +1,10 @@
-% $Id: IO_background.tex,v 1.5 2002/04/25 01:27:33 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.6 2002/05/02 13:07:08 lzaslavsky Exp $
 
 \section{Background}
 
-Applications in Earth system modeling require efficient and robust
-tools for input and output of gridded data and observational data streams.
-
+Earth system modeling applications require efficient and robust tools
+for input and output of gridded data associated with
+structured and or unstrustured grids, as well as observational data streams.
 Interfaces and methods provided by ESMF should allow reading and
 writing of data in several standard formats as well as support
 efficient internal data representations (see ESMF General
@@ -13,24 +13,40 @@ provide a unified interface to input data from a file with automatic
 detection of file-type in runtime, and to output data in a requested format.
 
 The data files  supported by ESMF are either {\em self-described} or
-{\em co-described} files.
+{\em co-described} files. These two types of data files are defined as
+follows:
 
 
-{\bf Self-Described Files} contain all metadata
-necessary to provide a unique interpretation of the file content
-assuming cirtain conventions. The metadata can be easily and
-strightforwardly read by a corresponding API.
+{\bf Self-Described Files} contain all metadata necessary to provide a
+unique interpretation of the file content
+assuming certain conventions. The metadata can be easily and
+straightforwardly read by a corresponding API.
 
 {\bf Co-Described Files} are accompanied by a metadata file. The
 metadata file provides a unique interpretation of the data file content
-under cirtain conventions. 
+under certain conventions. 
 
 
-NOTE. Some data files may contain complete description of their
-content included in the file itself in a fasion not allowing direct
-and strightforward extraction of metadata. A program, called {\em
-indexer}, can be applied to extract metadata and put them in a
-companion metadata file.
+{\bf NOTE} Some data files may contain complete description of their
+content, but the way metadata are represented might not allow direct
+and straightforward extraction of metadata. Metadata could be extracted
+from such a file and allocated to a companion metadata file.
+
+\subsection{Metadata conventions} 
+
+The NetCDF conventions for climate and forecast metadata, ``CF conventions'',
+\cite{NetCDF_CF_v1_beta3} promote processing and sharing of files
+created with netCDF API. Metadata created according to CF conventions
+provide definitive description of what the data represent, and spacial
+and temporal properties of data.
+
+We expect ESMF metadata conventions to be defined as extensions to
+CF-conventions and be accepted by participants of the ESMF project.
+
+ESMF IO interfaces and software will cover only IO of data covered by
+the convention.
+
+
 
 
 \subsection{Gridded Data Formats}
@@ -102,20 +118,6 @@ desirable to be able to use efficient native representation,
 accompanied by XML metadata file \cite{XML-W3C}. 
 \end{itemize}
 
-\subsection{Metadata conventions} 
-
-The conventions for climate and forecast metadata, ``CF conventions'',
-\cite{NetCDF_CF_v1_beta3} promote processing and sharing of files
-created with netCDF API. Metadata created according to CF convensions
-provide definitive description of what the data represent, and spacial
-and temporal properties of data.
-
-We expect that the ESMF gridded data will satisfy CF conventions, or
-that an extenstion to CF conventions will be accepted by participants.
-
-Thus, ESMF IO interfaces and software for gridded data will cover only
-IO of data covered by the convention.
-
 
 \subsection{Unstructural gridded Data}
 
@@ -124,7 +126,7 @@ keep spacial coordinates of each point and topological information
 through list of neighbors. 
 
 A possible approach to represent unstructural gridded data in ESMF is
-to use HDF-EOS Point Format \cite{HDF-EOS} where spacial coordinates
+to use {\bf HDF-EOS Point Format} \cite{HDF-EOS} where spacial coordinates
 and list of neighbors are included in the hierarchy.
 
 Use of indexing procedures may be necessary to operate with such
@@ -133,7 +135,8 @@ representation efficiently.
 \subsection{Observational Data}
 
 Observational data are usually transmitted and saved in BUFR format 
-\cite{WMO-BUFR-CREX}. 
+\cite{WMO-BUFR-CREX}. Another internal representation may be used to
+manipulate with observational data efficiently.
 
 \begin{itemize}
 \item[\bf BUFR] Binary Universal Form of Represantation
@@ -147,34 +150,35 @@ contains a sequence of data descriptors referring to a set of predefined and
 internationally agreed tables. Thus, instead of writing all detailed
 definitions within a message, one will just write a number identifying
 a parameter with its descriptions \cite{WMO-BUFR-CREX}.
-\end{itemize}
 
+\item[\bf Relational Database]
 The processes of receiving observational data and data assimilation
 may require complex access to data. To do it efficiently, a complex
 database software can be used. For example ECMWF currently exploits
 Observational Data Base (ODB) software based on SQL. It allows
-parallel quiery processing as well as use of {\em virtual data base}
+parallel query processing as well as use of {\em virtual data base}
 concept -- use of multiple data bases as one big virtual database
 \cite{ODB}. 
 
 An optimized indexing can provide very fast access to data in the
 process of data assimilation.
 
-
+\item[\bf HDF-EOS Point Format]
 An alternative/complimentary approach may be based on use of {\em
 point data structure} in HDF-EOS. In this case, optimized indexing can
 significantly accelerate access to data as well.
+\end{itemize}
 
 
-
-\subsection{IO optimization}
+\subsection{Parallel IO}
 
 The future development of ESMF IO facility will require further
 optimization with an expected increase in IO amount over the next few
 years. Increase in amount of satellitte data will result in the
-increase of time spent to input observational data. On the other hand,
-a customer's desire to download simulation results more frequently leads
-to significant increase in the amount of gridded data IO.
+increase of time spent to input observational data, as well as
+efficient manipulation of data in process of data assimilation. On the
+other hand, a customer's desire to download simulation results more 
+frequently leads to significant increase in the amount of gridded data IO.
 
 There are two aspects of  parallel IO:
 
@@ -186,18 +190,18 @@ written to a single file efficiently;
 discs and IO channels.
 \end{itemize}
  
-there several possibilities to perform IO in parallel:
+There are several possibilities to perform IO in parallel:
 \begin{itemize}
 \item {\bf Single-threaded IO.} A single process acquires all the data and
                                 writes them out; 
-\item {\bf Multithreaded/Single-fileset IO.} Many process write to a
+\item {\bf Multithreaded/Single-fileset IO.} Many processos write to a
 single file;
 
 \item {\bf Multithreaded, multi-fileset IO} Many processors write to
-multiple independent files. These fileas are later assembled. 
+multiple independent files. These files are later assembled. 
 \end{itemize}
 
-Multithreaded IO offers a simple way to stipe the data accross as many
+Multithreaded IO offers a simple way to stripe the data accross as many
 IO channels and disk channels as are available \cite{
 Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}.
 
@@ -213,7 +217,7 @@ above.
 
 Input/Output (IO) is part of the ESMF Infrastructure.  It will provide
 efficient utilities to input/output gridded data and observation data
-to and from the disk. A standard API will allow manipulate with multiple
+to and from the disk. A standard API will allow manipulation of multiple
 standard formats.
 
 
