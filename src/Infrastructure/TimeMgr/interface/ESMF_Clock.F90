@@ -1,5 +1,40 @@
-! $Id: ESMF_Clock.F90,v 1.1 2002/10/07 20:23:35 eschwab Exp $
-    module ESMF_ClockMod
+! $Id: ESMF_Clock.F90,v 1.2 2002/10/28 16:48:59 svasquez Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+! ESMF TimeInstant Module
+!
+! (all lines below between the !BOP and !EOP markers will be included in
+!  the automated document processing.)
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! put any constants or macros which apply to the whole component in this
+!  include file.  anything public or esmf-wide should be up higher at
+!  the top level include files.
+
+#include <ESMF_TimeMgr.h>
+
+!------------------------------------------------------------------------------
+! module definition
+!
+!   module ESMF_ClockMod
+!
+!
+! !DESCRIPTION:
+!
+!
+!
+!
+!
+!
+
 !===============================================================================
 !BOP
 !
@@ -11,6 +46,8 @@
         use ESMF_TimeInstantMod
         use ESMF_AlarmMod
 !
+!------------------------------------------------------------------------------
+
 ! !PUBLIC TYPES:
         implicit none
 
@@ -62,51 +99,133 @@
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
+!------------------------------------------------------------------------------
 
     contains
-    
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockInit
+
+! !INTERFACE:
         subroutine ESMF_ClockInit(this, TimeStep, StartTime, StopTime, &
                                   RefTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeIntv), intent(in) :: TimeStep
-            type(ESMF_TimeInstant), intent(in) :: StartTime, StopTime, RefTime
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeIntv), intent(in) :: TimeStep
+        type(ESMF_TimeInstant), intent(in) :: StartTime, StopTime, RefTime
+        integer, intent(out), optional :: rc
     
+! !DESCRIPTION:
+!     
+!     
+!     
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
             call c_ESMF_ClockInit(this, TimeStep, StartTime, StopTime, &
                                   RefTime, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockAddAlarm
+
+! !INTERFACE:
         subroutine ESMF_ClockAddAlarm(this, Alarm, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_Alarm), intent(in) :: Alarm
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_Alarm), intent(in) :: Alarm
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     
+!   
+!   
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
     
             call c_ESMF_ClockAddAlarm(this, Alarm, rc)
     
         end subroutine
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetAlarmList
+
+! !INTERFACE:
         subroutine ESMF_ClockGetAlarmList(this, AlarmList, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_Alarm), intent(out) :: AlarmList(:)
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+       type(ESMF_Clock), intent(inout) :: this
+       type(ESMF_Alarm), intent(out) :: AlarmList(:)
+       integer, intent(out), optional :: rc
     
+
+
+! !DESCRIPTION:
+!     
+!   
+!   
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+   
+
             call c_ESMF_ClockGetAlarmList(this, AlarmList, rc)
     
         end subroutine
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockSyncToWallClock
+
+! !INTERFACE:
         subroutine ESMF_ClockSyncToWallClock(this, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        integer, intent(out), optional :: rc
     
+
+! !DESCRIPTION:
+!     
+!   
+!   
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+   
+
             call c_ESMF_ClockSyncToWallClock(this, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockAdvance
+
+! !INTERFACE:
         subroutine ESMF_ClockAdvance(this, RingingAlarmList, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_Alarm), intent(out), optional :: RingingAlarmList(:)
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_Alarm), intent(out), optional :: RingingAlarmList(:)
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     
+!   
+!   
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
 
 			if (present(RingingAlarmList)) then
                 call c_ESMF_ClockAdvance(this, RingingAlarmList, rc)
@@ -116,109 +235,320 @@
     
         end subroutine
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockIsStopTime
+
+! !INTERFACE:
         function ESMF_ClockIsStopTime(this, rc)
-            logical :: ESMF_ClockIsStopTime
-            type(ESMF_Clock), intent(inout) :: this
-            integer, intent(out), optional :: rc
+
+!
+! !RETURN VALUE:
+        logical :: ESMF_ClockIsStopTime
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        integer, intent(out), optional :: rc
+
+
+! !DESCRIPTION:
+!     
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
 
             call c_ESMF_ClockIsStopTime(this, ESMF_ClockIsStopTime, rc)
     
         end function
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetAdvanceCount
+
+! !INTERFACE:
         subroutine ESMF_ClockGetAdvanceCount(this, AdvanceCount, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            integer(int32), intent(out) :: AdvanceCount
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        integer(int32), intent(out) :: AdvanceCount
+        integer, intent(out), optional :: rc
+
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+
 
             call c_ESMF_ClockGetAdvanceCount(this, AdvanceCount, rc)
     
         end subroutine
 
+
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetTimeInterval
+
+! !INTERFACE:
         subroutine ESMF_ClockGetTimeInterval(this, TimeInterval, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeIntv), intent(out) :: TimeInterval
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeIntv), intent(out) :: TimeInterval
+        integer, intent(out), optional :: rc
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
 
             call c_ESMF_ClockGetTimeInterval(this, TimeInterval, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockSetTimeInterval
+
+! !INTERFACE:
         subroutine ESMF_ClockSetTimeInterval(this, TimeInterval, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeIntv), intent(in) :: TimeInterval
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeIntv), intent(in) :: TimeInterval
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
 
             call c_ESMF_ClockSetTimeInterval(this, TimeInterval, rc)
 
         end subroutine
-    
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetCurrTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetCurrTime(this, CurrTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: CurrTime
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: CurrTime
+        integer, intent(out), optional :: rc
+
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
 
             call c_ESMF_ClockGetCurrTime(this, CurrTime, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockSetCurrTime
+
+! !INTERFACE:
         subroutine ESMF_ClockSetCurrTime(this, CurrTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(in) :: CurrTime
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(in) :: CurrTime
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
 
             call c_ESMF_ClockSetCurrTime(this, CurrTime, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetStartTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetStartTime(this, StartTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: StartTime
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: StartTime
+        integer, intent(out), optional :: rc
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
 
             call c_ESMF_ClockGetStartTime(this, StartTime, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetStopTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetStopTime(this, StopTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: StopTime
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: StopTime
+        integer, intent(out), optional :: rc
+
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+
 
             call c_ESMF_ClockGetStopTime(this, StopTime, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetRefTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetRefTime(this, RefTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: RefTime
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: RefTime
+        integer, intent(out), optional :: rc
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
 
             call c_ESMF_ClockGetRefTime(this, RefTime, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetRefTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetPrevTime(this, PrevTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: PrevTime
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: PrevTime
+        integer, intent(out), optional :: rc
+
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
 
             call c_ESMF_ClockGetPrevTime(this, PrevTime, rc)
+
     
         end subroutine
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetCurrSimTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetCurrSimTime(this, CurrSimTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: CurrSimTime
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: CurrSimTime
+        integer, intent(out), optional :: rc
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+
 
             call c_ESMF_ClockGetCurrSimTime(this, CurrSimTime, rc)
     
         end subroutine
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetPrevSimTime
+
+! !INTERFACE:
         subroutine ESMF_ClockGetPrevSimTime(this, PrevSimTime, rc)
-            type(ESMF_Clock), intent(inout) :: this
-            type(ESMF_TimeInstant), intent(out) :: PrevSimTime
-            integer, intent(out), optional :: rc
+
+
+! !ARGUMENTS:
+        type(ESMF_Clock), intent(inout) :: this
+        type(ESMF_TimeInstant), intent(out) :: PrevSimTime
+        integer, intent(out), optional :: rc
+
+
+
+! !DESCRIPTION:
+!     
+!
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
 
             call c_ESMF_ClockGetPrevSimTime(this, PrevSimTime, rc)
     
