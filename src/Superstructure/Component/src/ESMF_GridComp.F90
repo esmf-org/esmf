@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.17 2004/02/25 17:38:21 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.18 2004/02/26 16:36:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.17 2004/02/25 17:38:21 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.18 2004/02/26 16:36:03 svasquez Exp $'
 
 !==============================================================================
 !
@@ -1019,14 +1019,19 @@
 !     \begin{description}
 !     \item[component] 
 !          gridded component object
+!
 !     \item[{[max]}] 
 !          Maximum threading level
+!
 !     \item[{[pref\_intra\_process]}] 
 !          Intra process communication preference
+!
 !     \item[{[pref\_intra\_ssi]}] 
 !          Intra SSI communication preference
+!
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1082,16 +1087,22 @@
 !     \begin{description}
 !     \item[component] 
 !          gridded component object
+!
 !     \item[{[max]}] 
 !          Maximum threading level
+!
 !     \item[{[pref\_intra\_process]}] 
 !          Intra process communication preference
+!
 !     \item[{[pref\_intra\_ssi]}] 
 !          Intra SSI communication preference
+!
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
@@ -1145,16 +1156,22 @@
 !     \begin{description}
 !     \item[component] 
 !          gridded component object
+!
 !     \item[{[max]}] 
 !          Maximum threading level
+!
 !     \item[{[pref\_intra\_process]}] 
 !          Intra process communication preference
+!
 !     \item[{[pref\_intra\_ssi]}] 
 !          Intra SSI communication preference
+!
 !     \item[{[pref\_inter\_ssi]}] 
 !          Inter process communication preference
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
@@ -1202,10 +1219,13 @@
 !
 !     The arguments are:
 !     \begin{description}
+!
 !     \item[component] 
 !          gridded component object
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
