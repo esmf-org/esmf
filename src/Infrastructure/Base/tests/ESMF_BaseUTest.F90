@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.6 2003/10/20 20:13:53 cdeluca Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.7 2004/01/28 20:25:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.6 2003/10/20 20:13:53 cdeluca Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.7 2004/01/28 20:25:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -69,20 +69,14 @@
 
       call ESMF_Initialize(rc)
 
-      ! test setting of configuration values
-      !call ESMF_BaseSetConfig(base, config_set, rc)
-      !write(name, *) "ESMF_BaseSetConfig"
-      !write(failMsg, *) "rc =", rc, ", config_set =", config_set
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      !NEX_UTest
+      ! test creation of base objects
+      call ESMF_BaseCreate(base, "Base", "test object", 0, rc)
+      write(name, *) "ESMF_BaseCreate"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
-      ! test getting of configuration values,
-      !  compare to values set previously
-      !call ESMF_BaseGetConfig(base, config_get, rc)
-      !write(name, *) "ESMF_BaseGetConfig"
-      !write(failMsg, *) "rc =", rc, ", config_get =", config_get
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-      !                name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
       ! test setting of ESMF_Base members values
@@ -109,15 +103,25 @@
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
       !                name, failMsg, result, ESMF_SRCLINE)
 
+      !NEX_UTest
       ! test print method via option string
-      !call ESMF_Print(base, print_options, rc)
-      !write(name, *) "ESMF_Print"
-      !write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BasePrint(base, print_options, rc)
+      write(name, *) "ESMF_BasePrint"
+      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
+
+      !NEX_UTest
+      ! destroy base object
+      call ESMF_BaseDestroy(base, rc)
+      write(name, *) "ESMF_Destroy"
+      write(failMsg, *) "rc =", rc
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
 
       call ESMF_Finalize(rc)
   
