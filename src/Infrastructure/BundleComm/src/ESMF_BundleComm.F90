@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.33 2004/06/23 13:40:09 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.34 2004/08/28 00:14:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.33 2004/06/23 13:40:09 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.34 2004/08/28 00:14:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -175,16 +175,11 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       btypep => bundle%btypep
 
@@ -196,7 +191,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleAllGather
 #endif
@@ -260,16 +255,11 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: btypep    ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       btypep => bundle%btypep
 
@@ -282,7 +272,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGather
 
@@ -290,8 +280,8 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHalo"
-!BOPI
-! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on a Bundle
+!BOP
+! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on each Field in a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleHalo(bundle, routehandle, blocking, commhandle, rc)
@@ -305,9 +295,12 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a halo operation over the data
+!     Perform a halo operation over each {\tt ESMF\_Field}
 !     in an {\tt ESMF\_Bundle}.  This routine updates the data 
-!     inside the {\tt ESMF\_Bundle} in place.
+!     inside the {\tt ESMF\_Bundle} in place.  The current version
+!     of the code does not support {\tt ESMF\_Bundle}s with packed data.
+!     It simply operates on a {\tt ESMF\_Field} by {\tt ESMF\_Field}
+!     basis, updating each one at a time.
 !
 !     The arguments are:
 !     \begin{description}
@@ -332,26 +325,24 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: btypep              ! bundle type info
+      integer :: i                                ! loop counter
+      type(ESMF_BundleType) :: btypep             ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if(present(rc)) rc = ESMF_FAILURE
 
       btypep = bundle%btypep
 
-      call ESMF_ArrayHalo(btypep%flist(1)%ftypep%localfield%localdata, routehandle, &
-                             blocking, commhandle, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      do i=1, btypep%field_count
+          call ESMF_ArrayHalo(btypep%flist(i)%ftypep%localfield%localdata, &
+                              routehandle, blocking, commhandle, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleHalo
 
@@ -390,7 +381,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHaloStore"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_BundleHaloStore - Precompute a data halo operation on a Bundle
 
 ! !INTERFACE:
@@ -418,6 +409,8 @@
 !     {\tt ESMF\_Grid} and contains identical {\tt ESMF\_Field}s, then
 !     the same {\tt ESMF\_RouteHandle} can be computed once and used
 !     in multiple executions of the halo operation.
+!     In the current version of the code {\tt ESMF\_Bundle}s with
+!     packed data are not supported.
 !
 !     The arguments are:
 !     \begin{description}
@@ -436,20 +429,15 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: btypep     ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Sanity checks for good bundle, and that it has an associated grid
       ! and data before going down to the next level.
@@ -468,14 +456,17 @@
       endif
 
 
-      call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
+      ! TODO: does this need to be in a loop, with a separate routehandle
+      ! (or internal to routehandle a list of routehandles) for each field?
+      call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, &
+                               btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, routehandle, &
                                halodirection, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleHaloStore
 
@@ -542,30 +533,34 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: status                            ! Error status
+      integer :: i                                 ! loop counter
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       stypep = srcBundle%btypep
       dtypep = dstBundle%btypep
 
-      call ESMF_ArrayRedist(stypep%flist(1)%ftypep%localfield%localdata, &
-                            dtypep%flist(1)%ftypep%localfield%localdata, &
-                            routehandle, blocking, commhandle, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (stypep%field_count .ne. dtypep%field_count) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           "Source and destination Bundles must have same numbers of Fields", &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      do i = 1, stypep%field_count
+          call ESMF_ArrayRedist(stypep%flist(i)%ftypep%localfield%localdata, &
+                                dtypep%flist(i)%ftypep%localfield%localdata, &
+                                routehandle, blocking, commhandle, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRedist
 
@@ -655,16 +650,11 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Sanity checks for good bundle, and that it has an associated grid
       ! and data before going down to the next level.
@@ -701,7 +691,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRedistStore
 
@@ -757,17 +747,12 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
    
-!     Initialize return code   
+      ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call Grid method to perform actual work
+      ! Call Grid method to perform actual work??  TODO: is this right?
       !call ESMF_GridReduce(field%btypep%grid, &
       !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
       !                     rtype, result, status)
@@ -775,8 +760,8 @@
       !                            ESMF_ERR_PASSTHRU, &
       !                            ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleReduce
 
@@ -847,23 +832,37 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: status                            ! Error status
+      integer :: i                                 ! loop counter
+      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
+      stypep = srcBundle%btypep
+      dtypep = dstBundle%btypep
 
-      !TODO: add code  here
+      if (stypep%field_count .ne. dtypep%field_count) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           "Source and destination Bundles must have same numbers of Fields", &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
+      do i = 1, stypep%field_count
+          call ESMF_ArrayRegrid(stypep%flist(i)%ftypep%localfield%localdata, &
+                                dtypep%flist(i)%ftypep%localfield%localdata, &
+                                stypep%flist(i)%ftypep%mapping, &
+                                dtypep%flist(i)%ftypep%mapping, &
+	                        routehandle, srcmask, dstmask, &
+                                blocking, commhandle, status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      enddo
 
       ! Set return values.
-      !if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRegrid
 
@@ -952,22 +951,17 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
 
       !TODO: add code  here
 
 
       ! Set return values.
-      !if(rcpresent) rc = ESMF_SUCCESS
+      !if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRegridStore
 
@@ -1036,7 +1030,6 @@
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType) :: btypep             ! bundle type info
       !type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: delayout          ! layout
@@ -1049,11 +1042,7 @@
    
       ! Initialize return code   
       status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
+      if (present(rc)) rc = ESMF_FAILURE
 
       btypep = bundle%btypep
 
@@ -1097,7 +1086,7 @@
       btypep%flist(1)%ftypep%localfield%localdata = dstarray
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleScatter
 
