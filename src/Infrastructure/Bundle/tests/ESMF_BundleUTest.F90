@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.21 2004/06/13 02:44:01 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.22 2004/06/14 13:51:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.21 2004/06/13 02:44:01 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.22 2004/06/14 13:51:14 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -109,20 +109,20 @@
       ! This test crashes the test, it is commented out
       ! Bug report 969870 opened.
       ! Verify getting the name of an uninitialized Bundle is handled properly.
-      !call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
-      !write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
-      !write(name, *) "Getting name of uninitalized Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
+      write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
+      write(name, *) "Getting name of uninitalized Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
      
 
       ! This test crashes the test, it is commented out
       ! Bug report 969874 opened
       !  Verify the Field count query from an uninitialized Bundle is handled
-      !call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting Field count from an uninitialized Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Field count from an uninitialized Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Test Requirement FLD2.1.1 Creation using Field list
@@ -132,31 +132,31 @@
       !  Create several empty Fields and add them to a new Bundle.
       ! Commented out because it crashes
       ! Bug Report 969881 opened.
-      !fields(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
-      !fields(2) = ESMF_FieldCreateNoData(name="temperature", rc=rc)
-      !fields(3) = ESMF_FieldCreateNoData(name="heat flux", rc=rc)
-      !bundle1 = ESMF_BundleCreate(3, fields, name="atmosphere data", rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating Bundle with 3 No Data Fields Test Req. FLD2.1.1"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      fields(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
+      fields(2) = ESMF_FieldCreateNoData(name="temperature", rc=rc)
+      fields(3) = ESMF_FieldCreateNoData(name="heat flux", rc=rc)
+      bundle1 = ESMF_BundleCreate(3, fields, name="atmosphere data", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating Bundle with 3 No Data Fields Test Req. FLD2.1.1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
       ! Commented out because it crashes
       ! Bug Report 969881 opened.
-      !bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
-				!name="atmosphere data", rc=rc)
-      !write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
+				name="atmosphere data", rc=rc)
+      write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
       ! Commented out because it crashes
       ! Bug Report 969887 opened.
-      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
-      !write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
-      !write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
+      write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
+      write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !  Verify that a Field can be added to a Bundle
@@ -187,20 +187,20 @@
       !------------------------------------------------------------------------
 
       ! Creating a Field Test
-      !simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Create a Field Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       ! Add a field to an empty Bundle
       ! Commented out because it crashes
       ! bug report 969887 opened
-      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Adding a field to an Empty Bundle"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a field to an Empty Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
@@ -218,7 +218,8 @@
       call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to zero"
       write(name, *) "Getting Field count from an empty Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.0), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.0), &
+                      name, failMsg, result, ESMF_SRCLINE)
       print *, "Field count of empty Bundle = ", fieldcount
       !------------------------------------------------------------------------
 
@@ -226,10 +227,10 @@
       !  Verify that a Field can be added to an empty Bundle
       ! Commented out because simplefield has not been initialized
       ! uncomment when bug 969887 is resolved
-      !call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Adding a Field to an Empty Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding a Field to an Empty Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -237,151 +238,154 @@
       call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field count from a Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.1), &
+                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
       !  Test Requirement FLD2.5.7 Return Grid
       ! Commented out because there is no grid in the Bundle
       ! uncomment when bug 969887 is resolved
-      !call ESMF_BundleGet(bundle2, grid=grid2, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGet(bundle2, grid=grid2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
       ! Create an empty Bundle and then add multiple fields to it.
-      !bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc)
+      bundle3 = ESMF_BundleCreate(name="southern hemisphere", rc=rc)
       !bundle3 = ESMF_BundleCreate(name="northern hemisphere", rc=rc)
    
       !  Verify that multiple Fields can be added to a Bundle 
       ! Commented out because it crashes
       ! Bug Report 969881 opened.
-      !call ESMF_BundleAddField(bundle3, 3, fields, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Adding multiple Fields to a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleAddField(bundle3, 3, fields, rc)
+      write(failMsg, *) ""
+      write(name, *) "Adding multiple Fields to a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !  Verify that Fields count can be queried from a Bundle 
-      !call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc)
-      !write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to three"
-      !write(name, *) "Getting Field count from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc)
+      write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to three"
+      write(name, *) "Getting Field count from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.3), &
+                     name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Verify that the first Field names can be queried fron a Bundle
-      !call ESMF_BundleGetField(bundle1, "pressure", returnedfield1, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting first Field by name from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
+      call ESMF_BundleGetField(bundle1, "pressure", returnedfield1, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting first Field by name from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
 
-      !write(failMsg, *) "Did not return ESMF_SUCCESS or incorrect name returned"
-      !write(name, *) "Getting first Field from a Bundle Test continued"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname1.eq."pressure"), name, &
-							!failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or incorrect name returned"
+      write(name, *) "Getting first Field from a Bundle Test continued"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname1.eq."pressure"), name, &
+					failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       ! Verify that the second Field names can be queried fron a Bundle
-      !call ESMF_BundleGetField(bundle1, 2, returnedfield2, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a second Field by index from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_FieldGet(returnedfield2, name=fname2, rc=rc)
+      call ESMF_BundleGetField(bundle1, 2, returnedfield2, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a second Field by index from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGet(returnedfield2, name=fname2, rc=rc)
 
-      !write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
-      !write(name, *) "Getting a second Field from a Bundle Test continued"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname2.eq."temperature"), name, &
-						!failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
+      write(name, *) "Getting a second Field from a Bundle Test continued"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname2.eq."temperature"), name, &
+						failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
 
       ! Verify that the third Field names can be queried fron a Bundle
-      !call ESMF_BundleGetField(bundle1, 3, returnedfield3, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a third Field by index from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_FieldGet(returnedfield3, name=fname3, rc=rc)
+      call ESMF_BundleGetField(bundle1, 3, returnedfield3, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a third Field by index from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGet(returnedfield3, name=fname3, rc=rc)
 
-      !write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
-      !write(name, *) "Getting a third Field from a Bundle Test continued"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname3.eq."heat flux"), name, &
-						!failMsg, result, ESMF_SRCLINE)
-      !print *, "Bundle returned, field names = ", &
-                    !trim(fname1), ", ", trim(fname2), ", ", trim(fname3)
+      write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
+      write(name, *) "Getting a third Field from a Bundle Test continued"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname3.eq."heat flux"), name, &
+						failMsg, result, ESMF_SRCLINE)
+      print *, "Bundle returned, field names = ", &
+                    trim(fname1), ", ", trim(fname2), ", ", trim(fname3)
       !------------------------------------------------------------------------
 
 
       ! Verify that the fourth Field names cannot be queried from a Bundle
       ! because there are only three Fields in the Bundle
-      !call ESMF_BundleGetField(bundle1, 4, returnedfield3, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a non-existent Field from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetField(bundle1, 4, returnedfield3, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a non-existent Field from a Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
       ! Add an integer attribute to a Bundle Test
-      !call ESMF_BundleAddAttribute(bundle1, name="Sides", value=65, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Adding an integer attribute to a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleAddAttribute(bundle1, name="Sides", value=65, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an integer attribute to a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
 
       ! Get an integer attribute to a Bundle Test
-      !call ESMF_BundleGetAttribute(bundle1, name="Sides", value=number, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      !write(name, *) "Getting an integer attribute from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetAttribute(bundle1, name="Sides", value=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
 
       ! Print a Bundle Test
-      !call ESMF_BundlePrint(bundle1, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Printing a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundlePrint(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Printing a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
 
       ! Validate a Bundle Test
-      !call ESMF_BundleValidate(bundle1, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Validating a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleValidate(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validating a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 
       ! Verify that the zeroth Field names cannot be queried fron a Bundle
-      !call ESMF_BundleGetField(bundle1, 0, returnedfield3, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a zeroth non-existent Field from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetField(bundle1, 0, returnedfield3, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a zeroth non-existent Field from a Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
       ! Verify that the querying Field with wrong name from a Bundle returns FAILURE
-      !call ESMF_BundleGetField(bundle1, "nressure", returnedfield1, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting wrong Field name from a Bundle Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetField(bundle1, "nressure", returnedfield1, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting wrong Field name from a Bundle Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 
       ! Verify that the Bundle name can be queried 
-      !call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Query Bundle Name Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname1.eq."atmosphere data"), &
-				!name, failMsg, result, ESMF_SRCLINE)
-      !print *, "Bundle name = ", trim(bname1)
+      call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Query Bundle Name Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname1.eq."atmosphere data"), &
+				name, failMsg, result, ESMF_SRCLINE)
+      print *, "Bundle name = ", trim(bname1)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -402,7 +406,7 @@
       call ESMF_BundleDestroy(bundle1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Destroying a Destroyed Bundle Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, "rc = ", (rc)
       !------------------------------------------------------------------------
 
