@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.19 2003/04/29 23:02:05 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.20 2003/04/29 23:34:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.19 2003/04/29 23:02:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.20 2003/04/29 23:34:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -810,6 +810,7 @@
     // TODO: enable multiple simultaneous options (token parsing)
     //       (currently mutually exclusive)
     if (options != ESMC_NULL_POINTER) {
+
       if (strncmp(options, "timestep", 8) == 0) {
         cout << "TimeStep = " << endl;
         TimeStep.ESMC_TimeIntervalPrint(ESMC_NULL_POINTER);
@@ -866,8 +867,10 @@
           cout << AlarmList[i]->ESMC_AlarmPrint(ESMC_NULL_POINTER);
         }
       }
-    // print out all components
-    } else{
+
+    } else {
+      // default:  print out all components
+
       cout << "TimeStep = "  << endl; TimeStep.ESMC_TimeIntervalPrint(options);
       cout << "StartTime = " << endl; StartTime.ESMC_TimePrint(options);
       cout << "StopTime = "  << endl; StopTime.ESMC_TimePrint(options);
