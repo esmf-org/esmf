@@ -2,11 +2,12 @@
 \section{The ESMF Application Programming Interface}
 
 The ESMF Application Programming Interface (API) is based on the
-object-oriented programming notion of a {\it class}.  A class is a 
+object-oriented programming notion of a {\bf class}.  A class is a 
 software construct that's used for grouping a set of related variables 
 together with the subroutines and functions that operate on them.  We 
 use classes in ESMF because they help to organize the code, and often 
-make it easier to maintain and understand.
+make it easier to maintain and understand.  A particular instance
+of a class is called an {\bf object}.  
 
 The Fortran interface is implemented so that the variables associated
 with a class are stored in a derived type.  For example, an 
@@ -27,12 +28,12 @@ convenience, some ESMF calls are written as functions.
 
 The standard format for an ESMF Fortran call is:
 \begin{verbatim}
-call ESMF_<class><operation>(class_instance, arg1, arg2, ..., rc)
+call ESMF_<class><method>(class_instance, arg1, arg2, ..., rc)
 \end{verbatim}
 
 where \newline
 {\tt <class>} is the class name, \newline
-{\tt <operation>} is the name of the operation, \newline 
+{\tt <method>} is the name of the action to be performed, \newline 
 {\tt class\_instance} is a variable of the derived type associated 
 with the class, \newline
 the {\tt arg*} arguments are whatever other variables are required 
@@ -50,19 +51,38 @@ For example, to get the maximum halo widths in an ESMF Array called
 
 \end{verbatim}
 
-ESMF defines a set of standard operations that many classes 
-in the framework possess.  These include:
+ESMF defines a set of standard methods and interface rules that
+hold across the entire API.  These are: 
 \begin{itemize}
-\item {\tt Create} and {\tt Destroy}, for creating and destroying 
-classes.  The {\tt Create} operation includes allocating memory 
+
+\item {\tt Create()} and {\tt Destroy()}, for creating and destroying 
+classes.  The {\tt Create()} method allocates memory 
 for the class itself and for internal variables, as well as
 initialization.  It is always written as a function that returns
 a derived type instance of the class.
-\item {\tt Get} and {\tt Set}, for getting and setting data items 
-associated with a class.
-\item {\tt ReadRestart} and {\tt WriteRestart}, for writing out 
-sufficient information to reconstruct the class exactly, and for 
-reading in this information and restoring the class.
+
+\item {\tt Set()} and {\tt Get()}, for setting and retrieving a 
+particular item or flag in a class.  In general, these methods are
+overloaded for all cases where the item can be described with a
+name/value pair.  If identifying the item requires more than a 
+name, or if the object is of sufficient complexity that overloading
+for all cases in this way would be overwhelming, we define
+specific {\tt Set<Something>} and {\tt Get<Something>} interfaces.
+
+\item {\tt Add()}, {\tt Get()}, and {\tt Remove()} for manipulating 
+items that can be appended or inserted into a list of like
+items within a class.
+
+\item {\tt Print()}, for printing the contents of a class to 
+standard out.  This method is mainly intended for debugging.
+
+\item {\tt ReadRestart()} and {\tt WriteRestart}, for saving 
+the contents of a class and restoring it exactly.
+
+\item {\tt Validate()}, for determining whether a class is 
+internally consistent.  For example, Validate can check whether
+the Array and Grid associated with a Field are consistent.
+
 \end{itemize}
 
 
@@ -91,76 +111,115 @@ updates, are accessed through these classes.
 
 The main data classes in ESMF, in order of increasing complexity, are:
 \begin{itemize}
-\item {\tt Array} An ESMF {\tt Array} is a distributed, multi-dimensional array
-that can carry information about the halo widths associated with the array.  
-It contains a reference to a native Fortran array.
-\item {\tt Field}  A {\tt Field} represents a physical scalar or vector field.
+\item {\bf Array} An ESMF Array is a distributed, multi-dimensional 
+array that can carry information such as its type, kind, rank, and 
+associated halo widths.  It contains a reference to a native Fortran array.
+\item {\bf Field}  A Field represents a physical scalar or vector field.
 It contains a reference to an Array along with grid information and metadata.
-\item {\tt Bundle}  A {\tt Bundle} is a collection of {\tt Fields} discretized 
+\item {\bf Bundle}  A Bundle is a collection of Fields discretized 
 on the same grid.  The staggering of data points may be different for 
-different {\tt Fields} within a {\tt Bundle}.
-\item {\tt State}  A {\tt State} represents the collection of data that a 
-{\tt Component} either requires to run (an {\tt Import State}) or can make 
-available to other Components (an {\tt Export State}).
-States may contain references to {\tt Bundles}, {\tt Fields}, or {\tt Arrays}. 
-\item {\tt Component}  A {\tt Component} is a substantial piece of software 
+different Fields within a Bundle.
+\item {\bf State}  A State represents the collection of data that a 
+Component either requires to run (an Import State) or can make 
+available to other Components (an Export State).
+States may contain references to Bundles, Fields, or Arrays. 
+\item {\bf Component}  A Component is a substantial piece of software 
 with a distinct function.  ESMF currently recognizes two types 
-of {\tt Components}.  {\tt Components} that represent a physical domain 
+of Components.  Components that represent a physical domain 
 or process, such 
-as an atmospheric model, are called {\tt Gridded Components} since they are 
-usually discretized on an underlying grid.  The {\tt Components} 
-responsible for regridding and transferring data between {\tt Gridded 
-Components} are called {\tt Coupler Components}.  Each {\tt Component}
-is associated with an {\tt Import} and an {\tt Export State}.  
+as an atmospheric model, are called Gridded Components since they are 
+usually discretized on an underlying grid.  The Components 
+responsible for regridding and transferring data between Gridded 
+Components are called Coupler Components.  Each Component
+is associated with an Import and an Export State.  Components
+can be nested so that simpler components and applications can 
+be used to compose more complex applications.
+
 \end{itemize}
 
 Underlying these data classes are native language arrays.  ESMF allows 
-you to reference an existing Fortran array to an ESMF {\tt Array}, 
-{\tt Field}, or {\tt Bundle} so that ESMF data classes can be readily 
+you to reference an existing Fortran array to an ESMF Array, 
+Field, or Bundle, so that ESMF data classes can be readily 
 introduced into existing code.  You can perform communication operations 
-directly on Fortran arrays through the {\tt DELayout class}, which serves 
+directly on Fortran arrays through the DELayout class, which serves 
 as a unifying wrapper for distributed and shared memory communication 
 libraries.
-
-The set of operations common to model data classes includes: 
-\begin{itemize}
-\item {\tt Attach} and {\tt Detach}, for setting and nullifying 
-references to model data.
-\item {\tt Redist}, for data redistribution.
-\item {\tt Regrid}, for generating interpolation weights and transferring
-data from one grid to another.
-\item {\tt Halo}, for performing halo updates.
-\end{itemize}
 
 \subsection{ESMF Spatial Classes}
 
 Like the hierarchy of model data classes, ranging from the 
 simple to the complex, the ESMF is organized around an hierarchy of 
-classes that represent different spaces.
+classes that represent different spaces associated with a computation.
+Each of these spaces can be indexed in some fashion, in order to give
+the user control over how a computation is executed.  For Earth system
+applications, this hierarchy spans the environment associated with the 
+computer to the physical region described by the application.  
+The main spatial classes in ESMF, in order of those closest to the
+machine to those closest to the application, are:
 
 \begin{itemize}
-\item {\tt Grid}  A Grid is an abstraction of a physical space.  
-A Grid assigns a set of coordinates, an index space, and a topology 
-to a collection of grid cells. 
-\item {\tt DELayout}  A DELayout is an abstraction of a computational 
-space.  A DELayout assigns an index space and a topology to a 
-collection of Decomposition Elements (DEs).
-\item The {\tt Machine} is an abstraction of the physical computer.  
-\end{itemize} 
 
-Underlying these classes is the simplest space, the physical memory of 
-the computer.  
+\item The {\bf Virtual Machine}, or {\bf VM} The ESMF VM is an 
+abstraction of a parallel computing environment that encompasses 
+both shared and distributed memory.  Its primary purpose 
+is resource allocation.  Each Component defines its own VM based on 
+the resources it desires.  The elements of a VM are {\bf Persistent 
+Execution Threads}, or {\bf PETs}.  A simple case is one in which 
+every PET is associated with an MPI process running on a separate
+processor.  If Components are nested, the parent component allocates 
+a subset of its PETs to its children.  The children have some flexibility, 
+subject to the constraints of the computing environment, to decide 
+how they want to use the PETs they've received.
+
+\item {\bf DELayout}  A DELayout represents a decomposition.  Its
+basic elements are {\bf Decomposition Elements}, or {\bf DEs}.  
+A DELayout associates a set of DEs and a topology - how the DEs 
+are connected - with the PETs in a VM.  The user can also define 
+communication weights between DEs, for use in load balancing.
+DEs are not necessarily one-to-one with PETs.  For cache blocking,
+or user-managed multi-threading, more DEs than PETs may be defined.
+Fewer DEs than PETs may be defined if an application requires,
+for example, a decomposition that is an integer multiple.
+
+\item {\bf Grid}  A Grid is an abstraction of a physical space.  
+It associates a coordinate system, a set of coordinates, and 
+a topology to a collection of grid cells. 
+
+\item {\bf Field}  A Field may contain more dimensions than the 
+Grid that it is discretized on.  For example, for convenience 
+during integration, a user may want to define a single Field object 
+that holds snapshots of the data at multiple times.  The Field 
+must track what these additional dimensions mean.  Fields also 
+keep track of the location of a Field data point within its 
+associated Grid cell.
+
+\end{itemize}
+
+Although it is not an ESMF class, the linear {\bf address space} 
+of the computer is another fundamental index space that must be 
+mapped to data stored by the ESMF system.  
 
 In order to map between the index spaces of all of these classes,
-we require either rules or relational classes.
+we require either implicit rules (in which case the relationship 
+between index spaces is defined by default), or interfaces that 
+allow the user to specify the desired association.  The mechanisms
+within ESMF for defining these associations are:
 
-\subsection{ESMF Relational Classes}
+\begin{itemize}
 
-The Distributed Grid maps between the index space of the DELayout
-and the coordinate space of the grid.
+\item {\bf VM to DELayout} The DELayout provides interfaces and 
+shortcuts that map between its DEs and the PETs defined in the 
+VM.
 
-The DataMap class maps between the index space of the Array and
-the index space of the grid.
+\item {\bf DELayout to Grid} The Grid provides interfaces that map 
+between the index space defined by its coordinates and the decomposition 
+described by the DELayout.
+
+\item {\bf Grid, Array, and Field} The DataMap class maps between 
+an Array and a Grid.  It defines the relationships between their
+index spaces as well as any additional dimensions defined by the Field.
+
+\end{itemize}
 
 \subsection{ESMF Specification Classes}
 
@@ -168,7 +227,8 @@ At various places in the ESMF, it is useful to make neat packets
 of descriptive parameters.  Some of these are:
 \begin{itemize}
 \item {\tt IOSpec}, for storing IO parameters.
-\item {\tt ArraySpec}, for storing the specifics of an array.
+\item {\tt ArraySpec}, for storing the specifics, such as type/kind/rank,
+of an array.
 \end{itemize}
 
 \subsection{ESMF Utility Classes}
@@ -178,6 +238,5 @@ These are:
 \begin{itemize}
 \item {\tt TimeMgr}, for calendar, date, clock and alarm functions.
 \item {\tt LogErr}, for logging and error handling.
-\item {\tt PerfProf}, for timing and other performance profiling.
 \end{itemize}
 
