@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.3 2004/03/16 18:33:29 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.4 2004/03/24 17:56:48 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -32,7 +32,7 @@ Licensed under the GPL.
 
 #define ESMC_SUBSTITUTE_CTRL_CHARS 1
 
-#define FTN(func) func
+#define FTN(func) func##_
 
 #define ESMC_POINTER_SIZE 4
 #undef ESMC_HAVE_OMP_THREADS 
