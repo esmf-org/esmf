@@ -1,7 +1,10 @@
-# $Id: makefile,v 1.2 2003/11/10 22:35:51 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/11/10 23:55:14 nscollins Exp $ 
 
 
 LOCDIR   = src/Superstructure/AppDriver
+
+# this causes the makefile to build the quick_start rules
+QUICKSTART = yes
 
 # currently there are no subdirs in the quick_start dir.
 QUICKSTART_SUBDIRS = 
