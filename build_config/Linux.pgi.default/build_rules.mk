@@ -1,12 +1,18 @@
-# $Id: build_rules.mk,v 1.12 2004/10/28 22:11:30 nscollins Exp $
+# $Id: build_rules.mk,v 1.13 2005/01/25 17:13:25 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
 
 #
-#  Make sure that ESMF_PREC is set to 32
+#  Default processor word size setting.
 #
-ESMF_PREC = 32
+
+ifndef ESMF_PREC
+export ESMF_PREC := 32
+endif
+ifeq ($(ESMF_PREC),default)
+export ESMF_PREC := 32
+endif
 
 #
 # Default MPI setting.
@@ -62,10 +68,10 @@ endif
 
 ifeq ($(ESMF_COMM),mpich)
 # set up to use MPICH
-MPI_HOME       = 
-MPI_LIB        = -lmpich
-MPI_INCLUDE    = -DESMF_MPICH=1
-MPIRUN         = mpirun
+MPI_HOME       = /opt/mpich-gm
+MPI_LIB        = -L${MPI_HOME}/lib -lmpich
+MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
+MPIRUN         = ${MPI_HOME}/bin/mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
@@ -136,10 +142,24 @@ CXX_CLINKER	   = ${CXX_CC}
 CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} -V
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-C_F90CXXLD         = ${CXX_FC} -mp
-C_F90CXXLIBS       = -lpgc -lrt -lstd -lC
-C_CXXF90LD         = ${CXX_CC} 
-C_CXXF90LIBS       = -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
+# by default append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if it is not set, default to where the pgi
+# compilers try to install themselves.  if your compiler is someplace else
+# either set LD_LIBRARY_PATH first, or make a site specific file and
+# edit the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+else
+LIB_PATHS   = -L/opt/pgi/linux86-64/5.1/lib
+LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/linux86-64/5.1/lib
+endif
+C_F90CXXLD         = ${CXX_FC} -mp ${LD_PATHS}
+C_F90CXXLIBS       = ${LIB_PATHS} -lpgc -lrt -lstd -lC
+C_CXXF90LD         = ${CXX_CC}  ${LD_PATHS}
+C_CXXF90LIBS       = ${LIB_PATHS} -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 C_CXXSO            = ${CXX_CC} -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
