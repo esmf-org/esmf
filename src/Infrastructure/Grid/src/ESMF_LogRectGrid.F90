@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.17 2004/02/12 21:11:48 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.18 2004/02/12 23:53:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.17 2004/02/12 21:11:48 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.18 2004/02/12 23:53:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1522,7 +1522,6 @@
       allocate(periodic(numDims))
 
       if (associated(grid%gridSpecific%logRectGrid%coords)) then
-        allocate(coords(numDims))
         coords => grid%gridSpecific%logRectGrid%coords
       endif
       do i = 1,numDims
@@ -1993,10 +1992,9 @@
       deallocate(dimNames)
       deallocate(dimUnits)
       deallocate(periodic)
-      if (associated(coords)) deallocate(coords)
-      deallocate(coord1)
-      if (numDims.ge.2) deallocate(coord2)
-      if (numDims.ge.3) deallocate(coord3)
+      if (associated(coord1)) deallocate(coord1)
+      if (numDims.ge.2 .and. associated(coord2)) deallocate(coord2)
+      if (numDims.ge.3 .and. associated(coord3)) deallocate(coord3)
       deallocate(decompIdsUse)
       deallocate(countsPerDE1Use)
       deallocate(countsPerDE2Use)
