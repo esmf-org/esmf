@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.27 2004/06/21 22:04:20 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.28 2004/07/06 21:21:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.27 2004/06/21 22:04:20 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.28 2004/07/06 21:21:40 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -314,7 +314,7 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Verify that the second Field names can be queried fron a Bundle
+      ! Verify that the second Field names can be queried from a Bundle
       call ESMF_BundleGetField(bundle1, 2, returnedfield2, rc)
       write(failMsg, *) ""
       write(name, *) "Getting a second Field by index from a Bundle Test"
@@ -402,6 +402,24 @@
       write(failMsg, *) "Incorrect count"
       write(name, *) "Verify Attribute count from a Bundle "
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify that the third Field names can be queried fron a Bundle
+      call ESMF_BundleGetField(bundle1, 3, returnedfield3, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a third Field by index from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGet(returnedfield3, name=fname3, rc=rc)
+
+      !------------------------------------------------------------------------
+      ! Get a Bundle Data Pointer
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get a Bundle Data Pointer Test"
+      call ESMF_BundleGetDataPointer(bundle1, fieldName="heat flux", dataPointer=f90ptr2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
 
