@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.4 2004/03/22 14:55:55 theurich Exp $
+// $Id: ESMC_VM.C,v 1.5 2004/04/13 21:10:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.4 2004/03/22 14:55:55 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.5 2004/04/13 21:10:08 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -142,7 +142,10 @@ int ESMC_VM::ESMC_VMGet(
       *npes += this->vmachine_ncpet(i);
   }
   if (mpic != ESMC_NULL_POINTER)
-    *mpic = this->vmachine_mpi_comm();
+    // TODO:  Note:  on SunOS, MPI_Comm is defined as pointer to a structure,
+    //        so mpic should only be used as a reference container not to be
+    //        changed by the user.
+    *mpic = (int) this->vmachine_mpi_comm();
   if (ok_openmp != ESMC_NULL_POINTER)
     *ok_openmp = ESMF_TRUE;   // TODO: Determine this at compile time...
   return ESMF_SUCCESS;
