@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.4 2004/11/18 23:00:00 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.5 2004/11/19 00:27:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.4 2004/11/18 23:00:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.5 2004/11/19 00:27:11 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -68,8 +68,8 @@
 
    this->w = w;
 
-   // ensure normal form
-   return(ESMC_FractionNormalize());
+   // ensure simplified form
+   return(ESMC_FractionSimplify());
 
  }  // end ESMC_FractionSetw
 
@@ -97,8 +97,8 @@
 
    this->n = n;
 
-   // ensure normal form
-   return(ESMC_FractionNormalize());
+   // ensure simplified form
+   return(ESMC_FractionSimplify());
 
  }  // end ESMC_FractionSetn
 
@@ -126,8 +126,8 @@
 
    this->d = d;
 
-   // ensure normal form
-   return(ESMC_FractionNormalize());
+   // ensure simplified form
+   return(ESMC_FractionSimplify());
 
  }  // end ESMC_FractionSetd
 
@@ -237,8 +237,8 @@
    if (n != ESMC_NULL_POINTER) this->n = *n;
    if (d != ESMC_NULL_POINTER) this->d = *d;
 
-   // ensure normal form
-   return(ESMC_FractionNormalize());
+   // ensure simplified form
+   return(ESMC_FractionSimplify());
 
  }  // end ESMC_FractionSet
 
@@ -270,8 +270,8 @@
    this->n = n;
    this->d = d;
 
-   // ensure normal form
-   return(ESMC_FractionNormalize());
+   // ensure simplified form
+   return(ESMC_FractionSimplify());
 
  }  // end ESMC_FractionSet
 
@@ -309,10 +309,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_FractionNormalize - Ensure proper fraction (< 1) and sign
+// !IROUTINE:  ESMC_FractionSimplify - Ensure proper fraction (< 1) and sign; reduce to lowest denominator
 //
 // !INTERFACE:
-      int ESMC_Fraction::ESMC_FractionNormalize(void) {
+      int ESMC_Fraction::ESMC_FractionSimplify(void) {
 //
 // !RETURN VALUE:
 //    none.
@@ -322,14 +322,13 @@
 //
 // !DESCRIPTION:
 //     If fraction >= 1, add to whole part, and adjust fraction to remainder.
-//     Does not reduce; maintains same denominator, eg. 1000 (milli),
-//     1,000,000 (micro), 1,000,000,000 (nano).
+//     Then reduce to lowest denominator.
 //
 //EOP
 // !REQUIREMENTS:  
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_FractionNormalize()"
+ #define ESMC_METHOD "ESMC_FractionSimplify()"
 
     // check for divide-by-zero
     if (d == 0) {
@@ -362,38 +361,9 @@
       d *= -1; n *= -1;  // change signs
     }
 
-    return(ESMF_SUCCESS);
-
- }  // end ESMC_FractionNormalize
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_FractionReduce - Reduce to smallest denominator
-//
-// !INTERFACE:
-      int ESMC_Fraction::ESMC_FractionReduce(void) {
-//
-// !RETURN VALUE:
-//    none.
-//
-// !ARGUMENTS:
-//    none.
-//
-// !DESCRIPTION:
-//     Divide numerator and denominator by their GCD.
-//
-//EOP
-// !REQUIREMENTS:  
-
- #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_FractionReduce()"
-
-// TODO: could enhance by adding optional input argument denom to be
-//       desired denominator (eg. powers of 10:  1000 (milli),
-//                            100,000,000 (micro) etc.)
+    // reduce to lowest denominator
 
     ESMF_KIND_I4 gcd = ESMC_FractionGCD(n,d);
-
     // this should never happen since GCD never returns zero!
     if (gcd == 0) {
       ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
@@ -405,7 +375,7 @@
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_FractionReduce
+ }  // end ESMC_FractionSimplify
 
 //-------------------------------------------------------------------------
 //BOP
@@ -557,8 +527,8 @@
     ESMC_Fraction f2 = fraction;
 
     // ensure proper fractions
-    f1.ESMC_FractionNormalize();
-    f2.ESMC_FractionNormalize();
+    f1.ESMC_FractionSimplify();
+    f2.ESMC_FractionSimplify();
 
     // put both fractions on the same denominator, then compare
     ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
@@ -594,8 +564,8 @@
     ESMC_Fraction f2 = fraction;
 
     // put both fractions on the same denominator, then compare
-    f1.ESMC_FractionNormalize();
-    f2.ESMC_FractionNormalize();
+    f1.ESMC_FractionSimplify();
+    f2.ESMC_FractionSimplify();
 
     // put both fractions on the same denominator, then compare
     ESMF_KIND_I4 lcm = ESMC_FractionLCM(f1.d, f2.d);
@@ -631,8 +601,8 @@
     ESMC_Fraction f2 = fraction;
 
     // ensure proper fractions
-    f1.ESMC_FractionNormalize();
-    f2.ESMC_FractionNormalize();
+    f1.ESMC_FractionSimplify();
+    f2.ESMC_FractionSimplify();
 
     // ignore fractional part if whole parts are different
     if (f1.w != f2.w) return(f1.w < f2.w);
@@ -672,8 +642,8 @@
     ESMC_Fraction f2 = fraction;
 
     // ensure proper fractions
-    f1.ESMC_FractionNormalize();
-    f2.ESMC_FractionNormalize();
+    f1.ESMC_FractionSimplify();
+    f2.ESMC_FractionSimplify();
 
     // ignore fractional part if whole parts are different
     if (f1.w != f2.w) return(f1.w > f2.w);
@@ -773,9 +743,8 @@
     // whole part addition
     sum.w = w + fraction.w;
 
-    // normalize, but don't reduce; maintains denominators where possible.
-    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
-    sum.ESMC_FractionNormalize();
+   // ensure simplified form
+    sum.ESMC_FractionSimplify();
 
     return(sum);
 
@@ -813,9 +782,8 @@
     // whole part subtraction 
     diff.w = w - fraction.w;
 
-    // normalize, but don't reduce; maintains denominators where possible.
-    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
-    diff.ESMC_FractionNormalize();
+   // ensure simplified form
+    diff.ESMC_FractionSimplify();
 
     return(diff);
 
@@ -912,9 +880,8 @@
     // whole part multiplication
     product.w = w * multiplier;
 
-    // normalize, but don't reduce; maintains denominators where possible.
-    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
-    product.ESMC_FractionNormalize();
+   // ensure simplified form
+    product.ESMC_FractionSimplify();
 
     return(product);
 
@@ -1011,9 +978,8 @@
       quotient += ESMC_Fraction(0, remainder, divisor);
     }
 
-    // normalize, but don't reduce; maintains denominators where possible.
-    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
-    quotient.ESMC_FractionNormalize();
+   // ensure simplified form
+    quotient.ESMC_FractionSimplify();
 
     return(quotient);
 
@@ -1141,9 +1107,8 @@
       }
     }
 
-    // normalize, but don't reduce; maintains denominators where possible.
-    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
-    remainder.ESMC_FractionNormalize();
+   // ensure simplified form
+    remainder.ESMC_FractionSimplify();
 
     return(remainder);
 
@@ -1323,9 +1288,9 @@
    this->n = n;
    this->d = d;
 
-   // ensure normal form
-   ESMC_FractionNormalize();
-   // TODO:  throw exception if ESMC_FractionNormalize() returns ESMF_FAILURE
+   // ensure simplified form
+   ESMC_FractionSimplify();
+   // TODO:  throw exception if ESMC_FractionSimplify() returns ESMF_FAILURE
 
  }  // end ESMC_Fraction
 
@@ -1357,9 +1322,9 @@
    this->n = n;
    this->d = d;
 
-   // ensure normal form
-   ESMC_FractionNormalize();
-   // TODO:  throw exception if ESMC_FractionNormalize() returns ESMF_FAILURE
+   // ensure simplified form
+   ESMC_FractionSimplify();
+   // TODO:  throw exception if ESMC_FractionSimplify() returns ESMF_FAILURE
 
  }  // end ESMC_Fraction
 

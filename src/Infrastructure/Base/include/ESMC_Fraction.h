@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.h,v 1.4 2004/11/18 23:00:00 eschwab Exp $
+// $Id: ESMC_Fraction.h,v 1.5 2004/11/19 00:27:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,8 +70,7 @@ class ESMC_Fraction
     int ESMC_FractionGet(ESMF_KIND_I8 *w, ESMF_KIND_I4 *n,
                          ESMF_KIND_I4 *d) const;
 
-    int ESMC_FractionNormalize(void);
-    int ESMC_FractionReduce(void);
+    int ESMC_FractionSimplify(void);
     int ESMC_FractionConvert(ESMF_KIND_I4 denominator);
 
     // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
