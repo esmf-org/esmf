@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.28 2004/03/22 20:31:08 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.29 2004/03/22 21:17:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.28 2004/03/22 20:31:08 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.29 2004/03/22 21:17:47 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -733,16 +733,6 @@
       allocate(                dst_AI(nDEs, gridrank), stat=status)
       allocate(             gl_src_AI(nDEs, gridrank), stat=status)
       allocate(             gl_dst_AI(nDEs, gridrank), stat=status)
-     
-      ! Extract more information from the Grid
-      call ESMF_GridGet(grid, globalCellCountPerDim=globalCellCountPerDim, &
-                        globalStartPerDEPerDim=globalStartPerDEPerDim, &
-                        periodic=periodic, rc=status)
-      ! TODO: get decompids, get grid rank here?
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHalo: GridGet returned failure"
-         return
-      endif
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
@@ -753,11 +743,23 @@
         print *, "ERROR in ArrayHalo: DataMapGet returned failure"
         return
       endif
+     
+      ! Extract more information from the Grid
+      call ESMF_GridGet(grid, &
+                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                        globalCellCountPerDim=globalCellCountPerDim, &
+                        globalStartPerDEPerDim=globalStartPerDEPerDim, &
+                        periodic=periodic, rc=status)
+      ! TODO: get decompids, get grid rank here?
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayHaloStore: GridGet returned failure"
+         return
+      endif
 
       ! And get the Array sizes
       call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHalo: ArrayGet returned failure"
+         print *, "ERROR in ArrayHaloStore: ArrayGet returned failure"
          return
       endif
 
@@ -772,14 +774,16 @@
                                        vertRelLoc=vertRelloc, localAI2D=dst_AI, &
                                        globalAI2D=gl_dst_AI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHalo: GridLocalToGlobalIndex returned failure"
+         print *, "ERROR in ArrayHaloStore: ", &
+                  "GridLocalToGlobalIndex returned failure"
          return
       endif
       call ESMF_GridLocalToGlobalIndex(grid, horzRelLoc=horzRelLoc, &
                                        vertRelLoc=vertRelloc, localAI2D=src_AI, &
                                        globalAI2D=gl_src_AI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHalo: GridLocalToGlobalIndex returned failure"
+         print *, "ERROR in ArrayHaloStore: ", &
+                  "GridLocalToGlobalIndex returned failure"
          return
       endif
 
