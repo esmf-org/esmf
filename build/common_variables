@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.28 2003/05/21 16:43:18 flanigan Exp $ 
+# $Id: common_variables,v 1.29 2003/05/23 20:34:30 flanigan Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -26,6 +26,7 @@ ESMC_MODDIR     = $(ESMF_BUILD)/mod/mod$(BOPT)/$(ESMF_ARCH)
 ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(BOPT)/$(ESMF_ARCH)
 ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${BOPT}/$(ESMF_ARCH)
 ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(BOPT)/$(ESMF_ARCH)
+ESMF_EXDIR      = .
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
