@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.88 2004/02/25 19:58:54 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.89 2004/03/09 21:07:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -411,7 +411,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.88 2004/02/25 19:58:54 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.89 2004/03/09 21:07:39 svasquez Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -676,7 +676,6 @@ end function
 !           An {\tt ESMF\_Base} derived type to be deleted.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -763,19 +762,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[base]
 !       Any ESMF type.
-!
 !     \item[name]
 !       The name of the attribute to get.
-!
 !     \item[value]
 !       The value of the attribute.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -811,16 +805,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[anytype]
 !       Any ESMF type.
-!
 !     \item[count]
 !       The number of attributes.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -854,25 +844,18 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     
 !     \item[anytype]
 !       Any ESMF type.
-!       
 !     \item[number]
 !       The attribute number.
-!       
 !     \item[name]
 !       The attribute name.
-!       
 !     \item[type]
 !       The attribute datatype.
-!       
 !     \item[type]
 !       The attribute value.
-!       
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       
 !     \end{description}
 !     
 !
@@ -902,19 +885,14 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!   
 !     \item[anytype]
 !       Any ESMF type.
-!
 !     \item[count]
 !       The number of attributes.
-!
 !     \item[namelist]
 !       The list of attribute names.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -949,21 +927,15 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[anytype]
 !       Any ESMF type.
-!
 !     \item[namelist]
 !       The list of attribute names.
-!
 !     \item[valuelist]
 !       The list of attribute values.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOPI
 ! !REQUIREMENTS:  (none.  added for completeness)
@@ -993,22 +965,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[anytype]
 !       Any ESMF type.
-!
 !     \item[namelist]
 !       The list of attribute names.
-!
 !     \item[typelist]
 !       The list of attribute types.
-!
 !     \item[valuelist]
 !       The list of attribute values.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1037,21 +1003,15 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[anytypelist]
 !       A list of any ESMF types.
-!
 !     \item[name]
 !       The attribute name.
-!
 !     \item[typelist]
 !       The attribute value.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOPI
 ! !REQUIREMENTS:  FLD1.5.5 (pri 2)
@@ -1081,24 +1041,17 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-! 
 !     \item[anytypelist]
 !       The list of any ESMF types.
-!     
 !     \item[name]
 !       The attribute name.
-!     
 !     \item[typelist]
 !       The list of all possible data types.
-!     
 !     \item[valuelist]
 !       The list of attribute values.
-!     
 !     \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     
 !     \end{description}
-!
 !
 !EOPI
 ! !REQUIREMENTS:  FLD1.5.5 (pri 2)
@@ -1129,21 +1082,15 @@ end function
 ! 
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[name]
 !       The attribute name.
-!   
 !     \item[source]
 !       The source ESMF object.
-!
 !     \item[destination]
 !       The destination ESMF object.
-!     
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     
 !     \end{description}
-!     
 !
 !EOPI
 ! !REQUIREMENTS:  FLD1.5.4
@@ -1175,18 +1122,13 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[source]
 !       The source ESMF object.
-!
 !     \item[destination]
 !       The destination ESMF object.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOPI
 ! !REQUIREMENTS:  FLD1.5.4
@@ -1230,12 +1172,9 @@ end function
 !           for names will be followed.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 ! 
-
-!
 !EOPI
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       logical :: rcpresent                          ! Return code present   
@@ -1281,16 +1220,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[base]
 !       Any ESMF type.
-!
 !     \item[name]
 !       The name of the ESMF type.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1326,16 +1261,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[base]
 !       Any ESMF type.
-!
 !     \item[options]
 !       Print options.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1383,10 +1314,8 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[num_domains]
 !	A suggestion on the number of domains the object will hold.
-!
 !     \end{description}
 !
 !EOPI
@@ -1421,10 +1350,8 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[domainlist]
 !       A list of domains to destroy.
-!
 !     \end{description}
 !
 !EOPI
@@ -1452,10 +1379,8 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[domainlist]
 !       A list of domains to print.
-!
 !     \end{description}
 !
 !EOPI
@@ -1505,28 +1430,20 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     
 !     \item[domainlist]
 !       The ESMF\_DomainList.
-!       
 !     \item[min1]
 !	Minimimun in first direction.
-!       
 !     \item[max1]
 !	Maximum in first direction.
-!       
 !     \item[stride1]
 !	Stride in first direction.
-!       
 !     \item[min2]
 !	Minimimun in second direction.
-!       
 !     \item[max2]
 !	Maximimun in second direction.
-!       
 !     \item[stride2]
 !	Stride in second direction.
-!       
 !     \end{description}
 !
 !EOPI
@@ -1570,37 +1487,26 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[domainlist]
 !       The ESMF\_DomainList.
-!
 !     \item[min1]
 !       Minimimun in first direction.
-!
 !     \item[max1]
 !       Maximum in first direction.
-!
 !     \item[stride1]
 !       Stride in first direction.
-!
 !     \item[min2]
 !       Minimimun in second direction.
-!
 !     \item[max2]
 !       Maximimun in second direction.
-!
 !     \item[stride2]
 !       Stride in second direction.
-!
 !     \item[min3]
 !       Minimimun in third direction.
-!
 !     \item[max3]
 !       Maximimun in third direction.
-!
 !     \item[stride3]
 !       Stride in third direction.
-!
 !     \end{description}
 !
 !EOPI
@@ -1635,13 +1541,10 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[domainlist]
 !       The ESMF\_DomainList.
-!
 !     \item[newdomain]
 !       The ESMF\_Domain to add to the list.
-!
 !     \end{description}
 !
 !EOPI
@@ -1701,22 +1604,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[ai]
 !       The ESMF\_AxisIndex.
-!
 !     \item[min]
 !       The minimimun.
-!
 !     \item[max]
 !       The maximum.
-!
 !     \item[stride]
 !       The stride.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     
 !     \end{description}
 !
 !EOPI
@@ -1747,24 +1644,17 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[ai]
 !       The ESMF\_AxisIndex.
-!
 !     \item[min]
 !       The minimimun.
-!
 !     \item[max]
 !       The maximum.
-!
 !     \item[stride]
 !       The stride.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOPI
 
@@ -1797,16 +1687,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[ptype]
 !       ESMF\_Pointer.
-!
 !     \item[contents]
 !       The contents to set.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1835,13 +1721,10 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[ptype]
 !       ESMF\_Pointer.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1874,13 +1757,10 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[ptype]
 !       ESMF\_Pointer.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1912,16 +1792,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[status]
 !       The ESMF\_Status of a string.
-!
 !     \item[string]
 !       The status string.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1958,18 +1834,13 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[datatype]
 !       The ESMF\_DataType of a string.
-!
 !     \item[string]
 !       The status string.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
-!
 !
 !EOPI
 ! !REQUIREMENTS:
@@ -2001,16 +1872,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[datakind]
 !       The ESMF\_DataKind of a string.
-!
 !     \item[string]
 !       The status string.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -2048,16 +1915,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[tf]
 !       The ESMF\_Logical of a string.
-!
 !     \item[string]
 !       The status string.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
