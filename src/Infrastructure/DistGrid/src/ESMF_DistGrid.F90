@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.121 2004/08/21 22:10:31 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.122 2004/09/20 22:58:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -229,7 +229,8 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridCreateEmpty
-         module procedure ESMF_DistGridCreateInternal
+         module procedure ESMF_DistGridCreateBlock
+         module procedure ESMF_DistGridCreateVector
 !        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
@@ -246,7 +247,8 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridConstructNew
-         module procedure ESMF_DistGridConstructInternal
+         module procedure ESMF_DistGridConstructBlock
+         module procedure ESMF_DistGridConstructVector
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
@@ -261,7 +263,7 @@
       interface ESMF_DistGridSetCounts
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_DistGridSetCountsInternal
+         module procedure ESMF_DistGridSetCountsBlock
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -276,11 +278,28 @@
       interface ESMF_DistGridSetDE
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_DistGridSetDEInternal
+         module procedure ESMF_DistGridSetDEBlock
+         module procedure ESMF_DistGridSetDEVector
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     extent counts in a {\tt ESMF\_DistGrid}.
+!
+!EOPI
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface ESMF_DistGridAllocate
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DistGridAllocateBlock
+         module procedure ESMF_DistGridAllocateVector
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     allocate arrays in the derived types of a {\tt ESMF\_DistGrid}.
 !
 !EOPI
       end interface 
@@ -353,19 +372,17 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateInternal"
+#define ESMF_METHOD "ESMF_DistGridCreateBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateInternal - Create a new DistGrid internally
+! !IROUTINE: ESMF_DistGridCreateBlock - Create a new DistGrid internally
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateInternal(dimCount, counts, delayout, &
-                                           decompIDs, &
-                                           countsPerDEDim1, countsPerDEDim2, &
-                                           periodic, coversDomain, &
-                                           name, rc)
+      function ESMF_DistGridCreateBlock(dimCount, counts, delayout, decompIDs, &
+                                        countsPerDEDim1, countsPerDEDim2, &
+                                        periodic, coversDomain, name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateBlock
 !
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
@@ -420,7 +437,7 @@
 
 !     Initialize pointers
       nullify(dgtype)
-      nullify(ESMF_DistGridCreateInternal%ptr)
+      nullify(ESMF_DistGridCreateBlock%ptr)
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -437,10 +454,79 @@
                                   name=name, rc=rc)
 
 !     Set return values.
-      ESMF_DistGridCreateInternal%ptr => dgtype
+      ESMF_DistGridCreateBlock%ptr => dgtype
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_DistGridCreateInternal
+      end function ESMF_DistGridCreateBlock
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridCreateVector"
+!BOPI
+! !IROUTINE: ESMF_DistGridCreateVector - Create a new DistGrid internally
+
+! !INTERFACE:
+      function ESMF_DistGridCreateVector(dimCount, myCount, delayout, &
+                                         decompIDs, name, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateVector
+!
+! !ARGUMENTS:
+      integer, intent(in) :: dimCount
+      integer, intent(in) :: myCount
+      type(ESMF_DELayout), intent(in), optional :: delayout
+      integer, dimension(dimCount), intent(in) :: decompIDs
+      character (len = *), intent(in), optional :: name  
+      integer, intent(out), optional :: rc       
+
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_DistGrid} object, constructs its
+!     internals, and internally sets necessary attributes and values.
+!     Returns a pointer to a new {\tt ESMF\_DistGrid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dimCount]
+!          Number of dimensions described by this DistGrid.
+!     \item[myCount]
+!          Number of computational cells on this DE.
+!     \item[delayout]
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[decompIDs]
+!          Identifier for which Grid axes are decomposed.
+!     \item[{[name]}] 
+!          {\tt ESMF\_DistGrid} name.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOPI
+
+      type(ESMF_DistGridType), pointer :: dgtype  ! Pointer to new distgrid
+      integer :: localrc                          ! Error status
+
+!     Initialize pointers
+      nullify(dgtype)
+      nullify(ESMF_DistGridCreateVector%ptr)
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      allocate(dgtype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Distgrid type", &
+                                     ESMF_CONTEXT, rc)) return
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_DistGridConstruct(dgtype, dimCount, delayout, decompIDs, &
+                                  myCount, name, rc)
+
+!     Set return values.
+      ESMF_DistGridCreateVector%ptr => dgtype
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_DistGridCreateVector
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -598,16 +684,16 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridConstructInternal"
+#define ESMF_METHOD "ESMF_DistGridConstructBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
+! !IROUTINE: ESMF_DistGridConstructBlock - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructInternal(dgtype, dimCount, delayout, &
-                                                decompIDs, counts, &
-                                                countsPerDEDim1, countsPerDEDim2, &
-                                                gridBoundaryWidth, periodic, &
-                                                coversDomain, name, rc)
+      subroutine ESMF_DistGridConstructBlock(dgtype, dimCount, delayout, &
+                                             decompIDs, counts, &
+                                             countsPerDEDim1, countsPerDEDim2, &
+                                             gridBoundaryWidth, periodic, &
+                                             coversDomain, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -826,7 +912,115 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridConstructInternal
+      end subroutine ESMF_DistGridConstructBlock
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridConstructVector"
+!BOPI
+! !IROUTINE: ESMF_DistGridConstructVector - Construct the internals of an allocated DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridConstructVector(dgtype, dimCount, delayout, &
+                                              decompIDs, myCount, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), pointer :: dgtype 
+      integer, intent(in) :: dimCount
+      type(ESMF_DELayout), intent(in) :: delayout
+      integer, dimension(dimCount), intent(in) :: decompIDs
+      integer, intent(in) :: myCount
+      character (len = *), intent(in), optional :: name  
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt ESMF\_DistGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_DistGridDestruct}
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_DistGridCreate}, which calls
+!     {\tt ESMF\_DistGridConstruct}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dgtype]
+!          Pointer to a {\tt ESMF\_DistGrid}.
+!     \item[dimCount]
+!          Number of dimensions described by this DistGrid.
+!     \item[delayout]
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[decompIDs]
+!          Identifier for which Grid axes are decomposed by the layout.
+!     \item[myCount]
+!          Number of computational cells on this DE.
+!     \item[{[name]}] 
+!          {\tt ESMF\_DistGrid} name.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOPI
+
+      integer :: localrc                          ! Error status
+      integer :: i, ndim
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
+      type(ESMF_DistGridLocal),  pointer :: me
+      type(ESMF_Logical):: otoFlag, lrFlag
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+!     Error checking for required input   TODO: complete
+!     call ESMF_DELayoutValidate(delayout, rc=localrc)
+!     if (ESMF_LogMsgFoundError(localrc, &
+!                               ESMF_ERR_PASSTHRU, &
+!                               ESMF_CONTEXT, rc)) return
+ 
+      ! Initialize the derived type contents, including setting name
+      call ESMF_DistGridConstructNew(dgtype, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Allocate resources based on number of DE's
+      call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+                            logRectFlag=lrFlag, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Check DELayout attributes
+      if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layoutu
+        print logMsg, "not a 1-to-1 layout"
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
+                                    ESMF_CONTEXT, rc)
+        return
+      endif
+
+      ! Allocate necessary arrays
+      call ESMF_DistGridAllocate(dgtype, dimCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Fill in distgrid derived type with input
+      dgtype%dimCount = dimCount
+      dgtype%delayout = delayout
+      do i = 1,dimCount
+        dgtype%decompIDs(i) = decompIDs(i)
+      enddo
+
+      ! Fill in DE derived type
+      call ESMF_DistGridSetDE(dgtype, myCount, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridConstructVector
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1341,14 +1535,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetCountsInternal"
+#define ESMF_METHOD "ESMF_DistGridSetCountsBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
+! !IROUTINE: ESMF_DistGridSetCountsBlock - Set extent counts for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetCountsInternal(dgtype, dimCount, nDE, &
-                                                countsPerDEDim1, countsPerDEDim2, &
-                                                periodic, total, rc)
+      subroutine ESMF_DistGridSetCountsBlock(dgtype, dimCount, nDE, &
+                                             countsPerDEDim1, countsPerDEDim2, &
+                                             periodic, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -1570,7 +1764,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridSetCountsInternal
+      end subroutine ESMF_DistGridSetCountsBlock
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1683,16 +1877,16 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetDEInternal"
+#define ESMF_METHOD "ESMF_DistGridSetDEBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridSetDEInternal - Set DE information for a DistGrid
+! !IROUTINE: ESMF_DistGridSetDEBlock - Set DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetDEInternal(dgtype, rc)
+      subroutine ESMF_DistGridSetDEBlock(dgtype, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: dgtype
-      integer, intent(out), optional :: rc            
+      type(ESMF_DistGridType), pointer :: dgtype
+      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     Set a {\tt ESMF\_DistGrid} attribute with the given value.
@@ -1702,7 +1896,7 @@
 !     \begin{description}
 !     \item[dgtype] 
 !          Class to be modified.
-!     \item[{[rc]}] 
+!     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1713,19 +1907,21 @@
       integer :: DEID, localCellCount, localCellCountForDim
       integer :: compCellCount, compCellCountForDim
       integer :: i, myDEx, myDEy, nDEx, nDEy
-      integer :: localDe, deCountPerDim(2), coord(2)
+      integer :: localDE, deCountPerDim(2), coord(2)
+      type(ESMF_DistGridGlobal), pointer :: globC,  globT
+      type(ESMF_DistGridLocal),  pointer :: localC, localT
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      rc = ESMF_FAILURE
 
-      call ESMF_DELayoutGet(dgtype%delayout, localDe=localDe, &
+      call ESMF_DELayoutGet(dgtype%delayout, localDe=localDE, &
                             deCountPerDim=deCountPerDim, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_DELayoutGetDELocalInfo(dgtype%delayout, de=localDe, &
-        coord=coord, rc=localrc)
+      call ESMF_DELayoutGetDELocalInfo(dgtype%delayout, de=localDE, &
+                                       coord=coord, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1738,8 +1934,13 @@
 
       DEID = (myDEy-1)*nDEx + myDEx
 
-      dgtype%myDEComp%MyDE  = DEID
-      dgtype%myDETotal%MyDE = DEID
+      globC  => dgtype%globalComp
+      globT  => dgtype%globalTotal
+      localC => dgtype%myDEComp
+      localT => dgtype%myDETotal
+
+      localC%MyDE  = DEID
+      localT%MyDE  = DEID
 
 !     TODO: need to create the following with ESMFArrayCreate before doing this
 !     dgtype%DEids(DEID) = DEID        ! need to add capability for this
@@ -1748,27 +1949,95 @@
       localCellCount = 1
       compCellCount  = 1
       do i = 1,dgtype%dimCount
-        dgtype%myDEComp%globalAIPerDim(i) = dgtype%globalComp%AIPerDEPerDim(DEID,i)
-        dgtype%myDEComp%globalStartPerDim(i) = dgtype%globalComp%globalStartPerDEPerDim(DEID,i)
-        dgtype%myDEComp%localCellCountPerDim(i) = &
-              dgtype%globalComp%cellCountPerDEPerDim(DEID,i)
-        compCellCountForDim = dgtype%globalComp%cellCountPerDEPerDim(DEID,i)
-        if (compCellCountForDim.ne.0) compCellCount = compCellCount &
-                                                    * compCellCountForDim
-        dgtype%myDETotal%globalAIPerDim(i) = dgtype%globalTotal%AIPerDEPerDim(DEID,i)
-        dgtype%myDETotal%globalStartPerDim(i) = dgtype%globalTotal%globalStartPerDEPerDim(DEID,i)
-        dgtype%myDETotal%localCellCountPerDim(i) = &
-               dgtype%globalTotal%cellCountPerDEPerDim(DEID,i)
-        localCellCountForDim = dgtype%globalTotal%cellCountPerDEPerDim(DEID,i)
-        if (localCellCountForDim.ne.0) localCellCount = localCellCount &
-                                                      * localCellCountForDim
+        localC%globalAIPerDim(i)       = globC%AIPerDEPerDim(DEID,i)
+        localC%globalStartPerDim(i)    = globC%globalStartPerDEPerDim(DEID,i)
+        localC%localCellCountPerDim(i) = globC%cellCountPerDEPerDim(DEID,i)
+        compCellCountForDim            = globC%cellCountPerDEPerDim(DEID,i)
+        if (compCellCountForDim.ne.0) &
+                         compCellCount = compCellCount * compCellCountForDim
+
+        localT%globalAIPerDim(i)       = globT%AIPerDEPerDim(DEID,i)
+        localT%globalStartPerDim(i)    = globT%globalStartPerDEPerDim(DEID,i)
+        localT%localCellCountPerDim(i) = globT%cellCountPerDEPerDim(DEID,i)
+        localCellCountForDim           = globT%cellCountPerDEPerDim(DEID,i)
+        if (localCellCountForDim.ne.0) &
+                        localCellCount = localCellCount * localCellCountForDim
       enddo
-      dgtype%myDEComp%localCellCount  = compCellCount
-      dgtype%myDETotal%localCellCount = localCellCount
+      localC%localCellCount = compCellCount
+      localT%localCellCount = localCellCount
 
-      if (present(rc)) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridSetDEInternal
+      end subroutine ESMF_DistGridSetDEBlock
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSetDEVector"
+!BOPI
+! !IROUTINE: ESMF_DistGridSetDEVector - Set DE information for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridSetDEVector(dgtype, myCount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), pointer :: dgtype
+      integer, intent( in) :: myCount
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     Set a {\tt ESMF\_DistGrid} attribute with the given value.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dgtype] 
+!          Class to be modified.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS: 
+
+      integer :: localrc                          ! Error status
+      integer :: DEID
+      integer :: myDEx, myDEy, nDEx, nDEy
+      integer :: localDE, deCountPerDim(2), coord(2)
+      type(ESMF_DistGridLocal),  pointer :: localC, localT
+
+      ! Initialize return code; assume failure until success is certain
+      rc = ESMF_FAILURE
+
+      call ESMF_DELayoutGet(dgtype%delayout, localDe=localDE, &
+                            deCountPerDim=deCountPerDim, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_DELayoutGetDELocalInfo(dgtype%delayout, de=localDE, &
+                                       coord=coord, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! bring things into the form that the local code expects them in
+      nDEx  = deCountPerDim(1)
+      nDEy  = deCountPerDim(2)
+      myDEx = coord(1)
+      myDEy = coord(2)
+      DEID = (myDEy-1)*nDEx + myDEx
+
+      localC => dgtype%myDEComp
+      localT => dgtype%myDETotal
+
+      localC%MyDE           = DEID
+      localT%MyDE           = DEID
+      localC%localCellCount = myCount
+      localT%localCellCount = myCount
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridSetDEVector
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2410,18 +2679,18 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridAllocate"
+#define ESMF_METHOD "ESMF_DistGridAllocateBlock"
 !BOPI
 ! !IROUTINE: ESMF_DistGridAllocate - Allocate arrays in a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridAllocate(dgtype, nDEs, dimCount, rc)
+      subroutine ESMF_DistGridAllocateBlock(dgtype, nDEs, dimCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
       integer, intent(in) :: nDEs
       integer, intent(in) :: dimCount
-      integer, intent(out), optional :: rc            
+      integer, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     Allocates {\tt ESMF\_DistGrid} arrays to the specified sizes.
@@ -2434,7 +2703,7 @@
 !          Number of DE's in the layout.
 !     \item[dimCount]
 !          Number of dimensions described by this {\tt ESMF\_DistGrid}.
-!     \item[{[rc]}] 
+!     \item[rc]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2446,7 +2715,7 @@
       type(ESMF_DistGridGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
+      rc = ESMF_FAILURE
 
       ! DistGridType contents here:
       allocate(dgtype%decompIDs   (dimCount), &
@@ -2492,9 +2761,55 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "globalComp contents", &
                                      ESMF_CONTEXT, rc)) return
 
-      if (present(rc)) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridAllocate
+      end subroutine ESMF_DistGridAllocateBlock
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridAllocateVector"
+!BOPI
+! !IROUTINE: ESMF_DistGridAllocate - Allocate arrays in a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridAllocateVector(dgtype, dimCount, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), pointer :: dgtype 
+      integer, intent(in) :: dimCount
+      integer, intent(out) :: rc            
+!
+! !DESCRIPTION:
+!     Allocates {\tt ESMF\_DistGrid} arrays to the specified sizes.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dgtype] 
+!          Class to be allocated.
+!     \item[dimCount]
+!          Number of dimensions described by this {\tt ESMF\_DistGrid}.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: localrc                          ! Error status
+      type(ESMF_DistGridLocal), pointer :: me
+
+      ! Initialize return code; assume failure until success is certain
+      rc = ESMF_FAILURE
+
+      ! DistGridType contents here:
+      allocate(dgtype%decompIDs   (dimCount), &
+               dgtype%coversDomain(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "distgrid contents", &
+                                     ESMF_CONTEXT, rc)) return
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridAllocateVector
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
