@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.3 2003/03/10 23:42:01 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.4 2003/03/11 01:41:35 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@
                              // infers different data being moved, instead
                              // of parts of the same array, but maybe that's
                              // reasonable and more general
-     ESMC_MemAxis tuple;     // the memaxis stuff, based on rank
+!     ESMC_MemAxis tuple;     // the memaxis stuff, based on rank
      
      ESMC_XPacket *nextp;
 
