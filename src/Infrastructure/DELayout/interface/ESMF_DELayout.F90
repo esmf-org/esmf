@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.34 2004/06/21 19:38:33 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.35 2004/06/21 20:14:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.34 2004/06/21 19:38:33 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.35 2004/06/21 20:14:29 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -785,7 +785,7 @@ contains
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutValidate()"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DELayoutValidate - Validate DELayout internals
 
 ! !INTERFACE:
@@ -807,7 +807,7 @@ contains
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
