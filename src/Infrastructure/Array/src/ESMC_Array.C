@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.18 2003/10/10 17:21:04 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.19 2003/10/10 17:59:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -356,11 +356,11 @@
     comp_stride = 1;
     excl_stride = 1;
     for (i=0; i<rank; i++) {
-        counts[i]     = icounts ? icounts[i] : 1;        
+        counts[i]   = icounts ? icounts[i] : 1;        
         lbound[i]   = lbounds ? lbounds[i] : 1;
         ubound[i]   = ubounds ? ubounds[i] : counts[i];
         bytestride[i] = 1;
-        offset[i]     = offsets ? offsets[i] : 0;
+        offset[i]    = offsets ? offsets[i] : 0;
 
         if (halo_width == 0) {
             total_stride *= counts[i];
@@ -398,7 +398,7 @@
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
             FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &type, &kind, 
-                                         counts, lbounds, ubounds,   
+                                         counts, lbound, ubound,   
                                          &halo_width, &status);
     } 
 
