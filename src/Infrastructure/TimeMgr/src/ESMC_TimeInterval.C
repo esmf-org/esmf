@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.77 2005/01/07 00:13:45 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.78 2005/04/02 00:23:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.77 2005/01/07 00:13:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.78 2005/04/02 00:23:45 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -406,6 +406,7 @@
       switch (tiToConvert.calendar->calendarType)  
       {
         case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_JULIAN:
         case ESMC_CAL_NOLEAP:
           {
             // TODO: use TimeInterval operators (/) and (-) when ready ?
@@ -438,7 +439,8 @@
             } else { // no startTime or endTime available, convert what we can
                      //   from (mm, s)
               years = 0;
-              // convert mm for either ESMC_CAL_GREGORIAN or ESMC_CAL_NOLEAP
+              // convert mm for either ESMC_CAL_GREGORIAN, ESMC_CAL_JULIAN,
+              //  or ESMC_CAL_NOLEAP
               if (tiToConvert.mm != 0) {
                 years = tiToConvert.mm / tiToConvert.calendar->monthsPerYear;
                 tiToConvert.mm %= tiToConvert.calendar->monthsPerYear;
@@ -451,7 +453,7 @@
                 tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
                                           tiToConvert.calendar->secondsPerYear);
 
-              } else { // ESMC_CAL_GREGORIAN
+              } else { // ESMC_CAL_GREGORIAN or ESMC_CAL_JULIAN
                 // note: can't use abs() or labs() since result is (long long)
                 //       could use ISO llabs() if supported on all platforms
                 if (tiToConvert.ESMC_FractionGetw() >=
@@ -460,10 +462,15 @@
                    -tiToConvert.calendar->secondsPerYear){
                   // tiToConvert.ESMC_FractionGetw() >= 1 year =>
                   //  can't determine leap years without startTime or endTime !
-                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
-                            "yy or yy_i8 because for Gregorian time interval "
+                  char logMsg[ESMF_MAXSTR];
+                  sprintf(logMsg, 
+                            "yy or yy_i8 because for %s time interval "
                             ">= 1 year, can't determine leap years without "
-                            "startTime or endTime.", &rc); return(rc);
+                            "startTime or endTime.", 
+                            ESMC_Calendar::calendarTypeName[
+                              tiToConvert.calendar->calendarType-1]);
+                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
+                            logMsg, &rc); return(rc);
                 }
               }
             }
@@ -522,6 +529,7 @@
       switch (tiToConvert.calendar->calendarType)
       {
         case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_JULIAN:
         case ESMC_CAL_NOLEAP:
 
           // TODO: use TimeInterval operators (/) and (-) when ready ?
@@ -562,10 +570,15 @@
               // can't determine months without startTime or endTime !
               // TODO:  leave alone and let d,h,m,s be more than a month ?
               //        (unbounded or unnormalized ?) with ESMF_WARNING ?
-              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
-                        "mm or mm_i8 because for Gregorian or No Leap time "
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, 
+                        "mm or mm_i8 because for %s time "
                         "interval >= 28 days, can't determine months without "
-                        "startTime or endTime.", &rc); return(rc);
+                        "startTime or endTime.", 
+                            ESMC_Calendar::calendarTypeName[
+                              tiToConvert.calendar->calendarType-1]);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
+                            logMsg, &rc); return(rc);
             }
           }
           break;
@@ -631,12 +644,14 @@
       switch (tiToConvert.calendar->calendarType)  
       {
         case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_JULIAN:
           if (tiToConvert.mm != 0) {
             // no startTime or endTime available, can't do
             char logMsg[ESMF_MAXSTR];
             sprintf(logMsg, "need startTime or endTime to convert %lld months "
-                            "to days on ESMC_CAL_GREGORIAN calendar.",
-                             tiToConvert.mm);
+                            "to days on %s calendar.", tiToConvert.mm,
+                            ESMC_Calendar::calendarTypeName[
+                              tiToConvert.calendar->calendarType-1]);
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET, logMsg,
                                                   &rc);
             return(rc);
@@ -1027,6 +1042,7 @@
     switch (absValue.calendar->calendarType)
     {
       case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (absValue.yy != 0 || absValue.d != 0) {
           // shouldn't be here - yy and d already reduced in Reduce() call
@@ -1224,6 +1240,7 @@
     switch (ti1.calendar->calendarType)  
     {
       case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.d  != 0 || ti2.d  != 0) {
@@ -1615,6 +1632,7 @@
     switch (ti1.calendar->calendarType)  
     {
       case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.d  != 0 || ti2.d  != 0) {
@@ -2365,6 +2383,7 @@
     switch (ti1.calendar->calendarType)  
     {
       case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.d  != 0 || ti2.d  != 0) {
@@ -2974,6 +2993,7 @@
     switch (calendar->calendarType)
     {
       case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_JULIAN:
       case ESMC_CAL_NOLEAP:
         // use startTime to reduce yy,mm,d to seconds
         if (startTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
@@ -2999,7 +3019,8 @@
 
         } else { // no startTime or endTime available, reduce what we can
                  //   to (mm, s)
-          if (calendar->calendarType == ESMC_CAL_GREGORIAN) {
+          if (calendar->calendarType == ESMC_CAL_GREGORIAN ||
+              calendar->calendarType == ESMC_CAL_JULIAN) {
             // cannot reduce yy or mm to seconds, but can reduce yy to mm
             if (yy != 0) {
               mm += yy * calendar->monthsPerYear;
