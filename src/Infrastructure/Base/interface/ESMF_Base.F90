@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.102 2004/06/01 13:31:42 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.103 2004/06/02 09:13:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -8,11 +8,19 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
+#define ESMF_FILENAME "ESMF_Base.F90"
+
+!
 ! ESMF Base Module
 !
 ! (all lines between the !BOP and !EOP markers will be included in the
 ! automated document processing.)
 !------------------------------------------------------------------------------
+! one blank line for protex processing - in case all routines here are
+! marked internal (BOPI/EOPI), the output file will still have contents.
+!BOP
+
+!EOP
 
 !------------------------------------------------------------------------------
 ! module definition
@@ -28,7 +36,8 @@
 !
 ! The code in this file implements the Base defined type
 !  and functions which operate on all types.  This is an
-!  interface to the actual C++ base class implementation in the ../src dir.
+!  interface to the actual C++ base class implementation 
+!  in the ../src dir.
 !
 ! See the ESMF Developers Guide document for more details.
 !
@@ -201,7 +210,7 @@
 
 !------------------------------------------------------------------------------
 !
-      ! possible new type
+      ! possible new type, unused for now.
       type ESMF_Domain
       sequence
           integer :: DE
@@ -212,6 +221,9 @@
 
 !------------------------------------------------------------------------------
 !
+      ! in the regrid code if we want to send only parts of the
+      ! data array, here is a structure which allows lists of blocks
+      ! to be described in a single container object.
       type ESMF_DomainList
       sequence
           integer :: num_domains     ! number of domains stored
@@ -425,7 +437,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.102 2004/06/01 13:31:42 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.103 2004/06/02 09:13:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -530,7 +542,7 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_BlockingFlag's
+! function to compare two ESMF_BlockingFlags
 
 function ESMF_bfeq(bf1, bf2)
  logical ESMF_bfeq
@@ -641,7 +653,7 @@ end function
 !           specialized derived types will include an {\tt ESMF\_Base} 
 !           object as the first entry.
 !     \item [superclass]
-!           The name of the superclass, e.g. {\tt Grid}, {\tt Array}.
+!           The name of the superclass, e.g. {\tt "Grid"}, {\tt "Array"}.
 !           This sets the scope for unique object names.
 !     \item [{[name]}]
 !           If given, the unique name for this object.  If not given,
@@ -740,24 +752,18 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[base]
 !       Any ESMF type.
-!
 !     \item[name]
 !       The name of the attribute to set.
-!
 !     \item[value]
 !       The value of the attribute.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
       integer :: status 
 
@@ -799,7 +805,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
 
       integer :: status 
 
@@ -827,7 +832,6 @@ end function
 ! !DESCRIPTION:
 ! Returns number of attributes present.
 !
-!
 !     The arguments are:
 !     \begin{description}
 !     \item[anytype]
@@ -838,9 +842,13 @@ end function
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!
 !EOPI
-! !REQUIREMENTS:  FLD1.7.5
+
+      integer :: status 
+
+      status = ESMF_FAILURE
+      !call c_ESMC_AttributeGetCount(base, count, status) 
+      if (present(rc)) rc = status
 
       end subroutine ESMF_AttributeGetCount
 
@@ -885,7 +893,11 @@ end function
 !     
 !
 !EOPI
-! !REQUIREMENTS: 
+      integer :: status 
+
+      status = ESMF_FAILURE
+      !call c_ESMC_AttributeGetbyNumber(base, number, name, value, status) 
+      if (present(rc)) rc = status
 
       end subroutine ESMF_AttributeGetbyNumber
 
@@ -921,7 +933,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.7.3
 
       !TODO: when code added here, change (inout) for namelist to just out.
       ! absoft compiler was unhappy.
@@ -963,7 +974,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  (none.  added for completeness)
 
       end subroutine ESMF_AttributeSetList
 
@@ -1003,7 +1013,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.7.4
 
       end subroutine ESMF_AttributeGetList
 
@@ -1039,7 +1048,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 
       end subroutine ESMF_AttributeSetObjectList
 
@@ -1079,7 +1087,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5.5 (pri 2)
 
       end subroutine ESMF_AttributeGetObjectList
 
@@ -1118,7 +1125,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopy
 
@@ -1156,7 +1162,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopyAll
 
@@ -1180,10 +1185,10 @@ end function
 !
 !     \begin{description}
 !     \item [base]
-!           In the Fortran interface, this must in fact be a {\tt Base}
+!           In the Fortran interface this must be an {\tt ESMF\_Base}
 !           derived type object.  It is expected that all specialized 
-!           derived types will include a {\tt Base} object as the first
-!           entry.
+!           derived types will include a {\tt ESMF\_Base} object as the 
+!           first entry.
 !     \item [{[name]}]
 !           Object name.  An error will be returned if a duplicate name 
 !           is specified.  If a name is not given a unique name will be
@@ -1201,7 +1206,6 @@ end function
 !
 ! 
 !EOPI
-! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       logical :: rcpresent                          ! Return code present   
       integer :: status
 
@@ -1254,7 +1258,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       integer :: status
 
       call c_ESMC_GetName(base, name, status)
@@ -1269,7 +1272,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_BasePrint - call into C++ code to print base object
+! !IROUTINE:  ESMF_BasePrint - Call into C++ code to print base object
 
 !
 ! !INTERFACE:
@@ -1296,7 +1299,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:  FLD1.5.4
       integer :: status
       character(len=ESMF_MAXSTR) :: opts
 
@@ -1321,7 +1323,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_DomainListCreate - create domain list
+! !IROUTINE:  ESMF_DomainListCreate - Create domain list
 
 !
 ! !INTERFACE:
@@ -1334,8 +1336,8 @@ end function
 
 !
 ! !DESCRIPTION:
-! Create a domain list.  Initializes the array of domains.  Preallocates
-! some storage, hopefully enough.
+! Create a list of {\tt ESMF\_Domain}s.  
+! Initializes the array of domains.  Preallocates storage.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1361,7 +1363,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_DomainListDestroy - destroy domain list
+! !IROUTINE:  ESMF_DomainListDestroy - Destroy domain list
 
 !
 ! !INTERFACE:
@@ -1376,7 +1378,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[domainlist]
-!       A list of domains to destroy.
+!       An {\tt ESMF\_DomainList} to destroy.
 !     \end{description}
 !
 !EOPI
@@ -1389,7 +1391,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_DomainListPrint - print domain list
+! !IROUTINE:  ESMF_DomainListPrint - Print domain list
 
 !
 ! !INTERFACE:
@@ -1431,7 +1433,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_DomainListAdd2d - Add a 2d domainlist
+! !IROUTINE:  ESMF_DomainListAdd2d - Add a 2D domainlist
 
 !
 ! !INTERFACE:
@@ -1456,7 +1458,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[domainlist]
-!       The ESMF\_DomainList.
+!       The {\tt ESMF\_DomainList}.
 !     \item[min1]
 !	Minimimun in first direction.
 !     \item[max1]
@@ -1485,7 +1487,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_DomainListAdd3d - Add a 3d domainlist
+! !IROUTINE:  ESMF_DomainListAdd3d - Add a 3D domainlist
 
 !
 ! !INTERFACE:
@@ -1513,7 +1515,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[domainlist]
-!       The ESMF\_DomainList.
+!       The {\tt ESMF\_DomainList}.
 !     \item[min1]
 !       Minimimun in first direction.
 !     \item[max1]
@@ -1567,9 +1569,9 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[domainlist]
-!       The ESMF\_DomainList.
+!       The {\tt ESMF\_DomainList}.
 !     \item[newdomain]
-!       The ESMF\_Domain to add to the list.
+!       The {\tt ESMF\_Domain} to add to the list.
 !     \end{description}
 !
 !EOPI
@@ -1613,7 +1615,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_AxisIndexSet - initialize an AxisIndex object
+! !IROUTINE:  ESMF_AxisIndexSet - Initialize an AxisIndex object
 
 !
 ! !INTERFACE:
@@ -1630,7 +1632,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[ai]
-!       The ESMF\_AxisIndex.
+!       The {\tt ESMF\_AxisIndex} to set.
 !     \item[min]
 !       The minimimun.
 !     \item[max]
@@ -1654,7 +1656,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_AxisIndexGet - get contents of an AxisIndex object
+! !IROUTINE:  ESMF_AxisIndexGet - Get contents of an AxisIndex object
 !
 ! !INTERFACE:
       subroutine ESMF_AxisIndexGet(ai, min, max, stride, rc)
@@ -1670,7 +1672,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[ai]
-!       The ESMF\_AxisIndex.
+!       The {\tt ESMF\_AxisIndex} to query.
 !     \item[min]
 !       The minimimun.
 !     \item[max]
@@ -1695,7 +1697,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_SetPointer - set an opaque value
+! !IROUTINE:  ESMF_SetPointer - Set an opaque value
 
 !
 ! !INTERFACE:
@@ -1713,7 +1715,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[ptype]
-!       ESMF\_Pointer.
+!       An {\tt ESMF\_Pointer}.
 !     \item[contents]
 !       The contents to set.
 !     \item[{[rc]}]
@@ -1730,7 +1732,7 @@ end function
 !-------------------------------------------------------------------------
 !BOPI
 !
-! !IROUTINE:  ESMF_SetNullPointer - set an opaque value
+! !IROUTINE:  ESMF_SetNullPointer - Set an opaque value
 
 !
 ! !INTERFACE:
@@ -1747,7 +1749,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[ptype]
-!       ESMF\_Pointer.
+!       An {\tt ESMF\_Pointer}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1783,7 +1785,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[ptype]
-!       ESMF\_Pointer.
+!       An {\tt ESMF\_Pointer}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1813,13 +1815,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!   Return a status variable as a string.
-!
+!   Return an {\tt ESMF\_Status} as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[status]
-!       The ESMF\_Status derived type.
+!       The {\tt ESMF\_Status}.
 !     \item[string]
 !       A printable string.
 !     \item[{[rc]}]
@@ -1828,7 +1829,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
       if (status .eq. ESMF_STATE_UNINIT) string = "Uninitialized"
       if (status .eq. ESMF_STATE_READY) string = "Ready"
@@ -1855,13 +1855,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!   Return a datatype variable as a string.
-!
+!   Return an {\tt ESMF\_DataType} as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[datatype]
-!       The ESMF\_DataType.
+!       The {\tt ESMF\_DataType}.
 !     \item[string]
 !       A string describing the value.
 !     \item[{[rc]}]
@@ -1869,7 +1868,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
       if (datatype .eq. ESMF_DATA_INTEGER) string = "Integer"
       if (datatype .eq. ESMF_DATA_REAL) string = "Real"
@@ -1894,12 +1892,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!   Return a datakind variable as a string.
+!   Return an {\tt ESMF\_DataKind} variable as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[datakind]
-!       The ESMF\_DataKind variable.
+!       The {\tt ESMF\_DataKind}.
 !     \item[string]
 !       The value as a string.
 !     \item[{[rc]}]
@@ -1908,7 +1906,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
       if (datakind .eq. ESMF_I1)  string = "Integer*1"
       if (datakind .eq. ESMF_I2)  string = "Integer*2"
@@ -1937,12 +1934,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!   Return a tf variable as a string.
+!   Return an {\tt ESMF\_Logical} as a string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tf]
-!       A ESMF\_Logical type.
+!       An {\tt ESMF\_Logical}.
 !     \item[string]
 !       The value as a string.
 !     \item[{[rc]}]
@@ -1951,7 +1948,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
       if (tf .eq. ESMF_TRUE)  string = "True"
       if (tf .eq. ESMF_FALSE) string = "False"
@@ -1962,9 +1958,5 @@ end function
 
 !------------------------------------------------------------------------------
 
-!-------------------------------------------------------------------------
-! put Print and Validate skeletons here - but they should be
-!  overridden by higher level more specialized functions.
-!-------------------------------------------------------------------------
 
       end module ESMF_BaseMod
