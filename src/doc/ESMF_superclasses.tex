@@ -194,18 +194,6 @@ The {\tt ESMF\_StateValidate} call evaluates whether a component's
 import {\tt State} is ready for use.  It may check the entire {\tt State} or 
 a specified subset.
 
-Figure \ref{fig:RunApplicationDiagram} outlines the sequence of steps that an ESMF application
-executes in a basic simulation scenario. Two gridded components {\it Atmosphere} and {\it Ocean}
-are created and two coupler components {\it Atmosphere} to {\it Ocean} and {\it Ocean} to {\it Atmosphere}.
-The sequence in figure \ref{fig:RunApplicationDiagram} will be preceeded by the startup procedure illustrated
-in figure \ref{fig:ESMFApplicationMain}.
-
-\begin{figure}
-\caption[{Basic Run Application}]{Sequence for basic Run Application process.\\}
-\label{fig:RunApplicationDiagram}
-\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
-\end{figure}
-
 \subsection{Flow of Data}
 \label{sec:dataflow}
 The design choices we have made enable the user to configure ESMF
@@ -220,21 +208,28 @@ data from a source component is sent to a distinct set of {\tt Coupler}
 
 \subsection{Examples}
 
-Figure~\ref{fig:1waycoupling} shows the sequence of actions involved
+Figures~\ref{fig:ESMFApplicationMain} and \ref{fig:RunApplicationDiagram} together show the 
+sequence of actions involved
 in coupling an atmosphere to an ocean.  The vertical axis is time, positive
 downward, and the horizontal axis shows the objects that are involved in the
 exchange.  Arrow'd lines to text boxes mean that the source of the arrow has 
 created the object in the box.  Solid lines to the start of a vertical
 box indicate a method call.  Dashed lines indicate a return.  
-In this example, the coupling is one-way, so that the ocean 
-receives data from the atmosphere but does not send any data back.  Atmosphere
+In the example in figure \ref{fig:ESMFApplicationMain} and \ref{fig:RunApplicationDiagram}, the 
+coupling is two-way, with the ocean 
+receiving data from the atmosphere and sending data back to the atmosphere.  Atmosphere
 and ocean components are configured for concurrent execution.
 
-\subsubsection{System startup}
+\subsubsection{System and {\tt Application Component} startup}
 
 The basic startup procedure for an ESMF application is shown in figure \ref{fig:ESMFApplicationMain}. Startup
 begins by creating the top-level in figure \ref{fig:couplerscaling}. Any ESMF component could reside at the top-level, so
 all ESMF components are created to be consistent with the startup sequence shown in figure \ref{fig:ESMFApplicationMain}.
+In this scheme the component acting in the {\tt Application Component} role starts by invoking its
+own creation method (from a system invoked main() routine) and sets up the master component registry.
+The {\it Application Component} then instantiates its set of child subcomponents (in this case an Atmosphere {\tt Gridded
+Component}, an Ocean {\tt Gridded Component}, and two coupler components handling Atmosphere to Ocean and Ocean 
+to Atmosphere data transfers.
 
 \begin{figure}
 \caption[{ESMF Boot Up Stage}]{The basic startup procedure for
@@ -243,36 +238,56 @@ all ESMF applications.}
 \scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
 \end{figure}
 
-The application begins by creating atmosphere, ocean, and coupler components.
-The atmosphere initialization method defines the atmosphere import and export states
-(import state creation is not shown) and the ocean initialization method defines
-the ocean import and export states (export state creation is not shown).  The
-coupler initialization method creates input and output packets, which at this
-stage include empty buffers for packing and unpacking data.  The coupler returns a
-transform (in this case, perhaps a combined unit change, regrid and communication 
-operation) that will occur while the atmosphere 
-component is in the midst of its iteration loop.  Some parts of the transform
-may be user-defined (i.e., unit changes) and others supplied by the framework
-(i.e., regridding and communication).  The application calls the run methods
-of the atmosphere and ocean components with the transform provided by the coupler,
-which contains different tasks for the two components.  The atmosphere and ocean 
-check that their import states are valid as they begin executing concurrently on
-different {\tt DE} sets.  At an appropriate time the
-ocean component calls a state transform method with its import state and 
-the transform it received from the application.  If the frequency criteria
-contained within the transform specifies that this is a coupling timestep,
-the call 
-posts a message passing receive.  When the atmosphere's data is ready to send, 
-it calls a state transform method with the transform it was passed and 
-its export state.  This call checks the frequency criteria and if it is a 
-coupling timestep performs
-the unit conversion and regridding, initiates a send
-to the ocean and returns.  (Although the calculation is performed on the atmosphere 
-{\tt DE}s in this example, the transform could be staged on a separate set of coupler
-{\tt DE}s.)  The atmosphere calls a state transform complete call with the transform
-as an argument before it proceeds to make any changes to data in the export state
-that may still needed.  The atmosphere and ocean proceed to the next 
-timestep, and validate their import states as the timestep begins.  
+\subsubsection{Component Execution}
+
+\begin{figure}
+\caption[{Basic Run Application}]{Sequence for basic Run Application process.\\}
+\label{fig:RunApplicationDiagram}
+\scalebox{0.70}{\includegraphics{RunApplicationDiagram.eps}}
+\end{figure}
+
+Following {\tt Apllication Component} startup the run methods of the components are 
+invoked. This procedure is shown in figure \ref{fig:RunApplicationDiagram}. In the 
+example given the {\tt Application Component} invokes the run method of the of the
+Atmosphere and Ocean components concurrently. The application component waits until
+these stages are complete before it invokes the coupling components
+that take export states from the atmosphere and ocean respectively. These are also
+invoked to run concurrently with one another. Before iterating onto a second time step 
+the {\tt Aplication Component} selectively invokes the checkpoint/restart 
+methods of the Ocean and Atmosphere components, again concurrently. Finally the
+{\tt Application Component} evaluates whether it is time to exit or whether to
+return to the start of the run loop for subsequent iteration.
+
+% The application begins by creating atmosphere, ocean, and coupler components.
+% The atmosphere initialization method defines the atmosphere import and export states
+% (import state creation is not shown) and the ocean initialization method defines
+% the ocean import and export states (export state creation is not shown).  The
+% coupler initialization method creates input and output packets, which at this
+% stage include empty buffers for packing and unpacking data.  The coupler returns a
+% transform (in this case, perhaps a combined unit change, regrid and communication 
+% operation) that will occur while the atmosphere 
+% component is in the midst of its iteration loop.  Some parts of the transform
+% may be user-defined (i.e., unit changes) and others supplied by the framework
+% (i.e., regridding and communication).  The application calls the run methods
+% of the atmosphere and ocean components with the transform provided by the coupler,
+% which contains different tasks for the two components.  The atmosphere and ocean 
+% check that their import states are valid as they begin executing concurrently on
+% different {\tt DE} sets.  At an appropriate time the
+% ocean component calls a state transform method with its import state and 
+% the transform it received from the application.  If the frequency criteria
+% contained within the transform specifies that this is a coupling timestep,
+% the call 
+% posts a message passing receive.  When the atmosphere's data is ready to send, 
+% it calls a state transform method with the transform it was passed and 
+% its export state.  This call checks the frequency criteria and if it is a 
+% coupling timestep performs
+% the unit conversion and regridding, initiates a send
+% to the ocean and returns.  (Although the calculation is performed on the atmosphere 
+% {\tt DE}s in this example, the transform could be staged on a separate set of coupler
+% {\tt DE}s.)  The atmosphere calls a state transform complete call with the transform
+% as an argument before it proceeds to make any changes to data in the export state
+% that may still needed.  The atmosphere and ocean proceed to the next 
+% timestep, and validate their import states as the timestep begins.  
 
 \subsection{Class Descriptions}
 
