@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.99 2004/06/21 19:38:34 theurich Exp $
+// $Id: ESMC_Route.C,v 1.100 2004/10/05 22:55:24 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.99 2004/06/21 19:38:34 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.100 2004/10/05 22:55:24 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1577,15 +1577,17 @@ static int maxroutes = 10;
 //
 // !ARGUMENTS:
       int rank,                    // in  - rank of data
-      int my_DE,                   // in  - DE identifier in the DELayout
+      int myDE,                    // in  - DE identifier in the DELayout
       ESMC_DomainList *sendDomainList,
                                    // in  - array of axis indices for all DE's
                                    //       in the DELayout for the receiving
                                    //       Field
-      ESMC_DomainList *recvDomainList) {
+      ESMC_DomainList *recvDomainList,
                                    // in  - array of axis indices for all DE's
                                    //       in the DELayout for the receiving
                                    //       Field
+      ESMC_Logical *hasSrcData,
+      ESMC_Logical *hasDstData) {
 //
 // !DESCRIPTION:
 //      Initializes a Route from a DomainList with send and receive RouteTables.
@@ -1594,80 +1596,83 @@ static int maxroutes = 10;
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex my_AI[ESMF_MAXDIM], their_AI[ESMF_MAXDIM];
-    ESMC_XPacket *my_XP = NULL;
-    ESMC_XPacket *their_XP = NULL;
-    int my_XPcount, their_XPcount;
-    int global_count[ESMF_MAXDIM];
+    ESMC_AxisIndex myAI[ESMF_MAXDIM], theirAI[ESMF_MAXDIM];
+    ESMC_XPacket *myXP = NULL;
+    ESMC_XPacket *theirXP = NULL;
+    int myXPcount, theirXPcount;
+    int globalCount[ESMF_MAXDIM];
     int rc;  
     int j, k, theirOffset, offset, count;
-    int their_de;
+    int theirDE;
 
     for (j=0; j<rank; j++)
-      global_count[j] = 0;
+      globalCount[j] = 0;
 
     // Calculate the sending table.
     // loop over DE's from DomainList to send to
-    for (k=0; k<sendDomainList->num_domains; k++) {
-      their_de = sendDomainList->ESMC_DomainListGetDE(k);
-      //their_de = sendDomainList->domains[k].DE;
-      // get "my" AI
-      for (j=0; j<rank; j++) 
-        my_AI[j] = sendDomainList->ESMC_DomainListGetAI(k, j);
-        //my_AI[j] = sendDomainList->domains[k].ai_list[j];
+    if (*hasSrcData == ESMF_TRUE) {
+      for (k=0; k<sendDomainList->num_domains; k++) {
+        theirDE = sendDomainList->ESMC_DomainListGetDE(k);
+        //theirDE = sendDomainList->domains[k].DE;
+        // get "my" AI
+        for (j=0; j<rank; j++) 
+          myAI[j] = sendDomainList->ESMC_DomainListGetAI(k, j);
+          //myAI[j] = sendDomainList->domains[k].ai_list[j];
       
- 
-      // calculate "my" XPacket from the AxisIndices -- in this case the
-      // AIs are in local space and so is the XPacket
-      rc = ESMC_XPacketFromAxisIndex(my_AI, rank, global_count, NULL,
-                                     &my_XP, &my_XPcount);
+        // calculate "my" XPacket from the AxisIndices -- in this case the
+        // AIs are in local space and so is the XPacket
+        rc = ESMC_XPacketFromAxisIndex(myAI, rank, globalCount, NULL,
+                                       &myXP, &myXPcount);
       
-      // load the XPacket into the sending RTable
-      sendRT->ESMC_RTableSetEntry(their_de, my_XP);
-      ct->ESMC_CommTableSetPartner(their_de);
+        // load the XPacket into the sending RTable
+        sendRT->ESMC_RTableSetEntry(theirDE, myXP);
+        ct->ESMC_CommTableSetPartner(theirDE);
 
-      // free each XP before allocating another in XPacketFromAxisIndex
-      delete [] my_XP;
+        // free each XP before allocating another in XPacketFromAxisIndex
+        delete [] myXP;
+      }
     }
 
     // Calculate the receiving table.
     // loop over DE's from DomainList to receive from
     offset = 0;
-    for (k=0; k<recvDomainList->num_domains; k++) {
-      their_de = recvDomainList->ESMC_DomainListGetDE(k);
-      //their_de = recvDomainList->domains[k].DE;
-      // get "their" AI
-      count = 1;
-      for (j=0; j<rank; j++) {
-        their_AI[j] = recvDomainList->ESMC_DomainListGetAI(k, j);
-        //their_AI[j] = recvDomainList->domains[k].ai_list[j];
-        count = count * (their_AI[j].max - their_AI[j].min + 1);
-      }
+    if (*hasDstData == ESMF_TRUE) {
+      for (k=0; k<recvDomainList->num_domains; k++) {
+        theirDE = recvDomainList->ESMC_DomainListGetDE(k);
+        //theirDE = recvDomainList->domains[k].DE;
+        // get "their" AI
+        count = 1;
+        for (j=0; j<rank; j++) {
+          theirAI[j] = recvDomainList->ESMC_DomainListGetAI(k, j);
+          //theirAI[j] = recvDomainList->domains[k].ai_list[j];
+          count = count * (theirAI[j].max - theirAI[j].min + 1);
+        }
  
-      // calculate "their" XPacket from the AxisIndices -- in this case the
-      // AIs are in local space and so is the XPacket
-      rc = ESMC_XPacketFromAxisIndex(their_AI, rank, global_count, NULL,
-                                     &their_XP, &their_XPcount);
+        // calculate "their" XPacket from the AxisIndices -- in this case the
+        // AIs are in local space and so is the XPacket
+        rc = ESMC_XPacketFromAxisIndex(theirAI, rank, globalCount, NULL,
+                                       &theirXP, &theirXPcount);
       
-      // modify the XPacket so it gets stored immediately after the last one
-      theirOffset = their_XP->ESMC_XPacketGetOffset();
-      theirOffset += offset;
-      their_XP->ESMC_XPacketSetOffset(theirOffset);
-      offset += count;
+        // modify the XPacket so it gets stored immediately after the last one
+        theirOffset = theirXP->ESMC_XPacketGetOffset();
+        theirOffset += offset;
+        theirXP->ESMC_XPacketSetOffset(theirOffset);
+        offset += count;
 
-      // load the XPacket into the sending RTable
-      recvRT->ESMC_RTableSetEntry(their_de, their_XP);
-      ct->ESMC_CommTableSetPartner(their_de);
+        // load the XPacket into the sending RTable
+        recvRT->ESMC_RTableSetEntry(theirDE, theirXP);
+        ct->ESMC_CommTableSetPartner(theirDE);
 
-      // free each XP before allocating another in XPacketFromAxisIndex
-      delete [] their_XP;
+        // free each XP before allocating another in XPacketFromAxisIndex
+        delete [] theirXP;
+      }
     }
  
     //ESMC_RoutePrint("");
  
     // add this route to the cache table
-    ESMC_RouteAddCache(rank, my_DE, NULL, NULL, 0, delayout,
-                             my_DE, NULL, NULL, 0, delayout, NULL);
+    ESMC_RouteAddCache(rank, myDE, NULL, NULL, 0, delayout,
+                             myDE, NULL, NULL, 0, delayout, NULL);
 
     return rc;
 
