@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.5 2004/03/02 21:49:18 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.6 2004/03/05 23:59:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.5 2004/03/02 21:49:18 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.6 2004/03/05 23:59:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -802,16 +802,15 @@
 
 ! !INTERFACE:
       subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentLayout, &
-                                       routehandle, blocking, total, rc)
+                                        routehandle, blocking, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcBundle                 
       type(ESMF_Bundle), intent(inout) :: dstBundle                 
       type(ESMF_DELayout), intent(in) :: parentLayout
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -894,7 +893,7 @@
                                  dtypep%grid, &
                                  dtypep%flist(1)%ftypep%mapping, &
                                  parentLayout, &
-                                 routehandle, blocking, total, status)
+                                 routehandle, blocking, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
         return
