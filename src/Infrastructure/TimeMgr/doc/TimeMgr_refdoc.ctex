@@ -1,5 +1,6 @@
 % $Id: 
 
+#define INCLUDE_UML
 #ifdef STANDALONE
 \documentclass[]{article}
 
@@ -78,6 +79,15 @@
 \input{TimeMgr_usagenotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_usagenotes}
+#endif
+
+#ifdef INCLUDE_UML
+%\subsection{Object Model}
+#ifdef STANDALONE
+\input{TimeMgr_obj.tex}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_obj.tex}
+#endif
 #endif
 
 %\subsection{Implementation Notes}
