@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.20 2005/02/01 23:26:12 svasquez Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.19.4.1 2005/02/09 21:48:40 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559

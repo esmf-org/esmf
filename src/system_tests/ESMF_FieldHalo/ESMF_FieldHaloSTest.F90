@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.35 2005/02/01 23:08:50 svasquez Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.34.2.1 2005/02/09 21:48:37 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385

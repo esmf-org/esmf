@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.23 2005/02/01 23:14:12 svasquez Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.22.4.1 2005/02/09 21:48:38 nscollins Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497

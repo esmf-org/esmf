@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.16 2005/02/01 23:38:24 svasquez Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.14.4.1 2005/02/09 21:48:34 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384

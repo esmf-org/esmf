@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.18 2005/02/03 00:15:44 theurich Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.15.2.1 2005/02/09 21:48:36 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497

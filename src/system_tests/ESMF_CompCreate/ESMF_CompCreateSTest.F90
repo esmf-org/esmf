@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.14 2005/02/01 23:03:24 svasquez Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.13.2.1 2005/02/09 21:48:35 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029

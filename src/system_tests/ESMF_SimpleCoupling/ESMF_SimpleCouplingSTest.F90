@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.19 2005/02/01 23:32:30 svasquez Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.18.4.1 2005/02/09 21:48:40 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.16 2005/02/01 23:22:50 svasquez Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.15.4.1 2005/02/09 21:48:40 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558

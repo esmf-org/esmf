@@ -1,4 +1,4 @@
-! $Id: ESMF_VectorStorageSTest.F90,v 1.3 2005/02/01 23:34:11 svasquez Exp $
+! $Id: ESMF_VectorStorageSTest.F90,v 1.2.2.1 2005/02/09 21:48:40 nscollins Exp $
 !
 ! System test VectorStorage
 !  Description on Sourceforge under System Test #XXXXX
@@ -40,7 +40,7 @@
      integer :: i, j, j1, add
      integer :: counts(2), localCounts(2), miscount
      integer :: npets, myDE, myPet
-     integer :: myIndices(400,2)
+     integer, dimension(:,:), allocatable :: myIndices
      logical :: match
      real(ESMF_KIND_R8) :: min(2), max(2), compval
      real(ESMF_KIND_R8) :: pi = 3.1416d0
@@ -134,6 +134,11 @@
                              horzStagger=horz_stagger, &
                              name="source grid", rc=status)
      if (status .ne. ESMF_SUCCESS) goto 20
+
+     ! allocate myIndices to maximum number of points on any DE in the first dimension and
+     ! 2 in the second dimension.
+     i = int((counts(1)*counts(2) + npets -1)/npets)
+     allocate (myIndices(i,2))
 
      ! calculate myIndices based on DE number
      ! for now, start at point (1,1+myDE) and go up in the j-direction first
@@ -313,6 +318,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !   Clean up
+
+    deallocate(myIndices)
 
     call ESMF_FieldRedistRelease(rh12, status)
     if (status .ne. ESMF_SUCCESS) goto 20

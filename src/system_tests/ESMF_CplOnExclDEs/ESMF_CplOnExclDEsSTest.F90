@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.16 2005/02/01 23:29:12 svasquez Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.14.4.1 2005/02/09 21:48:35 nscollins Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
