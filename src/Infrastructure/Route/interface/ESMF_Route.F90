@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.50 2004/04/13 22:59:36 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.51 2004/04/20 22:53:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMF.h"
 !!#include "ESMF_Route.h"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_RouteMod - One line general statement about this class
 !
 ! !DESCRIPTION:
@@ -89,12 +89,12 @@
  
 !
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.50 2004/04/13 22:59:36 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.51 2004/04/20 22:53:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -128,7 +128,7 @@
 ! This section includes the Route Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteCreate - Create a new Route
 
 ! !INTERFACE:
@@ -155,7 +155,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
@@ -189,7 +189,7 @@
         end function ESMF_RouteCreate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteDestroy - Free all resources associated with a Route 
 
 ! !INTERFACE:
@@ -211,7 +211,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -244,7 +244,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteGet - Get values from a Route
 
 ! !INTERFACE:
@@ -272,7 +272,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -310,7 +310,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteSetRecvItems - Set size of recv buf in #items
 
 ! !INTERFACE:
@@ -339,7 +339,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -368,7 +368,7 @@
         end subroutine ESMF_RouteSetRecvItems
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteGetRecvItems - Get size of recv buf in #items
 
 ! !INTERFACE:
@@ -397,7 +397,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -426,7 +426,7 @@
         end subroutine ESMF_RouteGetRecvItems
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteSetRecv - Set recv values in a Route
 
 ! !INTERFACE:
@@ -456,7 +456,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -485,7 +485,7 @@
         end subroutine ESMF_RouteSetRecv
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteSetSend - Set send values in a Route
 
 ! !INTERFACE:
@@ -516,7 +516,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -545,7 +545,7 @@
         end subroutine ESMF_RouteSetSend
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteGetCached - Search for a precomputed Route
 
 ! !INTERFACE:
@@ -585,7 +585,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -683,7 +683,7 @@
         end subroutine ESMF_RouteGetCached
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteRun - Execute the communications the Route represents
 
 ! !INTERFACE:
@@ -711,7 +711,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -1025,7 +1025,7 @@
         end subroutine ESMF_RouteRunF90PtrR832D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RoutePrecomputeHalo - Precompute communication paths for a halo
 
 ! !INTERFACE:
@@ -1059,7 +1059,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -1420,7 +1420,7 @@
         end subroutine ESMF_RoutePrecomputeDomList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteValidate - Check internal consistency of a Route
 
 ! !INTERFACE:
@@ -1444,7 +1444,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 !
        character (len=6) :: defaultopts      ! default validate options
@@ -1478,7 +1478,7 @@
        end subroutine ESMF_RouteValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RoutePrint - Print the contents of a Route
 
 ! !INTERFACE:
@@ -1503,7 +1503,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
