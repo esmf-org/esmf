@@ -1,4 +1,3 @@
-! $Id: ESMF_LogErr.F90,v 1.8 2004/04/21 03:31:13 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,16 +58,16 @@ type ESMF_Log
            
     type(ESMF_Logical) :: FileIsOpen            
     integer unitNumber                                                   
-	type(ESMF_Logical) :: verbose
-	type(ESMF_Logical) :: flush
-	type(ESMF_Logical) :: root_only
-	integer halt
-	integer filetype
-	integer stream 
-	integer max_elements
-	type(ESMF_LOGENTRY), dimension(1)::LOG_ENTRY
+    type(ESMF_Logical) :: verbose
+    type(ESMF_Logical) :: flush
+    type(ESMF_Logical) :: root_only
+    integer halt
+    integer filetype
+    integer stream 
+    integer max_elements
+    type(ESMF_LOGENTRY), dimension(1)::LOG_ENTRY
     character(len=32) nameLogErrFile      
-
+    integer :: MaxTryOpen=100000
 !If standardout not unit 6, must be changed here.
 #ifndef ESMF_NO_INITIALIZERS
     integer :: stdOutUnitNumber=6
@@ -114,14 +113,19 @@ contains
 	character(len=10) 					:: t
 	character(len=8) 					:: d
 	
-	rc=1
+	if (present(rc)) then
+	  	rc=ESMF_FAILURE
+	endif
 	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
-		call DATE_AND_TIME(d,t)
-		WRITE(aLog%unitnumber,100) d,t,"INFO     Log Close"
-		100 FORMAT(a8,2x,a10,2x,a)
-		if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
-		CLOSE(UNIT=aLog%stdOutUnitNumber)
-		rc=0
+		!call DATE_AND_TIME(d,t)
+		!WRITE(aLog%unitnumber,100) d,t,"INFO     Log Close"
+		!100 FORMAT(a8,2x,a10,2x,a)
+		!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
+		!CLOSE(UNIT=aLog%stdOutUnitNumber)
+		aLog%FileIsOpen=ESMF_FALSE
+		if (present(rc)) then
+			rc=ESMF_SUCCESS
+		endif
 	endif	
 	
 end subroutine ESMF_LogClose
@@ -158,34 +162,34 @@ end subroutine ESMF_LogClose
 	character(len=10) 			:: t
 	character(len=8) 			:: d
 	
-	rc=1
+	if (present(rc)) rc=ESMF_FAILURE
 	aLog%FileIsOpen=ESMF_FALSE
 	if (aLog%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
 	aLog%nameLogErrFile=filename
 	aLog%unitnumber=aLog%stdOutUnitNumber
 	do i=aLog%unitnumber, ESMF_LOG_UPPER
-     	inquire(unit=i,iostat=status)
-     	if (status .eq. 0) then
-       		aLog%FileIsOpen = ESMF_TRUE
+     		inquire(unit=i,iostat=status)
+     		if (status .eq. 0) then
+       			aLog%FileIsOpen = ESMF_TRUE
        		exit
-     	endif
+     		endif
    	enddo 
 	if (aLog%FileIsOpen .eq. ESMF_FALSE) return
 	aLog%unitNumber = i  
-	
-	call DATE_AND_TIME(d,t)
+	if (present(rc)) rc=ESMF_SUCCESS
+	!call DATE_AND_TIME(d,t)
 
-	OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
-	ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=STATUS)
-	if (status .eq. 0) then
-    	aLog%FileIsOpen=ESMF_TRUE
-		WRITE(aLog%stdOutUnitNumber,100) d,t,"INFO     Log Open"
-		100 FORMAT(a8,2x,a10,2x,a)
-		if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Open"	
-		rc=0
-   	else
-    	aLog%FileIsOpen=ESMF_FALSE
-   	end if  
+	!OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
+	!ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=STATUS)
+	!if (status .eq. 0) then
+    		!aLog%FileIsOpen=ESMF_TRUE
+		!WRITE(aLog%stdOutUnitNumber,100) d,t,"INFO     Log Open"
+		!100 FORMAT(a8,2x,a10,2x,a)
+		!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Open"	
+		!rc=0
+   	!else
+    		!aLog%FileIsOpen=ESMF_FALSE
+   	!end if  
 	
 end subroutine ESMF_LogOpen	
 
@@ -232,14 +236,13 @@ end subroutine ESMF_LogOpen
 	character(len=32)					:: f
 	character(len=32)					::tmodule
 	character(len=32)					::tmethod
+	integer							::status
+	integer							::ok
+	integer							::i
 	
-	rc=ESMF_FAILURE
-	if (present(method)) then
-		tmethod=adjustl(method)
-	endif
-	if (present(module)) then
-		tmodule=adjustl(module)
-	endif	  
+	if (present(rc)) rc=ESMF_FAILURE
+	if (present(method)) tmethod=adjustl(method)
+	if (present(module)) tmodule=adjustl(module)	  
 	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
 		call DATE_AND_TIME(d,t)	
 		select case (logtype)
@@ -251,30 +254,40 @@ end subroutine ESMF_LogOpen
 				lt="ERROR"
 		end select				
 		f=adjustl(__FILE__)
-		if ((present(module)).and.(present(method))) then
-		  	WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
-                        100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
-			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-			lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string		
-		else if ((present(module)).and. .not.(present(method))) then
-		  	WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,string
-			101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
-			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-			lt,"    ",f,__LINE__,"  ",tmodule,string
-		else if (.not.(present(module)).and.(present(method))) then
-		  	WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,string
-			102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
-			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-			lt,"    ",f,__LINE__,"  ",tmodule,string	
-		else
-			WRITE(aLog%unitnumber,103) d,t,lt,f,__LINE__,string
-			103 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
-			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-			lt,"    ",f,__LINE__,"  ",string
-		endif	
-		rc=ESMF_SUCCESS
-	endif	
-       
+		ok=0
+		do i=1, aLog%MaxTryOpen
+			OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
+			ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
+			if (status.eq.0) then
+				if ((present(module)).and.(present(method))) then
+		  			WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
+                        		100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
+					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+					lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string		
+				else if ((present(module)).and. .not.(present(method))) then
+		  			WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,string
+					101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+					lt,"    ",f,__LINE__,"  ",tmodule,string
+				else if (.not.(present(module)).and.(present(method))) then
+		  			WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,string
+					102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+					lt,"    ",f,__LINE__,"  ",tmodule,string	
+				else
+					WRITE(aLog%unitnumber,103) d,t,lt,f,__LINE__,string
+					103 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
+					if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+					lt,"    ",f,__LINE__,"  ",string
+				endif	
+				CLOSE(UNIT=aLog%stdOutUnitNumber)
+				if (present(rc)) rc=ESMF_SUCCESS
+				ok=1
+			endif	
+			if (ok.eq.1) exit
+		enddo
+	endif
+	       
 end subroutine ESMF_LogWrite
 
 !--------------------------------------------------------------------------
@@ -367,33 +380,15 @@ end function ESMF_LogFoundError
 !      \end{description}
 ! 
 !EOP 
-	if (present(rc)) then
-	  rc=ESMF_FAILURE
-	endif
-	if (present(verbose)) then
-	  aLog%verbose=verbose
-	endif
-	if (present(flush)) then
-	  aLog%flush=flush
-	endif
-	if (present(root_only)) then
-	  aLog%root_only=root_only
-	endif
-	if (present(halt)) then
-	  aLog%halt=halt
-	endif
-	if (present(filetype)) then
-	  aLog%filetype=filetype
-	endif
-	if (present(stream)) then
-	  aLog%stream=stream
-	endif
-	if (present(max_elements)) then
-	  aLog%max_elements=max_elements
-	endif	
-	if (present(rc)) then
-	  rc=ESMF_SUCCESS 
-	endif 
+	if (present(rc)) rc=ESMF_FAILURE
+	if (present(verbose)) aLog%verbose=verbose
+	if (present(flush)) aLog%flush=flush
+	if (present(root_only)) aLog%root_only=root_only
+	if (present(halt)) aLog%halt=halt
+	if (present(filetype)) aLog%filetype=filetype
+	if (present(stream)) aLog%stream=stream
+	if (present(max_elements)) aLog%max_elements=max_elements
+	if (present(rc)) rc=ESMF_SUCCESS 
 end subroutine ESMF_LogSet
 
 !--------------------------------------------------------------------------
@@ -425,7 +420,7 @@ end subroutine ESMF_LogSet
 !      \item [halt]
 !	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
 !      \item [filetype]
-!            The type of file (singlelog(0), multilog(1)).
+!             The type of file (singlelog(0), multilog(1)).
 !      \item [stream]
 !            The type of stream (free(0), preordered(1))
 !      \item [max_elements]
