@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.24 2004/06/14 22:31:48 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.25 2004/07/27 15:56:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.24 2004/06/14 22:31:48 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.25 2004/07/27 15:56:38 nscollins Exp $'
 
 !==============================================================================
 
@@ -133,7 +133,8 @@
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, startComp, stopComp
       integer :: srcSizeZ, srcSizeZComp, size
-      integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
+      integer :: i, num_domains, dstCounts(3), srcCounts(3)
+      !integer :: j, ij 
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:), pointer :: found
       integer(ESMF_KIND_I4), dimension(:), pointer :: foundCount, srcLocalMask
@@ -403,9 +404,9 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
       integer ::           &
-         k,n,iter,         &! loop counters
+         k,                &! loop counters
          kkk,              &! more loop counters
          kp1,              &! neighbor indices
          kbDst, keDst,     &! beg, end of exclusive domain in k-dir of dest grid

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.25 2004/06/23 16:58:22 eschwab Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.26 2004/07/27 15:58:29 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -15,10 +15,10 @@
 !
 !\begin{verbatim}
 
-!   ! Example program showing various ways to create a Array object
+    ! Example program showing various ways to create a Array object
     program ESMF_LocalArrayTest
     
-!   ! Other ESMF modules which are needed by Arrays
+    ! Other ESMF modules which are needed by Arrays
     use ESMF_BaseMod
     use ESMF_IOSpecMod
     use ESMF_ArraySpecMod
@@ -27,19 +27,18 @@
     use ESMF_Mod
     implicit none
 
-!   ! Local variables
-    integer :: nx, ny, arank, brank, rc 
-    integer :: i, j, k, l, m, ni, nj, nk, nl, nm
-    type(ESMF_ArraySpec) :: arrayspec, spec
+    ! Local variables
+    integer :: arank, brank, rc 
+    integer :: i, j, k, ni, nj, nk
+    type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataType) :: atype
     type(ESMF_DataKind) :: akind
     integer :: counts(ESMF_MAXDIM), lb(1), ub(1), rlb(1), rub(1)
-    type(ESMF_LocalArray) :: array1, array2, array3, array4
+    type(ESMF_LocalArray) :: array1, array2, array4
     real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
     real(ESMF_KIND_R8), dimension(:,:), pointer :: realptr, realptr2
     integer(ESMF_KIND_I4), dimension(:), pointer :: intptr, intptr2
     integer(ESMF_KIND_I4), dimension(:,:), pointer :: int2Dptr
-    character(ESMF_MAXSTR) :: filename
 
 
     ! individual test failure message

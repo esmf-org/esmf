@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.38 2004/06/21 22:13:42 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.39 2004/07/27 15:56:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.38 2004/06/21 22:13:42 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.39 2004/07/27 15:56:38 nscollins Exp $'
 
 !==============================================================================
 
@@ -1461,7 +1461,7 @@
 
       ! variables used locally
       integer :: iorder     ! order of interpolation
-      integer :: localrc    ! for internal error flags
+      !integer :: localrc    ! for internal error flags
 
       logical :: dummy
 

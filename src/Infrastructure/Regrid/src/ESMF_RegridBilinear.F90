@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.71 2004/06/14 22:31:06 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.72 2004/07/27 15:56:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.71 2004/06/14 22:31:06 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.72 2004/07/27 15:56:37 nscollins Exp $'
 
 !==============================================================================
 
@@ -512,9 +512,9 @@
       integer :: srcAdd, dstAdd(2), srcTmp(2)     ! address in gathered source
                                                   ! and grid address in dest grid
          
-      real (ESMF_KIND_R8) :: lonThresh
+      !real (ESMF_KIND_R8) :: lonThresh
                            ! threshold for checking longitude crossing
-      real (ESMF_KIND_R8) :: lonCycle
+      !real (ESMF_KIND_R8) :: lonCycle
                            ! 360 for degrees, 2pi for radians
       real (ESMF_KIND_R8) :: dx1, dx2, dx3, dy1, dy2, dy3
                            ! differences for iterative scheme
