@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.9 2004/04/22 16:33:21 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.10 2004/04/27 20:19:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.9 2004/04/22 16:33:21 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.10 2004/04/27 20:19:02 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -490,6 +490,87 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(willRingNext), &
                       name, failMsg, result, ESMF_SRCLINE)
       
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      !Test Alarm ringing
+      call ESMF_ClockAdvance(clock, rc=rc)
+      write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
+      write(name, *) "Alarm is ringing Test"
+      bool =  ESMF_AlarmIsRinging(alarm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      !Test Alarm still ringing
+      call ESMF_ClockAdvance(clock, rc=rc)
+      write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
+      write(name, *) "Alarm is still ringing Test"
+      bool =  ESMF_AlarmIsRinging(alarm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+    ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      !Test Alarm Previously ringing
+      write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
+      write(name, *) "Alarm Was Previously ringing Test"
+      bool =  ESMF_AlarmWasPrevRinging(alarm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+	print *, "bool is ", bool
+
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      !Test Alarm Previously ringing
+      call ESMF_ClockAdvance(clock, rc=rc)
+      write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
+      write(name, *) "Alarm Was Previously ringing Test"
+      bool =  ESMF_AlarmWasPrevRinging(alarm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      !Test Alarm still ringing
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      call ESMF_ClockAdvance(clock, rc=rc)
+      write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
+      write(name, *) "Alarm is still ringing Test"
+      bool =  ESMF_AlarmIsRinging(alarm, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Turn off Ringing Alarm "
+      call ESMF_AlarmRingerOff(alarm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS or its ringing"
+      write(name, *) "Check if Alarm is not ringing Test"
+      isringing = ESMF_AlarmIsRinging(alarm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.isringing), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 
 
 
