@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.6 2004/01/09 16:43:20 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.7 2004/02/03 21:19:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.6 2004/01/09 16:43:20 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.7 2004/02/03 21:19:04 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -847,7 +847,7 @@
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutGetDEID(layout, id, status)
       if (status .ne. ESMF_SUCCESS) then
-        !print *, "ESMF_DELayoutGetDEID error"
+        print *, "ESMF_DELayoutGetDEID error"
         return
       endif
 
