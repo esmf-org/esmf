@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.36 2003/12/19 19:22:00 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.37 2003/12/23 00:33:52 eschwab Exp $'
 
 !==============================================================================
 !
@@ -658,7 +658,8 @@
       integer,          intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Sets a {\tt clock}'s current time to the wall clock time.
+!     Sets a {\tt clock}'s current time to the wall clock time.  It is
+!     accurate to the nearest second.
 !   
 !     The arguments are:
 !     \begin{description}

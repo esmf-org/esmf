@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.41 2003/12/19 19:22:00 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.42 2003/12/23 00:33:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.41 2003/12/19 19:22:00 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.42 2003/12/23 00:33:52 eschwab Exp $'
 
 !==============================================================================
 !
@@ -160,6 +160,13 @@
 ! !DESCRIPTION:
 !     This interface defines a new .DIV. operator for the
 !     {\tt ESMF\_TimeInterval} class.
+!
+!     Implementation note:  This cannot be overloaded with (/) because
+!     the arguments are the same as {\\t ESMF\_TimeIntervalRQuot} (see below).
+!     The difference is in the return type ({\\t ESMF\_Fraction} vs. real),
+!     which F90 does not use to distinguish among multiple overloaded methods.
+!     Since the {\\t ESMF\_Fraction} return type is less likely to be used, it
+!     was selected for the new .DIV. operator.
 !
 !EOP
       end interface

@@ -1,4 +1,4 @@
-% $Id: Time_desc.tex,v 1.10 2003/12/19 19:14:52 eschwab Exp $
+% $Id: Time_desc.tex,v 1.11 2003/12/23 00:33:52 eschwab Exp $
 \label{sec:Time}
 
 A Time represents a specific point in time.  In order to accommodate
@@ -22,9 +22,9 @@ does not need to be associated with a standard calendar; a Time whose
 specification includes time units of a day and greater must be.  The 
 ESMF representation
 of a calendar, the Calendar class, is described in Section~\ref{sec:Calendar}.
-The {\tt ESMF\_TimeSet} method is used to associate a Time with a 
-Calendar.  If a Time method is invoked in which a Calendar is 
-necessary and one has not been set, the ESMF method will return an error
+The {\tt ESMF\_TimeSet} method is used to initialize a Time as well as
+associate it with a Calendar.  If a Time method is invoked in which a Calendar
+is necessary and one has not been set, the ESMF method will return an error
 condition.
 
 In the ESMF the TimeInterval class is used to represent time periods.

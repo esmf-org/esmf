@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.53 2003/12/19 19:22:00 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.54 2003/12/23 00:33:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.53 2003/12/19 19:22:00 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.54 2003/12/23 00:33:52 eschwab Exp $'
 
 !==============================================================================
 !
@@ -330,7 +330,11 @@
 !
 !     Time manager represents and manipulates time internally with integers
 !     to maintain precision. Hence, user-specified floating point values are
-!     converted internally to integers.
+!     converted internally to integers.  Sub-second values will be represented
+!     internally with an integer numerator and denominator fraction (sN/sD).
+!     The smallest resolution will be nanoseconds (denominator), as per Time
+!     Manager requirement TMG3.1.  Anything smaller will be truncated.  For
+!     example, pi would be represented as s=3, sN=141592654, sD=1000000000.
 !
 !     The arguments are:
 !     \begin{description}
@@ -458,11 +462,14 @@
 
 ! !DESCRIPTION:
 !     Gets the value of {\tt time} in units specified by the user
-!     via F90 optional arguments.
+!     via F90 optional arguments.  See {\tt ESMF\_TimeSet()} above for a
+!     description of time units and calendars.
 !
 !     The ESMF Time Manager represents and manipulates time internally with 
-!     integers to maintain precision. Hence, user-specified floating point 
-!     values are converted internally from integers.
+!     integers to maintain precision.  Hence, user-specified floating point 
+!     values are converted internally from integers.  For example, if a time
+!     value is 5 and 3/8 seconds (s=5, sN=3, sD=8), and you want to get it as
+!     floating point seconds, you would get 5.375 (s\_r8=5.375).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time is defined to be 2:00 am on a particular date, then
@@ -638,7 +645,7 @@
 !
 ! !DESCRIPTION:
 !     Gets the system real time (wall clock time), and returns it as an
-!     {\tt ESMF\_Time}.
+!     {\tt ESMF\_Time}.  Accurate to the nearest second.
 !
 !     The arguments are:
 !     \begin{description}

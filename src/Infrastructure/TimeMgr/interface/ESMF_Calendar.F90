@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.43 2003/12/19 19:22:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.44 2003/12/23 00:33:52 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -139,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.43 2003/12/19 19:22:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.44 2003/12/23 00:33:52 eschwab Exp $'
 
 !==============================================================================
 
@@ -174,6 +174,8 @@
 !            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
 !            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
 !            {\tt ESMF\_CAL\_NOCALENDAR}.
+!          See the "Time Manager Reference" document for a description of
+!          each calendar type.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -223,17 +225,19 @@
 !     \item[{[daysPerYear]}]
 !          Integer number of days per year.  Use with daysPerYearDn and
 !          daysPerYearDd (see below) to specify a days-per-year calendar
-!          for any planetary body.
+!          for any planetary body.  Default = 0
 !     \item[{[daysPerYearDn]}]
 !          Integer numerator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear (see above) and daysPerYearDd (see below) to
 !          specify a days-per-year calendar for any planetary body.
+!          Default = 0
 !     \item[{[daysPerYearDd]}]
 !          Integer denominator portion of fractional number of days per year
 !          (daysPerYearDn/daysPerYearDd).
 !          Use with daysPerYear and daysPerYearDn (see above) to
 !          specify a days-per-year calendar for any planetary body.
+!          Default = 1
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -297,11 +301,18 @@
 !     \item[{[secondsPerYear]}]
 !          Integer number of seconds per year.
 !     \item[{[daysPerYear]}]
-!          Integer number of days per year.
+!          Integer number of days per year.  For calendars with
+!          intercalations, daysPerYear is the number of days for years without
+!          an intercalation.  For other calendars, it is the number of days in
+!          every year.
 !     \item[{[daysPerYearDn]}]
 !          Integer fractional number of days per year (numerator).
+!          For calendars with intercalations, daysPerYearDn/daysPerYearDd is
+!          the average fractional number of days per year (e.g. 25/100 for
+!          Julian 4-year intercalation).  For other calendars, it is zero.
 !     \item[{[daysPerYearDd]}]
-!          Integer fractional number of days per year (denominator).
+!          Integer fractional number of days per year (denominator).  See
+!          daysPerYearDn above.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
