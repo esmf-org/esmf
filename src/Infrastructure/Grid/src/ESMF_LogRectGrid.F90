@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.31 2004/03/08 16:39:46 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.32 2004/03/08 22:47:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.31 2004/03/08 16:39:46 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.32 2004/03/08 22:47:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3517,7 +3517,7 @@
       endif
 
       ! calculate default if dimOrder is not present
-      allocate(dimOrderUse(size(globalAI1D)))
+      allocate(dimOrderUse(arraySize))
       if (present(dimOrder)) then
         dimOrderUse(:) = dimOrder(:)
       else
