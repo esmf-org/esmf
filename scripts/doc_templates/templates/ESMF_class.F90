@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.12 2002/11/05 18:04:20 cdeluca Exp $
+! $Id: ESMF_class.F90,v 1.13 2003/02/03 15:29:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.12 2002/11/05 18:04:20 cdeluca Exp $'
+      '$Id: ESMF_class.F90,v 1.13 2003/02/03 15:29:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -139,8 +139,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>CreateNew - Create a new <Class>
+! !IROUTINE:  ESMF_<Class>CreateNew - Create a new <Class>
 
 ! !INTERFACE:
       function ESMF_<Class>CreateNew(arg1, arg2, arg3, rc)
@@ -180,8 +179,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>Destroy - Free all resources associated with a <Class> 
+! !IROUTINE: ESMF_<Class>Destroy - Free all resources associated with a <Class> 
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Destroy(<class>, rc)
@@ -212,8 +210,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>Construct - Construct the internals of an allocated <Class>
+! !IROUTINE: ESMF_<Class>Construct - Construct the internals of an allocated <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Construct(<class>, arg1, arg2, arg3, rc)
@@ -257,8 +254,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>Destruct - Free any <Class> memory allocated internally
+! !IROUTINE:  ESMF_<Class>Destruct - Free any <Class> memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Destruct(<class>, rc)
@@ -292,8 +288,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>Init - Initialize a <Class> 
+! !IROUTINE: ESMF_<Class>Init - Initialize a <Class> 
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Init(<class>, arg1, arg2, arg3, rc)
@@ -336,8 +331,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>GetConfig - Get configuration information from a <Class>
+! !IROUTINE:  ESMF_<Class>GetConfig - Get configuration information from a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>GetConfig(<class>, config, rc)
@@ -370,8 +364,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>SetConfig - Set configuration information for a <Class>
+! !IROUTINE: ESMF_<Class>SetConfig - Set configuration information for a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>SetConfig(<class>, config, rc)
@@ -405,8 +398,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>GetValue - Get <Value> for a <Class>
+! !IROUTINE: ESMF_<Class>GetValue - Get <Value> for a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>GetValue(<class>, value, rc)
@@ -441,8 +433,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>SetValue - Set <Value> for a <Class>
+! !IROUTINE: ESMF_<Class>SetValue - Set <Value> for a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>SetValue(<Class>, value, rc)
@@ -477,8 +468,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>Validate - Check internal consistency of a <Class>
+! !IROUTINE: ESMF_<Class>Validate - Check internal consistency of a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Validate(<class>, opt, rc)
@@ -511,8 +501,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_<Class>Print - Print the contents of a <Class>
+! !IROUTINE:  ESMF_<Class>Print - Print the contents of a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Print(<class>, opt, rc)
