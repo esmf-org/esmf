@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.40 2004/08/02 22:53:34 nscollins Exp $
+% $Id: ESMF_install.tex,v 1.41 2005/02/11 20:48:34 nscollins Exp $
 
 \subsection{ESMF Download Options}
 
@@ -26,7 +26,7 @@ Currently the ESMF\_DIR environment variable must be set on all
 platforms.  ESMF\_DIR should be set to the path of the top
 level ESMF directory.  
 
-There are eight other environment variables that the build system uses.
+There are several other environment variables that the build system uses.
 In most cases they do not have to be set by the user.  If they are not
 set, then the build system will assign default values to them.  For the
 current supported platforms, the default values are fine.  The other
@@ -50,13 +50,45 @@ environment variables are:
                  will be mpiuni so that the mpi stub library will be used.
                  Other possible settings are mpich and lam.
 
-  \item[ESMF\_COMPILER] Variable specifying which compiler to use.  Values
-                 can be default, absoft, intel, lahey, pgi, or nag. 
-                 If the value is default or ESMF\_COMPILER is 
-                 left unset, then the default compiler 
-                 will be used.  Exceptions for default values:  
-                 on Linux machines the default value 
-                 is lahey and on Darwin machines it is absoft.
+\item[ESMF\_COMPILER]
+
+Variable specifying which compiler to use.  Value can be default,
+absoft, intel, lahey, xlf, or nag.  If the value is default or
+ESMF\_COMPILER is left unset, then the default compiler will be
+used. On systems which usually come with a single vendor-supplied
+compiler, the default is to use this compiler.  On systems like
+Linux clusters where there is no single vendor compiler installed
+on all systems, you will generally want to set this.
+The default for Linux systems is lahey and on Darwin (Mac OS X)
+systems it is absoft.
+
+\item[ESMF\_C\_COMPILER]
+
+Variable specifying which C/C++ compiler to use.   In most cases
+this should not be set; the default is to use the vendor-supplied
+compilers on those systems which normally come with a single
+development environment; on other systems like Linux clusters,
+the default is to use the ESMF\_COMPILER setting.  However, some
+Fortran compilers support linking with C and C++ code compiled
+with the GNU compilers; in these cases, you can set this variable
+to the value gnu in order to compile with the vendor Fortran
+compiler and the GNU C/C++.   This option is only supported for
+ESMF\_ARCH=Darwin, ESMF\_COMPILER=xlf, and ESMF\_ARCH=Linux,
+ESMF\_COMPILER=intel.
+
+\item[ESMF\_C\_LIBRARY]
+
+Variable specifying which C/C++ libraries to link with.  In most cases
+this should not be set; the default is to use the vendor-supplied
+libraries on those systems which normally come with a single
+development environment; on other systems like Linux clusters,
+the default is to use the ESMF\_COMPILER setting.  However, some
+vendor compilers support compiling with their compilers but linking
+with the GNU C/C++ libraries.
+In these cases, you can set this variable
+to the value gnu in order to link with the GNU C/C++ libraries.
+This option is only supported for ESMF\_ARCH=Linux, ESMF\_COMPILER=intel.
+
 
   \item[ESMF\_EXHAUSTIVE] Variable specifying how to compile the unit tests.
                  If set to the value ON, then all unit tests will be compiled
