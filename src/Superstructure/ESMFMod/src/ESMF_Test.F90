@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.2 2004/12/08 18:34:24 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.3 2004/12/08 22:28:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,14 +40,15 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_Test
-      public ESMF_TestStart
       public ESMF_TestEnd
+      public ESMF_TestMinPETs
+      public ESMF_TestStart
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.2 2004/12/08 18:34:24 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.3 2004/12/08 22:28:14 nscollins Exp $'
 
 !==============================================================================
 
@@ -55,7 +56,8 @@
 
 !==============================================================================
 
-!===============================================================================
+
+!-------------------------------------------------------------------------------
 !BOP
 !
 ! !IROUTINE:  ESMF_Test - Print PASS/FAIL messages for tests
@@ -98,6 +100,120 @@
       end if
 
       end subroutine ESMF_Test
+
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestEnd - Print information at the end of testing
+!
+! !INTERFACE:
+      subroutine ESMF_TestEnd(result, file, line, unit)
+
+! !ARGUMENTS:
+      integer, intent(in) :: result         ! number of successful tests
+      character(*), intent(in) :: file      ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+
+! !DESCRIPTION:
+!     Prints a standard message; intended to be called at the end of any
+!     test code.  If {\tt unit}
+!     is specified, will in addition write the same message to that 
+!     Fortran unit number.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      integer :: rc
+      character(ESMF_MAXSTR) :: msg
+
+      write(msg, *) "Number of failed tests:", result
+      print *, msg
+      call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+      if (present(unit)) write(unit, *) msg
+
+      write(msg, *) "Ending Test, file ", trim(file), ", line", line
+      print *, msg
+      call ESMF_LogWrite("Ending Test", ESMF_LOG_INFO, line, file)
+      if (present(unit)) write(unit, *) msg
+
+      call ESMF_Finalize(rc)
+      if (rc .ne. ESMF_SUCCESS) then
+          write(msg, *) "Failure in Finalizing ESMF"
+          print *, msg
+      endif
+
+      end subroutine ESMF_TestEnd
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestMinPETs - Verify there are a sufficient number of PETs
+!
+! !INTERFACE:
+      function ESMF_TestMinPETs(petCount, file, line, unit)
+
+! !RETURN VALUE:
+      logical :: ESMF_TestMinPETs
+
+! !ARGUMENTS:
+      integer, intent(in) :: petCount       ! minimum number of acceptable PETs
+      character(*), intent(in) :: file      ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+
+! !DESCRIPTION:
+!     Verifies we are running on at least the minimum number of PETs.
+!     If {\tt unit} is specified, will in addition write the same message 
+!     to that Fortran unit number.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      character(ESMF_MAXSTR) :: msg, failMsg
+      type(ESMF_VM) :: globalVM
+      integer :: numPETs, localrc
+
+      ! assume failure until sure of success
+      ESMF_TestMinPETs = .false.
+
+      ! Get the global VM and pet count.
+      call ESMF_VMGetGlobal(globalVM, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        failMsg = "Unable to get global VM" 
+        write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      end if
+
+      call ESMF_VMGet(globalVM, petCount=numPETs, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        failMsg = "Unable to query global VM" 
+        write(msg, *) "FAIL ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      endif
+
+      if (petCount .lt. numPETs) then
+        write(failMsg, *) "This test must run on at least", petCount, "processors."
+        write(msg, *) "FAIL ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      endif
+
+      ESMF_TestMinPETs = .true.
+      return
+
+      end function ESMF_TestMinPETs
 
 !------------------------------------------------------------------------------
 !BOP
@@ -155,50 +271,6 @@
       if (present(unit)) write(unit, *) msg
 
       end subroutine ESMF_TestStart
-
-!------------------------------------------------------------------------------
-!BOP
-!
-! !IROUTINE:  ESMF_TestEnd - Print information at the end of testing
-!
-! !INTERFACE:
-      subroutine ESMF_TestEnd(result, file, line, unit)
-
-! !ARGUMENTS:
-      integer, intent(in) :: result         ! number of successful tests
-      character(*), intent(in) :: file      ! test file name
-      integer, intent(in) :: line           ! test file line number
-      integer, intent(in), optional :: unit ! additional output unit number
-
-! !DESCRIPTION:
-!     Prints a standard message; intended to be called at the end of any
-!     test code.  If {\tt unit}
-!     is specified, will in addition write the same message to that 
-!     Fortran unit number.
-!
-!EOP
-!-------------------------------------------------------------------------------
-
-      integer :: rc
-      character(ESMF_MAXSTR) :: msg
-
-      write(msg, *) "Number of failed tests:", result
-      print *, msg
-      call ESMF_LogWrite(msg, ESMF_LOG_INFO)
-      if (present(unit)) write(unit, *) msg
-
-      write(msg, *) "Ending Test, file ", trim(file), ", line", line
-      print *, msg
-      call ESMF_LogWrite("Ending Test", ESMF_LOG_INFO, line, file)
-      if (present(unit)) write(unit, *) msg
-
-      call ESMF_Finalize(rc)
-      if (rc .ne. ESMF_SUCCESS) then
-          write(msg, *) "Failure in Finalizing ESMF"
-          print *, msg
-      endif
-
-      end subroutine ESMF_TestEnd
 
 !------------------------------------------------------------------------------
 
