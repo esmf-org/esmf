@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.11 2004/02/11 18:10:21 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.12 2004/02/11 23:37:15 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -68,7 +68,7 @@
 !BOP
 !\begin{verbatim}
     field1 = ESMF_FieldCreate(grid, arraya, &
-                         relloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
+                         horizRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 !\end{verbatim}
 !EOP
     if (rc.NE.ESMF_SUCCESS) then
@@ -99,7 +99,7 @@
     end if
 !BOP
 !\begin{verbatim}
-    field2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
     print *, "Field example 2 returned"
 !\end{verbatim}
