@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.25 2003/09/23 19:24:33 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.26 2003/09/23 21:43:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.25 2003/09/23 19:24:33 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.26 2003/09/23 21:43:24 jwolfe Exp $'
 
 !==============================================================================
 
@@ -387,7 +387,7 @@
    !                                       size_x0, status)
  
       ! set the values in the TV
-      call ESMF_TransformValuesSet(tv, size, recvDomainList, &
+      call ESMF_TransformValuesSet(tv, 0, recvDomainList, &
                                    srcindex, dstindex, weights, rc)
 
       ! set up mask and logical found arrays for search
