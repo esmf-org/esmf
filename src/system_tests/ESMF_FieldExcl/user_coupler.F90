@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2004/10/07 16:31:22 nscollins Exp $
+! $Id: user_coupler.F90,v 1.3 2004/10/11 22:45:18 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -13,6 +13,8 @@
 !
 !\begin{verbatim}
 
+#include "ESMF.h"
+
     module user_coupler
 
     ! ESMF Framework module
@@ -24,6 +26,10 @@
         
     ! global data
     type(ESMF_RouteHandle), save :: routehandle
+
+    type wrap2DR8
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: value
+    end type
 
     contains
 
@@ -72,18 +78,19 @@
       type(ESMF_Field) :: humidity1proxy, humidity2proxy
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: cplDElayout, delayout
-      type(ESMF_Array) :: array1, array2
+      type(ESMF_Array) :: array1, array2, array1p, array2p
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: array1ptr, array1pptr
       real(ESMF_KIND_R8), dimension(:,:), pointer :: array2ptr, array2pptr
       type(ESMF_Grid) :: grid1, grid2
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2), max(2)
-      integer :: counts(ESMF_MAXGRIDDIM)
+      integer :: counts(ESMF_MAXGRIDDIM), lb(ESMF_MAXDIM)
       integer :: npets, pet_id, countsPerDE1(4), countsPerDE2(2)
       logical :: i_have_comp1, i_have_comp2
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       type(ESMF_GridHorzStagger) :: horz_stagger
+      type(wrap2DR8) :: wrap
 
 
       print *, "User Coupler Init starting"
@@ -160,11 +167,15 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_FieldGetDataPointer(humidity1, array1ptr, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetDataPointer(humidity1proxy, array1pptr, rc=status)
+        call ESMF_FieldGetArray(humidity1proxy, array1p, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! point at real data where we have it
-        array1pptr => array1ptr
+        wrap%value => array1ptr
+        call c_ESMC_ArraySetF90Ptr(array1p, wrap, status)
+        lb(1:2) = lbound(array1ptr)
+        call c_ESMC_ArraySetBaseAddr(array1p, &
+                  ESMF_DATA_ADDRESS(array1ptr(lb(1), lb(2))), status)
       endif
 
       call ESMF_StateAddField(importState, humidity1proxy, rc=status)
@@ -218,10 +229,15 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_FieldGetDataPointer(humidity2, array2ptr, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-        call ESMF_FieldGetDataPointer(humidity2proxy, array2pptr, rc=status)
+        call ESMF_FieldGetArray(humidity2proxy, array2p, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        array2pptr => array2ptr
+        ! point at real data where we have it
+        wrap%value => array2ptr
+        call c_ESMC_ArraySetF90Ptr(array2p, wrap, status)
+        lb(1:2) = lbound(array2ptr)
+        call c_ESMC_ArraySetBaseAddr(array2p, &
+                  ESMF_DATA_ADDRESS(array2ptr(lb(1), lb(2))), status)
       endif
 
       call ESMF_StateAddField(exportState, humidity2proxy, rc)
