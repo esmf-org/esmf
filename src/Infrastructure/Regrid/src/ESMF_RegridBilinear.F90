@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.16 2003/08/28 15:45:47 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.17 2003/08/28 21:03:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.16 2003/08/28 15:45:47 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.17 2003/08/28 21:03:18 jwolfe Exp $'
 
 !==============================================================================
 
@@ -278,7 +278,7 @@
                                           size, status)
       tv%dstindex = ESMF_LocalArrayCreate(2, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
                                           size_xy, status) 
-      tv%weights = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_KIND_R8, &
+      tv%weights  = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_KIND_R8, &
                                           size_x0, status)
  
       call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
@@ -292,7 +292,8 @@
         src_size_y = recvDomainList%domains(i)%ai(2)%max &
                    - recvDomainList%domains(i)%ai(2)%min + 1
         stop  = start + src_size_x*src_size_y - 1
-        call ESMF_RegridBilinearSearch(tv, src_center_x(start:stop), &
+        call ESMF_RegridBilinearSearch(tv, recvDomainList%domains(i), &
+                                       src_center_x(start:stop), &
                                        src_center_y(start:stop), &
                                        src_mask(start:stop), &
                                        src_size_x, src_size_y, start, &
@@ -315,13 +316,15 @@
 ! !IROUTINE: ESMF_RegridBilinearSearch - Searches a bilinear Regrid structure
 
 ! !INTERFACE:
-      subroutine ESMF_RegridBilinearSearch(tv, srcCenterX, srcCenterY, srcMask, &
+      subroutine ESMF_RegridBilinearSearch(tv, domain, &
+                                           srcCenterX, srcCenterY, srcMask, &
                                            srcSizeX, srcSizeY, srcStart, &
                                            dstCenterX, dstCenterY, dstMask, &
                                            dstSizeX, dstSizeY, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(inout) :: tv
+      type(ESMF_Domain), intent(in) :: domain
       integer, intent(in) :: srcSizeX  ! apparently these have to be first
       integer, intent(in) :: srcSizeY  ! so the compiler knows they're ints
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
@@ -366,6 +369,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+    !  logical, dimension(:,:), allocatable :: found
       logical :: found
       integer ::           &
          i,j,n,iter,       &! loop counters
@@ -399,13 +403,9 @@
          zero, half, one, pi
 
       real (ESMF_IKIND_R8), dimension(4) ::     &
-         src_x,     &! x coordinate of bilinear box corners
-         src_y,     &! y coordinate of bilinear box corners
+         src_x,        &! x coordinate of bilinear box corners
+         src_y,        &! y coordinate of bilinear box corners
          weights        ! bilinear weights for single box
-
-      integer, dimension(:), allocatable :: &
-         src_DE_overlap,    &! array to use for determining overlapping DEs
-         src_DE_gather       ! array to keep track of source DEs to gather up
 
       real (ESMF_IKIND_R8), dimension(:,:,:), allocatable :: &
          src_center_x,      &! cell center x-coord for gathered source grid
@@ -439,10 +439,10 @@
  !        endif
  !     endif
 
-      !   ib_dst = beginning index in 1st dir of exclusive domain on dst DE
-      !   ie_dst = ending    index in 1st dir of exclusive domain on dst DE
-      !   jb_dst = beginning index in 2nd dir of exclusive domain on dst DE
-      !   je_dst = ending    index in 2nd dir of exclusive domain on dst DE
+      ib_dst = 1
+      ie_dst = dstSizeX
+      jb_dst = 1
+      je_dst = dstSizeY
 
       !   dstmask     = get mask assoc with field from phys grid
 
@@ -456,10 +456,10 @@
           ! for this destination point, look for the proper neighbor cells in the
           ! source grid 
           found = .false.
-      !            ib_src = beginning index in 1st dir of exclusive domain on src DE
-      !            ie_src = ending    index in 1st dir of exclusive domain on src DE
-      !            jb_src = beginning index in 2nd dir of exclusive domain on src DE
-      !            je_src = ending    index in 2nd dir of exclusive domain on src DE
+      !          ib_src = beginning index in 1st dir of exclusive domain on src DE
+      !          ie_src = ending    index in 1st dir of exclusive domain on src DE
+      !          jb_src = beginning index in 2nd dir of exclusive domain on src DE
+      !          je_src = ending    index in 2nd dir of exclusive domain on src DE
 
           do jjj=jb_src,je_src
             do iii=ib_src,ie_src
@@ -480,22 +480,22 @@
 
               ! check longitude domain in spherical coords
        !       if (dst_grid%coord_system == ESMF_CoordSystem_Spherical) then
-                if (src_x(1) - dst_x >  lon_thresh) &
-                    src_x(1) = src_x(1) - lon_cycle
-                if (src_x(1) - dst_x < -lon_thresh) &
-                    src_x(1) = src_x(1) + lon_cycle
-                if (src_x(2) - dst_x >  lon_thresh) &
-                    src_x(2) = src_x(2) - lon_cycle
-                if (src_x(2) - dst_x < -lon_thresh) &
-                    src_x(2) = src_x(2) + lon_cycle
-                if (src_x(3) - dst_x >  lon_thresh) &
-                    src_x(3) = src_x(3) - lon_cycle
-                if (src_x(3) - dst_x < -lon_thresh) &
-                    src_x(3) = src_x(3) + lon_cycle
-                if (src_x(4) - dst_x >  lon_thresh) &
-                    src_x(4) = src_x(4) - lon_cycle
-                if (src_x(4) - dst_x < -lon_thresh) &
-                    src_x(4) = src_x(4) + lon_cycle
+       !         if (src_x(1) - dst_x >  lon_thresh) &
+       !             src_x(1) = src_x(1) - lon_cycle
+       !         if (src_x(1) - dst_x < -lon_thresh) &
+       !             src_x(1) = src_x(1) + lon_cycle
+       !         if (src_x(2) - dst_x >  lon_thresh) &
+       !             src_x(2) = src_x(2) - lon_cycle
+       !         if (src_x(2) - dst_x < -lon_thresh) &
+       !             src_x(2) = src_x(2) + lon_cycle
+       !         if (src_x(3) - dst_x >  lon_thresh) &
+       !             src_x(3) = src_x(3) - lon_cycle
+       !         if (src_x(3) - dst_x < -lon_thresh) &
+       !             src_x(3) = src_x(3) + lon_cycle
+       !         if (src_x(4) - dst_x >  lon_thresh) &
+       !             src_x(4) = src_x(4) - lon_cycle
+       !         if (src_x(4) - dst_x < -lon_thresh) &
+       !             src_x(4) = src_x(4) + lon_cycle
        !       endif
 
               ! check to see if point inside cell
