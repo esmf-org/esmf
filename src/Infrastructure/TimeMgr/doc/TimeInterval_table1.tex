@@ -1,4 +1,4 @@
-% $Id: TimeInterval_table1.tex,v 1.2 2004/04/26 20:37:10 eschwab Exp $
+% $Id: TimeInterval_table1.tex,v 1.3 2004/04/27 22:59:31 eschwab Exp $
 
 \subsubsection [API Usage Tables] {API Usage Tables}
 \newpage
@@ -13,6 +13,10 @@ The ISO 8601 standard states that Time Intervals can be specified in one of four
 The first specification method is handled by simply using the various time unit arguments of {\tt ESMF\_TimeIntervalSet()}.  The second, third, and fourth methods are handled within {\tt ESMF\_TimeInterval} by using the optional arguments startTime and endTime to {\tt ESMF\_TimeIntervalSet()}.
 
 The following table shows how to use {\tt ESMF\_TimeIntervalSet()} with the optional arguments {\tt startTime}, {\tt endTime}, and {\tt calendar} with respect to different calendars and absolute or relative time intervals.  Absolute time intervals are reducible to units of seconds, whereas relative time intervals are not.
+
+The optional argument {\tt calendar} to {\tt ESMF\_TimeIntervalSet()} is used to specify a relative duration of time on a specific calendar.  If {\tt calendar}, {\tt startTime}, or {\tt endTime} is not specified for a time interval, then the time interval is relative across all calendars.
+
+If a calendar is not specified for a time interval, the default is "No-Cal," which only defines hours, minutes, and seconds; it does not define years, months, or days.  A different default calendar can be set upon initialization via {\tt ESMF\_Initialize()} and/or changed during run-time via {\tt ESMF\_CalendarSetDefault()}.
 \begin{center}
 \begin{table}
 
