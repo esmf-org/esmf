@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.15 2003/04/22 20:48:02 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.16 2003/04/24 16:41:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.15 2003/04/22 20:48:02 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.16 2003/04/24 16:41:40 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -229,7 +229,7 @@
 
       ! Verifing that an Array can be created
       allocate(f90ptr1(10,20))
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -248,7 +248,7 @@
 
       ! Verifing that recreating a created Array is allowed
       allocate(f90ptr1(10,20))
-      arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreating a created Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -271,7 +271,7 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
-      f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+      f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
@@ -297,7 +297,7 @@
       !------------------------------------------------------------------------
 
       ! Verifing that a Field cannot` be created with an uninitialized Grid and Array
-      f3 = ESMF_FieldCreate(grid2, arr2, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+      f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
@@ -340,8 +340,8 @@
       ! It will be uncommented when the query function is written.
       ! Bug 705196 "Unable to query Grid name"
       !grid =  ESMF_GridCreate("oceangrid", rc=rc)
-      !arr = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
-      !f3 = ESMF_FieldCreate(grid, arr, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+      !arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
+      !f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    !dm, "Field 0", ios, rc)
       !call ESMF_FieldGetGrid(f3, grid3, rc=rc)
       !write(failMsg, *) ""

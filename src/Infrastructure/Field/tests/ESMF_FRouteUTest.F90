@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.8 2003/04/14 14:51:37 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.9 2003/04/24 16:41:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.8 2003/04/14 14:51:37 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.9 2003/04/24 16:41:39 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -145,7 +145,7 @@
       ! Verifing that an Array can be created
       allocate(f90ptr1(10,20))
       f90ptr1 = 10+myde
-      arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a src Test Array"
       call ESMF_ArrayPrint(arr1)
@@ -155,7 +155,7 @@
       ! second array
       allocate(f90ptr2(20,10))
       f90ptr2 = 100+myde
-      arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_NO_COPY, rc=rc)
+      arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a dst Test Array"
       call ESMF_ArrayPrint(arr2)
@@ -163,7 +163,7 @@
       !------------------------------------------------------------------------
 
       ! Verifing that a Field can be created with a Grid and Array
-      f1 = ESMF_FieldCreate(grid1, arr1, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+      f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
@@ -171,7 +171,7 @@
       !------------------------------------------------------------------------
 
       ! second field
-      f2 = ESMF_FieldCreate(grid2, arr2, ESMF_NO_COPY, ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 1", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
