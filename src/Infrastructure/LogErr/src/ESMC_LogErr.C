@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.55 2004/05/18 19:54:33 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.56 2004/05/18 20:56:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.55 2004/05/18 19:54:33 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.56 2004/05/18 20:56:53 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -357,10 +357,10 @@ bool ESMC_Log::ESMC_LogFoundError(
 //EOP
 {
     int result=false;
-    *rcToReturn=rcToCheck;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
-         ESMC_LogWrite(ESMC_LogGetErrMsg(*rcToReturn),ESMC_LOG_ERROR);
+         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
          result=true;
     }
     return result;
@@ -390,10 +390,10 @@ bool ESMC_Log::ESMC_LogFoundError(
 //EOP
 {
     int result=false;
-    *rcToReturn=rcToCheck;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
-         ESMC_LogWrite(ESMC_LogGetErrMsg(*rcToReturn),ESMC_LOG_ERROR,LINE,FILE,method);
+         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
          result=true;
     }
     return result;
@@ -420,7 +420,7 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     int result=false;
-    *rcToReturn=rcToCheck;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
         ESMC_LogWrite(msg,ESMC_LOG_ERROR);
@@ -454,7 +454,7 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //EOP
 {
     int result=false;
-    *rcToReturn=rcToCheck;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
         ESMC_LogWrite(msg,ESMC_LOG_ERROR,LINE,FILE,method);
