@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.45 2003/07/25 23:15:26 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.46 2003/07/28 17:37:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.45 2003/07/25 23:15:26 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.46 2003/07/28 17:37:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2057,9 +2057,10 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_AllGather} operation over the data
-!     in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is decomposed over N {\tt ESMF\_DE}s, this routine
-!     returns a copy of the entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
+!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_AllGather} operation
+!     over the data in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
+!     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
+!     entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
 !
 !     \begin{description}
 !     \item [field] 
@@ -2081,9 +2082,9 @@
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
       integer :: i, gridrank, datarank, thisdim, thislength
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
-      integer :: decomps(ESMF_MAXGRIDDIM)
+      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
+                                         global_dimlengths
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
@@ -2104,11 +2105,12 @@
         print *, "ERROR in FieldAllGather: DataMapGet returned failure"
         return
       endif 
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
-!     if(status .NE. ESMF_SUCCESS) then 
-!       print *, "ERROR in FieldAllGather: GridGet returned failure"
-!       return
-!     endif 
+      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, rc=status)
+!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldAllGather: GridGet returned failure"
+        return
+      endif 
       decomps(1) = 1    ! TODO: remove this once the grid call is created
       decomps(2) = 2
 
@@ -2123,7 +2125,11 @@
       allocate(decompids(datarank), stat=status)
       do i=1, datarank
         decompids(i) = dimorder(i)
-        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
+        global_dimlengths(i) = dimlengths(i)
+        if(dimorder(i).ne.0) then
+          decompids(i) = decomps(dimorder(i))
+          global_dimlengths(i) = global_cell_dim(dimorder(i))
+        endif
       enddo
 
       ! Set the axis info on the array to pass thru to DistGrid
@@ -2138,17 +2144,17 @@
       enddo
 
       ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, &
-                                                    compindex=axis, rc=status)
+      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, compindex=axis, &
+                                  rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: ArraySetAxisIndex returned failure"
         return
       endif 
 
-      ! Call Array method to perform actual work -- need layout and decompids
+      ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
       call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
-                               array, status)
+                               global_dimlengths, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: Array AllGather returned failure"
         return
@@ -2175,10 +2181,12 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Gather} operation over the data
-!     in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is decomposed over N {\tt ESMF\_DE}s, this routine
-!     returns a copy of the entire collected data {\tt ESMF\_Array} on the specified
-!     destination {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return {\tt ESMF\_Array}.
+!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Gather} operation
+!     over the data in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is
+!     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
+!     entire collected data {\tt ESMF\_Array} on the specified destination
+!     {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return
+!     {\tt ESMF\_Array}.
 !
 !     \begin{description}
 !     \item [field] 
@@ -2203,9 +2211,10 @@
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
       integer :: i, gridrank, datarank, thisdim, thislength
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
-      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
+      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
+                                         global_dimlengths
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
+      integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2225,11 +2234,12 @@
         print *, "ERROR in FieldGather: DataMapGet returned failure"
         return
       endif 
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
-!     if(status .NE. ESMF_SUCCESS) then 
-!       print *, "ERROR in FieldGather: GridGet returned failure"
-!       return
-!     endif 
+      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, rc=status)
+!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldGather: GridGet returned failure"
+        return
+      endif 
       decomps(1) = 1    ! TODO: remove this once the grid call is created
       decomps(2) = 2
 
@@ -2241,9 +2251,14 @@
         return
       endif 
 
+      allocate(decompids(datarank), stat=status)
       do i=1, datarank
         decompids(i) = dimorder(i)
-        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
+        global_dimlengths(i) = dimlengths(i)
+        if(dimorder(i).ne.0) then
+          decompids(i) = decomps(dimorder(i))
+          global_dimlengths(i) = global_cell_dim(dimorder(i))
+        endif
       enddo
 
       ! Set the axis info on the array to pass thru to DistGrid
@@ -2268,7 +2283,7 @@
       ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
       call ESMF_ArrayGather(ftypep%localfield%localdata, layout, decompids, &
-                            destination_de, array, status)
+                            global_dimlengths, destination_de, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: Array Gather returned failure"
         return
@@ -2658,8 +2673,9 @@
       logical :: hascachedroute    ! can we reuse an existing route?
       integer :: i, gridrank, datarank, thisdim
       integer :: nx, ny
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
+      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
+                                         global_dimlengths
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
@@ -2800,15 +2816,15 @@
       !  (if both are false then we've already returned.)
       if ((hassrcdata) .and. (.not. hasdstdata)) then
           call ESMF_RouteRun(route, srcarray=stypep%localfield%localdata, &
-                                                                     rc=status) 
+                             rc=status) 
 
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
           call ESMF_RouteRun(route, dstarray=dtypep%localfield%localdata, &
-                                                                     rc=status)
+                             rc=status)
 
       else
           call ESMF_RouteRun(route, stypep%localfield%localdata, &
-                                    dtypep%localfield%localdata, status)
+                             dtypep%localfield%localdata, status)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedist: RouteRun returned failure"

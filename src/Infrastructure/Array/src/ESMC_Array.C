@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.9 2003/07/24 21:52:45 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.10 2003/07/28 17:37:19 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1186,6 +1186,7 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
+      int global_dimlengths[],   // in  - array of global dimensions
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
@@ -1208,9 +1209,9 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
+      gsize = gsize * global_dimlengths[i];
       lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-      counts[i] = ai_comp[i].max;
+      counts[i] = global_dimlengths[i];
     }
 
     // switch based on datatype  TODO: this might be a good place to use templates
@@ -1270,6 +1271,7 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
+      int global_dimlengths[],   // in  - array of global dimensions
       int deid,                  // in  - the DE to collect the data on
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
@@ -1294,9 +1296,9 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
+      gsize = gsize * global_dimlengths[i];
       lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-      counts[i] = ai_comp[i].max;
+      counts[i] = global_dimlengths[i];
     }
 
     layout->ESMC_DELayoutGetDEID(&thisde);

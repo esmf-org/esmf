@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.5 2003/07/23 17:00:12 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.6 2003/07/28 17:36:54 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -141,16 +141,18 @@ extern "C" {
 
      void FTN(c_esmc_arrayallgather)(ESMC_Array **ptr, ESMC_DELayout **layout,
                                      int *decompids,  int *size_decomp,
+                                     int *global_dimlengths, 
                                      ESMC_Array **Array_out, int *status) {
-          *status = (*ptr)->ESMC_ArrayAllGather(*layout, decompids, 
-                                                *size_decomp, Array_out);
+          *status = (*ptr)->ESMC_ArrayAllGather(*layout, decompids, *size_decomp,
+                                                global_dimlengths, Array_out);
      }
 
      void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_DELayout **layout,
                                   int *decompids,  int *size_decomp, int *deid,
+                                  int *global_dimlengths, 
                                   ESMC_Array **Array_out, int *status) {
           *status = (*ptr)->ESMC_ArrayGather(*layout, decompids, *size_decomp,
-                                             *deid, Array_out);
+                                             global_dimlengths, *deid, Array_out);
      }
 
      void FTN(c_esmc_arrayscatter)(ESMC_Array **ptr, ESMC_DELayout **layout,
