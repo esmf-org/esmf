@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2003/10/20 23:46:50 jwolfe Exp $
+! $Id: user_model2.F90,v 1.5 2003/11/07 18:39:51 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -137,15 +137,13 @@
                               kind=ESMF_R8)
 
       ! Create the field and have it create the array internally
-      humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+    !  humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+      humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_NFACE, &
                                   haloWidth=0, name="humidity", rc=rc)
 
       ! Get the allocated array back and get an F90 array pointer
       call ESMF_FieldGetData(humidity, array1, rc)
       call ESMF_ArrayGetData(array1, idata, rc=rc)
-
-      ! Set initial data values over exclusive domain to the de identifier
-      idata = real(de_id)
 
       call ESMF_StateAddData(importstate, humidity, rc)
    !   call ESMF_StatePrint(importstate, rc=rc)
