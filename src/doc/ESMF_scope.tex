@@ -111,10 +111,8 @@ and methods.
 All inter-component communication in the framework occurs through 
 component calls to the superstructure. Here we provide a synopsis of the
 requirements that the superstructure layer will have to meet.
-Detailed, tangible requirements for the superstructure, that can
-be validated, are given in the {\bf \it Control} and the {\bf \it Coupler and
-Gridded Component Interfaces} detailed requirements sections -
-parts {\bf \ref{part:Superstructure:_Control}} and {\bf \ref{part:Superstructure:_Components}} 
+Detailed requirements for the superstructure are given in 
+part {\bf \ref{part:Superstructure:_Components}} 
 of this document. \\
 
 \noindent The main functions that ESMF superstructure enables (either
@@ -122,18 +120,11 @@ directly or through services provided by lower layer functions) are:
 
 \begin{enumerate}
 \item any merging, interpolation, or regridding 
-of data necessary for communication between components
-(see parts {\bf \ref{part:Superstructure:_Components} }
-and {\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding} } for detailed requirements relating
-to this function);
-\item transfering data between components (see part {\bf \ref{part:Superstructure:_Control} } for detailed 
-requirements relating to this function);
-\item sharing attribute information between components
-(see part {\bf \ref{part:Superstructure:_Control} } for detailed requirements relating
-to this function);
-\item to coordinate execution, checkpointing and restarting of
-  components (see part {\bf \ref{part:Superstructure:_Control} } for detailed 
-requirements relating to this function).
+of data necessary for communication between components;
+\item transferring data between components;
+\item sharing attribute information between components;
+\item coordinating execution, checkpointing and restarting of
+  components.
 \end{enumerate}
 
 The superstructure provides a high-level interface that enables 
@@ -141,16 +132,13 @@ applications to be assembled from multiple components.  It coordinates
 the transfer of distributed grid data and ungridded 
 observational data between components.  The superstructure will be able 
 to direct the merging of data originating from multiple source grids, and will 
-provide spatial and temporal averaging of data (see parts 
-{\bf \ref{part:Superstructure:_Control}}, {\bf \ref{part:Superstructure:_Components}}
-and {\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding} }).
+provide spatial and temporal averaging of data (see part {\bf \ref{part:Superstructure:_Components}}
+and part {\bf \ref{part:Infrastructure_Fields_and_Grids:_Regridding} }).
 
 The ESMF will be capable of operating in multiple modes of execution.
-components may exist within the same executable, within multiple 
+Components may exist within the same executable, within multiple 
 executables, and in mixed modes.  Components may execute serially, 
-concurrently, and in mixed modes (see {\bf \ref{req:CTL:control_element}},
-part {\bf \ref{part:Superstructure:_Control}}).
-
+concurrently, and in mixed modes.
 
 Functionality for regridding, interpolation, redistribution and other 
 data communication will be abstracted away from the high-level coupling
@@ -255,7 +243,6 @@ include but are not limited to:
 \item a generic machine interface (see part {\bf \ref{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}});
 \item I/O utilities (see part {\bf \ref{part:Infrastructure Utilities:_I/O}};
 \item general message logging (see part {\bf \ref{part:Infrastructure_Utilities:_Log}});
-\item mechanisms for publishing and querying component attributes (see part {\bf \ref{part:Infrastructure_Utilities:_Configuration_Attributes}});
 \footnote{Like many other elements under
 {\it Utility infrastructure}, the querying and publishing functions will be 
 fundamental to the superstructure control and coupling areas. Isolating the
