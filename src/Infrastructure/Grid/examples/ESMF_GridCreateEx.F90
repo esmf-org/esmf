@@ -25,7 +25,8 @@
 !     ! Local variables
       integer :: status, rc
       integer :: delist(4)
-      integer :: horz_gridtype, horz_stagger
+      type(ESMF_GridKind) :: horz_gridkind
+      type(ESMF_GridStagger) :: horz_stagger
       integer, dimension(2) :: counts
       real(ESMF_KIND_R8), dimension(2) :: min, max
       type(ESMF_CoordSystem) :: horz_coord_system
@@ -58,7 +59,7 @@
 
       counts(1) = 10
       counts(2) = 12
-      horz_gridtype = ESMF_GridType_XY
+      horz_gridkind = ESMF_GridKind_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       min(1) = 0.0
@@ -79,11 +80,14 @@
 
 !BOP
 !\begin{verbatim}
-      grid = ESMF_GridCreate(numDims=2, counts=counts, min=min, max=max, &
-                             layout=layout, horz_gridtype=horz_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             name=name, rc=status)
+      grid = ESMF_GridCreateLogRectUniform(numDims=2, counts=counts, &
+                              minGlobalCoordPerDim=min, &
+                              maxGlobalCoordPerDim=max, &
+                              layout=layout, &
+                              horzGridKind=horz_gridkind, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              name=name, rc=status)
 !\end{verbatim}
 !EOP
  
