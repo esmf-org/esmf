@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2005/02/08 18:48:49 theurich Exp $
+# $Id: build_rules.mk,v 1.17.2.1 2005/02/09 20:08:42 theurich Exp $
 # 
 # IRIX64.default.default.mk
 #
