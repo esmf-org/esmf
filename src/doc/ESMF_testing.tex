@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.17.2.1 2004/07/01 20:23:36 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.17.2.2 2004/07/01 21:30:44 svasquez Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -84,8 +84,6 @@ The results of the unit tests will be in:
 \end{verbatim}
 
 At the end of unit test execution a script runs to analyze the results.
-The script, which is written in ksh, will not run on platforms that do not support
-ksh. Those platforms print out a 'Command not found' message.
 
 The script output indicates whether there are any unit test failures.
 The following is a sample from the script output:
@@ -187,8 +185,6 @@ The results will be in:
 \end{verbatim}
 
 At the end of system test execution a script runs to analyze the results.
-The script, which is written in ksh, will not run on platforms that do not support
-ksh. Those platforms print out a 'Command not found' message.
 
 The script output indicates whether there are any system test failures.
 The following is a sample from the script output:
