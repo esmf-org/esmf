@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.132 2004/12/28 07:19:19 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.133 2005/01/12 06:51:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.132 2004/12/28 07:19:19 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.133 2005/01/12 06:51:11 theurich Exp $'
 
 !==============================================================================
 !
@@ -1825,7 +1825,7 @@
         if (myDE.eq.thisDE) then
           thisCount(1) = myCount
         endif
-        call ESMF_VMBroadcast(vm, thisCount, thisCount, 1, thisDE, rc=localrc)
+        call ESMF_VMBroadcast(vm, thisCount, 1, thisDE, rc=localrc)
         glob%cellCountPerDE(j)         = thisCount(1)
         glob%cellCountPerDEPerDim(j,1) = thisCount(1)
       enddo
@@ -2234,7 +2234,7 @@
             indices(i2) = me%localIndices(i,2)
           enddo
         endif
-        call ESMF_VMBroadcast(vm, indices, indices, 2*glob%cellCountPerDE(j), &
+        call ESMF_VMBroadcast(vm, indices, 2*glob%cellCountPerDE(j), &
                               thisDE, rc=localrc)
         ! unload into the big AI array
         AICountPerDE(j) = glob%cellCountPerDE(j)

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.132 2005/01/05 16:56:59 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.133 2005/01/12 06:53:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.132 2005/01/05 16:56:59 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.133 2005/01/12 06:53:03 theurich Exp $'
 
 !==============================================================================
 !
@@ -8533,7 +8533,7 @@
             point(1) = localMinPerDim(1)
             point(2) = localMinPerDim(2)
           endif
-          call ESMF_VMBroadcast(parentVM, point, point, 2, thisPET, rc=localrc)
+          call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
             call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), &
                                                localIndex, point, &
@@ -8545,7 +8545,7 @@
             point(1) = localMaxPerDim(1)
             point(2) = localMaxPerDim(2)
           endif
-          call ESMF_VMBroadcast(parentVM, point, point, 2, thisPET, rc=localrc)
+          call ESMF_VMBroadcast(parentVM, point, 2, thisPET, rc=localrc)
           if (hasSrcData) then
             call ESMF_PhysGridSearchMyDERowCol(srcGrid%ptr%physGrids(physId), & 
                                                localIndex, point, &

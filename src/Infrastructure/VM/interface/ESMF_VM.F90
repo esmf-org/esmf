@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.49 2004/12/30 23:56:13 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.50 2005/01/12 06:55:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.49 2004/12/30 23:56:13 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.50 2005/01/12 06:55:37 theurich Exp $'
 
 !==============================================================================
 
@@ -924,13 +924,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastI4(vm, sendData, recvData, count, root, &
+  subroutine ESMF_VMBroadcastI4(vm, bcstData, count, root, &
     blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer(ESMF_KIND_I4),    intent(inout)           :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -994,7 +993,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMBroadcast(vm, sendData, recvData, size, root, localrc)
+    call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1012,13 +1011,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastR4(vm, sendData, recvData, count, root, &
+  subroutine ESMF_VMBroadcastR4(vm, bcstData, count, root, &
     blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R4),       intent(inout)           :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1083,7 +1081,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMBroadcast(vm, sendData, recvData, size, root, localrc)
+    call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1101,13 +1099,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastR8(vm, sendData, recvData, count, root, &
+  subroutine ESMF_VMBroadcastR8(vm, bcstData, count, root, &
     blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    real(ESMF_KIND_R8),       intent(inout)           :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1172,7 +1169,7 @@ module ESMF_VMMod
 
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMBroadcast(vm, sendData, recvData, size, root, localrc)
+    call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1190,13 +1187,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMBroadcast()
-  subroutine ESMF_VMBroadcastLogical(vm, sendData, recvData, count, root, &
+  subroutine ESMF_VMBroadcastLogical(vm, bcstData, count, root, &
     blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    type(ESMF_Logical),       intent(in)              :: sendData(:)
-    type(ESMF_Logical),       intent(out)             :: recvData(:)
+    type(ESMF_Logical),       intent(inout)           :: bcstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
@@ -1260,7 +1256,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMBroadcast(vm, sendData, recvData, size, root, localrc)
+    call c_ESMC_VMBroadcast(vm, bcstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
