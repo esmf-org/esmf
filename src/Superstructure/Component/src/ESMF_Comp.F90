@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.10 2003/02/11 22:05:04 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.11 2003/02/11 23:09:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,8 +89,8 @@
          type(ESMF_State) :: importstate
          type(ESMF_State) :: exportstate
          type(ESMF_State), dimension(:), pointer :: statelist
-         integer :: instance_id
          type(ESMF_Clock) :: clock
+         integer :: instance_id
          ! lists of required entry points supplied by the component code
          integer :: function_count
          character(len=ESMF_MAXSTR), dimension(:), pointer :: function_name
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.10 2003/02/11 22:05:04 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.11 2003/02/11 23:09:29 nscollins Exp $'
 
 !==============================================================================
 ! 
