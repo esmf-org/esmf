@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.43 2003/09/03 18:58:17 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.44 2003/09/03 19:00:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.43 2003/09/03 18:58:17 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.44 2003/09/03 19:00:11 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -724,7 +724,7 @@
 ! !DESCRIPTION:
 !     Returns the difference between {\tt time1} and {\tt time2} as
 !     an {\tt ESMF\_TimeInterval}.  It is assumed that {\tt time1} is
-!     later than {\tt time2}; if not, the resulting {\tt ESMF_TimeInterval} 
+!     later than {\tt time2}; if not, the resulting {\tt ESMF\_TimeInterval} 
 !     will have a negative value.  This method is overloaded with the
 !     (-) operator.
 !
