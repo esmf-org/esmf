@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.61 2003/08/14 21:55:23 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.62 2003/08/15 17:59:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -227,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.61 2003/08/14 21:55:23 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.62 2003/08/15 17:59:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3099,9 +3099,9 @@
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, &
-                               my_dst_DE, dst_AI_exc, dst_AI_tot, &
+                               my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
                                AI_rcv_count, dstlayout, &
-                               my_src_DE, src_AI_exc, src_AI_tot, &
+                               my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
                                AI_snd_count, srclayout, periodic, &
                                hascachedroute, route, rc=status)
 
