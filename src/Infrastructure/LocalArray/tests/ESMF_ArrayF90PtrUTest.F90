@@ -195,7 +195,7 @@
     call c_ESMF_SizePrint(sizetest5S(1), sizetest5S(2), 5, rc)
 #endif
 
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program test
     

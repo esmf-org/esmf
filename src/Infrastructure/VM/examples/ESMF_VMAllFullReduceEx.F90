@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllFullReduceEx.F90,v 1.1 2004/06/18 19:46:08 theurich Exp $
+! $Id: ESMF_VMAllFullReduceEx.F90,v 1.2 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@ program ESMF_VMAllFullReduceEx
   print *, 'Global sum:'
   print *, localPet,' result: ', result
   
-  call ESMF_Finalize(rc)
+  call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_VMAllFullReduceEx.F90"

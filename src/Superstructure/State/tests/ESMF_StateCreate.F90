@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.14 2004/10/08 14:34:09 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.15 2005/02/14 04:36:25 theurich Exp $
 !
 ! Test code which creates a new State.
 
@@ -409,7 +409,7 @@
     P_BLANK()
 
 
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program ESMF_StateCreateTest
     

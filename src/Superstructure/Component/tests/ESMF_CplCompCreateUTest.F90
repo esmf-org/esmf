@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.9 2004/12/15 17:42:19 nscollins Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.10 2005/02/14 04:36:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@
 
 #endif
 
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program ESMF_CplCompCreateUTest
     

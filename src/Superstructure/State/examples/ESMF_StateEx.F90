@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.18 2004/06/23 19:22:40 cdeluca Exp $
+! $Id: ESMF_StateEx.F90,v 1.19 2005/02/14 04:36:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -220,7 +220,7 @@
 !   !  exchange between Components and Couplers.  Also "Required for 
 !   !  Restart".
 !-------------------------------------------------------------------------
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.2 2004/08/16 21:24:03 jwolfe Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.3 2005/02/14 04:36:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -150,7 +150,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !-------------------------------------------------------------------------
-     call ESMF_Finalize(rc)
+     call ESMF_Finalize(rc=rc)
 !-------------------------------------------------------------------------
 
     if (finalrc.EQ.ESMF_SUCCESS) then

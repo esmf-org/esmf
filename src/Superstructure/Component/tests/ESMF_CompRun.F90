@@ -1,4 +1,4 @@
-! $Id: ESMF_CompRun.F90,v 1.9 2004/04/09 19:54:14 eschwab Exp $
+! $Id: ESMF_CompRun.F90,v 1.10 2005/02/14 04:36:25 theurich Exp $
 !
 ! Test code which creates a new Component.
 
@@ -67,7 +67,7 @@
     print *, "Component Test 1 finished"
 
 
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program ESMF_GridCompCreateTest
     

@@ -191,7 +191,7 @@
         print *, "FAIL: ESMF_FieldWriteEx.F90"
      end if
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 !BOC
    end program ESMF_FieldWriteEx
 !EOC   

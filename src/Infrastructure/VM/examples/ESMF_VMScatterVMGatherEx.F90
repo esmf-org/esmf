@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.1 2004/06/17 19:19:22 theurich Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.2 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ program ESMF_VMScatterVMGatherEx
   enddo
 !EOC
   
-  call ESMF_Finalize(rc)
+  call ESMF_Finalize(rc=rc)
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_VMScatterVMGatherEx.F90"
   else

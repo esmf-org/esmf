@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpecUTest.F90,v 1.3 2004/10/05 16:07:11 svasquez Exp $
+! $Id: ESMF_IOSpecUTest.F90,v 1.4 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_IOSpecUTest.F90,v 1.3 2004/10/05 16:07:11 svasquez Exp $'
+      '$Id: ESMF_IOSpecUTest.F90,v 1.4 2005/02/14 04:36:24 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -113,7 +113,7 @@
       call ESMF_Test((fformat.eq.ESMF_IO_FILEFORMAT_UNSPECIFIED), name, failMsg, result, ESMF_SRCLINE)
 
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       print *, "******  End of IOSpecUTest  ******"
 

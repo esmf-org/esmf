@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommEx.F90,v 1.3 2004/09/23 16:24:47 nscollins Exp $
+! $Id: ESMF_ArrayCommEx.F90,v 1.4 2005/02/14 04:36:22 theurich Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -265,7 +265,7 @@
 #endif
 
 !BOC
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

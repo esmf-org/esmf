@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecEx.F90,v 1.1 2004/06/09 08:36:43 nscollins Exp $
+! $Id: ESMF_ArraySpecEx.F90,v 1.2 2005/02/14 04:36:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 
 !BOC
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

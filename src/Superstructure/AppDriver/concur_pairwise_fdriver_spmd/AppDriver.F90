@@ -209,7 +209,7 @@
 
 10 continue
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       end program ESMF_AppDriver
 

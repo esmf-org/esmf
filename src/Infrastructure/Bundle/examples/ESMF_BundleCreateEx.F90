@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.21 2004/06/13 02:40:03 svasquez Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.22 2005/02/14 04:36:23 theurich Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -233,7 +233,7 @@
        print *, "FAIL: ESMF_BundleCreateEx.F90"
     end if
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
 !BOC
      end program ESMF_BundleCreateEx

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapEx.F90,v 1.3 2004/06/15 11:41:24 nscollins Exp $
+! $Id: ESMF_BundleDataMapEx.F90,v 1.4 2005/02/14 04:36:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 
 !BOC
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

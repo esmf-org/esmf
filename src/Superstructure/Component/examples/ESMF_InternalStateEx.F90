@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.4 2004/12/28 19:05:42 nscollins Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.5 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
     call ESMF_GridCompDestroy(comp1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE 
 
     if (finalrc .eq. ESMF_SUCCESS) then

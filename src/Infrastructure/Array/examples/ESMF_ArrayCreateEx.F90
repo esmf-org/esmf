@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.15 2004/06/23 19:22:31 cdeluca Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.16 2005/02/14 04:36:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -189,7 +189,7 @@
         print *, "FAIL: ESMF_ArrayCreateEx.F90"
     end if
 !BOC
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     end program ESMF_ArrayCreateEx
 !EOC

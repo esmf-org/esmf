@@ -1,4 +1,4 @@
-! $Id: ESMF_XformEx.F90,v 1.5 2005/01/09 03:52:41 nscollins Exp $
+! $Id: ESMF_XformEx.F90,v 1.6 2005/02/14 04:36:25 theurich Exp $
 !
 ! Example code for creating Xforms.
 
@@ -73,7 +73,7 @@
 
     print *, "Xform Example 2 finished"
 
-    call ESMF_Finalize(rc)
+    call ESMF_Finalize(rc=rc)
 
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_XformEx.F90"

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.25 2004/06/11 00:25:22 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.26 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -150,7 +150,7 @@
       end if
 
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

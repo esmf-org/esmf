@@ -1,4 +1,4 @@
-! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.4 2004/07/29 20:15:29 nscollins Exp $
+! $Id: ESMF_VMGetMPICommunicatorEx.F90,v 1.5 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ program ESMF_VMGetMPICommunicatorEx
   call MPI_Comm_dup(mpic, mpic2, ierr)
   call MPI_Barrier(mpic2, ierr)
 !EOC
-  call ESMF_Finalize(rc)
+  call ESMF_Finalize(rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_VMGetMPICommunicatorEx.F90"

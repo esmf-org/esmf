@@ -1,4 +1,4 @@
-! $Id: InteractingFlowApp.F90,v 1.2 2005/01/12 22:21:18 eschwab Exp $
+! $Id: InteractingFlowApp.F90,v 1.3 2005/02/14 04:36:25 theurich Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -292,7 +292,7 @@
       ! it is being used and on some platforms that prevents messages from
       ! reaching their destination files.
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       end program ESMF_ApplicationWrapper
     

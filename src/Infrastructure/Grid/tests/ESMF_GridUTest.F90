@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.45 2004/10/05 16:06:04 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.46 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.45 2004/10/05 16:06:04 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.46 2005/02/14 04:36:24 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -456,5 +456,5 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
   
-      call ESMF_Finalize(status)
+      call ESMF_Finalize(rc=status)
       end program ESMF_GridUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.37 2004/06/11 20:00:52 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.38 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -163,7 +163,7 @@
 
 !BOC
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

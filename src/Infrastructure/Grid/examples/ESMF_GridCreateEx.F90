@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.29 2005/02/09 20:47:25 jwolfe Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.30 2005/02/14 04:36:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -294,7 +294,7 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-      call ESMF_Finalize(rc)
+      call ESMF_Finalize(rc=rc)
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
