@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.79 2004/10/19 21:59:06 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.80 2004/11/23 00:43:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.79 2004/10/19 21:59:06 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.80 2004/11/23 00:43:14 jwolfe Exp $'
 
 !==============================================================================
 
@@ -393,10 +393,10 @@
         if (dataOrder(i).eq.1) dstIndexMod(1) = haloWidth + lbounds(i) - 1
         if (dataOrder(i).eq.2) dstIndexMod(2) = haloWidth + lbounds(i) - 1
       enddo
-      numDomains = recvDomainListTot%num_domains
-      srcIndexMod    = -1
-      start = 1
-      startComp = 1
+      numDomains  = recvDomainListTot%num_domains
+      srcIndexMod = -1
+      start       = 1
+      startComp   = 1
       do i = 1,numDomains
         srcSizeXComp = recvDomainList%domains(i)%ai(1)%max &
                      - recvDomainList%domains(i)%ai(1)%min + 1
@@ -755,7 +755,7 @@
                 deli = (dxp*mat4 - dyp*mat2)/determinant
                 delj = (dyp*mat1 - dxp*mat3)/determinant
 
-                if (abs(deli) < converge .and. &
+                if (abs(deli) < converge .AND. &
                     abs(delj) < converge) exit iter_loop1
 
                 iguess = iguess + deli
