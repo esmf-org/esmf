@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.11 2003/04/22 20:24:59 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.12 2003/04/28 23:21:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.11 2003/04/22 20:24:59 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.12 2003/04/28 23:21:39 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -49,10 +49,10 @@
 
       ! temp variables for Get functions
       double precision :: d_
-      integer :: MM, DD, H, M, S
+      integer :: MM, DD, H, M
       type(ESMF_TimeInterval) :: time_step
       type(ESMF_TimeInterval) :: time_diff
-      integer(ESMF_IKIND_I8) :: advanceCount, D
+      integer(ESMF_IKIND_I8) :: advanceCount, D, S
 
       ! result code
       integer :: rc

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.2 2003/04/21 23:41:51 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.3 2003/04/28 23:21:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.2 2003/04/21 23:41:51 eschwab Exp $'
+      '$Id: ESMF_CalendarEx.F90,v 1.3 2003/04/28 23:21:39 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -41,8 +41,8 @@
       type(ESMF_Calendar) :: julianCalendar
 
       ! temp variables for Get functions
-      integer(ESMF_IKIND_I8) :: YR, D
-      integer :: MM, DD, H, M, S
+      integer(ESMF_IKIND_I8) :: YR, D, S
+      integer :: MM, DD, H, M
       type(ESMF_Time) :: timeZero
       type(ESMF_Time) :: checkTime
       type(ESMF_Time) :: yearOne
@@ -91,7 +91,7 @@
       !
       ! Gregorian Calendar
       !
-      call ESMF_TimeInit(timeZero, S=0, Sn=0, Sd=1, &
+      call ESMF_TimeInit(timeZero, S=int(0,kind=ESMF_IKIND_I8), Sn=0, Sd=1, &
                          cal=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
       print *, "Time Zero Gregorian = ", &
@@ -183,7 +183,7 @@
       ! No Leap Calendar
       !
       call ESMF_CalendarInit(noLeapCalendar, ESMF_CAL_NOLEAP, rc)
-      call ESMF_TimeInit(timeZero, S=0, Sn=0, Sd=1, &
+      call ESMF_TimeInit(timeZero, S=int(0,kind=ESMF_IKIND_I8), Sn=0, Sd=1, &
                          cal=noLeapCalendar, rc=rc)
       call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
       print *, "Time Zero No Leap = ", &
@@ -220,7 +220,7 @@
       ! 360 Day Calendar
       !
       call ESMF_CalendarInit(day360Calendar, ESMF_CAL_360DAY, rc)
-      call ESMF_TimeInit(timeZero, S=0, Sn=0, Sd=1, &
+      call ESMF_TimeInit(timeZero, S=int(0,kind=ESMF_IKIND_I8), Sn=0, Sd=1, &
                          cal=day360Calendar, rc=rc)
       call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
       print *, "Time Zero 360 Day = ", &
