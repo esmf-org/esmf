@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.8 2003/08/01 14:56:23 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.9 2003/08/06 21:19:30 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -168,7 +168,7 @@
       real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords, global_max_coords
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
-      integer :: i_max, j_max
+      integer :: counts(2)
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
@@ -256,20 +256,20 @@
 !
       call ESMF_GridCompGet(gcomp, layout=layout, grid=grid, rc=rc)
 
-      call ESMF_GridGet(grid, global_nmax=global_nmax, &
+      call ESMF_GridGet(grid, global_cell_dim=global_nmax, &
                               global_min_coords=global_min_coords, &
                               global_max_coords=global_max_coords, rc=rc)
 !
 ! Extract and calculate some other quantities
 !
-      i_max = global_nmax(1)
-      j_max = global_nmax(2)
+      counts(1) = global_nmax(1)
+      counts(2) = global_nmax(2)
       x_min = global_min_coords(1)
       y_min = global_min_coords(2)
       x_max = global_max_coords(1)
       y_max = global_max_coords(2)
-      dx = (x_max - x_min)/i_max      ! Should be calls to PhysGrid eventually
-      dy = (y_max - y_min)/j_max
+      dx = (x_max - x_min)/counts(1)  ! Should be calls to PhysGrid eventually
+      dy = (y_max - y_min)/counts(2)
 !
 ! Initialize the data
 !
@@ -579,6 +579,10 @@
             global(1,1) = i
             call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
                                              local2d=local, rc=status)
+            if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
+            if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
+  ! TODO:  The above two lines are junk, making up for the halo width which is
+  !        no longer in Grid. GlobalToLocal should be an Array method
             if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
               flag(local(1,1),local(1,2)) = -1
             endif
@@ -594,6 +598,10 @@
           global(1,2) = j
           call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
                                            local2d=local, rc=status)
+          if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
+          if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
+! TODO:  The above two lines are junk, making up for the halo width which is
+!        no longer in Grid. GlobalToLocal should be an Array method
           if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
             flag(local(1,1),local(1,2)) = 10
           endif
@@ -651,7 +659,7 @@
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
+      call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
@@ -742,7 +750,7 @@
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=rc)
+      call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
@@ -1610,21 +1618,21 @@
 !
 ! And now test output to a file
 !
-      call ESMF_FieldAllGather(field_u, outarray, status)
+      call ESMF_FieldAllGather(field_u, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
       call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_v, outarray, status)
+      call ESMF_FieldAllGather(field_v, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
       call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_sie, outarray, status)
+      call ESMF_FieldAllGather(field_sie, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
@@ -1634,7 +1642,7 @@
 ! First time through output two more files
 !
       if(file_no .eq. 1) then
-        call ESMF_FieldAllGather(field_flag, outarray, status)
+        call ESMF_FieldAllGather(field_flag, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
@@ -1646,7 +1654,7 @@
             de(i,j) = de_id
           enddo
         enddo
-        call ESMF_FieldAllGather(field_de, outarray, status)
+        call ESMF_FieldAllGather(field_de, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "DE", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
