@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.60 2004/06/15 22:28:28 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.61 2004/06/20 05:57:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.60 2004/06/15 22:28:28 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.61 2004/06/20 05:57:53 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -197,7 +197,7 @@
       call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting name of a destroyed Field Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -396,6 +396,7 @@
 
       !EX_UTest
       ! Verifing the ESMF_FieldSetDataMap
+       call ESMF_FieldDataMapSetDefault(dm1, ESMF_INDEX_JI, rc=rc)
        call ESMF_FieldSetDataMap(f3, datamap=dm1, rc=rc)
        write(failMsg, *) "Did return ESMF_SUCCESS"
        write(name, *) "Setting a Field Data Map Test"
@@ -424,16 +425,17 @@
                             ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Verifing that a destroying a destroyed  Field is handled properly.
-      call ESMF_FieldDestroy(f2, rc=rc)
+      call ESMF_FieldDestroy(f2, rc=rc)  ! should succeed, f2 exists
+      call ESMF_FieldDestroy(f2, rc=rc)  ! should fail
       write(failMsg, *) ""
       write(name, *) "Destroying a destroyed Field Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
@@ -443,7 +445,7 @@
       call ESMF_FieldGet(f5, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldDestroy(f5, rc=rc)
       !------------------------------------------------------------------------
 
