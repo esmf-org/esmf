@@ -5,13 +5,14 @@
 \usepackage{supertabular}
 \usepackage{html}
 \usepackage{times}
+\usepackage{graphicx}
 \usepackage[T1]{fontenc}
 
 \newcommand{\docmttype}{Requirements}
 \newcommand{\req}[1]{\section{\hspace{.2in}#1}}
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~}
+\newcommand{\mytitle}{DRAFT \longname \docmttype ~~}
 
 \newenvironment
 {reqlist}
@@ -24,7 +25,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{GR}
-\newcommand{\myauthors}{ESMF Joint Specification Team}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Tony Craig, Byron Boville, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Max Suarez, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 \setlength{\textwidth}{6.5truein}
 \setlength{\textheight}{8.5truein}
@@ -36,6 +37,7 @@
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
+
 \input{../../scripts/doc_templates/templates/title_alldoc}
 
 \newpage
@@ -59,6 +61,7 @@
 GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
 HIM                           & Hallberg \\
 CAM-EUL, CLM                  & Eaton \\
+CCSM-CPL                      & Bettge, Craig, Kuffman \\
 CAM-FV, PSAS                  & da Silva\\
 POP, CICE                     & Jones \\
 WRF                           & Michalakes \\
@@ -86,6 +89,15 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 %\section{Scope}
 \input{ESMF_scope}
 
+\section{Terms}
+\input{ESMF_terms}
+
+\section{Document Organization and Conventions}
+\input{../../scripts/doc_templates/templates/conv_reqdoc}
+
+\subsection{Requirement Attributes}
+\input{../../scripts/doc_templates/templates/attr_reqdoc}
+
 \newpage
 
 \setcounter{section}{0}
@@ -99,6 +111,46 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \part{Framework-Wide Requirements}
 
 \input{ESMF_req}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Superstructure Requirements: Components and Control}
+\end{htmlonly}
+\part{Superstructure Requirements: Components and Control}
+\input{../Superstructure/Control/doc/Control_reqdoc}
+\input{../Superstructure/Coupler/doc/Coupler_reqdoc}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Requirements: Fields and Grids}
+\end{htmlonly}
+\part{Infrastructure Requirements: Fields and Grids}
+\input{../Infrastructure/Fields/doc/Fields_reqdoc}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_reqdoc}
+\input{../Infrastructure/DistGrid/doc/DistGrid_reqdoc}
+\input{../Infrastructure/Regrid/doc/Regrid_reqdoc}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Requirements: Utilities}
+\end{htmlonly}
+\part{Infrastructure Requirements: Utilities}
+\input{../Infrastructure/TimeMgmt/doc/TimeMgmt_reqdoc}
+\input{../Infrastructure/PerfProf/doc/PerfProf_reqdoc}
+\input{../Infrastructure/Log/doc/Log_reqdoc}
+\input{../Infrastructure/IO/doc/IO_reqdoc}
 
 %\section{Bibliography}
 \bibliography{ESMF} 
