@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.71 2004/06/05 00:14:02 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.72 2004/06/08 00:28:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.71 2004/06/05 00:14:02 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.72 2004/06/08 00:28:26 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -739,11 +739,12 @@
       ! ----------------------------------------------------------------------------
 
      !EX_UTest
-      write(failMsg, *) "Should return ESMF_FAILURE."
-      write(name, *) "Time Initialization with hour = negative 3 Test" 
-      call ESMF_TimeSet(startTime, h=-3, calendar=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+     write(failMsg, *) "Should return ESMF_SUCCESS."
+     write(name, *) "Time Initialization with hour = negative 3 Test" 
+     call ESMF_TimeSet(startTime, h=-3, calendar=gregorianCalendar, rc=rc)
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+     call ESMF_TimePrint(startTime, rc=rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -923,6 +924,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, h=-1, rc=rc)
       clock_gregorian = ESMF_ClockCreate("Gregorian Clock", timeStep, &
                                          startTime, stopTime, rc=rc)
       write(name, *) "Clock initialization with above settings Test"
