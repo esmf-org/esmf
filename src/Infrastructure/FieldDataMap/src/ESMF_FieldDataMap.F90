@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.23 2004/08/16 20:37:10 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.24 2004/08/19 16:52:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.23 2004/08/16 20:37:10 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.24 2004/08/19 16:52:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -267,11 +267,11 @@
         !character (len = ESMF_MAXSTR) :: msgbuf
 
       !jw  write (msgbuf, *)  "FieldDataMap print:"
-      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  "FieldDataMap print:"
         if (fielddatamap%status .ne. ESMF_STATUS_READY) then
       !jw    write (msgbuf, *)  "Uninitialized or Invalid object"
-      !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw    call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
           write (*, *)  "Uninitialized or Invalid object"
           return
         endif
@@ -281,11 +281,11 @@
 
         call ESMF_RelLocString(fielddatamap%horzRelloc, str, rc)
       !jw  write (msgbuf, *)  "  Horizontal Relative location = ", trim(str)
-      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  "  Horizontal Relative location = ", trim(str)
         call ESMF_RelLocString(fielddatamap%vertRelloc, str, rc)
       !jw  write (msgbuf, *)  "  Vertical Relative location = ", trim(str)
-      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write (*, *)  "  Vertical Relative location = ", trim(str)
         call ESMF_InterleaveTypeString(fielddatamap%interleave, str, rc)
         write (*, *)  "  Interleave type = ", trim(str)

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.68 2004/07/21 22:31:39 jwolfe Exp $
+! $Id: ESMF_State.F90,v 1.69 2004/08/19 16:52:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -289,7 +289,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.68 2004/07/21 22:31:39 jwolfe Exp $'
+      '$Id: ESMF_State.F90,v 1.69 2004/08/19 16:52:24 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1231,23 +1231,20 @@ end function
 
         ! Local vars
         integer :: localrc                   ! local error status
-        logical :: dummy
 
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) rc = ESMF_FAILURE
 
         ! Simple sanity checks
         if (.not.associated(state%statep)) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "State uninitialized or already destroyed", &
-                                 ESMF_CONTEXT, rc)
-          return
+                                 ESMF_CONTEXT, rc)) return
         endif
         if (state%statep%st .eq. ESMF_STATE_INVALID) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "State uninitialized or already destroyed", &
-                                 ESMF_CONTEXT, rc)
-          return
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         ! Call Destruct to release resources
@@ -1415,7 +1412,6 @@ end function
       logical :: exists
       integer :: localrc
       character(len=ESMF_MAXSTR) :: errmsg
-      logical :: dummy
 
       localrc = ESMF_FAILURE
        
@@ -1428,16 +1424,14 @@ end function
                                                           dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)
-              return
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg,*) trim(nestedStateName), " found but not type State"
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)
-              return
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -1450,16 +1444,14 @@ end function
                                                           dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Array found named ", trim(arrayName)
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_ARRAY) then
           write(errmsg, *) trim(arrayName), " found but not type Array"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       array = dataitem%datap%ap
@@ -1559,17 +1551,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
@@ -1674,17 +1664,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
@@ -1789,17 +1777,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
@@ -1904,17 +1890,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
@@ -2020,17 +2004,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
@@ -2347,7 +2329,6 @@ end function
       type(ESMF_State) :: top
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      logical :: dummy
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
@@ -2358,16 +2339,14 @@ end function
                                                           dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)
-              return
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg, *) trim(nestedStateName), " found but not type State"
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)
-              return
+             if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -2380,16 +2359,14 @@ end function
                                                           dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Bundle found named ", trim(bundleName)
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_BUNDLE) then
           write(errmsg, *) trim(bundleName), " found but not type Bundle"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       bundle = dataitem%datap%bp
@@ -2453,7 +2430,6 @@ end function
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
       integer :: localrc
-      logical :: dummy
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
@@ -2464,16 +2440,14 @@ end function
                                                           dataitem, rc=localrc)
           if (.not. exists) then
               write(errmsg, *) "no nested state found named ", trim(nestedStateName)
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                         ESMF_CONTEXT, rc)
-              return
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                         ESMF_CONTEXT, rc)) return
           endif
     
           if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
               write(errmsg, *) trim(nestedStateName), " found but not type State"
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                          ESMF_CONTEXT, rc)
-              return
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                          ESMF_CONTEXT, rc)) return
           endif
           
           top%statep => dataitem%datap%spp
@@ -2486,23 +2460,20 @@ end function
                                                           dataitem, rc=localrc)
       if (.not. exists) then
           write(errmsg, *) "no Field found named ", trim(fieldName)
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                     ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_FIELD) then
           if (dataitem%otype .eq. ESMF_STATEITEM_INDIRECT) then
               ! TODO: how do we return the info that this is inside a bundle?
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+              if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                        "extracting Fields directly from Bundles in a State", &
-                       ESMF_CONTEXT, rc)
-              return
+                       ESMF_CONTEXT, rc)) return
           endif
           write(errmsg, *) trim(fieldname), " found but not type Field"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       field = dataitem%datap%fp
@@ -2556,7 +2527,6 @@ end function
       type(ESMF_StateClass), pointer :: stypep
       character (len=ESMF_MAXSTR) :: tryname
       character(len=ESMF_MAXSTR) :: errmsg
-      logical :: dummy
 
       ! assume failure until success assured
       if (present(rc)) rc = ESMF_FAILURE
@@ -2642,7 +2612,6 @@ end function
       type(ESMF_StateItem), pointer :: dataitem
       logical :: exists
       integer :: localrc
-      logical :: dummy
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
@@ -2650,9 +2619,8 @@ end function
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(itemName), &
-                                     ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(itemName), &
+                                     ESMF_CONTEXT, rc)) return
       endif
 
       neededflag = dataitem%needed
@@ -2702,7 +2670,6 @@ end function
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
       integer :: localrc
-      logical :: dummy
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
@@ -2712,16 +2679,14 @@ end function
                                                          dataitem, rc=localrc)
       if (.not. exists) then
           write (errmsg,*) "no nested state found named ", trim(nestedStateName)
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEITEM_STATE) then
           write (errmsg, *) trim(nestedStateName), " found but not type State"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       nestedState%statep => dataitem%datap%spp
@@ -2770,7 +2735,6 @@ end function
       type(ESMF_StateItem), pointer :: dataitem
       logical :: exists
       integer :: localrc
-      logical :: dummy
 
       ! Assume no unless we find it and it is needed.
       if (present(rc)) rc = ESMF_FAILURE
@@ -2783,10 +2747,9 @@ end function
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
-          dummy=ESMF_LogMsgFoundError(localrc, &
+          if (ESMF_LogMsgFoundError(localrc, &
                                       "Item by that name not found", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       if (dataitem%needed .eq. ESMF_NEEDED) ESMF_StateIsNeeded = .TRUE.
@@ -2835,7 +2798,6 @@ end function
        integer :: localrc                          ! local error status
        integer :: i
        character(len=ESMF_MAXSTR) :: msgbuf
-       logical :: dummy
 
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
@@ -2845,11 +2807,11 @@ end function
        ! print num of states, state type, etc
 
        !nsc write(msgbuf,*) "StatePrint: "  
-       !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        print *, "StatePrint: "  
        if (.not.associated(state%statep)) then 
-           !nsc if (ESMF_LogWrite("Uninitialized or already destroyed State", &
-           !nsc                   ESMF_LOG_INFO)) return
+           !nsc call ESMF_LogWrite("Uninitialized or already destroyed State", &
+           !nsc                   ESMF_LOG_INFO)
            print *, "Uninitialized or already destroyed State"
            rc = ESMF_SUCCESS
            return
@@ -2864,22 +2826,22 @@ end function
        if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) "  Export State"
        if (sp%st .eq. ESMF_STATE_UNSPECIFIED) write(msgbuf, *) "  State Type Unspecified"
        if (sp%st .eq. ESMF_STATE_INVALID) then
-           dummy=ESMF_LogWrite("Uninitialized or already destroyed State", &
+           call ESMF_LogWrite("Uninitialized or already destroyed State", &
                                 ESMF_LOG_INFO)
            rc = ESMF_SUCCESS
            return
        endif
-       !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        print *, trim(msgbuf)
        !nsc write(msgbuf, *) "  Number of members: ", sp%datacount
-       !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        print *, "  Number of members: ", sp%datacount
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
          !nsc write(msgbuf, *) "  Item ", i, ":"
-         !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+         !nsc call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
          print *, "  Item ", i, ":"
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
@@ -2907,7 +2869,7 @@ end function
              outbuf = trim(outbuf) //  " marked as NOT needed."
          end select
 
-        !nsc if (ESMF_LogWrite(outbuf, ESMF_LOG_INFO)) continue
+        !nsc call ESMF_LogWrite(outbuf, ESMF_LOG_INFO)
         print *, trim(outbuf)
 
         ! TODO: finish printing more info here
@@ -3069,17 +3031,15 @@ end function
 
       integer :: localrc                          ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
   
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
@@ -3188,17 +3148,15 @@ end function
 
       integer :: localrc                          ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
   
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
@@ -3307,17 +3265,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
@@ -3426,17 +3382,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
@@ -3545,17 +3499,15 @@ end function
 
       integer :: localrc                           ! Error status
       integer :: limit
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(valueList)
       if (count > limit) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
                                       "count longer than valueList", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
@@ -3657,7 +3609,6 @@ end function
       type(ESMF_StateItem), pointer :: dataitem
       logical :: exists
       integer :: localrc
-      logical :: dummy
 
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
@@ -3665,9 +3616,8 @@ end function
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, itemName, &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, itemName, &
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       dataitem%needed = neededflag
@@ -3713,24 +3663,21 @@ end function
 ! TODO: code goes here
 !
       character (len=6) :: defaultopts
-      logical :: dummy
 
       defaultopts = "brief"
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       if (.not.associated(state%statep)) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "State uninitialized or already destroyed", &
-                                  ESMF_CONTEXT, rc)
-          return
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       if (state%statep%st .eq. ESMF_STATE_INVALID) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "State uninitialized or already destroyed", &
-                                  ESMF_CONTEXT, rc)
-          return
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -4258,8 +4205,7 @@ end function
       integer, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex
-      logical :: exists
-      logical :: dummy
+      logical :: exists, dummy
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
@@ -4268,9 +4214,8 @@ end function
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (acount .le. 0) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
-                                     ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
       endif
       
       ! Add the arrays to the state, checking for name clashes
@@ -4453,7 +4398,6 @@ end function
       integer :: i
       integer :: newcount, findex
       logical :: exists
-      logical :: dummy
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE 
@@ -4462,18 +4406,16 @@ end function
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (fcount .le. 0) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "fcount must be >= 0", &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "fcount must be >= 0", &
+                                      ESMF_CONTEXT, rc)) return
       endif
       
       ! make sure sizes are consistent
       newcount = size(fields)
       if (fcount .gt. newcount) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                       "count must not be >= list length", &
-                                      ESMF_CONTEXT, rc)
-          return
+                                      ESMF_CONTEXT, rc)) return
       endif
 
       ! Add the fields to the state, checking for name clashes
@@ -4661,8 +4603,7 @@ end function
       integer :: bindex, findex 
       integer :: i, j
       integer :: fcount, fruncount, newcount
-      logical :: exists, fneedsdealloc
-      logical :: dummy
+      logical :: exists, fneedsdealloc, dummy
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
@@ -4672,9 +4613,8 @@ end function
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (bcount .le. 0) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "bcount must be >= 0", &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "bcount must be >= 0", &
+                                      ESMF_CONTEXT, rc)) return
       endif
       
       ! Add the bundles to the state, checking for name clashes
@@ -5026,7 +4966,6 @@ end function
       integer :: i
       integer :: newcount, sindex
       logical :: exists
-      logical :: dummy
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
@@ -5035,9 +4974,8 @@ end function
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (scount .le. 0) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "scount must be >= 0", &
-                                     ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "scount must be >= 0", &
+                                     ESMF_CONTEXT, rc)) return
       endif
       
       ! Add the states to the state, checking for name clashes
@@ -5317,9 +5255,8 @@ end function
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
       if (ncount .le. 0) then
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "ncount must be >= 0", &
-                                      ESMF_CONTEXT, rc)
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, "ncount must be >= 0", &
+                                      ESMF_CONTEXT, rc)) return
       endif
       
       ! Add the fields to the state, checking for name clashes

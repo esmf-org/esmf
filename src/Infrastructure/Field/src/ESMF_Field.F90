@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.177 2004/08/13 21:29:07 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.178 2004/08/19 16:52:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.177 2004/08/13 21:29:07 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.178 2004/08/19 16:52:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -466,13 +466,17 @@
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -556,13 +560,17 @@
 !           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -597,7 +605,8 @@
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, datamap, name, iospec, status)
+                                      haloWidth, datamap, name, &
+                                      iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1993,16 +2002,15 @@
         character(len=ESMF_MAXSTR) :: name, str
         type(ESMF_FieldType), pointer :: fp 
         integer :: status
-        !logical :: dummy
         !character(len=ESMF_MAXSTR) :: msgbuf
 
 
         if (present(rc)) rc = ESMF_FAILURE
 
-        !nsc dummy = ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
+        !nsc call ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
         write(*,*) "Field Print:"
         if (.not. associated(field%ftypep)) then
-        !jw  dummy = ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
+        !jw  call ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
           write(*,*) "Empty or Uninitialized Field"
           if (present(rc)) rc = ESMF_SUCCESS
           return
@@ -2016,7 +2024,7 @@
 
         call ESMF_StatusString(fp%fieldstatus, str, status)
       !jw  write(msgbuf, *)  "Field status = ", trim(str)
-      !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Field status = ", trim(str)
 
         if (fp%fieldstatus .ne. ESMF_STATUS_READY) then
@@ -2029,12 +2037,12 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
-      !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "  Name = '",  trim(name), "'"
 
         call ESMF_StatusString(fp%gridstatus, str, status)
       !jw  write(msgbuf, *)  "Grid status = ", trim(str)
-      !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Grid status = ", trim(str)
         if (fp%gridstatus .eq. ESMF_STATUS_READY) then 
            call ESMF_GridPrint(fp%grid, "", status)
@@ -2043,7 +2051,7 @@
 
         call ESMF_StatusString(fp%datastatus, str, status)
       !jw  write(msgbuf, *)  "Data status = ", trim(str)
-      !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Data status = ", trim(str)
         !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
@@ -2923,12 +2931,12 @@
            field%ftypep%gridstatus = ESMF_STATUS_READY
         else
            ! this could be considered a request to regrid the data
-           if (ESMF_LogWrite("Replacing existing grid not yet supported", &
+           call ESMF_LogWrite("Replacing existing grid not yet supported", &
                                ESMF_LOG_WARNING, &
-                               ESMF_CONTEXT)) continue
-           if (ESMF_LogWrite("Will be considered a regrid request", &
+                               ESMF_CONTEXT)
+           call ESMF_LogWrite("Will be considered a regrid request", &
                                ESMF_LOG_WARNING, &
-                               ESMF_CONTEXT)) continue
+                               ESMF_CONTEXT)
         endif
 
         if (present(rc)) rc = ESMF_SUCCESS
@@ -2996,12 +3004,12 @@
            field%ftypep%mapping = datamap
         else
            ! this could be considered a request to reorder the data
-           if (ESMF_LogWrite("Replacing existing datamap not yet supported", &
+           call ESMF_LogWrite("Replacing existing datamap not yet supported", &
                                ESMF_LOG_WARNING, &
-                               ESMF_CONTEXT)) continue
-           if (ESMF_LogWrite("Will be considered a data reorder request", &
+                               ESMF_CONTEXT)
+           call ESMF_LogWrite("Will be considered a data reorder request", &
                                ESMF_LOG_WARNING, &
-                               ESMF_CONTEXT)) continue
+                               ESMF_CONTEXT)
            return
         endif
 
@@ -3088,8 +3096,18 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType), pointer :: ftypep
+      type(ESMF_Relloc) :: horzRelloc
+      character(len=ESMF_MAXSTR) :: msgbuf
+      integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
+      integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
+      integer :: maplist(ESMF_MAXDIM)          ! mapping between them
+      integer :: otheraxes(ESMF_MAXDIM)        ! counts for non-grid dims
+      integer :: gridrank, maprank, arrayrank, halo
+      integer :: i, j
+    
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if (present(rc)) then
@@ -3103,11 +3121,82 @@
                                  ESMF_CONTEXT, rc)) return
       endif 
 
-      if (field%ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
+      ftypep => field%ftypep
+
+      if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
       endif 
+
+      ! get needed info from datamap
+      call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
+                                dataRank=maprank, dataIndexList=maplist, &
+                                counts=otheraxes, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! get grid dim and extents for the local piece
+      call ESMF_GridGet(ftypep%grid, dimCount=gridrank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, &
+                                   localCellCountPerDim=gridcounts, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! get array counts and other info
+      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
+                         haloWidth=halo, rank=arrayrank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! and now see if it is at all consistent.
+      if (arrayrank .ne. maprank) then
+          write(msgbuf, *) "Rank in FieldDataMap", maprank, &
+                           "must match rank in Array", arrayrank
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, msgbuf, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      j = 1
+      do i = 1, arrayrank
+          if (maplist(i) .ne. 0) then
+              ! maplist is 0 if the axes does not correspond to the grid.
+              ! in that case, it must correspond to the counts in the map.
+              if (arraycounts(i) .ne. otheraxes(j)) then
+                  write(msgbuf, *) "Non-grid axes", j, &
+                                   "in FieldDataMap has counts of", &
+                                   otheraxes(j), "while Array rank", i, &
+                                   "has counts of", arraycounts
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, msgbuf, &
+                                            ESMF_CONTEXT, rc)) return
+              
+              endif
+              j = j + 1
+          else
+              ! maplist is not 0, so this axes does correspond to the grid.
+              ! the sizes must match, taking into account the halo widths
+              ! and the index reordering.
+              if (arraycounts(maplist(i)) .ne. (gridcounts(i) + (2*halo))) then
+                  write(msgbuf, *) "Axes", maplist(i), &
+                                   "in Array has counts of", &
+                                   arraycounts(maplist(i)), &
+                                   "while Grid axes", i, &
+                                   "has counts of", gridcounts(i) + (2*halo)
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, msgbuf, &
+                                            ESMF_CONTEXT, rc)) return
+              
+              endif
+
+          endif
+      enddo
+      
+
 
       ! TODO: add more code here
 
@@ -4048,7 +4137,10 @@
 ! !DESCRIPTION:
 ! 
 !     Constructs all {\tt ESMF\_Field} internals, including the allocation
-!     of a data {\tt ESMF\_Array}.  
+!     of a data {\tt ESMF\_Array}.   TODO: this is missing a counts argument,
+!     which is required if the arrayspec rank is greater than the grid rank.
+!     Either that, or we must enforce that a datamap comes in, and it
+!     contains the counts for non-grid dims.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4066,13 +4158,14 @@
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!           If a relative location is specified both as an argument
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4089,6 +4182,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_Array) :: array                   ! New array
       type(ESMF_RelLoc) :: hRelLoc
+      type(ESMF_FieldDataMap) :: dmap
       integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
       integer, dimension(ESMF_MAXDIM) :: dimorder, counts
       integer :: hwidth
@@ -4109,8 +4203,12 @@
           hwidth = 0
       endif
 
+      ! construct a reasonable datamap first before calling field construct
+      if (.not.present(datamap)) then
+      endif
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      hwidth, datamap, name, iospec, status)
+                                      hwidth, dmap, name, &
+                                      iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4210,9 +4308,12 @@
 !           Data. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !           This input is currently ignored; the halo depth is taken
@@ -4222,7 +4323,8 @@
 !           future versions of the system; the halo region will only need
 !           to be added to axes which correspond to {\tt ESMF\_Grid} axes.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4236,6 +4338,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      type(ESMF_Field) :: tfield                  ! temp field for error check
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -4245,19 +4348,37 @@
         rc = ESMF_FAILURE
       endif     
 
-      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, datamap, name, iospec, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
+      ! make sure the array is a valid object first.
       call ESMF_ArrayValidate(array, "", status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      ! this validates the grid internally, no need to validate it here.
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+                                      haloWidth, arrayrank, counts, datamap, &
+                                      name, iospec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       ftype%localfield%localdata = array
-      !ftype%localfield%datastatus = ESMF_STATUS_READY
       ftype%datastatus = ESMF_STATUS_READY
+
+      ! instead of adding error checking all over the place, call the
+      ! validate routine to check sizes of array vs grid to be sure
+      ! they are consistent.  the tfield is a temp wrapper so we can
+      ! call the user level validate
+      tfield%ftypep => ftype
+      call ESMF_FieldValidate(tfield, "", status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
+          ! rc is already set, we just need to mark that the array
+          ! is not valid.
+          ftype%datastatus = ESMF_STATUS_INVALID
+          return
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -4302,13 +4423,17 @@
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per grid cell/vertex in the vertical 
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
@@ -4355,22 +4480,17 @@
         call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
-        if (gridRank .eq. 1) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_I, &
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, arrayspec%rank, 
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
-        else if (gridRank .eq. 2) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJ, &
-                                horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
-        else if (gridRank .eq. 3) then
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, ESMF_INDEX_IJK, &
-                                horzRelloc=horzRelloc, &
-                                vertRelloc=vertRelloc, rc=status)
-        endif
       endif
 
-      !call ESMF_ArrayConstructNoDataPtr(ftype%array)
+      ! construct the array here - but TODO: we are missing the counts
+      ! in case there are non-grid axes.  there has to be an additional
+      ! counts array which contains counts for any data axes which is
+      ! not associated with the grid.  e.g. for a 3d data array on a 2d grid,
+      ! there would be counts(1).  for 4d data, counts(2).
+      
 
       ! If I/O spec is present, copy it into the field object; otherwise just 
       ! initialize the I/O spec in the field object.
@@ -4427,13 +4547,17 @@
 !           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[vertRelloc]}] 
-!           Relative location of data per grid cell/vertex in the vertical grid.
+!           Relative location of data per grid cell/vertex in the vertical
+!           grid.  If a relative location is specified both as an argument
+!           here as well as set in the {\tt datamap}, this takes priority.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.23 2004/07/22 14:45:31 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.24 2004/08/19 16:52:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.23 2004/07/22 14:45:31 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.24 2004/08/19 16:52:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -435,11 +435,11 @@ end function
         !character(len=ESMF_MAXSTR) :: msgbuf
 
       !jw  write(msgbuf,*)  "ArrayDataMap print:"
-      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*,*)  "ArrayDataMap print:"
         if (arraydatamap%status .ne. ESMF_STATUS_READY) then
       !jw    write(msgbuf,*)  "Uninitialized or Invalid object"
-      !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw    call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
           write(*,*)  "Uninitialized or Invalid object"
           if (present(rc)) rc = ESMF_SUCCESS
           return
@@ -447,21 +447,21 @@ end function
 
         ! individual data item information
       !jw  write(msgbuf,*)  " Data rank = ", arraydatamap%dataRank
-      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*,*)  " Data rank = ", arraydatamap%dataRank
       !jw  write(msgbuf,*)  " Data Index Order and Lengths for non-Grid Indices:"
-      !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*,*)  " Data Index Order and Lengths for non-Grid Indices:"
         j = 1
         do i=1, ESMF_MAXDIM
             if (arraydatamap%dataDimOrder(i) .eq. 0) then
       !jw         write(msgbuf,*)  i, "Non-Grid index, length = ", arraydatamap%dataNonGridCounts(j)
-      !jw         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw         call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
                write(*,*)  i, "Non-Grid index, length = ", arraydatamap%dataNonGridCounts(j)
                j = j + 1
             else
       !jw         write(msgbuf,*)  i, "Grid index ", arraydatamap%dataDimOrder(i)
-      !jw         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      !jw         call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
                write(*,*)  i, "Grid index ", arraydatamap%dataDimOrder(i)
             endif
         enddo

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.38 2004/07/15 21:50:14 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.39 2004/08/19 16:52:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.38 2004/07/15 21:50:14 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.39 2004/08/19 16:52:19 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -818,14 +818,12 @@ contains
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
-    logical :: dummy
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
     if (delayout%this .eq. ESMF_NULL_POINTER) then
-      dummy=ESMF_LogWrite("Uninitialized DELayout object", &
-                           ESMF_LOG_INFO)
+      call ESMF_LogWrite("Uninitialized DELayout object", ESMF_LOG_INFO)
       rc = ESMF_FAILURE
       return
     endif

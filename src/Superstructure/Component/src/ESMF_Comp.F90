@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.106 2004/08/18 05:19:59 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.107 2004/08/19 16:52:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -227,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.106 2004/08/18 05:19:59 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.107 2004/08/19 16:52:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -411,11 +411,11 @@ end function
         ! a config filename are given.  the current rules are:  a config object
         ! gets priority over a name if both are specified.
         if (present(configFile) .and. present(config)) then
-            if (ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
-                 ESMF_LOG_WARNING)) continue
+            call ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
+                 ESMF_LOG_WARNING)
 
-            if (ESMF_LogWrite("Using Config object; ignoring Config filename.", &
-                 ESMF_LOG_WARNING)) continue
+            call ESMF_LogWrite("Using Config object; ignoring Config filename.", &
+                 ESMF_LOG_WARNING)
             compp%config = config
 
         ! name of a specific config file.  open it and store the config object.
@@ -661,8 +661,8 @@ end function
         if (present(clock)) then
             ! all is well
         else
-            if (ESMF_LogWrite("Component Initialize called without a clock", &
-                               ESMF_LOG_WARNING)) continue
+            call ESMF_LogWrite("Component Initialize called without a clock", &
+                               ESMF_LOG_WARNING)
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -979,8 +979,8 @@ end function
         if (present(clock)) then
             ! all is well
         else
-            if (ESMF_LogWrite("Component Initialize called without a clock", &
-                               ESMF_LOG_WARNING)) continue
+            call ESMF_LogWrite("Component Initialize called without a clock", &
+                               ESMF_LOG_WARNING)
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -1117,8 +1117,8 @@ end function
         if (present(clock)) then
             ! all is well
         else
-            if (ESMF_LogWrite("Component Initialize called without a clock", &
-                               ESMF_LOG_WARNING)) continue
+            call ESMF_LogWrite("Component Initialize called without a clock", &
+                               ESMF_LOG_WARNING)
         endif
 
         call ESMF_GetName(compp%base, cname, status)
@@ -1507,7 +1507,7 @@ end function
 
        call ESMF_GetName(compp%base, cname, status)
      !jw  write (msgbuf,*) "  name = ", trim(cname)
-     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        write (*,*) "  name = ", trim(cname)
        
        ! TODO: add more info here

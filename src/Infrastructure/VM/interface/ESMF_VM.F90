@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.34 2004/07/22 14:47:09 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.35 2004/08/19 16:52:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.34 2004/07/22 14:47:09 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.35 2004/08/19 16:52:22 nscollins Exp $'
 
 !==============================================================================
 
@@ -366,9 +366,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -453,9 +453,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -540,9 +540,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -627,9 +627,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -714,9 +714,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -801,9 +801,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -931,9 +931,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1017,9 +1017,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1103,9 +1103,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1406,9 +1406,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1486,9 +1486,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1566,9 +1566,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1652,9 +1652,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1739,9 +1739,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1826,9 +1826,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1906,9 +1906,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -1986,9 +1986,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -2066,9 +2066,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -2156,9 +2156,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -2248,9 +2248,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif
@@ -2340,9 +2340,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingflag)) then
       if (blockingflag == ESMF_NONBLOCKING) then
-        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
-          ESMF_CONTEXT)) continue
+          ESMF_CONTEXT)
         return
       endif
     endif

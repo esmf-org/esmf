@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.115 2004/07/22 14:46:11 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.116 2004/08/19 16:52:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.115 2004/07/22 14:46:11 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.116 2004/08/19 16:52:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -854,7 +854,6 @@
 !EOPI
       integer :: status
       character(len=ESMF_MAXSTR) :: opts
-      logical :: dummy
 
       if (present(options)) then
           opts = options
@@ -863,7 +862,7 @@
       endif
 
       if (base%this .eq. ESMF_NULL_POINTER) then
-        dummy=ESMF_LogWrite("Uninitialized Base object", &
+        call ESMF_LogWrite("Uninitialized Base object", &
                              ESMF_LOG_INFO) 
         return
       endif
@@ -904,7 +903,6 @@
 !EOPI
       integer :: status
       character(len=ESMF_MAXSTR) :: opts
-      logical :: dummy
 
       if (present(options)) then
           opts = options
@@ -913,7 +911,7 @@
       endif
 
       if (base%this .eq. ESMF_NULL_POINTER) then
-        dummy=ESMF_LogWrite("Uninitialized Base object", &
+        call ESMF_LogWrite("Uninitialized Base object", &
                              ESMF_LOG_INFO) 
         rc = ESMF_FAILURE
         return
@@ -1021,25 +1019,25 @@
       !character(len=ESMF_MAXSTR) :: msgbuf
 
     !jw  write (msgbuf, *)  "DomainListPrint"
-    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "DomainListPrint"
     !jw  write (msgbuf, *)  "Number stored domains:", domainlist%num_domains
-    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "Number stored domains:", domainlist%num_domains
     !jw  write (msgbuf, *)  "Total points:", domainlist%total_points
-    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "Total points:", domainlist%total_points
 
 ! Now loop through domains and print them out
 
       do i=1, domainlist%num_domains
     !jw     write (msgbuf, *)  '***Domain.  Rank:', domainlist%domains(i)%rank
-    !jw     if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw     call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
          write (*, *)  '***Domain.  Rank:', domainlist%domains(i)%rank
          do j=1, domainlist%domains(i)%rank
 	    call ESMF_AxisIndexGet(domainlist%domains(i)%ai(j), min, max, stride)
     !jw        write (msgbuf, *)  '   axis:min,max,stride3:', min, max, stride
-    !jw        if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw        call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
 	    write (*, *)  '   axis:min,max,stride3:', min, max, stride
          enddo
       enddo

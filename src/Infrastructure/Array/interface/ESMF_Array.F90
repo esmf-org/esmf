@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.17 2004/08/02 18:54:37 svasquez Exp $
+! $Id: ESMF_Array.F90,v 1.18 2004/08/19 16:52:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.17 2004/08/02 18:54:37 svasquez Exp $'
+      '$Id: ESMF_Array.F90,v 1.18 2004/08/19 16:52:16 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -360,8 +360,8 @@ end subroutine
       endif
    
       if (present(strides)) then
-         if (ESMF_LogWrite("Strides not yet supported", &
-                               ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+         call ESMF_LogWrite("Strides not yet supported", &
+                               ESMF_LOG_WARNING, ESMF_CONTEXT)
          strides(:) = 1
       endif
 

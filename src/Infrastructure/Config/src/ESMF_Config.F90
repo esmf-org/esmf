@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.15 2004/07/20 21:13:01 atrayanov Exp $
+! $Id: ESMF_Config.F90,v 1.16 2004/08/19 16:52:19 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1515,8 +1515,8 @@
       endif
 
       if ( present (delayout) ) then
-         if (ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
-                           ESMF_CONTEXT)) continue 
+         call ESMF_LogWrite("DELayout not used yet", ESMF_LOG_WARNING, &
+                           ESMF_CONTEXT)
          !print *, myname_, ' DE layout is not used yet '
       endif
 
@@ -1569,9 +1569,9 @@
       iret = 0
 
       if ( present( unique ) ) then
-         if (ESMF_LogWrite("uniqueness of labels not checked yet", &
+         call ESMF_LogWrite("uniqueness of labels not checked yet", &
                            ESMF_LOG_WARNING, &
-                           ESMF_CONTEXT)) continue 
+                           ESMF_CONTEXT)
          !print *, myname_, ' Uniqueness of labels is not checked yet '
       endif
 

@@ -73,7 +73,7 @@
     if (rc .ne. ESMF_SUCCESS) stop 99 
 
 
-    dummy=ESMF_LogWrite("ESMF AppDriver start", ESMF_LOG_INFO)
+    call ESMF_LogWrite("ESMF AppDriver start", ESMF_LOG_INFO)
 
     !
     ! Read in Configuration information from a default config file
@@ -112,7 +112,7 @@
     ! Create the top Gridded component, passing in the default layout.
     compGridded = ESMF_GridCompCreate(defaultvm, "ESMF Gridded Component", rc=rc)
 
-    dummy=ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
+    call ESMF_LogWrite("Component Create finished", ESMF_LOG_INFO)
 
 
 !!------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.62 2004/07/22 22:22:38 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.63 2004/08/19 16:52:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2339,17 +2339,17 @@ end function
       integer :: status
 
     !jw  write (msgbuf, *)  "Bundle print:"
-    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "Bundle print:"
 
       btype => bundle%btypep
       call c_ESMC_GetName(btype%base, bname, status)
     !jw  write (msgbuf, *)  "  Bundle name = ", trim(bname)
-    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "  Bundle name = ", trim(bname)
     
     !jw  write (msgbuf, *)  "  Field count = ", btype%field_count
-    !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+    !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
       write (*, *)  "  Field count = ", btype%field_count
     
       do i = 1, btype%field_count
@@ -2360,7 +2360,7 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
      !jw  write (msgbuf, *)  "    Field", i, "name = ", trim(fname)
-     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+     !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
        write (*, *)  "    Field", i, "name = ", trim(fname)
       enddo
 
