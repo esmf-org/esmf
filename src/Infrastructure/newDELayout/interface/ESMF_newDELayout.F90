@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.3 2004/03/03 19:49:46 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.4 2004/03/04 21:22:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,7 +104,8 @@
       
       public ESMF_newDELayoutScatter
       public ESMF_newDELayoutGather
-      public ESMF_newDELayoutAllReduce
+      
+      public ESMF_newDELayoutAllGlobalReduce
 
       public ESMF_newDELayoutDataCreate
       public ESMF_newDELayoutDataDestroy
@@ -114,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.3 2004/03/03 19:49:46 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.4 2004/03/04 21:22:36 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -849,21 +850,24 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutAllReduce - MPI-like AllReduce
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduce - Reduce to a single value
 
 ! !INTERFACE:
-  subroutine ESMF_newDELayoutAllReduce(layout, vm, array, result, len, op, rc)
+  subroutine ESMF_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, len, &
+    op, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)      :: layout
     type(ESMF_VM), intent(in)               :: vm
-    integer, intent(in)                     :: array(:), op, len
-    integer, intent(out)                    :: result(:)
+    type(ESMF_DELayoutData_I4), intent(in)  :: datain
+    integer, intent(out)                    :: dataout
+    integer, intent(in)                     :: len
+    type(ESMF_newOp), intent(in)            :: op
     integer, intent(out), optional          :: rc  
 !         
 !
 ! !DESCRIPTION:
-!     MPI-like AllReduce
+!     Reduce to a single value
 !
 !     The arguments are:
 !     \begin{description}
@@ -888,16 +892,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllReduce(layout, vm, array, result, len, op, status)
+    call c_ESMC_newDELayoutAllGlobalReduce(layout, vm, datain, dataout, &
+      len, op, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutReduce error"
+      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllReduce
+  end subroutine ESMF_newDELayoutAllGlobalReduce
 !------------------------------------------------------------------------------
 
 
