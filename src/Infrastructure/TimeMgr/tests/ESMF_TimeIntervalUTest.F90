@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.14 2004/04/09 20:13:58 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.15 2004/04/14 00:12:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.14 2004/04/09 20:13:58 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.15 2004/04/14 00:12:32 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, YY, days, months, years, totalDays, &
+      integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, totalDays, &
                  hours, minutes, secs, testResults, ans
 
       ! individual test name
@@ -1232,6 +1232,33 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "rc = ", rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Calendar sum of 2 Time intervals Test 1"
+      write(failMsg, *) " Did not return (yy=5, mm=-19, d=120, h=-4, m=-50, s=-50) or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=5, d=30, h=7, m=8, s=18, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=2, mm=-24, d=90, h=-13, m=62, s=-68, rc=rc)
+      timeStep3 = timeStep + timeStep2
+      call ESMF_TimeIntervalGet(timeStep3, yy=YY, mm=MM, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==5 .and. MM==-19 .and. D==120 .and. &
+                      H==-4 .and. M==-50 .and. S==-50 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "yy=", YY, "mm=", MM, "d=", D, "h=", H, "m=", M, "s=", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Calendar multiplication of a Time interval Test 1"
+      write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
+      timeStep2 = timeStep * 3
+      call ESMF_TimeIntervalGet(timeStep2, yy=YY, mm=MM, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==9 .and. MM==-15 .and. D==90 .and. &
+                      H==20 .and. M==37 .and. S==15 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "yy=", YY, "mm=", MM, "d=", D, "h=", H, "m=", M, "s=", S
 
       call ESMF_CalendarDestroy(julianDayCalendar)
       call ESMF_CalendarDestroy(day360Calendar)
