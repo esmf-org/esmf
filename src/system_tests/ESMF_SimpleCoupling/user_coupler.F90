@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2004/04/14 21:13:03 nscollins Exp $
+! $Id: user_coupler.F90,v 1.10 2004/04/27 15:57:50 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -65,27 +65,38 @@
 
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2
+        type(ESMF_VM) :: vm
         type(ESMF_newDELayout) :: cpllayout
+        integer :: status
 
         print *, "User Coupler Init starting"
-        call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
-        call ESMF_FieldPrint(humidity1, rc=rc)
+        call ESMF_StateGetField(importState, "humidity", humidity1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
+        call ESMF_FieldPrint(humidity1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
-        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
-        call ESMF_FieldPrint(humidity2, rc=rc)
+        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
+        call ESMF_FieldPrint(humidity2, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
-        ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
+        ! Get VM from coupler component and create a layout with all the PETs
+        call ESMF_CplCompGet(comp, vm=vm, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
+        cpllayout = ESMF_newDELayoutCreate(vm, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! Precompute communication patterns
         call ESMF_FieldRedistStore(humidity1, humidity2, cpllayout, &
-                                   routehandle, rc=rc)
+                                   routehandle, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! This is where the model specific setup code goes.  
 
         print *, "User Coupler Init returning"
    
-        rc = ESMF_SUCCESS
+10 continue
+        rc = status
 
     end subroutine user_init
 
@@ -109,24 +120,31 @@
         print *, "User Coupler Run starting"
 
         ! Get input data
-        call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
-        call ESMF_FieldPrint(humidity1, "", rc=rc)
+        call ESMF_StateGetField(importState, "humidity", humidity1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
+        call ESMF_FieldPrint(humidity1, "", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! Get location of output data
-        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
-        call ESMF_FieldPrint(humidity2, "", rc=rc)
+        call ESMF_StateGetField(exportState, "humidity", humidity2, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
+        call ESMF_FieldPrint(humidity2, "", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! These are fields on different layouts - call Redist to rearrange
         !  the data using the Comm routines.
         call ESMF_FieldRedist(humidity1, humidity2, routehandle, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
 
         ! Output data operated on in place, export state now has new values.
         call ESMF_StatePrint(exportState, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10 
 
  
         print *, "User Coupler Run returning"
 
+10 continue
         rc = status
 
     end subroutine user_run
