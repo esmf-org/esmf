@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2003/10/09 20:56:13 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2003/10/10 17:16:41 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -111,11 +111,12 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(kind=ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
+      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
                        uin, rhoin, siein, &
@@ -136,8 +137,15 @@
 !
 ! Calculate some other quantities
 !
-      dx = (x_max - x_min)/counts(1)   ! Should be calls to PhysGrid eventually
-      dy = (y_max - y_min)/counts(2)
+      ! TODO: reorder the namelist input so we can read the values directly
+      ! into g_min and g_max instead of having to go through intermediates.
+      g_min(1) = x_min
+      g_max(1) = x_max
+      g_min(2) = y_min
+      g_max(2) = y_max
+      ! Should be calls to PhysGrid eventually
+      dx = (g_max(1) - g_min(1))/counts(1)   
+      dy = (g_max(1) - g_min(1))/counts(2)
 !
 ! Query component for information.
 !
@@ -149,9 +157,8 @@
       horz_stagger = ESMF_GridStagger_C
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
-      grid = ESMF_GridCreate(counts=counts, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
+      grid = ESMF_GridCreate(2, counts=counts, &
+                             min=g_min, max=g_max, &
                              layout=layout, &
                              horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &

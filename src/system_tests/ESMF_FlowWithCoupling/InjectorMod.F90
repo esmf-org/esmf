@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.1 2003/10/09 20:56:13 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.2 2003/10/10 17:16:41 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -99,13 +99,14 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
       real :: in_energy, in_velocity, in_rho
       integer :: printout
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
+      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde
       type(injectdata), pointer :: datablock
       type(wrapper) :: wrap
@@ -117,6 +118,12 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       ! Set initial values
       !
       rc = ESMF_FAILURE
+      ! TODO: reorder the input namelist so we can read directly into
+      !  the g_min and g_max values.  
+      g_min(1) = x_min
+      g_max(1) = x_max
+      g_min(2) = y_min
+      g_max(2) = y_max
    
       !
       ! Read in input file
@@ -164,9 +171,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       horz_coord_system = ESMF_CoordSystem_Cartesian
       vert_coord_system = ESMF_CoordSystem_Unknown
 
-      grid = ESMF_GridCreate(counts=counts, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
+      grid = ESMF_GridCreate(2, counts=counts, &
+                             min=g_min, max=g_max, &
                              layout=layout, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &
