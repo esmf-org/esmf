@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.34 2004/06/02 22:54:53 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.35 2004/06/15 20:44:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.34 2004/06/02 22:54:53 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.35 2004/06/15 20:44:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -285,21 +285,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "gname= ", gname
 
-      !------------------------------------------------------------------------
-      ! The following code crashes, bug 722780 has been filed
-
-      ! name = "test grid 1"
-
-      ! call ESMF_GridAddPhysGrid(grid_type, counts=counts, &
-      ! 		     physgrid_id=phy_grid_id, &
-      !                      y_min=y_min, y_max=y_max, &
-      ! 		     physgrid_name=name, rc=status)
-
-      ! write(failMsg, *) "Did not return ESMF_SUCCESS"
-      ! write(name, *) "Adding a Physical Grid Test"
-      ! call ESMF_Test((status.eq.ESMF_SUCCESS), &
-      !                   name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
 #endif
 
       ! return number of failures to environment; 0 = success (all pass)
