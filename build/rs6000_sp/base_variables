@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.10 2003/03/28 22:12:38 jwolfe Exp $ 
+# $Id: base_variables,v 1.11 2003/04/03 20:22:14 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -24,14 +24,14 @@ FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # ######################### C and Fortran compiler ########################
 #
-C_CC			= mpcc_r -qsmp=omp
-C_FC			= mpxlf90_r
+C_CC			= mpcc_r -qsmp=omp -qcheck -qheapdebug
+C_FC			= mpxlf90_r -qcheck 
 C_FC_MOD		= -I
 C_CLINKER_SLFLAG	= -L
 C_FLINKER_SLFLAG	= -L
-C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000 
+C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000  -qcheck -qheapdebug
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC
+C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC -qcheck 
 C_CCV			= unknown
 C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
@@ -47,18 +47,23 @@ O_FOPTFLAGS		= -O3 -w
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 # ########################## C++ compiler ##################################
 #
-###  this section used to call mpCC_r, but it is currently broken on
-###  bluesky.  i was told that mpcc_r should compile both C and C++,
-###  and it seems to work on what i've tried so far.  but if something
-###  doesn't work, try setting the mpcc_r lines in this section back to
-###  mpCC_r, and add /usr/vacpp/bin to your search path if you get errors
-###  about xlC_r not being found.   nsc  1/29/2003
-CXX_CC			= mpcc_r
-CXX_FC			= mpxlf_r
+###  on one of our rs6000s the mpCC_r system cover script will not find 
+###  the actual xlC_r compiler without adding the dir /usr/vacpp/bin to 
+###  your search path.  on the other rs6000 it works as expected
+###  without any environment changes.  we were told that mpcc_r should behave
+###  the same as mpCC_r and it works without an additional dir in the search
+###  path, but it does *not* add the same default libraries and causes
+###  problems, especially with cross linking in fortran and with -qheapdebug.
+###  so i am choosing to go back to calling mpCC_r and putting up with
+###  the user support problems i know this is going to cause.   nsc 4/2/2003
+###
+###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003
+CXX_CC			= mpCC_r -qcheck -qheapdebug
+CXX_FC			= mpxlf_r -qcheck 
 CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
-CXX_CLINKER		= mpcc_r
-CXX_FLINKER		= mpcc_r -brtl
+CXX_CLINKER		= mpCC_r -qcheck -qheapdebug
+CXX_FLINKER		= mpCC_r -brtl -qcheck -qheapdebug
 CXX_CCV			= unknown
 CXX_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
 CXX_SYS_LIBS		= -lC
@@ -68,13 +73,13 @@ C_CXXF90LIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC \
+			  -lpthreads -lm_r -lm -lc_r -lc \
 			  /usr/lpp/ppe.poe/lib/libc.a
 C_F90CXXLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC \
+			  -lpthreads -lm_r -lm -lc_r -lc \
 			  /usr/lpp/ppe.poe/lib/libc.a
 C_CXXSO			= cc_r -G
 C_CXXSOLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
