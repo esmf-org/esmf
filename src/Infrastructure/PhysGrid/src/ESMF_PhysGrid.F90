@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.87 2004/11/23 00:39:16 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.88 2004/12/02 18:19:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -323,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.87 2004/11/23 00:39:16 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.88 2004/12/02 18:19:55 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2709,9 +2709,9 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ! local variables
-      !integer :: localrc                             ! Error status
-      real(kind=ESMF_KIND_R8) :: rlon1, rlat1, rlon2, rlat2  ! lon/lat in radians
-      real(kind=ESMF_KIND_R8) :: pi
+      real(kind=ESMF_KIND_R8) :: rlon1, rlat1, rlon2, rlat2  ! lon/lat in degrees
+      real(kind=ESMF_KIND_R8) :: pi, innards
+      real(kind=ESMF_KIND_R8) :: tiny = 1.0d-12              ! TODO: should be in base
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -2726,10 +2726,11 @@
       rlat2 = lat2*pi/180.d0
 
       ! compute angular distance
-      ESMF_PhysGridCompDistSpherical = &
-         acos( cos(rlat1)*cos(rlat2)*cos(rlon1)*cos(rlon2) + &
-               cos(rlat1)*cos(rlat2)*sin(rlon1)*sin(rlon2) + &
-               sin(rlat1)*sin(rlat2) )
+      innards = cos(rlat1)*cos(rlat2)*cos(rlon1)*cos(rlon2) + &
+                cos(rlat1)*cos(rlat2)*sin(rlon1)*sin(rlon2) + &
+                sin(rlat1)*sin(rlat2)
+      if (innards.gt.1.0d0 .AND. (innards-tiny).le.1.0d0) innards = 1.0d0
+      ESMF_PhysGridCompDistSpherical = acos(innards)
 
       ! if radius present, convert to linear distance
       if (present(radius)) then
