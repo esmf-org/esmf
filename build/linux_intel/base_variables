@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.2 2003/02/11 22:02:19 nscollins Exp $ 
+# $Id: base_variables,v 1.3 2003/02/20 22:44:46 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -44,9 +44,9 @@ CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = efc -mp
-C_F90CXXLIBS       = 
+C_F90CXXLIBS       = -lcprts
 C_CXXF90LD         = ecc 
-C_CXXF90LIBS       = 
+C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins
 C_CXXSO            = ecc -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
