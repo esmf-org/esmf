@@ -1,16 +1,14 @@
-% $Id: ESMF_infradataoverview.tex,v 1.7 2004/02/19 00:12:43 svasquez Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.8 2004/03/16 00:08:09 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Classes}
 
-{\tt Field}, {\tt Bundle}, and {\tt Array} objects 
-provide data access and data handling methods.
-Their methods are called both from user written
+Field, Bundle, and Array objects provide data access and data 
+handling methods.  Their methods are called both from user written
 code and from other objects internal to the framework.
 
-A {\tt Field} 
-object encapsulates computational and/or observational data together 
-with the underlying grid on which it is located.  
-A {\tt Field} object provides the
+A Field object encapsulates computational and/or observational 
+data together with its underlying grid or set of spatial locations.  
+It contains an A {\tt Field} object provides the
 application with both an overall logical view of the entire
 dataset, as well as access to processor-local data after decomposition.
 It provides methods for configuration, initialization, setting and
@@ -18,208 +16,73 @@ retrieving data values, data I/O, intercomponent data
 exchange, data regridding, and manipulation of attributes.
 
 Groups of fields on the same underlying physical grid 
-can be collected into a single object called a {\tt Bundle}.  
-A {\tt Bundle} provides two major functions: it allows groups of 
-{\tt Fields}
-to be manipulated using a single identifier, for example during
+can be collected into a single object called a Bundle.  
+A Bundle provides two major functions: it allows groups of 
+Fields to be manipulated using a single identifier, for example during
 export or import of data between components; and it allows
 data from multiple fields to be packed together in memory 
 for higher locality of reference and ease in subsetting operations.
-A {\tt Bundle} object contains methods
-for setting and retrieving constituent fields, import and export
-data exchange during intercomponent communication,
-regridding, data I/O, and reordering of data in memory.
+Bundle objects contain methods for setting and retrieving constituent 
+fields, import and export data exchange during intercomponent 
+communication, regridding, data I/O, and reordering of data in memory.
 
+\subsection{Distributed Data Methods}
 
-\subsection{Programming Model}
+Bundles, Fields, and Arrays all have versions of the following
+communication methods.  These all involve movements of data between
+DEs.  The first three are higher level functions which are intended to
+map closely to needs of applications programs.  They are:
 
-The following sections give a high level description of how
-the overall application and components will operate,
-focusing on how Fields and Bundles are created and used.
-This is followed by a more detailed description of how
-those functions are encapsulated into internal ESMF 
-objects, followed by a detailed API (Application Programming
-Interface) listing.
+There is a common object handle, an {\tt ESMF\_RouteHandle}, which
+allows the communication patterns to be precomputed during 
+initialization and the information stored in that RouteHandle.
+By specifying the correct RouteHandle at execution time, only
+the source and destination data pointers must be supplied and the
+runtime overhead is minimized.
 
-\subsection{Using Fields and Bundles}
+\subsubsection{Halo}
+\input{../Infrastructure/ArrayComm/doc/ArrayHalo_desc}
 
-\subsubsection{Field Initialization}
+\subsubsection{Regrid}
+\input{../Infrastructure/Regrid/doc/Regrid_desc}
+\input{../Infrastructure/Regrid/doc/Regrid_usage.tex}
 
-The following section describes issues related to
-creation and initialization of Fields.
+\subsubsection{Redist}
+\input{../Infrastructure/ArrayComm/doc/ArrayRedist_desc}
 
+\subsubsection{Lower Level Functions}
+The last seven correspond closely to the lower level
+MPI communications primitives.  They are:
 \begin{description}
-
-\item{Framework Initialization}
- 
-At Framework initialization there is an opportunity to 
-specify a configuration file which can contain attribute values 
-that affect the
-operation of Fields and Bundles.  The most likely used
-attributes will control I/O specifications, e.g. 
-filenames and file formats defaults.  These can be
-queried at run time by the Field and Bundle code.
-
-\item{Field Creation}
-
-All versions of the {\tt ESMF\_FieldCreate} 
-routines require a Grid object as input, or require a Grid
-be added before most operations involving Fields can be performed.
-The Grid contains the information needed to know which 
-Decomposition Elements ({\tt DE}s) are participating in 
-the processing of this Field, and which subsets of the data
-are local to this {\tt DE}.
-
-Requests to access local Field data will not require 
-communication overhead; the user code is expected to
-query the Grid object to discover what part of the
-overall dataset is local to this processor and do
-computations based on that data.
-
-The details of how the create process happens depends 
-on which of the 
-variants of the {\tt ESMF\_FieldCreate} call is used.
-Some differences will be discussed below.
-
-\item{Associating constructed data with Fields}
-
-There are versions of the {\tt ESMF\_FieldCreate} interface
-which allow user code to specify the initial data values.
-The can be constructed or read in data from
-outside of the ESMF.  Empty Fields can also be created in
-which case the data can be added at some later time.
-
-For versions of Create which do not specify data values,
-user code can create an {\tt ESMF\_ArraySpec} object, which
-contains information about the Type, Kind, and Rank of the
-data values in the array.  Then at Field create time, the
-appropriate amount of memory is allocated to contain the
-data which is local to each {\tt DE}.
-
-\item{Having Fields Allocate Space for Data}
-
-There are versions of the {\tt ESMF\_FieldCreate} interface
-which create the Field based on the input Grid.  The ESMF
-can allocate the proper amount of 
-space but not assign initial values.  The user code
-can then detach the uninitialized buffer, set the
-initial data values, and reattach the buffer.
-
-\item{Field Read}
-
-Fields can be created by the {\tt ESMF\_FieldRead}
-routine, with options to create the Grid at this time
-as well as creating the associated Arrays.
-
+\item[Gather]
+Reassembling data which is decomposed over a set of DEs into a single
+block of data on one DE.
+\item[AllGather]
+Reassembling data which is decomposed over a set of DEs into multiple
+copies of a single block of data, one copy per original DE.
+\item[Scatter]
+Spreading an undecomposed block of data on one DE over a set of DEs,
+decomposing that single block into smaller subsets of data, one
+data decomposition per DE.
+\item[AlltoAll]
+Spreading an undecomposed block of data from multiple DEs onto
+each of the other DEs in the set, resulting in a set of multiple decomposed 
+data blocks per DE, one from each of the original source DEs.
+\item[Broadcast]
+Spreading an undecomposed block of data from one DE onto all other
+DEs, where the resulting data is still undecomposed and simply
+copied to all other DEs.
+\item[Reduction]
+Computing a single data value, e.g. the data maximum, minimum, sum, etc
+from a group of decomposed data blocks across a set of DEs, where the
+result is delivered to a single DE.
+\item[AllReduce]
+Computing a single data value, e.g. the data maximum, minimum, sum, etc
+from a group of decomposed data blocks across a set of DEs, where the
+result is delivered to all DEs in the set.
 \end{description}
 
-Fields can be created and destroyed
-at any time during application execution.  However, the creation
-and deletion of Fields will require some time to complete.  
-It is not recommended
-that Fields are created or destroyed
-inside performance-critical computational loops.
-
-Fields and Bundles are used in constructing 
-the Import and Export states for component coupling, 
-which requires that the 
-Fields involved in data exchange be identified, as well as
-which Transforms must be performed on them to make the
-data compatible with the specifications of
-receiving components.  
-
-\subsubsection{Bundle Initialization}
-
-It is not required that {\tt Bundles} be created or used.
-{\tt Bundles} offer a way to group {\tt Fields} which share a
-common {\tt Grid}, and optionally to pack the {\tt Field} data
-together in a single buffer.
-
-\begin{description}
-
-\item{Bundle Creation from Existing Fields}
-
-After creating multiple Fields, Bundles can be created
-by calling the {\tt ESMF\_BundleCreate} subroutine.  There are
-options to create a {\tt Bundle} which simply references
-the data buffers of the existing {\tt Fields}, 
-or the Bundle can make a separate copy of the data in a private 
-Bundle data buffer.  If a data copy is made, there are options to
-control the interleaving of the Field data in the Bundle data buffer.
-
-All Fields in a bundle must share the same underlying Grid.
-If the Bundle has a private data buffer, then the Fields must
-all share a compatible mapping of data onto the Grid as well.
-
-\end{description}
-
-\subsubsection{Use During Execution}
-
-Access to data is similar for {\tt Fields} and {\tt Bundles} with
-packed data.  It is described below using the {\tt Field}
-routines in the examples, but corresponding {\tt Bundle} level
-routines exist.  To access data in a
-Bundle which is not packed, the user must loop over the
-Fields in the Bundles, querying for each
-constituent Field and then using the Field level data interfaces.
-
-\begin{description}
-
-\item{Accessing Field Data}
-
-The user code on each DE calls the {\tt ESMF\_FieldGridQuery}
-routine to find out about the local subset of the data, including
-the number of items, the extents
-of the dimensions, and the corresponding coordinates of this
-decomposition.
-
-The user code can then call {\tt ESMF\_FieldDataDetach} to
-begin iterating through the data.  This routine returns a
-pointer to the buffer and marks the data as "in use by
-the user code".  The ESMF cannot read or write that
-data until {\tt ESMF\_FieldDataAttach} is called.  Once the data
-is reattached the framework can use the data in regridding 
-operations, halo updates, etc.  
-
-There is a data access option, {\tt ESMF\_FieldDataDetachCopy}
-which returns a copy of the data buffer and does not mark the
-Field data as detached or in use in any way.  The ESMF 
-allocates space for this data buffer, so it becomes the
-responsibility of the calling code to release that space 
-when finished with it.
-
-\end{description}
-
-\subsubsection{Finalization}
-
-\begin{description}
-
-\item{Field Deletion}
-
-There is a {\tt ESMF\_FieldDestroy} subroutine which releases
-any data buffers which were allocated or copied by this Field,
-and deletes the Field object.  Since the Grid can be shared
-amongst multiple Fields, the Grid is not deleted by this call.
-
-\item{Bundle Deletion}
-
-If Bundles are used, the user must call the 
-{\tt ESMF\_BundleDestroy} subroutine before deleting any constituent
-Fields.  If a private Bundle data buffer exists, the space is
-freed and all resources associated with the Bundle are released.
-The constituent Fields are not deleted by this call, since they
-can be contained by multiple Bundles.
-
-\end{description}
-
-\subsection{Attributes}
-
-Attributes are implemented in the Base class so they can be attached to
-any object in the system which is built on the Base object.  (This is true
-for all deep objects in the system.)  Attributes are created by making a
-private copy of the information provided during the Set call.  Lists of
-values are supported, but they are not intended for problem-sized
-data arrays.   Data is also copied during a Get operation.
+\subsection{Field and Bundle Attributes}
 
 There are routines for setting and getting single values and lists of
 int/I4, double/R8, and logical (ESMF\_Logical) types, and char */character
@@ -234,55 +97,9 @@ A count of all Attributes associated with an object can be returned, and
 then Attributes can also be queried and retrieved by number, for iterating
 an unknown Attribute list.
 
-For this release, Fields, Bundles, and States have Attribute support enabled.
+Currently Fields, Bundles, and States have Attribute support enabled.
 
 \input{../Infrastructure/Base/doc/ESMF_Base_fapi}
-
-
-\subsection{Data Class Communication Methods}
-
-The following methods operate on Data Class objects, including
-{\tt ESMF\_Bundle}s, {\tt ESMF\_Field}s, and {\tt ESMF\_Array}s.
-The {\it Regrid} method computes new data values based on a source
-and destination grid, and a Regridding Method.  The {\it Halo} 
-method updates ghost-cell or halo regions; data which is computed
-by a one DE but a copy is needed by another DE to do computations.
-The {\it Redistribution} method moves data from one DE to another
-when the decomposition of identical Grids is different or the
-index ordering of the data is to be changed.  No data
-interpolation is done during this process.
-
-There is a common object handle, an {\tt ESMF\_RouteHandle}, which
-allows the communication patterns to be precomputed during initialization
-and the information stored in that RouteHandle.
-By specifying the correct RouteHandle at execution time, only
-the source and destination data pointers must be supplied and the
-runtime overhead is minimized.
-
-In the following methods, the Bundle and Field code cascades down
-through the Array code, so that the actual computations exist in
-only one place in the source.
-
-\subsubsection{Regrid}
-
-\input{../Infrastructure/Regrid/doc/Regrid_desc}
-
-\subsubsection{Halo}
-
-\input{../Infrastructure/ArrayComm/doc/ArrayHalo_desc}
-
-\subsubsection{Redistribution}
-
-\input{../Infrastructure/ArrayComm/doc/ArrayRedist_desc}
-
-\subsubsection{Gather, Scatter, etc}
-
-There are lower level communication routines which have methods
-at the Array level to simplify the interfaces to the user code.
-Field and Bundle methods may be added if required.
-The full list of possible communication routines in this category
-are Gather, AllGather, Scatter, Reduce,
-AllReduce, Broadcast, and AllToAll.
 
 \newpage
 \subsection{Object Model}

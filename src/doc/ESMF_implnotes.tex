@@ -1,0 +1,25 @@
+% $Id: ESMF_implnotes.tex,v 1.1 2004/03/16 00:08:09 cdeluca Exp $
+
+\subsection{Design and Implementation Notes}
+
+\subsubsection{Base}
+
+\begin{enumerate}
+
+\item All ESMF classes are built upon a Base class.  The Base is used to hold 
+system-wide capabilities, such as Attributes.
+
+\end{enumerate}
+
+\subsubsection{Attributes}
+
+\begin{enumerate}
+
+\item Attributes are implemented in the Base class so they can be attached to
+any object in the system which is built on the Base object.  (This is true
+for all deep objects in the system.)  Attributes are created by making a
+private copy of the information provided during the Set call.  Lists of
+values are supported, but they are not intended for large
+data arrays.   Data is also copied during a Get operation.
+
+\end{enumerate}
