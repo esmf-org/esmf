@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.85 2004/02/20 17:48:46 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.86 2004/02/24 15:35:15 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -240,6 +240,24 @@
       type(ESMF_Logical), parameter :: ESMF_TRUE     = ESMF_Logical(1), &
                                        ESMF_FALSE    = ESMF_Logical(2)
 
+#ifdef ESMF_ENABLE_VM
+!------------------------------------------------------------------------------
+!
+!     ! Typed reduction operations
+
+!     ! WARNING: must match corresponding values in ../include/ESMC_Base.h
+
+      type ESMF_newOp
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_newOp), parameter :: ESMF_newSUM   = ESMF_newOp(1), &
+                                     ESMF_newMIN   = ESMF_newOp(2), &
+                                     ESMF_newMAX   = ESMF_newOp(3)
+#endif
+                                     
 !------------------------------------------------------------------------------
 !
       ! Contains pointer to real Base object which is defined in C++
@@ -275,6 +293,10 @@
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
       public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
+
+#ifdef ESMF_ENABLE_VM
+      public ESMF_newOp, ESMF_newSUM, ESMF_newMIN, ESMF_newMAX
+#endif
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
@@ -389,7 +411,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.85 2004/02/20 17:48:46 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.86 2004/02/24 15:35:15 theurich Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
