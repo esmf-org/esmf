@@ -1,4 +1,4 @@
-!  $Id: ESMF_Xform_C.F90,v 1.1 2003/10/22 21:00:55 cdeluca Exp $
+!  $Id: ESMF_Xform_C.F90,v 1.2 2004/06/08 09:27:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Xform_C.F90,v 1.1 2003/10/22 21:00:55 cdeluca Exp $'
+!      '$Id: ESMF_Xform_C.F90,v 1.2 2004/06/08 09:27:21 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -42,6 +42,7 @@
 
    ! TODO: for an init method, does this need to call thru the interface?
    function f_esmf_xforminit(name, rc)
+       use ESMF_BaseTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_XformMod
 
@@ -54,6 +55,7 @@
    end function f_esmf_xforminit
 
    subroutine f_esmf_xformget(xformp, name, rc)
+       use ESMF_BaseTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_XformMod
 
@@ -66,6 +68,7 @@
    end subroutine f_esmf_xformget
 
    subroutine f_esmf_xformset(xformp, name, rc)
+       use ESMF_BaseTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_XformMod
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2004/05/20 11:43:38 nscollins Exp $ 
+# $Id: makefile,v 1.11 2004/06/08 09:27:18 nscollins Exp $ 
 
 ALL: build_here 
 
@@ -6,9 +6,9 @@ CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
 SOURCEC	  = ESMC_LogErr.C
-SOURCEF	  = ESMF_LogErr.F90
+SOURCEF	  = 
 SOURCEH	  = 
-STOREH    = ESMF_LogErr.inc ESMC_LogErr.h ESMC_LogErr.inc
+STOREH    = ESMC_LogErr.h ESMC_LogErr.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

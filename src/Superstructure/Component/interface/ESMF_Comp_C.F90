@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.22 2004/05/27 21:33:54 jwolfe Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.23 2004/06/08 09:27:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.22 2004/05/27 21:33:54 jwolfe Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.23 2004/06/08 09:27:21 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -42,6 +42,7 @@
 
 
    recursive subroutine f_esmf_compinsertvm(comp, vm, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_VMMod
@@ -55,6 +56,7 @@
    end subroutine f_esmf_compinsertvm
 
    recursive subroutine f_esmf_compget(comp, ctype, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
 
@@ -67,6 +69,7 @@
    end subroutine f_esmf_compget
 
    recursive subroutine f_esmf_compreplicate(comp, comp_src, vm, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_VMMod
@@ -88,6 +91,7 @@
    end subroutine f_esmf_compreplicate
 
    recursive subroutine f_esmf_compcopy(comp, comp_src, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_VMMod
@@ -105,6 +109,7 @@
    end subroutine f_esmf_compcopy
 
    recursive subroutine f_esmf_compdelete(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        
@@ -118,6 +123,7 @@
 
    subroutine f_esmf_gridcompcreate(gcomp, name, mtype, grid, &
                                      config, configFile, clock, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ConfigMod
        use ESMF_ClockMod
@@ -140,6 +146,7 @@
    end subroutine f_esmf_gridcompcreate
 
    subroutine f_esmf_gridcompdestroy(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_GridCompMod
@@ -153,6 +160,7 @@
 
    subroutine f_esmf_gridcompinitialize(comp, importState, exportState, &
                                         clock, phase, blockingFlag, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
@@ -173,6 +181,7 @@
    end subroutine f_esmf_gridcompinitialize
 
    subroutine f_esmf_gridcomprun(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
@@ -193,6 +202,7 @@
    end subroutine f_esmf_gridcomprun
 
    subroutine f_esmf_gridcompfinalize(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
@@ -213,6 +223,7 @@
    end subroutine f_esmf_gridcompfinalize
  
    subroutine f_esmf_gridcompset(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_GridCompMod
@@ -225,6 +236,7 @@
    end subroutine f_esmf_gridcompset
  
    subroutine f_esmf_gridcompget(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_GridCompMod
@@ -237,6 +249,7 @@
    end subroutine f_esmf_gridcompget
 
    subroutine f_esmf_gridcompvalidate(comp, options, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_GridCompMod
@@ -250,6 +263,7 @@
    end subroutine f_esmf_gridcompvalidate
 
    subroutine f_esmf_gridcompprint(comp, options, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_GridCompMod
@@ -266,6 +280,7 @@
 !------------------------------------------------------------------------------
 
    subroutine f_esmf_cplcompcreate(ccomp, name, config, configFile, clock, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_CompMod
@@ -283,6 +298,7 @@
    end subroutine f_esmf_cplcompcreate
 
    subroutine f_esmf_cplcompdestroy(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_CplCompMod
@@ -296,6 +312,7 @@
 
    subroutine f_esmf_cplcompinitialize(comp, importState, exportState, &
                                         clock, phase, blockingFlag, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
@@ -316,6 +333,7 @@
    end subroutine f_esmf_cplcompinitialize
 
    subroutine f_esmf_cplcomprun(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
@@ -336,6 +354,7 @@
    end subroutine f_esmf_cplcomprun
 
    subroutine f_esmf_cplcompfinalize(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_ClockMod
        use ESMF_StateMod
@@ -356,6 +375,7 @@
    end subroutine f_esmf_cplcompfinalize
  
    subroutine f_esmf_cplcompset(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_CplCompMod
@@ -368,6 +388,7 @@
    end subroutine f_esmf_cplcompset
  
    subroutine f_esmf_cplcompget(comp, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_CplCompMod
@@ -380,6 +401,7 @@
    end subroutine f_esmf_cplcompget
 
    subroutine f_esmf_cplcompvalidate(comp, options, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_CplCompMod
@@ -393,6 +415,7 @@
    end subroutine f_esmf_cplcompvalidate
 
    subroutine f_esmf_cplcompprint(comp, options, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_CompMod
        use ESMF_CplCompMod

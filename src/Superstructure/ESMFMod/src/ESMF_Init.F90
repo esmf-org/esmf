@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.11 2004/06/07 09:11:55 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.12 2004/06/08 09:27:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,8 @@
 ! Framework-wide init and finalize code.
 !
 !
-! !USES:
+! !USES: 
+      use ESMF_BaseTypesMod
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_LogErrMod

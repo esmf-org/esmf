@@ -1,4 +1,4 @@
-! $Id: ESMF_class_C.F90,v 1.1 2004/01/26 17:44:00 nscollins Exp $
+! $Id: ESMF_class_C.F90,v 1.2 2004/06/08 09:27:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class_C.F90,v 1.1 2004/01/26 17:44:00 nscollins Exp $'
+      '$Id: ESMF_class_C.F90,v 1.2 2004/06/08 09:27:17 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -48,6 +48,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>create(<class>p, arg1, arg2, arg3, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -67,6 +68,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>destroy(<class>p, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -84,6 +86,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>init(<class>p, arg1, arg2, arg3, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -101,6 +104,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>getconfig(<class>p, config, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -115,6 +119,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>setconfig(<class>p, config, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -129,6 +134,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>get(<class>p, <value>, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -143,6 +149,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>set(<class>p, <value>, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -157,6 +164,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>validate(<class>p, options, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 
@@ -171,6 +179,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_<class>print(<class>p, options, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_<Class>Mod
 

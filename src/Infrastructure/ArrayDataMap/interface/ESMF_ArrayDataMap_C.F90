@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap_C.F90,v 1.3 2004/05/26 18:23:24 nscollins Exp $
+! $Id: ESMF_ArrayDataMap_C.F90,v 1.4 2004/06/08 09:27:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !   character(*), parameter, private :: version = &
-!     '$Id: ESMF_ArrayDataMap_C.F90,v 1.3 2004/05/26 18:23:24 nscollins Exp $'
+!     '$Id: ESMF_ArrayDataMap_C.F90,v 1.4 2004/06/08 09:27:14 nscollins Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -41,6 +41,7 @@
 !
 !------------------------------------------------------------------------------
     subroutine f_esmf_arraydatamapsetdefault(admp, dataRank, dataIndices, counts, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
 
@@ -58,6 +59,7 @@
 
 !------------------------------------------------------------------------------
     subroutine f_esmf_arraydatamapget(admp, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
 
@@ -72,6 +74,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_arraydatamapset(admp, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
 
@@ -86,6 +89,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_arraydatamapvalidate(admp, options, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
 
@@ -100,6 +104,7 @@
   
 !------------------------------------------------------------------------------
     subroutine f_esmf_arraydatamapprint(admp, options, rc)
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
 

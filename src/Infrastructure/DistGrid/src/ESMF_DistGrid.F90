@@ -40,7 +40,8 @@
 ! with the {\tt ESMF\_PhysGrid} object.
 !
 !------------------------------------------------------------------------------
-! !USES:
+! !USES: 
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod
       use ESMF_LogErrMod
       use ESMF_DELayoutMod
@@ -215,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.115 2004/06/04 21:54:30 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.116 2004/06/08 09:27:16 nscollins Exp $'
 
 !==============================================================================
 !

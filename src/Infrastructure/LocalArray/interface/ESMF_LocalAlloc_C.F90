@@ -22,10 +22,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LocalAlloc_C.F90,v 1.2 2004/02/11 21:54:55 nscollins Exp $'
+!      '$Id: ESMF_LocalAlloc_C.F90,v 1.3 2004/06/08 09:27:18 nscollins Exp $'
 !==============================================================================
    subroutine f_esmf_localarrayf90allocate(array, rank, type, kind, counts, &
                                            lbounds, ubounds, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_LocalArrayMod
      type(ESMF_LocalArray) :: array
@@ -44,6 +45,7 @@
    end subroutine f_esmf_localarrayf90allocate
 
    subroutine f_esmf_localarrayf90deallocate(array, rank, type, kind, rc)
+       use ESMF_BaseTypesMod    ! ESMF base class
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_LocalArrayMod
      type(ESMF_LocalArray) :: array

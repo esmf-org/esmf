@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:34:36 nscollins Exp $ 
+# $Id: makefile,v 1.3 2004/06/08 09:27:14 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -16,13 +16,13 @@ LOCDIR	  = src/Infrastructure/ArrayComm/examples
 
 
 
-EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_ArrayCreateEx 
+EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_ArrayCommEx 
 
 
-EXAMPLES_RUN     =  run_ESMF_ArrayCreateEx
+EXAMPLES_RUN     =  run_ESMF_ArrayCommEx
 
 
-EXAMPLES_RUN_UNI =  run_ESMF_ArrayCreateEx_uni 
+EXAMPLES_RUN_UNI =  run_ESMF_ArrayCommEx_uni 
 
 
 
@@ -37,12 +37,12 @@ CLOBBERDIRS =
 
 
 #
-# ESMF_ArrayCreateEx
+# ESMF_ArrayCommEx
 #
-run_ESMF_ArrayCreateEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_ArrayCreateEx > $(ESMF_EXDIR)/ESMC_ArrayCreateEx.stdout
+run_ESMF_ArrayCommEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_ArrayCommEx > $(ESMF_EXDIR)/ESMC_ArrayCommEx.stdout
 
 
-run_ESMF_ArrayCreateEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ArrayCreateEx > $(ESMF_EXDIR)/ESMC_ArrayCreateEx_uni.stdout
+run_ESMF_ArrayCommEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ArrayCommEx > $(ESMF_EXDIR)/ESMC_ArrayCommEx_uni.stdout
 

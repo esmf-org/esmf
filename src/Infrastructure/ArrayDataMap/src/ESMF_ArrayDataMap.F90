@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.9 2004/06/07 05:20:52 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.10 2004/06/08 09:27:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,6 +48,7 @@
 ! !MODULE: ESMF_ArrayDataMapMod
       
 ! !USES:
+      use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_LogErrMod
@@ -208,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.9 2004/06/07 05:20:52 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.10 2004/06/08 09:27:15 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
