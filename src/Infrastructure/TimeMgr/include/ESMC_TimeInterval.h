@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.11 2003/04/15 16:47:36 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.12 2003/04/16 21:12:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -161,6 +161,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     ESMC_TimeInterval& operator* (double &) const;
 
     // copy or assign from ESMC_BaseTime expressions
+    // TODO:  should be implicit ?
     ESMC_TimeInterval& operator=(const ESMC_BaseTime &);
 
     // required methods inherited and overridden from the ESMC_Base class

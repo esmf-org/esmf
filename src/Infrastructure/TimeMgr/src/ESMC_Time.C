@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.17 2003/04/16 17:26:42 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.18 2003/04/16 21:12:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.17 2003/04/16 17:26:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.18 2003/04/16 21:12:54 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -822,7 +822,8 @@
 //
 // !REQUIREMENTS:  
 
-    // invoke base class default assignment operator
+    // invoke base class assignment operator
+    // TODO:  should be implicit ?
     ESMC_BaseTime::operator=(baseTime);
 
     return(*this);
