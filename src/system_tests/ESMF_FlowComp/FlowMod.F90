@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.9 2004/04/20 19:25:31 nscollins Exp $
+! $Id: FlowMod.F90,v 1.10 2004/04/27 16:35:56 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -59,23 +59,33 @@
 !
 ! Local variables
 !      
-      integer :: i, j
+      type(ESMF_VM) :: vm
       type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
-      integer :: myde, halo_width
+      type(ESMF_GridType) :: horz_gridtype
+      type(ESMF_GridStagger) :: horz_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system
+      integer :: myde, npets, halo_width
 !
 ! Set initial values
 !
       rc = ESMF_FAILURE
 !
-! Query component for information.
+! Query component for number of PETs, and create a layout which corresponds
 !
-        call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
+      layout = ESMF_newDELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
+
+      ! and get our local de number
+      call ESMF_newDELayoutGet(layout, localDE=myde, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) return
+
 !
 ! Create the Grid
 !
@@ -86,11 +96,8 @@
         g_min(2) = 0.0
         g_max(2) = 50.0
         horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_D_NE
-        vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
-        vert_coord_system = ESMF_CoordSystem_Unknown
         halo_width = 1
 
         grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
@@ -98,11 +105,8 @@
                                maxGlobalCoordPerDim=g_max, &
                                delayout=layout, &
                                horzGridType=horz_gridtype, &
-                               vertGridType=vert_gridtype, &
                                horzStagger=horz_stagger, &
-                               vertStagger=vert_stagger, &
                                horzCoordSystem=horz_coord_system, &
-                               vertCoordSystem=vert_coord_system, &
                                name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
@@ -195,9 +199,9 @@
 ! note: since we're operating on a five-point stencil, we don't
 !       really care out how the corners get set
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
+      call ESMF_GridGet(grid, delayout=layout, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  grid comp get"
+        print *, "ERROR in Flowinit:  grid get"
         return
       endif
       !call ESMF_DELayoutGetSize(layout, nx, ny, rc)
@@ -614,7 +618,7 @@
 !
       real, dimension(imax,jmax) :: rho_new  ! sloppy, but OK for now
       integer :: i, j
-      real :: rhou_m, rhou_p, rhov_m, rhov_p, dsiedx2, dsiedy2
+      real :: rhou_m, rhou_p, rhov_m, rhov_p
 !
 ! Set initial values
 !
@@ -905,12 +909,11 @@
 !
 ! Local variables
 !
-      integer :: ni, nj, i, j, de_id
+      integer :: de_id
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: array2
       type(ESMF_Grid) :: grid
       type(ESMF_newDELayout) :: layout
-      real, dimension(:,:), pointer :: ldata
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -923,7 +926,8 @@
       ! call ESMF_StateGetData(import_state, "U", field_u, rc)
 
       ! Collect results on DE 0 and output to a file
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
+      call ESMF_GridGet(grid, delayout=layout, rc=rc)
       call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
 
       ! Frame number from computation

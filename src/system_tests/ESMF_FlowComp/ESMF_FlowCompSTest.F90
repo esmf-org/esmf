@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.12 2004/04/15 22:05:12 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.13 2004/04/27 16:35:56 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -27,10 +27,9 @@
     implicit none
     
     ! Local variables
-    integer :: i, de_id, ndes, delist(64), rc
+    integer :: pet_id, npets, rc
 
     character(len=ESMF_MAXSTR) :: cname1
-    type(ESMF_newDELayout) :: layout1, layout2
     type(ESMF_VM) :: vm
     type(ESMF_State) :: c1exp
     type(ESMF_GridComp) :: comp1
@@ -40,7 +39,6 @@
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-    integer(ESMF_KIND_I8) :: advanceCount
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -66,32 +64,23 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    ! Initialize framework
-    call ESMF_Initialize(rc=rc)
+    ! Initialize framework and get back the default global VM
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! get the default global VM
-    call ESMF_VMGetGlobal(vm, rc=rc)
+    ! Find out how many PETs we were started with
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Query for the default layout
-    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGet(layout1, deCount=ndes, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    if (ndes .lt. 4) then
-        print *, "This system test needs to run at least 4-way, current np = ", ndes
+    if (npets .lt. 4) then
+        print *, "This system test needs to run at least 4-way, current np = ", npets
         goto 10
     endif
 
 
-    ! Create the model component
+    ! Create the model component, giving it all PETs to run on
     cname1 = "fluid flow"
-    !delist = (/ (i, i=0, ndes-1) /)
-    !layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), rc)
-    layout2 = ESMF_newDELayoutCreate(vm, (/ ndes/2, 2 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
+    comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc 
 
@@ -178,12 +167,12 @@
       print *, "Component Finalize finished, rc =", rc
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
+      call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
-      print *, "Test finished, de_id = ", de_id
+      print *, "Test finished, pet_id = ", pet_id
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
 
@@ -209,9 +198,6 @@
       call ESMF_GridCompDestroy(comp1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_newDELayoutDestroy(layout2, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -219,7 +205,7 @@
 10    print *, "System Test FlowComp complete!"
 
 
-      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         write(failMsg, *)  "System Test failure"
         write(testname, *) "System Test FlowComp: Fluid Solver, single component"
   
