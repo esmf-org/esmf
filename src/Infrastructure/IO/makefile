@@ -1,25 +1,10 @@
-# $Id: makefile,v 1.2 2002/10/04 23:01:48 nscollins Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.3 2002/10/08 19:14:15 nscollins Exp $ 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = ESMF_IO.F90
-SOURCEH	  = 
-OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
-OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
-MANSEC	  = Timeobj
-LIBBASE	  = libesmf
-DIRS	  = 
-#DIRS	  = examples doc
+DIRS	  =  interface
+#DIRS	  =  src interface examples doc
 LOCDIR	  = src/Infrastructure/IO/
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
-
-
-
 
 
 
