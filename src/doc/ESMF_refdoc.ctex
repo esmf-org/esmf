@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.48 2004/04/29 17:23:19 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.49 2004/05/11 12:12:30 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -117,7 +117,9 @@
 
 #include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
 
-#include "../Infrastructure/DataMap/doc/DataMap_refdoc.ctex"
+#include "../Infrastructure/ArrayDataMap/doc/ArrayDataMap_refdoc.ctex"
+#include "../Infrastructure/FieldDataMap/doc/FieldDataMap_refdoc.ctex"
+#include "../Infrastructure/BundleDataMap/doc/BundleDataMap_refdoc.ctex"
 
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
 
