@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.22 2003/04/25 21:23:46 flanigan Exp $ 
+# $Id: base_variables,v 1.23 2003/04/25 22:39:44 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -109,11 +109,19 @@ OCOMP_FOPTFLAGS		= -O3
 #
 PARCH			= rs6000
 
-SL_SUFFIX   = so
-SL_LIBOPTS  = -G -brtl
-SL_LINKOPTS = -lC -brtl -blazy
-SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
-SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+
+# SL_SUFFIX   = so
+# SL_LIBOPTS  = -G 
+# SL_LINKOPTS = -lC -blazy
+# SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+# SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+
+SL_SUFFIX   =
+SL_LIBOPTS  =
+SL_LINKOPTS =
+SL_F_LINKER = $(F90CXXLD) 
+SL_C_LINKER = $(CXXF90LD) 
+
 
 include $(ESMF_BUILD_DIR)/common_variables
 
