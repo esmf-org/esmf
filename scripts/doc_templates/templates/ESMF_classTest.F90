@@ -1,4 +1,4 @@
-! $Id: ESMF_classTest.F90,v 1.2 2003/02/28 04:20:56 eschwab Exp $
+! $Id: ESMF_classTest.F90,v 1.3 2003/03/06 17:32:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_classTest.F90,v 1.2 2003/02/28 04:20:56 eschwab Exp $'
+      '$Id: ESMF_classTest.F90,v 1.3 2003/03/06 17:32:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -43,6 +43,9 @@
 
       ! individual test result code
       integer :: rc
+
+      ! individual test name
+      character(ESMF_MAXSTR) :: name
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -52,71 +55,81 @@
 
       ! test dynamic allocation of ESMF_<Class>
       <class> = ESMF_<Class>Create(args, rc)
+      write(name, *) "ESMF_<Class>Create"
       write(failMsg, *) "rc =", rc, ", args =", args
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
     
       ! test internal dynamic allocation within statically allocated
       !   ESMF_<Class>
       call ESMF_<Class>Construct(<class>, args, rc)
+      write(name, *) "ESMF_<Class>Construct"
       write(failMsg, *) "rc =", rc, ", args =", args
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test initialization of members of statically allocated ESMF_<Class>
       !   may want to read back values via Get methods for comparison
       call ESMF_<Class>Init(<class>, args, rc)
+      write(name, *) "ESMF_<Class>Init"
       write(failMsg, *) "rc =", rc, ", args =", args
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test setting of configuration values
       type(ESMF_<Class>Config) config_set
       call ESMF_<Class>SetConfig(<class>, config_set, rc)
+      write(name, *) "ESMF_<Class>SetConfig"
       write(failMsg, *) "rc =", rc, ", config_set =", config_set
       call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test getting of configuration values,
       !  compare to values set previously
       type(ESMF_<Class>Config) :: config_get
       call ESMF_<Class>GetConfig(<class>, config_get, rc)
+      write(name, *) "ESMF_<Class>GetConfig"
       write(failMsg, *) "rc =", rc, ", config_get =", config_get
       call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test setting of ESMF_<Class> members values
       <value type> :: value_set
       call ESMF_<Class>Set<Value>(<class>, value_set, rc)
+      write(name, *) "ESMF_<Class>Set<Value>"
       write(failMsg, *) "rc =", rc, ", value_set =", value_set
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test getting of ESMF_<Class> members values,
       !   compare to values set previously
       <value type> :: value_get
       call ESMF_<Class>Get<Value>(<class>, value_get, rc)
+      write(name, *) "ESMF_<Class>Get<Value>"
       write(failMsg, *) "rc =", rc, ", value_get =", value_get
       call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
     
       ! test validate method via option string
       character(ESMF_MAXSTR) :: validate_options
       call ESMF_<Class>Validate(<class>, validate_options, rc)
+      write(name, *) "ESMF_<Class>Validate"
       write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test print method via option string
       character(ESMF_MAXSTR) :: print_options
       call ESMF_<Class>Print(<class>, print_options, rc)
+      write(name, *) "ESMF_<Class>Print"
       write(failMsg, *) "rc =", rc, ", print_options =", print_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! test internal dynamic deallocation within statically allocated 
       !   ESMF_<Class>
       call ESMF_<Class>Destruct(<class>, rc)
+      write(name, *) "ESMF_<Class>Destruct"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       failMsg, result, ESMF_SRCLINE)
@@ -124,9 +137,10 @@
       ! test dynamic deallocation of ESMF_<Class>
       !   also tests destructor
       call ESMF_<Class>Destroy(<class>, rc)
+      write(name, *) "ESMF_<Class>Destroy"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
