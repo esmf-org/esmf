@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.6 2004/02/09 18:04:27 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.7 2004/02/23 20:53:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.6 2004/02/09 18:04:27 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.7 2004/02/23 20:53:45 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -400,8 +400,8 @@ ESMC_Machine Machine;
 
     int initialized, numProcs, numArgs;
     // TODO: mpich requires these be passed into init...
-    //extern int argc;
-    //extern char **argv;
+    extern int globalargc;
+    extern char **globalargv;
 
 #ifdef alpha
     long curr_cpu;
@@ -414,13 +414,10 @@ ESMC_Machine Machine;
 #endif
  
 
+    // check to see if some other code has already initialized MPI
     MPI_Initialized(&initialized);
     if (!initialized) {
-      numArgs = 0;
-      MPI_Init(&numArgs, NULL);
-      //MPI_Init(&argc, &argv);
-    } else {
-      // log error?
+      MPI_Init(&globalargc, &globalargv);
     }
 
     // TODO: MPI overrides given nProcs ?
