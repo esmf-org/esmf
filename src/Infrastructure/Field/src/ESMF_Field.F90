@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.113 2004/03/03 17:47:06 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.114 2004/03/05 16:28:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.113 2004/03/03 17:47:06 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.114 2004/03/05 16:28:11 svasquez Exp $'
 
 !==============================================================================
 !
@@ -993,6 +993,7 @@
 !     \item [{[horizRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
+!
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
 !
@@ -1313,20 +1314,20 @@
 !     \item [{[grid]}]
 !           {\tt ESMF\_Grid}.
 !
-!     \item [{[array}]]
+!     \item [{[array]}]
 !           {\tt ESMF\_Array}.
 !
-!     \item [{[datamap}]]
+!     \item [{[datamap]}]
 !           {\tt ESMF\_DataMap}.
 !
-!     \item [{[horizRelloc}]]
+!     \item [{[horizRelloc]}]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
-!     \item [{[vertRelloc}]]
+!     \item [{[vertRelloc]}]
 !           Relative location of data per grid cell/vertex in the vertical grid.
 !
-!     \item [{[name}]]
+!     \item [{[name]}]
 !           Name of queried item.
 !
 !     \item [{[rc]}]
