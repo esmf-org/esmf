@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.22 2003/05/07 14:14:37 cdeluca Exp $
+// $Id: ESMC_TimeInterval.C,v 1.23 2003/05/07 16:18:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.22 2003/05/07 14:14:37 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.23 2003/05/07 16:18:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -280,8 +280,6 @@
 
     if (D != ESMC_NULL_POINTER) {
       *D = this->S / secPerDay;
-      // adjust for negative time (reverse integer division)
-      if (this->S % secPerDay < 0) (*D)--;
     }
     if (d_ != ESMC_NULL_POINTER) {
       *d_ = (double) this->S / (double) secPerDay;
@@ -431,11 +429,11 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalNegAbsVal - Get a Time Interval's negative absolute value
+// !IROUTINE:  ESMC_TimeIntervalNegAbsValue - Get a Time Interval's negative absolute value
 //
 // !INTERFACE:
       ESMC_TimeInterval
-                     ESMC_TimeInterval::ESMC_TimeIntervalNegAbsVal(void) const{
+                  ESMC_TimeInterval::ESMC_TimeIntervalNegAbsValue(void) const {
 //
 // !RETURN VALUE:
 //    ESMC_TimeInterval result
@@ -450,21 +448,21 @@
 // !REQUIREMENTS:  TMG 1.5.8
 
     // initialize result to subject time interval
-    ESMC_TimeInterval negAbsVal = *this;
+    ESMC_TimeInterval negAbsValue = *this;
 
     // check individual components (should be all positive or all negative)
     //   note: can't use abs() or labs() since these will be (long long)
     //         (64-bit) on some platforms
-    if (S  > 0) negAbsVal.S  *= -1;
-    if (Sn > 0) negAbsVal.Sn *= -1;
-    if (YY > 0) negAbsVal.YY *= -1;
-    if (MO > 0) negAbsVal.MO *= -1;
+    if (S  > 0) negAbsValue.S  *= -1;
+    if (Sn > 0) negAbsValue.Sn *= -1;
+    if (YY > 0) negAbsValue.YY *= -1;
+    if (MO > 0) negAbsValue.MO *= -1;
 //   TODO: use when Calendar Intervals implemented
-//    if (D  > 0) negAbsVal.D  *= -1;
+//    if (D  > 0) negAbsValue.D  *= -1;
 
-    return(negAbsVal);
+    return(negAbsValue);
 
- }  // end ESMC_TimeIntervalNegAbsVal
+ }  // end ESMC_TimeIntervalNegAbsValue
 
 //-------------------------------------------------------------------------
 //BOP
@@ -484,9 +482,10 @@
 //    Returns this time interval divided by given time interval as a fractional
 //    quotient.
 //
+//EOP
 // !REQUIREMENTS:  
 
-    ESMC\_Fraction quotient;
+    ESMC_Fraction quotient;
 
     // TODO:
 
@@ -505,13 +504,14 @@
 //    double result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
-                                                //        to divide by
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //        to divide by
 //
 // !DESCRIPTION:
 //    Returns this time interval divided by given time interval as a double
 //    precision quotient.
 //
+//EOP
 // !REQUIREMENTS:  
 
     double quotient;
@@ -544,6 +544,7 @@
 //    Divides a {\tt TimeInterval} by an integer divisor, returns quotient as a
 //    {\tt TimeInterval}
 //
+//EOP
 // !REQUIREMENTS:  
 
     ESMC_TimeInterval quotient;
@@ -575,6 +576,7 @@
 // !DESCRIPTION:
 //    Divides a {\tt TimeInterval} by an integer divisor
 //
+//EOP
 // !REQUIREMENTS:  
 
     // TODO: fractional & calendar interval parts
@@ -605,6 +607,7 @@
 //    Divides a {\tt TimeInterval} by an double divisor, returns quotient as a
 //    {\tt TimeInterval}
 //
+//EOP
 // !REQUIREMENTS:  
 
     ESMC_TimeInterval quotient;
@@ -636,6 +639,7 @@
 // !DESCRIPTION:
 //    Divides a {\tt TimeInterval} by a double precision divisor
 //
+//EOP
 // !REQUIREMENTS:  
 
     // TODO: fractional & calendar interval parts
@@ -666,6 +670,7 @@
 //     Multiply a {\tt TimeInterval} by an integer, return product as a
 //    {\tt TimeInterval}
 //
+//EOP
 // !REQUIREMENTS:  
 
     ESMC_TimeInterval product;
@@ -694,6 +699,7 @@
 // !DESCRIPTION:
 //     Multiply a {\tt TimeInterval} by an integer
 //
+//EOP
 // !REQUIREMENTS:  
 
     // TODO: fractional & calendar interval parts
@@ -721,6 +727,7 @@
 //     Multiply a {\tt TimeInterval} by an fraction, return product as a
 //    {\tt TimeInterval}
 //
+//EOP
 // !REQUIREMENTS:  
 
     ESMC_TimeInterval product;
@@ -747,6 +754,7 @@
 // !DESCRIPTION:
 //     Multiply a {\tt TimeInterval} by a fraction
 //
+//EOP
 // !REQUIREMENTS:  
 
     // TODO: whole, fractional & calendar interval parts
@@ -772,6 +780,7 @@
 //     Multiply a {\tt TimeInterval} by an double precision,
 //     return product as a {\tt TimeInterval}
 //
+//EOP
 // !REQUIREMENTS:  
 
     ESMC_TimeInterval product;
@@ -800,6 +809,7 @@
 // !DESCRIPTION:
 //     Multiply a {\tt TimeInterval} by a double precision
 //
+//EOP
 // !REQUIREMENTS:  
 
     // TODO: fractional & calendar interval parts
@@ -827,6 +837,7 @@
 //    Assign {\tt BaseTime} expression to this time intervals.
 //    Supports inherited operators from {\tt ESMC\_BaseTime}
 //
+//EOP
 // !REQUIREMENTS:  
 
     // invoke base class assignment operator
