@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.14 2003/04/23 21:39:34 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.15 2003/04/25 09:12:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.14 2003/04/23 21:39:34 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.15 2003/04/25 09:12:57 eschwab Exp $'
 
 !==============================================================================
 
@@ -197,7 +197,7 @@
 !     TMG4.1, TMG4.2
 !EOP
     
-!      call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
+      call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
     
       end subroutine ESMF_ClockAddAlarm
 
@@ -230,7 +230,7 @@
 !     TMG4.3
 !EOP
 
-!      call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
+      call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
     
       end subroutine ESMF_ClockGetAlarmList
 
@@ -263,7 +263,7 @@
 !     TMG4.3
 !EOP
 
-!      call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
+      call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
     
       end subroutine ESMF_ClockGetNumAlarms
 
@@ -293,7 +293,7 @@
 !     TMG3.4.5
 !EOP
 
-!      call c_ESMC_ClockSyncToWallClock(clock, rc)
+      call c_ESMC_ClockSyncToWallClock(clock, rc)
     
       end subroutine ESMF_ClockSyncToWallClock
 
