@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.7 2003/04/25 22:07:24 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.8 2003/04/28 22:50:41 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -670,9 +670,9 @@
           if (flag(i-1,j).eq.-1.0) dsiedx2 = (sie(i+1,j)+2.*sieobs-3.*sie(i,j))/dx**2
           if (flag(i,j+1).eq.-1.0) dsiedy2 = (2.*sieobs+sie(i,j-1)-3.*sie(i,j))/dy**2
           if (flag(i,j-1).eq.-1.0) dsiedy2 = (sie(i,j+1)+2.*sieobs-3.*sie(i,j))/dy**2
-          if (flag(i+1,j).eq.10.0) dsiedx2 = (2.*siein2+sie(i-1,j)-3.*sie(i,j))/dx**2
-          if (flag(i-1,j).eq.10.0) dsiedx2 = (sie(i+1,j)+2.*siein2-3.*sie(i,j))/dx**2
-          if (flag(i,j-1).eq.10.0) dsiedy2 = (sie(i,j+1)+2.*siein2-3.*sie(i,j))/dy**2
+!         if (flag(i+1,j).eq.10.0) dsiedx2 = (2.*siein2+sie(i-1,j)-3.*sie(i,j))/dx**2
+!         if (flag(i-1,j).eq.10.0) dsiedx2 = (sie(i+1,j)+2.*siein2-3.*sie(i,j))/dx**2
+!         if (flag(i,j-1).eq.10.0) dsiedy2 = (sie(i,j+1)+2.*siein2-3.*sie(i,j))/dy**2
           if (flag(i-1,j).eq.1.0) dsiedx2 = (sie(i+1,j)+2.*siein-3.*sie(i,j))/dx**2
           if (flag(i+1,j).eq.2.0) dsiedx2 = (sie(i-1,j)-sie(i,j))/dx**2
           if (flag(i,j-1).eq.3.0) dsiedy2 = (sie(i,j+1)-sie(i,j))/dy**2
@@ -800,10 +800,10 @@
             sie(i,j) = sieobs
             rho(i,j) = rho0
           endif
-          if (flag(i,j).eq.10.0) then
-            sie(i,j) = siein2
-            rho(i,j) = rhoin2
-          endif
+!         if (flag(i,j).eq.10.0) then
+!           sie(i,j) = siein2
+!           rho(i,j) = rhoin2
+!         endif
         enddo
       enddo
       call ESMF_FieldHalo(field_rho, status)
@@ -895,8 +895,6 @@
           if (flag(i,j).eq.10.0) then
             u(i,j) = 0.0
             rhou(i,j) = 0.0
-            v(i,j) = vin2
-            rhov(i,j) = rhoin2*vin2
           endif
         enddo
       enddo
