@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.60 2004/07/26 21:02:35 svasquez Exp $
+#  $Id: common.mk,v 1.61 2004/07/28 16:26:39 svasquez Exp $
 #===============================================================================
 #   common.mk
 #
@@ -139,6 +139,7 @@ SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
 
 DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results
+DO_UT_RESULTS.PL	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results.pl -d $(ESMF_DIR) -b $(ESMF_BOPT) -a $(ESMF_ARCH) -c $(ESMF_COMPILER) -p $(ESMF_PREC) -s $(ESMF_SITE)
 DO_UT_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results.bash
 DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results
 DO_EX_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.bash
@@ -578,11 +579,7 @@ tree_run_tests_uni: $(TESTS_RUN_UNI)
 # report statistics on tests
 #
 check_tests:
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_UT_RESULTS) ; \
-        else \
-                $(DO_UT_RESULTS.BASH)  ; \
-        fi; \
+	$(DO_UT_RESULTS.PL) ;\
 
 #-------------------------------------------------------------------------------
 # Targets for building and running examples
