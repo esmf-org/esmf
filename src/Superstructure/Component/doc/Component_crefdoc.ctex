@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.11 2003/05/07 04:34:31 cdeluca Exp $
+% $Id: Component_crefdoc.ctex,v 1.1 2003/05/07 04:34:31 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 \newpage
 #endif
 
-\section{Overview}
+\section{Synopsis}
 #ifdef STANDALONE
 \input{Component_syn}
 #elif defined(CONSTITUENT)
@@ -75,11 +75,11 @@
 \input{../Superstructure/Component/doc/comp_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Design}
 #ifdef STANDALONE
-\input{comp_usage}
+\input{comp_design}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/comp_usage}
+\input{../Superstructure/Component/doc/comp_design}
 #endif
 
 \subsubsection{Restrictions}
@@ -96,8 +96,24 @@
 \input{../Superstructure/Component/doc/ESMF_Comp_fapi}
 #endif
 
+%\section{Component C++ Interface}
+
+%% \subsection{Use and Examples}
+%% #ifdef STANDALONE
+%% \input{ESMC_CompEx_ccapi}
+%% #elif defined(CONSTITUENT)
+%% \input{../Superstructure/Component/doc/ESMC_CompEx_ccapi}
+%% #endif
+
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{ESMC_Comp_chapi}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMC_Comp_chapi}
+%#endif
+
 %%%%%%%%%%%%% Application Class %%%%%%%%%
-\section{Application Component Class}
+\section{Application Component Design}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -106,11 +122,11 @@
 \input{../Superstructure/Component/doc/app_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Design}
 #ifdef STANDALONE
-\input{app_usage}
+\input{app_design}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/app_usage}
+\input{../Superstructure/Component/doc/app_design}
 #endif
 
 \subsubsection{Restrictions}
@@ -127,17 +143,25 @@
 \input{../Superstructure/Component/doc/ESMF_AppComp_fapi}
 #endif
 
-%\subsection{Application F90 Use and Examples}
+\subsection{Application F90 Use and Examples}
+#ifdef STANDALONE
+\input{ESMF_AppMainEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMF_AppMainEx_fapi}
+#endif
+
+%\subsection{Application C++ Use and Examples}
 %#ifdef STANDALONE
-%\input{ESMF_AppMainEx_fapi}
+%\input{ESMC_AppMainEx_ccapi}
 %#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_AppMainEx_fapi}
+%\input{../Superstructure/Component/doc/ESMC_AppMainEx_ccapi}
 %#endif
 
 
 
+
 %%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
-\section{Gridded Component Class}
+\section{Gridded Component Design}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -146,11 +170,11 @@
 \input{../Superstructure/Component/doc/gcomp_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Design}
 #ifdef STANDALONE
-\input{gcomp_usage}
+\input{gcomp_design}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_usage}
+\input{../Superstructure/Component/doc/gcomp_design}
 #endif
 
 \subsubsection{Restrictions}
@@ -167,17 +191,24 @@
 \input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
 #endif
 
-%\subsection{Gridded Component F90 Use and Examples}
+\subsection{Gridded Component F90 Use and Examples}
+#ifdef STANDALONE
+\input{ESMF_GCompEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
+#endif
+
+%\subsection{Gridded Component C++ Use and Examples}
 %#ifdef STANDALONE
-%\input{ESMF_GCompEx_fapi}
+%\input{ESMC_GCompEx_ccapi}
 %#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
+%\input{../Superstructure/Component/doc/ESMC_GCompEx_ccapi}
 %#endif
 
 
 
 %%%%%%%%%%%%% Coupler Class %%%%%%%%%
-\section{Coupler Component Class}
+\section{Coupler Component Design}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -186,11 +217,11 @@
 \input{../Superstructure/Component/doc/cpl_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Design}
 #ifdef STANDALONE
-\input{cpl_usage}
+\input{cpl_design}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_usage}
+\input{../Superstructure/Component/doc/cpl_design}
 #endif
 
 \subsubsection{Restrictions}
@@ -207,18 +238,26 @@
 \input{../Superstructure/Component/doc/ESMF_CplComp_fapi}
 #endif
 
-%\subsection{Coupler F90 Use and Examples}
+\subsection{Coupler F90 Use and Examples}
+#ifdef STANDALONE
+\input{ESMF_CplEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
+#endif
+
+%\subsection{Coupler C++ Use and Examples}
 %#ifdef STANDALONE
-%\input{ESMF_CplEx_fapi}
+%\input{ESMC_CplEx_ccapi}
 %#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
+%\input{../Superstructure/Component/doc/ESMC_CplEx_ccapi}
 %#endif
 
 
 
 
+
 %%%%%%%%%%%%% State Class %%%%%%%%%
-\section{State Class}
+\section{State Design}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -227,11 +266,11 @@
 \input{../Superstructure/Component/doc/state_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Design}
 #ifdef STANDALONE
-\input{state_usage}
+\input{state_design}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/state_usage}
+\input{../Superstructure/Component/doc/state_design}
 #endif
 
 \subsubsection{Restrictions}
@@ -241,12 +280,14 @@
 \input{../Superstructure/Component/doc/state_rest}
 #endif
 
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{ESMF_StateEx_fapi}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/ESMF_StateEx_fapi}
-%#endif
+%\section{State F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{ESMF_StateEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMF_StateEx_fapi}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
@@ -255,10 +296,26 @@
 \input{../Superstructure/Component/doc/ESMF_State_fapi}
 #endif
 
+%\section{State C++ Interface}
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{ESMC_StateEx_ccapi}
+#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
+#endif
+
+%%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{ESMC_State_chapi}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMC_State_chapi}
+%#endif
+
 
 
 %%%%%%%%%%%%% Transform Class %%%%%%%%%
-%\section{Transform Class}
+%\section{Transform Design}
 
 %\subsection{Description}
 %#ifdef STANDALONE
@@ -267,11 +324,11 @@
 %\input{../Superstructure/Component/doc/xform_desc}
 %#endif
 
-%\subsection{Usage}
+%\subsection{Design}
 %#ifdef STANDALONE
-%\input{xform_usage}
+%\input{xform_design}
 %#elif defined(CONSTITUENT)
-%\input{../Superstructure/Component/doc/xform_usage}
+%\input{../Superstructure/Component/doc/xform_design}
 %#endif
 
 %\subsubsection{Restrictions}
@@ -280,6 +337,8 @@
 %#elif defined(CONSTITUENT)
 %\input{../Superstructure/Component/doc/xform_rest}
 %#endif
+
+%\section{Transform F90 Interface}
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE
@@ -293,6 +352,22 @@
 %\input{ESMF_Xform_fapi}
 %#elif defined(CONSTITUENT)
 %\input{../Superstructure/Component/doc/ESMF_Xform_fapi}
+%#endif
+
+%\section{Transform C++ Interface}
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{ESMC_XformEx_ccapi}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMC_XformEx_ccapi}
+%#endif
+
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{ESMC_Xform_chapi}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMC_Xform_chapi}
 %#endif
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.6 2003/04/23 21:39:28 cdeluca Exp $
+! $Id: ESMF_DataMap.F90,v 1.7 2003/05/07 04:34:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -208,7 +208,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.6 2003/04/23 21:39:28 cdeluca Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.7 2003/05/07 04:34:30 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -240,7 +240,7 @@
                                       
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DataMapConstruct - Initialize contents of a DataMap type
 
 ! !INTERFACE:
@@ -254,7 +254,7 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt DataMap}
 !  construction methods.
-!EOP
+!EOPI
 
        end interface 
 
@@ -552,7 +552,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_DataMapConstructNew(datamap, iorder, relloc, rc)
 !
@@ -566,7 +566,7 @@ end function
 !      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
 !      The corresponding internal routine is Destruct.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: internal
 
 !       local vars
@@ -664,7 +664,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_DataMapConstructMatchGrid(datamap, grid, relloc, rc)
 !
@@ -678,7 +678,7 @@ end function
 !      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
 !      The corresponding internal routine is Destruct.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: internal
 
 
@@ -772,7 +772,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       subroutine ESMF_DataMapDestruct(datamap, rc)
 !
@@ -784,7 +784,7 @@ end function
 !      Release all resources except the DataMap datatype itself.
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: internal
 
 !       local vars

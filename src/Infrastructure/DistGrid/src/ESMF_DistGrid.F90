@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.49 2003/04/29 19:30:29 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.50 2003/05/07 04:34:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.49 2003/04/29 19:30:29 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.50 2003/05/07 04:34:30 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -182,7 +182,7 @@
       end interface 
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_DistGridConstruct
 
@@ -194,7 +194,7 @@
 !     This interface provides a single entry point for methods that construct
 !     a complete {\tt DistGrid}.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
@@ -440,7 +440,7 @@
       end subroutine ESMF_DistGridDestroy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridConstructNew - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
@@ -470,7 +470,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status=ESMF_SUCCESS               ! Error status
       logical :: rcpresent=.FALSE.                 ! Return code present
@@ -525,7 +525,7 @@
       end subroutine ESMF_DistGridConstructNew
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
@@ -570,7 +570,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
@@ -666,7 +666,7 @@
       end subroutine ESMF_DistGridConstructInternal
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridDestruct - Free any DistGrid memory allocated internally
 
 ! !INTERFACE:
@@ -691,7 +691,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present

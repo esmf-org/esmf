@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.5 2003/04/23 21:39:28 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.6 2003/05/07 04:34:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -194,7 +194,7 @@
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleConstruct - Construct the internals of a new Bundle
 !
 ! !INTERFACE:
@@ -207,7 +207,7 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 !  types of BundleConstruct functions.
-!EOP
+!EOPI
       end interface
 
 !------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleConstructNew - Construct the internals of a Bundle
 !
 ! !INTERFACE:
@@ -578,7 +578,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
       
       integer :: i                                ! temp var
       integer :: status                           ! Error status
@@ -615,7 +615,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleConstructNoFields - Construct the internals of a Bundle
 !
 ! !INTERFACE:
@@ -645,7 +645,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
       
       integer :: status                            ! Error status
       logical :: rcpresent                         ! Return code present
@@ -689,7 +689,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleDestruct - Free contents of a Bundle 
 !
 ! !INTERFACE:
@@ -711,7 +711,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 
       logical :: rcpresent                        ! Return code present
 

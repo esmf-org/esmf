@@ -22,7 +22,7 @@
 !!!#include "ESMF_Macros.inc"
 !------------------------------------------------------------------------------
 !
-!BOP
+!BOPI
 ! !MODULE: ESMF_ConfigMod - Implements ESMF configuration management
 !
 !
@@ -208,7 +208,7 @@
 ! !PUBLIC TYPES:
 !------------------------------------------------------------------------------
        public :: ESMF_Config     ! WHY DO WE NEED IT PUBLIC?
-!EOP
+!EOPI
 
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
@@ -276,9 +276,6 @@
 !
 ! !DESCRIPTION: Create ESMF configuration for a given layout.
 !
-! !REVISION HISTORY:
-! 	7apr2003  Zaslavsky  initial interface/prolog
-!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigCreate'
       integer iret
@@ -317,9 +314,6 @@
 !
 ! !DESCRIPTION: Destroys an ESMF configuration.
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigDestroy'
       integer :: ier, iret
@@ -363,9 +357,6 @@
 !
 ! !DESCRIPTION: Resource file fname is loaded is loaded into memory
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
 
       character(len=*),parameter :: myname_='ESMF_ConfigLoadFile'
@@ -427,9 +418,6 @@
 !
 ! !DESCRIPTION: Resource file fname is loaded is loaded into memory
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
       integer         lu, ios, loop, ls, ptr, iret
       character*256   line
@@ -545,9 +533,6 @@
 !               line labels by : and tabel labels by ::..
 !
 !
-! !REVISION HISTORY:
-!    7anp2003  Zaslavsky  initial interface/prolog
-!   11apr2003  Zaslavsky  Coded using DAO code written by da Silva   
 !EOP -------------------------------------------------------------------
 	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
 
@@ -608,9 +593,6 @@
 
       integer, intent(out), optional:: rc        ! Error code
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      11apr2003  Zaslavsky  Coded using DAO code written by da Silva 
 !EOP -------------------------------------------------------------------
       integer :: i, j, iret
       logical :: local_tend
@@ -674,9 +656,6 @@
       
       integer, intent(out), optional         :: rc       ! Error code
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      11apr2003  Zaslavsky  Coded using DAO code written by da Silva   
 !EOP -------------------------------------------------------------------
       character*1   ch
       integer       ib, ie, iret
@@ -755,9 +734,6 @@
 !
 ! !DESCRIPTION: Gets a floating point number
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
 !
       integer:: iret
@@ -820,9 +796,6 @@
 !
 ! !DESCRIPTION: Gets a floating point array of a given size.
 !
-! !REVISION HISTORY:
-! 25anp2003  Zaslavsky  initial interface/prolog
-!      25apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
       integer iret, i 
@@ -889,9 +862,6 @@
 !
 ! !DESCRIPTION: Gets an integer number
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character*256 string
       real*8        x
@@ -960,9 +930,6 @@
 !
 ! !DESCRIPTION: Gets an integer array of given size.
 !
-! !REVISION HISTORY:
-! 25anp2003  Zaslavsky  initial interface/prolog
-!      25apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
       integer iret, i 
@@ -1030,9 +997,6 @@
 ! !DESCRIPTION: Gets a character
 !
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character ch
       character*256 string
@@ -1093,9 +1057,6 @@
 ! !DESCRIPTION: Gets the length of the line in words by counting words
 !               disregarding types
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      22apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character*256 string
       integer iret
@@ -1156,9 +1117,6 @@
 ! !DESCRIPTION: Gets number of lines in the table and max number of 
 !               words in a table line
 !
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      23apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       integer n, iret
       logical tend
@@ -1223,9 +1181,6 @@
 !
       character(len=*), intent(in) :: string, tok
 !
-! !REVISION HISTORY:
-!
-!  2001Apr25   G. Gaspari   Original code.
 !-------------------------------------------------------------------------
       integer idx, i, n, nlen, lt, ibot, itop
       integer, parameter :: MAXLEN = 32767   ! max size of signed 2-byte integer
@@ -1274,9 +1229,6 @@
 !     character*256 string    ! the modified string
 !
 !
-! !REVISION HISTORY: 
-!
-!  19Jun96   da Silva   Original code.
 !-------------------------------------------------------------------------
 
       integer     ib, i
@@ -1378,16 +1330,6 @@
 	  implicit none
 	  integer :: luavail	! result
 
-! !REVISION HISTORY:
-! 	23Apr98 - Jing Guo <guo@thunder> - new prototype/prolog/code
-!			- with additional unit constraints for SunOS.
-!
-! 	: Jing Guo, [09-Oct-96]
-! 		+ Checking also Cray assign() attributes, with some
-! 		  changes to the code.  See also other routines.
-!
-! 	: Jing Guo, [01-Apr-94]
-! 		+ Initial code.
 !-----------------------------------------------------------------------
 
   character(len=*),parameter :: myname_=myname//'::luavail'
@@ -1461,11 +1403,6 @@ end function luavail
       character(len=*),intent(in) :: status ! the value for STATUS=<>
       integer,         intent(out):: ier    ! the status
 
-
-! !REVISION HISTORY:
-!
-!	02Feb95 - Jing G. - First version included in PSAS and libpsas.a
-! 	09Oct96 - J. Guo  - modified to allow assign() call under UNICOS
 !-----------------------------------------------------------------------
 !
 
@@ -1534,8 +1471,6 @@ end function luavail
       integer,                    intent(out) :: ier    ! the status
       Character(len=*), optional, intent(In)  :: status ! keep/delete
 
-! !REVISION HISTORY:
-! 	09Oct96 - J. Guo	- (to do)
 !-----------------------------------------------------------------------
           character(len=*), parameter :: myname_ = myname//'::clsitext'
           Character(Len=6) :: status_

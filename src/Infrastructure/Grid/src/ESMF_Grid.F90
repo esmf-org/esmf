@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.47 2003/04/29 19:33:13 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.48 2003/05/07 04:34:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 #include "ESMF_Grid.h"
 #include "ESMF_Macros.inc"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_GridMod - Grid class
 !
 ! !DESCRIPTION:
@@ -202,12 +202,12 @@
       ESMF_CoordIndex_Local           =  1, &! uses local indexing
       ESMF_CoordIndex_Global          =  2   ! uses global indexing
 
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.47 2003/04/29 19:33:13 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.48 2003/05/07 04:34:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -978,7 +978,7 @@
       end subroutine ESMF_GridDestroy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridConstructInternal - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
@@ -1052,7 +1052,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: TODO
-!EOP
+!EOPI
 
       character(len=4) :: physgrid_name       !
       integer :: physgrid_id                  ! integer identifier for physgrid
@@ -1121,7 +1121,7 @@
       end subroutine ESMF_GridConstructInternal
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridConstructNew - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
@@ -1151,7 +1151,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: TODO
-!EOP
+!EOPI
 
       integer :: status=ESMF_SUCCESS               ! Error status
       logical :: rcpresent=.FALSE.                 ! Return code present
@@ -1192,7 +1192,7 @@
       end subroutine ESMF_GridConstructNew
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridDestruct - Free any Grid memory allocated internally
 
 ! !INTERFACE:
@@ -1217,7 +1217,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status                       ! Error status
@@ -1263,7 +1263,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Adds a physgrid to a grid.
+!     Adds a {\tt PhysGrid} to a {\tt Grid}.
 !
 !     The arguments are:
 !     \begin{description}

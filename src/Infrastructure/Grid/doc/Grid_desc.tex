@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.1 2002/11/20 22:06:01 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.2 2003/05/07 04:34:30 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,10 @@
 
 % <Describe class function and relation to other classes.>
 
-The Grid class aggregates the PhysGrid class and the DistGrid class.
+
+Each Grid contains a Distributed Grid and a Physical Grid. The Physical Grid
+maintains information about the global coordinates. In general this data is
+described implicitly by specifying the grid type and the corresponding
+parameters. However it is possible that the Physical Grid must be completely
+enumerated, perhaps in the case of assimilated data or unstructured data. The
+Distributed Grid defines an index space that corresponds to cells in the Physical Grid and is decomposed among DEs in a DELayout.

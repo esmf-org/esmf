@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.25 2003/05/02 16:18:43 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.26 2003/05/07 04:34:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.25 2003/05/02 16:18:43 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.26 2003/05/07 04:34:30 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -262,7 +262,7 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstruct - Construct the internals of a new Field
 !
 ! !INTERFACE:
@@ -276,11 +276,11 @@
 !     This interface provides an entry point for methods that construct a 
 !     complete {\tt Field}.
  
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructNoData - Construct the internals of a new empty Field
 !
 ! !INTERFACE:
@@ -295,7 +295,7 @@
 !     This interface provides an entry point for {\tt Field} construction 
 !     methods that do not allocate or reference any associated data.
  
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
@@ -924,7 +924,7 @@
 ! This section includes all the Field Construct and Destruct methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructNew - Construct the internals of a Field
 
 ! !INTERFACE:
@@ -971,7 +971,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1026,7 +1026,7 @@
       end subroutine ESMF_FieldConstructNew
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructNewArray - Construct the internals of a Field
 
 ! !INTERFACE:
@@ -1069,7 +1069,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1109,7 +1109,7 @@
       end subroutine ESMF_FieldConstructNewArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructNoBuffer - Construct a Field with no associated buffer
 
 ! !INTERFACE:
@@ -1152,7 +1152,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1208,7 +1208,7 @@
       end subroutine ESMF_FieldConstructNoBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructNoArray - Construct a Field with no associated Array
 
 ! !INTERFACE:
@@ -1247,7 +1247,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1287,7 +1287,7 @@
       end subroutine ESMF_FieldConstructNoArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
 !
 ! !INTERFACE:
@@ -1305,7 +1305,7 @@
 !     and {\tt Data}.
 !
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
-!EOP
+!EOPI
 
       ! Local variables
       integer :: status                           ! Error status
@@ -1346,7 +1346,7 @@
       end subroutine ESMF_FieldConstructNoGridArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_FieldDestruct - Free any Field memory allocated internally
 !
 ! !INTERFACE:
@@ -1368,7 +1368,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS: 
-!EOP
+!EOPI
 
       logical :: rcpresent                          ! Return code present
 

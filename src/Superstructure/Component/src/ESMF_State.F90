@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.40 2003/04/30 21:12:48 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.41 2003/05/07 04:34:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.40 2003/04/30 21:12:48 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.41 2003/05/07 04:34:31 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -610,7 +610,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateConstruct -- Construct a new State
 
 ! !INTERFACE:
@@ -677,7 +677,7 @@ end function
 !
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 
@@ -881,7 +881,7 @@ end function
         end subroutine ESMF_StateConstructEmpty
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateDestruct -- Internal routine to deallocate space
 !
 ! !INTERFACE:
@@ -905,7 +905,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !       local vars

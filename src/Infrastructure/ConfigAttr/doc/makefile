@@ -3,11 +3,14 @@ All: alldoc
 
 LOCDIR = src/Infrastructure/ConfigAttr/doc
 
-DVIFILES  = 
+DVIFILES  =	${ESMC_DOCDIR}/Config_reqdoc.dvi \
+		${ESMC_DOCDIR}/Config_refdoc.dvi
+
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
-HTMLFILES =
+HTMLFILES =	${ESMC_DOCDIR}/Config_reqdoc \
+		${ESMC_DOCDIR}/Config_refdoc
 
 #
 # Tex Files to make

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.2 2003/05/03 03:58:23 pwjones Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 ! INCLUDES
 #include <ESMF_Macros.inc>
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_RegridBilinearMod - Bilinear interpolation
 !
 ! !DESCRIPTION:
@@ -50,12 +50,12 @@
                                         ! for a bilinear regridding
 
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.2 2003/05/03 03:58:23 pwjones Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -87,8 +87,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridConstructFromFieldBilinear - Constructs bilinear Regrid structure for a field pair
+! !IROUTINE: ESMF_RegridConstructFromFieldBilinear - Constructs bilinear Regrid structure for a field pair
 
 ! !INTERFACE:
       function ESMF_RegridConstructFromFieldBilinear(src_field, dst_field, &
@@ -605,8 +604,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridConstructFromBundleBilinear - Constructs bilinear Regrid structure for a bundle pair
+! !IROUTINE: ESMF_RegridConstructFromBundleBilinear - Constructs bilinear Regrid structure for a bundle pair
 
 ! !INTERFACE:
       function ESMF_RegridConstructFromBundleBilinear(src_bundle, dst_bundle, &

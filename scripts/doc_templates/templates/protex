@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.12 2003/02/27 18:56:35 rstaufer Exp $
+#  $Id: protex,v 1.13 2003/05/07 04:34:28 cdeluca Exp $
 #
 #BOP
 #
@@ -148,7 +148,6 @@ Arg:
             "!INPUT/OUTPUT PARAMETERS:",
             "!OUTPUT PARAMETERS:",
             "!RETURN VALUE:",
-            "!REQUIREMENTS:",
             "!REVISION HISTORY:",
             "!BUGS:",
             "!SEE ALSO:",

@@ -40,12 +40,12 @@
 \newpage
 #endif
 
-%\section{Synopsis}
-%#ifdef STANDALONE
-%\input{DistGrid_syn}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_syn}
-%#endif
+\section{Synopsis}
+#ifdef STANDALONE
+\input{DistGrid_syn}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_syn}
+#endif
 
 %\section{Algorithmic Description}
 #ifdef STANDALONE
@@ -54,12 +54,12 @@
 %\input{../Infrastructure/DistGrid/doc/DistGrid_alg}
 #endif
 
-%\section{Object Model}
-%#ifdef STANDALONE
-%\input{DistGrid_obj}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_obj}
-%#endif
+\section{Object Model}
+#ifdef STANDALONE
+\input{DistGrid_obj}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_obj}
+#endif
 
 % \section{Global Parameters and Definitions}
 % #ifdef STANDALONE
@@ -68,7 +68,7 @@
 % \input{../Infrastructure/DistGrid/doc/DistGrid_param}
 % #endif
 
-\section{DistGrid Class}
+\section{DistGrid Design}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -77,49 +77,76 @@
 \input{../Infrastructure/DistGrid/doc/DistGrid_desc}
 #endif
 
-%\subsection{Design}
-%#ifdef STANDALONE
-%\input{DistGrid_design}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_design}
-%#endif
+\subsection{Design}
+#ifdef STANDALONE
+\input{DistGrid_design}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_design}
+#endif
 
-%\subsubsection{DistGrid Definition}
-%#ifdef STANDALONE
-%\input{DistGrid_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_def}
-%#endif
+\subsubsection{DistGrid Definition}
+#ifdef STANDALONE
+\input{DistGrid_def}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_def}
+#endif
 
-%\subsubsection{Restrictions}
-%#ifdef STANDALONE
-%\input{DistGrid_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_rest}
-%#endif
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{DistGrid_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_rest}
+#endif
 
-%\section{DistGrid F90 Interface}
+\section{DistGrid F90 Interface}
 
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{DistGrid_fex}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_fex}
-%#endif
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{DistGrid_fex}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_fex}
+#endif
 
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{DistGrid_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/DistGrid/doc/DistGrid_fparam}
-%#endif
+\subsection{Parameters and Definitions}
+#ifdef STANDALONE
+\input{DistGrid_fparam}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/DistGrid_fparam}
+#endif
 
-\subsection{Class API}
+%\subsection{DistGrid API}
 #ifdef STANDALONE
 \input{ESMF_DistGrid_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/DistGrid/doc/ESMF_DistGrid_fapi}
 #endif
+
+%\section{DistGrid C++ Interface}
+
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
+%\input{DistGrid_ccex}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/DistGrid/doc/DistGrid_ccex}
+%#endif
+
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{DistGrid_ccparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/DistGrid/doc/DistGrid_ccparam}
+%#endif
+
+% %\subsection{Class API}
+% #ifdef STANDALONE
+% \input{DistGrid_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/DistGrid/doc/DistGrid_ccapi}
+% #endif
+
+%\section{<Name2> Design}
+
+% Subsections same as DistGrid Design ...
 
 #ifdef STANDALONE
 \section{Review Status}

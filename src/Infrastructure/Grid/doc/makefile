@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/04/30 22:23:25 cdeluca Exp $ 
+# $Id: makefile,v 1.10 2003/05/07 04:34:30 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -54,7 +54,7 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Grid_desdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Grid_desdoc.tex
+CLEANDIRS   = Grid_desdoc Grid_reqdoc Grid_refdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Grid_desdoc.tex Grid_reqdoc.tex Grid_refdoc.tex
 CLOBBERDIRS =
 

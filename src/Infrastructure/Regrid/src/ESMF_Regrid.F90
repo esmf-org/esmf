@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.12 2003/05/03 03:58:23 pwjones Exp $
+! $Id: ESMF_Regrid.F90,v 1.13 2003/05/07 04:34:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
 ! INCLUDES
 #include <ESMF_Macros.inc>
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_RegridMod - Regridding and interpolation
 !
 ! !DESCRIPTION:
@@ -121,11 +121,11 @@
          ESMF_RegridMethod_User     = 90   ! user-supplied method
 
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.12 2003/05/03 03:58:23 pwjones Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.13 2003/05/07 04:34:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -178,8 +178,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridCreateFromField - Creates Regrid structure for a field pair
+! !IROUTINE: ESMF_RegridCreateFromField - Creates Regrid structure for a field pair
 
 ! !INTERFACE:
       function ESMF_RegridCreateFromField(src_field, dst_field, method, name, rc)
@@ -329,8 +328,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridCreateFromBundle - Creates Regrid structure for a bundle pair
+! !IROUTINE: ESMF_RegridCreateFromBundle - Creates Regrid structure for a bundle pair
 
 ! !INTERFACE:
       function ESMF_RegridCreateFromBundle(src_bundle, dst_bundle, method, name, rc)
@@ -486,8 +484,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridCreateFromRegrid - Creates Regrid structure from existing regrid
+! !IROUTINE: ESMF_RegridCreateFromRegrid - Creates Regrid structure from existing regrid
 
 ! !INTERFACE:
       function ESMF_RegridCreateFromRegrid(old_regrid, method, &
@@ -579,8 +576,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridRunField - Performs a regridding between two fields
+! !IROUTINE: ESMF_RegridRunField - Performs a regridding between two fields
 
 ! !INTERFACE:
       subroutine ESMF_RegridRunField(src_field, dst_field, regrid, rc)
@@ -635,8 +631,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridRunBundle - Performs a regridding between two bundles of fields
+! !IROUTINE: ESMF_RegridRunBundle - Performs a regridding between two bundles of fields
 
 ! !INTERFACE:
       subroutine ESMF_RegridRunBundle(src_bundle, dst_bundle, regrid, rc)
@@ -696,8 +691,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridGetConfig - Get configuration information from a Regrid
+! !IROUTINE: ESMF_RegridGetConfig - Get configuration information from a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetConfig(regrid, config, rc)
@@ -730,8 +724,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridSetConfig - Set configuration information for a Regrid
+! !IROUTINE: ESMF_RegridSetConfig - Set configuration information for a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridSetConfig(regrid, config, rc)
@@ -765,8 +758,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridGet - Get an attribute of a Regrid
+! !IROUTINE: ESMF_RegridGet - Get an attribute of a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridGet(regrid, name,            &
@@ -812,7 +804,7 @@
 !          with this regrid. 
 !     \item[[method]]
 !          Integer enum of method used in this regrid.
-!     \item[[num_links]]
+!     \item[[num\_links]]
 !          Number of unique links between grids for this regrid.
 !     \item[[gather]]
 !          Route used to gather non-local information to perform regrid.
@@ -875,8 +867,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridDestroy - Free all resources associated with a Regrid
+! !IROUTINE: ESMF_RegridDestroy - Free all resources associated with a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestroy(regrid, rc)
@@ -887,7 +878,7 @@
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt Regrid} object previously allocated
-!     via an {\tt ESMF_RegridCreate routine}.
+!     via an {\tt ESMF\_RegridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -926,8 +917,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridValidate - Check internal consistency of a Regrid
+! !IROUTINE: ESMF_RegridValidate - Check internal consistency of a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridValidate(regrid, opt, rc)
@@ -960,8 +950,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridPrint - Print the contents of a Regrid
+! !IROUTINE: ESMF_RegridPrint - Print the contents of a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridPrint(regrid, opt, rc)

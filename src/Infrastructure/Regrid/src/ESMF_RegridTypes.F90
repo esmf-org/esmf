@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.2 2003/05/03 03:58:23 pwjones Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 ! INCLUDES
 #include <ESMF_Macros.inc>
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_RegridTypesMod - Regridding and interpolation data types
 !
 ! !DESCRIPTION:
@@ -103,11 +103,11 @@
     public ESMF_RegridDestruct     ! deallocate memory associated with a regrid
 
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.2 2003/05/03 03:58:23 pwjones Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -127,8 +127,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridAddLink - Adds address pair and regrid weight to regrid
+! !IROUTINE: ESMF_RegridAddLink - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridAddLink(regrid, src_add, dst_add, weights, rc)
@@ -199,8 +198,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridTypeGet - Get attribute of a Regrid type
+! !IROUTINE: ESMF_RegridTypeGet - Get attribute of a Regrid type
 
 ! !INTERFACE:
       subroutine ESMF_RegridTypeGet(regrid, name,            &
@@ -246,7 +244,7 @@
 !          with this regrid. 
 !     \item[[method]]
 !          Integer enum of method used in this regrid.
-!     \item[[num_links]]
+!     \item[[num\_links]]
 !          Number of unique links between grids for this regrid.
 !     \item[[gather]]
 !          Route used to gather non-local information to perform regrid.
@@ -315,8 +313,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridTypeSet - Set attribute of a Regrid
+! !IROUTINE: ESMF_RegridTypeSet - Set attribute of a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridTypeSet(regrid, name,            &
@@ -361,7 +358,7 @@
 !          with this regrid. 
 !     \item[[method]]
 !          Integer enum of method used in this regrid.
-!     \item[[num_links]]
+!     \item[[num\_links]]
 !          Number of unique links between grids for this regrid.
 !     \item[[gather]]
 !          Route used to gather non-local information to perform regrid.
@@ -403,8 +400,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridConstructEmpty - Create empty regrid structure
+! !IROUTINE: ESMF_RegridConstructEmpty - Create empty regrid structure
 
 ! !INTERFACE:
       subroutine ESMF_RegridConstructEmpty(regrid, rc)
@@ -452,8 +448,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_RegridDestruct - Free any Regrid memory allocated internally
+! !IROUTINE: ESMF_RegridDestruct - Free any Regrid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestruct(regrid, rc)

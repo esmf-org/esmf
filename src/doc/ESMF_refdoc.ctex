@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.21 2003/04/30 23:22:52 flanigan Exp $
+% $Id: ESMF_refdoc.ctex,v 1.22 2003/05/07 04:34:32 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -8,11 +8,12 @@
 \usepackage{graphicx}
 \usepackage[T1]{fontenc}
 
-\newcommand{\docmttype}{Reference}
+\newcommand{\docmttype}{Reference Manual}
 \newcommand{\req}[1]{\section{\hspace{.2in}#1}}
 \newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
 \newcommand{\mytitle}{\longname \docmttype ~~}
+\newcommand{\myversion}{Version 1.0}
 
 \newenvironment
 {reqlist}
@@ -44,6 +45,14 @@
 \tableofcontents
 
 \newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{ESMF Overview}
+\end{htmlonly}
+\part{ESMF Overview}
+
+\label{part:ESMFOverview}
+
+\newpage
 %\section{Introduction}
 \input{ESMF_refintro}
 
@@ -52,10 +61,11 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Superstructure: Components}
+\addcontentsline{toc}{part}{Superstructure}
 \end{htmlonly}
-\part{Superstructure: Components}
-\label{part:Superstructure:_Components}
+\part{Superstructure}
+
+\label{part:Superstructure}
 
 #include "../Superstructure/Component/doc/Component_refdoc.ctex"
 
@@ -63,164 +73,52 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
+\addcontentsline{toc}{part}{Infrastructure:  Fields and Grids}
 \end{htmlonly}
-\part{Infrastructure Fields and Grids: Fields}
+\part{Infrastructure:  Fields and Grids}
+
+\section{Overview}
+\input{ESMF_fieldgridoverview.tex}
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
-%====================================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Grids}
-
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
-
-%====================================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Physical Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
 
 #include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
 
-%====================================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Distributed Grids}
-\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
-
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
-%====================================================================================================
+#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
-%\end{htmlonly}
-%\part{Infrastructure Fields and Grids: Regridding}
-%\label{part:Infrastructure_Fields_and_Grids:_Regridding}
-
-%include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
-
-%====================================================================================================
-
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Base}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Base}
-%\label{part:Infrastructure_Utilities:_Base}
-
-%#include "../Infrastructure/TimeMgr/doc/Base_refdoc.ctex"
 
 %====================================================================================================
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
+\addcontentsline{toc}{part}{Infrastructure:  Utilities}
 \end{htmlonly}
-\part{Infrastructure Utilities: Time Management}
-\label{part:Infrastructure_Utilities:_Time_Management}
+\part{Infrastructure:  Utilities}
+
+\section{Overview}
+\input{ESMF_utiloverview}
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
-%====================================================================================================
-
-% \newpage
-% \begin{htmlonly}
-% \addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
-% \end{htmlonly}
-% \part{Infrastructure Utilities: Communication and Memory Kernels}
-% \label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
-
-% #include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
-
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Configuration Atrributes}
-%\label{part:Infrastructure_Utilities:_Configuration_Attributes}
-
-
-% replace % with # below to uncomment
-%include "../Infrastructure/ConfigAttr/doc/ConfigAttr_refdoc.ctex"
-
-
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Performance Profiling}
-%\label{part:Infrastructure_Utilities:_Performance_Profiling}
-
-%include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
-
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Log}
-%\label{part:Infrastructure_Utilities:_Log}
-
-% #include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
-
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Machine}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Machine}
-%\label{part:Infrastructure_Utilities:_Machine}
-
-%include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
-
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Route}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Route}
-%\label{part:Infrastructure_Utilities:_Route}
-
-%include "../Infrastructure/Route/doc/Route_refdoc.ctex"
-
-
-%====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Data}
-\end{htmlonly}
-\part{Infrastructure Utilities: Data}
-\label{part:Infrastructure_Utilities:_Data}
-
 #include "../Infrastructure/Data/doc/Data_refdoc.ctex"
 
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: I/O}
-%\label{part:Infrastructure Utilities:_I/O}
+#include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
 
-%include "../Infrastructure/IO/doc/IO_refdoc.ctex"
+#include "../Infrastructure/ConfigAttr/doc/Config_refdoc.ctex"
 
-%====================================================================================================
+%#include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
+
+%#include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
+
+%#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
+
+%#include "../Infrastructure/Route/doc/Route_refdoc.ctex"
+
+%#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
 \end{document}
 
