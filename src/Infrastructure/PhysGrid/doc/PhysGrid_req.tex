@@ -1,5 +1,6 @@
-% $Id: PhysGrid_req.tex,v 1.7 2002/04/23 15:13:48 cnh Exp $
-%===============================================================================
+% $Id: PhysGrid_req.tex,v 1.8 2002/04/24 20:43:30 cnh Exp $
+m%titude
+===============================================================================
 \req{Initialization of a Physical Grids}
 \begin{reqlist}
 {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
@@ -20,90 +21,204 @@ valid (i.e. non-error or exception generating) physical grid operations on data 
 does not have a realizable physical grid, for example linear algebra space data values.
 \end{reqlist}
 
+\sreq{Initialization of rotated regions}
+It should be possible to create a physical grid composed of distinct regions that
+are rotated with respect to one another.
+Each region can be rotated by 0, 90, 180, or 270 degrees with respect
+to its neighbor(s) at each interface.
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
+{\bf Notes:}
+This adds a dimension to the PhysGrid index space that allows a limited
+form of rotation between grid locations. The tripolar and cube-sphere
+grids can take advantage of this capability.
+\end{reqlist}
+
 \sreq{It should be possible to Set a Physical Grid using Numerical Values}
 Numerical initialization of a Physical grid is specified through a combination
 of grid cell locations, grid cell areas and grid cell volumes.
-Mechanisms shall be provided to specify grids numerically i.e.
+Mechanisms shall be provided to specify grids numerically
 using numerical values pre-defined by component code (i.e. user code).
 The values required will be dependent on 
 the component application, the details of the grid being represented
 and on the Regridding requirements associted with the component. 
+The mechanisms will need to support grids that are staggered in both
+the horizontal (e.g. Arakawa B,C,D,E type grids) and vertical (e.g
+Charney-Phillips and Lorenz style vertical grids). Support for different
+conventions for the index origin is also required. Index origins
+in the horizontal can be south and west based, north and east based.
+Index origins in the vertical could either orient
+so that the origin is at the top of the domain (as defined by
+the direction of gravity) or so that the origin is at the
+bottom of the domain.
 \begin{reqlist}
 {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
 \end{reqlist}
 
-\ssreq{Mechanisms should be provided for components to set grid cell locations}
+\ssreq{When setting using Numerical Values the caller can select copying of values or storing a reference.}
 \begin{reqlist}
 {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ 
-{\bf Notes: Locations in a mapping are to be given in standard, S.I., units as follows.
-For horizontal locations, coordinates of meters (Cartesian domain), degrees latitude
-and degrees longitude (speherical polar domain) and meters and degrees (Cylindrical
-coordinates} are used.
+{\bf Notes: It would be easier if there were only one mode - would it be 
+practical to have just copying?}
+\end{reqlist}
+
+\ssreq{Mechanisms should be provided for components to set grid cell locations}
+\label{pg_reqdoc:cell_loc_init}
+\begin{reqlist}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ 
+{\bf Notes: Locations in a Physical Grid are to be given in standard, S.I., units
+as follows. For true physical quantities the horizontal locations, 
+coordinates of meters (Cartesian domain), degrees latitude and degrees 
+longitude (spherical polar domain) and meters and degrees (Cylindrical coordinates} 
+are used. For vertical locations, coordinates can be given in units of pressure 
+and normalized pressure, isotherms and isopyncnals and as a user
+interpretable proxy. This latter vertical coordinate allows fields to be 
+constructed that have a ``vertical'' index correpsonding to a location
+in sattelite channel space. For spectral information the physical location 
+values, $\underline{p}$, correspond to the wave numbers associated with the 
+index, $\uderline{i}$.
 \end{reqlist}
 
 \ssreq{Initialization of grid cell areas with vertex based numerical values}
 \begin{reqlist}
-{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+A list of vertices can be used to specify horizontal and vertical areas associated
+with a grid. Vertices will be specified in either clockwise or anti-clockwise form.
+The vertex locations can use units as described in \ref{pg_reqdoc:cell_loc_init}.
+}
 \end{reqlist}
 
 \ssreq{Initialization of grid cell areas with area based numerical values}
 \begin{reqlist}
-{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+The units used to specify grid areas directly are square meters in the horizontal
+and the product of meters and the vertical coordinate for vertically oriented 
+areas.
+}
 \end{reqlist}
 
-\ssreq{Initialization of grid cell volumes with vertex based numerical values}
 \ssreq{Initialization of grid cell volumes with area based numerical values}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+The units used to specify grid volumes directly are square meters multiplied
+by a vertical coordinate unit.  }
 \ssreq{Initialization of grid cell volumes with fractional extent}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+The units used to specify grid volumes directly are square meters multiplied
+by a vertical coordinate unit ( see \ref{pg_reqdoc:cell_loc_init}).  }
 \ssreq{Initialization from Internal Application Numerical Values}
-It should be possible to initialize a physical grid from
-a set of numerical values that are calculated by a component application.
+The source for the numerical values used to initialize a Physical Grid can be 
+component code.
 \ssreq{Initialization from File}
+The source for the numerical values used to initialize a Physical Grid can be 
+a file.
+\sreq{Initialization from a Functional Form}
+For some cases it is more appropriate to use a functional
+form for the Physical Grid $\underline{i} \mapsto \underline{p}$ mapping.
 
-\sreq{Initialization by a Function}
-\ssreq{Spectral Spherical Harmonics Code}
-\ssreq{Spectral FFT Code}
-\ssreq{Grid Point Cartesian Code}
-\ssreq{Grid Point Spherical Polar Code}
-\ssreq{Grid Point User Supplied Function}
-\ssreq{Spectral User Supplied Function}
+\ssreq{Initialization from predefined functional forms for Spectral Spherical Harmonics Grids}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+A spectral spherical harmonics grid can be defined by a simple interface
+that just requires specifying the wave number truncation in two dimensions.
+At a minimum, rhomboidal and triangular truncations will be supported.
+}
+\ssreq{Initialization from predefined functional forms for Spectral FFT Grids}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+A spectral FFT grid can be defined from a function which is given
+wave number truncation in X and Y.
+}
+\ssreq{Initialization from predefined functional forms for Grid Point Cartesian Grids}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+A grid-point cartesian grid can be defined from a function which is given
+a set of grid spacings independent in latitude, longitude and the vertical. The 
+spacings can be an array of numbers or an constant for each axis.
+A scale factor function for each axis can also be defined 
+(e.g. $\delta \lambda_{\theta} = \delta \lambda_{\theta=0}\cos^{2}(\theta)$) to support
+constant aspect ratio grids or deep atmosphere grids.
+}
+\ssreq{Initialization from predefined functional forms for Grid Point Spherical Polar Grids}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+A grid-point spherical polar grid can be defined from a function which is given
+a set of grid spacings independent in latitude, logitude and the vertical. The spacings can be an array
+of numbers or a constant for each axis. Additionally a minimum latitude 
+can be specified and an origin meridian.
+}
+\ssreq{Initialization from functional forms for User Supplied Function}
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+It should be possible to provide a set of functions that will provide 
+approriate grid information when queried. The interface for these functions will be 
+user specified.
+}
 
-\sreq{Modification Tracking}
+\sreq{Modification Tracking is Required}
+It should be possible to determine when a Physical Grid has been modified.
+{\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
+Communication and setup costs can be ammortized, especially in a component
+doing Regridding, if it is possible to determine that a Physical Grid is
+unmodified from a previous use.
+This could be implemented through a montonically incresing counter
+that is incremented every time a modification is made. However, see section
+on parallelism for notes on issues of behavior in a distributed environment.
+}
 
 \req{Physical Grid Attributes and Queries}
-\sreq{X-axis index labeling}
-\sreq{Y-axis index labeling}
-\sreq{R-axis index labeling}
+\sreq{Horizontal x-axis index labeling}
+A standard for labeling the X-axis is required.
+\sreq{Horizontal y-axis index labeling}
+A standard for labeling the y-axis is required.
+\sreq{Vertical index labeling}
+A standard for labeling the vertical axis is required.
+\sreq{Region index labeling}
+A standard for labeling a region axis is required.
 \sreq{Labeling of quantities}
-\ssreq{An associative form}
-\sreq{Quadrilateral curvilinear othogonal A-grid, physical grid values}
-\sreq{Quadrilateral curvilinear othogonal B-grid, physical grid values}
-\sreq{Quadrilateral curvilinear othogonal C-grid, physical grid values}
-\sreq{Quadrilateral curvilinear othogonal D-grid, physical grid values}
-\sreq{Quadrilateral curvilinear othogonal E-grid, physical grid values}
-\sreq{Catchment Grid software-convention}
-\sreq{Ungridded Grid software-convention}
-\sreq{Mapping queries}
+A standard for labeling staggered grid locations, areas and volumes is
+required.
+\sreq{Queries}
+It should be possible to query attributes, individual values and to query 
+regions of
 \ssreq{Index based}
 \ssreq{Lines of constant index}
-\sreq{Inverse Mapping queries}
 \ssreq{Coordinate based}
 \ssreq{Cuts - Lines of constant coordinate}
 \sreq{Underlying Physical space extents}
 \ssreq{X low and X high for cartesian}
 \ssreq{R for sphere and cylinder}
+\ssreq{Correctness queries}
 
 \req{Physical Grid Parallelism and Scalability}
+\sreq{Physical Grids Can Be Decomposed}
 \sreq{Memory Footprint}
 \begin{reqlist}
 {bf Notes:} Interaction With Index Range
 \end{reqlist}
-\sreq{Valid Indexing Range}
+\sreq{Valid Physical Grid Indexing Range}
 \begin{reqlist}
 \end{reqlist}
 \sreq{Thread Safety}
 \begin{reqlist}
 {bf Notes:} Optional
 \end{reqlist}
+\sreq{Modification flags can change independently across tasks}
+\begin{reqlist}
+{bf Notes:} Optional
+\end{reqlist}
+
+\req{Physical Grid I/O}
+\sreq{Write}
+\sreq{Read}
+
+\req{Physical Grid Operations}
+\sreq{Copy}
+\begin{reqlist}
+{\bf Notes: Copying creates a new PhysGrid with all data copied.} 
+\end{reqlist}
+
+\sreq{Delete}
+\begin{reqlist}
+{\bf Notes:} It should not be possible to delete a PhysGrid that has a reference
+from a Field or Grid i.e. a PhysGrid must be {\it detached} before it can be deleted.
+\end{reqlist}
+
+
 
 \req{Physical locations}
 %-------------------------------------------------------------------------------
