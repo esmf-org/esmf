@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/03/25 00:18:28 flanigan Exp $ 
+# $Id: makefile,v 1.13 2003/04/02 23:00:13 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -66,7 +66,7 @@ lib::
 	  mkdir -p ${ESMC_MODDIR}/oldworld ; \
 	fi
 	-@for i in `echo ${MVMODFILES} | tr [:upper:]  [:lower:] ` ; do \
-	  if [ -f $$i ] ; then mv -f $$i ${ESMC_MODDIR}/oldworld ; fi ; \
+	  if [ ! -f ${ESMC_MODDIR}/oldworld/$$i ] ; then mv -f $$i ${ESMC_MODDIR}/oldworld ; fi ; \
 	done
 	echo "moving TimeMgmt module files to prevent name collisions with newer TimeMgr"
 
