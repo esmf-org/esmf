@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.11 2004/03/11 18:19:43 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.12 2004/03/11 20:28:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -234,7 +234,7 @@
 #define LocalArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr##mrank##D##mtypekind - make an ESMF array from an unallocated F90 array @\
  @\
 ! !INTERFACE: @\
@@ -274,8 +274,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_LocalArray) :: array          ! new array object @\
@@ -331,7 +330,7 @@
 #define LocalArrayCreateByFlArrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr##mrank##D##mtypekind - make an ESMF array from an Allocated F90 array @\
  @\
 ! !INTERFACE: @\
@@ -368,8 +367,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_LocalArray) :: array          ! new array object @\
@@ -444,7 +442,7 @@
 #define LocalArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr##mrank##D##mtypekind - make an ESMF array from an unallocated F90 pointer @\
  @\
 ! !INTERFACE: @\
@@ -483,8 +481,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_LocalArray) :: array          ! new array object @\
@@ -537,7 +534,7 @@
 #define LocalArrayCreateByFlPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
+!BOPI @\
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr##mrank##D##mtypekind - make an ESMF array from an Allocated F90 pointer @\
  @\
 ! !INTERFACE: @\
@@ -573,8 +570,7 @@
 ! @\
  @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         ! Local variables @\
         type (ESMF_LocalArray) :: array          ! new array object @\
@@ -697,7 +693,6 @@
  @\
 ! @\
 !EOPI @\
-! !REQUIREMENTS: @\
  @\
         ! Local variables @\
         integer :: i                        ! temp var @\
@@ -822,8 +817,7 @@
 !      Return an F90 pointer to the data buffer, or return an F90 pointer @\
 !      to a new copy of the data. @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
@@ -909,8 +903,7 @@
 ! !DESCRIPTION: @\
 !      Deallocate data contents if LocalArray object is responsible for cleaning up. @\
 ! @\
-!EOP @\
-! !REQUIREMENTS: @\
+!EOPI @\
  @\
         integer :: status                               ! local error status @\
  @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.19 2004/03/11 18:19:42 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.20 2004/03/11 20:28:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -322,7 +322,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.19 2004/03/11 18:19:42 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.20 2004/03/11 20:28:30 nscollins Exp $'
 
 !==============================================================================
 !
@@ -554,9 +554,10 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreateByLst1D -- Convenience cover for 1D counts
+! !IROUTINE: ESMF_LocalArrayCreate -- Create an array with explicit arguments
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LocalArrayCreate()
       function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, &
                                             lbounds, ubounds, rc)
 !
@@ -604,7 +605,6 @@ end function
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         integer, dimension(1) :: countlist
         integer, dimension(1) :: lb, ub
@@ -623,9 +623,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreateByList -- Create an LocalArray specifying all options.
+! !IROUTINE: ESMF_LocalArrayCreate -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LocalArrayCreate()
       function ESMF_LocalArrayCreateByList(rank, type, kind, counts, &
                                            lbounds, ubounds, rc)
 !
@@ -669,8 +670,6 @@ end function
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-
 
         ! Local vars
         type (ESMF_LocalArray) :: array ! new C++ LocalArray
@@ -719,9 +718,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreateBySpec -- Create a new LocalArray from an ArraySpec
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LocalArrayCreate()
       function ESMF_LocalArrayCreateBySpec(arrayspec, counts, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
@@ -754,7 +754,6 @@ end function
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! Local vars
         type (ESMF_LocalArray) :: array ! new C++ LocalArray
@@ -837,9 +836,7 @@ end function
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
-! !REQUIREMENTS:
-
+!EOPI
 
         ! Local vars
         integer :: status ! local error status
@@ -1015,7 +1012,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr1DI2 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1055,8 +1052,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1106,7 +1102,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr1DI4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1146,8 +1142,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1197,7 +1192,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr1DI8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1237,8 +1232,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1288,7 +1282,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr2DI2 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1328,8 +1322,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1379,7 +1372,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr2DI4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1419,8 +1412,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1470,7 +1462,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr2DI8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1510,8 +1502,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1561,7 +1552,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr3DI2 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1601,8 +1592,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1652,7 +1642,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr3DI4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1692,8 +1682,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1743,7 +1732,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr3DI8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1783,8 +1772,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1834,7 +1822,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr4DI2 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1874,8 +1862,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -1925,7 +1912,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr4DI4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -1965,8 +1952,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2016,7 +2002,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr4DI8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2056,8 +2042,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2107,7 +2092,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr5DI2 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2147,8 +2132,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2198,7 +2182,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr5DI4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2238,8 +2222,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2289,7 +2272,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr5DI8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2329,8 +2312,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2380,7 +2362,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr1DR4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2420,8 +2402,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2471,7 +2452,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr1DR8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2511,8 +2492,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2562,7 +2542,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr2DR4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2602,8 +2582,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2653,7 +2632,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr2DR8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2693,8 +2672,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2744,7 +2722,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr3DR4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2784,8 +2762,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2835,7 +2812,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr3DR8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2875,8 +2852,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -2926,7 +2902,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr4DR4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -2966,8 +2942,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3017,7 +2992,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr4DR8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -3057,8 +3032,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3108,7 +3082,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr5DR4 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -3148,8 +3122,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3199,7 +3172,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTArr5DR8 - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
@@ -3239,8 +3212,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3296,7 +3268,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr1DI2 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3333,8 +3305,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3403,7 +3374,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr1DI4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3440,8 +3411,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3510,7 +3480,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr1DI8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3547,8 +3517,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3617,7 +3586,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr2DI2 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3654,8 +3623,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3724,7 +3692,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr2DI4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3761,8 +3729,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3831,7 +3798,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr2DI8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3868,8 +3835,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -3938,7 +3904,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr3DI2 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -3975,8 +3941,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4045,7 +4010,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr3DI4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4082,8 +4047,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4152,7 +4116,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr3DI8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4189,8 +4153,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4259,7 +4222,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr4DI2 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4296,8 +4259,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4366,7 +4328,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr4DI4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4403,8 +4365,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4473,7 +4434,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr4DI8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4510,8 +4471,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4580,7 +4540,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr5DI2 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4617,8 +4577,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4687,7 +4646,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr5DI4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4724,8 +4683,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4794,7 +4752,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr5DI8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4831,8 +4789,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -4901,7 +4858,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr1DR4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -4938,8 +4895,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5008,7 +4964,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr1DR8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5045,8 +5001,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5115,7 +5070,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr2DR4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5152,8 +5107,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5222,7 +5176,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr2DR8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5259,8 +5213,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5329,7 +5282,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr3DR4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5366,8 +5319,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5436,7 +5388,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr3DR8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5473,8 +5425,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5543,7 +5494,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr4DR4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5580,8 +5531,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5650,7 +5600,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr4DR8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5687,8 +5637,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5757,7 +5706,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr5DR4 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5794,8 +5743,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5864,7 +5812,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlArr5DR8 - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
@@ -5901,8 +5849,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -5976,7 +5923,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr1DI2 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6015,8 +5962,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6063,7 +6009,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr1DI4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6102,8 +6048,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6150,7 +6095,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr1DI8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6189,8 +6134,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6237,7 +6181,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr2DI2 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6276,8 +6220,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6324,7 +6267,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr2DI4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6363,8 +6306,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6411,7 +6353,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr2DI8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6450,8 +6392,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6498,7 +6439,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr3DI2 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6537,8 +6478,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6585,7 +6525,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr3DI4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6624,8 +6564,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6672,7 +6611,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr3DI8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6711,8 +6650,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6759,7 +6697,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr4DI2 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6798,8 +6736,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6846,7 +6783,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr4DI4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6885,8 +6822,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -6933,7 +6869,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr4DI8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -6972,8 +6908,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7020,7 +6955,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr5DI2 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7059,8 +6994,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7107,7 +7041,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr5DI4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7146,8 +7080,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7194,7 +7127,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr5DI8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7233,8 +7166,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7281,7 +7213,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr1DR4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7320,8 +7252,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7368,7 +7299,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr1DR8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7407,8 +7338,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7455,7 +7385,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr2DR4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7494,8 +7424,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7542,7 +7471,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr2DR8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7581,8 +7510,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7629,7 +7557,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr3DR4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7668,8 +7596,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7716,7 +7643,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr3DR8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7755,8 +7682,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7803,7 +7729,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr4DR4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7842,8 +7768,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7890,7 +7815,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr4DR8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -7929,8 +7854,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -7977,7 +7901,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr5DR4 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8016,8 +7940,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8064,7 +7987,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByMTPtr5DR8 - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8103,8 +8026,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8158,7 +8080,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr1DI2 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8194,8 +8116,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8261,7 +8182,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr1DI4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8297,8 +8218,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8364,7 +8284,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr1DI8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8400,8 +8320,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8467,7 +8386,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr2DI2 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8503,8 +8422,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8570,7 +8488,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr2DI4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8606,8 +8524,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8673,7 +8590,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr2DI8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8709,8 +8626,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8776,7 +8692,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr3DI2 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8812,8 +8728,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8879,7 +8794,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr3DI4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -8915,8 +8830,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -8982,7 +8896,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr3DI8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9018,8 +8932,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9085,7 +8998,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr4DI2 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9121,8 +9034,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9188,7 +9100,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr4DI4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9224,8 +9136,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9291,7 +9202,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr4DI8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9327,8 +9238,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9394,7 +9304,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr5DI2 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9430,8 +9340,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9497,7 +9406,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr5DI4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9533,8 +9442,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9600,7 +9508,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr5DI8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9636,8 +9544,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9703,7 +9610,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr1DR4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9739,8 +9646,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9806,7 +9712,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr1DR8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9842,8 +9748,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -9909,7 +9814,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr2DR4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -9945,8 +9850,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10012,7 +9916,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr2DR8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10048,8 +9952,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10115,7 +10018,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr3DR4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10151,8 +10054,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10218,7 +10120,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr3DR8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10254,8 +10156,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10321,7 +10222,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr4DR4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10357,8 +10258,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10424,7 +10324,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr4DR8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10460,8 +10360,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10527,7 +10426,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr5DR4 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10563,8 +10462,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10630,7 +10528,7 @@ end function
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
-!BOP 
+!BOPI 
 ! !IROUTINE: ESMF_LocalArrCreateByFlPtr5DR8 - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
@@ -10666,8 +10564,7 @@ end function
 ! 
  
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  ! Local variables 
  type (ESMF_LocalArray) :: array ! new array object 
@@ -10789,7 +10686,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -10944,7 +10840,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11099,7 +10994,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11254,7 +11148,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11409,7 +11302,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11564,7 +11456,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11719,7 +11610,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -11874,7 +11764,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12029,7 +11918,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12184,7 +12072,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12339,7 +12226,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12494,7 +12380,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12649,7 +12534,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12804,7 +12688,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -12959,7 +12842,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13114,7 +12996,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13269,7 +13150,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13424,7 +13304,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13579,7 +13458,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13734,7 +13612,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -13889,7 +13766,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14044,7 +13920,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14199,7 +14074,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14354,7 +14228,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14509,7 +14382,6 @@ end function
  
 ! 
 !EOPI 
-! !REQUIREMENTS: 
  
  ! Local variables 
  integer :: i ! temp var 
@@ -14633,8 +14505,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -14714,8 +14585,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -14795,8 +14665,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -14876,8 +14745,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -14957,8 +14825,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15038,8 +14905,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15119,8 +14985,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15200,8 +15065,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15281,8 +15145,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15362,8 +15225,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15443,8 +15305,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15524,8 +15385,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15605,8 +15465,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15686,8 +15545,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15767,8 +15625,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15848,8 +15705,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -15929,8 +15785,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16010,8 +15865,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16091,8 +15945,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16172,8 +16025,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16253,8 +16105,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16334,8 +16185,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16415,8 +16265,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16496,8 +16345,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16577,8 +16425,7 @@ end function
 ! Return an F90 pointer to the data buffer, or return an F90 pointer 
 ! to a new copy of the data. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
@@ -16663,8 +16510,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16697,8 +16543,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16731,8 +16576,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16765,8 +16609,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16799,8 +16642,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16833,8 +16675,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16867,8 +16708,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16901,8 +16741,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16935,8 +16774,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -16969,8 +16807,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17003,8 +16840,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17037,8 +16873,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17071,8 +16906,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17105,8 +16939,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17139,8 +16972,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17173,8 +17005,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17207,8 +17038,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17241,8 +17071,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17275,8 +17104,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17309,8 +17137,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17343,8 +17170,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17377,8 +17203,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17411,8 +17236,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17445,8 +17269,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17479,8 +17302,7 @@ end function
 ! !DESCRIPTION: 
 ! Deallocate data contents if LocalArray object is responsible for cleaning up. 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI 
  
  integer :: status ! local error status 
  
@@ -17531,7 +17353,6 @@ end function
 ! the deallocate() during the object delete.
 !
 !EOP
-! !REQUIREMENTS:
 
         ! Local vars
         integer :: status ! local error status
@@ -17660,7 +17481,7 @@ end function
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArraySetData
 !
 ! !INTERFACE:
@@ -17678,10 +17499,10 @@ end function
 ! specified later. Otherwise it is an error to replace the data contents
 ! associated with a {\tt ESMF\_LocalArray}.
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
 !
+! added BOPI/EOPI until code is written
 ! TODO: code goes here
 !
         if (present(rc)) rc = ESMF_FAILURE
@@ -17725,8 +17546,6 @@ end function
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-
 
         ! Local vars
         integer :: status ! local error status
@@ -17793,8 +17612,6 @@ end function
 ! All the arguments after the array input are optional to facilitate this.
 !
 !EOP
-! !REQUIREMENTS:
-
 
       integer :: status ! Error status
       logical :: rcpresent ! Return code present
@@ -17879,7 +17696,6 @@ end function
 ! a unique one.
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status ! Error status
       logical :: rcpresent ! Return code present
@@ -18016,7 +17832,6 @@ end function
 ! \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
     integer :: status ! local error status
     integer, dimension(ESMF_MAXDIM) :: lb, ub
@@ -18767,7 +18582,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArrayF90Deallocate - Deallocate an F90 pointer
 !
 ! !INTERFACE:
@@ -18796,8 +18611,7 @@ end function
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
     integer :: status ! local error status
     integer :: localkind, localtype
@@ -19103,7 +18917,7 @@ end function
 ! This section is for higher level LocalArray funcs
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       function ESMF_LocalArraySlice(array, slicedim, sliceloc, rc)
 !
@@ -19123,7 +18937,9 @@ end function
 ! allocates new space and copies the data, leaving the original array
 ! unchanged.
 !
-!EOP
+!EOPI
+        ! BOPI/EOPI because the actual function is not working yet
+
         ! Local vars
         type (ESMF_LocalArray) :: newarray ! new C++ LocalArray
         integer :: status ! local error status
@@ -19221,7 +19037,6 @@ end function
 ! select the fastest way to save data to disk.
 !
 !EOP
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -19250,11 +19065,7 @@ end function
 ! from the last call to WriteRestart.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
         type (ESMF_LocalArray) :: a
 
 ! this is just to shut the compiler up
@@ -19289,7 +19100,6 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS:
 
        character (len=16) :: defaultopts ! default write options
        character (len=16) :: defaultfile ! default filename
@@ -19342,11 +19152,7 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
         type (ESMF_LocalArray) :: a
 
 ! this is just to shut the compiler up
@@ -19380,11 +19186,7 @@ end function
 ! Routine to print information about a {\tt ESMF\_LocalArray}.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
        character (len=6) :: defaultopts ! default print options
        integer :: status ! local error status
        logical :: rcpresent
@@ -19439,11 +19241,7 @@ end function
 ! Routine to print information about a {\tt ESMF\_LocalArray}.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
        character (len=6) :: defaultopts ! default print options
        integer :: status ! local error status
        logical :: rcpresent

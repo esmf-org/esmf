@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.15 2004/03/11 16:25:27 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.16 2004/03/11 20:28:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.15 2004/03/11 16:25:27 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.16 2004/03/11 20:28:31 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -332,9 +332,10 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreateByLst1D -- Convenience cover for 1D counts
+! !IROUTINE: ESMF_LocalArrayCreate -- Create an array with explicit arguments
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LocalArrayCreate()
       function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, &
                                             lbounds, ubounds, rc)
 !
@@ -382,7 +383,6 @@ end function
 ! \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         integer, dimension(1) :: countlist
         integer, dimension(1) :: lb, ub
@@ -401,9 +401,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreateByList -- Create an LocalArray specifying all options.
+! !IROUTINE: ESMF_LocalArrayCreate -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LocalArrayCreate()
       function ESMF_LocalArrayCreateByList(rank, type, kind, counts, &
                                            lbounds, ubounds, rc)
 !
@@ -447,8 +448,6 @@ end function
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
@@ -497,9 +496,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LocalArrayCreateBySpec -- Create a new LocalArray from an ArraySpec
+! !IROUTINE: ESMF_LocalArrayCreate -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LocalArrayCreate()
       function ESMF_LocalArrayCreateBySpec(arrayspec, counts, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
@@ -532,7 +532,6 @@ end function
 !  \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! Local vars
         type (ESMF_LocalArray) :: array     ! new C++ LocalArray
@@ -615,9 +614,7 @@ end function
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
-! !REQUIREMENTS:
-
+!EOPI
 
         ! Local vars
         integer :: status                   ! local error status
@@ -1209,7 +1206,6 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !   the deallocate() during the object delete.
 !
 !EOP
-! !REQUIREMENTS:
 
         ! Local vars
         integer :: status                   ! local error status
@@ -1338,7 +1334,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LocalArraySetData
 !
 ! !INTERFACE:
@@ -1356,10 +1352,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      specified later.  Otherwise it is an error to replace the data contents
 !      associated with a {\tt ESMF\_LocalArray}.  
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
 !
+!  added BOPI/EOPI until code is written
 ! TODO: code goes here
 !
         if (present(rc)) rc = ESMF_FAILURE
@@ -1403,8 +1399,6 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
-
 
         ! Local vars
         integer :: status                        ! local error status
@@ -1471,12 +1465,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      All the arguments after the array input are optional to facilitate this.
 !
 !EOP
-! !REQUIREMENTS:
 
-
-      integer :: status ! Error status
-      logical :: rcpresent ! Return code present
-      integer :: lrank  ! Local use to get rank
+      integer :: status     ! Error status
+      logical :: rcpresent  ! Return code present
+      integer :: lrank      ! Local use to get rank
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1557,7 +1549,6 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      a unique one.
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1694,7 +1685,6 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !   \end{description} 
 ! 
 !EOPI
-! !REQUIREMENTS: 
  
     integer :: status                               ! local error status 
     integer, dimension(ESMF_MAXDIM) :: lb, ub
@@ -1834,7 +1824,7 @@ AllocAllocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
  
 
 !------------------------------------------------------------------------------ 
-!BOP 
+!BOPI
 ! !IROUTINE:  ESMF_LocalArrayF90Deallocate - Deallocate an F90 pointer 
 !
 ! !INTERFACE: 
@@ -1863,8 +1853,7 @@ AllocAllocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
 ! 
-!EOP 
-! !REQUIREMENTS: 
+!EOPI
  
     integer :: status                               ! local error status 
     integer :: localkind, localtype
@@ -2009,7 +1998,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 ! This section is for higher level LocalArray funcs
 !
 !------------------------------------------------------------------------------ 
-!BOP
+!BOPI
 ! !INTERFACE:
       function ESMF_LocalArraySlice(array, slicedim, sliceloc, rc)
 !
@@ -2029,7 +2018,9 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      allocates new space and copies the data, leaving the original array
 !      unchanged.
 !
-!EOP
+!EOPI
+        ! BOPI/EOPI because the actual function is not working yet
+
         ! Local vars
         type (ESMF_LocalArray) :: newarray  ! new C++ LocalArray
         integer :: status                   ! local error status
@@ -2127,7 +2118,6 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      select the fastest way to save data to disk.
 !
 !EOP
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -2156,11 +2146,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      from the last call to WriteRestart.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
         type (ESMF_LocalArray) :: a 
 
 !       this is just to shut the compiler up
@@ -2195,7 +2181,6 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !
 !
 !EOP
-! !REQUIREMENTS:
 
        character (len=16) :: defaultopts      ! default write options 
        character (len=16) :: defaultfile      ! default filename
@@ -2248,11 +2233,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
         type (ESMF_LocalArray) :: a
 
 !       this is just to shut the compiler up
@@ -2286,11 +2267,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      Routine to print information about a {\tt ESMF\_LocalArray}.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
        logical :: rcpresent        
@@ -2345,11 +2322,7 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !      Routine to print information about a {\tt ESMF\_LocalArray}.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
        logical :: rcpresent        
