@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.2 2003/08/29 16:55:48 flanigan Exp $
+#  $Id: common.mk,v 1.3 2003/09/04 20:01:37 nscollins Exp $
 #
 #  common.mk
 #
@@ -278,6 +278,10 @@ storeh: chkdir_include
 # Builds library.
 build_libs: chk_dir
 	cd $(ESMF_TOP_DIR) ;\
+	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree 
+
+# Build only stuff below the current dir.
+build_here: chk_dir
 	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree 
 
 # Builds library
