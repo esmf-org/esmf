@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.11 2004/12/07 17:20:49 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.12 2004/12/20 02:26:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,11 +140,11 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     //int ESMC_ArraySet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_LocalArrayDeserialize(char *buffer, int *offset);
-    int ESMC_LocalArrayDeserializeNoData(char *buffer, int *offset);
+    int ESMC_LocalArrayDeserialize(char *buffer, int *boffset);
+    int ESMC_LocalArrayDeserializeNoData(char *buffer, int *boffset);
     int ESMC_LocalArrayPrint(const char *options = NULL) const;
-    int ESMC_LocalArraySerialize(char *buffer, int *length, int *offset) const;
-    int ESMC_LocalArraySerializeNoData(char *buffer, int *length, int *offset) const;
+    int ESMC_LocalArraySerialize(char *buffer, int *length, int *boffset) const;
+    int ESMC_LocalArraySerializeNoData(char *buffer, int *length, int *boffset) const;
     int ESMC_LocalArrayWrite(const char *options, const char *filename) const;
     int ESMC_LocalArrayValidate(const char *options) const;
 
