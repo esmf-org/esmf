@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.2 2003/08/25 22:48:34 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.3 2003/08/29 21:11:19 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,12 +45,12 @@ extern "C" {
 
        // the int needs to be an enum, the label needs to be added and handled
        void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, 
-                                       ESMC_HandleType **htype, 
+                                       ESMC_HandleType *htype, 
                                        ESMC_Route **r1, ESMC_Route **r2, 
                                        ESMC_TransformValues **tv,
                                        // char **label,   not null terminated
                                        int *status) {
-           *status = (*ptr)->ESMC_RouteHandleGet(*htype, r1, r2, tv, (char **)(NULL));
+           *status = (*ptr)->ESMC_RouteHandleGet(htype, r1, r2, tv, (char **)(NULL));
        }
 
        void FTN(c_esmc_routehandleset)(ESMC_RouteHandle **ptr, 
