@@ -343,8 +343,8 @@
     subroutine ESMF_ConfigDestroy( cf, rc )
 
       implicit none
-      type(ESMF_Config), intent(in) :: cf       ! ESMF Configuration
-      integer,intent(out), optional :: rc       ! error code
+      type(ESMF_Config), intent(inout) :: cf       ! ESMF Configuration
+      integer,intent(out), optional    :: rc       ! error code
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
@@ -381,14 +381,14 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in) :: cf        ! ESMF Configuration
-      character(len=*), intent(in)  :: fname     ! file name
-      logical, intent(in), optional :: unique    ! if unique is present, 
-                                                 ! uniqueness of labels
-                                                 ! is checked and error
-                                                 ! code is set
-                                                 ! 
-      integer, intent(out), optional :: rc       ! Error code
+      type(ESMF_Config), intent(inout) :: cf        ! ESMF Configuration
+      character(len=*), intent(in)     :: fname     ! file name
+      logical, intent(in), optional    :: unique    ! if unique is present, 
+                                                    ! uniqueness of labels
+                                                    ! is checked and error
+                                                    ! code is set
+                                                    ! 
+      integer, intent(out), optional :: rc          ! Error code
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
@@ -433,7 +433,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in) :: cf        ! ESMF Configuration
+      type(ESMF_Config), intent(inout) :: cf     ! ESMF Configuration
       character(len=*), intent(in)  :: fname     ! file name
       logical, intent(in), optional :: unique    ! if unique is present, 
                                                  ! uniqueness of labels
@@ -524,10 +524,10 @@
          if ( present (rc )) rc = iret
          return
       endif
-      ESMF_Config_now%buffer(ptr:ptr) = EOB
-      ESMF_Config_now%nbuf = ptr
-      ESMF_Config_now%this_line=' '
-      ESMF_Config_now%next_line=0
+      cf%buffer(ptr:ptr) = EOB
+      cf%nbuf = ptr
+      cf%this_line=' '
+      cf%next_line=0
 
       iret = 0
       if ( present (rc )) rc = iret
@@ -547,7 +547,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in)  :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout)  :: cf    ! ESMF Configuration
       character(len=*), intent(in)   :: label    ! label
       integer, intent(out), optional  :: rc      ! Error code
                                                  !   0  no error
@@ -576,10 +576,10 @@
 
 !     Determine whether label exists
 !     ------------------------------    
-!      print *,'buffer= ',cf%buffer(1:ESMF_Config_now%nbuf)
+!      print *,'buffer= ',cf%buffer(1:cf%nbuf)
 !      print *,'label= ',EOL//label 
 
-      i = index_ ( cf%buffer(1:cf_now%nbuf), &
+      i = index_ ( cf%buffer(1:cf%nbuf), &
                    EOL//label ) + 1
       if ( i .eq. 1 ) then
            cf%this_line = BLK // EOL
@@ -624,7 +624,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in)  :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout) :: cf     ! ESMF Configuration
       logical, intent(out), optional :: end      ! if present, end of the
                                                  ! table mark (::) is checked
 
@@ -684,7 +684,7 @@
 
       implicit none
       
-      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(out)          :: token    ! token (word)
       
       character(len=*), intent(in), optional :: label    ! label
@@ -756,7 +756,7 @@
     real function ESMF_ConfigGetFloat( cf, label, default, rc )
       implicit none
 
-      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
 !      integer, intent(in), optional          :: size     ! number of floating 
 !                                                         ! point numbers
@@ -775,7 +775,11 @@
       
       iret = 0
 
-      call ESMF_ConfigGetToken( cf, token, label, default, iret )
+      if (present (label ) ) then
+         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+      else
+         call ESMF_ConfigGetToken( cf, token, rc = iret )
+      endif
 
       if ( iret .eq. 0 ) then
            read(token,*,iostat=iret) x
@@ -811,7 +815,7 @@
     integer function ESMF_ConfigGetInt( cf, label, default, rc )
       implicit none
 
-      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
 !      integer, intent(in), optional          :: size     ! number of floating 
 !                                                         ! point numbers
@@ -829,7 +833,11 @@
 
       iret = 0
 
-      call ESMF_ConfigGetToken( cf, token, label, default, iret )
+      if (present (label ) ) then
+         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+      else
+         call ESMF_ConfigGetToken( cf, token, rc = iret )
+      endif
 
       if ( iret == 0 ) then
            read(token,*,iostat=iret) x
@@ -869,7 +877,7 @@
     character function ESMF_ConfigGetChar( cf, label, default, rc )
       implicit none
 
-      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
 !      integer, intent(in), optional          :: size     ! number of  
 !                                                         ! characters
@@ -886,7 +894,11 @@
 
       iret = 0
 
-      call ESMF_ConfigGetToken( cf, token, label, default, iret )
+      if (present (label ) ) then
+         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+      else
+         call ESMF_ConfigGetToken( cf, token, rc = iret )
+      endif
 
      if ( iret .ne. 0 ) then
         ch = default
@@ -919,7 +931,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(out)          :: string   ! string
 
       character(len=*), intent(in), optional :: label    ! label
@@ -934,7 +946,13 @@
 !EOP -------------------------------------------------------------------
       integer iret
 
-      call ESMF_ConfigGetToken( cf, string, label, default, iret )
+      if (present (label ) ) then
+         call ESMF_ConfigGetToken( cf, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetToken( cf, string, rc = iret )
+      endif
+
+
 
       rc = iret
 
@@ -956,7 +974,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in)          :: cf    ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
 
       character(len=*), intent(in), optional :: label ! label (if present)
                                                       ! otherwise, current
@@ -977,8 +995,12 @@
 
       call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
       if ( iret == 0 ) then
-         do 
-            call ESMF_ConfigGetToken( cf, token, rc = iret )
+         do
+      if (present (label ) ) then
+         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+      else
+         call ESMF_ConfigGetToken( cf, token, rc = iret )
+      endif
             if ( iret == 0 ) then
                count = count + 1
             else
@@ -1011,7 +1033,7 @@
 
       implicit none
 
-      type(ESMF_Config), intent(in)          :: cf    ! ESMF Configuration
+      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
 
      integer, intent(out)                    :: lines
      integer, intent(out)                    :: columns  
@@ -1027,6 +1049,7 @@
 !
 !EOP -------------------------------------------------------------------
       integer n, iret
+      logical end
 
       lines = 0
       columns = 0
@@ -1056,7 +1079,7 @@
                rc = iret
                return
             else
-               colunms = max(columns, n)
+               columns = max(columns, n)
             endif
          endif 
       enddo
@@ -1066,6 +1089,57 @@
 
     end subroutine ESMF_ConfigGetDim
     
+
+
+      integer function index_ (string,tok)
+
+      implicit NONE
+!-------------------------------------------------------------------------
+!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+!-------------------------------------------------------------------------
+!BOP
+!
+! !ROUTINE: index_ Extension of the Fortran 77 intrinsic "index" for
+!  "string" (input) with length that can exceed 2**15-1 (=MAXLEN).  
+!
+! !DESCRIPTION: Finds the starting location = "index_", of the first character in "tok" 
+!  within "string", where string is of "arbitrary" length.  If tok occurs more than
+!  once in "string", then the value of index_ is based on the first occurrence of "tok". 
+!
+! !CALLING SEQUENCE:
+!
+!      index_( string,tok )
+!
+! !INPUT PARAMETERS:
+!
+      character(len=*), intent(in) :: string, tok
+!
+! !REVISION HISTORY:
+!
+!  2001Apr25   G. Gaspari   Original code.
+!
+!EOP
+!-------------------------------------------------------------------------
+      integer idx, i, n, nlen, lt, ibot, itop
+      integer, parameter :: MAXLEN = 32767   ! max size of signed 2-byte integer
+      n = len(string)         ! length of string
+      lt = len(tok)           ! length of token
+      i = 1                   ! initialize loop index
+      nlen = MAXLEN-lt        ! index requires len(sting)+len(tok)<=MAXLEN 
+      itop = min(nlen,n)      ! top of string to index
+      ibot = 1                ! bottom of string
+      idx  = index(string(ibot:itop),tok)  ! set for good, if itop=n (<=MAXLEN)
+      do while(idx == 0 .and. itop < n)
+       i = i+1
+       itop = min(i*MAXLEN-lt,n)      ! subtract lt to find tok at bdry
+       ibot = max(1,itop+1-nlen)    ! bottom of string to index
+       idx  = index(string(ibot:itop),tok)   ! idx>=0, since itop-ibot<=MAXLEN
+      end do
+      index_ = idx                    ! case where idx = 0, or (i=1 & idx > 0)
+      if(idx > 0) index_ = idx - 1 + ibot
+      return
+      end function index_
+
 
     
   end module ESMF_ConfigMod
