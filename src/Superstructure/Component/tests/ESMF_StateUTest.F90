@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.13 2003/04/14 14:51:42 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.14 2003/04/16 19:31:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.13 2003/04/14 14:51:42 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.14 2003/04/16 19:31:49 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -254,8 +254,6 @@
       !------------------------------------------------------------------------
 
       ! Test Creation of an export State with Bundle
-      ! This code crashes, it will be commented out until
-      ! bug 707751 is fixed.
       bundlename = "Humidity"
       compname = "Atmosphere2"
       statename = "Atm Export State"
@@ -271,8 +269,6 @@
       !------------------------------------------------------------------------
 
       ! Test Creation of an export State with a Field
-      ! This code crashes, it will be commented out until
-      ! bug 708906 is fixed.
       compname = "Atmosphere2"
       statename = "Atm2 Export State"
       x = 1
@@ -288,8 +284,6 @@
       !------------------------------------------------------------------------
 
       ! Test Creation of an export State with an array
-      ! This code crashes, it will be commented out until
-      ! bug 708912 is fixed.
       compname = "Atmosphere3"
       statename = "Atm3 Export State"
       x  = 2
@@ -542,8 +536,6 @@
       !------------------------------------------------------------------------
 
       ! Test adding an uninitialized Bundle to a State
-      ! This code crashes, it will be commented out until
-      ! bug 707751 is fixed.
       call ESMF_StateAddData(state1, bundle5, rc)
       write(name, *) "Adding an uninitialized  Bundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
@@ -568,8 +560,6 @@
 
       !------------------------------------------------------------------------
       ! Test Creation of an export State with Bundle
-      ! This code crashes, it will be commented out until
-      ! bug 707751 is fixed.
       bundlename = "Humidity"
       compname = "Atmosphere2"
       statename = "Export State"
@@ -598,8 +588,6 @@
       call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
       ! Test Creation of an export State with a Field
-      ! This code crashes, it will be commented out until
-      ! bug 708906 is fixed.
       compname = "Atmosphere2"
       statename = "Export State"
       x = 1
@@ -628,8 +616,6 @@
       call  ESMF_StatePrint(state2, rc=rc)
       !------------------------------------------------------------------------
       ! Test Creation of an export State with an array
-      ! This code crashes, it will be commented out until
-      ! bug 708912 is fixed.
       compname = "Atmosphere3"
       statename = "Export State"
       x  = 2
