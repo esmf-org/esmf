@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.68 2004/12/04 01:42:48 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.69 2004/12/10 22:49:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
  #define ESMC_FILENAME "ESMC_Clock.C"
 
  // higher level, 3rd party or system includes here
- #include <iostream.h>
+ #include <stdio.h>
  #include <string.h>
  #include <ctype.h>
  #include <ESMC_LogErr.h>
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.68 2004/12/04 01:42:48 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.69 2004/12/10 22:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1404,7 +1404,7 @@ int ESMC_Clock::count=0;
       return(rc);
     }
 
-    cout << "Clock ----------------------------------" << endl;
+    printf("Clock ----------------------------------\n");
 
     // print out individually selected components
     // TODO: enable multiple simultaneous options (token parsing)
@@ -1421,10 +1421,10 @@ int ESMC_Clock::count=0;
       opts[i] = '\0';
 
       if (strncmp(opts, "name", 4) == 0) {
-        cout << "name = " << name << endl;
+        printf("name = %s\n", name);
       }
       else if (strncmp(opts, "timestep", 8) == 0) {
-        cout << "timeStep = " << endl;
+        printf("timeStep = \n");
         // TODO:  timeStep.ESMC_TimeIntervalPrint(&opts(8)); ?
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           timeStep.ESMC_TimeIntervalPrint("string");
@@ -1433,7 +1433,7 @@ int ESMC_Clock::count=0;
         }
       }
       else if (strncmp(opts, "starttime", 9) == 0) {
-        cout << "startTime = " << endl;
+        printf("startTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           startTime.ESMC_TimePrint("string");
         } else {
@@ -1441,7 +1441,7 @@ int ESMC_Clock::count=0;
         }
       }
       else if (strncmp(opts, "stoptime", 8) == 0) {
-        cout << "stopTime = " << endl;
+        printf("stopTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           stopTime.ESMC_TimePrint("string");
         } else {
@@ -1449,7 +1449,7 @@ int ESMC_Clock::count=0;
         }
       }
       else if (strncmp(opts, "reftime", 7) == 0) {
-        cout << "refTime = " << endl;
+        printf("refTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           refTime.ESMC_TimePrint("string");
         } else {
@@ -1457,7 +1457,7 @@ int ESMC_Clock::count=0;
         }
       }
       else if (strncmp(opts, "currtime", 8) == 0) {
-        cout << "currTime = " << endl;
+        printf("currTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           currTime.ESMC_TimePrint("string");
         } else {
@@ -1465,7 +1465,7 @@ int ESMC_Clock::count=0;
         }
       }
       else if (strncmp(opts, "prevtime", 8) == 0) {
-        cout << "prevTime = " << endl;
+        printf("prevTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           prevTime.ESMC_TimePrint("string");
         } else {
@@ -1473,15 +1473,15 @@ int ESMC_Clock::count=0;
         }
       }
       else if (strncmp(opts, "advancecount", 12) == 0) {
-        cout << "advanceCount = " << advanceCount << endl;
+        printf("advanceCount = %lld\n", advanceCount);
       }
-      else if (strncmp(opts, "numalarms", 9) == 0) {
-        cout << "alarmCount = " << alarmCount << endl;
+      else if (strncmp(opts, "alarmcount", 10) == 0) {
+        printf("alarmCount = %d\n", alarmCount);
       }
       else if (strncmp(opts, "alarmlist", 9) == 0) {
-        cout << "alarmList = " << endl;
+        printf("alarmList = \n");
         for (int i=0; i<alarmCount; i++) {
-          cout << alarmList[i]->ESMC_AlarmPrint(&opts[9]);
+          alarmList[i]->ESMC_AlarmPrint(&opts[9]);
         }
       }
 
@@ -1489,22 +1489,29 @@ int ESMC_Clock::count=0;
     } else {
       // default:  print out all properties
 
-      cout << "name = "      << name << endl;
-      cout << "timeStep = "  << endl; timeStep.ESMC_TimeIntervalPrint(options);
-      cout << "startTime = " << endl; startTime.ESMC_TimePrint(options);
-      cout << "stopTime = "  << endl; stopTime.ESMC_TimePrint(options);
-      cout << "refTime = "   << endl; refTime.ESMC_TimePrint(options);
-      cout << "currTime = "  << endl; currTime.ESMC_TimePrint(options);
-      cout << "prevTime = "  << endl; prevTime.ESMC_TimePrint(options);
-      cout << "advanceCount = " << advanceCount << endl;
-      cout << "alarmCount = "   << alarmCount   << endl;
-      cout << "alarmList = " << endl;
+      printf("timeStep = \n");
+      printf("startTime = \n");
+      printf("stopTime = \n");
+      printf("refTime = \n");
+      printf("currTime = \n");
+      printf("prevTime = \n");
+
+      printf("name = %s\n", name);
+      printf("timeStep = \n");  timeStep.ESMC_TimeIntervalPrint(options);
+      printf("startTime = \n"); startTime.ESMC_TimePrint(options);
+      printf("stopTime = \n");  stopTime.ESMC_TimePrint(options);
+      printf("refTime = \n");   refTime.ESMC_TimePrint(options);
+      printf("currTime = \n");  currTime.ESMC_TimePrint(options);
+      printf("prevTime = \n");  prevTime.ESMC_TimePrint(options);
+      printf("advanceCount = %lld\n", advanceCount);
+      printf("alarmCount = %d\n", alarmCount);
+      printf("alarmList = \n");
       for (int i=0; i<alarmCount; i++) {
-        cout << alarmList[i]->ESMC_AlarmPrint(options);
+        alarmList[i]->ESMC_AlarmPrint(options);
       }
     }
 
-    cout << "end Clock ------------------------------" << endl << endl;
+    printf("end Clock ------------------------------\n\n");
 
     return(ESMF_SUCCESS);
 

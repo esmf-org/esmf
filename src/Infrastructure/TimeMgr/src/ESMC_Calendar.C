@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.78 2004/12/06 21:08:55 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.79 2004/12/10 22:49:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
  #define ESMC_FILENAME "ESMC_Calendar.C"
 
  // higher level, 3rd party or system includes
- #include <iostream.h>
+ #include <stdio.h>
  #include <limits.h>
  #include <string.h>
  #include <ctype.h>
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.78 2004/12/06 21:08:55 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.79 2004/12/10 22:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -2050,7 +2050,7 @@ int ESMC_Calendar::count=0;
       isLeapYear = ESMC_IS_LEAP_YEAR(yy_i8);
     }
 
-    cout << "Calendar -------------------------------" << endl;
+    printf("Calendar -------------------------------\n");
 
     // print out individually selected components
     // TODO: enable multiple simultaneous options (token parsing)
@@ -2067,63 +2067,61 @@ int ESMC_Calendar::count=0;
       opts[i] = '\0';
 
       if (strncmp(opts, "name", 4) == 0) {
-        cout << "name = " << name << endl;
+        printf("name = %s\n", name);
       }
       else if (strncmp(opts, "calendartype", 12) == 0) {
         // TODO:  make lookup table: int -> string
-        cout << "calendarType = " << calendarType << endl;
+        printf("calendarType = %s\n", calendarTypeName[calendarType-1]);
       }
       else if (strncmp(opts, "dayspermonth", 12) == 0) {
-        cout << "daysPerMonth = ";
+        printf("daysPerMonth = ");
         for (int i=0; i<this->monthsPerYear; i++) {
           if (i == 1 && calendarType == ESMC_CAL_GREGORIAN && isLeapYear) {
-            cout << daysPerMonth[i]+1 << " ";   // leap year
+            printf("%d ", daysPerMonth[i]+1);  // leap year
           } else {
-            cout << daysPerMonth[i]   << " ";   // non leap year
+            printf("%d ", daysPerMonth[i]);    // non leap year
           }
         }
       }
       else if (strncmp(opts, "monthsperyear", 13) == 0) {
-        cout << "monthsPerYear = "  << monthsPerYear  << endl;
+        printf("monthsPerYear = %d\n", monthsPerYear);
       }
       else if (strncmp(opts, "secondsperday", 13) == 0) {
-        cout << "secondsPerDay = "  << secondsPerDay  << endl;
+        printf("secondsPerDay = %d\n", secondsPerDay);
       }
       else if (strncmp(opts, "secondsperyear", 14) == 0) {
-        cout << "secondsPerYear = " << secondsPerYear << endl;
+        printf("secondsPerYear = %d\n", secondsPerYear);
       }
       else if (strncmp(opts, "daysperyear", 11) == 0) {
-        cout << "daysPerYear = "    << daysPerYear.d  << endl;
-        cout << "daysPerYeardN = "  << daysPerYear.dN << endl;
-        cout << "daysPerYeardD = "  << daysPerYear.dD << endl;
+        printf("daysPerYear = %d\n",   daysPerYear.d);
+        printf("daysPerYeardN = %d\n", daysPerYear.dN);
+        printf("daysPerYeardD = %d\n", daysPerYear.dD);
       }
 
     } else {
       // default:  print out all properties
 
-      cout << "name = " << name << endl;
+      printf("name = %s\n", name);
+      printf("calendarType = %s\n", calendarTypeName[calendarType-1]);
 
-      // TODO:  make lookup table: int -> string
-      cout << "calendarType = " << calendarType << endl;
-
-      cout << "daysPerMonth = "; 
+      printf("daysPerMonth = "); 
       for (int i=0; i<this->monthsPerYear; i++) {
           if (i == 1 && calendarType == ESMC_CAL_GREGORIAN && isLeapYear) {
-            cout << daysPerMonth[i]+1 << " ";   // leap year
+            printf("%d ", daysPerMonth[i]+1);  // leap year
           } else {
-            cout << daysPerMonth[i]   << " ";   // non leap year
+            printf("%d ", daysPerMonth[i]);    // non leap year
           }
       }
-      cout << endl;
-      cout << "monthsPerYear = "  << monthsPerYear  << endl;
-      cout << "secondsPerDay = "  << secondsPerDay  << endl;
-      cout << "secondsPerYear = " << secondsPerYear << endl;
-      cout << "daysPerYear = "    << daysPerYear.d  << endl;
-      cout << "daysPerYeardN = "  << daysPerYear.dN << endl;
-      cout << "daysPerYeardD = "  << daysPerYear.dD << endl;
+      printf("\n");
+      printf("monthsPerYear = %d\n",  monthsPerYear);
+      printf("secondsPerDay = %d\n",  secondsPerDay);
+      printf("secondsPerYear = %d\n", secondsPerYear);
+      printf("daysPerYear = %d\n",    daysPerYear.d);
+      printf("daysPerYeardN = %d\n",  daysPerYear.dN);
+      printf("daysPerYeardD = %d\n",  daysPerYear.dD);
     }
 
-    cout << "end Calendar ---------------------------" << endl << endl;
+    printf("end Calendar ---------------------------\n\n");
     
     return(ESMF_SUCCESS);
 

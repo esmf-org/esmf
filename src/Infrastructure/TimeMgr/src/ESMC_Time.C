@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.74 2004/12/03 00:59:17 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.75 2004/12/10 22:49:04 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
  #define ESMC_FILENAME "ESMC_Time.C"
 
  // higher level, 3rd party or system includes
- #include <iostream.h>
+ #include <stdio.h>
  #include <math.h>     // modf()
  #include <time.h>
  #include <string.h>
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.74 2004/12/03 00:59:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.75 2004/12/10 22:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1062,14 +1062,14 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "Time -----------------------------------" << endl;
+    printf("Time -----------------------------------\n");
 
     // parse options
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
         ESMC_TimeGetString(timeString, &options[6]);
-        cout << timeString << endl;
+        printf("%s\n", timeString);
         // see also method ESMC_TimeGet()
       }
     } else {
@@ -1078,10 +1078,10 @@
       if (this->calendar != ESMC_NULL_POINTER) {
         this->calendar->ESMC_CalendarPrint(options, this);
       }
-      cout << "timeZone = " << timeZone << endl;
+      printf("timeZone = %d\n", timeZone);
     }
 
-    cout << "end Time -------------------------------" << endl << endl;
+    printf("end Time -------------------------------\n\n");
 
     return(ESMF_SUCCESS);
 

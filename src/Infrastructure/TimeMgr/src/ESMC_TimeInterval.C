@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.75 2004/11/24 22:42:42 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.76 2004/12/10 22:49:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
  #define ESMC_FILENAME "ESMC_TimeInterval.C"
 
  // higher level, 3rd party or system includes
- #include <iostream.h>
+ #include <stdio.h>
  #include <math.h>
  #include <limits.h>
  #include <float.h>
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.75 2004/11/24 22:42:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.76 2004/12/10 22:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -2681,25 +2681,25 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "TimeInterval ---------------------------" << endl;
+    printf("TimeInterval ---------------------------\n");
 
     // parse options
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
         ESMC_TimeIntervalGetString(timeString, &options[6]);
-        cout << timeString << endl;
+        printf("%s\n", timeString);
         // see also method ESMC_TimeIntervalGet()
       }
     } else {
       // default
       ESMC_BaseTime::ESMC_BaseTimePrint(options);
-      cout << "yy = " << yy << endl;
-      cout << "mm = " << mm << endl;
-      cout << "d  = " << d << endl;
+      printf("yy = %lld\n", yy);
+      printf("mm = %lld\n", mm);
+      printf("d  = %lld\n", d);
     }
 
-    cout << "end TimeInterval -----------------------" << endl << endl;
+    printf("end TimeInterval -----------------------\n\n");
 
     return(ESMF_SUCCESS);
 

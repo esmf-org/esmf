@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.51 2004/12/04 01:46:06 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.52 2004/12/10 22:49:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
  #define ESMC_FILENAME "ESMC_Alarm.C"
 
  // insert any higher level, 3rd party or system includes here
- #include <iostream.h>
+ #include <stdio.h>
  #include <string.h>
  #include <ctype.h>
 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.51 2004/12/04 01:46:06 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.52 2004/12/10 22:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -1304,7 +1304,7 @@ int ESMC_Alarm::count=0;
       return(rc);
     }
 
-    cout << "Alarm ----------------------------------" << endl;
+    printf("Alarm ----------------------------------\n");
 
     // print out individually selected components
     // TODO: enable multiple simultaneous options (token parsing)
@@ -1321,10 +1321,10 @@ int ESMC_Alarm::count=0;
       opts[i] = '\0';
 
       if (strncmp(opts, "name", 4) == 0) {
-        cout << "name = " << name << endl;
+        printf("name = %s\n", name);
       }
       else if (strncmp(opts, "clock", 5) == 0) {
-        cout << "clock = " << endl;
+        printf("clock = \n");
         if (strstr(opts, "name") != ESMC_NULL_POINTER) {
           clock->ESMC_ClockPrint("name");
         } else {
@@ -1332,7 +1332,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "ringinterval", 12) == 0) {
-        cout << "ringInterval = " << endl;
+        printf("ringInterval = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           ringInterval.ESMC_TimeIntervalPrint("string");
         } else {
@@ -1340,7 +1340,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "ringduration", 12) == 0) {
-        cout << "ringDuration = " << endl;
+        printf("ringDuration = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           ringDuration.ESMC_TimeIntervalPrint("string");
         } else {
@@ -1348,7 +1348,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "ringtime", 8) == 0) {
-        cout << "ringTime = " << endl;
+        printf("ringTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           ringTime.ESMC_TimePrint("string");
         } else {
@@ -1356,7 +1356,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "prevringtime", 12) == 0) {
-        cout << "prevRingTime = " << endl;
+        printf("prevRingTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           prevRingTime.ESMC_TimePrint("string");
         } else {
@@ -1364,7 +1364,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "stoptime", 8) == 0) {
-        cout << "stopTime = " << endl;
+        printf("stopTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           stopTime.ESMC_TimePrint("string");
         } else {
@@ -1372,7 +1372,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "ringbegin", 9) == 0) {
-        cout << "ringBegin = " << endl;
+        printf("ringBegin = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           ringBegin.ESMC_TimePrint("string");
         } else {
@@ -1380,7 +1380,7 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "reftime", 7) == 0) {
-        cout << "refTime = " << endl;
+        printf("refTime = \n");
         if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           refTime.ESMC_TimePrint("string");
         } else {
@@ -1388,46 +1388,46 @@ int ESMC_Alarm::count=0;
         }
       }
       else if (strncmp(opts, "ringtimestepcount", 17) == 0) {
-        cout << "ringTimeStepCount = " << ringTimeStepCount << endl;
+        printf("ringTimeStepCount = %d\n", ringTimeStepCount);
       }
       else if (strncmp(opts, "timestepringingcount", 20) == 0) {
-        cout << "timeStepRingingCount = " << timeStepRingingCount << endl;
+        printf("timeStepRingingCount = %d\n", timeStepRingingCount);
       }
       else if (strncmp(opts, "ringing", 7) == 0) {
-        cout << "ringing = " << ringing << endl;
+        printf("ringing = %s\n", ringing ? "true" : "false");
       }
       else if (strncmp(opts, "ringingonprevtimestep", 21) == 0) {
-        cout << "ringingOnPrevTimeStep = " << ringingOnPrevTimeStep << endl;
+        printf("ringingOnPrevTimeStep = %s\n",
+                ringingOnPrevTimeStep ? "true" : "false");
       }
       else if (strncmp(opts, "enabled", 7) == 0) {
-        cout << "enabled = " << enabled << endl;
+        printf("enabled = %s\n", enabled ? "true" : "false");
       }
       else if (strncmp(opts, "sticky", 6) == 0) {
-        cout << "sticky = " << sticky << endl;
+        printf("sticky = %s\n", sticky ? "true" : "false");
       }
 
     } else {
       // default:  print out all properties
 
-      cout << "name = "         << name << endl;
-      cout << "ringInterval = " << endl;
-                                   ringInterval.ESMC_TimeIntervalPrint(options);
-      cout << "ringDuration = " << endl;
-                                   ringDuration.ESMC_TimeIntervalPrint(options);
-      cout << "ringTime = "     << endl; ringTime.ESMC_TimePrint(options);
-      cout << "prevRingTime = " << endl; prevRingTime.ESMC_TimePrint(options);
-      cout << "stopTime = "     << endl; stopTime.ESMC_TimePrint(options);
-      cout << "ringBegin = "    << endl; ringBegin.ESMC_TimePrint(options);
-      cout << "refTime = "      << endl; refTime.ESMC_TimePrint(options);
-      cout << "ringTimeStepCount = "    << ringTimeStepCount << endl;
-      cout << "timeStepRingingCount = " << timeStepRingingCount << endl;
-      cout << "ringing = "      << ringing << endl;
-      cout << "ringingOnPrevTimeStep = "  << ringingOnPrevTimeStep << endl;
-      cout << "enabled = "      << enabled << endl;
-      cout << "sticky = "       << sticky << endl;
+      printf("name = %s\n", name);
+      printf("ringInterval = \n"); ringInterval.ESMC_TimeIntervalPrint(options);
+      printf("ringDuration = \n"); ringDuration.ESMC_TimeIntervalPrint(options);
+      printf("ringTime = \n");     ringTime.ESMC_TimePrint(options);
+      printf("prevRingTime = \n"); prevRingTime.ESMC_TimePrint(options);
+      printf("stopTime = \n");     stopTime.ESMC_TimePrint(options);
+      printf("ringBegin = \n");    ringBegin.ESMC_TimePrint(options);
+      printf("refTime = \n");      refTime.ESMC_TimePrint(options);
+      printf("ringTimeStepCount = %d\n",    ringTimeStepCount);
+      printf("timeStepRingingCount = %d\n", timeStepRingingCount);
+      printf("ringing = %s\n", ringing ? "true" : "false");
+      printf("ringingOnPrevTimeStep = %s\n",
+              ringingOnPrevTimeStep ?    "true" : "false");
+      printf("enabled = %s\n", enabled ? "true" : "false");
+      printf("sticky = %s\n",  sticky ?  "true" : "false");
     }
 
-    cout << "end Alarm ------------------------------" << endl << endl;
+    printf("end Alarm ------------------------------\n\n");
 
     return(ESMF_SUCCESS);
 

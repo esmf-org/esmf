@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.41 2004/12/06 21:15:16 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.42 2004/12/10 22:49:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
 //
  #define ESMC_FILENAME "ESMC_BaseTime.C"
 
- #include <iostream.h>
+ #include <stdio.h>
  #include <stdlib.h>
  #include <limits.h>
  /*
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.41 2004/12/06 21:15:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.42 2004/12/10 22:49:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -558,11 +558,11 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "BaseTime -------------------------------" << endl;
-    cout << "s = "  << ESMC_FractionGetw() << endl;
-    cout << "sN = " << ESMC_FractionGetn() << endl;
-    cout << "sD = " << ESMC_FractionGetd() << endl;
-    cout << "end BaseTime ---------------------------" << endl << endl;
+    printf("BaseTime -------------------------------\n");
+    printf("s = %lld\n", ESMC_FractionGetw());
+    printf("sN = %d\n",  ESMC_FractionGetn());
+    printf("sD = %d\n",  ESMC_FractionGetd());
+    printf("end BaseTime ---------------------------\n\n");
 
     return(ESMF_SUCCESS);
 
