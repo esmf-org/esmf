@@ -363,7 +363,7 @@ complex areas of development.
 \end{reqlist}
 
 
-\sreq{QA Coding Standards may be ignored}
+\sreq{Coding Standards may be ignored}
 The core framework and EVA suite are required to meet very specific agreed code quality and coding
 standards for milestone acceptance. Failure to develop code that meets the
 standard will cause project funding delays.
@@ -372,10 +372,10 @@ standard will cause project funding delays.
 {\bf Nature of Impact:} \\
 {\bf Problem Likelihood:} Fairly Low \\
 {\bf Preventative Measures Being Taken:} Developers are aware of the
-coding standards and a peer review and independent QA validation process
-has been established.
+coding standards and a peer review and independent {\it milestone validation process}
+that have been established.
 \\
-{\bf Fix:} Closer involvement of external QA team in ongoing code 
+{\bf Fix:} Closer involvement of {\it milestone validation team} in ongoing code 
 assessment. Development of automated tools to assist in code standard validation.
 \\
 {\bf Notes:} 
@@ -463,6 +463,27 @@ As code evolves previously working feature may break.
 broken code at a fine grain level.
 \\
 {\bf Fix:}\\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Insufficient test platform availability}
+ESMF will need to be continually teste on a range of platforms for
+a variety of different hardware configurations and both small and larger
+numbers of processors.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Nature of Impact:} Could impact milestone achievement by affecting code portability
+and code performance.\\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventative Measures Being Taken:}
+Resources have been requested from NASA and have recently been provided.
+Usage, utility and responsiveness of the systems is being monitored.
+\\
+{\bf Fix:} Acquire special dedicated hardware resources for exclusive project
+use.
+Acquire compute resources through other channels - other agency centers,
+industrial partners etc...
+\\
 {\bf Notes:} 
 \end{reqlist}
 
