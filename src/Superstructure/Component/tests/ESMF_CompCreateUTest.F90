@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateUTest.F90,v 1.7 2004/06/15 12:17:05 nscollins Exp $
+! $Id: ESMF_CompCreateUTest.F90,v 1.8 2004/06/15 15:54:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,8 +114,7 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !Commented out because it crashes
-    ! Bug Report 969251 opened.
+    !EX_UTest
 !   !  Test printing a component
 
     call ESMF_GridCompPrint(comp1, rc=rc)
