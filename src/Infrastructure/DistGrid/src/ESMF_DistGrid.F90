@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.73 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.74 2003/09/12 22:34:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.73 2003/09/04 22:24:21 cdeluca Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.74 2003/09/12 22:34:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1620,7 +1620,9 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global1D, local1D, &
-                                                 global2D, local2D, rc)
+                                                 global2D, local2D, &
+                                                 globalAI1D, localAI1D, &
+                                                 globalAI2D, localAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), intent(in) :: distgrid
@@ -1628,6 +1630,10 @@
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: local2D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  globalAI1D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: localAI1D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  globalAI2D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: localAI2D
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1649,16 +1655,26 @@
 !     \item[[local2D]]
 !          Two-dimensional Array of local identifiers corresponding to
 !          global identifiers.
+!     \item[{[globalAI1D]}]
+!          One-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI1D]}]
+!          One-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[globalAI2D]}]
+!          Two-dimensional array of global AxisIndices to be translated.
+!     \item[{[localAI2D]}]
+!          Two-dimensional array of local AxisIndices corresponding to global AIs.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
+! TODO: figure out the right way to translate AI's - should 1D refer to a number of AIs or rank?
+
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
-      integer :: i, base, l1, r1, l2, r2
+      integer :: i, j, base, l1, r1, l2, r2, local_count
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1726,6 +1742,50 @@
           endif
         enddo
   
+      endif
+
+!     1-D AxisIndex translation here
+      if(present(globalAI1D)) then
+!       make sure local AI array is present as well
+        if(.not. present(localAI1D)) then
+          print *, "ERROR in ESMF_DistGridGlobalToLocal: local array not ", &
+                   "present"
+          return
+        endif
+!       make sure array lengths are the same
+        if(size(globalAI1D) .NE. size(localAI1D)) then
+          print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not ", &
+                   "equal"
+          return
+        endif
+        do i = 1, size(globalAI1D)
+          localAI1D(i)%min = globalAI1D(i)%min - distgrid%MyDE%global_start(i)
+          localAI1D(i)%max = globalAI1D(i)%max - distgrid%MyDE%global_start(i)
+          localAI1D(i)%stride = localAI1D(i)%max - localAI1D(i)%min + 1
+        enddo
+      endif
+
+!     2-D AxisIndex translation here
+      if(present(globalAI2D)) then
+!       make sure local ai array is present as well
+        if(.not. present(localAI2D)) then
+          print *, "ERROR in ESMF_DistGridGlobalToLocal: local array not ", &
+                   "present"
+          return
+        endif
+!       make sure array lengths are the same
+        if(size(globalAI2D) .NE. size(localAI2D)) then
+          print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not ", &
+                   "equal"
+          return
+        endif
+        do j = 1, size(globalAI2D,2)
+          do i = 1, size(globalAI2D,1)
+            localAI2D(i,j)%min = globalAI2D(i,j)%min - distgrid%global_start(i,j)
+            localAI2D(i,j)%max = globalAI2D(i,j)%max - distgrid%global_start(i,j)
+            localAI2D(i,j)%stride = localAI2D(i,j)%max - localAI2D(i,j)%min + 1
+          enddo
+        enddo
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
