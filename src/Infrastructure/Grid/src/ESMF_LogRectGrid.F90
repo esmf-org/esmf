@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.124 2004/12/17 19:40:16 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.125 2004/12/18 16:40:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.124 2004/12/17 19:40:16 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.125 2004/12/18 16:40:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -6623,7 +6623,7 @@
 
       integer :: localrc                          ! Error status
       integer :: i, i1, j1
-      integer, dimension(:), allocatable :: counts, cornerCounts
+      integer :: counts(1), cornerCounts(2)
       logical :: dummy
       real(ESMF_KIND_R8) :: cornerUse11, cornerUse12, cornerUse21, cornerUse22
       real(ESMF_KIND_R8), dimension(:  ), pointer :: center, center1, center2
@@ -6636,10 +6636,10 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! allocate arrays
-      allocate(counts(1), &
-               cornerCounts(2), &
-               centerArray(dimCount), &
-               cornerArray(dimCount), stat=localrc)
+      allocate(centerArray(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      allocate(cornerArray(dimCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "local arrays", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -6916,10 +6916,6 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
-      deallocate(cornerCounts, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating cornerCounts", &
-                                     ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
