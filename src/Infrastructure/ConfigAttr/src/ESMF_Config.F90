@@ -1206,11 +1206,8 @@
       integer function index_ (string,tok)
 
       implicit NONE
+
 !-------------------------------------------------------------------------
-!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
-!-------------------------------------------------------------------------
-!BOP
-!
 ! !ROUTINE: index_ Extension of the Fortran 77 intrinsic "index" for
 !  "string" (input) with length that can exceed 2**15-1 (=MAXLEN).  
 !
@@ -1229,8 +1226,6 @@
 ! !REVISION HISTORY:
 !
 !  2001Apr25   G. Gaspari   Original code.
-!
-!EOP
 !-------------------------------------------------------------------------
       integer idx, i, n, nlen, lt, ibot, itop
       integer, parameter :: MAXLEN = 32767   ! max size of signed 2-byte integer
@@ -1256,10 +1251,8 @@
 
       implicit NONE
 
+
 !-------------------------------------------------------------------------
-!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
-!-------------------------------------------------------------------------
-!BOP
 !
 ! !ROUTINE:  ESMF_Config_Trim() - Removes leading blanks from strings.
 !
@@ -1284,8 +1277,6 @@
 ! !REVISION HISTORY: 
 !
 !  19Jun96   da Silva   Original code.
-!
-!EOP
 !-------------------------------------------------------------------------
 
       integer     ib, i
@@ -1312,11 +1303,8 @@
 
       implicit NONE
 
-!-------------------------------------------------------------------------
-!         NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
-!-------------------------------------------------------------------------
-!BOP
-!
+
+!-------------------------------------------------------------------------!
 ! !ROUTINE:  ESMF_CONFIG_Pad() --- Pad strings.
 ! 
 ! !DESCRIPTION: 
@@ -1345,8 +1333,6 @@
 ! !REVISION HISTORY: 
 !
 !  19Jun96   da Silva   Original code.
-!
-!EOP
 !-------------------------------------------------------------------------
 
       integer i
@@ -1375,9 +1361,8 @@
 
 
 
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
-!BOP -------------------------------------------------------------------
+
+!-----------------------------------------------------------------------
 !
 ! !IROUTINE: luavail - locate the next available unit
 !
@@ -1403,7 +1388,7 @@
 !
 ! 	: Jing Guo, [01-Apr-94]
 ! 		+ Initial code.
-!EOP ___________________________________________________________________
+!-----------------------------------------------------------------------
 
   character(len=*),parameter :: myname_=myname//'::luavail'
 
@@ -1458,12 +1443,7 @@ end function luavail
 
 
 
-
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
 !-----------------------------------------------------------------------
-!BOP
-!
 ! !IROUTINE: opntext - portablly open a text file
 !
 ! !DESCRIPTION:
@@ -1486,9 +1466,8 @@ end function luavail
 !
 !	02Feb95 - Jing G. - First version included in PSAS and libpsas.a
 ! 	09Oct96 - J. Guo  - modified to allow assign() call under UNICOS
-!			  = and now, it is a module in Fortran 90.
-!EOP
-!_______________________________________________________________________
+!-----------------------------------------------------------------------
+!
 
 		! local parameter
 	character(len=*),parameter :: myname_=myname//'::opntext'
@@ -1539,10 +1518,8 @@ end function luavail
 
 	end subroutine opntext
 
-!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-!       NASA/GSFC, Data Assimilation Office, Code 910.3, GEOS/DAS      !
+
 !-----------------------------------------------------------------------
-!BOP
 !
 ! !IROUTINE: clstext - close a text file opend with an opntext() call
 !
@@ -1559,8 +1536,7 @@ end function luavail
 
 ! !REVISION HISTORY:
 ! 	09Oct96 - J. Guo	- (to do)
-!EOP
-!_______________________________________________________________________
+!-----------------------------------------------------------------------
           character(len=*), parameter :: myname_ = myname//'::clsitext'
           Character(Len=6) :: status_
 
