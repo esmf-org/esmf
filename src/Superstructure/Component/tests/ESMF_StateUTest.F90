@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.3 2003/03/21 21:52:50 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.4 2003/03/21 23:56:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.3 2003/03/21 21:52:50 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.4 2003/03/21 23:56:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! Some common definitions.  This requires the C preprocessor.
@@ -48,10 +48,13 @@
 
 !     ! Local variables
       integer :: x, y, rc
-      character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
-      type(ESMF_Field) :: field1
-      type(ESMF_Bundle) :: bundle1, bundle2(1)
+      character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname, bname
+      character(ESMF_MAXSTR) :: fieldname, fname
+      type(ESMF_Field) :: field1, field2
+      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1)
       type(ESMF_State) :: state1, state2, state3, state4
+      type(ESMF_Array) :: array1
+      real, dimension(:,:), pointer :: f90ptr1
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -194,7 +197,7 @@ print *, "StateUnitTest EXHAUSTIVE"
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      ! Test adding Bundle to State
+      ! Test adding Bundle to a State
       bundlename = "Temperature"
       bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
       write(failMsg, *) ""
@@ -207,6 +210,32 @@ print *, "StateUnitTest EXHAUSTIVE"
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      ! Test adding Field to a State
+      fieldname = "Humidity"
+      field1 = ESMF_FieldCreateNoData(fieldname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1, field1, rc)
+      write(name, *) "Adding a Field to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test adding an Array to a State
+      allocate(f90ptr1(10,20))
+      array1 = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an Array Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1,array1, rc)
+      write(name, *) "Adding an Array to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       ! Test printing of State
       call  ESMF_StatePrint(state1, rc=rc)
       write(failMsg, *) ""
@@ -215,6 +244,29 @@ print *, "StateUnitTest EXHAUSTIVE"
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      ! Test getting Bundle from State
+      call  ESMF_StateGetData(state1, bundlename, bundle2(1), rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Bundle from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_BundleGetName(bundle2(1), bname, rc)
+      write(name, *) "Getting Bundle from a State Test continued"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test getting Field from State
+      call  ESMF_StateGetData(state1, fieldname, field2, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting Field from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGetName(field2, fname, rc)
+      write(name, *) "Getting Field from a State Test continued"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       ! Test Creation of an export State with Bundle
       ! This code crashes, it will be commented out until
       ! bug 707751 is fixed.
@@ -224,12 +276,12 @@ print *, "StateUnitTest EXHAUSTIVE"
       ! x = 1
       ! bundle2(1) = ESMF_BundleCreate(bundlename, rc=rc)
       ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
-				!bundles=bundle2, statename=statename, rc=rc)
+			! bundles=bundle2, statename=statename, rc=rc)
       ! write(failMsg, *) ""
       ! write(name, *) "Creating an export State with a Bundle Test"
       ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
-      ! call  ESMF_StatePrint(state2, rc=rc)
+                     ! name, failMsg, result, ESMF_SRCLINE)
+       ! call  ESMF_StatePrint(state2, rc=rc)
 
       !------------------------------------------------------------------------
       ! Test Destruction of State
