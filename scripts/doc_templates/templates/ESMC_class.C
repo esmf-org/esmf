@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 eschwab Exp $
+// $Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 eschwab Exp $
 //
 // ESMC <Class> method code (body) file
 //
@@ -17,6 +17,9 @@
 // < insert a paragraph or two explaining what you'll find in this file >
 //
 //-------------------------------------------------------------------------
+//
+// insert any higher level or system includes here
+#include <ESMC_Util.h>
 
 // associated class definition file
 #include <ESMC_<Class>.h>
@@ -24,7 +27,7 @@
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 eschwab Exp $";
+static const char *const version = "$Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -41,6 +44,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 //
 // !INTERFACE:
       ESMC_<Class> *ESMC_<Class>::ESMC_<Class>Create(
+//
+// !RETURN VALUE:  pointer to newly allocated ESMC_<Class>
 //
 // !ARGUMENTS:
       int arg1,            // in
@@ -72,6 +77,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Destroy(void) {
 //
+// !RETURN VALUE:  int error return code
+//
 // !ARGUMENTS: none
 //
 // !DESCRIPTION:
@@ -93,6 +100,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 //
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Construct(
+//
+// !RETURN VALUE:  int error return code
 //
 // !ARGUMENTS:
       int arg1,            // in
@@ -123,6 +132,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Destruct(void) {
 //
+// !RETURN VALUE:  int error return code
+//
 // !ARGUMENTS: none
 //
 // !DESCRIPTION:
@@ -147,6 +158,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 //
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Init(
+//
+// !RETURN VALUE:  int error return code
 //
 // !ARGUMENTS:
       int arg1,            // in
@@ -175,6 +188,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>GetConfig(
 //
+// !RETURN VALUE:  int error return code
+//
 // !ARGUMENTS:
       ESMC_<Class>Config *config) const {  // out - resources
 //
@@ -197,6 +212,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>SetConfig(
 //
+// !RETURN VALUE:  int error return code
+//
 // !ARGUMENTS:
       const ESMC_<Class>Config *config) {     // in - resources
 //
@@ -218,6 +235,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 //
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Get<Value>(
+//
+// !RETURN VALUE:  int error return code
 //
 // !ARGUMENTS:
       <value type> *value) const {     // out - value
@@ -242,6 +261,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Set<Value>(
 //
+// !RETURN VALUE:  int error return code
+//
 // !ARGUMENTS:
       <value type> value) {     // in - value
 //
@@ -264,6 +285,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 //
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Validate(
+//
+// !RETURN VALUE:  int error return code
 //
 // !ARGUMENTS:
       const char *options) const {    // in
@@ -289,6 +312,8 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Print(
 //
+// !RETURN VALUE:  int error return code
+//
 // !ARGUMENTS:
       const char *options) const {     //  in
 //
@@ -304,3 +329,53 @@ static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 
 //
 
 } // end ESMC_<Class>Print
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_<Class> - native C++ constructor
+//
+// !INTERFACE:
+      ESMC_<Class>::ESMC_<Class>(
+//
+// !RETURN VALUE:  none
+//
+// !ARGUMENTS:
+      int arg1,            // in
+      int arg2,            // in
+      const char *arg3) {  // in
+//
+// !DESCRIPTION:
+//      Calls standard ESMF deep or shallow methods for initialization
+//      with default or passed-in values
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+} // end ESMC_<Class>
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ~ESMC_<Class> - native C++ destructor
+//
+// !INTERFACE:
+      ESMC_<Class>::~ESMC_<Class>(
+//
+// !RETURN VALUE:  none
+//
+// !ARGUMENTS:  none
+//
+// !DESCRIPTION:
+//      Calls standard ESMF deep or shallow methods for destruction
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+} // end ~ESMC_<Class>

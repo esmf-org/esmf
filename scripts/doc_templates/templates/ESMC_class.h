@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.4 2002/10/10 23:51:55 eschwab Exp $
+// $Id: ESMC_class.h,v 1.5 2002/10/11 01:49:06 eschwab Exp $
 //
 // ESMF <Class> C++ definition include file
 //
@@ -94,6 +94,10 @@ class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
 // required methods inherited and overridden from the ESMC_Base class
     int ESMC_<Class>Validate(const char *options) const;
     int ESMC_<Class>Print(const char *options) const;
+
+// native C++ constructors/destructors
+	ESMC_<Class>(args);
+	~ESMC_<Class>(args);
   
 // < list the rest of the public interface methods here >
   
