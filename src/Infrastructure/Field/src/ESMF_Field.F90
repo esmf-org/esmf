@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.169 2004/06/16 15:56:10 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.170 2004/06/17 11:34:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.169 2004/06/16 15:56:10 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.170 2004/06/17 11:34:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2297,7 +2297,8 @@
 
         if (present(rc)) rc = ESMF_FAILURE
 
-        dummy = ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
+        !nsc dummy = ESMF_LogWrite("Field Print:", ESMF_LOG_INFO)
+        write(*,*) "Field Print:"
         if (.not. associated(field%ftypep)) then
         !jw  dummy = ESMF_LogWrite("Empty or Uninitialized Field", ESMF_LOG_INFO)
           write(*,*) "Empty or Uninitialized Field"
@@ -2307,10 +2308,9 @@
 
         fp => field%ftypep
         call ESMF_BasePrint(fp%base, str, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          if (present(rc)) rc = ESMF_FAILURE
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         call ESMF_StatusString(fp%fieldstatus, str, status)
       !jw  write(msgbuf, *)  "Field status = ", trim(str)
@@ -2318,16 +2318,14 @@
         write(*, *)  "Field status = ", trim(str)
 
         if (fp%fieldstatus .ne. ESMF_STATUS_READY) then
-          if (present(rc)) rc = ESMF_FAILURE
+          if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
 
         call c_ESMC_GetName(fp%base, name, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          write(msgbuf, *)  "ERROR in ESMF_FieldGetName"
-          dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-          return
-        endif 
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       !jw  write(msgbuf, *)  "  Name = '",  trim(name), "'"
       !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "  Name = '",  trim(name), "'"
@@ -2340,17 +2338,19 @@
            call ESMF_GridPrint(fp%grid, "", status)
         endif
 
+
         call ESMF_StatusString(fp%datastatus, str, status)
       !jw  write(msgbuf, *)  "Data status = ", trim(str)
       !jw  dummy = ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
         write(*, *)  "Data status = ", trim(str)
+        !TODO: add code here to print more info
         if (fp%datastatus .eq. ESMF_STATUS_READY) then 
            call ESMF_ArrayPrint(fp%localfield%localdata, "", status)
         endif
 
         call ESMF_FieldDataMapPrint(fp%mapping, "", status)
 
-        !TODO: add code here to print more info
+
 
         ! global field contents
         !type (ESMF_IOSpec) :: iospec             ! iospec values
