@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.1 2004/12/14 22:09:48 nscollins Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.2 2004/12/20 17:33:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !\subsubsection{Invoking Components on a subset of the Parent PETs}
 !   
 !  Here we register the subroutines which should be called for initialization.
-!  Then we call ESMF_GridCompInitialize() on all PETs, but the code runs
+!  Then we call ESMF\_GridCompInitialize() on all PETs, but the code runs
 !  only on the PETs given in the petList when the Component was created.
 !
 !  Because this example is so short, we call the entry point code
