@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.9 2004/03/05 00:58:17 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.10 2004/03/08 20:02:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.9 2004/03/05 00:58:17 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.10 2004/03/08 20:02:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,8 @@
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
       type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2
       type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
-      type(ESMF_Calendar) :: gregorianCalendar, noLeapCalendar, day360Calendar
+      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
+                             noLeapCalendar, day360Calendar
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       type(ESMF_TimeInterval) :: absoluteTime
       integer(ESMF_KIND_I8) :: advanceCounts, year, days2, month, minute, second
@@ -86,6 +87,8 @@
                                               ESMF_CAL_NOLEAP, rc)
       day360Calendar = ESMF_CalendarCreate("360 Day", &
                                               ESMF_CAL_360DAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate("Julian Day", &
+                                              ESMF_CAL_JULIANDAY, rc)
 
       ! ----------------------------------------------------------------------------
       ! Gregorian Leap year 2004 tests
@@ -892,6 +895,59 @@
 
       print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
 
+      ! ----------------------------------------------------------------------------
+      ! Julian Day calendar interval tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Julian Day Calendar Interval increment d=1200 by d=34 Test"
+      write(failMsg, *) " Did not return d=1234 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, d=1200, h=12, m=17, s=58, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=34, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, d=days, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((days==1234 .and. H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Julian Day Calendar Interval decrement d=4350 by d=29 Test"
+      write(failMsg, *) " Did not return d=4321 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, d=4350, h=12, m=17, s=58, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=29, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, d=days, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((days==4321 .and. H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Julian Day Calendar Interval increment d=4350 by d=-29 Test"
+      write(failMsg, *) " Did not return d=4350 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, d=4350, h=12, m=17, s=58, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=-29, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, d=days, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((days==4321 .and. H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Julian Day Calendar Interval decrement d=1200 by d=-34 Test"
+      write(failMsg, *) " Did not return d=1234 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, d=1200, h=12, m=17, s=58, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=-34, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, d=days, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((days==1234 .and. H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days, " ", H, ":", M, ":", S
+
+      call ESMF_CalendarDestroy(julianDayCalendar)
       call ESMF_CalendarDestroy(day360Calendar)
       call ESMF_CalendarDestroy(noLeapCalendar)
       call ESMF_CalendarDestroy(gregorianCalendar)
