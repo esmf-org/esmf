@@ -1,10 +1,14 @@
-// $Id: ESMC_class.h,v 1.7 2002/10/11 22:50:11 eschwab Exp $
+// $Id: ESMC_class.h,v 1.8 2002/10/14 21:53:58 cdeluca Exp $
 //
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+
 // ESMF <Class> C++ definition include file
-//
-// < Something here from legal about the status of the code, like:
-//  This code developed by NASA/NCAR/ESMF whatever, and is covered by
-//  the terms of the GNU public license.  See license file for more details. >
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)

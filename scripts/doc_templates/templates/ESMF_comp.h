@@ -1,11 +1,14 @@
-! $Id: ESMF_comp.h,v 1.1 2002/10/07 16:28:55 eschwab Exp $
+! $Id: ESMF_comp.h,v 1.2 2002/10/14 21:54:00 cdeluca Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
 !
 ! ESMF <Comp> include file for F90
-!
-! < Something here from legal about the status of the code, like:
-!  This code developed by NASA/NCAR/ESMF whatever, and is covered by
-!  the terms of the GNU public license.  See license file for more details. >
-!
 
 ! these lines prevent this file from being read more than once if it
 ! ends up being included multiple times

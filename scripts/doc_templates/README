@@ -30,8 +30,8 @@ The templates that are currently included are:
                                    ESMC_class.h              README_REF
                                    ESMC_class.C
     Requirements document (LaTeX)  comp_reqdoc.tex           README_REQ
-    Architecture document (LaTeX)  comp_archdoc.tex	         README_ARCH
-    Design document (LaTeX)	       comp_desdoc.tex	         README_DES
+    Architecture document (LaTeX)  comp_archdoc.tex	     README_ARCH
+    Design document (LaTeX)	   comp_desdoc.tex	     README_DES
     Reference manual               comp_refdoc.tex           README_REF    
     User's guide                   comp_usrdoc.tex           README_USR
     Physics                        comp_physdoc.tex          README_PHYS
@@ -42,13 +42,10 @@ The ProTeX website:
 http://dao.gsfc.nasa.gov/dao/software/ProTeX
 has additional templates and examples.
 
-The "examples" directory contains a number of sample documents that were 
-created using the templates.  Links to the web-browsable form of these sample 
-documents are included in the ESMF Software Developer's Guide Documentation 
-Section.  Further discussion of the documents is also included in the 
-Developer's Guide:
+Further discussion of the documents is included in the Earth System
+Modeling Framework Developer's Guide:
 
-http://www.esmf.ucar.edu -> Development Documents
+http://www.esmf.ucar.edu -> Milestones and Archives -> Milestone A
 
 2. Implied development cycle
    -------------------------
@@ -84,14 +81,14 @@ The implementation language can be one of the following:
 This will create a new component directory tree if it does not already exist:
 
    <comp>/doc         - documentation directory (see do_newdoc below)
-   <comp>/examples    - for your example code
+   <comp>/examples    - for your example and test code
    <comp>/include     - for your include files
    <comp>/src         - for your implementation source code files
    <comp>/interface   - for your interface (wrapper) source code files
 
 Prologued code template files as well as makefile templates will be placed
-in the appropriate directories.  If you choose F90 as you implementation
-language, then an F90 code template is placed in the src directory and a
+in the appropriate directories.  If you choose F90 as your implementation
+language, then a F90 code template is placed in the src directory and a
 C++ .C template placed in the interface directory.  Also a corresponding
 C++ .h file is placed in the include directory.  Similarly, if you choose
 C++ as your implementation language, a .h template is placed in the
@@ -128,7 +125,7 @@ The document type can be one of the following:
 	des  - design document
 	ref  - reference manual
 	usr  - user's guide
-    phys - physical description
+        phys - physical description
 	all  - templates and READMEs for all documents
 
 If the directory does not exist, the script will create a new directory 
@@ -142,4 +139,7 @@ See individual README's for further explanation on how to prepare specific
 documents.
 
 ================================================================================
-C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
+C. DeLuca (cdeluca@ucar.edu) - initial version                 March 13, 2000
+E. Schwab (eschwab@ucar.edu) - added do_newcomp / do_newclass  October 11, 2002
+
+

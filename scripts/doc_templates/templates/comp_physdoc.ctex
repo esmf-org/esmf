@@ -1,4 +1,12 @@
-% $Id: comp_physdoc.ctex,v 1.2 2002/10/07 18:18:07 nscollins Exp $
+% $Id: comp_physdoc.ctex,v 1.3 2002/10/14 21:54:17 cdeluca Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
 
 #ifdef STANDALONE
 \documentclass[]{article}

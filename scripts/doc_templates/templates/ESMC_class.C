@@ -1,11 +1,14 @@
-// $Id: ESMC_class.C,v 1.7 2002/10/11 22:50:11 eschwab Exp $
+// $Id: ESMC_class.C,v 1.8 2002/10/14 21:53:56 cdeluca Exp $
 //
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+
 // ESMC <Class> method code (body) file
-//
-// < Something here from legal about the status of the code, like:
-//  This code developed by NASA/NCAR/ESMC whatever, and is covered by
-//  the terms of the GNU public license.  See license file for more details. >
-//
 
 //-------------------------------------------------------------------------
 //
@@ -27,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_class.C,v 1.7 2002/10/11 22:50:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_class.C,v 1.8 2002/10/14 21:53:56 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //

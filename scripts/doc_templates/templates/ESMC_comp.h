@@ -1,11 +1,14 @@
-// $Id: ESMC_comp.h,v 1.1 2002/10/07 16:28:55 eschwab Exp $
+// $Id: ESMC_comp.h,v 1.2 2002/10/14 21:53:59 cdeluca Exp $
 //
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+
 // ESMC <Comp> include file for C++
-//
-// < Something here from legal about the status of the code, like:
-//  This code developed by NASA/NCAR/ESMC whatever, and is covered by
-//  the terms of the GNU public license.  See license file for more details. >
-//
 
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
@@ -51,3 +54,22 @@
 
 
 #endif  // ESMC_<Comp>_h
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

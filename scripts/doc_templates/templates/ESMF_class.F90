@@ -1,10 +1,14 @@
-! $Id: ESMF_class.F90,v 1.7 2002/10/11 17:11:45 eschwab Exp $
+! $Id: ESMF_class.F90,v 1.8 2002/10/14 21:53:59 cdeluca Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
 !
 ! ESMF <Class> Module
-!
-! < Something here from legal about the status of the code, like:
-!  This code developed by NASA/NCAR/ESMF whatever, and is covered by
-!  the terms of the GNU public license.  See license file for more details. >
 !
 ! (all lines below between the !BOP and !EOP markers will be included in 
 !  the automated document processing.)
@@ -96,7 +100,7 @@
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.7 2002/10/11 17:11:45 eschwab Exp $
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.8 2002/10/14 21:53:59 cdeluca Exp $
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
