@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.8 2004/04/21 22:48:59 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.9 2004/04/22 16:33:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.8 2004/04/21 22:48:59 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.9 2004/04/22 16:33:21 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -434,8 +434,8 @@
       !NEX_UTest
       ! Test Setting the Stop Time
       write(failMsg, *) " Returned ESMF_FAILURE"
-      write(name, *) "Set Start Time Initialization Test"
-      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=13, &
+      write(name, *) "Set Stop Time Initialization Test"
+      call ESMF_TimeSet(stopTime, yy=2003, mm=3, dd=13, &
                                    h=18, m=45, s=27, &
                                    calendarType=ESMF_CAL_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -483,7 +483,6 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       !Test Alarm will ring next
-      call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
       write(name, *) "Alarm will ring next Test"
