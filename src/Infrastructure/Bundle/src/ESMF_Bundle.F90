@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.46 2004/06/08 13:40:24 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.47 2004/06/08 22:12:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,7 +178,7 @@
 
        public ESMF_BundleGet          ! Get Bundle information
 
-       public ESMF_BundleAddAttribute       ! Set and Get Attributes
+       public ESMF_BundleAddAttribute       ! Set and Get attributes
        public ESMF_BundleGetAttribute       !   interface to Base class
 
        public ESMF_BundleGetAttributeCount  ! number of attribs
@@ -307,7 +307,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleAddAttribute - Set a Bundle Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleAddAttribute 
@@ -330,7 +330,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Get a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleGetAttribute 
@@ -353,7 +353,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle Attribute
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle attribute
 !
 ! !INTERFACE:
       interface ESMF_BundleGetAttributeInfo
@@ -406,7 +406,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddIntAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -427,9 +427,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The integer value of the Attribute.
+!           The integer value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -463,7 +463,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddIntListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -485,11 +485,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The integer values of the Attribute.
+!           The integer values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -531,7 +531,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddRealAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a real Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -552,9 +552,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The real value of the Attribute.
+!           The real value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -588,7 +588,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddRealListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -610,11 +610,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The real values of the Attribute.
+!           The real values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -656,7 +656,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddLogicalAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a logical Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -677,9 +677,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The logical true/false value of the Attribute.
+!           The logical true/false value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -713,7 +713,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -735,11 +735,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The logical true/false values of the Attribute.
+!           The logical true/false values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -781,7 +781,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddCharAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a character Attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Set a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -802,9 +802,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The character value of the Attribute.
+!           The character value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -899,12 +899,12 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddField()
-      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fields, rc)
+      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fieldList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle        
       integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
+      type(ESMF_Field), dimension(:), intent(in) :: fieldList
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
@@ -922,7 +922,7 @@ end function
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
 !           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
+!     \item [fieldList]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
@@ -951,7 +951,7 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
     
-      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fieldList, rc)
       
       end subroutine ESMF_BundleAddFieldList
 
@@ -964,7 +964,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleCreate()
-      function ESMF_BundleCreateNew(fieldCount, fields, &
+      function ESMF_BundleCreateNew(fieldCount, fieldList, &
                                   packflag, bundleInterleave, name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -972,7 +972,7 @@ end function
 !
 ! !ARGUMENTS:
       integer, intent(in) :: fieldCount           
-      type(ESMF_Field), dimension (:) :: fields
+      type(ESMF_Field), dimension (:) :: fieldList
       type(ESMF_PackFlag), intent(in), optional :: packflag 
       type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
       character (len = *), intent(in), optional :: name 
@@ -993,7 +993,7 @@ end function
 !      Number of fields to be added to the {\tt ESMF\_Bundle}.
 !      Must be equal to or less than the number of 
 !      {\tt ESMF\_Field}s in the following argument.
-!   \item [fields]
+!   \item [fieldList]
 !      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
 !      items will be added to the {\tt ESMF\_Bundle}.
 !   \item [{[packflag]}]
@@ -1039,7 +1039,7 @@ end function
                                        ESMF_CONTEXT, rc)) return
 
 !     Call construction method to allocate and initialize bundle internals.
-      call ESMF_BundleConstructNew(btypep, fieldCount, fields, &
+      call ESMF_BundleConstructNew(btypep, fieldCount, fieldList, &
                                    packflag, bundleInterleave, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1350,7 +1350,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetIntAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1371,9 +1371,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The integer value of the named Attribute.
+!           The integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1407,7 +1407,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetIntListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer list Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1429,11 +1429,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values in the list.
 !     \item [value]
-!           The list (fortran array) of integer values of the named Attribute.
+!           The list (fortran array) of integer values of the named attribute.
 !           The list must be at least {\tt count} item long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1476,7 +1476,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetRealAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1497,9 +1497,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The real value of the named Attribute.
+!           The real value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1532,7 +1532,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetRealListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real list Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1554,11 +1554,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values in the list.
 !     \item [value]
-!           The list (fortran array) of real values of the named Attribute.
+!           The list (fortran array) of real values of the named attribute.
 !           The list must be at least {\tt count} item long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1601,7 +1601,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetLogicalAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1622,9 +1622,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The logical value of the named Attribute.
+!           The logical value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1658,7 +1658,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1680,11 +1680,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values in the list.
 !     \item [value]
-!           The list (fortran array) of logical values of the named Attribute.
+!           The list (fortran array) of logical values of the named attribute.
 !           The list must be at least {\tt count} item long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1727,7 +1727,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetCharAttr"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character Attribute
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
@@ -1749,9 +1749,9 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The character value of the named Attribute.
+!           The character value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1784,7 +1784,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetAttributeCount"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of Attributes
+! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetAttributeCount(bundle, count, rc)
@@ -1835,16 +1835,16 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetAttrInfoByName"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an Attribute by name
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an attribute by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByName(bundle, name, type, count, rc)
+      subroutine ESMF_BundleGetAttrInfoByName(bundle, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -1857,11 +1857,11 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the Attribute to query.
-!     \item [type]
-!           The type of the Attribute.
+!           The name of the attribute to query.
+!     \item [datatype]
+!           The datatype of the attribute.
 !     \item [count]
-!           The number of items in this Attribute.  For character types,
+!           The number of items in this attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1889,7 +1889,7 @@ end function
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
       if (present(count)) count = localCount
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -1900,17 +1900,17 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetAttrInfoByNum"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an Attribute by number
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an attribute by number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByNum(bundle, num, name, type, count, rc)
+      subroutine ESMF_BundleGetAttrInfoByNum(bundle, num, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       integer, intent(in) :: num
       character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -1923,13 +1923,13 @@ end function
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [num]
-!           The number of the Attribute to query.
+!           The number of the attribute to query.
 !     \item [name]
-!           Returns the name of the Attribute.
-!     \item [type]
-!           Returns the type of the Attribute.
+!           Returns the name of the attribute.
+!     \item [datatype]
+!           Returns the datatype of the attribute.
 !     \item [count]
-!           Returns the number of items in this Attribute.  For character types,
+!           Returns the number of items in this attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1960,7 +1960,7 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
       if (present(count)) count = localCount
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -2590,7 +2590,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRead"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRead - Create a Bundle from an external source
 !
 ! !INTERFACE:
@@ -2617,7 +2617,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 
-!EOP
+!EOPI
 ! !REQUIREMENTS:  (which req number is this?)
 
 !
@@ -2634,7 +2634,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleReadRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleReadRestart - Read back a saved Bundle
 !
 ! !INTERFACE:
@@ -2663,7 +2663,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD2.5.10
 
 
@@ -2995,7 +2995,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleWriteRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleWriteRestart - Save Bundle in the quickest manner possible
 !
 ! !INTERFACE:
@@ -3022,7 +3022,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD2.5.10
 
 
