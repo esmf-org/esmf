@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.6 2003/05/02 14:11:05 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.7 2003/07/09 19:47:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.6 2003/05/02 14:11:05 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.7 2003/07/09 19:47:21 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -299,35 +299,31 @@ static int globalCount = 0;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AxisIndexInit - Initialize an AxisIndex object
+// !IROUTINE:  ESMC_AxisIndexSet - Initialize an AxisIndex object
 //
 // !INTERFACE:
-    int ESMC_AxisIndexInit(
+    int ESMC_AxisIndexSet(
 //
 // !RETURN VALUE:
 //    int return code
 // 
 // !ARGUMENTS:
      ESMC_AxisIndex *ai,
-     int l,
-     int r,
+     int min,
      int max,
-     int decomp, 
-     int gstart) {
+     int stride) {
 // 
 // !DESCRIPTION:
-//     Initialize an AxisIndex object.
+//     Initialize/set an AxisIndex object.
 //
 //EOP
 
      if (ai == NULL) 
          return ESMF_FAILURE;
 
-     ai->l = l;
-     ai->r = r;
+     ai->min = min;
      ai->max = max;
-     ai->decomp = decomp;
-     ai->gstart = gstart;
+     ai->stride = stride;
 
      return ESMF_SUCCESS;
 };
@@ -344,11 +340,9 @@ static int globalCount = 0;
 // 
 // !ARGUMENTS:
      ESMC_AxisIndex *ai,
-     int *l,
-     int *r,
      int *max,
-     int *decomp, 
-     int *gstart) {
+     int *max,
+     int *stride) {
 // 
 // !DESCRIPTION:
 //     Get values from an AxisIndex object.
@@ -358,11 +352,9 @@ static int globalCount = 0;
      if (ai == NULL) 
         return ESMF_FAILURE;
 
-     if (l) *l = ai->l;
-     if (r) *r = ai->r;
+     if (min) *min = ai->min;
      if (max) *max = ai->max;
-     if (decomp) *decomp = ai->decomp;
-     if (gstart) *gstart = ai->gstart;
+     if (stride) *stride = ai->stride;
 
      return ESMF_SUCCESS;
 };
@@ -394,11 +386,9 @@ static int globalCount = 0;
      if ((ai1 == NULL) || (ai2 == NULL))
         return ESMF_TF_FALSE;
 
-     if ((ai1->l != ai2->l) ||
-         (ai1->r != ai2->r) ||
+     if ((ai1->min != ai2->min) ||
          (ai1->max != ai2->max) ||
-         (ai1->decomp != ai2->decomp) ||
-         (ai1->gstart != ai2->gstart))
+         (ai1->stride != ai2->stride))
          return ESMF_TF_FALSE;
 
      return ESMF_TF_TRUE;
