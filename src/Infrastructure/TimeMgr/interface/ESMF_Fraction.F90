@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.2 2002/10/28 16:54:38 svasquez Exp $
+! $Id: ESMF_Fraction.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@
 !  include file.  anything public or esmf-wide should be up higher at
 !  the top level include files.
 
-#include <ESMF_TimeMgr.h>
+#include <ESMF_TimeMgr.inc>
 
 !------------------------------------------------------------------------------
 ! module definition
@@ -38,40 +38,34 @@
 !
 !
 ! !USES:
-		use ESMF_TypesMod
 !------------------------------------------------------------------------------
 
 !
 ! !PUBLIC TYPES:
-        implicit none
+      implicit none
 
-		type ESMF_Fraction
-			private
-			sequence
-                integer(int32) :: n    ! fractional numerator
-                integer(int32) :: d    ! fractional denominator
-		end type
+      type ESMF_Fraction
+      sequence
+      private
+        integer :: n    ! fractional numerator
+        integer :: d    ! fractional denominator
+      end type
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! !PUBLIC DATA MEMBERS:
 !
 ! !DESCRIPTION:
-!        Part of Time Manager F90 API wrapper of C++ implemenation
-!
-! !REVISION HISTORY:
-!
-!  09Aug02   Earl Schwab  Initial code.
-!
+!     Part of Time Manager F90 API wrapper of C++ implemenation
 
 !------------------------------------------------------------------------------
 
-	!contains
+!     contains
 
 !------------------------------------------------------------------------------
 
-	! wrappers to C++ fraction routines
+      ! wrappers to C++ fraction routines
 
 !EOP
 !===============================================================================
-	end module ESMF_FractionMod
+      end module ESMF_FractionMod

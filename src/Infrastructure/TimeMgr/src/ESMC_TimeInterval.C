@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.2 2002/10/15 03:26:28 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,14 +14,12 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ TimeInterval methods declared
-// in the companion file ESMC_TimeInterval.h
+// The code in this file implements the C++ {\tt TimeInterval} methods declared
+// in the companion file {\tt ESMC_TimeInterval.h}
 //
 //-------------------------------------------------------------------------
 
  // higher level, 3rd party or system includes
-#include <ESMC_Types.h>
- #include<ESMC_Util.h>
 
  // associated class definition file
  #include <ESMC_TimeInterval.h>
@@ -29,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.2 2002/10/15 03:26:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -44,32 +42,36 @@
 // Class ESMC_TimeInterval Methods
 //-------------------------------------------------------------------------
 
+#if 0
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntvInit - shallow class initializer 1
+// !IROUTINE:  ESMC_TimeIntervalInit - shallow class initializer 1
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntvInit(
+      int ESMC_TimeInterval::ESMC_TimeIntervalInit(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      int64 S,              // in - integer seconds
-      int32 Sn,             // in - fractional seconds, numerator
-      int32 Sd ) {          // in - fractional seconds, denominator
+      ESMF_IKIND_I8 S,              // in - integer seconds
+      int Sn,             // in - fractional seconds, numerator
+      int Sd,             // in - fractional seconds, denominator
+      ESMC_Calendar *Cal) { // in - optional associated calendar for
+                            //      calendar intervals
 //
 // !DESCRIPTION:
-//      Initialzes a TimeInterval with given values
+//      Initialzes a {\tt TimeInterval} with given values
 //
 //EOP
 // !REQUIREMENTS:
 
-	ESMC_Time::ESMC_TimeInit(S, Sn, Sd);
+	ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd);
 
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
-}  // end ESMC_TimeIntvInit
+}  // end ESMC_TimeIntervalInit
+#endif
 
 //-------------------------------------------------------------------------
 //BOP
@@ -85,7 +87,8 @@
 //    none
 //
 // !DESCRIPTION:
-//      Initializes a ESMC_TimeInterval with defaults via ESMC_Time base class
+//      Initializes an {\tt ESMC\_TimeInterval} with defaults via
+//      {\tt ESMC\_BaseTime} base class
 //
 //EOP
 // !REQUIREMENTS:
@@ -105,13 +108,14 @@
 //    none
 //
 // !ARGUMENTS:
-      int64 S,              // in - integer seconds
-      int32 Sn,             // in - fractional seconds, numerator
-      int32 Sd) :           // in - fractional seconds, denominator
-    ESMC_Time(S, Sn, Sd) {  // invoke ESMC_Time base class constructor
+      ESMF_IKIND_I8 S,              // in - integer seconds
+      int Sn,             // in - fractional seconds, numerator
+      int Sd) :           // in - fractional seconds, denominator
+    ESMC_BaseTime(S, Sn, Sd) {  // invoke ESMC_BaseTime base class constructor
 //
 // !DESCRIPTION:
-//      Initializes a ESMC_TimeInterval via ESMC_Time base class
+//      Initializes a {\tt ESMC\_TimeInterval} via {\tt ESMC\_BaseTime}
+//      base class
 //
 //EOP
 // !REQUIREMENTS:
@@ -132,7 +136,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Default ESMC_TimeInterval destructor
+//      Default {\tt ESMC\_TimeInterval} destructor
 //
 //EOP
 // !REQUIREMENTS:

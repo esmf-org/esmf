@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.2 2002/10/15 23:29:53 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.3 2003/02/11 19:03:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,8 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_TimeMgr.h>
- #include <ESMC_Types.h>
+ #include <ESMF_TimeMgr.inc>
  #include <pthread.h>
 
 //-------------------------------------------------------------------------
@@ -36,24 +35,25 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ Clock members and declares method
-// signatures (prototypes).  The companion file ESMC_Clock.C contains
-// the definitions (full code bodies) for the Clock methods.
+// The code in this file defines the C++ {\tt Clock} members and declares
+// method signatures (prototypes).  The companion file {\tt ESMC\_Clock.C}
+// contains the definitions (full code bodies) for the {\tt Clock} methods.
 //
-// The clock class encapsulates the essential ESM component requirement of
-// tracking and time-stepping model time.  It also checks associated alarms to
-// trigger their ringing state.
+// The {\tt Clock} class encapsulates the essential ESM component requirement
+// of tracking and time-stepping model time.  It also checks associated alarms
+// to trigger their ringing state.
 //
-// The Clock class contains TimeInstants and a TimeInterval to track and time
-// step model time.  For tracking, TimeInstants are instantiated for the
-// current time, stop time, start time, reference time, and previous time. For
-// time stepping, a single TimeInterval is instantiated.  There is also an
-// integer counter for keeping track of the number of timesteps, and an array
-// of associated alarms.  Methods are defined for advancing the clock (perform
-// a time step), checking if the stop time is reached, synchronizing with a
-// real-time clock, and getting values of the class attributes defined above.
-// After performing the time step, the advance method will iterate over the
-// alarm list and return a list of any active alarms.
+// The {\tt Clock} class contains {\tt Time} instants and a {\tt TimeInterval}
+// to track and time step model time.  For tracking, {\tt Time} instants are
+// instantiated for the current time, stop time, start time, reference time,
+// and previous time.  For time stepping, a single {\tt TimeInterval} is
+// instantiated.  There is also an integer counter for keeping track of the
+// number of timesteps, and an array of associated alarms.  Methods are
+// defined for advancing the clock (perform a time step), checking if the
+// stop time is reached, synchronizing with a real-time clock, and getting
+// values of the class attributes defined above. After performing the time
+// step, the advance method will iterate over the alarm list and return a
+// list of any active alarms.
 //
 // Notes:
 //    TMG 3.2:  Create multiple clocks by simply instantiating this class
@@ -64,12 +64,10 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-//#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+ #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
  #include <ESMC_TimeInterval.h>
- #include <ESMC_TimeInstant.h>
+ #include <ESMC_Time.h>
  #include <ESMC_Alarm.h>
-
- #define MAX_ALARMS 10    // maximum alarms per clock
 
 // !PUBLIC TYPES:
  class ESMC_Clock;
@@ -82,14 +80,18 @@
 
   private:   // corresponds to F90 module 'type ESMF_Clock' members
     ESMC_TimeInterval TimeStep;
-    ESMC_TimeInstant  StartTime;
-    ESMC_TimeInstant  StopTime;
-    ESMC_TimeInstant  RefTime;   // reference time
-    ESMC_TimeInstant  CurrTime;  // current time
-    ESMC_TimeInstant  PrevTime;  // previous time
+    ESMC_Time         StartTime;
+    ESMC_Time         StopTime;
+    ESMC_Time         RefTime;   // reference time
+    ESMC_Time         CurrTime;  // current time
+    ESMC_Time         PrevTime;  // previous time
 
-    uint32     		  AdvanceCount;
-    ESMC_Alarm *AlarmList[MAX_ALARMS];    // associated alarms
+    ESMF_IKIND_I8     AdvanceCount;             // number of times
+                                                //   ESMC_ClockAdvance has
+                                                //   been called (number of
+                                                //   time steps taken so far)
+    ESMC_Alarm       *AlarmList[MAX_ALARMS];    // associated alarms
+    int               NumAlarms;                // number of defined alarms
 
     pthread_mutex_t ClockMutex; // (TMG 7.5)
 
@@ -99,21 +101,22 @@
 
     // Clock is a shallow class, so only Init methods are needed
     int ESMC_ClockInit(ESMC_TimeInterval *TimeStep,
-                       ESMC_TimeInstant  *StartTime,
-                       ESMC_TimeInstant  *StopTime,
-                       ESMC_TimeInstant  *RefTime);
-	                   // (TMG 3.1, 3.4.4)
+                       ESMC_Time         *StartTime,
+                       ESMC_Time         *StopTime,
+                       ESMC_Time         *RefTime);
+                       // (TMG 3.1, 3.4.4)
 
     // Clock doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    int ESMC_ClockAddAlarm(ESMC_Alarm *Alarm);	// (TMG 4.1, 4.2)
-    int ESMC_ClockGetAlarmList(ESMC_Alarm *AlarmList);	// (TMG 4.3)
+    int ESMC_ClockAddAlarm(ESMC_Alarm *Alarm);  // (TMG 4.1, 4.2)
+    int ESMC_ClockGetAlarmList(ESMC_Alarm *AlarmList, int *NumAlarms);
+    int ESMC_ClockGetNumAlarms(int *NumAlarms); // (TMG 4.3)
 
-    int ESMC_ClockSyncToWallClock(); // TMG3.4.5
-    // (see ESMC_TimeInstant::GetRealTime() ??
+    int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
+    // (see ESMC_Time::GetRealTime()
 
-    int ESMC_ClockAdvance(ESMC_Alarm *RingingList);
+    int ESMC_ClockAdvance(ESMC_Alarm *RingingList, int *NumRingingAlarms);
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
 
@@ -121,20 +124,20 @@
 
     // accessor methods
 
-    int ESMC_ClockGetAdvanceCount(uint32 *AdvanceCount);    // TMG3.5.1
+    int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *AdvanceCount);    // TMG3.5.1
 
     int ESMC_ClockGetTimeInterval(ESMC_TimeInterval *TimeInterval);
                                                                    // TMG3.5.2
     int ESMC_ClockSetTimeInterval(ESMC_TimeInterval *TimeInterval);
                                                                    // TMG3.4.2
 
-    int ESMC_ClockGetCurrTime(ESMC_TimeInstant *CurrTime);    // TMG3.5.4
-    int ESMC_ClockSetCurrTime(ESMC_TimeInstant *CurrTime);    // TMG3.4.3
+    int ESMC_ClockGetCurrTime(ESMC_Time *CurrTime);    // TMG3.5.4
+    int ESMC_ClockSetCurrTime(ESMC_Time *CurrTime);    // TMG3.4.3
 
-    int ESMC_ClockGetStartTime(ESMC_TimeInstant *StartTime);  // TMG3.5.3
-    int ESMC_ClockGetStopTime(ESMC_TimeInstant *StopTime);    // TMG3.5.3
-    int ESMC_ClockGetRefTime(ESMC_TimeInstant *RefTime);      // TMG3.5.3
-    int ESMC_ClockGetPrevTime(ESMC_TimeInstant *PrevTime);    // TMG3.5.4
+    int ESMC_ClockGetStartTime(ESMC_Time *StartTime);  // TMG3.5.3
+    int ESMC_ClockGetStopTime(ESMC_Time *StopTime);    // TMG3.5.3
+    int ESMC_ClockGetRefTime(ESMC_Time *RefTime);      // TMG3.5.3
+    int ESMC_ClockGetPrevTime(ESMC_Time *PrevTime);    // TMG3.5.4
 
     int ESMC_ClockGetCurrSimTime(ESMC_TimeInterval *CurrSimTime);   // TMG3.5.5
     int ESMC_ClockGetPrevSimTime(ESMC_TimeInterval *PrevSimTime);   // TMG3.5.5
@@ -142,20 +145,21 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // internal validation
-    int ESMC_ClockValidate(const char *options) const;
+    int ESMC_BaseValidate(const char *options) const;
 
     // for persistence/checkpointing
-    int ESMC_ClockPrint(ESMC_TimeInterval *TimeStep,
-                        ESMC_TimeInstant  *StartTime,
-                        ESMC_TimeInstant  *StopTime,
-                        ESMC_TimeInstant  *RefTime,
-                        ESMC_TimeInstant  *CurrTime,
-                        ESMC_TimeInstant  *PrevTime,
-                        uint32            *AdvanceCount,
-                        ESMC_Alarm        *AlarmList[] ) const;
+    int ESMC_BasePrint(ESMC_TimeInterval *TimeStep,
+                       ESMC_Time         *StartTime,
+                       ESMC_Time         *StopTime,
+                       ESMC_Time         *RefTime,
+                       ESMC_Time         *CurrTime,
+                       ESMC_Time         *PrevTime,
+                       ESMF_IKIND_I8     *AdvanceCount,
+                       ESMC_Alarm        *AlarmList[],
+                       int               *NumAlarms ) const;
 
     // for testing/debugging
-    int ESMC_ClockPrint(void) const;
+    int ESMC_BasePrint(void) const;
 
     // native C++ constructors/destructors
     ESMC_Clock(void);

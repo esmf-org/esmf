@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.2 2002/10/15 23:29:54 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,14 +14,13 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Calendar methods declared
-// in the companion file ESMC_Calendar.h
+// The code in this file implements the C++ {\tt Calendar} methods declared
+// in the companion file {\tt ESMC_Calendar.h}
 //
 //-------------------------------------------------------------------------
 
  // higher level, 3rd party or system includes
  #include <stdio.h>
- #include<ESMC_Util.h>
 
  // associated class definition file
  #include <ESMC_Calendar.h>
@@ -29,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.2 2002/10/15 23:29:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -42,10 +41,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalInit - shallow class initializer 1
+// !IROUTINE:  ESMC_CalendarInit - shallow class initializer 1
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalInit(
+      int ESMC_Calendar::ESMC_CalendarInit(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -54,7 +53,7 @@
       ESMC_CalendarType_e Type) {   // in - initialize to be Calendar type
 //
 // !DESCRIPTION:
-//      Initialzes a Calendar to be of a specific type
+//      Initialzes a {\tt Calendar} to be of a specific type
 //
 //EOP
 // !REQUIREMENTS:
@@ -67,71 +66,72 @@
 	{
 		case ESMC_GREGORIAN:
 		case ESMC_NOLEAP:
-			// specific leap year is property of a TimeInstant, not Calendar ??
-			//    OR calculated on-the-fly during TimeInstant calculations ??
+			// specific leap year is property of a Time instant, not Calendar ??
+			//    OR calculated on-the-fly during Time instant calculations ??
 			//    Calendar type only determines whether leap year is used
-			DaysPerMonth[1]  = 31; DaysPerMonth[2]  = 28;
-			DaysPerMonth[3]  = 31; DaysPerMonth[4]  = 30;
-			DaysPerMonth[5]  = 31; DaysPerMonth[6]  = 30;
-			DaysPerMonth[7]  = 31; DaysPerMonth[8]  = 31;
-			DaysPerMonth[9]  = 30; DaysPerMonth[10] = 31;
-			DaysPerMonth[11] = 30; DaysPerMonth[12] = 31;
+			DaysPerMonth[0]  = 31; DaysPerMonth[1]  = 28;
+			DaysPerMonth[2]  = 31; DaysPerMonth[3]  = 30;
+			DaysPerMonth[4]  = 31; DaysPerMonth[5]  = 30;
+			DaysPerMonth[6]  = 31; DaysPerMonth[7]  = 31;
+			DaysPerMonth[8]  = 30; DaysPerMonth[9]  = 31;
+			DaysPerMonth[10] = 30; DaysPerMonth[11] = 31;
 			SecondsPerDay  = 86400;
 			DaysPerYear.D  = 365;
 			DaysPerYear.Dn = 0;
 			DaysPerYear.Dd = 1;
-			rc = ESMC_SUCCESS;
+			rc = ESMF_SUCCESS;
 			break;
 
 		case ESMC_JULIAN:
-			// Days is the highest grouping of time, i.e. there is no
+			// Days is the highest resolution of time, i.e. there is no
 			//   concept of months or years ??
 			SecondsPerDay  = 86400;
 			DaysPerYear.D  = 0;
 			DaysPerYear.Dn = 0;
 			DaysPerYear.Dd = 1;
-			rc = ESMC_SUCCESS;
+			rc = ESMF_SUCCESS;
 			break;
 
 		case ESMC_360DAY:
 			// 12 months of 30 days each
-			for (int i=1; i<=MonthsPerYear; i++) DaysPerMonth[i] = 30;
+			for (int i=1; i<=MONTHSPERYEAR; i++) DaysPerMonth[i] = 30;
 			SecondsPerDay  = 86400;
 			DaysPerYear.D  = 360;
 			DaysPerYear.Dn = 0;
 			DaysPerYear.Dd = 1;
-			rc = ESMC_SUCCESS;
+			rc = ESMF_SUCCESS;
 			break;
 
 		case ESMC_NOCALENDAR:
-			// no calendar needed, not for any planetary body ??
+			// no calendar needed, convert base time up to days only
 			SecondsPerDay  = 0;
 			DaysPerYear.D  = 0;
 			DaysPerYear.Dn = 0;
 			DaysPerYear.Dd = 1;
-			rc = ESMC_SUCCESS;
+			rc = ESMF_SUCCESS;
 			break;
 
 		case ESMC_GENERIC:
-			// need more info -- must call InitGeneric() instead
-			rc = ESMC_FAILURE;
+			// user defined; need more info; user must call
+            //   InitGeneric() instead
+			rc = ESMF_FAILURE;
 			break;
 
 		default:
 			// unknown calendar type
-			rc = ESMC_FAILURE;
+			rc = ESMF_FAILURE;
 			break;
 	}
 	return(rc);
 
-}  // end ESMC_CalInit
+}  // end ESMC_CalendarInit
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalInitGeneric - shallow class initializer 1
+// !IROUTINE:  ESMC_CalendarInitGeneric - shallow class initializer 1
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalInitGeneric(
+      int ESMC_Calendar::ESMC_CalendarInitGeneric(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -144,14 +144,14 @@
       int DaysPerYearDd) {  // in
 // 
 // !DESCRIPTION:
-//      Initialzes a Calendar to be a custom, user-defined type
+//      Initialzes a {\tt Calendar} to be a custom, user-defined type
 // 
 //EOP
 // !REQUIREMENTS:
 
 	Type = ESMC_GENERIC;
 
-	for(int i=1; i<=MonthsPerYear; i++)
+	for(int i=1; i<=MONTHSPERYEAR; i++)
 	{ 
        	this->DaysPerMonth[i] = DaysPerMonth[i];
 	}
@@ -160,31 +160,32 @@
     this->DaysPerYear.Dn = DaysPerYearDn;
     this->DaysPerYear.Dd = DaysPerYearDd;
 
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
-}  // end ESMC_CalInitGeneric
+}  // end ESMC_CalendarInitGeneric
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalConvertToTime - convert calendar date to ESMC_Time
+// !IROUTINE:  ESMC_CalendarConvertToTime - convert calendar date to ESMC_BaseTime
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalConvertToTime(
+      int ESMC_Calendar::ESMC_CalendarConvertToTime(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      int YR, int MM, int DD, int32 D,          // in
-      int H, int M, int S, int MS, int32 US,    // in
-      int32 NS, int32 Sn, int32 Sd,             // in
+      int YY, int MM, int DD, int D,          // in
+      int H, int M, int S, int MS, int US,    // in
+      int NS, int Sn, int Sd,             // in
       double d, double h, double m, double s,   // in
       double ms, double us, double ns,          // in
-      ESMC_Time *T) {                           // out
+      ESMC_BaseTime *T) {                       // out
 //
 // !DESCRIPTION:
-//     Converts a calendar-specific date to core ESMC_Time representation
-//     Conversions based on UTC: time zone offset done by client
+//     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
+//     representation. Conversions based on UTC: time zone offset done by
+//     client
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
@@ -195,59 +196,60 @@
 		case ESMC_GREGORIAN:
 		{
 			int temp;
-			int32 jdays;
+			int jdays;
 
-			// convert date portion of TimeInstant into time portion of
-			//  TimeInstant
+			// convert date portion of Time instant into time portion of
+			//  Time instant
 			// Convert to Julian first
-			// Gregorian date (YR, MM, DD) => Julian day (D)
+			// Gregorian date (YY, MM, DD) => Julian day (D)
     		temp = (MM-14)/12;
-    		jdays = (1461 * (YR + 4800 + temp)) / 4 + (367 * (MM - 2 - 12 *
-       				temp ))/12 - (3 * ( (YR + 4900 + temp)/100))/4 + DD - 32075;
-			T->ESMC_TimeWrite_S(jdays * SecondsPerDay);
+    		jdays = (1461 * (YY + 4800 + temp)) / 4 + (367 * (MM - 2 - 12 *
+       				temp ))/12 - (3 * ( (YY + 4900 + temp)/100))/4 + DD - 32075;
+			T->S = jdays * SecondsPerDay;
 			break;
 		}
 		// convert Julian Date => Time
 		case ESMC_JULIAN:
 		{
-			T->ESMC_TimeWrite_S(D * SecondsPerDay);
+			T->S = D * SecondsPerDay;
 			break;
 		}
 		default:
 			break;
 	}
 
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
-}  // end ESMC_CalConvertToTime
+}  // end ESMC_CalendarConvertToTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalConvertToDate - convert ESMC_Time to calendar date
+// !IROUTINE:  ESMC_CalendarConvertToDate - convert ESMC_BaseTime to calendar date
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalConvertToDate(
+      int ESMC_Calendar::ESMC_CalendarConvertToDate(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Time *T,                                   // in
-      int *YR, int *MM, int *DD, int32 *D, int *H,    // out
-      int *M, int *S, int *MS, int32 *US, int32 *NS,  // out
-      int32 *Sn, int32 *Sd, double *d, double *h,     // out
+      ESMC_BaseTime *T,                               // in
+      int *YY, int *MM, int *DD, int *D, int *H,    // out
+      int *M, int *S, int *MS, int *US, int *NS,  // out
+      int *Sn, int *Sd, double *d, double *h,     // out
       double *m, double *s, double *ms) {             // out
 //
 // !DESCRIPTION:
-//     Converts a core ESMC_Time representation to a calendar-specific date
-//     Conversions based on UTC: time zone offset done by client
+//     Converts a core {\tt ESMC\_BaseTime} representation to a
+//     calendar-specific date. Conversions based on UTC: time zone offset
+//     done by client
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
-	int64 TimeS;
+	ESMF_IKIND_I8 TimeS;
 
-	T->ESMC_TimeRead_S(&TimeS);
+	TimeS = T->S;
 
 	switch (Type)
 	{
@@ -255,11 +257,11 @@
 		case ESMC_GREGORIAN:
 		{
 			int tempi, tempj, templ, tempn;
-			int32 jdays;
+			int jdays;
 
-			// convert time portion of TimeInstant into date portion of
-			//     TimeInstant
-			// Julian day (D) => Gregorian date (YR, MM, DD)
+			// convert time portion of Time instant into date portion of
+			//     Time instant
+			// Julian day (D) => Gregorian date (YY, MM, DD)
 			// The calculation below fails for jday >= 536,802,343.
 			//    (4*templ = 2^31)
 			jdays = TimeS / SecondsPerDay;	// convert to Julian first
@@ -272,7 +274,7 @@
     		*DD = templ - ( 2447 * tempj ) / 80;
     		templ = tempj / 11;
     		*MM = tempj + 2 - ( 12 * templ );
-    		*YR = 100 * ( tempn - 49 ) + tempi + templ;
+    		*YY = 100 * ( tempn - 49 ) + tempi + templ;
 			break;
 		}
 		// convert Time => Julian Date
@@ -285,16 +287,16 @@
 			break;
 	}
 
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
-}  // end ESMC_CalConvertToDate
+}  // end ESMC_CalendarConvertToDate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalPrint - return Calendar state
+// !IROUTINE:  ESMC_BasePrint - return Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalPrint(
+      int ESMC_Calendar::ESMC_BasePrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -308,7 +310,7 @@
       int *DaysPerYearDd) const { // out
 // 
 // !DESCRIPTION:
-//      Returns Calendar state for persistence/checkpointing
+//      Returns {\tt Calendar} state for persistence/checkpointing
 // 
 //EOP
 // !REQUIREMENTS:
@@ -318,7 +320,7 @@
 		DaysPerYearDn != NULL && DaysPerYearDd != NULL)
 	{
 		*Type = this->Type;
-		for (int i=1; i<= MonthsPerYear; i++)
+		for (int i=1; i<= MONTHSPERYEAR; i++)
 		{
 			DaysPerMonth[i] = this->DaysPerMonth[i];	
 		}
@@ -327,18 +329,18 @@
 		*DaysPerYearDn = this->DaysPerYear.Dn;
 		*DaysPerYearDd = this->DaysPerYear.Dd;
 
-		return(ESMC_SUCCESS);
+		return(ESMF_SUCCESS);
 	}
-	else return(ESMC_FAILURE);
+	else return(ESMF_FAILURE);
 
-}  // end ESMC_CalPrint
+}  // end ESMC_BasePrint
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalPrint - print Calendar state
+// !IROUTINE:  ESMC_BasePrint - print Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalPrint(void) const {
+      int ESMC_Calendar::ESMC_BasePrint(void) const {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -347,23 +349,23 @@
 //    none
 //
 // !DESCRIPTION:
-//      print Calendar state for testing/debugging
+//      print {\tt Calendar} state for testing/debugging
 //
 //EOP
 // !REQUIREMENTS: 
 
 	printf("Type = %d\n", Type);
 	printf("DaysPerMonth = ");
-	for (int i=1; i<= MonthsPerYear; i++) printf("%d ", DaysPerMonth[i]);
+	for (int i=1; i<= MONTHSPERYEAR; i++) printf("%d ", DaysPerMonth[i]);
 	printf("\n");
 	printf("SecondsPerDay = %d\n", SecondsPerDay);
 	printf("DaysPerYear = %d\n", DaysPerYear.D);
 	printf("DaysPerYearDn = %d\n", DaysPerYear.Dn);
 	printf("DaysPerYearDd = %d\n", DaysPerYear.Dd);
 	
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
-}  // end ESMC_CalPrint
+}  // end ESMC_BasePrint
 
 //-------------------------------------------------------------------------
 //BOP
@@ -379,13 +381,14 @@
 //    none
 //
 // !DESCRIPTION:
-//      Initializes a ESMC_Calendar with defaults via ESMC_CalInit
+//      Initializes a {\tt ESMC\_Calendar} with defaults via
+//      {\tt ESMC\_CalendarInit}
 //
 //EOP
 // !REQUIREMENTS: 
 
 	// default calendar type is none ??
-	ESMC_CalInit(ESMC_NOCALENDAR);
+	ESMC_CalendarInit(ESMC_NOCALENDAR);
 
 } // end ESMC_Calendar
 
@@ -403,13 +406,13 @@
       ESMC_CalendarType_e Type) {  // in
 //
 // !DESCRIPTION:
-//      Initializes a ESMC_TimeInstant to be of a specific type via
-//      ESMC_CalInit
+//      Initializes a {\tt ESMC\_TimeInstant} to be of a specific type via
+//      {\tt ESMC\_CalendarInit}
 //
 //EOP
 // !REQUIREMENTS: 
 
-	ESMC_CalInit(Type);
+	ESMC_CalendarInit(Type);
 
 }   // end ESMC_Calendar
 
@@ -431,19 +434,19 @@
       int DaysPerYearDd) {   // in
 //
 // !DESCRIPTION:
-//      Initializes a ESMC_TimeInstant to be of a custom user-defined type
-//      via ESMC_CalInitGeneric
+//      Initializes a {\tt ESMC\_Time} to be of a custom user-defined type
+//      via {\tt ESMC\_CalendarInitGeneric}
 //
 //EOP
 // !REQUIREMENTS: 
 
-	ESMC_CalInitGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
+	ESMC_CalendarInitGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
 			            DaysPerYearDn, DaysPerYearDd);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~~ESMC_Calendar - native default C++ destructor
+// !IROUTINE:  ~ESMC_Calendar - native default C++ destructor
 //
 // !INTERFACE:
       ESMC_Calendar::~ESMC_Calendar(void) {
@@ -455,7 +458,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Default ESMC_Calendar destructor
+//      Default {\tt ESMC\_Calendar} destructor
 //
 //EOP
 // !REQUIREMENTS: 

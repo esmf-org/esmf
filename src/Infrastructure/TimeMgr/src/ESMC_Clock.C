@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.2 2002/10/15 23:29:54 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,13 +14,12 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Clock methods declared
-// in the companion file ESMC_Clock.h
+// The code in this file implements the C++ {\tt Clock} methods declared
+// in the companion file {\tt ESMC_Clock.h}
 //
 //-------------------------------------------------------------------------
 //
  // higher level, 3rd party or system includes here
- #include <ESMC_Util.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -28,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.2 2002/10/15 23:29:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.3 2003/02/11 19:03:34 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -51,12 +50,12 @@
 //
 // !ARGUMENTS:
       ESMC_TimeInterval *TimeStep,    // in
-      ESMC_TimeInstant  *StartTime,   // in
-      ESMC_TimeInstant  *StopTime,    // in
-      ESMC_TimeInstant  *RefTime) {   // in
+      ESMC_Time         *StartTime,   // in
+      ESMC_Time         *StopTime,    // in
+      ESMC_Time         *RefTime) {   // in
 
 // !DESCRIPTION:
-//      Initializes a Clock with given values
+//      Initializes a {\tt Clock} with given values
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -64,7 +63,7 @@
 //
 //  code goes here
 //
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
  } // end ESMC_ClockInit
 
@@ -79,7 +78,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm *RingingList) {  // out - list of ringing alarms
+      ESMC_Alarm *RingingList,            // out - list of ringing alarms
+      int        *NumRingingAlarms) {     // out - number of ringing alarms
 //
 // !DESCRIPTION:
 //     Advances a clock's current time by timestep, then checks
@@ -94,16 +94,16 @@
 	// call each alarm's CheckRingTime method; compile and return a list of 
     // ringing alarms
 
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
- } // end ESMC_ClockGet<Value>
+ } // end ESMC_ClockAdvance
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockValidate - internal consistency check for a Clock
+// !IROUTINE:  ESMC_BaseValidate - internal consistency check for a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockValidate(
+      int ESMC_Clock::ESMC_BaseValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -112,8 +112,9 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Clock is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Validates that a {\tt Clock} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base}
+//      class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -121,34 +122,36 @@
 //
 //  code goes here
 //
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
- } // end ESMC_ClockValidate
+ } // end ESMC_BaseValidate
 
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockPrint - print contents of a Clock
+// !IROUTINE:  ESMC_BasePrint - print contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockPrint(
+      int ESMC_Clock::ESMC_BasePrint(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
       ESMC_TimeInterval *TimeStep,             // out
-      ESMC_TimeInstant  *StartTime,            // out
-      ESMC_TimeInstant  *StopTime,             // out
-      ESMC_TimeInstant  *RefTime,              // out
-      ESMC_TimeInstant  *CurrTime,             // out
-      ESMC_TimeInstant  *PrevTime,             // out
-      uint32            *AdvanceCount,         // out
-      ESMC_Alarm        *AlarmList[] ) const { // out 
+      ESMC_Time         *StartTime,            // out
+      ESMC_Time         *StopTime,             // out
+      ESMC_Time         *RefTime,              // out
+      ESMC_Time         *CurrTime,             // out
+      ESMC_Time         *PrevTime,             // out
+      ESMF_IKIND_I8            *AdvanceCount,         // out
+      ESMC_Alarm        *AlarmList[],          // out
+      int               *NumAlarms ) const {   // out 
 //
 // !DESCRIPTION:
-//      Print information about a Clock.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      Print information about a {\tt Clock}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base}
+//      class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -156,9 +159,9 @@
 //
 //  code goes here
 //
-	return(ESMC_SUCCESS);
+	return(ESMF_SUCCESS);
 
- } // end ESMC_ClockPrint
+ } // end ESMC_BasePrint
 
 //-------------------------------------------------------------------------
 //BOP

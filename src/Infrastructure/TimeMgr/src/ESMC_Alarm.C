@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.2 2002/10/15 23:29:53 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.3 2003/02/11 19:03:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,13 +14,12 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Alarm methods declared
-// in the companion file ESMC_Alarm.h
+// The code in this file implements the C++ {\tt Alarm} methods declared
+// in the companion file {\tt ESMC_Alarm.h)
 //
 //-------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <ESMC_Util.h>
 
  // associated class definition file
  #include <ESMC_Alarm.h>
@@ -28,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.2 2002/10/15 23:29:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.3 2003/02/11 19:03:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -51,12 +50,12 @@
 //
 // !ARGUMENTS:
       ESMC_TimeInterval *RingInterval,  // in
-      ESMC_TimeInstant  *RingTime,      // in
-      ESMC_TimeInstant  *StopTime,      // in
+      ESMC_Time         *RingTime,      // in
+      ESMC_Time         *StopTime,      // in
       bool               Enabled) {     // in
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes Alarm values; it does not
+//      ESMF routine which only initializes {\tt Alarm} values; it does not
 //      allocate any resources.  
 //
 //EOP
@@ -65,7 +64,7 @@
 //
 //  code goes here
 //
-    return(ESMC_SUCCESS);
+    return(ESMF_SUCCESS);
 
  } // end ESMC_AlarmInit
 
@@ -80,7 +79,7 @@
 //    bool is ringing or not
 //
 // !ARGUMENTS:
-      ESMC_TimeInstant *CurrTime,  // in - current time to check
+      ESMC_Time *CurrTime,  // in - current time to check
       bool positive,    // in - postive or negative ring time crossing trigger
       int  rc) {        // out - error return code
 //
@@ -96,14 +95,14 @@
 //
     return(false);
 
- } // end ESMC_AlarmGet<Value>
+ } // end ESMC_AlarmCheckRingTime
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmValidate - internal consistency check for an Alarm
+// !IROUTINE:  ESMC_BaseValidate - internal consistency check for an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmValidate(
+      int ESMC_Alarm::ESMC_BaseValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -112,8 +111,9 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Alarm is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Validates that a {\tt Alarm} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base}
+//      class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -121,33 +121,33 @@
 //
 //  code goes here
 //
-    return(ESMC_SUCCESS);
+    return(ESMF_SUCCESS);
 
- } // end ESMC_AlarmValidate
+ } // end ESMC_BaseValidate
 
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmPrint - print contents of an Alarm
+// !IROUTINE:  ESMC_BasePrint - print contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmPrint(
+      int ESMC_Alarm::ESMC_BasePrint(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
       ESMC_TimeInterval *RingInterval,
-      ESMC_TimeInstant  *RingTime,
-      ESMC_TimeInstant  *PrevRingTime,
-      ESMC_TimeInstant  *StopTime,
+      ESMC_Time         *RingTime,
+      ESMC_Time         *PrevRingTime,
+      ESMC_Time         *StopTime,
       bool              *Ringing,
       bool              *Enabled,
       int               *ID) const {
 
 //
 // !DESCRIPTION:
-//      Print information about an Alarm. For persistence/checkpointing
+//      Print information about an {\tt Alarm}. For persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -155,16 +155,16 @@
 //
 //  code goes here
 //
-    return(ESMC_SUCCESS);
+    return(ESMF_SUCCESS);
 
- } // end ESMC_AlarmPrint
+ } // end ESMC_BasePrint
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmPrint - print contents of an Alarm
+// !IROUTINE:  ESMC_BasePrint - print contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmPrint(void) const {
+      int ESMC_Alarm::ESMC_BasePrint(void) const {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -173,7 +173,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Print information about an Alarm.  For testing/debugging
+//      Print information about an {\tt Alarm}.  For testing/debugging
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -181,9 +181,10 @@
 //
 //  code goes here
 //
-    return(ESMC_SUCCESS);
+    return(ESMF_SUCCESS);
 
- } // end ESMC_AlarmPrint
+ } // end ESMC_BasePrint
+
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_Alarm - native C++ constructor

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.3 2002/10/15 03:27:37 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.4 2003/02/11 19:03:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,8 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-#include <ESMC_TimeMgr.h>
-#include <ESMC_Types.h>
+#include <ESMF_TimeMgr.inc>
 #include <ESMC_Fraction.h>
 
 //-------------------------------------------------------------------------
@@ -35,42 +34,41 @@
 // !CLASS:  ESMC_TimeInterval - represents a time interval
 //
 // !DESCRIPTION:
-//   A TimeInterval inherits from the Time base class and is designed to
-//   represent time deltas which are independent of any calendar.
+//   A {\tt TimeInterval} inherits from the {\tt BaseTime} base class and is
+//   designed to represent time deltas. These can either be independent of
+//   any calendar or dependent on a calendar and thought of as a calendar
+//   interval. 
 //
-//   TimeInterval inherits from the base class Time.  As such, it gains the core
-//   representation of time as well as its associated methods.   TimeInterval
-//   further specializes Time by adding shortcut methods to set and get a
-//   TimeInterval in natural way with appropriate unit combinations, as per the
-//   requirements.  The largest unit of time for a TimeInterval is a day, so a
-//   TimeInterval is independent of any calendar.  This is in contrast with a
-//   TimeInstant, which is calendar-dependent, since its largest units of time
-//   are months and years.  TimeInterval also defines methods for multiplication
-//   and division of TimeIntervals by integers, reals, fractions and other
-//   TimeIntervals.  TimeInterval defines methods for absolute value and
-//   negative absolute value for use with both positive or negative time
-//   intervals.  TimeInterval does not add any new attributes to Time.
-//   Calendar intervals are dependent on a calendar and so represent a
-//   specialized case of a TimeInterval.  A derived class CalendarInterval
-//   will be defined to inherit from TimeInterval and specialize it for
-//   use with Calendars.
+//   {\tt TimeInterval} inherits from the base class {\tt BaseTime}.  As such,
+//   it gains the core representation of time as well as its associated methods.
+//   {\tt TimeInterval} further specializes {\tt BaseTime} by adding shortcut
+//   methods to set and get a {\tt TimeInterval} in a natural way with 
+//   appropriate unit combinations, as per the requirements.  Usually, the
+//   largest resolution of time for a {\tt TimeInterval} is in days, making it
+//   independent of any calendar.  A {\tt TimeInterval} can also be used as a
+//   {\tt Calendar} interval by associating it with a calendar type.  Then it
+//   becomes calendar-dependent, since its largest resolution of time will be
+//   in months and years.  In order to support calendar intervals,
+//   {\tt TimeInterval} adds a calendar type attribute to {\tt BaseTime}.
+//   {\tt TimeInterval} also defines methods for multiplication and division
+//   of {\tt TimeIntervals} by integers, reals, fractions and other
+//   {\tt TimeIntervals}.  {\tt TimeInterval} defines methods for absolute
+//   value and negative absolute value for use with both positive or
+//   negative time intervals. 
 //
 //   Notes:
 //       - For arithmetic consistency both whole seconds and the numerator of
 //         fractional seconds must carry the same sign (both positve or both 
 //         negative), except, of course, for zero values.
 //       - fractional math should be handled by an open-source package if
-//         available (see ESMC\_Time.h also)
-//       - Calendar intervals are dependent on a calendar and so represent
-//         a specialized case of a TimeInterval.  A derived class
-//         CalendarInterval will be defined to inherit from TimeInterval
-//         and specialize it for use with Calendars.
+//         available (see {\tt ESMC\_BaseTime.h} also)
 //
 //-------------------------------------------------------------------------
 
 // !USES:
-//#include <ESMC_Base.h>           // inherited Base class ??
- #include <ESMC_Time.h>           // inherited Time class
+ #include <ESMC_Base.h>           // inherited Base class
+ #include <ESMC_BaseTime.h>       // inherited BaseTime class
+ #include <ESMC_Calendar.h>       // associated Calendar class
 
 // !PUBLIC TYPES:
  class ESMC_TimeInterval;
@@ -79,65 +77,63 @@
  // class configuration type:  not needed for TimeInterval
 
  // class definition type
-class ESMC_TimeInterval : public ESMC_Time {  // inherits ESMC_Time & Base
-                                              // classes ??
+class ESMC_TimeInterval : public ESMC_BaseTime { 
+                                             // inherits ESMC_BaseTime & Base
+                                             // classes
   private:
-	// inherited from ESMC_Time
+    // set for Calendar intervals only
+    ESMC_Calendar *Calendar;    // associated calendar for Calendar intervals
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
 
     // TimeInterval is a shallow class, so only Init methods are needed
-	int ESMC_TimeIntvInit(int64 S, int32 Sn, int32 Sd);
-    int ESMC_TimeIntvInit(const char *TimeList, ...);
+    // TODO:  use default argument for calendar (NULL)
+    int ESMC_TimeIntervalInit(ESMC_Calendar *Cal, const char *TimeList, ...);
 
     // TimeInstant doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-	// accessor methods
+    // accessor methods
 
     // all get/set routines perform signed conversions, where applicable;
     //   direct, one-to-one access to core time elements is provided by the
-    //   ESMC_Time base class
+    //   ESMC_BaseTime base class
 
     // generic interface -- via variable argument lists
     //   can map to F90 named-optional-arguments interface
-    //   adv:     flexible -- can specify any combination w/o source changes
-    //            elegant -- only list those time items needed
-    //   disadv:  parsing overhead, but limited to just those items specified
-    //            no arg type checking -- user may pass-in bad args.
-	//   
 
-	// (TMG 1.1)
-    int ESMC_TimeIntvGet(const char *TimeList, ...);
+    // (TMG 1.1)
+    int ESMC_TimeIntervalGet(const char *TimeList, ...);
     // e.g. Get("D:S",(int *)D, (int *)S);
 
-    int ESMC_TimeIntvSet(const char *TimeList, ...);
+    int ESMC_TimeIntervalSet(const char *TimeList, ...);
     // e.g. Set("s" , (double) s);
 
-    // -- AND/OR -- individual/combo get/set
-    //   adv:    fastest -- no parsing
-    //             args type checked
-    //   disadv: limited combinations, must modify source to add more
+    int ESMC_TimeIntervalGetCalendar(ESMC_Calendar *Cal);
+    int ESMC_TimeIntervalSetCalendar(ESMC_Calendar *Cal);
 
-    // shortcut interfaces (TMG 1.1, 1.2, 1.5.1)
-    int ESMC_TimeIntvGet_S_nd(int64 *S, int32 *Sn, int32 *Sd);
-    int ESMC_TimeIntvSet_S_nd(int64  S, int32  Sn, int32  Sd);
+    bool ESMC_TimeIntervalIsSameCal(ESMC_TimeInterval *);
 
-    int ESMC_TimeIntvGet_D_S(int32 *D, int *S);
-    int ESMC_TimeIntvSet_D_S(int32  D, int  S);
+    // return in string format (TMG 1.5.9)
+    int ESMC_TimeIntervalGetString(char *Ts);
 
-    int ESMC_TimeIntvGet_D_H_M_S_MS(int32 *D, int *H, int *M, int *S, int *MS);
-    int ESMC_TimeIntvSet_D_H_M_S_MS(int32  D, int  H, int  M, int  S, int  MS);
+    // return positive value (TMG 1.5.8)
+    ESMC_TimeInterval *ESMC_TimeIntervalGetAbsValue(ESMC_TimeInterval *);
+
+    // return negative value (TMG 1.5.8)
+    ESMC_TimeInterval *ESMC_TimeIntervalGetNegAbsVal(ESMC_TimeInterval *);
 
     // division (TMG 1.5.5)
-     // return fraction _nd ??
-    ESMC_Fraction& operator/(ESMC_TimeInterval &);
+    double& operator/(ESMC_TimeInterval &);
+    ESMC_Fraction& operatorDIV(ESMC_TimeInterval &);  // TODO  DIV
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
     ESMC_TimeInterval& operator/=(int &);
     ESMC_TimeInterval& operator/ (int &);
+    ESMC_TimeInterval& operator/=(double &);
+    ESMC_TimeInterval& operator/ (double &);
 
     // multiplication (TMG 1.5.7, 7.2)
     ESMC_TimeInterval& operator*=(int &);
@@ -147,29 +143,20 @@ class ESMC_TimeInterval : public ESMC_Time {  // inherits ESMC_Time & Base
     ESMC_TimeInterval& operator*=(double &);
     ESMC_TimeInterval& operator* (double &);
 
-    // return in string format (TMG 1.5.9)
-    int ESMC_TimeIntvGetString(char *Ts);
-
-    // return positive value (TMG 1.5.8)
-    ESMC_TimeInterval *ESMC_TimeIntvGetAbsValue(ESMC_TimeInterval *);
-
-    // return negative value (TMG 1.5.8)
-    ESMC_TimeInterval *ESMC_TimeIntvGetNegAbsValue(ESMC_TimeInterval *);
-
     // required methods inherited and overridden from the ESMC_Base class
 
     // internal validation
-    int ESMC_TimeIntvValidate(const char *options) const;
+    int ESMC_BaseValidate(const char *options) const;
 
     // for persistence/checkpointing
-    int ESMC_TimeIntvPrint(int64 *S, int32 *Sn, int32 *Sd) const;
+    int ESMC_BasePrint(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
 
     // for testing/debugging
-    int ESMC_TimeIntvPrint(void) const;
+    int ESMC_BasePrint(void) const;
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-	ESMC_TimeInterval(int64 S, int32 Sn, int32 Sd);
+    ESMC_TimeInterval(ESMF_IKIND_I8 S, int Sn, int Sd);
     ~ESMC_TimeInterval(void);
 
  // < declare the rest of the public interface methods here >

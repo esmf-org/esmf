@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.2 2002/10/28 18:13:55 svasquez Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -8,1226 +8,1266 @@
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
-! ESMF Time Interval Module
+!==============================================================================
 !
-! (all lines below between the !BOP and !EOP markers will be included in
-!  the automated document processing.)
+!     ESMF TimeInterval Module
+      module ESMF_TimeIntervalMod
+!
+!==============================================================================
+!
+! This file contains the TimeInterval class definition and all TimeInterval
+! class methods.
+!
 !------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-! put any constants or macros which apply to the whole component in this
-!  include file.  anything public or esmf-wide should be up higher at
-!  the top level include files.
-
-#include <ESMF_TimeMgr.h>
-
-!------------------------------------------------------------------------------
-! module definition
-
-    module ESMF_TimeIntervalMod
+! INCLUDES
+#include <ESMF_TimeMgr.inc>
+!
 !===============================================================================
 !BOP
-!
 ! !MODULE: ESMF_TimeIntervalMod
+!
 ! !DESCRIPTION:
+! Part of Time Manager F90 API wrapper of C++ implemenation
 !
-!
-!
-!
-!
-!
-! !USES:
-        use ESMF_TypesMod
-        use ESMF_FractionMod
-        use ESMF_TimeMod    ! inherit from base class
+! Defines F90 wrapper entry points for corresponding
+! C++ implementaion of class ESMC\_TimeInterval
 !
 !------------------------------------------------------------------------------
+! !USES:
+      ! inherit from ESMF base class
+      use ESMF_BaseMod         
 
+      ! inherit from base time class
+      use ESMF_BaseTimeMod, only : ESMF_BaseTime 
+
+      ! associated derived types
+      use ESMF_FractionMod, only : ESMF_Fraction
+      use ESMF_CalendarMod, only : ESMF_Calendar
+
+      implicit none
+!
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+      private
+!------------------------------------------------------------------------------
+!     ! ESMF_TimeInterval
+!
+!     ! F90 class to match C++ TimeInterval class in size and sequence
+
+      type ESMF_TimeInterval
+      sequence                           ! match C++ storage order
+      private                            !   (members opaque on F90 side)
+        type(ESMF_BaseTime) :: basetime  ! inherit base class
+        type(ESMF_Calendar) :: calendar  ! optional calendar for calendar
+                                         !   intervals
+      end type
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-        implicit none
-
-        type ESMF_TimeInterval
-            private
-            sequence
-                type(ESMF_Time) :: time
-        end type
+      public ESMF_TimeInterval
+!------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-!       subroutine ESMF_TimeIntervalInit(this, S, Sn, Sd, rc)
-!       subroutine ESMF_TimeIntervalInit(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-!                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
-!       subroutine ESMF_TimeIntervalGet(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-!                                       _d, _h, _m, _s, _ms, _us, _ns, rc)
-!       subroutine ESMF_TimeIntervalSet(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-!                                       _d, _h, _m, _s, _ms, _us, _ns, rc)
-!       subroutine ESMF_TimeIntervalGet_S(this, S, rc)
-!       subroutine ESMF_TimeIntervalSet_S(this, S, rc)
-!       subroutine ESMF_TimeIntervalGet_s_(this, s, rc)
-!       subroutine ESMF_TimeIntervalSet_s_(this, s, rc)
-!       subroutine ESMF_TimeIntervalGet_h(this, h, rc)
-!       subroutine ESMF_TimeIntervalSet_h(this, h, rc)
-!       subroutine ESMF_TimeIntervalRead_S(this, S)
-!       subroutine ESMF_TimeIntervalWrite_S(this, S)
-!       subroutine ESMF_TimeIntervalRead_Sn(this, Sn)
-!       subroutine ESMF_TimeIntervalWrite_Sn(this, Sn)
-!       subroutine ESMF_TimeIntervalRead_Sd(this, Sd)
-!       subroutine ESMF_TimeIntervalWrite_Sd(this, Sd)
-!       subroutine ESMF_TimeIntvGet_S_nd(this, S, Sn, Sd, rc)
-!       subroutine ESMF_TimeIntvSet_S_nd(this, S, Sn, Sd, rc)
-!       subroutine ESMF_TimeIntvGet_D_S(this, D, S, rc)
-!       subroutine ESMF_TimeIntvSet_D_S(this, D, S, rc)
-!       subroutine ESMF_TimeIntvGet_D_H_M_S_MS(this, D, H, M, S, MS, rc)
-!       subroutine ESMF_TimeIntvSet_D_H_M_S_MS(this, D, H, M, S, MS, rc)
-!       subroutine ESMF_TimeIntervalGetString(this, Ts, rc)
-!       subroutine ESMF_TimeIntervalGetAbsValue(this, rc)
-!       function ESMF_TimeIntervalEQ(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalNE(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalLT(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalGT(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalLE(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalGE(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalSum(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalDiff(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalQuot(timeinterval1, timeinterval2)
-!       function ESMF_TimeIntervalQuotI(timeinterval, divisor)
-!       function ESMF_TimeIntervalProdI(timeinterval, multiplier)
-!       function ESMF_TimeIntervalProdF(timeinterval, multiplier)
-!       function ESMF_TimeIntervalProdR(timeinterval, multiplier)
-!
-! !PUBLIC DATA MEMBERS:
+      public ESMF_TimeIntervalInit
+      public ESMF_TimeIntervalGet
+      public ESMF_TimeIntervalSet
+      public ESMF_TimeIntervalGetCalendar
+      public ESMF_TimeIntervalSetCalendar
+      public ESMF_TimeIntervalIsSameCal
+      public ESMF_TimeIntervalGetString
+      public ESMF_TimeIntervalGetAbsValue
+      public ESMF_TimeIntervalGetNegAbsVal
+      public ESMF_TimeIntervalFQuot
+
+! Required inherited and overridden ESMF_Base class methods
+
+      public ESMF_BaseValidate
+      public ESMF_BasePrint
+
+! !PRIVATE MEMBER FUNCTIONS:
+ 
+! overloaded operator functions
+ 
+      private ESMF_TimeIntervalRQuot
+      private ESMF_TimeIntervalQuotI
+      private ESMF_TimeIntervalQuotR
+
+      private ESMF_TimeIntervalProdI
+      private ESMF_TimeIntervalProdF
+      private ESMF_TimeIntervalProdR
+
+! Inherited and overloaded from ESMF_BaseTime
+
+      private ESMF_TimeIntervalSum
+      private ESMF_TimeIntervalDiff
+      private ESMF_TimeIntervalEQ
+      private ESMF_TimeIntervalNE
+      private ESMF_TimeIntervalLT
+      private ESMF_TimeIntervalGT
+      private ESMF_TimeIntervalLE
+      private ESMF_TimeIntervalGE
 !EOP
 
 !------------------------------------------------------------------------------
-! leave the following line as-is; it will insert the cvs ident string
-! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: '
-!------------------------------------------------------------------------------
-! 
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_TimeInterval.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $'
+
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOP
+! !INTERFACE:
+      interface operator(/)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalRQuot
+      module procedure ESMF_TimeIntervalQuotI
+      module procedure ESMF_TimeIntervalQuotR
+
 ! !DESCRIPTION:
-!       Part of Time Manager F90 API wrapper of C++ implemenation
-!
-!       Defines F90 wrapper entry points for corresponding
-!        C++ class ESMC\_TimeInterval
-!
-! !REVISION HISTORY:
-!
-!  09Aug02   Earl Schwab  Initial code.
+!     This interface overloads the / operator for the {\tt TimeInterval} class
 !
 !EOP
-!===============================================================================
-    
-        interface ESMF_TimeIntervalInit
-            module procedure ESMF_TimeIntervalInit1
-            module procedure ESMF_TimeIntervalInit2
-        end interface
-!------------------------------------------------------------------------------
-
-    contains
-
+      end interface
+!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalInit1
-
 ! !INTERFACE:
-        subroutine ESMF_TimeIntervalInit1(this, S, Sn, Sd, rc)
+      interface operator(*)
 
-
-! !ARGUMENTS:
-       type(ESMF_TimeInterval), intent(inout) :: this
-       integer(int64), intent(in) :: S
-       integer(int32), intent(in) :: Sn, Sd
-       integer, intent(out), optional :: rc
-
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdI
+      module procedure ESMF_TimeIntervalProdF
+      module procedure ESMF_TimeIntervalProdR
 
 ! !DESCRIPTION:
+!     This interface overloads the * operator for the {\tt TimeInterval} class
+!
+!EOP
+      end interface
+!
+
+!==============================================================================
+
+      contains
+
+!==============================================================================
+!
+! This section includes the Init methods.
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalInit - Initialize via user-specified unit set
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalInit(timeinterval, D, H, M, S, MS, US, NS, &
+                                       d_, h_, m_, s_, ms_, us_, ns_, &
+                                       Sn, Sd, cal, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(in), optional :: D
+      integer, intent(in), optional :: H
+      integer, intent(in), optional :: M
+      integer(ESMF_IKIND_I8), intent(in), optional :: S
+      integer, intent(in), optional :: MS
+      integer, intent(in), optional :: US
+      integer, intent(in), optional :: NS
+      real, intent(in), optional :: d_
+      real, intent(in), optional :: h_
+      real, intent(in), optional :: m_
+      real, intent(in), optional :: s_
+      real, intent(in), optional :: ms_
+      real, intent(in), optional :: us_
+      real, intent(in), optional :: ns_
+      integer, intent(in), optional :: Sn
+      integer, intent(in), optional :: Sd
+      type(ESMF_Calendar), intent(in), optional :: cal
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Initializes a {\tt ESMF\_TimeInterval} with set of user-specified units
+!     via F90 optional arguments
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize
+!     \item[{[D]}]
+!          Integer days
+!     \item[{[H]}]
+!          Integer hours
+!     \item[{[M]}]
+!          Integer minutes
+!     \item[{[S]}]
+!          64-bit integer seconds
+!     \item[{[MS]}]
+!          Integer milliseconds
+!     \item[{[US]}]
+!          Integer microseconds
+!     \item[{[NS]}]
+!          Integer nanoseconds
+!     \item[{[d\_]}]
+!          Real days
+!     \item[{[h\_]}]
+!          Real hours
+!     \item[{[m\_]}]
+!          Real minutes
+!     \item[{[s\_]}]
+!          Real seconds
+!     \item[{[ms\_]}]
+!          Real milliseconds
+!     \item[{[us\_]}]
+!          Real microseconds
+!     \item[{[ns\_]}]
+!          Real nanoseconds
+!     \item[{[Sn]}]
+!          Integer fractional seconds - numerator
+!     \item[{[Sd]}]
+!          Integer fractional seconds - denominator
+!     \item[{[cal]}]
+!          Optional associated calendar for calendar intervals
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalInit(timeinterval, D, H, M, S, MS, US, NS, &
+                                   d_, h_, m_, s_, ms_, us_, ns_, &
+                                   Sn, Sd, cal, rc)
+
+      end subroutine ESMF_TimeIntervalInit
+
+!------------------------------------------------------------------------------
+!
+! This section includes the TimeInterval Get and Set methods.
+!
+!------------------------------------------------------------------------------
+!
+! Generic Get/Set routines which use F90 optional arguments
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalGet - Get value in user-specified units
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalGet(timeinterval, D, H, M, S, MS, US, NS, &
+                                      d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(out), optional :: D
+      integer, intent(out), optional :: H
+      integer, intent(out), optional :: M
+      integer(ESMF_IKIND_I8), intent(out), optional :: S
+      integer, intent(out), optional :: MS
+      integer, intent(out), optional :: US
+      integer, intent(out), optional :: NS
+      real, intent(out), optional :: d_
+      real, intent(out), optional :: h_
+      real, intent(out), optional :: m_
+      real, intent(out), optional :: s_
+      real, intent(out), optional :: ms_
+      real, intent(out), optional :: us_
+      real, intent(out), optional :: ns_
+      integer, intent(out), optional :: Sn
+      integer, intent(out), optional :: Sd
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get the value of the {\tt TimeInterval} in units specified by the user
+!     via F90 optional arguments
 !     
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to query
+!     \item[{[D]}]
+!          Integer days
+!     \item[{[H]}]
+!          Integer hours
+!     \item[{[M]}]
+!          Integer minutes
+!     \item[{[S]}]
+!          64-bit integer seconds
+!     \item[{[MS]}]
+!          Integer milliseconds
+!     \item[{[US]}]
+!          Integer microseconds
+!     \item[{[NS]}]
+!          Integer nanoseconds
+!     \item[{[d\_]}]
+!          Real days
+!     \item[{[h\_]}]
+!          Real hours
+!     \item[{[m\_]}]
+!          Real minutes
+!     \item[{[s\_]}]
+!          Real seconds
+!     \item[{[ms\_]}]
+!          Real milliseconds
+!     \item[{[us\_]}]
+!          Real microseconds
+!     \item[{[ns\_]}]
+!          Real nanoseconds
+!     \item[{[Sn]}]
+!          Integer fractional seconds - numerator
+!     \item[{[Sd]}]
+!          Integer fractional seconds - denominator
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMG1.1
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
-
-            call c_ESMF_TimeIntervalInit1(this, S, Sn, Sd, rc)
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalGet(timeinterval, D, H, M, S, MS, US, NS, &
+                                  d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
-        end subroutine
+      end subroutine ESMF_TimeIntervalGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalInit2
+! !IROUTINE: ESMF_TimeIntervalSet - Set value in user-specified units
 
 ! !INTERFACE:
-        subroutine ESMF_TimeIntervalInit2(this,D, H, M, S, MS, US, NS, Sn, Sd, &
-                                          d_, h_, m_, s_, ms_, us_, ns_, rc)
-
+      subroutine ESMF_TimeIntervalSet(timeinterval, D, H, M, S, MS, US, NS, &
+                                      d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
 
 ! !ARGUMENTS:
-       type(ESMF_TimeInterval), intent(inout) :: this
-       integer, intent(in), optional :: H, M, MS
-       integer(int64), intent(in), optional :: S
-       integer(int32), intent(in), optional :: D, US, NS, Sn, Sd
-       real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
-       integer, intent(out), optional :: rc
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(in), optional :: D
+      integer, intent(in), optional :: H
+      integer, intent(in), optional :: M
+      integer(ESMF_IKIND_I8), intent(in), optional :: S
+      integer, intent(in), optional :: MS
+      integer, intent(in), optional :: US
+      integer, intent(in), optional :: NS
+      real, intent(in), optional :: d_
+      real, intent(in), optional :: h_
+      real, intent(in), optional :: m_
+      real, intent(in), optional :: s_
+      real, intent(in), optional :: ms_
+      real, intent(in), optional :: us_
+      real, intent(in), optional :: ns_
+      integer, intent(in), optional :: Sn
+      integer, intent(in), optional :: Sd
+      integer, intent(in), optional :: rc
 
 ! !DESCRIPTION:
+!     Set the value of the {\tt TimeInterval} in units specified by the user
+!     via F90 optional arguments
 !     
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to query
+!     \item[{D]}]
+!          Integer days
+!     \item[{H]}]
+!          Integer hours
+!     \item[{M]}]
+!          Integer minutes
+!     \item[{S]}]
+!          64-bit integer seconds
+!     \item[{MS]}]
+!          Integer milliseconds
+!     \item[{US]}]
+!          Integer microseconds
+!     \item[{NS]}]
+!          Integer nanoseconds
+!     \item[{d\_]}]
+!          Real days
+!     \item[{h\_]}]
+!          Real hours
+!     \item[{m\_]}]
+!          Real minutes
+!     \item[{s\_]}]
+!          Real seconds
+!     \item[{ms\_]}]
+!          Real milliseconds
+!     \item[{us\_]}]
+!          Real microseconds
+!     \item[{ns\_]}]
+!          Real nanoseconds
+!     \item[{Sn]}]
+!          Integer fractional seconds - numerator
+!     \item[{Sd]}]
+!          Integer fractional seconds - denominator
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMGn.n.n
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
     
-            ! use optional args for any subset
-            call c_ESMF_TimeIntervalInit2(this,D, H, M, S, MS, US, NS, Sn, Sd, &
-                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
+      ! use optional args for any subset
+       call c_ESMC_TimeIntervalSet(timeinterval, D, H, M, S, MS, US, NS, &
+                                   d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+    
+      end subroutine ESMF_TimeIntervalSet
 
-        end subroutine
-!------------------------------------------------------------------------------
-        !
-        ! generic get/set routines which use F90 optional arguments
-        !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalGet
+! !IROUTINE: ESMF_TimeIntervalGetCalendar - Get associated calendar
 
 ! !INTERFACE:
-        subroutine ESMF_TimeIntervalGet(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
-
+      subroutine ESMF_TimeIntervalGetCalendar(timeinterval, cal, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer, intent(out), optional :: H, M, MS
-        integer(int64), intent(out), optional :: S
-        integer(int32), intent(out), optional :: D, US, NS, Sn, Sd
-        real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
-        integer, intent(out), optional :: rc
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      type(ESMF_Calendar), intent(out) :: cal
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     
+!     For Calendar intervals, get the associated calendar
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to query
+!     \item[{cal}]
+!          Associated calendar for calendar intervals
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMGn.n.n
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      call c_ESMC_TimeIntervalGetCalendar(timeinterval, cal, rc)
     
-            ! use optional args for any subset
-            call c_ESMF_TimeIntervalGet(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
-    
-        end subroutine
+      end subroutine ESMF_TimeIntervalGetCalendar
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet
+! !IROUTINE: ESMF_TimeIntervalSetCalendar - Set associated calendar
 
 ! !INTERFACE:
-        subroutine ESMF_TimeIntervalSet(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
+      subroutine ESMF_TimeIntervalSetCalendar(timeinterval, cal, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer, intent(in), optional :: H, M, MS
-        integer(int64), intent(in), optional :: S
-        integer(int32), intent(in), optional :: D, US, NS, Sn, Sd
-        real, intent(out), optional :: d_, h_, m_, s_, ms_, us_, ns_
-        integer, intent(out), optional :: rc
-
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      type(ESMF_Calendar), intent(in) :: cal
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     For Calendar intervals, set the associated calendar
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to set
+!     \item[{cal}]
+!          Associated calendar for calendar intervals
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMGn.n.n
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
+
+      call c_ESMC_TimeIntervalSetCalendar(timeinterval, cal, rc)
     
-            ! use optional args for any subset
-            call c_ESMF_TimeIntervalSet(this, D, H, M, S, MS, US, NS, Sn, Sd, &
-                                        d_, h_, m_, s_, ms_, us_, ns_, rc)
-    
-        end subroutine
-
-!------------------------------------------------------------------------------
-        !
-        ! wrappers for "inherited" ESMF_Time base class routines
-        !
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeIntervalGet_S
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalGet_S(this, S, rc)
-
-
-! !ARGUMENTS:
-       type(ESMF_TimeInterval), intent(inout) :: this
-       integer(int64), intent(out) :: S
-       integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-    
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeGet_S(this%time, S, rc)
-
-        end subroutine
-
+      end subroutine ESMF_TimeIntervalSetCalendar
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet_S
+! !IROUTINE: ESMF_TimeIntervalIsSameCal - Compare calendars of two time intervals
 
 ! !INTERFACE:
-        subroutine ESMF_TimeIntervalSet_S(this, S, rc)
+      function ESMF_TimeIntervalIsSameCal(timeinterval1, timeinterval2, rc)
 
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(in) :: S
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!     
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-    
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeSet_S(this%time, S, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeIntervalGet_s_
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalGet_s_(this, s, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        real, intent(out) :: s
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!     
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-    
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeGet_s(this%time, s, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalSet_s_
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalSet_s_(this, s, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        real, intent(in) :: s
-       integer, intent(out), optional :: rc
-
-
-
-! !DESCRIPTION:
-!     
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-    
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeSet_s(this%time, s, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalGet_h
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalGet_h(this, h, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        real, intent(out) :: h
-        integer, intent(out), optional :: rc
-    
-
-
-! !DESCRIPTION:
-!     
-!  
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeGet_h(this%time, h, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalSet_h
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalSet_h(this, h, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        real, intent(in) :: h
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!     
-!  
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeSet_h(this%time, h, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalRead_S
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalRead_S(this, S, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(out) :: S
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!     
-!  
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-    
-            print *, "ESMF_TimeIntervalRead_S entered"
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeRead_S(this%time, S, rc)
-
-        end subroutine
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalWrite_S
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalWrite_S(this, S, rc)
-
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(in) :: S
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!     
-!  
-!  
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-    
-            print *, "ESMF_TimeIntervalWrite_S entered"
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeWrite_S(this%time, S, rc)
-
-        end subroutine
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalRead_Sn
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalRead_Sn(this, Sn, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int32), intent(out) :: Sn
-        integer, intent(out), optional :: rc
-
-
-
-! !DESCRIPTION:
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-    
-            print *, "ESMF_TimeIntervalRead_Sn entered"
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeRead_Sn(this%time, Sn, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalWrite_Sn
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalWrite_Sn(this, Sn, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(in) :: Sn
-        integer, intent(out), optional :: rc
-
-
-
-! !DESCRIPTION:
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            print *, "ESMF_TimeIntervalWrite_Sn entered"
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeWrite_Sn(this%time, Sn, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalRead_Sd
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalRead_Sd(this, Sd, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int32), intent(out) :: Sd
-        integer, intent(out), optional :: rc
-
-
-
-! !DESCRIPTION:
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-    
-            print *, "ESMF_TimeIntervalRead_Sd entered"
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeRead_Sd(this%time, Sd, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalWrite_Sd
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalWrite_Sd(this, Sd, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(in) :: Sd
-        integer, intent(out), optional :: rc
-
-
-
-! !DESCRIPTION:
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-            print *, "ESMF_TimeIntervalWrite_Sd entered"
-
-            ! call ESMF_Time base class subroutine
-            call c_ESMF_TimeWrite_Sd(this%time, Sd, rc)
-
-        end subroutine
-
-
-!------------------------------------------------------------------------------
-        !
-        !  wrappers for ESMF_Time base class overloaded operators
-        !
-
-        ! overloaded (==) operator interface function maps to
-        !   ESMF_Time base class
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeIntervalEQ
-
-! !INTERFACE:
-        function ESMF_TimeIntervalEQ(timeinterval1, timeinterval2)
-
-
-!
 ! !RETURN VALUE:
-       logical :: ESMF_TimeIntervalEQ
+      logical :: ESMF_TimeIntervalIsSameCal
 
 ! !ARGUMENTS:
-            type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
-
-!DESCRIPTION:
-!     
-!
-!
-!
-! !REQUIREMENTS:  AAAn.n.n
-
-
-
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeEQ(timeinterval1%time, timeinterval2%time, &
-                               ESMF_TimeIntervalEQ)
-
-        end function
-
-!------------------------------------------------------------------------------
-        ! overloaded (/=) operator interface function maps to
-        !   ESMF_Time base class
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalNE
-
-! !INTERFACE:
-        function ESMF_TimeIntervalNE(timeinterval1, timeinterval2)
-
-
-!
-! !RETURN VALUE:
-        logical :: ESMF_TimeIntervalNE
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     
+!     Returns true if both {\tt TimeInterval}'s calendars are the same,
+!     false otherwise
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          The first object instance to compare
+!     \item[timeinterval2]
+!          The second object instance to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMGn.n.n
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      call c_ESMC_TimeIntervalIsSameCal(timeinterval1, timeinterval2, &
+                                             ESMF_TimeIntervalIsSameCal, rc)
+    
+      end function ESMF_TimeIntervalIsSameCal
 
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeNE(timeinterval1%time, timeinterval2%time, &
-                               ESMF_TimeIntervalNE)
-
-        end function
-
-!------------------------------------------------------------------------------
-        ! overloaded (<) operator interface function maps to
-        !   ESMF_Time base class
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalLT
+! !IROUTINE:  ESMF_TimeIntervalGetString - Get time interval value in string format
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalLT(timeinterval1, timeinterval2)
-
-
-!
-! !RETURN VALUE:
-        logical :: ESMF_TimeIntervalLT
+      subroutine ESMF_TimeIntervalGetString(timeinterval, Ts, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      character, dimension(ESMF_MAXSTR), intent(out) :: Ts
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     
+!     Convert {\tt TimeInterval}'s value into string format
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to convert
+!     \item[Ts]
+!          The string to return
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMG1.5.9
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      call c_ESMC_TimeIntervalGetString(timeinterval, Ts, rc)
 
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeLT(timeinterval1%time, timeinterval2%time, &
-                               ESMF_TimeIntervalLT)
+      end subroutine ESMF_TimeIntervalGetString
 
-        end function
-
-!------------------------------------------------------------------------------
-        ! overloaded (>) operator interface function maps to
-        !   ESMF_Time base class
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalGT
+! !IROUTINE:  ESMF_TimeIntervalGetAbsValue - Get the absolute value of a time interval
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalGT(timeinterval1, timeinterval2)
-
-
-!
-! !RETURN VALUE:
-        logical :: ESMF_TimeIntervalGT
-
+      subroutine ESMF_TimeIntervalGetAbsValue(timeinterval, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     
+!     Get a {\tt TimeInterval}'s absolute value.  Return in the given
+!     {\tt TimeInterval}
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance with which to take the absolute value.
+!          Absolute value returned as new value of timeinterval.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMG1.5.8
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
+    
+      call c_ESMC_TimeIntervalGetAbsValue(timeinterval, rc)
 
+      end subroutine ESMF_TimeIntervalGetAbsValue
 
-
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeGT(timeinterval1%time, timeinterval2%time, &
-                               ESMF_TimeIntervalGT)
-
-        end function
-
-!------------------------------------------------------------------------------
-        ! overloaded (<=) operator interface function maps to
-        !   ESMF_Time base class
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalLE
+! !IROUTINE:  ESMF_TimeIntervalGetNegAbsVal - Get the negative absolute value of a time interval
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalLE(timeinterval1, timeinterval2)
-
-!
-! !RETURN VALUE:
-        logical :: ESMF_TimeIntervalLE
+      subroutine ESMF_TimeIntervalGetNegAbsVal(timeinterval, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     
+!     Get a {\tt TimeInterval}'s negative absolute value.  Return in the given
+!     {\tt TimeInterval}
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance with which to take the negative absolute value.
+!          Negative absolute value returned as new value of timeinterval.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMG1.5.8
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
+    
+      call c_ESMC_TimeIntervalGetNegAbsVal(timeinterval, rc)
 
+      end subroutine ESMF_TimeIntervalGetNegAbsVal
 
-
-
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeLE(timeinterval1%time, timeinterval2%time, &
-                               ESMF_TimeIntervalLE)
-
-        end function
-!------------------------------------------------------------------------------
-        ! overloaded (>=) operator interface function maps to
-        !   ESMF_Time base class
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalLE
+! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two time intervals, return fraction result
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalGE(timeinterval1, timeinterval2)
+      function ESMF_TimeIntervalFQuot(timeinterval1, timeinterval2, rc)
 
-!
 ! !RETURN VALUE:
-       logical :: ESMF_TimeIntervalGE
+      type(ESMF_Fraction) :: ESMF_TimeIntervalFQuot
 
-! !ARGUMENTS:
-       type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
+! !ARGUMENTS: 
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     
+!     Returns timeinterval1 divided by timeinterval2 as a fraction quotient.
+!     Note:  this method is not overloaded, since it has the same arguments
+!     as ESMF\_TimeIntervalRQuot, and also will be less frequently used.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          The dividend
+!     \item[timeinterval2]
+!          The divisor
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMG1.5.5
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
+                                    ESMF_TimeIntervalFQuot, rc)
 
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeGE(timeinterval1%time, timeinterval2%time, &
-                               ESMF_TimeIntervalGE)
-
-        end function
+      end function ESMF_TimeIntervalFQuot
 
 !------------------------------------------------------------------------------
-		! overloaded (+) operator interface function maps to
-		!   ESMF_Time base class
+!
+! This section includes overloaded operators defined only for TimeInterval
+! (not inherited from BaseTime)
+! Note:  these functions do not have a return code, since F90 forbids more
+! than 2 arguments for arithmetic overloaded operators
+!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalSum
+! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two time intervals, return real result
 
 ! !INTERFACE:
-	function ESMF_TimeIntervalSum(timeinterval1, timeinterval2)
+      function ESMF_TimeIntervalRQuot(timeinterval1, timeinterval2)
 
-!
 ! !RETURN VALUE:
-	type(ESMF_TimeInterval) :: ESMF_TimeIntervalSum
+      real :: ESMF_TimeIntervalRQuot
 
-
-! !ARGUMENTS:
-	type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
+! !ARGUMENTS: 
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
-!     
+!     Returns timeinterval1 divided by timeinterval2 as a real number quotient.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          The dividend
+!     \item[timeinterval2]
+!          The divisor
+!     \end{description}
 !
+! !REQUIREMENTS:
+!     TMG1.5.5
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      call c_ESMC_TimeIntervalRQuot(timeinterval1, timeinterval2, &
+                                    ESMF_TimeIntervalRQuot)
 
-		! call ESMF_Time base class function
-		call c_ESMF_TimeSum(timeinterval1%time, timeinterval2%time, &
-								ESMF_TimeIntervalSum%time)
+      end function ESMF_TimeIntervalRQuot
 
-	end function
-
-!------------------------------------------------------------------------------
-        ! overloaded (-) operator interface function maps to
-        !   ESMF_Time base class
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalSum
+! !IROUTINE:  ESMF_TimeIntervalQuotI - Divide time interval by an integer, return time interval result 
+
+! !INTERFACE:
+      function ESMF_TimeIntervalQuotI(timeinterval, divisor)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalQuotI
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+      integer, intent(in) :: divisor
+
+! !DESCRIPTION:
+!     Divides a {\tt TimeInterval} by an integer divisor, returns quotient as a
+!     {\tt TimeInterval}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The dividend
+!     \item[divisor]
+!          Integer divisor
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.6, TMG5.3, TMG7.2
+!EOP
+
+      call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
+                                    ESMF_TimeIntervalQuotI)
+
+      end function ESMF_TimeIntervalQuotI
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalQuotR - Divide time interval by an real, return time interval result 
+
+! !INTERFACE:
+      function ESMF_TimeIntervalQuotR(timeinterval, divisor)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalQuotR
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+      real, intent(in) :: divisor
+
+! !DESCRIPTION:
+!     Divides a {\tt TimeInterval} by an real divisor, returns quotient as a
+!     {\tt TimeInterval}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The dividend
+!     \item[divisor]
+!          Real divisor
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.6, TMG5.3, TMG7.2
+!EOP
+
+      call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
+                                    ESMF_TimeIntervalQuotR)
+
+      end function ESMF_TimeIntervalQuotR
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:   ESMF_TimeIntervalProdI - Multiply a time interval by an integer
+
+! !INTERFACE:
+      function ESMF_TimeIntervalProdI(timeinterval, multiplier)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdI
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+      integer, intent(in) :: multiplier
+
+! !DESCRIPTION:
+!     Multiply a {\tt TimeInterval} by an integer, return product as a
+!     {\tt TimeInterval}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The multiplicand
+!     \item[mutliplier]
+!          Integer multiplier
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!EOP
+
+      call c_ESMC_TimeIntervalProdI(timeinterval, multiplier, &
+                                    ESMF_TimeIntervalProdI)
+
+      end function ESMF_TimeIntervalProdI
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalProdF - Multiply a time interval by a fraction
+
+! !INTERFACE:
+      function ESMF_TimeIntervalProdF(timeinterval, multiplier)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdF
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+      type(ESMF_Fraction), intent(in) :: multiplier
+
+! !DESCRIPTION:
+!     Multiply a {\tt TimeInterval} by a fraction, return product as a
+!     {\tt TimeInterval}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The multiplicand
+!     \item[mutliplier]
+!          Fraction multiplier
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!EOP
+
+      call c_ESMC_TimeIntervalProdF(timeinterval, multiplier, &
+                                    ESMF_TimeIntervalProdF)
+
+      end function ESMF_TimeIntervalProdF
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:   ESMF_TimeIntervalProdR - Multiply a time interval by a real
+
+! !INTERFACE:
+      function ESMF_TimeIntervalProdR(timeinterval, multiplier)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdR
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+      real, intent(in) :: multiplier
+
+! !DESCRIPTION:
+!     Multiply a {\tt TimeInterval} by a real number, return product as a
+!     {\tt TimeInterval}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The multiplicand
+!     \item[mutliplier]
+!          Real multiplier
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!EOP
+
+      call c_ESMC_TimeIntervalProdR(timeinterval, multiplier, &
+                                    ESMF_TimeIntervalProdR)
+
+      end function ESMF_TimeIntervalProdR
+
+!------------------------------------------------------------------------------
+!
+! This section includes the inherited ESMF_BaseTime class overloaded operators
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalSum - Add two time intervals together
+
+! !INTERFACE:
+      function ESMF_TimeIntervalSum(timeinterval1, timeinterval2, rc)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalSum
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Add two {\tt TimeIntervals}, return sum as a {\tt TimeInterval}.
+!     Maps overloaded (+) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          The augend 
+!     \item[timeinterval2]
+!          The addend
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, 
+!                 TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeSum(timeinterval1%basetime, timeinterval2%basetime, &
+                              ESMF_TimeIntervalSum%basetime, rc)
+
+      end function ESMF_TimeIntervalSum
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalDiff - Subtract one time interval from another
    
 ! !INTERFACE:
-        function ESMF_TimeIntervalDiff(timeinterval1, timeinterval2)
+      function ESMF_TimeIntervalDiff(timeinterval1, timeinterval2, rc)
 
 ! !RETURN VALUE:
-        type(ESMF_TimeInterval) :: ESMF_TimeIntervalDiff
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalDiff
 
 ! !ARGUMENTS: 
-        type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     Subtract timeinterval2 from timeinterval1, return remainder as a 
+!     {\tt TimeInterval}.
+!     Map overloaded (-) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          The minuend 
+!     \item[timeinterval2]
+!          The subtrahend
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
-            ! call ESMF_Time base class function
-            call c_ESMF_TimeDiff(timeinterval1%time, timeinterval2%time, &
-                                 ESMF_TimeIntervalDiff%time)
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeDiff(timeinterval1%basetime, timeinterval2%basetime, &
+                               ESMF_TimeIntervalDiff%basetime, rc)
 
-        end function
+      end function ESMF_TimeIntervalDiff
 
-!------------------------------------------------------------------------------
-        !
-        ! wrappers for ESMF_TimeInterval overloaded operators
-        !
-
-        ! overloaded (/) operator, timeinterval input, fraction output
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalQuot
+! !IROUTINE: ESMF_TimeIntervalEQ - Compare two time intervals for equality
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalQuot(timeinterval1, timeinterval2)
+      function ESMF_TimeIntervalEQ(timeinterval1, timeinterval2, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeIntervalEQ
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
+
+!DESCRIPTION:
+!     Return true if both given time intervals are equal, false otherwise.
+!     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          First time interval to compare
+!     \item[timeinterval2]
+!          Second time interval to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeEQ(timeinterval1%basetime, timeinterval2%basetime, &
+                             ESMF_TimeIntervalEQ, rc)
+
+      end function ESMF_TimeIntervalEQ
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalNE - Compare two time intervals for inequality
+
+! !INTERFACE:
+      function ESMF_TimeIntervalNE(timeinterval1, timeinterval2, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeIntervalNE
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Return true if both given time intervals are not equal, false otherwise.
+!     Maps overloaded (/=) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          First time interval to compare
+!     \item[timeinterval2]
+!          Second time interval to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeNE(timeinterval1%basetime, timeinterval2%basetime, &
+                             ESMF_TimeIntervalNE, rc)
+
+      end function ESMF_TimeIntervalNE
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalLT - Time interval 1 less than time interval 2 ?
+
+! !INTERFACE:
+      function ESMF_TimeIntervalLT(timeinterval1, timeinterval2, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeIntervalLT
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Return true if first time interval is less than second time interval,
+!     false otherwise.
+!     Maps overloaded (<) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          First time interval to compare
+!     \item[timeinterval2]
+!          Second time interval to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeLT(timeinterval1%basetime, timeinterval2%basetime, &
+                             ESMF_TimeIntervalLT, rc)
+
+      end function ESMF_TimeIntervalLT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalGT - Time interval 1 greater than time interval 2?
+
+! !INTERFACE:
+      function ESMF_TimeIntervalGT(timeinterval1, timeinterval2, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_TimeIntervalGT
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Return true if first time interval is greater than second time interval,
+!     false otherwise.
+!     Maps overloaded (>) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          First time interval to compare
+!     \item[timeinterval2]
+!          Second time interval to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOP
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeGT(timeinterval1%basetime, timeinterval2%basetime, &
+                             ESMF_TimeIntervalGT, rc)
+
+      end function ESMF_TimeIntervalGT
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalLE - Time interval 1 less than or equal to time interval 2 ?
+
+! !INTERFACE:
+      function ESMF_TimeIntervalLE(timeinterval1, timeinterval2, rc)
 
 ! !RETURN VALUE:
-        type(ESMF_Fraction) :: ESMF_TimeIntervalQuot
+      logical :: ESMF_TimeIntervalLE
 
-
-! !ARGUMENTS: 
-         type(ESMF_TimeInterval), intent(in) :: timeinterval1, timeinterval2
-
-
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     Return true if first time interval is less than or equal to second time
+!     interval, false otherwise.
+!     Maps overloaded (<=) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          First time interval to compare
+!     \item[timeinterval2]
+!          Second time interval to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeLE(timeinterval1%basetime, timeinterval2%basetime, &
+                             ESMF_TimeIntervalLE, rc)
 
-            call c_ESMF_TimeIntervalQuot(timeinterval1, timeinterval2, &
-                                         ESMF_TimeIntervalQuot)
-
-        end function
+      end function ESMF_TimeIntervalLE
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalQuot
-        ! overloaded (/) operator, integer input, timeinterval output
+! !IROUTINE:  ESMF_TimeIntervalGE - Time interval 1 greater than or equal to time interval 2 ?
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalQuotI(timeinterval, divisor)
-
+      function ESMF_TimeIntervalGE(timeinterval1, timeinterval2, rc)
+!
 ! !RETURN VALUE:
-        type(ESMF_TimeInterval) :: ESMF_TimeIntervalQuotI
+      logical :: ESMF_TimeIntervalGE
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval
-        integer, intent(in) :: divisor
-
+      type(ESMF_TimeInterval), intent(in) :: timeinterval1
+      type(ESMF_TimeInterval), intent(in) :: timeinterval2
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     Return true if first time interval is greater than or equal to second
+!     time interval, false otherwise.
+!     Maps overloaded (>=) operator interface function to {\tt ESMF\_BaseTime}
+!     base class.
 !
-! overloaded (/) operator, integer input, timeinterval output
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval1]
+!          First time interval to compare
+!     \item[timeinterval2]
+!          Second time interval to compare
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG2.4.3, TMG7.2
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeGE(timeinterval1%basetime, timeinterval2%basetime, &
+                             ESMF_TimeIntervalGE, rc)
 
-            call c_ESMF_TimeIntervalQuotI(timeinterval, divisor, &
-                                          ESMF_TimeIntervalQuotI)
+      end function ESMF_TimeIntervalGE
 
-        end function
-
+!------------------------------------------------------------------------------
+!
+! This section defines the overridden Validate and Print methods inherited 
+! from the ESMF_Base class
+!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalProdI
+! !IROUTINE:  ESMF_BaseValidate - Validate a time interval's properties
 
 ! !INTERFACE:
-        function ESMF_TimeIntervalProdI(timeinterval, multiplier)
-
-
-! !RETURN VALUE:
-        type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdI
-
+      subroutine ESMF_BaseValidate(timeinterval, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval
-        integer, intent(in) :: multiplier
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     Perform a validation check on a {\tt TimeInterval}'s properties
 !
-! overloaded (/) operator, integer input, timeinterval output
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          Time interval to validate
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
+! !REQUIREMENTS:
+!     TMGn.n.n
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-            call c_ESMF_TimeIntervalProdI(timeinterval, multiplier, &
-                                          ESMF_TimeIntervalProdI)
-
-        end function
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalProdF
-
-! !INTERFACE:
-        function ESMF_TimeIntervalProdF(timeinterval, multiplier)
-
-! !RETURN VALUE:
-        type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdF
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval
-        type(ESMF_Fraction), intent(in) :: multiplier
-
-! !DESCRIPTION:
-!
-! overloaded (/) operator, integer input, timeinterval output
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-            call c_ESMF_TimeIntervalProdF(timeinterval, multiplier, &
-                                          ESMF_TimeIntervalProdF)
-
-        end function
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:   ESMF_TimeIntervalProdR
-
-! !INTERFACE:
-        function ESMF_TimeIntervalProdR(timeinterval, multiplier)
-
-! !RETURN VALUE:
-        type(ESMF_TimeInterval) :: ESMF_TimeIntervalProdR
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(in) :: timeinterval
-        real, intent(in) :: multiplier
-
-! !DESCRIPTION:
-!
-! overloaded (*) operator, real input, timeinterval output
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-
-            call c_ESMF_TimeIntervalProdR(timeinterval, multiplier, &
-                                          ESMF_TimeIntervalProdR)
-
-        end function
-
-!------------------------------------------------------------------------------
-        !
-        ! shortcut routines for common get/set groupings
-        !
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntvGet_S_nd
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntvGet_S_nd(this, S, Sn, Sd, rc)
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(out) :: S
-        integer(int32), intent(out) :: Sn, Sd
-        integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!
-! 
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
     
-            call c_ESMF_TimeIntvGet_S_nd(this, S, Sn, Sd, rc)
+      call c_ESMC_BaseValidate(timeinterval, rc)
 
-        end subroutine
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntvSet_S_nd
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntvSet_S_nd(this, S, Sn, Sd, rc)
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int64), intent(in) :: S
-        integer(int32), intent(in) :: Sn, Sd
-        integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            call c_ESMF_TimeIntvSet_S_nd(this, S, Sn, Sd, rc)
-
-        end subroutine
+      end subroutine ESMF_BaseValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntvGet_D_S
+! !IROUTINE:  ESMF_BasePrint - Print out a time interval's properties
 
 ! !INTERFACE:
-        subroutine ESMF_TimeIntvGet_D_S(this, D, S, rc)
+      subroutine ESMF_BasePrint(timeinterval, rc)
 
 ! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int32), intent(out) :: D
-        integer, intent(out) :: S
-        integer, intent(out), optional :: rc
-
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
+!     To support testing/debugging, print out a {\tt TimeInterval}'s
+!     properties.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          Time interval to print out
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!
-!
+! !REQUIREMENTS:
+!     TMGn.n.n
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
-
     
-            call c_ESMF_TimeIntvGet_D_S(this, D, S, rc)
+      call c_ESMC_BasePrint(timeinterval, rc)
 
-        end subroutine
+      end subroutine ESMF_BasePrint
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntvSet_D_S
 
-! !INTERFACE:
-        subroutine ESMF_TimeIntvSet_D_S(this, D, S, rc)
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int32), intent(in) :: D
-        integer, intent(in) :: S
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            call c_ESMF_TimeIntvSet_D_S(this, D, S, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntvGet_D_H_M_S_MS
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntvGet_D_H_M_S_MS(this, D, H, M, S, MS, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int32), intent(out) :: D
-        integer, intent(out) :: H, M, S, MS
-        integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            call c_ESMF_TimeIntvGet_D_H_M_S_MS(this, D, H, M, S, MS, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntvSet_D_H_M_S_MS
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntvSet_D_H_M_S_MS(this, D, H, M, S, MS, rc)
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer(int32), intent(in) :: D
-        integer, intent(in) :: H, M, S, MS
-        integer, intent(in), optional :: rc
-
-
-! !DESCRIPTION:
-!
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            call c_ESMF_TimeIntvSet_D_H_M_S_MS(this, D, H, M, S, MS, rc)
-
-        end subroutine
-
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalGetString
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalGetString(this, Ts, rc)
-
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        character, dimension(40), intent(out) :: Ts
-        integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!
-!
-!
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            call c_ESMF_TimeIntervalGetString(this, Ts, rc)
-
-        end subroutine
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalGetAbsValue
-
-! !INTERFACE:
-        subroutine ESMF_TimeIntervalGetAbsValue(this, rc)
-
-! !ARGUMENTS:
-        type(ESMF_TimeInterval), intent(inout) :: this
-        integer, intent(out), optional :: rc
-
-
-! !DESCRIPTION:
-!
-!
-!  
-!
-!EOP
-! !REQUIREMENTS:  AAAn.n.n
-
-    
-            call c_ESMF_TimeIntervalGetAbsValue(this, rc)
-
-        end subroutine
-!EOP
-!===============================================================================
-    end module ESMF_TimeIntervalMod
+      end module ESMF_TimeIntervalMod

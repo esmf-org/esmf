@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.2 2002/10/15 23:29:53 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.3 2003/02/11 19:03:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,8 +25,7 @@
  // put any constants or macros which apply to the whole component in this file.
  // anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_TimeMgr.h>
- #include <ESMC_Types.h>
+ #include <ESMF_TimeMgr.inc>
  #include <pthread.h>
 
 //-------------------------------------------------------------------------
@@ -36,23 +35,24 @@
 // 
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ Alarm members and method
-// signatures (prototypes).  The companion file ESMC_Alarm.C contains
-// the full code (bodies) for the Alarm methods.
+// The code in this file defines the C++ {\tt Alarm} members and method
+// signatures (prototypes).  The companion file {\tt ESMC\_Alarm.C} contains
+// the full code (bodies) for the {\tt Alarm} methods.
 //
-// The Alarm class encapsulates the required alarm behavior, triggering its
-// ringing state on either a one-shot or repeating interval basis.
+// The {\tt Alarm} class encapsulates the required alarm behavior, triggering
+// its ringing state on either a one-shot or repeating interval basis.
 //
-// The Alarm class contains TimeInstants and a TimeInterval to perform one-shot
-// and interval alarming.  A single TimeInterval holds the alarm interval if
-// used.  A TimeInstant is defined for the ring time, used for either the
-// one-shot alarm time or for the next interval alarm time.  A TimeInstant
-// is also defined for the previous ring time to keep track of alarm intervals.
-// A TimeInstant for stop time defines when alarm intervals end.  If a one-shot
-// alarm is defined, only the ring time attribute is used, the others are not.
-// To keep track of alarm state, two logical attributes are defined, one for
-// ringing on/off, and the other for alarm enabled/disabled.  An alarm is
-// enabled by default; if disabled by the user, it does not function at all.
+// The {\tt Alarm} class contains {\tt Time} instants and a {\tt TimeInterval}
+// to perform one-shot and interval alarming.  A single {\tt TimeInterval}
+// holds the alarm interval if used.  A {\tt Time} instant is defined for the
+// ring time, used for either the one-shot alarm time or for the next interval
+// alarm time.  A {\tt Time} instant is also defined for the previous ring
+// time to keep track of alarm intervals.  A {\tt Time} instant for stop time
+// defines when alarm intervals end.  If a one-shot alarm is defined, only
+// the ring time attribute is used, the others are not.  To keep track of
+// alarm state, two logical attributes are defined, one for ringing on/off,
+// and the other for alarm enabled/disabled.  An alarm is enabled by default;
+// if disabled by the user, it does not function at all.
 //
 // The primary method is to check whether it is time to set the ringer, which
 // is called by the associated clock after performing a time step.  The clock
@@ -74,9 +74,9 @@
 //-------------------------------------------------------------------------
 //
 // !USES:
-//#include <ESMC_Base.h>
+ #include <ESMC_Base.h>
  #include <ESMC_TimeInterval.h>
- #include <ESMC_TimeInstant.h>
+ #include <ESMC_Time.h>
 
 // !PUBLIC TYPES:
  class ESMC_Alarm;
@@ -88,28 +88,28 @@
 class ESMC_Alarm {
 
   private:   // corresponds to F90 module 'type ESMF_Alarm' members
-    ESMC_TimeInterval RingInterval;	// (TMG 4.5.2)
-    ESMC_TimeInstant  RingTime;    // (TMG 4.5.1) (StartTime ?? )
-    ESMC_TimeInstant  PrevRingTime;
-    ESMC_TimeInstant  StopTime;
+    ESMC_TimeInterval RingInterval; // (TMG 4.5.2)
+    ESMC_Time         RingTime;     // (TMG 4.5.1)
+    ESMC_Time         PrevRingTime;
+    ESMC_Time         StopTime;
 
-    bool              Ringing;	  // (TMG 4.4)
+    bool              Ringing;    // (TMG 4.4)
     bool              Enabled;    // able to ring (TMG 4.5.3)
-	
-	int               ID;		  // used to distinguish among
+
+    int               ID;         // used to distinguish among
                                   //   multiple clock alarms
 
-    pthread_mutex_t   AlarmMutex;	// (TMG 7.5)
+    pthread_mutex_t   AlarmMutex; // (TMG 7.5)
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
 
     // Alarm is a shallow class, so only Init methods are needed
-	// (TMG 4.1, 4.7)
+    // (TMG 4.1, 4.7)
     int ESMC_AlarmInit(ESMC_TimeInterval *RingInterval,
-                       ESMC_TimeInstant  *RingTime,
-                       ESMC_TimeInstant  *StopTime,
+                       ESMC_Time         *RingTime,
+                       ESMC_Time         *StopTime,
                        bool Enabled);
 
     // Alarm doesn't need configuration, hence GetConfig/SetConfig
@@ -122,7 +122,7 @@ class ESMC_Alarm {
     int ESMC_AlarmTurnOff(void);
 
     bool ESMC_AlarmIsRinging(void);    // TMG 4.4: synchronous query for apps
-    bool ESMC_AlarmCheckRingTime(ESMC_TimeInstant *CurrTime, bool positive,
+    bool ESMC_AlarmCheckRingTime(ESMC_Time *CurrTime, bool positive,
                                  int rc);
                          // associated clock should invoke after advance:
                          // TMG4.4, 4.6
@@ -139,36 +139,36 @@ class ESMC_Alarm {
     int ESMC_AlarmSetRingInterval(ESMC_TimeInterval *RingInterval);
                                                            // TMG4.5.2, 4.7
 
-    int ESMC_AlarmGetRingTime(ESMC_TimeInstant *RingTime);
+    int ESMC_AlarmGetRingTime(ESMC_Time *RingTime);
                                                            // TMG4.7, 4.8
-    int ESMC_AlarmSetRingTime(ESMC_TimeInstant *RingTime); 
+    int ESMC_AlarmSetRingTime(ESMC_Time *RingTime); 
                                                            // TMG4.5.1, 4.7, 4.8
 
-    int ESMC_AlarmGetPrevRingTime(ESMC_TimeInstant *PrevRingTime);
+    int ESMC_AlarmGetPrevRingTime(ESMC_Time *PrevRingTime);
                                                            // TMG 4.7, 4.8
-    int ESMC_AlarmSetPrevRingTime(ESMC_TimeInstant *PrevRingTime);
+    int ESMC_AlarmSetPrevRingTime(ESMC_Time *PrevRingTime);
                                                            // TMG 4.7, 4.8
 
-    int ESMC_AlarmGetStopTime(ESMC_TimeInstant *StopTime); // TMG 4.5.2, 4.7
-    int ESMC_AlarmSetStopTime(ESMC_TimeInstant *StopTime); // TMG 4.5.2, 4.7
+    int ESMC_AlarmGetStopTime(ESMC_Time *StopTime); // TMG 4.5.2, 4.7
+    int ESMC_AlarmSetStopTime(ESMC_Time *StopTime); // TMG 4.5.2, 4.7
 
 
     // required methods inherited and overridden from the ESMC_Base class
 
     // internal validation
-    int ESMC_AlarmValidate(const char *options) const;
+    int ESMC_BaseValidate(const char *options) const;
 
     // for persistence/checkpointing
-    int ESMC_AlarmPrint(ESMC_TimeInterval *RingInterval,
-                        ESMC_TimeInstant  *RingTime,
-                        ESMC_TimeInstant  *PrevRingTime,
-                        ESMC_TimeInstant  *StopTime,
-                        bool              *Ringing,
-                        bool              *Enabled,
-	                    int               *ID) const;
+    int ESMC_BasePrint(ESMC_TimeInterval *RingInterval,
+                       ESMC_Time         *RingTime,
+                       ESMC_Time         *PrevRingTime,
+                       ESMC_Time         *StopTime,
+                       bool              *Ringing,
+                       bool              *Enabled,
+                       int               *ID) const;
 
     // for testing/debugging
-    int ESMC_AlarmPrint(void) const;
+    int ESMC_BasePrint(void) const;
 
     // native C++ constructors/destructors
     ESMC_Alarm(void);

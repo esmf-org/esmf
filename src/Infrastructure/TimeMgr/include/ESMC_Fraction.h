@@ -1,8 +1,8 @@
-// $Id: ESMC_Fraction.h,v 1.1 2002/10/07 19:31:19 eschwab Exp $
+// $Id: ESMC_Fraction.h,v 1.2 2003/02/11 19:03:32 eschwab Exp $
 #ifndef ESMC_FRACTION_H
 #define ESMC_FRACTION_H
 
-#include <ESMC_Types.h>
+#include <ESMC_Base.h>
 
 class ESMC_Fraction
 {
@@ -28,7 +28,7 @@ class ESMC_Fraction
     ~ESMC_Fraction(void);
 //
 // !DESCRIPTION:
-//      ESMF C++ Fraction class
+//      ESMF C++ {\tt Fraction} class
 //
 // !BUGS:
 //
@@ -42,8 +42,8 @@ class ESMC_Fraction
 //-------------------------------------------------------------------------
   protected:
 
-    int32 n;	// Integer fraction (exact) n/d; numerator
-    int32 d;  	// Integer fraction (exact) n/d; denominator
+    int n;  // Integer fraction (exact) n/d; numerator
+    int d;  // Integer fraction (exact) n/d; denominator
 };
 
 #endif // ESMC_FRACTION_H
