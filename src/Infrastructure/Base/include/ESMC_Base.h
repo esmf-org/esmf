@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.40 2004/01/29 19:04:43 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.41 2004/01/29 23:30:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -164,9 +164,9 @@ class ESMC_Base
     int           refCount;     // number of references to this instance
     int           classID;      // unique ID relative to this class
     ESMC_Status   baseStatus;   // status of an instance of Base derived class
-    char          baseName[ESMF_MAXSTR];  // object name, unique over class 
+    char          baseName[ESMF_MAXSTR];    // object name, unique over class 
     char          baseNameF90[ESMF_MAXSTR]; // same name, non-null terminated
-    char          className[ESMF_MAXSTR]; // object class
+    char          className[ESMF_MAXSTR];   // object class
 
   private:
     int attrCount;              // number of attributes in use in list
@@ -250,6 +250,15 @@ extern "C" {
   void FTN(c_esmc_setf90name)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_getf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_setf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
+  void FTN(c_esmc_attributesetint)(ESMC_Base **base, char *name, int *value, int *rc, int nlen);
+  void FTN(c_esmc_attributesetreal)(ESMC_Base **base, char *name, double *value, int *rc, int nlen);
+  void FTN(c_esmc_attributesetlogical)(ESMC_Base **base, char *name, ESMC_Logical *value, int *rc, int nlen);
+  void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);
+  void FTN(c_esmc_attributegetint)(ESMC_Base **base, char *name, int *value, int *rc, int nlen);
+  void FTN(c_esmc_attributegetreal)(ESMC_Base **base, char *name, double *value, int *rc, int nlen);
+  void FTN(c_esmc_attributegetlogical)(ESMC_Base **base, char *name, ESMC_Logical *value, int *rc, int nlen);
+  void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);
+
 }
 
 // class utility functions, not methods, since they operate on
