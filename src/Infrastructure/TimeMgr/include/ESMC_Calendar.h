@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.46 2005/01/07 00:13:10 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.47 2005/04/02 00:05:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,8 +38,8 @@
 // the full code (bodies) for the {\tt Calendar} methods.
 //
 // The {\tt Calendar} class encapsulates the knowledge (attributes and
-// behavior) of all required calendar types:  Gregorian, Julian, no-leap,
-//  360-day, custom, and no-calendar.
+// behavior) of all required calendar types:  Gregorian, Julian, Julian Day,
+// no-leap, 360-day, custom, and no-calendar.
 //
 // The {\tt Calendar} class encapsulates the definition of all required
 // calendar types. For each calendar type, it contains the number of months
@@ -76,13 +76,10 @@ class ESMC_TimeInterval;
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
 
-// TODO: make function for Gregorian only?
-#define ESMC_IS_LEAP_YEAR(year)  ( (year%400 == 0) || ((year%4 == 0) && \
-                                                       (year%100 != 0)) )
-
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
-#define CALENDAR_TYPE_COUNT 6
+#define CALENDAR_TYPE_COUNT 7
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
+                        ESMC_CAL_JULIAN,
                         ESMC_CAL_JULIANDAY,
                         ESMC_CAL_NOLEAP,      // like Gregorian, except
                                               //   Feb always has 28 days
@@ -123,6 +120,9 @@ class ESMC_Calendar {
         ESMF_KIND_I4 dN;   // fractional number of days per year (numerator)
         ESMF_KIND_I4 dD;   //                                    (denominator)
     } daysPerYear;    // e.g. for Venus, d=0, dN=926, dD=1000
+
+    // array of calendar type name strings
+    static const char *const calendarTypeName[CALENDAR_TYPE_COUNT];
 
     // one-of-each calendar type held automatically, as needed
     static ESMC_Calendar *internalCalendar[CALENDAR_TYPE_COUNT];
@@ -190,6 +190,8 @@ class ESMC_Calendar {
     ESMC_Time ESMC_CalendarDecrement(const ESMC_Time *time,
                                      const ESMC_TimeInterval &timeinterval)
                                      const;
+
+    bool ESMC_CalendarIsLeapYear(ESMF_KIND_I8 yy, int *rc=0) const;
 
     bool operator==(const ESMC_Calendar &) const;
     bool operator==(const ESMC_CalendarType &) const;
