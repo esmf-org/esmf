@@ -5,7 +5,6 @@
 #include <iostream.h>
 #define ESMC_METHOD "ESMC_LogErrEx"
 
-//!EXAMPLE String used by test script to count examples.
 int main() {
     int rc;
     int rc1;
