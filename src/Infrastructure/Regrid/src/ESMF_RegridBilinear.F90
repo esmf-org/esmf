@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.76 2004/10/05 22:51:47 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.77 2004/10/14 16:55:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.76 2004/10/05 22:51:47 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.77 2004/10/14 16:55:57 jwolfe Exp $'
 
 !==============================================================================
 
@@ -565,6 +565,8 @@
                                                   ! i-dir of source grid
       integer :: jbSrc, jeSrc                     ! beg, end of excl domain in
                                                   ! j-dir of source grid
+      integer :: iStrt, jStrt
+      integer :: d1, d2, s1, s2
       integer :: srcCount, srcValidCount
       integer :: srcAdd, dstAdd(2), srcTmp(2)     ! address in gathered source
                                                   ! and grid address in dest grid
@@ -584,6 +586,7 @@
       real (ESMF_KIND_R8) :: mat3, mat4
       real (ESMF_KIND_R8) :: dxp, dyp
       real (ESMF_KIND_R8) :: dstX, dstY
+      real (ESMF_KIND_R8) :: maxX, maxY, minX, minY
       real (ESMF_KIND_R8) :: determinant
       real (ESMF_KIND_R8) :: sumWts, zero, half, one, pi
       real (ESMF_KIND_R8), dimension(4) :: srcX
@@ -595,7 +598,8 @@
 
       integer, parameter :: maxIter = 100                  ! max iteration count
                                                            ! for i,j iteration
-      real (ESMF_KIND_R8), parameter :: converge = 1.e-10  ! convergence criterion
+!jw      real (ESMF_KIND_R8), parameter :: converge = 1.e-10  ! convergence criterion
+      real (ESMF_KIND_R8), parameter :: converge = 1.e-06  ! convergence criterion
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -613,6 +617,10 @@
  !           lonCycle  = 2.0*pi
  !        endif
  !     endif
+      d1 = dstOrder(1)
+      d2 = dstOrder(2)
+      s1 = srcOrder(1)
+      s2 = srcOrder(2)
 
       ibDst = 1
       ieDst = dstSizeX
@@ -623,8 +631,10 @@
       jbSrc = domain%ai(2)%min
       jeSrc = domain%ai(2)%max - 1
 
-      do j=jbDst,jeDst
-      do i=ibDst,ieDst
+      jStrt = jbSrc
+      do j  = jbDst,jeDst
+      iStrt = ibSrc
+      do i   = ibDst,ieDst
         dstX = dstCenterX(i,j)
         dstY = dstCenterY(i,j)
             
@@ -632,8 +642,8 @@
         if (dstUserMask(i,j) .and. (.not.found(i,j))) then
           ! for this destination point, look for the proper neighbor cells in the
           ! source grid 
-          search_loop: do jjj=jbSrc,jeSrc
-            do iii=ibSrc,ieSrc
+    5     search_loop: do jjj = jStrt,jeSrc
+            do iii = iStrt,ieSrc
                
               ! assume ghost cells filled so no worries about boundaries
               ip1 = iii + 1
@@ -670,11 +680,28 @@
        !       endif
 
               ! check to see if point inside cell
+              ! quick and dirty check first
+              minX = minval(srcX)
+              maxX = maxval(srcX)
+              minY = minval(srcY)
+              maxY = maxval(srcY)
+              if (dstX.lt.minX .OR. dstX.gt.maxX .OR. &
+                  dstY.lt.minY .OR. dstY.gt.maxY) cycle
               found(i,j) = ESMF_PhysGridPointInCell(dstX, dstY, srcX, srcY, localrc)
 
-              if (found(i,j)) exit search_loop
+              if (found(i,j)) then
+                iStrt = iii
+                jStrt = jjj
+                exit search_loop
+              endif
             enddo            ! iii-loop on src DE
           enddo search_loop  ! jjj-loop on src DE
+       
+          if (.not.found(i,j) .AND. (iStrt.ne.ibSrc .OR. jStrt.ne.jbSrc)) then
+            iStrt = ibSrc
+            jStrt = jbSrc
+            goto 5
+          endif
                
           ! if we've found a bilinear box containing the point continue with
           ! computation of weights
@@ -683,13 +710,13 @@
             ! check to see if src masks are true at all points
             ! check grid mask to see if it's a ghost cell
             srcCount = 0
-            if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).ne.1)) &
+            if (srcUserMask(iii,jjj) .AND. (srcGridMask(iii,jjj).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).ne.1)) &
+            if (srcUserMask(ip1,jjj) .AND. (srcGridMask(ip1,jjj).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).ne.1)) &
+            if (srcUserMask(iii,jp1) .AND. (srcGridMask(iii,jp1).ne.1)) &
                 srcCount = srcCount + 1
-            if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).ne.1)) &
+            if (srcUserMask(ip1,jp1) .AND. (srcGridMask(ip1,jp1).ne.1)) &
                 srcCount = srcCount + 1
 
             ! if all four are valid points, compute bilinear weights using
@@ -842,35 +869,35 @@
 
             ! now store this link into address, weight arrays
             if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).eq.0)) then
-              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
-              dstAdd(dstOrder(2)) = j   + dstIndexMod(2)
-              srcTmp(srcOrder(1)) = iii + srcIndexMod(1)
-              srcTmp(srcOrder(2)) = jjj + srcIndexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(2)
+              srcTmp(s1) = iii + srcIndexMod(1)
+              srcTmp(s2) = jjj + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc=rc)
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
-              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
-              dstAdd(dstOrder(2)) = j   + dstIndexMod(1)
-              srcTmp(srcOrder(1)) = ip1 + srcIndexMod(1)
-              srcTmp(srcOrder(2)) = jjj + srcIndexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(1)
+              srcTmp(s1) = ip1 + srcIndexMod(1)
+              srcTmp(s2) = jjj + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc=rc)
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
-              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
-              dstAdd(dstOrder(2)) = j   + dstIndexMod(1)
-              srcTmp(srcOrder(1)) = ip1 + srcIndexMod(1)
-              srcTmp(srcOrder(2)) = jp1 + srcIndexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(1)
+              srcTmp(s1) = ip1 + srcIndexMod(1)
+              srcTmp(s2) = jp1 + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc=rc)
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
-              dstAdd(dstOrder(1)) = i   + dstIndexMod(1)
-              dstAdd(dstOrder(2)) = j   + dstIndexMod(1)
-              srcTmp(srcOrder(1)) = iii + srcIndexMod(1)
-              srcTmp(srcOrder(2)) = jp1 + srcIndexMod(2)
-              srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
+              dstAdd(d1) = i   + dstIndexMod(1)
+              dstAdd(d2) = j   + dstIndexMod(1)
+              srcTmp(s1) = iii + srcIndexMod(1)
+              srcTmp(s2) = jp1 + srcIndexMod(2)
+              srcAdd     = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc=rc)
             endif
 
