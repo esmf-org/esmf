@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.51 2003/06/06 14:33:10 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.52 2003/06/25 21:44:15 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,14 +28,14 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt DistGrid} class, which contains a
-! collection of subgrids which constitute a single logical {\tt Grid}. The
+! The code in this file implements the {\tt ESMF\_DistGrid} class, which contains a
+! collection of subgrids which constitute a single logical {\tt ESMF\_Grid}. The
 ! subgrids can be operated on in parallel on a multiprocessor machine. The
-! {\tt DistGrid} class contains the mapping between the local grid 
-! decompositions and the global logical {\tt Grid}. It contains methods to
+! {\tt ESMF\_DistGrid} class contains the mapping between the local grid 
+! decompositions and the global logical {\tt ESMF\_Grid}. It contains methods to
 ! synchronize data values between the boundaries of subsets, and to collect
 ! and communicate global data values. It interacts closely with the
-! {\tt PhysGrid} object.
+! {\tt ESMF\_PhysGrid} object.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -158,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.51 2003/06/06 14:33:10 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.52 2003/06/25 21:44:15 rstaufer Exp $'
 
 !==============================================================================
 !
@@ -175,7 +175,7 @@
 !        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for DistGrid create
+!     This interface provides a single entry point for {\tt ESMF\_DistGrid} create
 !     methods.
 !
 !EOP
@@ -192,7 +192,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
-!     a complete {\tt DistGrid}.
+!     a complete {\tt ESMF\_DistGrid}.
 !
 !EOPI
       end interface 
@@ -207,7 +207,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     extent counts in a {\tt DistGrid}.
+!     extent counts in a {\tt ESMF\_DistGrid}.
 !
 !EOP
       end interface 
@@ -222,7 +222,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
-!     extent counts in a {\tt DistGrid}.
+!     extent counts in a {\tt ESMF\_DistGrid}.
 !
 !EOP
       end interface 
@@ -251,8 +251,8 @@
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt DistGrid} object and constructs its
-!     internals.  Returns a pointer to a new {\tt DistGrid}.
+!     Allocates memory for a new {\tt ESMF\_DistGrid} object and constructs its
+!     internals.  Returns a pointer to a new {\tt ESMF\_DistGrid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -320,9 +320,9 @@
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt DistGrid} object, constructs its
+!     Allocates memory for a new {\tt ESMF\_DistGrid} object, constructs its
 !     internals, and internally sets necessary attributes and values.
-!     Returns a pointer to a new {\tt DistGrid}.
+!     Returns a pointer to a new {\tt ESMF\_DistGrid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -331,13 +331,13 @@
 !     \item[[j\_max]] 
 !          Global number of computation cells in the 2nd direction.
 !     \item[[layout]]
-!          DELayout of DE's.
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[[halo\_width]] 
 !          Constant number of computation cells added to the decomposed
 !          axes for haloing (added to the total cells but not exclusive
 !          cells).
 !     \item[[name]] 
-!          {\tt DistGrid} name.
+!          {\tt ESMF\_DistGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -389,8 +389,8 @@
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt DistGrid} object previously allocated
-!     via an {\tt ESMF\_DistGridCreate routine}.
+!     Destroys a {\tt ESMF\_DistGrid} object previously allocated
+!     via an {\tt ESMF\_DistGridCreate} routine.
 !
 !     The arguments are:
 !     \begin{description}
@@ -453,8 +453,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
-!     allocated {\tt DistGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF\_DistGridDestruct
+!     allocated {\tt ESMF\_DistGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_DistGridDestruct}
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_DistGridCreate}, which calls
 !     {\tt ESMF\_DistGridConstruct}. 
@@ -462,9 +462,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
-!          Pointer to a {\tt DistGrid}.
+!          Pointer to a {\tt ESMF\_DistGrid}.
 !     \item[[name]] 
-!          Name of the {\tt DistGrid}.
+!          Name of the {\tt ESMF\_DistGrid}.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -543,8 +543,8 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
-!     allocated {\tt DistGrid} object.  May perform additional allocations
-!     as needed.  Must call the corresponding ESMF\_DistGridDestruct
+!     allocated {\tt ESMF\_DistGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_DistGridDestruct}
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_DistGridCreate}, which calls
 !     {\tt ESMF\_DistGridConstruct}. 
@@ -552,19 +552,19 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
-!          Pointer to a {\tt DistGrid}.
+!          Pointer to a {\tt ESMF\_DistGrid}.
 !     \item[[i\_max]] 
 !          Global number of computation cells in the 1st direction.
 !     \item[[j\_max]] 
 !          Global number of computation cells in the 2nd direction.
 !     \item[[layout]]
-!          DELayout of DE's.
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[[halo\_width]] 
 !          Constant number of computation cells added to the decomposed
 !          axes for haloing (added to the total cells but not exclusive
 !          cells).
 !     \item[[name]] 
-!          {\tt DistGrid} name.
+!          {\tt ESMF\_DistGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -739,7 +739,7 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Returns information from the DistGrid object.
+!     Returns information from the {\tt ESMF\_DistGrid} object.
 !
 !     The arguments are:
 !     \begin{description}
@@ -752,15 +752,15 @@
 !     \item[[gcell\_dim]]
 !          Array of the global number of cells in each dimension.
 !     \item[[lcelltot\_max]]
-!          Maximum number of total cells on any DE.
+!          Maximum number of total cells on any {\tt ESMF\_DE}.
 !     \item[[lcelltot\_max]]
-!          Maximum number of exclusive cells on any DE.
+!          Maximum number of exclusive cells on any {\tt ESMF\_DE}.
 !     \item[[lcelltot\_max\_dim]]
 !          Array of the maximum number of total cells in each dimension on
-!          any DE.
+!          any {\tt ESMF\_DE}.
 !     \item[[lcellexc\_max\_dim]]
 !          Array of the maximum number of exclusive cells in each dimension
-!          on any DE.
+!          on any {\tt ESMF\_DE}.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -837,7 +837,7 @@
 
 !
 ! !DESCRIPTION:
-!     Sets the DistGrid object with information given.
+!     Sets the {\tt ESMF\_DistGrid} object with information given.
 !
 !     The arguments are:
 !     \begin{description}
@@ -850,15 +850,15 @@
 !     \item[[gcell\_dim]]
 !          Array of the global number of cells in each dimension.
 !     \item[[lcelltot\_max]]
-!          Maximum number of total cells on any DE.
+!          Maximum number of total cells on any {\tt ESMF\_DE}.
 !     \item[[lcelltot\_max]]
-!          Maximum number of exclusive cells on any DE.
+!          Maximum number of exclusive cells on any {\tt ESMF\_DE}.
 !     \item[[lcelltot\_max\_dim]]
 !          Array of the maximum number of total cells in each dimension on
-!          any DE.
+!          any {\tt ESMF\_DE}.
 !     \item[[lcellexc\_max\_dim]]
 !          Array of the maximum number of exclusive cells in each dimension
-!          on any DE.
+!          on any {\tt ESMF\_DE}.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -925,7 +925,7 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Returns the set of resources the DistGrid object was configured with.
+!     Returns the set of resources the {\tt ESMF\_DistGrid} object was configured with.
 !
 !     The arguments are:
 !     \begin{description}
@@ -959,7 +959,7 @@
 
 !
 ! !DESCRIPTION:
-!     Configures the DistGrid object with set of resources given.
+!     Configures the {\tt ESMF\_DistGrid} object with set of resources given.
 !
 !     The arguments are:
 !     \begin{description}
@@ -993,7 +993,7 @@
 
 !
 ! !DESCRIPTION:
-!     Returns the value of DistGrid attribute <Value>.
+!     Returns the value of {\tt ESMF\_DistGrid} attribute <Value>.
 !     May be multiple routines, one per attribute.
 !
 !     The arguments are:
@@ -1028,7 +1028,7 @@
 
 !
 ! !DESCRIPTION:
-!     Set a DistGrid attribute with the given value.
+!     Set a {\tt ESMF\_DistGrid} attribute with the given value.
 !     May be multiple routines, one per attribute.
 !
 !     The arguments are:
@@ -1072,30 +1072,30 @@
 
 !
 ! !DESCRIPTION:
-!     Get DistGrid extent counts for a given DE
+!     Get {\tt ESMF\_DistGrid} extent counts for a given {\tt ESMF\_DE}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be modified.
 !     \item[[DE\_id]]
-!          Given DE's identifier.
+!          Given {\tt ESMF\_DE}'s identifier.
 !     \item[[lcelltot\_count]]
-!          Array of the number of total cells per dimension for this DE.
+!          Array of the number of total cells per dimension for this {\tt ESMF\_DE}.
 !     \item[[lcellexc\_count]]
-!          Array of the number of exclusive cells per dimension for this DE.
+!          Array of the number of exclusive cells per dimension for this {\tt ESMF\_DE}.
 !     \item[[lcelltot\_start]]
 !          Array of the starting position, in the global decompostion, for
-!          the total cells per dimension for this DE.
+!          the total cells per dimension for this {\t ESMF\_DE}.
 !     \item[[lcellexc\_start]]
 !          Array of the starting position, in the global decompostion, for
-!          the exclusive cells per dimension for this DE.
+!          the exclusive cells per dimension for this {\tt ESMF\_DE}.
 !     \item[[lcelltot\_end]]
 !          Array of the ending position, in the global decompostion, for
-!          the total cells per dimension for this DE.
+!          the total cells per dimension for this {\tt ESMF\_DE}.
 !     \item[[lcellexc\_end]]
 !          Array of the ending position, in the global decompostion, for
-!          the exclusive cells per dimension for this DE.
+!          the exclusive cells per dimension for this {\tt ESMF\_DE}.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1176,16 +1176,16 @@
 
 !
 ! !DESCRIPTION:
-!     Set DistGrid extent counts
+!     Set {\tt ESMF\_DistGrid} extent counts
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be modified.
 !     \item[[nDE\_i]]
-!          Number of DE's in the 1st direction.
+!          Number of {\tt ESMF\_DE}'s in the 1st direction.
 !     \item[[nDE\_j]]
-!          Number of DE's in the 2nd direction.
+!          Number of {\tt ESMF\_DE}'s in the 2nd direction.
 !     \item[[i\_max]]
 !          Number of cells in the 1st direction.
 !     \item[[j\_max]]
@@ -1335,18 +1335,18 @@
 
 !
 ! !DESCRIPTION:
-!     Get a DistGrid attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid]
 !          Class to be modified.
 !     \item[[MyDE]]
-!          Identifier for this DE.
+!          Identifier for this {\tt ESMF\_DE}.
 !     \item[[lcelltot\_count]]
-!          Local (on this DE) number of total cells.
+!          Local (on this {\tt ESMF\_DE}) number of total cells.
 !     \item[[lcellexc\_count]]
-!          Local (on this DE) number of exclusive cells.
+!          Local (on this {\tt ESMF\_DE}) number of exclusive cells.
 !     \item[[gcelltot\_start]]
 !          Global index of starting count for total cells.
 !     \item[[gcellexc\_start]]
@@ -1393,7 +1393,7 @@
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Set a DistGrid attribute with the given value.
+!     Set a {\tt ESMF\_DistGrid} attribute with the given value.
 !     May be multiple routines, one per attribute.
 !
 !     The arguments are:
@@ -1464,7 +1464,7 @@
 
 !
 ! !DESCRIPTION:
-!     Get a DistGrid attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1517,7 +1517,7 @@
 !     \item[distgrid]
 !          Class to be modified.
 !     \item[[layout]]
-!          The {\tt DELayout} corresponding to the {\tt DistGrid}.
+!          The {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_DistGrid}.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1558,7 +1558,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Translates global indexing to local indexing for a DistGrid
+!     Translates global indexing to local indexing for a {\tt ESMF\_DistGrid}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1674,7 +1674,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Translates local indexing to global indexing for a DistGrid
+!     Translates local indexing to global indexing for a {\tt ESMF\_DistGrid}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1784,7 +1784,7 @@
 !     \item[distgrid] 
 !          Class to be used.
 !     \item[[array]]
-!          ESMF\_Array to be haloed.
+!          {\tt ESMF\_Array} to be haloed.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1876,9 +1876,9 @@
 !     \item[srcarray]
 !          N-way decomposed {\tt Array} to be allgathered.
 !     \item[dstarray]
-!          N copies (one per DE in the layout) of full {\tt Array} 
-!          containing collected data.  Note that this {\tt Array} is 
-!          not meaningful in a {\tt Field} object anymore unless it
+!          N copies (one per i{\tt ESMF\_DE} in the layout) of full {\tt ESMF\_Array} 
+!          containing collected data.  Note that this {\tt ESMF\_Array} is 
+!          not meaningful in a {\tt ESMF\_Field} object anymore unless it
 !          is redistributed, for example with a Scatter operation.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1962,7 +1962,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Gather an array onto the specified DE number.  All other DEs return
+!     Gather an array onto the specified {\tt ESMF\_DE} number.  All other {\tt ESMF\_DE}s return
 !     an invalid array object.
 !
 !     The arguments are:
@@ -1970,14 +1970,14 @@
 !     \item[distgrid] 
 !          Class to be used.
 !     \item[srcarray]
-!          N-way decomposed {\tt Array} to be gathered into a single 
-!          full {\tt Array} on one DE.
+!          N-way decomposed {\tt ESMF\_Array} to be gathered into a single 
+!          full {\tt ESMF\_Array} on one {\tt ESMF\_DE}.
 !     \item[deid] 
-!          DE number in this layout to gather Array onto.
+!          {\tt ESMF\_DE} number in this layout to gather Array onto.
 !     \item[dstarray]
-!          1 copy on the specified DE in the layout of full {\tt Array} 
-!          containing collected data.  Note that this {\tt Array} is 
-!          not meaningful in a {\tt Field} object anymore unless it
+!          1 copy on the specified {\tt ESMF\_DE} in the layout of full {\tt ESMF\_Array} 
+!          containing collected data.  Note that this {\tt ESMF\_Array} is 
+!          not meaningful in a {\tt ESMF\_Field} object anymore unless it
 !          is redistributed, for example with a Scatter operation.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2063,31 +2063,31 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Scatter an array from the specified DE number to all DEs in the layout. 
+!     Scatter an array from the specified {\tt ESMF\_DE} number to all DEs in the layout. 
 !     The {\tt srcarray} argument will be ignored for all but the specified
 !     DE.  The decomposition of the grid will determine how the array is
 !     decomposed.  The {\tt dimorder} input controls how the dimension of the
 !     input array are decomposed over the grid.   The destination arrays are
-!     appropriate to be added as data to a {\tt Field} using this {\tt Grid}.
+!     appropriate to be added as data to a {\tt ESMF\_Field} using this {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be used.
 !     \item[deid] 
-!          Integer DE number containing the source {\tt Array}.
+!          Integer {\tt ESMF\_DE} number containing the source {\tt ESMF\_Array}.
 !     \item[srcarray]
-!          A single undecomposed {\tt Array} located on the specified DE.
-!          It will be N-way decomposed onto all other DEs in the layout.
+!          A single undecomposed {\tt ESMF\_Array} located on the specified {\tt ESMF\_DE}.
+!          It will be N-way decomposed onto all other {\tt ESMF\_DE}s in the layout.
 !     \item[dimorder] 
 !          Integer array specifying how the dimensions of the input array
 !          are to be decomposed over the layout.  0 means no decomposition
 !          for the corresponding dimension, and 1 to N indicate the mapping
-!          to the {\tt Grid} dimensions.
+!          to the {\tt ESMF\_Grid} dimensions.
 !     \item[dstarray]
-!          Returned N-way decomposed data, different on each DE.
-!          These {\tt Array}s are ready to add to a {\tt Field} object
-!          which uses the same {\tt PhysGrid} and a {\tt DataMap}
+!          Returned N-way decomposed data, different on each {\tt ESMF\_DE}.
+!          These {\tt ESMF\_Array}s are ready to add to a {\tt ESMF\_Field} object
+!          which uses the same {\tt ESMF\_PhysGrid} and a {\tt ESMF\_DataMap}
 !          which corresponds to the given {\tt dimorder}.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2169,7 +2169,7 @@
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Validates that a DistGrid is internally consistent.
+!     Validates that a {\tt ESMF\_DistGrid} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2202,7 +2202,7 @@
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!      Print information about a DistGrid.  
+!      Print information about a {\tt ESMF\_DistGrid}.  
 !
 !     The arguments are:
 !     \begin{description}
