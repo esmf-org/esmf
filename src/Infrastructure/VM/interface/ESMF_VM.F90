@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.13 2004/05/14 21:31:53 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.14 2004/05/18 16:13:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,6 +40,27 @@ module ESMF_VMMod
   private
       
 !------------------------------------------------------------------------------
+!     ! ESMF_CommHandle
+!
+! TODO: This needs to be filled with life once we work on non-blocking 
+!     
+!     ! Shallow sync/async communications type.  Mirrored on C++ side.
+!     ! Contains a place to hold
+!     ! the MPI handle in the case of nonblocking MPI calls.  The wait
+!     ! parameter controls whether the "IsComplete" call blocks/waits
+!     ! or simply tests and returns.
+      
+      type ESMF_CommHandle
+      sequence
+      private
+        integer :: dummy  !so compiler is satisfied for now...
+!        integer :: mpi_handle  ! mpi returns this for async calls
+!        integer :: wait        ! after an async call, does query block?
+      end type
+      
+      integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
+
+!------------------------------------------------------------------------------
 
   ! F90 class type to hold pointer to C++ object
   type ESMF_VM
@@ -68,12 +89,14 @@ module ESMF_VMMod
   
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
+  public ESMF_CommHandle
   public ESMF_VM
   public ESMF_VMPlan
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
       
+  public ESMF_TEST_COMPLETE, ESMF_WAIT_COMPLETE
   public ESMF_PREF_INTRA_PROCESS_SHMHACK
   public ESMF_PREF_INTRA_PROCESS_PTHREAD
   public ESMF_PREF_INTRA_SSI_POSIXIPC
@@ -122,7 +145,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.13 2004/05/14 21:31:53 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.14 2004/05/18 16:13:32 theurich Exp $'
 
 !==============================================================================
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.21 2004/05/07 19:14:02 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.22 2004/05/18 16:13:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,24 +45,6 @@
 !     ! ESMF_DELayout
 !
 !------------------------------------------------------------------------------
-!     ! ESMF_CommHandle
-!     
-!     ! Shallow sync/async communications type.  Mirrored on C++ side.
-!     ! Contains a place to hold
-!     ! the MPI handle in the case of nonblocking MPI calls.  The wait
-!     ! parameter controls whether the "IsComplete" call blocks/waits
-!     ! or simply tests and returns.
-      
-      type ESMF_CommHandle
-      sequence
-      private
-        integer :: mpi_handle  ! mpi returns this for async calls
-        integer :: wait        ! after an async call, does query block?
-      end type
-      
-      integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
-
-!------------------------------------------------------------------------------
 
       ! F90 class type to hold pointer to C++ object
       type ESMF_DELayout
@@ -106,22 +88,11 @@
 
 !------------------------------------------------------------------------------
 
-      ! TODO: is this needed?  there is a basic ESMF_CommHandle type
-      ! already defined.  take this out for now.
-      ! CommHandle type for DELayout
-      !type ESMF_DELayoutCommHandle
-      !  sequence
-      !  integer:: dummy ! not yet used...
-      !end type
-
-!------------------------------------------------------------------------------
-
       integer(ESMF_KIND_I4), parameter:: ESMF_CWGHT_NORMAL = 50 !default
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_DELayout
-      public ESMF_CommHandle
       public ESMF_I4_AP
       public ESMF_R4_AP
       public ESMF_R8_AP
@@ -131,7 +102,6 @@
 ! !PUBLIC PARAMETERS:
       
       public ESMF_CWGHT_NORMAL
-      public ESMF_TEST_COMPLETE, ESMF_WAIT_COMPLETE
 
 !------------------------------------------------------------------------------
 
@@ -165,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.21 2004/05/07 19:14:02 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.22 2004/05/18 16:13:31 theurich Exp $'
 
 !==============================================================================
 ! 
