@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.22 2003/08/01 18:00:43 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.23 2003/08/04 20:22:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.22 2003/08/01 18:00:43 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.23 2003/08/04 20:22:21 nscollins Exp $'
 
 !==============================================================================
 !
@@ -429,7 +429,7 @@
       subroutine ESMF_RouteGetCached(rank, &
                  my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
                  my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
-                 hascachedroute, route, rc)
+                 periodic, hascachedroute, route, rc)
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
@@ -443,6 +443,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
+      type(ESMF_Logical), dimension(:), intent(in) :: periodic
       logical, intent(out) :: hascachedroute
       type(ESMF_Route), intent(out) :: route
       integer, intent(out), optional :: rc            
@@ -504,7 +505,7 @@
         call c_ESMC_RouteGetCached(rank, &
                  my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
                  my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
-                 lcache, lroute, status)
+                 periodic, lcache, lroute, status)
 
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
@@ -724,7 +725,7 @@
       integer, dimension(:,:), intent(in) :: global_start
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: global_stride
       type(ESMF_DELayout), intent(in) :: layout
-      type(ESMF_Logical), intent(in), optional :: periodic(:)
+      type(ESMF_Logical), intent(in) :: periodic(:)
       integer, intent(out), optional :: rc
 
 !

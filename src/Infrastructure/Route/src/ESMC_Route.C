@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.49 2003/08/04 17:22:51 rjacob Exp $
+// $Id: ESMC_Route.C,v 1.50 2003/08/04 20:22:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.49 2003/08/04 17:22:51 rjacob Exp $";
+               "$Id: ESMC_Route.C,v 1.50 2003/08/04 20:22:21 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -276,6 +276,7 @@ static int maxroutes = 10;
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
       ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
+      ESMC_Logical *periodic,      // in - if halo'ing, per/axis flag
       ESMC_Logical *hascachedroute,  // out - ESMF_TF_TRUE, ESMF_TF_FALSE
       ESMC_Route **route) {        // out - if true, cached route
 
@@ -312,6 +313,7 @@ static int maxroutes = 10;
             if (tf == ESMF_TF_FALSE) continue;
             tf = ESMC_AxisIndexEqual(AI_rcv_tot, ep->rcv_AI_tot); 
             if (tf == ESMF_TF_FALSE) continue;
+            if (periodic[j] != ep->periodic[j]) continue;
         }
 
         *hascachedroute = ESMF_TF_TRUE;
@@ -796,6 +798,7 @@ static int maxroutes = 10;
         for (i=0; i<rank; i++) {
           ep->rcv_AI_exc[i] = AI_rcv_exc[i]; 
           ep->rcv_AI_tot[i] = AI_rcv_tot[i];
+          ep->periodic[i] = ESMF_TF_FALSE;
         }
     } else {
        printf("Warning: this route not Cached - Cache table full\n");
@@ -1022,6 +1025,7 @@ static int maxroutes = 10;
         for (i=0; i<rank; i++) {
           ep->rcv_AI_exc[i] = AI_exc[i]; 
           ep->rcv_AI_tot[i] = AI_tot[i];
+          ep->periodic[i] = periodic[i];
         }
     } else {
        printf("Warning: this route not Cached - Cache table full\n");

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.23 2003/08/01 18:00:43 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.24 2003/08/04 20:22:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,6 +66,7 @@
     int rcv_AI_count; 
     ESMC_AxisIndex rcv_AI_exc[ESMF_MAXDIM]; 
     ESMC_AxisIndex rcv_AI_tot[ESMF_MAXDIM];
+    ESMC_Logical periodic[ESMF_MAXDIM];
     int routeid;
     ESMC_Route *theroute;
  } ESMC_RouteCacheEntry;
@@ -152,6 +153,7 @@
                        int my_DE_snd, 
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
                        int AI_snd_count, ESMC_DELayout *layout_snd,
+                       ESMC_Logical *periodic,
                        ESMC_Logical *hascachedroute, ESMC_Route **route);
 
  #endif  // ESMC_Route_H
