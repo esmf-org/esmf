@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.55 2004/08/13 21:54:34 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.56 2004/08/17 21:11:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.55 2004/08/13 21:54:34 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.56 2004/08/17 21:11:03 svasquez Exp $'
 
 !==============================================================================
 !
@@ -942,7 +942,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompReadRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
 !
 ! !INTERFACE:
@@ -995,7 +995,7 @@
 !   \end{description}
 !
 !EOP
-
+	! Change BOPI to BOP when implemented.
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
                                   blockingflag, rc)
 
@@ -1341,7 +1341,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompWriteRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompWriteRestart - Call the GridComp's checkpoint routine
 !
 ! !INTERFACE:
@@ -1391,7 +1391,7 @@
 !   \end{description}
 !
 !EOP
-
+	!Change BOPI to BOP when implemented.
         call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
                                    blockingflag, rc)
 
