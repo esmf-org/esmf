@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.25 2003/02/13 15:11:08 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.26 2003/02/13 18:04:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.25 2003/02/13 15:11:08 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.26 2003/02/13 18:04:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1085,7 +1085,7 @@ end function
       type(ESMF_StateData), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
       character(len=ESMF_MAXSTR) :: bname, fname
-      integer, pointer, dimension(:) :: btodo, ftodo
+      integer, allocatable, dimension(:) :: btodo, ftodo
       integer :: bindex, findex 
       integer :: i, j
       integer :: fcount, fruncount, newcount
@@ -1101,7 +1101,8 @@ end function
         rc = ESMF_FAILURE
       endif
   
-      ! Return if list is empty.  TODO: decide if this should *not* be an error.
+      ! Return with error if list is empty.  
+      ! TODO: decide if this should *not* be an error.
       if (bcount .le. 0) return
       
       ! Add the bundles to the state, checking for name clashes
@@ -1119,12 +1120,13 @@ end function
 
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
-      !  existing entry or placeholder.
+      !  existing entry or placeholder.  Set all entries to 0.
       allocate(btodo(bcount), stat=status)
       if (status .ne. 0) then    ! F90 return code
         print *, "Error: adding bundles to a state"
         return
       endif
+      btodo(1:bcount) = 0
 
       if (fruncount .ge. 0) then
         allocate(ftodo(fruncount), stat=status)
@@ -1133,14 +1135,13 @@ end function
           return
         endif
         fneedsdealloc = .TRUE.
+        ftodo(1:fruncount) = 0
       endif
 
   
-      ! Initialize flag arrays to 0, counters to 0, indices to 1
+      ! Initialize counters to 0, indices to 1
       fruncount = 1
       newcount = 0
-      btodo = 0
-      ftodo = 0
 
       ! This is the start of the first pass through the bundle list.
       ! For each bundle...
@@ -1148,14 +1149,14 @@ end function
 
         call ESMF_BundleGetName(bundles(i), bname, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+          print *, "ERROR in ESMF_StateTypeAddBundleList: get bundle name"
           return
         endif
     
         ! See if this name is already in the state
         exists = ESMF_StateTypeFindData(stypep, bname, dataitem, bindex, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+          print *, "ERROR in ESMF_StateTypeAddBundleList: looking for preexisting bundle"
           return
         endif
    
@@ -1191,32 +1192,24 @@ end function
         endif
     
 
-        print *, "fcount = ", fcount
         do j=1, fcount
             ! get next field and query name
             call ESMF_BundleGetFields(bundles(i), j, field, status)
-            print *, "--After GetFields, status = ", status, "j = ", j
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
               return
             endif
 
-            print *, "Before field print, j = ", j
             call ESMF_FieldPrint(field, "", status)
-            print *, "After field print, before get name, name = ", trim(fname)
 
-            print *, "Before get name, j = ", j
             call ESMF_FieldGetName(field, fname, status)
-            print *, "After field get name, name = ", trim(fname), status
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddBundleList: get name from field"
               return
             endif
     
-            print *, "Before find data name, j = ", j
             exists = ESMF_StateTypeFindData(stypep, fname, dataitem, &
                                                               findex, status)
-            print *, "After find data name, exists = ", exists
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
               return
@@ -1284,7 +1277,7 @@ end function
       fruncount = 1     
       do i=1, bcount
 
-        ! If bundle wasn't found in the list, we need to add it here.
+        ! If bundle wasn't already found in the list, we need to add it here.
         if (btodo(i) .eq. 1) then
             stypep%datacount = stypep%datacount + 1
 
@@ -1604,6 +1597,148 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
+
+      integer :: status                   ! local error status
+      logical :: rcpresent                ! did user specify rc?
+      type(ESMF_StateData), pointer :: nextitem, dataitem
+      character(len=ESMF_MAXSTR) :: aname
+      integer, allocatable, dimension(:) :: atodo
+      integer :: i, j
+      integer :: newcount, aindex
+      logical :: exists
+
+      ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE 
+      rcpresent = .FALSE.
+      
+      aname = ""
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+  
+      ! Return with error if list is empty.  
+      ! TODO: decide if this should *not* be an error.
+      if (acount .le. 0) return
+      
+      ! Add the arrays to the state, checking for name clashes
+      !  and name placeholders
+
+      ! TODO: check for existing name, if placeholder, replace it
+      !       if existing object - what?  replace it silently?
+
+      ! Allocate some flags to mark whether this is a new item which
+      !  needs to be added to the end of the list, or if it replaces an
+      !  existing entry or placeholder.  Set all entries to 0.
+      allocate(atodo(acount), stat=status)
+      if (status .ne. 0) then    ! F90 return code
+        print *, "Error: adding arrays to a state"
+        return
+      endif
+      atodo(1:acount) = 0
+
+      ! Initialize counters to 0, indices to 1
+      newcount = 0
+
+      ! This is the start of the first pass through the array list.
+      ! For each array...
+      do i=1, acount
+
+        call ESMF_ArrayGetName(arrays(i), aname, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddArrayList: get array name"
+          return
+        endif
+    
+        ! See if this name is already in the state
+        exists = ESMF_StateTypeFindData(stypep, aname, dataitem, aindex, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddArrayList: looking for preexisting array"
+          return
+        endif
+   
+        ! If not, in the second pass we will need to add it.
+        if (.not. exists) then
+            newcount = newcount + 1
+            aindex = -1
+            atodo(i) = 1
+        else
+            ! It does already exist.  
+            ! Check to see if this is a placeholder, and if so, replace it
+            if (dataitem%otype .eq. ESMF_STATEDATANAME) then
+                allocate(dataitem%datap, stat=status)
+                if (status .ne. 0) then    ! F90 return code
+                  print *, "Error: adding arrays to a state"
+                  return
+                endif
+            endif
+
+            dataitem%otype = ESMF_STATEARRAY
+            dataitem%datap%ap = arrays(i)
+        
+            dataitem%needed = ESMF_STATEDATAISNEEDED
+            dataitem%ready = ESMF_STATEDATAREADYTOREAD
+            dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+        endif
+      enddo
+
+      ! We now know how many total new items need to be added
+      call ESMF_StateTypeExtendList(stypep, newcount, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_StateTypeAddArrayList: datalist allocate"
+        return
+      endif
+
+
+      ! There is enough space now to add new arrays to the list.
+      ! This is the start of the second pass through the array list.
+      do i=1, acount
+
+        ! If array wasn't already found in the list, we need to add it here.
+        if (atodo(i) .eq. 1) then
+            stypep%datacount = stypep%datacount + 1
+
+            nextitem => stypep%datalist(stypep%datacount)
+            nextitem%otype = ESMF_STATEARRAY
+
+            ! Add name
+            allocate(nextitem%namep, stat=status)
+            if (status .ne. 0) then    ! F90 return code
+              print *, "Error: adding arrays to a state"
+              return
+            endif
+
+            call ESMF_ArrayGetName(arrays(i), nextitem%namep, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_StateTypeAddArrayList: get array name"
+              return
+            endif
+
+            allocate(nextitem%datap, stat=status)
+            if (status .ne. 0) then    ! F90 return code
+              print *, "Error: adding array to a state"
+              return
+            endif
+            nextitem%datap%ap = arrays(i)
+ 
+            nextitem%needed = ESMF_STATEDATAISNEEDED
+            nextitem%ready = ESMF_STATEDATAREADYTOREAD
+            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+ 
+        endif
+
+      enddo
+
+      ! Get rid of temp flag arrays
+      deallocate(atodo, stat=status)
+      if (status .ne. 0) then    ! F90 return code
+        print *, "Error: adding arrays to a state"
+        return
+      endif
+
+#if 0
+========== start of old code
+
       type(ESMF_StateData), pointer :: nextitem
       integer :: i, startbase
       integer :: status                   ! local error status
@@ -1659,6 +1794,9 @@ end function
   
 
       stypep%datacount = startbase + acount
+
+========== end of old code
+#endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1811,7 +1949,8 @@ end function
 !     
 ! !DESCRIPTION:
 !      Make sure there is enough allocated space for {\tt itemcount}
-!      more things in the datalist.
+!      more things in the datalist.  This is an internal-only routine;
+!      {\tt rc} is NOT optional, especially since allocation can fail.
 !
 ! !REQUIREMENTS: 
 !EOP
@@ -1831,9 +1970,6 @@ end function
       ! An initially empty list. Simply allocate, no data copy needed.
       if (stypep%alloccount .eq. 0) then
 
-          print *, 1, itemcount, chunksize
-          print *, 2, chunksize
-          print *, 3, mod(itemcount, chunksize)
           allocsize = itemcount + chunksize - mod(itemcount,chunksize)
           allocate(stypep%datalist(allocsize), stat=status)
           if(status .NE. 0) then
