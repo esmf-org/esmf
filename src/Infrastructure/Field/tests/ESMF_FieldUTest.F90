@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.75 2004/10/14 22:59:30 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.76 2004/10/26 22:53:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.75 2004/10/14 22:59:30 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.76 2004/10/26 22:53:05 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
       integer, dimension(2) :: cellCounts
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
-      type(ESMF_Grid) :: grid, grid2, grid3, grid4
+      type(ESMF_Grid) :: grid, grid2, grid3, grid4, nogrid
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr1, f90ptr2, f90ptr3, f90ptr4, f90ptr5
@@ -65,7 +65,7 @@
       character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
       !type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7
+      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6, f7, nofield
       integer(ESMF_KIND_I4) :: intattr, intattr2
       integer(ESMF_KIND_I4) :: intattrlist(6)
       real(ESMF_KIND_R8) :: rattr, rattrlist(2)
@@ -116,6 +116,11 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      ! set up a known deleted field - will be used below.  same for grid.
+      nofield = ESMF_FieldCreateNoData(rc=rc)
+      call ESMF_FieldDestroy(nofield, rc=rc)
+      nogrid = ESMF_GridCreate(rc=rc)
+      call ESMF_GridDestroy(nogrid, rc=rc)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -189,6 +194,9 @@
 
       !EX_UTest
       ! Verifing that printing an uninitialized Field is handled properly.
+#ifdef ESMF_NO_INITIALIZERS
+      f6 = nofield
+#endif
       call ESMF_FieldPrint(f6, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing an uninitialized Field Test"
@@ -429,10 +437,16 @@
 
       !E-X-_-U-T-e-s-t
       ! Verifing that destroying a Grid in a Field is not allowed
-      ! TODO: we cannot tell that this has happened!  there is no way to
-      ! prevent the user from doing this!!  comment this test back in after
-      ! we have agreed as a group on the strategy for validation vs. the
-      ! cost of doing it each time you call into the framework.
+      ! TODO: the Grid has no way to tell that it is being referenced by
+      ! any other object, because we have so far chosen not to implement
+      ! reference counts.  so this cannot be tested and expected to fail.
+      ! however - it is reasonable to expect that the field might need to
+      ! notice the next time the user tries to access the field and the
+      ! associated grid has been destroyed.  but the testing for validity
+      ! does have a cost (in performance), and so far we have not put in
+      ! a ton of checks into every function.  it is reasonable to add a
+      ! field function after the grid is destroyed and see if that is 
+      ! detected, after we decide on a framework-wide consistent strategy.
      !!call ESMF_GridDestroy(grid, rc=rc)
      !!write(failMsg, *) ""
      !!write(name, *) "Destroying a Grid in a Field Test"
@@ -458,6 +472,9 @@
       !EX_UTest
       ! Verifing that a Field cannot be created with an uninitialized Grid 
       ! and Array.  f3 is *not* created here and should be invalid.
+#ifdef ESMF_NO_INITIALIZERS
+      grid2 = nogrid
+#endif
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
@@ -573,7 +590,6 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Bug 986852 opened
       ! Verify the pointers are equal
       call ESMF_FieldGetDataPointer(f2, f90ptr5, rc=rc)
       print *, "data = ", f90ptr5(1,1)
@@ -742,8 +758,6 @@
       ! It shall be possible to specify whether the field data is row major 
       ! or column major at field creation and to rearrange it (assumes 
       ! local copy).
-      ! Cannot be tested until Bug 705247 "Unable to query Data Map from Field" 
-      ! is fixed.
       !EX_UTest
       call ESMF_FieldGet(f3, datamap=dm, rc=rc)
       write(failMsg, *) ""
