@@ -1,0 +1,21 @@
+% $Id: Calendar_def.tex,v 1.1 2002/10/08 18:13:09 eschwab Exp $
+\begin{verbatim}
+        integer, parameter :: MonthsPerYear = 12
+            
+        type ESMF_DaysPerYear
+            private
+            sequence
+                integer :: D    ! whole days per year
+                integer :: Dn   ! fractional days per year numerator
+                integer :: Dd   ! fractional days per year denominator
+        end type
+
+        type ESMF_Calendar
+            private
+            sequence
+                integer :: Type
+                integer, dimension(MonthsPerYear) :: DaysPerMonth 
+                integer :: SecondsPerDay
+                type(ESMF_DaysPerYear) :: DaysPerYear
+        end type
+\end{verbatim}

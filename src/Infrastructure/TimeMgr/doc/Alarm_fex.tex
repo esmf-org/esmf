@@ -1,0 +1,48 @@
+% $Id: Alarm_fex.tex,v 1.1 2002/10/08 18:13:09 eschwab Exp $
+
+A Alarm is used in conjunction with a clock to ring at certain points in time.
+The following shows how to create and initialize two in F90, based on the
+example shown in Figure 2.  The first is a one-shot and the second is an
+interval alarm.
+
+\begin{verbatim}
+! use the Alarm Module
+use ESMF_AlarmMod
+
+! create two Alarms
+type(ESMF_Alarm) :: Alarm1, Alarm2
+
+! Initialize one to be a one-shot
+type(ESMF_TimeInstant) :: AlarmTime
+call ESMF_TimeInstantInit(AlarmTime, YR=2002, MM=8, DD=30, Gregorian)
+call ESMF_AlarmInit(Alarm1, RingTime=AlarmTime)
+
+! Initialize other to ring on an interval
+type(ESMF_TimeInterval) :: AlarmInterval
+call ESMF_TimeIntervalInit(AlarmInterval, DD=1)
+call ESMF_AlarmInit(Alarm2, RingInterval=AlarmInterval)
+
+! Associate alarms with clock
+call ESMF_ClockAddAlarm(ModelTime, Alarm1)
+call ESMF_ClockAddAlarm(ModelTime, Alarm2)
+
+! time step, clock reports active alarms in RingingAlarms list
+call ESMF_ClockAdvance(ModelTime, RingingAlarms)
+
+! process any active alarms
+if (RingingAlarms(1) == Alarm1) then
+
+   ! process Alarm1
+   call ProcessAlarm1()
+
+else if (RingingAlarms(2) == Alarm2) then
+
+   ! process Alarm2
+   call ProcessAlarm2()
+
+   ! after processing alarms, turn off interval alarm to prepare for next
+   !   ring time
+   ESMF_AlarmTurnOff(Alarm2)
+
+end if
+\end{verbatim}

@@ -1,0 +1,10 @@
+% $Id: Time_def.tex,v 1.1 2002/10/08 18:13:10 eschwab Exp $
+\begin{verbatim}
+        type ESMF_Time
+            private
+            sequence
+                integer(int64) :: S     ! whole seconds
+                integer(int32) :: Sn    ! fractional seconds, numerator
+                integer(int32) :: Sd    ! fractional seconds, denominator
+        end type
+\end{verbatim}

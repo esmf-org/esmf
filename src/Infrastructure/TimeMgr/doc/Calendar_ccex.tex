@@ -1,0 +1,18 @@
+% $Id: Calendar_ccex.tex,v 1.1 2002/10/08 18:13:09 eschwab Exp $
+
+A Calendar will be used as a reference for time instants.
+The following shows how to create and initialize one in C++:
+
+\begin{verbatim}
+// use the Calendar class
+#include <ESMC_Calendar.h>
+
+// create a Calendar
+ESMC_Calendar Gregorian;
+
+// initialize it to be a Gregorian calendar
+Gregorian.Init(ESMC_GREGORIAN);
+
+// pass it to a time instant
+StartTime.Init(..., Gregorian);
+\end{verbatim}

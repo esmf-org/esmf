@@ -1,0 +1,8 @@
+% $Id: Clock_rest.tex,v 1.1 2002/10/08 18:13:10 eschwab Exp $
+
+The maximum number of alarms that can be associated with a clock is hard-coded
+at 10.  This is done via a F90 parameter and a C++ \#define for ease of
+modification.  See the F90 and C++ "Parameters and Definitions" sections below.
+If needed, this can be changed in a future release to a dynamic value passed
+in during runtime initialization.  But the requirement for no dynamic memory
+allocation would have to be relaxed.
