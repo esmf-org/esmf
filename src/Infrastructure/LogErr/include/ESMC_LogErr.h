@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.31 2004/04/29 22:01:29 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.32 2004/05/04 20:05:50 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,9 +82,15 @@ class ESMC_Log {
     int ESMC_LogWrite(char msg[],int logtype);
     int ESMC_LogWrite(char msg[],int logtype,char modmeth[]);
     int ESMC_LogWrite(char msg[],int logtype,char module[],char method[]);
+    int ESMC_LogWrite(char FILE[],int LINE,char msg[],int logtype);
+    int ESMC_LogWrite(char FILE[],int LINE,char msg[],int logtype,char modmeth[]);
+    int ESMC_LogWrite(char FILE[],int LINE,char msg[],int logtype,char module[],char method[]);
     int ESMC_LogFoundError(int rc,char msg[],int logtype);
     int ESMC_LogFoundError(int rc,char msg[],int logtype,char modmeth[]);
     int ESMC_LogFoundError(int rc,char msg[],int logtype,char module[],char method[]);
+    int ESMC_LogFoundError(int rc,char FILE[],int LINE,char msg[],int logtype);
+    int ESMC_LogFoundError(int rc,char FILE[],int LINE,char msg[],int logtype,char modmeth[]);
+    int ESMC_LogFoundError(int rc,char FILE[],int LINE,char msg[],int logtype,char module[],char method[]);
     //void ESMC_LogInfo(char* fmt,...);   
     //char charData[],char strData[][32],int intData[], double floatData[]);
     //int ESMC_LogGetUnit()

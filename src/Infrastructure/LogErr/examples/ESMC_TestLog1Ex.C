@@ -1,5 +1,6 @@
 
 #include "ESMC.h"
+#include "ESMF_LogMacros.inc"
 
 int main() {
     ESMC_Log aLog;
