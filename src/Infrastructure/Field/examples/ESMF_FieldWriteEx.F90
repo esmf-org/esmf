@@ -35,7 +35,7 @@ program ESMF_FieldWriteEx
   real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: u2
   type(ESMF_Field) :: field_u2
   type(ESMF_ArraySpec) :: arrayspec
-  type(ESMF_Array), pointer :: array_temp
+  type(ESMF_Array) :: array_temp
   type(ESMF_Time) :: timestamp
   type(ESMF_IOSpec) :: iospec
   integer i,j
