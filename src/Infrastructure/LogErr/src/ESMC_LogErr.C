@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.60 2004/05/19 22:11:08 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.61 2004/05/27 21:22:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.60 2004/05/19 22:11:08 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.61 2004/05/27 21:22:04 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -71,7 +71,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
     ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
     result=true;
@@ -100,11 +100,11 @@ bool ESMC_Log::ESMC_LogAllocError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-	int result=false;
+	bool result=false;
 	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
 	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,method);
-	result=ESMF_TRUE;
-	return true;
+	result=true;
+	return result;
 }
 
 //----------------------------------------------------------------------------
@@ -127,7 +127,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
     strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
@@ -160,13 +160,13 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     char logMsg[ESMF_MAXSTR];
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
     strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
     ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
-    result=ESMF_TRUE;
-    return true;
+    result=true;
+    return result;
 }
 //----------------------------------------------------------------------------
 //
@@ -471,12 +471,12 @@ bool ESMC_Log::ESMC_LogFoundError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
-         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
          result=true;
+         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
     }
     return result;
 }
@@ -504,12 +504,12 @@ bool ESMC_Log::ESMC_LogFoundError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
-         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
          result=true;
+         ESMC_LogWrite(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
     }
     return result;
 }
@@ -534,14 +534,14 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
+        result=true;
         char logMsg[ESMF_MAXSTR];
         strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
         ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR);
-        result=true;
     }
     return result;
 }
@@ -570,14 +570,16 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-    int result=false;
+    bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
     if (rcToCheck!=ESMF_SUCCESS)
     {
+        result=true;   // TODO: if this line moved to after ESMC_LogWrite()
+                       // below, will crash ESMF_TimeIntervalUTest.F90 on 
+                       // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         char logMsg[ESMF_MAXSTR];
         strcpy(logMsg, ESMC_LogGetErrMsg(rcToCheck));
         ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
-        result=true;
     }
     return result;
 }
