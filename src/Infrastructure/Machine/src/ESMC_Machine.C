@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.2 2003/07/02 23:34:38 rstaufer Exp $
+// $Id: ESMC_Machine.C,v 1.3 2003/10/15 23:36:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.2 2003/07/02 23:34:38 rstaufer Exp $";
+                 "$Id: ESMC_Machine.C,v 1.3 2003/10/15 23:36:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -390,7 +390,10 @@ ESMC_Machine Machine;
 //EOP
 // !REQUIREMENTS:  
 
-    int initialized, numProcs;
+    int initialized, numProcs, numArgs;
+    // TODO: mpich requires these be passed into init...
+    //extern int argc;
+    //extern char **argv;
 
 #ifdef alpha
     long curr_cpu;
@@ -405,7 +408,9 @@ ESMC_Machine Machine;
 
     MPI_Initialized(&initialized);
     if (!initialized) {
-      MPI_Init(0, NULL);
+      numArgs = 0;
+      MPI_Init(&numArgs, NULL);
+      //MPI_Init(&argc, &argv);
     } else {
       // log error?
     }
