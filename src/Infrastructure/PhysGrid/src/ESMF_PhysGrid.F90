@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.43 2003/09/12 22:37:54 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.44 2003/09/18 22:57:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@
            dim_names,             &! dimension names
            dim_units               ! dimension units
 
-        real, dimension(ESMF_MAXGRIDDIM) :: &   ! TODO: originally real*8
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: &
            global_min,            &! global coordinate minimums
            global_max,            &! global coordinate maximums
            local_min,             &! local  coordinate minimums
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.43 2003/09/12 22:37:54 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.44 2003/09/18 22:57:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -410,7 +410,7 @@
          local_nmax,    &! local number of grid increments in each direction
          global_nmax     ! global number of grid increments in each direction
 
-      real, dimension(dim_num), intent(in) :: &
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: &
          local_min,     &! local coordinate minimum in each direction
          local_max,     &! local coordinate maximum in each direction
          global_min,    &! global coordinate minimum in each direction
@@ -507,12 +507,12 @@
 ! !ARGUMENTS:
       integer, intent(in) :: dim_num
       type(ESMF_RelLoc), intent(in) :: relloc
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
-      real, dimension(dim_num), intent(in) :: local_min
-      real, dimension(dim_num), intent(in) :: local_max
-      real, dimension(dim_num), intent(in) :: global_min
-      real, dimension(dim_num), intent(in) :: global_max
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_min
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_max
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_min
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_max
       integer, dimension(dim_num), intent(in) :: counts
       character (len=*), dimension(:), intent(in), optional :: dim_names
       character (len=*), dimension(:), intent(in), optional :: dim_units
@@ -753,7 +753,7 @@
          local_nmax,    &! local number of grid increments in each direction
          global_nmax     ! global number of grid increments in each direction
 
-      real, dimension(dim_num), intent(in) :: &
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: &
          local_min,     &! local coordinate minimum in each direction
          local_max,     &! local coordinate maximum in each direction
          global_min,    &! global coordinate minimum in each direction
@@ -849,12 +849,12 @@
       type(ESMF_PhysGridType) :: physgrid  
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(in) :: dim_num
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
-      real, dimension(dim_num), intent(in) :: local_min
-      real, dimension(dim_num), intent(in) :: local_max
-      real, dimension(dim_num), intent(in) :: global_min
-      real, dimension(dim_num), intent(in) :: global_max
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_min
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: local_max
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_min
+      real(ESMF_KIND_R8), dimension(dim_num), intent(in) :: global_max
       integer, dimension(dim_num), intent(in) :: counts
       character (len=*), dimension(:), intent(in), optional :: dim_names
       character (len=*), dimension(:), intent(in), optional :: dim_units
@@ -1055,7 +1055,7 @@
          dim_names,              &! names for each dimension
          dim_units                ! units for each dimension
 
-      real, dimension(:), intent(inout), optional :: &
+      real(ESMF_KIND_R8), dimension(:), intent(inout), optional :: &
          local_min,              &! local minimum in each coord direction
          local_max,              &! local maximum in each coord direction
          global_min,             &! global minimum in each coord direction
@@ -1179,7 +1179,7 @@
          dim_names,              &! names for each dimension
          dim_units                ! units for each dimension
 
-      real, dimension(ESMF_MAXGRIDDIM), &
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM), &
          intent(in), optional :: &
          local_min,              &! local minimum in each coord direction
          local_max,              &! local maximum in each coord direction
@@ -1447,8 +1447,8 @@
       integer, intent(in) :: global_nmax1
       integer, intent(in) :: global_nmin2
       integer, intent(in) :: global_nmax2
-      real, intent(in) :: delta1
-      real, intent(in) :: delta2
+      real(ESMF_KIND_R8), intent(in) :: delta1
+      real(ESMF_KIND_R8), intent(in) :: delta2
       integer, intent(out), optional :: rc            
 
 !
@@ -1488,8 +1488,11 @@
       integer :: i                                ! local counter
       integer :: global_n1, global_n2             ! counters
       integer :: local_n1, local_n2               ! counters
-      integer :: l1, l2
+      integer :: l1, l2, counts(3)
       logical :: rcpresent                        ! Return code present
+      type(ESMF_DataType) :: type
+      type(ESMF_DataKind) :: kind
+      real(ESMF_KIND_R8) :: crap
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp
       type(ESMF_LocalArray) :: array_temp
       
@@ -1511,6 +1514,14 @@
       l1 = (global_nmax1 - global_nmin1) + 1
       l2 = (global_nmax2 - global_nmin2) + 1
       allocate(temp(l1,l2,2))    ! TODO: hardcoded for dim=2 for now
+   !   type = ESMF_DATA_REAL
+   !   kind = ESMF_R8
+   !   counts(1) = (global_nmax1 - global_nmin1) + 1
+   !   counts(2) = (global_nmax2 - global_nmin2) + 1
+   !   counts(3) = 2            ! TODO: hardcoded for dim=2 for now
+   !   array_temp = ESMF_LocalArrayCreate(3, type, kind, counts, status)
+   !   call ESMF_LocalArrayGetData(array_temp, temp, &
+   !                               ESMF_DATA_REF, status)
 
 !     Loop over number of coordinate location specifiers
       do i = 1,ncoord_locs
@@ -1526,7 +1537,9 @@
             local_n1 = (global_n1 - global_nmin1) + 1
             do global_n2 = global_nmin2,global_nmax2
               local_n2 = (global_n2 - global_nmin2) + 1
-              temp(local_n1,local_n2,1) = delta1*0.5*real(global_n1+global_n1-1)
+              crap = delta1*0.5d0*real(global_n1+global_n1-1)
+              temp(local_n1,local_n2,1) = crap
+              write(*,*) '1,2,3,temp,crap',local_n1,local_n2,temp(local_n1,local_n2,1),crap
             enddo
           enddo
           array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
@@ -1537,7 +1550,7 @@
             local_n2 = (global_n2 - global_nmin2) + 1
             do global_n1 = global_nmin1,global_nmax1
               local_n1 = (global_n1 - global_nmin1) + 1
-              temp(local_n1,local_n2,2) = delta2*0.5*real(global_n2+global_n2-1)
+              temp(local_n1,local_n2,2) = delta2*0.5d0*real(global_n2+global_n2-1)
             enddo
           enddo
           array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
@@ -1613,7 +1626,7 @@
 
       enddo
 
-      deallocate(temp)    ! TODO: figure out how to load one array
+  !    deallocate(temp)    ! TODO: figure out how to load one array
 
 !     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
 
@@ -1639,8 +1652,8 @@
       integer, intent(in) :: local_nmax1
       integer, intent(in) :: local_nmin2
       integer, intent(in) :: local_nmax2
-      real, dimension(:), intent(in) :: delta1
-      real, dimension(:), intent(in) :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: delta2
       integer, intent(out), optional :: rc            
 
 !
@@ -1679,8 +1692,10 @@
       integer :: status                           ! Error status
       integer :: i                                ! local counter
       integer :: local_n1, local_n2               ! counters
-      integer :: l1, l2
+      integer :: l1, l2, counts(3)
       logical :: rcpresent                        ! Return code present
+      type(ESMF_DataType) :: type
+      type(ESMF_DataKind) :: kind
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp
       real(ESMF_KIND_R8) :: xLoc, yLoc
       type(ESMF_LocalArray) :: array_temp
@@ -1703,6 +1718,14 @@
       l1 = (local_nmax1 - local_nmin1) + 1
       l2 = (local_nmax2 - local_nmin2) + 1
       allocate(temp(l1,l2,2))    ! TODO: hardcoded for dim=2 for now
+  !    type = ESMF_DATA_REAL
+  !    kind = ESMF_R8
+  !    counts(1) = (local_nmax1 - local_nmin1) + 1
+  !    counts(2) = (local_nmax2 - local_nmin2) + 1
+  !    counts(3) = 2            ! TODO: hardcoded for dim=2 for now
+  !    array_temp = ESMF_LocalArrayCreate(3, type, kind, counts, status)
+  !    call ESMF_LocalArrayGetData(array_temp, temp, &
+  !                                ESMF_DATA_REF, status)
 
 !     Loop over number of coordinate location specifiers
       do i = 1,ncoord_locs
@@ -1717,7 +1740,7 @@
           xLoc = physgrid%local_min(1)
           do local_n1 = local_nmin1,local_nmax1
             do local_n2 = local_nmin2,local_nmax2
-              temp(local_n1,local_n2,1) = 0.5*delta1(local_n1) + xLoc
+              temp(local_n1,local_n2,1) = 0.5d0*delta1(local_n1) + xLoc
             enddo
             xLoc = xLoc + delta1(local_n1)
           enddo
@@ -1728,7 +1751,7 @@
           yLoc = physgrid%local_min(2)
           do local_n2 = local_nmin2,local_nmax2
             do local_n1 = local_nmin1,local_nmax1
-              temp(local_n1,local_n2,2) = 0.5*delta2(local_n2) + yLoc
+              temp(local_n1,local_n2,2) = 0.5d0*delta2(local_n2) + yLoc
             enddo
             yLoc = yLoc + delta2(local_n2)
           enddo
@@ -1761,7 +1784,7 @@
 
       enddo
 
-      deallocate(temp)    ! TODO: figure out how to load one array
+  !    deallocate(temp)    ! TODO: figure out how to load one array
 
 !     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
 
@@ -3067,12 +3090,23 @@
       ref_product,     &! the cross product for first non-zero value
       sign_test,       &! test to see if cross products are same sign
       zero, one
-
+   real(kind=ESMF_KIND_R8) :: min_x, max_x, min_y, max_y
 !
 !     set default return value
 !
-
       ESMF_PhysGridPointInCell = .false.
+!
+!     quick and dirty screen test first
+!
+      min_x = minval(corner_x)
+      max_x = maxval(corner_x)
+      min_y = minval(corner_y)
+      max_y = maxval(corner_y)
+      if (xpoint.lt.min_x .or. xpoint.gt.max_x .or. &
+          ypoint.lt.min_y .or. ypoint.gt.max_y) then
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 !
 !     set constants
 !
@@ -3080,50 +3114,44 @@
 !
 !     perform the cross product for each cell side
 !
-
       num_corners = size(corner_x)
 
       corner_loop: do ncorn=1,num_corners
          next_n = MOD(ncorn,num_corners) + 1
-
 !
 !        here we take the cross product of the vector making
 !        up each cell side with the vector formed by the vertex
 !        and search point.  if all the cross products are
 !        the same sign, the point is contained in the cell.
 !
-
          vec1_x = corner_x(next_n) - corner_x(ncorn)
          vec1_y = corner_y(next_n) - corner_y(ncorn)
          vec2_x = xpoint - corner_x(ncorn)
          vec2_y = ypoint - corner_y(ncorn)
-
 !
 !        if search point coincident with vertex
 !        then cell contains the point
 !
-
          if (vec2_x == 0 .and. vec2_y == 0) then
             ESMF_PhysGridPointInCell = .true.
             exit corner_loop
          endif
-
 !
 !        if cell side has zero length (degenerate vertices)
 !         then skip the side and move on to the next
 !
-
          if (vec1_x == 0 .and. vec1_y == 0) cycle corner_loop
 
 !        compute cross product
 
          cross_product = vec1_x*vec2_y - vec2_x*vec1_y
-
 !
 !        if the cross product is zero, the point
 !        lies exactly on the side and is contained in the cell
+!        TODO:  talk to Phil - not exactly true since if either all
+!               three x-points or all three y-points are colinear the
+!               cross product will be zero but the point not necessarily inside
 !
-
          if (cross_product == zero) then
             ESMF_PhysGridPointInCell = .true.
             exit corner_loop
@@ -3145,11 +3173,9 @@
          if (test_product < zero) exit corner_loop ! x-prod has different sign
 
       end do corner_loop
-
 !
 !     if cross products all same sign this location contains the pt
 !
-
       if (test_product > zero)  ESMF_PhysGridPointInCell = .true.
 
       if (present(rc)) rc = ESMF_SUCCESS
