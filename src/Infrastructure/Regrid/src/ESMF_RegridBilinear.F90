@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.62 2004/04/28 23:12:09 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.63 2004/04/30 22:02:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.62 2004/04/28 23:12:09 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.63 2004/04/30 22:02:54 jwolfe Exp $'
 
 !==============================================================================
 
@@ -739,7 +739,7 @@
               srcTmp(srcOrder(1)) = iii+indexMod(1)
               srcTmp(srcOrder(2)) = jjj+indexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
-              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc)
+              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc=rc)
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
               dstAdd(dstOrder(1)) = i
@@ -747,7 +747,7 @@
               srcTmp(srcOrder(1)) = ip1+indexMod(1)
               srcTmp(srcOrder(2)) = jjj+indexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
-              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc)
+              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc=rc)
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
               dstAdd(dstOrder(1)) = i
@@ -755,7 +755,7 @@
               srcTmp(srcOrder(1)) = ip1+indexMod(1)
               srcTmp(srcOrder(2)) = jp1+indexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
-              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc)
+              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc=rc)
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
               dstAdd(dstOrder(1)) = i
@@ -763,7 +763,7 @@
               srcTmp(srcOrder(1)) = iii+indexMod(1)
               srcTmp(srcOrder(2)) = jp1+indexMod(2)
               srcAdd = (srcTmp(2)-1)*srcICount + srcTmp(1) + srcStart
-              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc)
+              call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc=rc)
             endif
 
           endif ! found box
