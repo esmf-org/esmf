@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.3 2003/05/07 21:06:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.3 2003/05/07 21:06:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -116,8 +116,9 @@
       ! print entire clock state
       call ESMF_ClockPrint(clock, rc=rc)
 
-      ! get clock's time_step
+      ! get and print clock's time_step
       call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      call ESMF_ClockPrint(clock, "timestep string", rc)
 
       ! get time step in integer days and seconds
       call ESMF_TimeIntervalGet(time_step, D=D, S=S, rc=rc)
@@ -160,7 +161,35 @@
       call ESMF_TimeIntervalGet(prevSimTime, D=D, S=S, rc=rc)
       print *, "Clock's previous simulation time = ", D, " days", S, " seconds."
 
+      !
+      ! change time step and current time
+      !
+
+      print *, "Current Time Step = "
+      call ESMF_ClockPrint(clock, "timestep string", rc)
+
+      call ESMF_TimeIntervalInit(timeStep, D=int(2,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_ClockSetTimeStep(clock, timeStep, rc)
+      print *, "Time Step reset to = "
+      call ESMF_ClockPrint(clock, "timestep string", rc)
+
+      print *, "Current time = "
+      call ESMF_ClockPrint(clock, "currtime string", rc)
+      print *, "Previous time = "
+      call ESMF_ClockPrint(clock, "prevtime string", rc)
+
+      call ESMF_TimeInit(curr_time, YR=int(1776,kind=ESMF_IKIND_I8), &
+                         MM=7, DD=4, cal=gregorianCalendar, rc=rc)
+      call ESMF_ClockSetCurrTime(clock, curr_time, rc)
+      print *, "Current Time changed to = "
+      call ESMF_ClockPrint(clock, "currtime string", rc)
+      print *, "Previous Time changed to = "
+      call ESMF_ClockPrint(clock, "prevtime string", rc)
+
+      !
       ! sync clock to wall clock
+      !
+
       call ESMF_ClockSyncToWallClock(clock, rc)
       print *
       print *, "Clock sync to wall clock = "
