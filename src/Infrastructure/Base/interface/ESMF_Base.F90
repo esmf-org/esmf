@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.107 2004/06/08 09:31:13 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.108 2004/06/08 12:12:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -153,7 +153,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.107 2004/06/08 09:31:13 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.108 2004/06/08 12:12:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -965,18 +965,24 @@
 !EOPI
       integer :: i, j
       integer :: min, max, stride
+      character(len=ESMF_MAXSTR) :: msgbuf
 
-      print *, "DomainListPrint"
-      print *, "Number stored domains:", domainlist%num_domains
-      print *, "Total points:", domainlist%total_points
+      print msgbuf, "DomainListPrint"
+      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      print msgbuf, "Number stored domains:", domainlist%num_domains
+      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+      print msgbuf, "Total points:", domainlist%total_points
+      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
 
 ! Now loop through domains and print them out
 
       do i=1, domainlist%num_domains
-         print *, '***Domain.  Rank:', domainlist%domains(i)%rank
+         print msgbuf, '***Domain.  Rank:', domainlist%domains(i)%rank
+         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
          do j=1, domainlist%domains(i)%rank
 	    call ESMF_AxisIndexGet(domainlist%domains(i)%ai(j), min, max, stride)
-	    print *, '   axis:min,max,stride3:', min, max, stride
+	    print msgbuf, '   axis:min,max,stride3:', min, max, stride
+            if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
          enddo
       enddo
 

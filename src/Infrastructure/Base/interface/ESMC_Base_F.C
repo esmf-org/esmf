@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.17 2004/06/08 07:56:07 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.18 2004/06/08 12:12:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.17 2004/06/08 07:56:07 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.18 2004/06/08 12:12:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -427,7 +427,7 @@ extern "C" {
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-      !printf("ESMF_AttributeSet: bad attribute name\n");
+      //printf("ESMF_AttributeSet: bad attribute name\n");
       if (rc) *rc = status;
       return;
   }
@@ -435,7 +435,7 @@ extern "C" {
   if ((!value) || (vlen <= 0) || (value[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", &status);
-      !printf("ESMF_AttributeSet: bad attribute value\n");
+      //printf("ESMF_AttributeSet: bad attribute value\n");
       if (rc) *rc = status;
       return;
   }
@@ -502,7 +502,7 @@ extern "C" {
   if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name", &status);
-      !printf("ESMF_AttributeSet: bad attribute name\n");
+      //printf("ESMF_AttributeSet: bad attribute name\n");
       if (rc) *rc = status;
       return;
   }
@@ -517,7 +517,7 @@ extern "C" {
   status = (*base)->ESMC_AttributeGet(cname, &attrDt, &attrCount, NULL);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "failed getting attribute type and count", &status)) {
-    !printf("ESMF_AttributeGetValue: failed getting attribute info\n");
+    //printf("ESMF_AttributeGetValue: failed getting attribute info\n");
     delete [] cname;
     if (rc) *rc = status;
     return;
@@ -526,8 +526,8 @@ extern "C" {
   if (attrDt != *dt) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "attribute value not expected type", &status);
-    !printf("attribute %s not expected type %s, actually type %d\n", 
-    !       name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
+    //printf("attribute %s not expected type %s, actually type %d\n", 
+    //       name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
     delete [] cname;
     if (rc) *rc = status;
     return;
@@ -535,8 +535,8 @@ extern "C" {
   if (attrCount != *count) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(status,
                          "attribute value not expected count", &status);
-    !printf("expected count %d does not match actual count %d\n", 
-    !           *count, attrCount);
+    //printf("expected count %d does not match actual count %d\n", 
+    //           *count, attrCount);
     delete [] cname;
     if (rc) *rc = status;
     return;

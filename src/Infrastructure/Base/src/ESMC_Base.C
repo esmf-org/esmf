@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.37 2004/06/02 08:53:55 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.38 2004/06/08 12:12:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,11 +30,12 @@
 #include <stdlib.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.37 2004/06/02 08:53:55 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.38 2004/06/08 12:12:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -49,6 +50,8 @@ static int globalCount = 0;
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetClassName - Get Base class name
 //
@@ -71,6 +74,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseGetClassName
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetF90ClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetF90ClassName - Get Base class name in Fortran format
 //
@@ -97,6 +102,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseGetF90ClassName
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetID"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetID - Get Base class unique ID
 //  
@@ -119,6 +126,8 @@ static int globalCount = 0;
 } // end ESMC_BaseGetID
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetInstCount"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetInstCount - Get number of Base class instances
 //
@@ -142,6 +151,8 @@ static int globalCount = 0;
 } // end ESMC_BaseGetInstCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetName - Get Base object name
 //
@@ -164,6 +175,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseGetName
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetF90Name"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetF90Name - Get Base object name in Fortran format
 //
@@ -187,6 +200,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseGetF90Name
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetRefCount"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetRefCount - Get Base class reference count
 //
@@ -208,6 +223,8 @@ static int globalCount = 0;
 } // end ESMC_BaseGetRefCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseGetStatus"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetStatus - Get Base class status
 //
@@ -230,6 +247,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseGetStatus
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetClassName - Set Base class name
 //
@@ -247,14 +266,16 @@ static int globalCount = 0;
 //
 //EOPI
 
-  int len;
+  int rc, len;
+  char msgbuf[ESMF_MAXSTR];
  
   if (classname) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
-       fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
+       sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d\n",
                           len, ESMF_MAXSTR-1);
-       return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
      }
   }
 
@@ -265,6 +286,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseSetClassName
  
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetF90ClassName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetF90ClassName - Set Base class name
 //
@@ -282,11 +305,14 @@ static int globalCount = 0;
 //    Accessor method to set base class name.
 //
 //EOPI
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
 
   if (nlen > ESMF_MAXSTR) {
-      fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
+       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
                        nlen, ESMF_MAXSTR);
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
   }
 
   return ESMC_F90toCstring(name, nlen, className, ESMF_MAXSTR);
@@ -294,6 +320,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseSetF90ClassName
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetID"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetID - Set Base class unique ID
 //  
@@ -316,6 +344,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseSetID
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetName"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetName - Set Base class name
 //
@@ -334,8 +364,9 @@ static int globalCount = 0;
 //
 //EOPI
 
-  int len;
+  int len, rc;
   int defname, defclass;
+  char msgbuf[ESMF_MAXSTR];
  
   // no name, no context:  generate a name "globalXXX" where xxx is a seq num
   // no name, but a context: name is contextXXX with the seq num again
@@ -347,9 +378,10 @@ static int globalCount = 0;
   if (name && (name[0]!='\0')) { 
      len = strlen(name);
      if (len >= ESMF_MAXSTR) {
-       fprintf(stderr, "Error: object name %d bytes longer than limit of %d\n", 
-                          len, ESMF_MAXSTR-1);
-       return ESMF_FAILURE;
+       sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes\n",
+                       len, ESMF_MAXSTR-1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
      }
      defname = 0;
   } 
@@ -357,9 +389,10 @@ static int globalCount = 0;
   if (classname && (classname[0]!='\0')) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
-       fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
-                          len, ESMF_MAXSTR-1);
-       return ESMF_FAILURE;
+       sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes\n",
+                       len, ESMF_MAXSTR-1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
      }
      defclass = 0;
   }
@@ -377,6 +410,8 @@ static int globalCount = 0;
 }  // end ESMC_BaseSetName
  
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetF90Name"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetF90Name - Set Base class name
 //
@@ -394,11 +429,14 @@ static int globalCount = 0;
 //     Accessor method to set base class name.
 //
 //EOPI
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
 
   if (nlen > ESMF_MAXSTR) {
-      fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
+       sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
                        nlen, ESMF_MAXSTR);
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
   }
 
   memcpy(baseNameF90, name, nlen);
@@ -412,6 +450,8 @@ static int globalCount = 0;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetRefCount"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetRefCount - Set Base class reference count
 //
@@ -434,6 +474,8 @@ static int globalCount = 0;
 } // end ESMC_BaseSetRefCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_BaseSetStatus"
 //BOPI
 // !IROUTINE:  ESMC_BaseSetStatus - Set Base class status
 //
@@ -458,6 +500,8 @@ static int globalCount = 0;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Print"
 //BOPI
 // !IROUTINE:  ESMC_Print - Print contents of a Base object
 //
@@ -477,13 +521,19 @@ static int globalCount = 0;
 //EOPI
 
   int i;
+  char msgbuf[ESMF_MAXSTR];
 
-  printf("Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
+  sprintf(msgbuf,
+       "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
            ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  
 
-  printf("  %d Attributes:\n", attrCount);
+  sprintf(msgbuf, "  %d Attributes:\n", attrCount);
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   for (i=0; i<attrCount; i++) {
-      printf(" Attr %d: ", i);
+      sprintf(msgbuf, " Attr %d: ", i);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       attrList[i]->ESMC_Print();
   }
                          
@@ -492,6 +542,8 @@ static int globalCount = 0;
  } // end ESMC_Print
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Read"
 //BOPI
 // !IROUTINE:  ESMC_Read - Read in contents of a Base object
 //
@@ -514,6 +566,8 @@ static int globalCount = 0;
  } // end ESMC_Read
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Validate"
 //BOPI
 // !IROUTINE:  ESMC_Validate - Internal consistency check for Base object
 //
@@ -541,6 +595,8 @@ static int globalCount = 0;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Write"
 //BOP
 // !IROUTINE:  ESMC_Write - Write out contents of a Base object
 //
@@ -567,6 +623,8 @@ static int globalCount = 0;
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexSet"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexSet - Initialize an AxisIndex object
 //
@@ -598,6 +656,8 @@ static int globalCount = 0;
 };
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexGet"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexGet - Retrieve values from an AxisIndex object
 //
@@ -629,6 +689,8 @@ static int globalCount = 0;
 };
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexPrint"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexPrint - Print an AxisIndex object
 //
@@ -645,16 +707,21 @@ static int globalCount = 0;
 //     Print values from an AxisIndex object.
 //
 //EOPI
+     char msgbuf[ESMF_MAXSTR];
 
      if (ai == NULL) 
-        printf("Empty (NULL) AxisIndex pointer\n");
+        ESMC_LogDefault.ESMC_LogWrite("Empty (NULL) AxisIndex pointer", 
+                                       ESMC_LOG_INFO);
 
-     printf("min=%d, max=%d, stride=%d\n", ai->min, ai->max, ai->stride);
+     sprintf(msgbuf, "min=%d, max=%d, stride=%d\n", ai->min, ai->max, ai->stride);
+     ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
      return ESMF_SUCCESS;
 };
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexEqual"
 //BOPI
 // !IROUTINE:  ESMC_AxisIndexEqual - Compare two AxisIndex structs for equality
 //
@@ -710,6 +777,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_DataKindSize"
 //BOPI
 // !IROUTINE:  ESMC_DataKindSize - Return number of bytes in a DataKind
 //
@@ -733,14 +802,17 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       case ESMF_C8:  return  8;
       case ESMF_C16: return 16;
       default:
-         fprintf(stderr, "Unknown DataKind in ESMC_DataKindSize()\n");
-         return -1;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                "Unknown DataKind", NULL);
+       return -1;
     }
 
     /* not reached */
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_StatusString"
 //BOPI
 // !IROUTINE:  ESMC_StatusString - Return fixed char string for printing
 //
@@ -762,14 +834,17 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       case ESMF_STATE_BUSY:         return  "Busy";
       case ESMF_STATE_INVALID:      return  "Invalid";
       default:
-         fprintf(stderr, "Unknown Status in ESMC_StatusString()\n");
-         return NULL;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                      "Unknown Status", NULL);
+       return NULL;
     }
 
     /* not reached */
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_DataTypeString"
 //BOPI
 // !IROUTINE:  ESMC_DataTypeString - Return fixed char string for printing
 //
@@ -789,7 +864,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       case ESMF_DATA_LOGICAL:      return  "Logical";
       case ESMF_DATA_CHARACTER:    return  "Character";
       default:
-         fprintf(stderr, "Unknown DataType in ESMC_DataTypeString()\n");
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                     "Unknown DataType", NULL);
          return NULL;
     }
 
@@ -797,6 +873,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_DataKindString"
 //BOPI
 // !IROUTINE:  ESMC_DataKindString - Return fixed char string for printing
 //
@@ -820,7 +898,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       case ESMF_C8:      return  "Complex*8";
       case ESMF_C16:     return  "Complex*16";
       default:
-         fprintf(stderr, "Unknown DataKind in ESMC_DataKindString()\n");
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                     "Unknown DataKind", NULL);
          return NULL;
     }
 
@@ -828,6 +907,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_LogicalString"
 //BOPI
 // !IROUTINE:  ESMC_LogicalString - Return fixed char string for printing
 //
@@ -845,7 +926,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       case ESMF_TRUE:      return  "True";
       case ESMF_FALSE:     return  "False";
       default:
-         fprintf(stderr, "Unknown Logical in ESMC_LogicalString()\n");
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                     "Unknown DataKind", NULL);
          return NULL;
     }
 
@@ -854,6 +936,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_F90toCstring"
 //BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
 //
@@ -874,8 +958,9 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0)) {
-        printf("Bad input parameters: 1 either bad count or NULL pointer\n");
-        return NULL;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                            "bad count or NULL pointer", NULL);
+       return NULL;
     }
 
     // count back from end of string to last non-blank character.
@@ -892,6 +977,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_F90toCstring"
 //BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
 //
@@ -910,13 +997,15 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOPI
 
     char *cp, *ctmp;
-    int clen;
+    int clen, rc;
+    char msgbuf[ESMF_MAXSTR];
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0) ||
         (dst == NULL) || (dlen <= 0)) {
-        printf("Bad input parameters: 2 either bad count or NULL pointer\n");
-        return ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad count or NULL pointer", &rc);
+            return rc;
     }
 
     // count back from end of string to last non-blank character.
@@ -925,9 +1014,11 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
     // make sure dst space is long enough 
     if (clen >= dlen) {
-        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-                dlen, clen+1);
-        return ESMF_FAILURE;
+       sprintf(msgbuf, 
+             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+             dlen, clen+1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
     }
     
     strncpy(dst, src, clen);
@@ -939,6 +1030,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_CtoF90string"
 //BOPI
 // !IROUTINE:  ESMC_CtoF90string - Convert a C++ string into an F90 string
 //
@@ -956,20 +1049,24 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOPI
 
     char *cp, *ctmp;
-    int clen;
+    int clen, rc;
+    char msgbuf[ESMF_MAXSTR];
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (dst == NULL) || (dlen <= 0)) {
-        printf("Bad input parameters: 3 either bad count or NULL pointer\n");
-        return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad count or NULL pointer", &rc);
+       return rc;
     }
 
     // fortran doesn't need trailing null, so len can be up to == maxlen
     clen = strlen(src);
     if (clen > dlen) {
-        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-                dlen, clen);
-        return ESMF_FAILURE;
+       sprintf(msgbuf, 
+             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+             dlen, clen);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       return rc;
     }
 
     // move bytes, then pad rest of string to spaces
@@ -983,6 +1080,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "esmf_f90tostring"
 //BOPI
 // !IROUTINE:  ESMF_F90toCstring - Fortran-callable conversion routine from F90 character to C++ string
 //
@@ -1006,13 +1105,14 @@ extern "C" {
 
     char *cp, *ctmp;
     int clen;
+    char msgbuf[ESMF_MAXSTR];
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
         (dst == NULL) || (*dlen <= 0)) {
-        printf("Bad input parameters: 4 either bad count or NULL pointer\n");
-        if (rc) *rc = ESMF_FAILURE;
-        return;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad count or NULL pointer", rc);
+       return;
     }
 
     // count back from end of string to last non-blank character.
@@ -1021,10 +1121,11 @@ extern "C" {
 
     // make sure dst space is long enough 
     if (clen >= *dlen) {
-        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-                *dlen, clen+1);
-        if (rc) *rc = ESMF_FAILURE;
-        return;
+       sprintf(msgbuf, 
+             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+             *dlen, clen+1);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
+       return;
     }
     
     strncpy(dst, src, clen);
@@ -1038,6 +1139,8 @@ extern "C" {
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "esmf_ctof90string"
 //BOPI
 // !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character 
 //
@@ -1061,22 +1164,24 @@ extern "C" {
 
     char *cp, *ctmp;
     int clen;
+    char msgbuf[ESMF_MAXSTR];
 
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (*slen <= 0) ||
         (dst == NULL) || (*dlen <= 0)) {
-        printf("Bad input parameters: 5 either bad count or NULL pointer\n");
-        if (rc) *rc = ESMF_FAILURE;
-        return;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad count or NULL pointer", rc);
+            return;
     }
 
     // fortran doesn't need trailing null, so len can be up to == maxlen
     clen = strlen(src);
     if (clen > *dlen) {
-        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
-                *dlen, clen);
-        if (rc) *rc = ESMF_FAILURE;
-        return;
+       sprintf(msgbuf, 
+             "dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+             *dlen, clen);
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
+       return;
     }
 
     // move bytes, then pad rest of string to spaces
@@ -1099,6 +1204,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeAlloc"
 //BOPI
 // !IROUTINE:  ESMC_AttributeAlloc - ensure the attribute list is long enough
 //
@@ -1139,6 +1246,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
 //
@@ -1165,8 +1274,9 @@ extern "C" {
 
   // simple sanity checks
   if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
-      printf("ESMF_AttributeSet: bad attribute object\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute object", &rc);
+       return rc;
   }
 
   // first, see if you are replacing an existing attribute
@@ -1198,6 +1308,8 @@ extern "C" {
 }  // end ESMC_AttributeSet
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
 //
@@ -1230,6 +1342,8 @@ extern "C" {
 }  // end ESMC_AttributeSet(int)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOPI
 // !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
 //
@@ -1263,6 +1377,8 @@ extern "C" {
 }  // end ESMC_AttributeSet(int *)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(double) - set attribute on an ESMF type
 //
@@ -1295,6 +1411,8 @@ extern "C" {
 }  // end ESMC_AttributeSet(double)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(double *) - set attribute on an ESMF type
 //
@@ -1328,6 +1446,8 @@ extern "C" {
 }  // end ESMC_AttributeSet(double *)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
 //
@@ -1360,6 +1480,8 @@ extern "C" {
 }  // end ESMC_AttributeSet(bool)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
 //
@@ -1393,6 +1515,8 @@ extern "C" {
 }  // end ESMC_AttributeSet(bool *)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
 //
@@ -1426,6 +1550,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSet"
 //BOP
 // !IROUTINE:  ESMC_AttributeSet(dt,count,value) - set attribute on an ESMF type
 //
@@ -1462,6 +1588,8 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
 //
@@ -1478,12 +1606,13 @@ extern "C" {
 //
 //EOP
 
-  int rc, i;
+  int i;
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 5 bad attribute name\n");
-      return NULL;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                               "bad attribute name", NULL);
+       return NULL;
   }
 
   for (i=0; i<attrCount; i++) {
@@ -1500,6 +1629,8 @@ extern "C" {
 }  // end ESMC_AttributeGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
 //
@@ -1522,23 +1653,27 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 6 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_INTEGER) {
-      printf("ESMF_AttributeGet: attribute not type integer\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
   if (attr->items != 1) {
-      printf("ESMF_AttributeGet: attribute not single value\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not single value", &rc);
+       return rc;
   }
 
   *value = attr->vi;
@@ -1547,6 +1682,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(int)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(int *) - get attribute from an ESMF type
 //
@@ -1570,19 +1707,22 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 7 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_INTEGER) {
-      printf("ESMF_AttributeGet: attribute not type integer\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
 
   if (count) 
@@ -1600,6 +1740,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(int *)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(double) - get attribute from an ESMF type
 //
@@ -1622,23 +1764,27 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 8 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_REAL) {
-      printf("ESMF_AttributeGet: attribute not type real\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
   if (attr->items != 1) {
-      printf("ESMF_AttributeGet: attribute not single value\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not single value", &rc);
+       return rc;
   }
 
   *value = attr->vr;
@@ -1647,6 +1793,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(double)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(double *) - get attribute from an ESMF type
 //
@@ -1670,19 +1818,22 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 9 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_REAL) {
-      printf("ESMF_AttributeGet: attribute not type real\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
 
   if (count) 
@@ -1700,6 +1851,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(double *)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(bool) - get attribute from an ESMF type
 //
@@ -1722,23 +1875,27 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 10 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_LOGICAL) {
-      printf("ESMF_AttributeGet: attribute not type logical\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
   if (attr->items != 1) {
-      printf("ESMF_AttributeGet: attribute not single value\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not single value", &rc);
+       return rc;
   }
 
   *value = attr->vl;
@@ -1748,6 +1905,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(bool *) - get attribute from an ESMF type
 //
@@ -1771,19 +1930,22 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 1 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_LOGICAL) {
-      printf("ESMF_AttributeGet: attribute not type logical\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
 
   if (count) 
@@ -1801,6 +1963,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(bool *)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(char) - get attribute from an ESMF type
 //
@@ -1823,27 +1987,32 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 2 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad attribute name", &rc);
+       return rc;
   }
   if (!value) {
-      printf("ESMF_AttributeGet: bad return location\n");
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "bad value return argument", &rc);
       return ESMF_FAILURE;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not found", &rc);
+       return rc;
   }
 
   if (attr->dt != ESMF_DATA_CHARACTER) {
-      printf("ESMF_AttributeGet: attribute not type character\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not type integer", &rc);
+       return rc;
   }
   if (attr->items != 1) {
-      printf("ESMF_AttributeGet: attribute not single value\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                  "attribute not single value", &rc);
+       return rc;
   }
 
   strcpy(value, attr->vcp);
@@ -1852,6 +2021,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(char)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(dt,count,value) - get attribute from an ESMF type
 //
@@ -1876,14 +2047,16 @@ extern "C" {
 
   // simple sanity checks
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: 3 bad attribute name\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "bad attribute name", &rc);
+       return rc;
   }
 
   attr = ESMC_AttributeGet(name);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "attribute not found", &rc);
+       return rc;
   }
 
   if (dt) 
@@ -1909,11 +2082,15 @@ extern "C" {
               *(ESMC_Logical *)value = attr->vl; 
               break;
             case ESMF_DATA_CHARACTER:
-              printf("ESMF_AttributeGet: cannot return character string here\n");
-              break;
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "cannot return character string here", 
+                                       &rc);
+              return rc;
             default:  
-              printf("ESMF_AttributeGet: 1 unknown data type\n");
-              return ESMF_FAILURE;
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "unknown data type", 
+                                       &rc);
+              return rc;
           }
  
       } else {
@@ -1931,8 +2108,10 @@ extern "C" {
                   ((ESMC_Logical *)value)[i] = attr->vlp[i];
               break;
             default:  
-              printf("ESMF_AttributeGet: 2 unknown data type\n");
-              return ESMF_FAILURE;
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "unknown data type", 
+                                       &rc);
+              return rc;
           }
       }
   }
@@ -1942,6 +2121,8 @@ extern "C" {
 }  // end ESMC_AttributeGet(dt,count,value)
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet(dt,count,value) - get attribute from an ESMF type
 //
@@ -1967,8 +2148,9 @@ extern "C" {
 
   attr = ESMC_AttributeGet(num);
   if (!attr) {
-      printf("ESMF_AttributeGet: attribute not found\n");
-      return ESMF_FAILURE;
+       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "attribute not found", &rc);
+       return rc;
   }
 
   if (name)
@@ -1997,11 +2179,15 @@ extern "C" {
               *(ESMC_Logical *)value = attr->vl; 
               break;
             case ESMF_DATA_CHARACTER:
-              printf("ESMF_AttributeGet: cannot return character string here\n");
-              break;
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "cannot return character string here", 
+                                       &rc);
+              return rc;
             default:  
-              printf("ESMF_AttributeGet: 3 unknown data type\n");
-              return ESMF_FAILURE;
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "unknown data type", 
+                                       &rc);
+              return rc;
           }
  
       } else {
@@ -2019,8 +2205,10 @@ extern "C" {
                   ((ESMC_Logical *)value)[i] = attr->vlp[i];
               break;
             default:  
-              printf("ESMF_AttributeGet: 4 unknown data type\n");
-              return ESMF_FAILURE;
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                       "unknown data type", 
+                                       &rc);
+              return rc;
           }
       }
   }
@@ -2031,6 +2219,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGetCount"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
 // 
@@ -2054,6 +2244,8 @@ extern "C" {
 } // end ESMC_AttributeGetCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGet"
 //BOP
 // !IROUTINE:  ESMC_AttributeGet - get an ESMF object's attribute by number
 //
@@ -2073,13 +2265,13 @@ extern "C" {
 //
 //EOP
 
-
-  int rc, i;
+  int i;
+  char msgbuf[ESMF_MAXSTR];
 
   // simple sanity check
   if ((number < 0) || (number >= attrCount)) {
-      printf("ESMC_AttributeGet: attribute number must be  0 < N <= %d\n",
-                                         attrCount-1);
+      sprintf(msgbuf, "attribute number must be  0 < N <= %d\n", attrCount-1);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, NULL);
       return NULL;
   }
 
@@ -2088,6 +2280,8 @@ extern "C" {
 }  // end ESMC_AttributeGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGetNameList"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetNameList - get the list of attribute names
 //
@@ -2111,6 +2305,8 @@ extern "C" {
 }  // end ESMC_AttributeGetNameList
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSetList"
 //BOP
 // !IROUTINE:  ESMC_AttributeSetList - set multiple attributes at once
 // 
@@ -2134,6 +2330,8 @@ extern "C" {
 }  // end ESMC_AttributeSetList
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGetList"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetList - get multiple attributes at once
 // 
@@ -2157,6 +2355,8 @@ extern "C" {
 }  // end ESMC_AttributeGetList
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeCopy"
 //BOP
 // !IROUTINE:  ESMC_AttributeCopy - copy an attribute between two objects
 //
@@ -2181,6 +2381,8 @@ extern "C" {
 }  // end ESMC_AttributeCopy
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeCopyAll"
 //BOP
 // !IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects 
 //
@@ -2205,6 +2407,8 @@ extern "C" {
 }  // end ESMC_AttributeCopyAll
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Print"
 //BOP
 // !IROUTINE:  ESMC_Attribute::ESMC_Print - print the Attribute contents
 //
@@ -2221,34 +2425,46 @@ extern "C" {
 //     Print the contents of a Attribute object
 //
 //EOP
+  int rc;
+  char msgbuf[ESMF_MAXSTR];
 
-  printf("name '%s', type %s", attrName, ESMC_DataTypeString(dt));
+  sprintf(msgbuf, "name '%s', type %s", attrName, ESMC_DataTypeString(dt));
+  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
   if (items <= 0) 
-      printf("\n");
+      ESMC_LogDefault.ESMC_LogWrite("\n", ESMC_LOG_INFO);
 
   if (items == 1) {
-      printf(", value: ");
+      ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
       switch (dt) {
-        case ESMF_DATA_INTEGER:   printf("%d\n", vi); break;
-        case ESMF_DATA_REAL:      printf("%g\n", vr); break; 
-        case ESMF_DATA_LOGICAL:   printf("%s\n", ESMC_LogicalString(vl)); break;
-        case ESMF_DATA_CHARACTER: printf("%s\n", vcp); break;
-        default:  printf(" unknown\n"); return ESMF_FAILURE;
+        case ESMF_DATA_INTEGER:   sprintf(msgbuf, "%d\n", vi); break;
+        case ESMF_DATA_REAL:      sprintf(msgbuf, "%g\n", vr); break; 
+        case ESMF_DATA_LOGICAL:   sprintf(msgbuf, "%s\n", ESMC_LogicalString(vl)); break;
+        case ESMF_DATA_CHARACTER: sprintf(msgbuf, "%s\n", vcp); break;
+        default:  
+             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "unknown value", &rc);
+             return rc;
       }
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items > 1) { 
-      printf(", %d items, values:\n", items);
+      sprintf(msgbuf, ", %d items, values:\n", items);
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
           switch (dt) {
-            case ESMF_DATA_INTEGER: printf(" item %d: %d\n", i, vip[i]); break;
-            case ESMF_DATA_REAL:    printf(" item %d: %g\n", i, vrp[i]); break; 
-            case ESMF_DATA_LOGICAL: printf(" item %d: %s\n", 
+            case ESMF_DATA_INTEGER: sprintf(msgbuf, " item %d: %d\n", i, vip[i]); break;
+            case ESMF_DATA_REAL:    sprintf(msgbuf, " item %d: %g\n", i, vrp[i]); break; 
+            case ESMF_DATA_LOGICAL: sprintf(msgbuf, " item %d: %s\n", 
                                           i, ESMC_LogicalString(vlp[i])); break;
-            default:  printf(" unknown\n"); return ESMF_FAILURE;
+            default: 
+             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                             "unknown value", &rc);
+             return rc;
           }
       }
+      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   return ESMF_SUCCESS;
@@ -2262,6 +2478,8 @@ extern "C" {
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeSetObjectList"
 //BOP
 // !IROUTINE:  ESMC_AttributeSetObjectList - set an attribute on multiple ESMF objects
 //
@@ -2285,6 +2503,8 @@ extern "C" {
 }  // end ESMC_AttributeSetObjectList
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeGetObjectList"
 //BOP
 // !IROUTINE:  ESMC_AttributeGetObjectList - get an attribute from multiple ESMF objects 
 //
@@ -2310,6 +2530,8 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AttributeCopy(=)"
 //BOP
 // !IROUTINE:  ESMC_AttributeCopy(=) - assignment operator for attributes
 //
@@ -2391,6 +2613,8 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Attribute()"
 //BOP
 // !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
 //
@@ -2416,6 +2640,8 @@ extern "C" {
  } // end ESMC_Attribute
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Attribute()"
 //BOP
 // !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
 //
@@ -2435,16 +2661,17 @@ extern "C" {
 //   initialize an attribute, and make a copy of the data if items > 1
 //
 //EOP
-  int i, len;
+  int i, len, rc;
+  char msgbuf[ESMF_MAXSTR];
 
   if (!name)
       attrName[0] = '\0';
   else {
       len = strlen(name)+1;   // strlen doesn't count trailing null
       if (len > ESMF_MAXSTR) {
-          printf("ERROR in ESMF_Attribute: attr name longer than %d\n",
-                                                ESMF_MAXSTR);
-          return; 
+        sprintf(msgbuf, "attr name %d bytes longer than limit of %d bytes\n",
+                       len, ESMF_MAXSTR);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
       }
       memcpy(attrName, name, len);
   }
@@ -2517,6 +2744,8 @@ extern "C" {
  } // end ESMC_Attribute
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "~ESMC_Attribute()"
 //BOP
 // !IROUTINE:  ~ESMC_Attribute - native C++ destructor for ESMC_Attribute class
 //
@@ -2546,6 +2775,8 @@ extern "C" {
  } // end ~ESMC_Attribute
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Base()"
 //BOPI
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
@@ -2578,6 +2809,8 @@ extern "C" {
  } // end ESMC_Base
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Base()"
 //BOPI
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
@@ -2622,6 +2855,8 @@ extern "C" {
  } // end ESMC_Base
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "~ESMC_Base()"
 //BOPI
 // !IROUTINE:  ~ESMC_Base - native C++ destructor for ESMC_Base class
 //
