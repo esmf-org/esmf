@@ -1,4 +1,4 @@
-! $Id: ESMF_StateTypes.F90,v 1.4 2005/02/02 00:25:46 nscollins Exp $
+! $Id: ESMF_StateTypes.F90,v 1.5 2005/02/24 22:23:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,8 @@
                 ESMF_STATEITEM_STATE = ESMF_StateItemType(4), &
                 ESMF_STATEITEM_NAME = ESMF_StateItemType(5), &
                 ESMF_STATEITEM_INDIRECT = ESMF_StateItemType(6), &
-                ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(7)
+                ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(7), &
+                ESMF_STATEITEM_NOTFOUND = ESMF_StateItemType(8)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_NeededFlag
@@ -231,7 +232,7 @@
       public ESMF_State
       public ESMF_StateItemType, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
                                    ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
-                                   ESMF_STATEITEM_NAME
+                                   ESMF_STATEITEM_NAME, ESMF_STATEITEM_NOTFOUND
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_UNSPECIFIED
       public ESMF_NeededFlag, ESMF_NEEDED, &
@@ -256,7 +257,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateTypes.F90,v 1.4 2005/02/02 00:25:46 nscollins Exp $'
+      '$Id: ESMF_StateTypes.F90,v 1.5 2005/02/24 22:23:11 nscollins Exp $'
 
 !==============================================================================
 ! 

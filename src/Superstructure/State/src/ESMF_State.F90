@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.83 2005/02/02 00:25:18 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.84 2005/02/24 22:23:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,9 +57,7 @@
       public ESMF_StateAddBundle, ESMF_StateAddField, ESMF_StateAddArray
       public ESMF_StateAddState
       public ESMF_StateGetBundle, ESMF_StateGetField, ESMF_StateGetArray
-      public ESMF_StateGetState
-      !public ESMF_StateQueryData         ! returns ESMF type for this entry
-      !public ESMF_StateGetFromList
+      public ESMF_StateGetState, ESMF_StateGetItemInfo
 
       public ESMF_StateGet
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
@@ -93,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.83 2005/02/02 00:25:18 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.84 2005/02/24 22:23:10 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2191,95 +2189,86 @@ end interface
       end subroutine ESMF_StateGetField
 
 
-
-#if 0
-!! TODO - remove this code when we finalize on nested State objects.
-!!  but this has shifted around so many times, i'm not removing this code
-!!  until we're sure...
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateGetFromList"
-!BOPI
-! !IROUTINE: ESMF_StateGetFromList -- Get a State by name from an array of States
+#define ESMF_METHOD "ESMF_StateGetItemInfo"
+!BOP
+! !IROUTINE: ESMF_StateGetItemInfo - Get information about a State
 !
 ! !INTERFACE:
-      function ESMF_StateGetFromList(statelist, statename, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_State) :: ESMF_StateGetFromList
-!
+      subroutine ESMF_StateGetItemInfo(state, name, stateitemtype, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State), dimension(:), intent(in) :: statelist
-      character (len=*), intent(in) :: statename
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(in) :: name
+      type(ESMF_StateItemType), intent(out) :: stateitemtype
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns the State from this array of {\tt State}s by name.
+!     Returns the type for the item named
+!     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
+!     exists, the value {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
+!     and the error code will not be set to an error.  Thus this routine
+!     can be used to safely query for the existance of items by name 
+!     whether or not they are expected to be there.   The error code will
+!     be set in case of other errors, for example if the {\tt ESMF\_State}
+!     itself is invalid.
 !
 !     The arguments are:
 !     \begin{description}     
-!     \item[statelist]
-!       Fortran array of {\tt ESMF\_State}s to query.
-!      \item[statename]
-!       State Name to return.
+!     \item[state]
+!        {\tt ESMF\_State} to be queried.
+!      \item[name]
+!        Name of the item to return information about.
+!      \item[stateitemtype]
+!        Returned item types for the item with the given name, including 
+!        placeholder names.  Options are
+!        listed in Section~\ref{opt:stateitemtype}.  If no item with the
+!        given name is found, {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
+!        and {\tt rc} will {\bf not} be set to an error.
 !      \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
+!       \end{description}
 !
-!EOPI
-
-      integer :: localrc
-      integer :: nstates, i
+!
+!EOP
+      integer :: i, localrc
       type(ESMF_StateClass), pointer :: stypep
-      character (len=ESMF_MAXSTR) :: tryname
-      character(len=ESMF_MAXSTR) :: errmsg
+      type(ESMF_StateItem), pointer :: nextitem
 
-      ! assume failure until success assured
-      if (present(rc)) rc = ESMF_FAILURE
+      if (.not.associated(state%statep)) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or invalid State", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
+      stypep => state%statep
+      if (stypep%statestatus .ne. ESMF_STATUS_READY) then
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or invalid State", &
+                                 ESMF_CONTEXT, rc)) return
+      endif
 
-      ESMF_StateGetFromList%statep => NULL()
-   
+      ! Start out assuming the name does not exist, and if it is found
+      ! then overwrite the type and jump out of the loop.   It will not be
+      ! an error to not find the name; an error will trigger a message to
+      ! the log file, possibly an 'exit on error' condition.   It should be
+      ! benign to query for a name which is not there - it might not be
+      ! expected to exist yet.
+      stateitemtype = ESMF_STATEITEM_NOTFOUND
 
-      nstates = size(statelist)
-      do i = 1, nstates
-  
-        stypep => statelist(i)%statep
-  
-        if (.not. associated(stypep)) then
-          write(errmsg, *) "uninitialized State in statelist, number", i
-          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, errmsg, rc)
-          return
-        endif
-  
-        if (stypep%st .eq. ESMF_STATE_INVALID) then
-          write(errmsg, *) "invalid State in statelist, number", i
-          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, errmsg, rc)
-          return
-        endif
-  
-        call c_ESMC_GetName(stypep%base, tryname, localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          write(errmsg, *) "cannot get name from State number", i, "in list"
-          dummy=EM_LogMsgFoundError(localrc, errmsg, rc)
-          return
-        endif
-  
-        if (statename .eq. tryname) then
-          ESMF_StateGetFromList%statep => stypep
-          if (present(rc)) rc = ESMF_SUCCESS
-          return
-        endif
-  
+      ! Find the object which matches this name
+      do i=1, stypep%datacount
+          nextitem => stypep%datalist(i)
+          if (trim(name) .eq. trim(nextitem%namep)) then
+              stateitemtype = nextitem%otype
+              exit    ! jump out of the do loop here
+          endif
       enddo
 
-      write(errmsg, *) "State with name", trim(statename), &
-                     "not found in list of States"
-      dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
+      if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_StateGetFromList
-#endif
+      end subroutine ESMF_StateGetItemInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
