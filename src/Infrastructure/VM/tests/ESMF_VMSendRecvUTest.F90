@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvUTest.F90,v 1.3 2005/02/28 16:31:34 nscollins Exp $
+! $Id: ESMF_VMSendRecvUTest.F90,v 1.4 2005/03/17 17:45:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvUTest.F90,v 1.3 2005/02/28 16:31:34 nscollins Exp $'
+      '$Id: ESMF_VMSendRecvUTest.F90,v 1.4 2005/03/17 17:45:34 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -79,15 +79,21 @@
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-      ! exit early if we have less than 4 procs
-     !if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
- 
       ! Get count of PETs and which PET number we are
       call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
 
       ! Allocate localData
       count = 2
+
+!------------------------------------------------------------------------------
+! IMPORTANT NOTE:
+!   The correct operation of this unit test in uni-process mode depends on 
+!   sufficient internal buffering inside ESMF_VMSendRecv! There will be an 
+!   implementation specific threshold for count above which this unit test will 
+!   start to hang!
+!------------------------------------------------------------------------------
+
       allocate(localData(count))
       allocate(r8_localData(count))
       allocate(r4_localData(count))
