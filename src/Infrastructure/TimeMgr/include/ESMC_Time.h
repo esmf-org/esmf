@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.12 2003/04/05 01:49:44 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.13 2003/04/08 20:00:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,6 +136,9 @@
                                                         // (TMG 2.5.5)
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
     int ESMC_TimeGetRealTime(void);
+
+    // copy or assign from ESMC_BaseTime expressions
+    ESMC_Time& operator=(const ESMC_BaseTime &);  
 
     // required methods inherited and overridden from the ESMC_Base class
 

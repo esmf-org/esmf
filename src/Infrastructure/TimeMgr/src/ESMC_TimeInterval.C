@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.10 2003/04/05 01:51:10 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.11 2003/04/08 20:02:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.10 2003/04/05 01:51:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.11 2003/04/08 20:02:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -394,6 +394,32 @@
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeIntervalSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(=) - copy or assign from BaseTime expression
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime to copy
+//
+// !DESCRIPTION:
+//    Assign {\tt BaseTime} expression to this time intervals.
+//    Supports inherited operators from {\tt ESMC_BaseTime}
+//
+// !REQUIREMENTS:  
+
+    // invoke base class default assignment operator
+    ESMC_BaseTime::operator=(baseTime);
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator=
 
 //-------------------------------------------------------------------------
 //BOP
