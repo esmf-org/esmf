@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.7 2004/02/06 18:00:54 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.8 2004/02/18 20:40:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.7 2004/02/06 18:00:54 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.8 2004/02/18 20:40:08 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2239,7 +2239,10 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 //EOP
 
-  return(ESMF_SUCCESS);
+  // TODO: add object specific validation here
+
+  // for now, at least validate the base class
+  return ESMC_Validate();
 
  } // end ESMC_DELayoutValidate
 
