@@ -1,0 +1,65 @@
+# $Id: base_variables,v 1.1 2002/12/11 23:35:00 nscollins Exp $ 
+#
+#     See the file build/base_variables.defs for a complete explanation of all these fields
+#
+AR		   = ar
+AR_FLAGS	   = cr
+RM		   = rm -f
+OMAKE		   = ${MAKE}
+RANLIB		   = ranlib
+SHELL		   = /bin/sh
+SED		   = /usr/bin/sed
+SH_LD		   = gcc
+# ######################### C and Fortran compiler ########################
+#
+C_CC		   = gcc
+C_FC		   = f95 
+C_FC_MOD           = -I
+C_CLINKER_SLFLAG   = -Wl,-rpath,
+C_FLINKER_SLFLAG   = -Wl,-rpath,
+C_CLINKER	   = gcc
+C_FLINKER	   = f95
+C_CCV		   = ${C_CC} --version
+C_FCV              = f95
+C_SYS_LIB	   = -ldl -lc -lg2c -lm
+#C_SYS_LIB	   = -ldl -lc -lf2c -lm
+#C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
+# ---------------------------- BOPT - g options ----------------------------
+G_COPTFLAGS	   = -g 
+G_FOPTFLAGS	   = -g
+# ----------------------------- BOPT - O options -----------------------------
+O_COPTFLAGS	   = -O 
+O_FOPTFLAGS	   = -O
+# ########################## C++ compiler ##################################
+#
+CXX_CC		   = g++ -fPIC
+CXX_FC		   = f95
+CXX_CLINKER_SLFLAG = -Wl,-rpath,
+CXX_FLINKER_SLFLAG = -Wl,-rpath,
+CXX_CLINKER	   = g++
+CXX_FLINKER	   = g++
+CXX_CCV		   = ${CXX_CC} --version
+#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
+CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
+C_F90CXXLD         = f95 -verbose
+C_F90CXXLIBS       = 
+C_CXXF90LD         = g++  
+C_CXXF90LIBS       = 
+# ------------------------- BOPT - g_c++ options ------------------------------
+GCXX_COPTFLAGS	   = -g 
+GCXX_FOPTFLAGS	   = -g
+# ------------------------- BOPT - O_c++ options ------------------------------
+OCXX_COPTFLAGS	   = -O 
+OCXX_FOPTFLAGS	   = -O
+# -------------------------- BOPT - g_complex options ------------------------
+GCOMP_COPTFLAGS	   = -g
+GCOMP_FOPTFLAGS	   = -g
+# --------------------------- BOPT - O_complex options -------------------------
+OCOMP_COPTFLAGS	   = -O
+OCOMP_FOPTFLAGS	   = -O
+##################################################################################
+
+PARCH		   = mac_osx
+
+include ${ESMF_DIR}/build/common_variables

@@ -1,0 +1,23 @@
+# $Id: base.site,v 1.1 2002/12/11 23:35:00 nscollins Exp $ 
+
+#
+#  This file contains site-specific information.  The definitions below
+#  should be changed to match the locations of libraries at your site.
+#  The following naming convention is used:
+#     XXX_LIB - location of library XXX
+#     XXX_INCLUDE - directory for include files needed for library XXX
+#
+
+# Location of MPI (Message Passing Interface) software
+
+#ESMC_MPIRUN      = 
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_LIB        = -lmpiuni
+MPI_INCLUDE    = -I${MPI_HOME}
+MPIRUN         =  ${MPI_HOME}/mpirun
+
+# MP_LIB is for openMP
+#MP_LIB          = 
+#MP_INCLUDE      = 
+# For pthreads (or omp)
+THREAD_LIB      = 
