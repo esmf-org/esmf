@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.86.2.2 2005/03/02 21:13:45 nscollins Exp $
+#  $Id: common.mk,v 1.86.2.3 2005/03/08 04:22:23 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -107,6 +107,14 @@ endif
 #
 #  ESMF_COMM set in site files.
 #
+
+# According to the above comment this is not the right place, but it's 
+# a quick fix for now... For how things are right now this will _not_ work
+# for those cases where the platform specific build_rules set ESMF_COMM to
+# mpiuni!
+ifeq ($(ESMF_COMM),mpiuni)
+CPPFLAGS       += -DESMF_MPIUNI
+endif
 
 # default compiler flag is optimized.
 ifndef ESMF_BOPT
