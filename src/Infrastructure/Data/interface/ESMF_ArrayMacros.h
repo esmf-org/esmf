@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.3 2003/02/10 21:24:53 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.4 2003/02/10 22:11:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -118,7 +118,7 @@
         endif @\
  @\
         if (present(docopy)) then @\
-          if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. @\
+          if (docopy%docopy .eq. ESMF_DO_COPY%docopy) copyreq = .TRUE. @\
         endif @\
         if (copyreq) then @\
           allocate(localp( mlen ), stat=status) @\
@@ -196,7 +196,7 @@
         ! check copyflag to see if we are making a reference @\
         ! or making a new array and a copy @\
         if (present(docopy)) then @\
-          if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. @\
+          if (docopy%docopy .eq. ESMF_DO_COPY%docopy) copyreq = .TRUE. @\
         endif @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.1 2003/02/10 16:43:38 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.2 2003/02/10 22:11:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.1 2003/02/10 16:43:38 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.2 2003/02/10 22:11:20 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -300,7 +300,7 @@ end interface
 
 !==============================================================================
 
-! functions to compare two ESMF_CopyFlags to see if they're the same or not
+! functions to compare two ESMF_CopyFlags to see if they are the same or not
 
 function cfeq(cf1, cf2)
  logical cfeq
@@ -736,7 +736,7 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 !       ! TODO: document the current rule - if we did the allocate in
 !       !   the case of ESMF_DO_COPY at create time, then we delete the
 !       !   space.  otherwise, the user needs to destroy the array first
-!       !   (we'll ignore the data) and then call deallocate themselves.
+!       !   (we will ignore the data) and then call deallocate themselves.
 
 !       call Destruct first, then free this memory
         call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
@@ -857,8 +857,8 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 !
 !  !TODO: remove this note before generating user documentation
 !
-!      (i'm not sure this makes sense now, or that the routine should be
-!      in this class.  but i'm leaving this here as a reminder that we
+!      (i am not sure this makes sense now, or that the routine should be
+!      in this class.  but i am leaving this here as a reminder that we
 !      might need some low level reorder functions.  maybe the argument
 !      should be another array or an arrayspec which describes what you
 !      want, and the input array is what exists, and this routine can then
