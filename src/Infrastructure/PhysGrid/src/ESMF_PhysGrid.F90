@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.56 2003/10/30 16:20:43 atrayanov Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.57 2004/01/06 21:12:07 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,19 +73,6 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_RegionKind
-!
-!     ! Type to specify kind of region for defined PhysGrid regions.
-!     !  See the public parameters declared below for the possible valid
-!     !  values for this.  (They include polygons and ellipses/ellipsii.)
-
-      type ESMF_RegionKind
-      sequence
-      private
-        integer :: region_kind
-      end type
-
-!------------------------------------------------------------------------------
 !     !  ESMF_PhysRegion
 !
 !     !  Physical locations for a set of points defining regions of the grid
@@ -112,16 +99,6 @@
         ! note that the values can be equal, describing a circle or sphere
         type (ESMF_Array), dimension(2) :: ellipse
       
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_GridMaskKind
-!
-!     ! Type to specify kind of region for defined PhysGrid regions.
-
-      type ESMF_GridMaskKind
-      sequence
-        integer :: mask_kind
       end type
 
 !------------------------------------------------------------------------------
@@ -162,6 +139,9 @@
         ! Coordinate system (eg Cartesian, Spherical, ...etc)
         type (ESMF_CoordSystem) :: coord_system
 
+        ! Orientation (eg Horizontal, Vertical, Unknown)
+        type (ESMF_PhysGridOrientation) :: orientation
+        
         ! Description of each physical coordinate axis, including extents
         ! for this grid.  
         integer :: num_dims
@@ -176,18 +156,26 @@
 
         ! Grid-based masks.  Includes both logical, multiplicative masks
         ! Default mask (for query) is the first one if no name given.
-        ! Region IDs can be encoded as a mask as well.
+        ! Region IDs are encoded as an integer mask.
         integer :: num_masks
         type (ESMF_GridMask), dimension(:), pointer :: masks
 
         ! A place to store metrics for the grid.  There is no support for
-        ! the Framework to use these metrics, but they can be set and queried
-        ! as a convenience to the user.  If there arises a need for internally
+        ! in the Framework for computing these metrics, but they can be set 
+        ! and queried.  If there arises a need for internally
         ! computed metrics, they will also be set here.
         integer :: num_metrics      
         type (ESMF_Array), dimension(:), pointer :: metrics
 
       end type
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+
+      ! These are public primarily for use by the Grid module and
+      ! are not meant to be directly accessible to users.
+      public ESMF_PhysGrid, ESMF_RegionKind, ESMF_GridMaskKind
+      public ESMF_PhysGridOrientation
 
 !------------------------------------------------------------------------------
 !     !  ESMF_PhysGrid
@@ -201,9 +189,41 @@
       end type
 
 !------------------------------------------------------------------------------
-! !PUBLIC TYPES:
-      public ESMF_PhysGrid, ESMF_RegionKind, ESMF_GridMaskKind
-      public ESMF_PhysGridType   ! really local to the Grid routines
+!     ! ESMF_RegionKind
+!
+!     ! Type to specify kind of region for defined PhysGrid regions.
+!     !  See the public parameters declared below for the possible valid
+!     !  values for this.  (They include polygons and ellipses/ellipsii.)
+
+      type ESMF_RegionKind
+      sequence
+      private
+        integer :: region_kind
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_GridMaskKind
+!
+!     ! Type to specify kind of mask for defined PhysGrid masks.
+
+      type ESMF_GridMaskKind
+      sequence
+        integer :: mask_kind
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_PhysGridOrientation
+!
+!     ! Type to specify orientation for defined PhysGrids.  Useful for
+!     !  queries of grid directions.
+!     !  See the public parameters declared below for the possible valid
+!     !  values for this.  (They include horizontal, vertical, 3D)
+
+      type ESMF_PhysGridOrientation
+      sequence
+      private
+        integer :: orientation
+      end type
 
 !------------------------------------------------------------------------------
 !
@@ -244,6 +264,22 @@
 !
 ! !PUBLIC DATA MEMBERS:
 
+      ! Supported ESMF PhysGrid Orientation Types
+      !   Unknown     = unknown or undefined orientation
+      !   Horizontal  = PhysGrid is a horizontal grid
+      !   Vertical    = PhysGrid is a vertical grid
+      !   3D          = PhysGrid is a full 3-d description of grid space
+      !   XZ          = PhysGrid is a XZ (or zonal     ) slice out of 3-d space 
+      !   YZ          = PhysGrid is a YZ (or meridional) slice out of 3-d space
+
+      type (ESMF_PhysGridOrientation), parameter, public :: &! grid direction
+         ESMF_PhysGridOrientation_Unknown     = ESMF_PhysGridOrientation( 0), &
+         ESMF_PhysGridOrientation_Horizontal  = ESMF_PhysGridOrientation( 1), &
+         ESMF_PhysGridOrientation_Vertical    = ESMF_PhysGridOrientation( 2), &
+         ESMF_PhysGridOrientation_3D          = ESMF_PhysGridOrientation( 3), &
+         ESMF_PhysGridOrientation_XZ          = ESMF_PhysGridOrientation( 4), &
+         ESMF_PhysGridOrientation_YZ          = ESMF_PhysGridOrientation( 5)
+
       ! Supported ESMF PhysGrid Region Types
       !   Unknown     = unknown or undefined region type
       !   Polygonal   = polygons defined by vertex coordinates
@@ -271,7 +307,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.56 2003/10/30 16:20:43 atrayanov Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.57 2004/01/06 21:12:07 pwjones Exp $'
 
 !==============================================================================
 !
@@ -355,11 +391,12 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridMaskKindEqual
          module procedure ESMF_RegionKindEqual
+         module procedure ESMF_PhysGridOrientationEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
-!     ESMF region and mask kind data types.  It is provided for easy
-!     comparisons of region types with defined values.
+!     ESMF region kind, mask kind and orientation data types.  It is 
+!     provided for easy comparisons of these types with defined values.
 !
 !EOP
       end interface
@@ -372,11 +409,12 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridMaskKindNotEqual
          module procedure ESMF_RegionKindNotEqual
+         module procedure ESMF_PhysGridOrientationNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
-!     ESMF region and mask kind data types.  It is provided for easy
-!     comparisons of region types with defined values.
+!     ESMF region kind, mask kind and orientation data types.  It is 
+!     provided for easy comparisons of these types with defined values.
 !
 !EOP
       end interface
@@ -396,7 +434,7 @@
 
 ! !INTERFACE:
       function ESMF_PhysGridCreateNew(num_dims, relloc, name, coord_system, &
-                                      rc)
+                                      orientation, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_PhysGrid) :: ESMF_PhysGridCreateNew
@@ -407,6 +445,7 @@
 
       character (len = *), intent(in), optional :: name  
       type (ESMF_CoordSystem), intent(in), optional :: coord_system
+      type (ESMF_PhysGridOrientation), intent(in), optional :: orientation
 
       integer, intent(out), optional :: rc               
 
@@ -431,6 +470,9 @@
 !     \item[{[coord\_system]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.).
+!     \item[{[orientation]}]
+!          {\tt ESMF\_PhysGridOrientation} which identifies an ESMF standard
+!          orientation (e.g. horizontal, vertical, 3D, etc.).
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -471,6 +513,14 @@
       
       if (present(coord_system)) then
          physgrid%coord_system = coord_system
+      else
+         physgrid%coord_system = ESMF_CoordSystem_Unknown
+      endif
+      
+      if (present(orientation)) then
+         physgrid%orientation = orientation
+      else
+         physgrid%orientation = ESMF_PhysGridOrientation_Unknown
       endif
       
       if (present(name)) then
@@ -533,14 +583,18 @@
 ! !IROUTINE: ESMF_PhysGridSet - Sets value of selected PhysGrid quantities.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSet(physgrid, name, coord_system, rc)
+      subroutine ESMF_PhysGridSet(physgrid, name, coord_system, orientation, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_PhysGrid), intent(inout) :: physgrid
 
       character (len = *), intent(in), optional :: name  
+
       type (ESMF_CoordSystem), intent(in), optional :: coord_system
 
+      type (ESMF_PhysGridOrientation), intent(in), optional :: &
+         orientation
+         
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -557,6 +611,9 @@
 !     \item[{[coord\_system]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.).
+!     \item[{[orientation]}]
+!          {\tt ESMF\_PhysGridOrientation} which identifies an ESMF standard
+!          orientation (e.g. horizontal, vertical, 3D).
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -579,6 +636,10 @@
          physgrid%ptr%coord_system = coord_system
       endif
       
+      if (present(orientation)) then
+         physgrid%ptr%orientation = orientation
+      endif
+      
       if (present(name)) then
          call ESMF_SetName(physgrid%ptr%base, name, "PhysGrid", status)
          if (status /= ESMF_SUCCESS) then
@@ -598,7 +659,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridGet(physgrid, relloc, name, num_dims, &
-                                  coord_system, rc)
+                                  coord_system, orientation, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_PhysGrid), intent(in) :: physgrid
@@ -606,6 +667,7 @@
       character (len = *), intent(out), optional :: name  
       integer, intent(out), optional :: num_dims
       type (ESMF_CoordSystem), intent(out), optional :: coord_system
+      type (ESMF_PhysGridOrientation), intent(out), optional :: orientation
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -627,6 +689,9 @@
 !     \item[{[coord\_system]}]
 !          {\tt ESMF\_CoordSystem} identifying coordinate system 
 !          (e.g. spherical, cartesian, pressure, etc.).
+!     \item[{[orientation]}]
+!          {\tt ESMF\_PhysGridOrientation} identifying physgrid orientation 
+!          (e.g. horizontal, vertical, 3D, etc.).
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -656,6 +721,7 @@
       if (present(relloc      )) relloc       = physgrid%ptr%relloc
       if (present(num_dims    )) num_dims     = physgrid%ptr%num_dims
       if (present(coord_system)) coord_system = physgrid%ptr%coord_system
+      if (present(orientation )) orientation  = physgrid%ptr%orientation
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -673,7 +739,7 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
       type (ESMF_PhysCoord), intent(in) :: phys_coord
-      integer, intent(in) ::  dim_order          !TODO: make this optional
+      integer, intent(in), optional ::  dim_order
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -687,9 +753,10 @@
 !          {\tt ESMF\_PhysGrid} for which coordinate is to be added.
 !     \item[phys\_coord]
 !          A previously-created {\tt ESMF\_PhysCoord} to add to the PhysGrid.
-!     \item[dim\_order]
+!     \item[{[dim\_order]}]
 !          Dimension to which this coordinate will be assigned (e.g. x coord =1,
-!          (y coord = 2)
+!          (y coord = 2).  If not supplied, dimension order will be the
+!          order in which a coordinate is added.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -722,9 +789,20 @@
 !
 !     add coordinate
 !
-      !TODO: if dim_order optional, store these in the order called
-      !      would require checking for next empty slot
-      physgrid%ptr%coords(dim_order) = phys_coord
+      if (present(dim_order)) then
+         physgrid%ptr%coords(dim_order) = phys_coord
+      else
+         order_loop: do idim=1,physgrid%ptr%num_dims
+            if (.not. associated(physgrid%ptr%coords(idim))) then
+               physgrid%ptr%coords(idim) = phys_coord
+               exit order_loop
+            endif
+         end do order_loop
+         if (idim > physgrid%ptr%num_dims) then
+            print *,'ERROR in PhysGridSetCoord: too many coords defined'
+            return
+         endif
+      endif
 !
 !     set return code
 !
@@ -1050,7 +1128,8 @@
 !          physical dimension for each vertex point at each logical grid point. 
 !          The array is assumed to be dimensioned (num\_dims,num\_vertices)
 !          while the {\tt ESMF\_Array} would typically be consistent with
-!          other grid arrays.
+!          other grid arrays. The order of dimensions is assumed to be the
+!          same order defined for the PhysGrid coordinates.
 !     \item[{[ellipse\_array]}]
 !          Array of {\tt ESMF\_Array}s containing the two parameters
 !          necessary for describing the elliptical region at each grid point.
@@ -2777,6 +2856,74 @@
                                  RegionKind2%region_kind)
 
       end function ESMF_RegionKindNotEqual
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridOrientationEqual - equality of PhysGrid orientation
+!
+! !INTERFACE:
+      function ESMF_PhysGridOrientationEqual(Orientation1, Orientation2)
+
+! !RETURN VALUE:
+      logical :: ESMF_PhysGridOrientationEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_PhysGridOrientation), intent(in) :: &
+         Orientation1,      &! Two orientation types to compare for
+         Orientation2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PhysGridOrientation types to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[Orientation1, Orientation2]
+!          Two orientation types to compare for equality
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_PhysGridOrientationEqual = (Orientation1%orientation == &
+                                       Orientation2%orientation)
+
+      end function ESMF_PhysGridOrientationEqual
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridOrientationNotEqual - non-equality of PhysGrid orientations
+!
+! !INTERFACE:
+      function ESMF_PhysGridOrientationNotEqual(Orientation1, Orientation2)
+
+! !RETURN VALUE:
+      logical :: ESMF_PhysGridOrientationNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_PhysGridOrientation), intent(in) :: &
+         Orientation1,      &! Two PhysGrid orientation types to compare for
+         Orientation2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF PhysGridOrientation types to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[Orientation1, Orientation2]
+!          Two PhysGrid orientations to compare for inequality
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_PhysGridOrientationNotEqual = (Orientation1%orientation /= &
+                                          Orientation2%orientation)
+
+      end function ESMF_PhysGridOrientationNotEqual
 
 !------------------------------------------------------------------------------
 
