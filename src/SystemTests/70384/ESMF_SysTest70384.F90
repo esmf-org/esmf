@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.15 2003/06/06 20:24:14 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.16 2003/06/16 17:17:21 jwolfe Exp $
 !
 ! System test code #70384
 
@@ -25,7 +25,7 @@
     
     ! Local variables
     integer :: nx, ny, nz, i, j, k, ni, nj, nk, nj2, nk2, rc, ii, jj, kk
-    integer, dimension(6) :: delist
+    integer, dimension(:), allocatable :: delist
     integer :: result, len, base, de_id
     integer :: i_max, j_max, k_max, miscount
     integer :: status
@@ -74,7 +74,8 @@
 
     ndex = 2
     ndey = ndes/2
-    delist = (/ (i, i=0, ndes) /)
+    allocate(delist(ndes))
+    delist = (/ (i, i=0, ndes-1) /)
     layout1 = ESMF_DELayoutCreate(layout0, 2, (/ ndex, ndey /), (/ 0, 0 /), &
                                                       de_indices=delist, rc=rc)
     print *, "DELayout Create finished, rc =", rc
