@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.130 2005/03/02 00:28:42 jwolfe Exp $
+//$Id: ESMC_Route.C,v 1.131 2005/03/02 18:44:42 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.130 2005/03/02 00:28:42 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.131 2005/03/02 18:44:42 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -436,18 +436,20 @@
     vmk_commhandle *stackHandle[STACKLIMIT];
     char *stackSendBuffer[STACKLIMIT];
     char *stackRecvBuffer[STACKLIMIT];
+    ESMC_RouteOptions useOptions;
 
     char *sendBuffer, *recvBuffer;
     char **sendBufferList, **recvBufferList;
     vmk_commhandle **handle;
 
     nbytes = ESMC_DataKindSize(dk);
+    useOptions = options;
 
 // -----------------------------------------------------------
 // Branch here in a big way based on SYNC/ASYNC communications
 // -----------------------------------------------------------
 
-    if (options & ESMC_ROUTE_OPTION_SYNC) {
+    if (useOptions & ESMC_ROUTE_OPTION_SYNC) {
       xpCount = 1;
 
       myPET = vm->vmk_mypet();
@@ -464,20 +466,22 @@
         // find total number of xpackets
 	rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
 	rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
-
-        // right here, we should check for the xp count, if 1, disable
-        // pet packing even if requested.   if 1, and contig, also disable
-        // buffer packing, etc.     (might need separate flags for send and
-        // receive, so inside the loops we can test "is_send_contig", etc).
+        maxXPCount = MAX(recvXPCount, sendXPCount);
 
 // -----------------------------------------------------------
 // Branch again, this time based on packing option
 // First up is packing by PET
 // -----------------------------------------------------------
 
+        // reset options only for packing by PET and if the maximum XPCount is 1
+        if ((useOptions & ESMC_ROUTE_OPTION_PACK_PET) && (maxXPCount == 1)) {
+          useOptions = (ESMC_RouteOptions)(useOptions ^ ESMC_ROUTE_OPTION_PACK_PET);
+          useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_PACK_XP);
+        }
+
         // First up is packing on a PET-level, where all the data that must be
         // exchanged between PETs is loaded up into single buffers for exchange
-        if (options & ESMC_ROUTE_OPTION_PACK_PET) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
 
           // get corresponding send/recv xpackets from the rtable
           if (sendXPCount > 0)
@@ -541,10 +545,9 @@
         // Next is packing on an XP-level, where all the data that must be
         // exchanged between PETs loops over all the XPs that must be exchanged,
         // communicating them one at a time.
-        if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             madeSendBuf = madeRecvBuf = false;
@@ -651,7 +654,7 @@
 // Next up is MPI_type_vector packing
 // -----------------------------------------------------------
 
-        if (options & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
            // if you wanted to send multiple XPs with one communication call 
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
@@ -668,10 +671,9 @@
 
         // Next is no packing, which means that each contiguous chunk of data
         // described by an XP is sent as a separate communication.
-        if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             // load up the corresponding send/recv xpackets from the rtables
@@ -855,6 +857,10 @@
 #endif
           }        // XP loop
         }          // packing branch
+
+        // reset the useOptions to the default ones in case it has been overwritten
+        useOptions = options;
+
       }            // communication (PET) loop, variable i
     }              // SYNC branch
 
@@ -862,20 +868,18 @@
 // Now the BIG branch for asynchronous communications
 // -----------------------------------------------------------
 
-    if (options & ESMC_ROUTE_OPTION_ASYNC) {
+    if (useOptions & ESMC_ROUTE_OPTION_ASYNC) {
 
       myPET = vm->vmk_mypet();
       rc = ct->ESMC_CommTableGetCount(&commCount);
 
       sendXPCount = 0;
       recvXPCount = 0;
-      if (options & ESMC_ROUTE_OPTION_PACK_PET) {
+      if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
         ct->ESMC_CommTableGetCount(&sendXPCount);
       }
-      if (options & ESMC_ROUTE_OPTION_PACK_XP) {
-        sendRT->ESMC_RTableGetTotalCount(&sendXPCount);
-        recvRT->ESMC_RTableGetTotalCount(&recvXPCount); 
-        maxReps = 0;
+      if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
+        maxXPCount = 0;
         for (i=0; i<commCount; i++) {
 
           rc = ct->ESMC_CommTableGetPartner(i, &theirPET, &needed);
@@ -890,7 +894,7 @@
         }            // loop over PETs
         sendXPCount = recvXPCount = maxXPCount;
       }
-      if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+      if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
         maxReps = 0;
         for (i=0; i<commCount; i++) {
 
@@ -900,9 +904,9 @@
           // find number of xpackets to be communicated with this PET
           rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
           rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
+          maxXPCount = MAX(recvXPCount, sendXPCount);
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             // load up the corresponding send/recv xpackets from the rtables
@@ -960,7 +964,7 @@
       }
 
       // allocate any necessary arrays for specific options
-      if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+      if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
         madeSendBufList = new bool[xpCount];
         madeRecvBufList = new bool[xpCount];
       }
@@ -991,15 +995,22 @@
         // find number of xpackets to be communicated with this PET
 	rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
 	rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
+        maxXPCount = MAX(recvXPCount, sendXPCount);
 
 // -----------------------------------------------------------
 // Branch again, this time based on packing option
 // First up is packing by PET
 // -----------------------------------------------------------
 
+        // reset options only for packing by PET and if the maximum XPCount is 1
+        if ((useOptions & ESMC_ROUTE_OPTION_PACK_PET) && (maxXPCount == 1)) {
+          useOptions = (ESMC_RouteOptions)(useOptions ^ ESMC_ROUTE_OPTION_PACK_PET);
+          useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_PACK_XP);
+        }
+
         // First up is packing on a PET-level, where all the data that must be
         // exchanged between PETs is loaded up into single buffers for exchange
-        if (options & ESMC_ROUTE_OPTION_PACK_PET) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
 
           // get corresponding send/recv xpackets from the rtable
           if (sendXPCount > 0)
@@ -1059,10 +1070,9 @@
         // Next is packing on an XP-level, where all the data that must be
         // exchanged between PETs loops over all the XPs that must be exchanged,
         // communicating them one at a time.
-        if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             madeSendBufList[req] = madeRecvBufList[req] = false;
@@ -1158,7 +1168,7 @@
 // Next up is MPI_type_vector packing
 // -----------------------------------------------------------
 
-        if (options & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
            // if you wanted to send multiple XPs with one communication call 
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
@@ -1175,10 +1185,9 @@
 
         // Next is no packing, which means that each contiguous chunk of data
         // described by an XP is sent as a separate communication.
-        if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             // load up the corresponding send/recv xpackets from the rtables
@@ -1306,15 +1315,22 @@
         // find total number of xpackets
 	rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
 	rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
+        maxXPCount = MAX(recvXPCount, sendXPCount);
 
 // -----------------------------------------------------------
 // Branch again, this time based on packing option
 // First up is packing by PET
 // -----------------------------------------------------------
 
+        // reset options only for packing by PET and if the maximum XPCount is 1
+        if ((useOptions & ESMC_ROUTE_OPTION_PACK_PET) && (maxXPCount == 1)) {
+          useOptions = (ESMC_RouteOptions)(useOptions ^ ESMC_ROUTE_OPTION_PACK_PET);
+          useOptions = (ESMC_RouteOptions)(useOptions | ESMC_ROUTE_OPTION_PACK_XP);
+        }
+
         // First up is packing on a PET-level, where all the data that must be
         // exchanged between PETs is loaded up into single buffers for exchange
-        if (options & ESMC_ROUTE_OPTION_PACK_PET) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_PET) {
 
           // get corresponding send/recv xpackets from the rtable
           if (recvXPCount > 0)
@@ -1357,10 +1373,9 @@
         // Next is packing on an XP-level, where all the data that must be
         // exchanged between PETs loops over all the XPs that must be exchanged,
         // communicating them one at a time.
-        if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             // load up the corresponding recv xpackets from the rtables
@@ -1409,7 +1424,7 @@
 // Next up is MPI_type_vector packing
 // -----------------------------------------------------------
 
-        if (options & ESMC_ROUTE_OPTION_PACK_VECTOR) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_VECTOR) {
            // if you wanted to send multiple XPs with one communication call 
            // using the MPI-Vector equivalent, you would need code here which
            // could take an array of VMTypes instead of a single one.
@@ -1426,10 +1441,9 @@
 
         // Next is no packing, which means that each contiguous chunk of data
         // described by an XP is sent as a separate communication.
-        if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+        if (useOptions & ESMC_ROUTE_OPTION_PACK_NOPACK) {
 
           // loop over the XPs
-          maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
             // load up the corresponding send/recv xpackets from the rtables
@@ -1482,7 +1496,7 @@
           delete [] recvBufferList;
       }
       // free any necessary arrays for specific options
-      if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+      if (useOptions & ESMC_ROUTE_OPTION_PACK_XP) {
         delete [] madeSendBufList;
         delete [] madeRecvBufList;
       }
@@ -2014,6 +2028,10 @@
     // set this here, because if neither send or recv are > 0 then we
     // do nothing here.
     rc = ESMF_SUCCESS;
+
+    // Set a different default value for this route
+    this->ESMC_RouteSetOptions((ESMC_RouteOptions) (ESMC_ROUTE_OPTION_ASYNC |
+                               ESMC_ROUTE_OPTION_PACK_PET));
 
     // Calculate the sending table.  If this DE is not part of the sending
     // layout skip this loop.
