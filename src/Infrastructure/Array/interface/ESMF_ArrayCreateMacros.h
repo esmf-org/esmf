@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.3 2004/04/19 22:21:25 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.4 2004/06/02 13:27:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreate - make an ESMF array from an unallocated Fortran array pointer @\
+! !IROUTINE: ESMF_ArrayCreate - Make an ESMF array from an unallocated Fortran array pointer @\
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_ArrayCreate() @\
@@ -61,9 +61,9 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt Array} based on an unallocated (but allocatable) Fortran @\
-!   array pointer.  This routine allocates memory to the array and fills in @\
-!   the array object with all necessary information. @\
+! Creates an {\tt ESMF\_Array} based on an unallocated (but allocatable) @\
+! Fortran array pointer.  This routine allocates memory to the array and @\
+! saves all necessary information about bounds, data type, kind, etc. @\
 ! @\
 ! The function return is an {\tt ESMF\_Array} type with space @\
 ! allocated for data. @\
@@ -93,8 +93,10 @@
 #define ArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-      function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(fptr, counts, haloWidth, & @\
-                                                     lbounds, ubounds, rc) @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayCreateByMTPtr##rank##D##mtypekind" @\
+      function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(fptr, counts, & @\
+                                           haloWidth, lbounds, ubounds, rc) @\
  @\
       type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind @\
  @\
@@ -166,7 +168,7 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_ArrayCreate - make an ESMF array from an allocated Fortran array @\
+! !IROUTINE: ESMF_ArrayCreate - Make an ESMF array from an allocated Fortran array @\
 ! @\
 ! !INTERFACE: @\
 !     ! Private name; call using ESMF_ArrayCreate() @\
@@ -182,9 +184,9 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Creates an {\tt ESMF\_Array} based on an already allocated Fortran array @\
+! Create an {\tt ESMF\_Array} based on an already allocated Fortran array @\
 !   pointer.  This routine can make a copy or reference the existing data @\
-!   and fills in the array object with all necessary information. @\
+!   and saves all necessary information about bounds, data type, kind, etc. @\
 ! @\
 ! The function return is an {\tt ESMF\_Array} type. @\
 ! @\
@@ -210,8 +212,11 @@
 #define ArrayCreateByFullPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind" @\
  @\
-      function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(fptr, docopy, haloWidth, rc) @\
+      function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(fptr, docopy, & @\
+                                                haloWidth, rc) @\
  @\
       type(ESMF_Array) :: ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind @\
  @\
@@ -314,8 +319,9 @@
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-!  Creates a Fortran pointer of the requested T/K/R.  After creating the @\
-!  pointer and doing the allocation based on counts, also goes ahead and @\
+!  Create a Fortran pointer of the requested type/kind/rank. @\
+!  After creating the pointer and doing the allocation @\
+!  based on counts, also goes ahead and @\
 !  calls into the C++ interfaces to set values on the {\tt ESMF\_Array} @\
 !  object. (This is to save on the total number of nested crossings of the @\
 !  Fortran/C++ boundary.) @\
@@ -323,11 +329,12 @@
 !  Optional args are an existing Fortran pointer which if given is used @\
 !  instead of a new one, and a docopy flag which if set to copy will @\
 !  do a contents copy or reference. @\
+! @\
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[array]  The {\tt ESMF\_Array} to set the values into. @\
 !  \item[counts]  An integer array of counts.  Must be the same length as the rank. @\
-!  \item[hwidth]  An integer halo width. Width on each edge. @\
+!  \item[hwidth]  An integer halo width. Currently same width on each edge. @\
 !  \item[{[fptr]}] An optional existing Fortran pointer.  Will be used instead of an @\
 !   internally generated Fortran pointer if given.  Must be given if the {\tt docopy} is specified. @\
 !  \item[{[docopy]}]  An optional copy flag which can be specified if an Fortran pointer is also @\
@@ -343,6 +350,8 @@
 #define ArrayConstructF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind" @\
       subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth, fptr, & @\
                                                    docopy, lbounds, ubounds, rc) @\
  @\
@@ -473,7 +482,18 @@
 !      integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!      Deallocate data contents if Array object is responsible for cleaning up. @\
+!   Deallocate data contents if {\tt ESMF\_Array} is responsible @\
+!   for deleting data space.  This routine is for internal use only. @\
+! @\
+!  \begin{description} @\
+!  \item[array] @\
+!    An {\tt ESMF\_Array} object. @\
+!  \item[wrap] @\
+!    A Fortran pointer of the proper type/kind/rank, wrapped in a @\
+!    derived type to allow the pointer itself to be passed by reference. @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
 ! @\
 !EOPI @\
  @\
@@ -481,6 +501,8 @@
 #define ArrayDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayDeallocate##mrank##D##mtypekind" @\
       subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
  @\
       type(ESMF_Array) :: array @\

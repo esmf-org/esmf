@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.8 2004/04/22 22:26:27 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.9 2004/06/02 13:27:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Array.F90"
 !
 !     ESMF Array module
       module ESMF_ArrayMod
@@ -45,6 +46,7 @@
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
+      use ESMF_DELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -106,6 +108,7 @@
       public ESMF_ArrayGet, ESMF_ArraySet
 
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
+      public ESMF_ArrayComputeAxisIndex
 
       public ESMF_ArrayWriteRestart
       public ESMF_ArrayReadRestart
@@ -121,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.8 2004/04/22 22:26:27 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.9 2004/06/02 13:27:54 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -148,6 +151,8 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGet"
 !BOP
 ! !IROUTINE: ESMF_ArrayGet
 !
@@ -172,48 +177,53 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Returns information about the array.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the array input are optional to facilitate this.
-!
+!  Return information about an {\tt ESMF\_Array}.
+!  For queries where the caller only wants a single value, 
+!  specify the argument by name.
+!  All the arguments after the array input are optional to facilitate this.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array}.
 !     \item [{[rank]}]
-!           The number of dimensions in the array.
+!           The number of dimensions in the {\tt array}.
 !     \item [{[type]}]
-!	    Real or integer.
+!	    {\tt ESMF\_DataType}.  Will be one of: 
+!           {\tt ESMF\_DATA\_INTEGER}, {\tt ESMF\_DATA\_REAL},
+!           {\tt ESMF\_DATA\_LOGICAL}, {\tt ESMF\_DATA\_CHARACTER}, or
+!           {\tt ESMF\_DATA\_COMPLEX}.
 !     \item [{[kind]}]
 !           {\tt ESMF\_DataKind} variable which indicates 
-!           the item size in bytes.
+!           the item size in bytes.  Will be one of:
+!           {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4},
+!           {\tt ESMF\_I8}, {\tt ESMF\_R4}, {\tt ESMF\_R8},
+!           {\tt ESMF\_C8}, or {\tt ESMF\_C16}.
 !     \item [{[counts]}]
-!           The number of items in each dimension of the array.
+!           The number of items in each dimension of the {\tt array}.
 !     \item [{[lbounds]}]
-!           The lower index value of each dimension of the array.
+!           The lower index value of each dimension of the {\tt array}.
 !     \item [{[ubounds]}]
-!           The upper index value of each dimension of the array.
+!           The upper index value of each dimension of the {\tt array}.
 !     \item [{[strides]}]
 !           If nonzero, the spacing between index values per dimension
-!           of the array.
+!           of the {\tt array}.
 !     \item [{[haloWidth]}]
 !           Width of halo region.
 !     \item [{[base]}]
-!           Base memory address of the data region of the array.
+!           Base memory address of the data region of the {\tt array}.
 !     \item [{[name]}]
-!           Array name.  If not specified, a unique name will be generated.
+!           {\tt array} name.  If one was not specified at create time,
+!           a unique name will have been generated.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
-
-      integer :: status ! Error status
-      logical :: rcpresent ! Return code present
-      integer :: lrank  ! Local use to get rank
+      integer :: status      ! Error status
+      logical :: rcpresent   ! Return code present
+      integer :: lrank       ! Local use to get rank
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -285,6 +295,8 @@ end subroutine
       end subroutine ESMF_ArrayGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayGetAxisIndex"
 !BOPI
 ! !IROUTINE: ESMF_ArrayGetAxisIndex
 !
@@ -300,13 +312,12 @@ end subroutine
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used to retrieve the index annotation from an Array.
-!
+!      Used to retrieve the index annotation from an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array}.
 !     \item [totalindex]
 !           An array of index spaces for the total array size.
 !     \item [{[compindex]}]
@@ -319,7 +330,6 @@ end subroutine
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
         integer :: status, i
 
@@ -362,12 +372,13 @@ end subroutine
         end subroutine ESMF_ArrayGetAxisIndex
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayPrint"
 !BOP
 ! !IROUTINE: ESMF_ArrayPrint - Print contents of an Array object
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayPrint(array, options, rc)
-!
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
@@ -375,22 +386,19 @@ end subroutine
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
-!
+!     Print information about an {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array}.
 !     \item [{[options]}]
-!           The print options
+!           The standard print options. See {\ref:xx}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!
 !EOP
-! !REQUIREMENTS:
 
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
@@ -424,12 +432,14 @@ end subroutine
          return
        endif
 
-!      set return values
+       ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_ArrayPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayRead"
 !BOPI
 ! !IROUTINE: ESMF_ArrayRead
 !
@@ -445,13 +455,13 @@ end subroutine
       integer, intent(out), optional :: rc                 ! return code
 !
 ! !DESCRIPTION:
-!      Used to read data from persistent storage in a variety of formats.
+!     Read data from persistent storage in a variety of formats.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
+!           An {\tt ESMF\_Array}.
+!     \item [{[iospec]}]
 !           The file specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -462,12 +472,11 @@ end subroutine
 ! !REQUIREMENTS:
 
 !
-! TODO: code goes here
 !	Changed BOP/EOP to BOPI/EOPI until function is implemented.
 !
         type (ESMF_Array) :: a
 
-!       this is just to shut the compiler up
+!       ! this is just to prevent compiler warnings
         a%this = ESMF_NULL_POINTER
 
 !
@@ -481,6 +490,8 @@ end subroutine
         end function ESMF_ArrayRead
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayReadRestat"
 !BOPI
 ! !IROUTINE: ESMF_ArrayReadRestart
 !
@@ -492,19 +503,20 @@ end subroutine
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! array name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec 
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Array from the last call to WriteRestart.
+!      all data associated with an {\tt ESMF\_Array}
+!      from the last call to writerestart.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
+!           An {\tt ESMF\_Array}.
+!     \item [{[iospec]}]
 !           The file specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -514,12 +526,9 @@ end subroutine
 !EOPI
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
         type (ESMF_Array) :: a 
 
-!       this is just to shut the compiler up
+!       ! this is just to prevent compiler warnings
         a%this = ESMF_NULL_POINTER
 
 !
@@ -533,6 +542,8 @@ end subroutine
         end function ESMF_ArrayReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayReorder"
 !BOPI
 ! !IROUTINE: ESMF_ArrayReorder
 !
@@ -559,7 +570,6 @@ end subroutine
 !      a copy?)
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -570,6 +580,8 @@ end subroutine
         end subroutine ESMF_ArrayReorder
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySetAxisIndex"
 !BOPI
 ! !IROUTINE: ESMF_ArraySetAxisIndex
 !
@@ -585,14 +597,14 @@ end subroutine
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used to annotate an Array with information used to manage halo
-!      regions.
+!      Used to annotate an {\tt ESMF\_Array} with information 
+!      used to manage halo regions.
 !           
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
-!     \item [totalindex]
+!           An {\tt ESMF\_Array}.
+!     \item [{[totalindex]}]
 !	    An array of index spaces for the total array size.
 !     \item [{[compindex]}]
 !	    An array of index spaces for the computational array size.
@@ -658,6 +670,56 @@ end subroutine
         end subroutine ESMF_ArraySetAxisIndex
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayComputeAxisIndex"
+!BOPI
+! !IROUTINE: ESMF_ArrayComputeAxisIndex
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayComputeAxisIndex(array, delayout, decompids, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array 
+      type(ESMF_DELayout), intent(in) :: delayout
+      integer, dimension(:), intent(in) :: decompids
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Used to annotate an {\tt ESMF\_Array} with information 
+!      used to manage halo regions.
+!           
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           An {\tt ESMF\_Array}.
+!     \item [delayout]
+!           The {\tt ESMF\_DELayout} over which this {\tt ESMF\_Array}
+!           is decomposed.
+!     \item [decompids]
+!           An integer array, one index per dimension, identifying
+!           which axes are decomposed and in which order.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!       
+!
+!EOPI
+
+        integer :: status
+        integer :: i, dlength
+
+        ! call c routine to do work
+        dlength = size(decompids)
+        call c_ESMC_ArrayComputeAxisIndex(array, delayout, decompids, &
+                                          dlength, status)
+
+        if (present(rc)) rc = status
+
+        end subroutine ESMF_ArrayComputeAxisIndex
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySet"
 !BOP
 ! !IROUTINE: ESMF_ArraySet - Set information about an Array
 !
@@ -672,22 +734,22 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!     Sets the name of the array.  (Unlike other objects, there are
-!     very few items which can be set once an array is created.)
+!     Sets the name of the {\tt ESMF\_Array}.  
+!     Note: Unlike most other ESMF objects, there are
+!     very few items which can be set once an {\tt ESMF\Array} 
+!     is created.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array}.
 !     \item [{[name]}]
 !           The array name.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -714,6 +776,8 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayValidate"
 !BOP
 ! !IROUTINE: ESMF_ArrayValidate - Check validity of Array object
 !
@@ -727,25 +791,21 @@ end subroutine
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
+!     Verify an {\tt ESMF\_Array} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array}.
 !     \item [{[options]}]
-!           The validation options.
+!           The standard validation options.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
        character (len=6) :: defaultopts      ! default print options 
        integer :: status                     ! local error status
        logical :: rcpresent        
@@ -783,6 +843,8 @@ end subroutine
        end subroutine ESMF_ArrayValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayWrite"
 !BOP
 ! !IROUTINE: ESMF_ArrayWrite
 !
@@ -797,14 +859,13 @@ end subroutine
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
-!      (see WriteRestart/Restore for quick data dumps.)  Details of I/O 
-!      options specified in the IOSpec derived type. 
-!
+!      (see writerestart/restore for quick data dumps.)  Details of I/O 
+!      options specified with an {\tt ESMF\_IOSpec}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
+!           An {\tt ESMF\_Array}.
 !     \item [{[iospec]}]
 !           The file specification.
 !     \item [{[filename]}]
@@ -813,10 +874,7 @@ end subroutine
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!
-!
 !EOP
-! !REQUIREMENTS:
 
        character (len=16) :: defaultopts      ! default write options 
        character (len=16) :: defaultfile      ! default filename
@@ -845,13 +903,15 @@ end subroutine
          return
        endif
 
-!      set return values
+       ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayWrite
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayWriteRestart"
 !BOPI
 ! !IROUTINE: ESMF_ArrayWriteRestart
 !
@@ -865,15 +925,15 @@ end subroutine
 !
 ! !DESCRIPTION:
 !      Used to save all data to disk as quickly as possible.  
-!      (see Read/Write for other options).  Internally this routine uses the
-!      same I/O interface as Read/Write, but the default options are to
+!      (see read/write for other options).  Internally this routine uses the
+!      same I/O interface as read/write, but the default options are to
 !      select the fastest way to save data to disk.
 !     
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
-!           An {\tt ESMF\_Array} object.
-!     \item [{[iospece]}]
+!           An {\tt ESMF\_Array}.
+!     \item [{[iospec]}]
 !           The file specification.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -891,6 +951,7 @@ end subroutine
         end subroutine ESMF_ArrayWriteRestart
 
 
+!------------------------------------------------------------------------------
 
 
        end module ESMF_ArrayMod

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Alloc_C.F90,v 1.6 2004/03/18 22:23:55 nscollins Exp $
+!  $Id: ESMF_Alloc_C.F90,v 1.7 2004/06/02 13:27:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Alloc_C.F90"
 !
 ! F77 interface files for C++ layer calling into F90 implementation layer.
 !  This cannot use any F90 syntax, including modules, or allocatable 
@@ -23,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Alloc_C.F90,v 1.6 2004/03/18 22:23:55 nscollins Exp $'
+!      '$Id: ESMF_Alloc_C.F90,v 1.7 2004/06/02 13:27:54 nscollins Exp $'
 !==============================================================================
    subroutine f_esmf_arrayf90allocate(array, rank, type, kind, counts, &
                                       lbounds, ubounds, hwidth, rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cpp,v 1.3 2004/03/18 22:23:55 nscollins Exp $
+! $Id: ESMF_ArrayCreate.cpp,v 1.4 2004/06/02 13:27:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_ArrayCreate.F90"
 !
 !     ESMF Array module
       module ESMF_ArrayCreateMod
@@ -80,7 +81,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayCreate.cpp,v 1.3 2004/03/18 22:23:55 nscollins Exp $'
+      '$Id: ESMF_ArrayCreate.cpp,v 1.4 2004/06/02 13:27:55 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -162,87 +163,17 @@ end interface
       contains
 
 !==============================================================================
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+DeclarationMacro(ArrayCreateByFullPtr)
+
+!! < end of automatically generated functions >
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section includes the Array Create methods.
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayCreate -- Create a new Array from an ArraySpec
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_ArrayCreate()
-      function ESMF_ArrayCreateBySpec(arrayspec, counts, haloWidth, &
-                                      lbounds, ubounds, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateBySpec
-!
-! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: arrayspec
-      integer, intent(in), dimension(:) :: counts
-      integer, intent(in), optional :: haloWidth 
-      integer, dimension(:), intent(in), optional :: lbounds
-      integer, dimension(:), intent(in), optional :: ubounds
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Create a new Array and allocate data space, which remains uninitialized.
-!  The return value is a new Array.
-!    
-!  The arguments are:
-!  \begin{description}
-!  \item[arrayspec]  
-!    ArraySpec object.
-!  \item[counts]  
-!    The number of items in each dimension of the array.  This is a 1D
-!    integer array the same length as the rank.
-!  \item[{[haloWidth]}]  
-!    Set the maximum width of the halo region on all edges. Defaults to 0.
-!  \item[{[lbounds]}]  
-!    An integer array of length rank, with the lower index for each dimension.
-!  \item[{[ubounds]}]  
-!    An integer array of length rank, with the upper index for each dimension.
-!   \item[{[rc]}]   
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        ! Local vars
-        type (ESMF_Array) :: array          ! new C++ Array
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-        integer :: rank
-        type(ESMF_DataType) :: type
-        type(ESMF_DataKind) :: kind
-
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        array%this = ESMF_NULL_POINTER
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        call ESMF_ArraySpecGet(arrayspec, rank, type, kind, status)
-        if (status .ne. ESMF_SUCCESS) return
-        
-        ! Call the list function to make the array
-        ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
-                                                       counts, haloWidth, &
-                                                       lbounds, ubounds, status)
-        if (rcpresent) rc = status
-
-        end function ESMF_ArrayCreateBySpec
-
-
-!------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCreateByList"
 !BOP
 ! !IROUTINE: ESMF_ArrayCreate -- Create an Array specifying all options.
 !
@@ -265,29 +196,32 @@ end interface
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Array and allocate data space, which remains uninitialized.
-!  The return value is a new Array.
+!  Create a new {\tt ESMF\_Array} and allocate data space, which 
+!  remains uninitialized.  The return value is the new {\tt ESMF\_Array}.
 !    
 !  The arguments are:
 !  \begin{description}
 !  \item[rank]  
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 7D.
+!    Array rank (dimensionality -- 1D, 2D, etc).  Maximum allowed is 7D.
 !  \item[type]  
 !    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, {\tt ESMF\_DATA\_CHARACTER}.
+!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, or
+!    {\tt ESMF\_DATA\_CHARACTER}.
 !  \item[kind]  
 !    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !  \item[counts]  
 !    The number of items in each dimension of the array.  This is a 1D
-!    integer array the same length as the rank.
+!    integer array the same length as the {\tt rank}.
 !  \item[{[haloWidth]}]  
 !    Set the maximum width of the halo region on all edges. Defaults to 0.
 !  \item[{[lbounds]}]  
-!    An integer array of length rank, with the lower index for each dimension.
+!    An integer array of length {\tt rank} with the lower index 
+!    for each dimension.
 !  \item[{[ubounds]}]  
-!    An integer array of length rank, with the upper index for each dimension.
+!    An integer array of length {\tt rank} with the upper index 
+!    for each dimension.
 !   \item[{[rc]}]   
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -353,19 +287,87 @@ end interface
 !! < start of macros which become actual function bodies after expansion >
 DeclarationMacro(ArrayCreateByMTPtr)
 
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-
-!! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayCreateByFullPtr)
-
-!------------------------------------------------------------------------------
+!! < end of automatically generated functions >
 !------------------------------------------------------------------------------
 
-!! < start of macros which become actual function bodies after expansion >
-DeclarationMacro(ArrayConstructF90Ptr)
-
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCreateBySpec"
+!BOP
+! !IROUTINE: ESMF_ArrayCreate -- Create a new Array from an ArraySpec
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_ArrayCreate()
+      function ESMF_ArrayCreateBySpec(arrayspec, counts, haloWidth, &
+                                      lbounds, ubounds, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Array) :: ESMF_ArrayCreateBySpec
+!
+! !ARGUMENTS:
+      type(ESMF_ArraySpec), intent(in) :: arrayspec
+      integer, intent(in), dimension(:) :: counts
+      integer, intent(in), optional :: haloWidth 
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new {\tt ESMF\_Array} and allocate data space, which 
+!  remains uninitialized. The return value is the new {\tt ESMF\_Array}.
+!    
+!  The arguments are:
+!  \begin{description}
+!  \item[arrayspec]  
+!    An {\tt ESMF\_ArraySpec} object which contains the type/kind/rank
+!    information for the data.
+!  \item[counts]  
+!    The number of items in each dimension of the array.  This is a 1D
+!    integer array the same length as the {\tt rank}.
+!  \item[{[haloWidth]}]  
+!    Set the maximum width of the halo region on all edges. Defaults to 0.
+!  \item[{[lbounds]}]  
+!    An integer array of length {\tt rank} with the lower index 
+!    for each dimension.
+!  \item[{[ubounds]}]  
+!    An integer array of length {\tt rank}, with the upper index 
+!    for each dimension.
+!   \item[{[rc]}]   
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+        ! Local vars
+        type (ESMF_Array) :: array          ! new C++ Array
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+        integer :: rank
+        type(ESMF_DataType) :: type
+        type(ESMF_DataKind) :: kind
+
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        array%this = ESMF_NULL_POINTER
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        call ESMF_ArraySpecGet(arrayspec, rank, type, kind, status)
+        if (status .ne. ESMF_SUCCESS) return
+        
+        ! Call the list function to make the array
+        ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
+                                                       counts, haloWidth, &
+                                                       lbounds, ubounds, status)
+        if (rcpresent) rc = status
+
+        end function ESMF_ArrayCreateBySpec
+
+
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
@@ -377,6 +379,8 @@ DeclarationMacro(ArrayDeallocate)
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayDestroy"
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArrayDestroy(array, rc)
@@ -386,12 +390,12 @@ DeclarationMacro(ArrayDeallocate)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Array}.
+!     Releases all resources associated with this {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[array]
-!       Destroy contents of this {\tt Array}.
+!       Destroy contents of this {\tt ESMF\_Array}.
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -401,10 +405,9 @@ DeclarationMacro(ArrayDeallocate)
 !   first deallocate the space and then call the C++ code to release
 !   the object space.  When it returns we are done and can return to the user.
 !   Otherwise we would need to make a nested call back into F90 from C++ to do
-!   the deallocate() during the object delete.
+!   the deallocation during the object delete.
 !
 !EOP
-! !REQUIREMENTS:
 
         ! Local vars
         integer :: status                   ! local error status
@@ -468,6 +471,8 @@ DeclarationMacro(ArrayDeallocate)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayConstructF90Ptr"
 !BOPI
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add a Fortran ptr to array
 !
@@ -487,9 +492,10 @@ DeclarationMacro(ArrayDeallocate)
       integer, intent(out) :: rc 
 !
 ! !DESCRIPTION:
-!  Take a partially created {\tt Array} and T/K/R information and call the
-!   proper subroutine to create an F90 pointer, allocate space, and set the
-!   corresponding values in the {\tt Array} object.
+!  Take a partially created {\tt ESMF\_Array} and type/kind/rank 
+!  information and call the proper subroutine to create an F90 pointer, 
+!  allocate space, and set the corresponding values in the 
+!  {\tt ESMF\_Array} object header.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -499,7 +505,7 @@ DeclarationMacro(ArrayDeallocate)
 !    pointer to be used later.
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
-!    integer array the same length as the rank.
+!    integer array the same length as the {\tt rank}.
 !  \item[hwidth]
 !    The halo width on all edges.  Used to set the computational area
 !    in the array.
@@ -524,7 +530,6 @@ DeclarationMacro(ArrayDeallocate)
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
 
         ! Local vars
@@ -776,6 +781,13 @@ DeclarationMacro(ArrayDeallocate)
         end subroutine ESMF_ArrayConstructF90Ptr
 
 !------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+DeclarationMacro(ArrayConstructF90Ptr)
+
+!! < end of automatically generated functions >
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section is Allocate/Deallocate for Arrays
@@ -783,6 +795,8 @@ DeclarationMacro(ArrayDeallocate)
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------ 
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayF90Allocate"
 !BOPI
 ! !IROUTINE:  ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
 !
@@ -802,25 +816,26 @@ DeclarationMacro(ArrayDeallocate)
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
-!     Allocate data contents for an array created from the C++ interface. 
+!     Allocate data contents for an {\tt ESMF\_Array} created 
+!     from the C++ interface. 
 !     The arguments are: 
 !     \begin{description} 
 !     \item[array]  
-!          A partially created {\tt Array} object. 
+!          A partially created {\tt ESMF\_Array} object. 
 !     \item[rank]  
-!          The {\tt Array} rank.  
+!          The {\tt ESMF\_Array} rank.  
 !     \item[type]  
-!          The {\tt Array} type (integer, real/float, etc).  
+!          The {\tt ESMF\_Array} type (integer, real/float, etc).  
 !     \item[kind]  
-!          The {\tt Array} kind (short/2, long/8, etc).  
+!          The {\tt ESMF\_Array} kind (short/2, long/8, etc).  
 !     \item[counts]  
 !          An integer array, size {\tt rank}, of each dimension length. 
 !     \item[lbounds]  
-!          An integer array, size {\tt rank}, of each dimensions lower index.
+!          An integer array, size {\tt rank}, of each dimension lower index.
 !     \item[ubounds]  
-!          An integer array, size {\tt rank}, of each dimensions upper index.
+!          An integer array, size {\tt rank}, of each dimension upper index.
 !     \item[hwidth]  
-!          An integer width, single value, applied to each dimension. 
+!          An integer halo width, a single value, applied to each dimension. 
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
@@ -1036,6 +1051,8 @@ AllocAllocateMacro(R8, 7, RNG7, LOC7)
  
 
 !------------------------------------------------------------------------------ 
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayF90Deallocate"
 !BOPI
 ! !IROUTINE:  ESMF_ArrayF90Deallocate - Deallocate an F90 pointer 
 !
@@ -1050,23 +1067,23 @@ AllocAllocateMacro(R8, 7, RNG7, LOC7)
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
-!     Deallocate data contents for an array created from the C++ interface. 
+!     Deallocate data contents for an {\tt ESMF\_Array} created 
+!     from the C++ interface. 
 !     The arguments are: 
 !     \begin{description} 
 !     \item[array]  
-!          A partially created {\tt Array} object. 
+!          A partially created {\tt ESMF\_Array} object. 
 !     \item[rank]  
-!          The {\tt Array} rank.  
+!          The {\tt ESMF\_Array} rank.  
 !     \item[type]  
-!          The {\tt Array} type (integer, real/float, etc).  
+!          The {\tt ESMF\_Array} type (integer, real/float, etc).  
 !     \item[kind]  
-!          The {\tt Array} kind (short/2, long/8, etc).  
+!          The {\tt ESMF\_Array} kind (short/2, long/8, etc).  
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
 ! 
 !EOPI
-! !REQUIREMENTS: 
  
     integer :: status                               ! local error status 
     integer :: localkind, localtype

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayGetMacros.h,v 1.2 2004/04/19 22:19:53 nscollins Exp $
+! $Id: ESMF_ArrayGetMacros.h,v 1.3 2004/06/02 13:27:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,13 +48,14 @@
 !      integer, intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!      Return a Fortran pointer to the existing data buffer, @\
+!      Given an {\tt ESMF\_Array}, @\
+!      return a Fortran pointer to the existing data buffer, @\
 !      or return a Fortran pointer to a new copy of the data. @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[array] @\
-!    An {\tt ESMF\_Array} type.
+!    An {\tt ESMF\_Array}. @\
 !  \item[farr] @\
 !    An allocatable (but currently unallocated) Fortran array pointer.  @\
 !  \item[docopy] @\
@@ -71,6 +72,8 @@
 #define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_ArrayGetData##mrank##D##mtypekind" @\
       subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
  @\
       type(ESMF_Array) :: array @\
