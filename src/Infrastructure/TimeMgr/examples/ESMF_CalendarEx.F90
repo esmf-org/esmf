@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.28 2004/06/11 20:00:04 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.29 2004/06/17 19:18:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,6 @@
       ! local variables for Get methods
       integer(ESMF_KIND_I8) :: dl
       type(ESMF_Time) :: time
-      type(ESMF_CalendarType) :: calType
 
       ! return code
       integer:: rc
@@ -81,18 +80,13 @@
 !EOE
 
 !BOC
-      call ESMF_CalendarGet(gregorianCalendar, calendarType=calType, rc=rc)
-!EOC
-
-      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-!BOC
       ! compare calendar type against a known type
-      if (calType == ESMF_CAL_GREGORIAN) then
+      if (gregorianCalendar == ESMF_CAL_GREGORIAN) then
           print *, "gregorianCalendar is of type ESMF_CAL_GREGORIAN."
       else
           print *, "gregorianCalendar is not of type ESMF_CAL_GREGORIAN."
       end if
+!EOC
 
 !BOE
 !\subsubsection{Time Conversion Between Calendars}
