@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.24 2003/12/19 21:42:17 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.25 2004/02/05 18:43:45 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -773,6 +773,7 @@
 // !ARGUMENTS:
       struct ESMC_AxisIndex *global,       // in - associated global AIs
       int nDEs,                            // in -
+      int rank,                            // in -
       struct ESMC_AxisIndex *total,        // out - total region
       struct ESMC_AxisIndex *comp,         // out - computational
       struct ESMC_AxisIndex *excl) const { // out - exclusive
@@ -791,12 +792,12 @@
      int halo_widths[ESMF_MAXGRIDDIM][2];
 
      // TODO: when widths are 2*Ndim, compute all of them.
-     for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+     for (i=0; i<rank; i++) {
        halo_widths[i][0] = ai_comp[i].min  - ai_total[i].min;
        halo_widths[i][1] = ai_total[i].max - ai_comp[i].max;
      }
 
-     for (j=0; j<ESMF_MAXGRIDDIM; j++) {
+     for (j=0; j<rank; j++) {
        for (i=0; i<nDEs; i++) {
          ij = j*nDEs + i;
          count = global[ij].max - global[ij].min;
