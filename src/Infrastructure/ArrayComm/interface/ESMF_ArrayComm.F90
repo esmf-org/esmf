@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.12 2004/01/28 21:46:48 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.13 2004/02/05 00:05:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.12 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.13 2004/02/05 00:05:09 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -171,16 +171,17 @@
 !EOP
 ! !REQUIREMENTS:
 
-      integer :: status, nDEs, i, j
+      integer :: status, nDEs, i, j, numDims
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalindex
       type(ESMF_DELayout) :: layout
 
       ! get layout from the grid in order to get the number of DEs
+      call ESMF_GridGet(grid, numDims=numDims, rc=status)
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
 
       ! allocate globalindex array and get all of them from the grid
-      allocate(globalindex(nDEs,ESMF_MAXGRIDDIM), stat=status)
+      allocate(globalindex(nDEs,numDims), stat=status)
       call ESMF_GridGetAllAxisIndex(grid, globalindex, rc=status)
 
       if (present(totalindex)) then
@@ -229,7 +230,9 @@
       status = ESMF_SUCCESS
 
  10   continue
-        if (present(rc)) rc = status
+
+      ! Clean up
+      deallocate(globalindex, stat=status)
 
       if (present(rc)) rc = status 
 
@@ -498,17 +501,17 @@
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
       type(ESMF_DELayout) :: layout
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
       type(ESMF_Route) :: route
-      integer, dimension(ESMF_MAXGRIDDIM) :: globalCellCountPerDim, decompids
+      integer, dimension(:), allocatable :: globalCellCountPerDim, decompids
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       integer :: size_decomp, size_AI
       integer :: nDEs, my_DE
       integer :: gridrank, datarank
-      integer :: i
+      integer :: i, numDims
       logical :: hascachedroute    ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
@@ -524,17 +527,21 @@
     
       ! Extract layout information from the Grid
       call ESMF_GridGetDELayout(grid, layout, status)
+      call ESMF_GridGet(grid, numDims=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
       call ESMF_DELayoutGetDEid(layout, my_DE, status)
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
 
       ! Allocate temporary arrays
-      allocate(globalStartPerDEPerDim(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(      src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(      dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(   gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(   gl_dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(              periodic(      gridrank), stat=status)
+      allocate(             decompids(      gridrank), stat=status)
+      allocate( globalCellCountPerDim(      gridrank), stat=status)
+      allocate(globalStartPerDEPerDim(nDEs, gridrank), stat=status)
+      allocate(                src_AI(nDEs, gridrank), stat=status)
+      allocate(                dst_AI(nDEs, gridrank), stat=status)
+      allocate(             gl_src_AI(nDEs, gridrank), stat=status)
+      allocate(             gl_dst_AI(nDEs, gridrank), stat=status)
      
       ! Extract more information from the Grid
       call ESMF_GridGet(grid, globalCellCountPerDim=globalCellCountPerDim, &
@@ -548,8 +555,7 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(datamap, gridrank=gridrank, dimlist=dimorder, &
-                           rc=status)
+      call ESMF_DataMapGet(datamap, dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayHalo: DataMapGet returned failure"
         return
@@ -604,6 +610,9 @@
       call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
 
       ! get rid of temporary arrays
+      if (allocated(periodic))    deallocate(periodic)
+      if (allocated(decompids))   deallocate(decompids)
+      if (allocated(globalCellCountPerDim)) deallocate(globalCellCountPerDim)
       if (allocated(globalStartPerDEPerDim)) &
          deallocate(globalStartPerDEPerDim, stat=status)
       if (associated(    src_AI)) deallocate(src_AI, stat=status)
@@ -784,7 +793,7 @@
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps
       integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
-      integer, dimension(ESMF_MAXGRIDDIM) :: tempMLCCPD, tempGCCPD
+      integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
 
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -795,10 +804,14 @@
         endif
  
 ! extract necessary information from the grid
+      call ESMF_GridGet(grid, numDims=gridrank, rc=status)
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
       allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
-      allocate(tempCCPDEPD(nDEs,ESMF_MAXGRIDDIM), stat=status)
+      allocate( tempMLCCPD(     gridrank), stat=status)
+      allocate(  tempGCCPD(     gridrank), stat=status)
+      allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
+
       call ESMF_GridGet(grid, globalCellCountPerDim=tempGCCPD, &
                         cellCountPerDEPerDim=tempCCPDEPD, &
                         maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
@@ -820,8 +833,7 @@
 
 ! Query the datamap and set info for grid so it knows how to match up the
 ! array indices and the grid indices.
-      call ESMF_DataMapGet(datamap, gridrank=gridrank, dimlist=dimorder, &
-                           rc=status)
+      call ESMF_DataMapGet(datamap, dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
         return
@@ -855,6 +867,12 @@
           print *, "c_ESMC_ArrayAllGather returned error"
           return
         endif
+
+! Clean up
+        deallocate(localAxisLengths)
+        deallocate(      tempMLCCPD)
+        deallocate(       tempGCCPD)
+        deallocate(     tempCCPDEPD)
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
