@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.15 2003/08/15 21:33:53 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.16 2003/08/15 22:56:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_DELayoutMod
+      use ESMF_RouteMod
       use ESMF_GridMod
       use ESMF_DataMapMod
       use ESMF_LocalArrayMod
@@ -76,6 +77,8 @@
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
       public ESMF_ArrayGetAllAxisIndices
 
+      public ESMF_ArrayHaloPrecompute
+      public ESMF_ArrayHaloRun
       public ESMF_ArrayRedist, ESMF_ArrayRegrid, ESMF_ArrayHalo
 
       public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
@@ -96,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.15 2003/08/15 21:33:53 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.16 2003/08/15 22:56:01 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -110,7 +113,7 @@
       interface ESMF_ArrayHalo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-          module procedure ESMF_ArrayHaloNew
+          !module procedure ESMF_ArrayHaloNew
           module procedure ESMF_ArrayHaloDeprecated
 
 ! !DESCRIPTION:
@@ -612,11 +615,72 @@ end subroutine
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayHaloNew(array, grid, datamap, async, rc)
+      subroutine ESMF_ArrayHaloRun(array, route, async, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform a {\tt Halo} operation over the data in an {\tt ESMF\_Array}.
+!     This routine updates the data inside the {\tt ESMF\_Array} in place.
+!     It uses a precomputed {\tt ESMF\_Route} for the communications
+!     pattern.
+!
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing data to be halo'd.
+!     \item [route]
+!           {\tt ESMF\_Route} has been precomputed.
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      type(ESMF_LocalArray) :: local_array
+
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+ 
+      ! Execute the communications call.
+      local_array = array
+      call ESMF_RouteRun(route, local_array, local_array, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayHaloRun: RouteRun returned failure"
+        return
+      endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayHaloRun
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayHaloPrecompute(array, grid, route, datamap, async, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Route), intent(out) :: route
       type(ESMF_DataMap), intent(in), optional :: datamap
       type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc
@@ -650,39 +714,118 @@ end subroutine
 !
 !EOP
 ! !REQUIREMENTS:
-        integer :: status         ! local error status
-        logical :: rcpresent      ! did user specify rc?
-        integer :: size_decomp, size_AI
-        integer, dimension(ESMF_MAXGRIDDIM) :: decompids
-        integer :: gridrank
-        type(ESMF_DELayout) :: layout
-        integer :: i
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
+      integer, dimension(ESMF_MAXGRIDDIM) :: global_count, decompids
+      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
+      integer, dimension(:,:), allocatable :: global_start
+      integer :: size_decomp, size_AI
+      integer :: nDEs, my_DE
+      integer :: gridrank, datarank
+      integer :: i
+      logical :: hascachedroute    ! can we reuse an existing route?
 
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
  
-! get layout, decompids from grid
-        call ESMF_GridGetDELayout(grid, layout, status)
-        !call ESMF_GridGet(grid, decompids=decompids, rc=status)
-        !call ESMF_GridGet(grid, dimnum=size_decomp, rc=status)
-        call ESMF_DataMapGet(datamap, gridrank=size_decomp, rc=status)
+      ! TODO: all this code could be moved to the C++ side once Grid has
+      !       an interface
+    
+      ! Extract layout information from the Grid
+      call ESMF_GridGetDELayout(grid, layout, status)
 
-! call c routine to halo
-        call c_ESMC_ArrayHalo(array, layout, decompids, size_decomp, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayHalo returned error"
-          return
-        endif
+      ! Our DE number in the layout and the total number of DEs
+      call ESMF_DELayoutGetDEid(layout, my_DE, status)
+      call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
+
+      ! Allocate temporary arrays
+      allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(      src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(      dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(   gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(   gl_dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+     
+      ! Extract more information from the Grid
+      call ESMF_GridGet(grid, global_cell_dim=global_count, &
+                        global_start=global_start, periodic=periodic, rc=status)
+      ! TODO: get decompids, get grid rank here?
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayHalo: GridGet returned failure"
+         return
+      endif
+
+      ! Query the datamap and set info for grid so it knows how to
+      ! match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(datamap, gridrank=gridrank, dimlist=dimorder, &
+                           rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayHalo: DataMapGet returned failure"
+        return
+      endif
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayHalo: ArrayGet returned failure"
+         return
+      endif
+
+      ! TODO: apply dimorder and decompids to get mapping of array to data
+
+      ! set up things we need to find a cached route or precompute one
+      call ESMF_ArrayGetAllAxisIndices(array, grid, totalindex=dst_AI, &
+                                       compindex=src_AI, rc=status)
+
+      ! translate AI's into global numbering
+      call ESMF_GridLocalToGlobalIndex(grid, localAI2D=dst_AI, &
+                                       globalAI2D=gl_dst_AI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayHalo: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+      call ESMF_GridLocalToGlobalIndex(grid, localAI2D=src_AI, &
+                                       globalAI2D=gl_src_AI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayHalo: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+
+      ! Does this same route already exist?  If so, then we can drop
+      ! down immediately to RouteRun.
+      call ESMF_RouteGetCached(datarank, my_DE, gl_dst_AI, gl_dst_AI, &
+                               nDEs, layout, my_DE, gl_src_AI, gl_src_AI, &
+                               nDEs, layout, periodic, hascachedroute, &
+                               route, status)
+
+      if (.not. hascachedroute) then
+          ! Create the route object.
+          route = ESMF_RouteCreate(layout, rc)
+
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+                                        gl_dst_AI, nDEs, global_start, &
+                                        global_count, layout, periodic, status)
+      endif
+
+      ! get rid of temporary arrays
+      if (allocated(global_start)) deallocate(global_start, stat=status)
+      if (associated(     src_AI)) deallocate(src_AI, stat=status)
+      if (associated(     dst_AI)) deallocate(dst_AI, stat=status)
+      if (associated(  gl_src_AI)) deallocate(gl_src_AI, stat=status)
+      if (associated(  gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayHaloNew
+        end subroutine ESMF_ArrayHaloPrecompute
 
 !------------------------------------------------------------------------------
 !BOP
