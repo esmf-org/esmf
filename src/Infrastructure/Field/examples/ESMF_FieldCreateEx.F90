@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.19 2004/03/18 20:28:02 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.20 2004/03/24 14:54:35 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -67,7 +67,7 @@
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
-    call ESMF_FieldGetName(field1, fname, rc)
+    call ESMF_FieldGet(field1, name=fname, rc=rc)
     print *, "Field example 1 returned, name = ", trim(fname)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

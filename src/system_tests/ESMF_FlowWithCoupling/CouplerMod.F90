@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.7 2004/03/18 23:29:11 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.8 2004/03/24 14:55:04 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -83,7 +83,7 @@
 
       ! Now see which way we're going so we set the correct fields needed
       ! and compute the right routehandle
-      call ESMF_StateGetName(importState, statename, rc)
+      call ESMF_StateGet(importState, name=statename, rc=rc)
       if (trim(statename) .eq. "FlowSolver Feedback") then
 
         call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
@@ -155,7 +155,7 @@
       ! since the transformations are symmetric.  But if we cared, here is
       ! one way of telling.
 
-      call ESMF_StateGetName(importState, statename, rc)
+      call ESMF_StateGet(importState, name=statename, rc=rc)
       if (trim(statename) .eq. "Injection Feedback") then
           ! Injector to FlowSolver
           injecttoflow = .TRUE.

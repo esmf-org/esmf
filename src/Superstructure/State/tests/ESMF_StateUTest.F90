@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.4 2004/01/28 17:47:50 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.5 2004/03/24 14:54:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,13 +34,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.4 2004/01/28 17:47:50 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.5 2004/03/24 14:54:48 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: x, y, rc
       logical :: IsNeeded
-      character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname, bname
+      character(ESMF_MAXSTR) :: statename, bundlename, dataname, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname
       type(ESMF_Field) :: field1, field2, field3(3), field4
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5, bundle6
@@ -153,7 +153,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      call ESMF_ArrayGetName(array1, aname, rc)  ! get the name for later
+      call ESMF_ArrayGet(array1, name=aname, rc=rc)  ! get the name for later
 
       !NEX_UTest
       call ESMF_StateAddData(state1,array1, rc)
@@ -179,7 +179,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      call ESMF_BundleGetName(bundle2(1), bname, rc)
+      call ESMF_BundleGet(bundle2(1), name=bname, rc=rc)
       write(failMsg, *) "Bundle name not 'Temperature'"
       write(name, *) "Verifying that the Bundle has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), &
@@ -283,7 +283,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      call ESMF_FieldGetName(field2, fname, rc)
+      call ESMF_FieldGet(field2, name=fname, rc=rc)
       write(failMsg, *) "Wrong Field name "
       write(name, *) "Verifying that the Field has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), &
@@ -371,11 +371,10 @@
       !NEX_UTest
       ! Test Creation of an export State with Bundle
       bundlename = "Humidity"
-      compname = "Atmosphere2"
       statename = "Export State"
       x = 1
       bundle2(1) = ESMF_BundleCreate(name=bundlename, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
                                 bundles=bundle2, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Bundle Test"
@@ -388,12 +387,11 @@
 
       !EX_UTest
       ! Test Creation of an export State with the wrong number of Fields
-      compname = "Atmosphere2"
       statename = "Export State"
       x = 1
       fieldname = "Precipitation"
       field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
                                 fields=field3, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a bad Field list"
@@ -405,12 +403,11 @@
 #endif
 
       ! Test Creation of an export State with a Field
-      compname = "Atmosphere2"
       statename = "Export State"
       x = 1
       fieldname = "Precipitation"
       field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
                                 fields=field3(1:1), itemcount=x, rc=rc)
       !NEX_UTest
       write(failMsg, *) ""
@@ -422,12 +419,11 @@
 
       !NEX_UTest
       ! Test Creation of an export State with an array
-      compname = "Atmosphere3"
       statename = "Export State"
       x  = 1
       allocate(f90ptr1(10,20))
       array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
                                 arrays=array2(1:1), itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Array Test"
@@ -438,13 +434,12 @@
 
       !NEX_UTest
       ! Test Creation of an export State with an array
-      compname = "Atmosphere3"
       statename = "Export State"
       x  = 2
       allocate(f90ptr1(10,20))
       array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
                                 arrays=array2, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Array list Test"
@@ -466,13 +461,12 @@
 
       !NEX_UTest
       ! Test Creation of an export State with an array list
-      compname = "Atmosphere3"
       statename = "Export State"
       x  = 2
       allocate(f90ptr1(10,20))
       array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
                                 arrays=array2, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Array list Test"

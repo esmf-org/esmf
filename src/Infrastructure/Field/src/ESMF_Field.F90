@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.133 2004/03/23 17:33:16 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.134 2004/03/24 14:54:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -169,9 +169,6 @@
 
    public ESMF_FieldGet                ! Generic Get() routine, replaces others
 
-   public ESMF_FieldGetName            ! Get Field name
- 
-   public ESMF_FieldGetGrid            ! Return a Grid pointer
    public ESMF_FieldGetGlobalGridInfo  ! Return global Grid info
    public ESMF_FieldGetLocalGridInfo   ! Return local Grid info
 
@@ -180,8 +177,6 @@
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
    public ESMF_FieldGetRelLoc          ! Return relative location
 
-   public ESMF_FieldGetDataMap         ! Return a pointer to DataMap object
-
    public ESMF_FieldSetGrid            ! Set a Grid (may regrid if different
                                        !   Grid is already present)
    public ESMF_FieldSetArray           ! Set a data Array in a Field
@@ -189,7 +184,6 @@
 
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
                                        !   DataMap is already present)
-
 
    public ESMF_FieldAddAttribute       ! Set and Get Attributes
    public ESMF_FieldGetAttribute       !  
@@ -214,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.133 2004/03/23 17:33:16 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.134 2004/03/24 14:54:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1525,7 +1519,7 @@
         endif
 
         if (present(name)) then
-            call ESMF_GetName(ftype%base, name, status)
+            call c_ESMC_GetName(ftype%base, name, status)
             if (status .ne. ESMF_SUCCESS) then
                 print *, "ERROR in getting Field name in ESMF_FieldGet"
                 rc = status
@@ -1536,72 +1530,6 @@
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_FieldGet
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetName - Retrieve the name of a Field
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetName(field, name, rc)
-
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!      Returns the name of the field.  If the field was created without 
-!      specifying a name, the framework will have assigned it a unique one.
-!
-!       
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           {\tt ESMF\_Field} object to query..
-!     \item [name]
-!           Field name.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      ! Minimal error checking 
-      if (.not.associated(field%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
-
-      if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "Field not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
-
-      call ESMF_GetName(field%ftypep%base, name, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetName"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldGetName
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2213,59 +2141,6 @@
 
       end subroutine ESMF_FieldGetAttrInfoByNum
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetGrid - Return the Grid associated with a Field
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetGrid(field, grid, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field    
-      type(ESMF_Grid), intent(out) :: grid     
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Returns a reference to the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [Grid]
-!           {\tt ESMF\_Grid} returned.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.6.2
-
-
-        ! assume failure
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
- 
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
-
-        if (field%ftypep%gridstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: No grid attached to Field"
-          return
-        endif
-
-        grid = field%ftypep%grid
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_FieldGetGrid
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2480,61 +2355,6 @@
         end subroutine ESMF_FieldGetGlobalDataInfo
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetDataMap - Get DataMap associated with Field
-! !INTERFACE:
-      subroutine ESMF_FieldGetDataMap(field, datamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field          
-      type(ESMF_DataMap), intent(out) :: datamap     
-      integer, intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!      Returns a description of the actual ordering of data in the
-!      memory buffer, e.g. row-major/column-major.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [datamap]
-!           Field {\tt ESMF\_DataMap}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: FLD1.2, FLD1.6.3 (pri 2?)
-
-
-
-        ! assume failure
-        if (present(rc)) rc = ESMF_FAILURE
-
-        ! Minimal error checking
-        if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
-        endif
- 
-        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
-        endif
-
-        if (field%ftypep%datastatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: No data attached to Field"
-          return
-        endif
-
-        datamap = field%ftypep%mapping
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_FieldGetDataMap
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalDataInfo - Get information about Field Data
 !
@@ -2639,8 +2459,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [options]
+!     \item [{[options]}]
 !           Print options.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2678,7 +2497,7 @@
           return
         endif
 
-        call ESMF_GetName(fp%base, name, status)
+        call c_ESMC_GetName(fp%base, name, status)
         if(status .NE. ESMF_SUCCESS) then 
           print *, "ERROR in ESMF_FieldGetName"
           return
@@ -3976,9 +3795,9 @@
       if (hassrcdata) then
         ! Query the datamap and set info for grid so it knows how to
         ! match up the array indices and the grid indices.
-        call ESMF_FieldGetGrid(srcField, srcGrid, status)
+        call ESMF_FieldGet(srcField, grid=srcGrid, rc=status)
         if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
+          print *, "ERROR in FieldBoxIntersect: FieldGet returned failure on Grid"
           return
         endif
         ! From the grid get the bounding box on this DE
@@ -3995,9 +3814,9 @@
       if (hasdstdata) then
         ! Query the datamap and set info for grid so it knows how to
         ! match up the array indices and the grid indices.
-        call ESMF_FieldGetGrid(dstField, dstGrid, status)
+        call ESMF_FieldGet(dstField, grid=dstGrid, rc=status)
         if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
+          print *, "ERROR in FieldBoxIntersect: FieldGet returned failure on Grid"
           return
         endif
         ! From the grid get the bounding box on this DE

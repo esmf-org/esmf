@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.18 2004/03/23 21:04:22 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.19 2004/03/24 14:54:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.18 2004/03/23 21:04:22 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.19 2004/03/24 14:54:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1014,7 +1014,7 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
+      call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
@@ -1023,11 +1023,11 @@
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
           call ESMF_FieldGetArray(srcfield, src_array, rc=status)
-          call ESMF_FieldGetDataMap(srcfield, src_datamap, rc=status)
+          call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
+      call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
@@ -1036,7 +1036,7 @@
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
           call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
-          call ESMF_FieldGetDataMap(dstfield, dst_datamap, rc=status)
+          call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
       endif
 
       ! if neither are true this DE cannot be involved in the communication
@@ -1206,7 +1206,7 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
+      call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
@@ -1215,11 +1215,11 @@
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
           call ESMF_FieldGetArray(srcfield, src_array, rc=status)
-          call ESMF_FieldGetDataMap(srcfield, src_datamap, rc=status)
+          call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
+      call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
@@ -1228,7 +1228,7 @@
           ! don't ask for our de number if this de isn't part of the layout
           call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
           call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
-          call ESMF_FieldGetDataMap(dstfield, dst_datamap, rc=status)
+          call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
       endif
 
       ! if neither are true this DE cannot be involved in the communication

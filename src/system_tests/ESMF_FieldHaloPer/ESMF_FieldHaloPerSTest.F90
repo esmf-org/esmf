@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.13 2004/03/20 03:55:03 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.14 2004/03/24 14:54:49 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -672,13 +672,13 @@
       if (rc .ne. ESMF_SUCCESS) goto 40
       if (verbose) print *, "array back from field"
 
-      call ESMF_FieldGetGrid(thisfield, grid1, rc)
+      call ESMF_FieldGet(thisfield, grid=grid1, rc=rc)
       if (verbose) print *, "grid back from field"
       call ESMF_GridGetDELayout(grid1, layout=layout, rc=rc)
       call ESMF_GridGet(grid1, periodic=pflags, rc=rc)
       if (verbose) print *, "layout, periodic flags back from grid"
 
-      call ESMF_FieldGetName(thisfield, fname, rc)
+      call ESMF_FieldGet(thisfield, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
       if (verbose) print *, "name back from field"
 

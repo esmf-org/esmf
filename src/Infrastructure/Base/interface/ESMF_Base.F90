@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.91 2004/03/19 20:19:25 theurich Exp $
+! $Id: ESMF_Base.F90,v 1.92 2004/03/24 14:54:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -89,7 +89,7 @@
 !
 !    ! Generic pointer, large enough to hold a pointer on any architecture,
 !    ! but not useful directly in fortran.  Expected to be used where a
-!    ! pointer generated in C++ needs to be stored on the F90 side.
+!    ! pointer generated in C++ needs to be stored on the Fortran side.
 
 !     ! WARNING: 
 !     !  constants MUST match corresponding values in ../include/ESMC_Base.h
@@ -224,9 +224,9 @@
 !------------------------------------------------------------------------------
 !
 !     ! Typed true/false values which are not compiler dependent, so that
-!     ! when crossing the F90/C++ language boundary with logical values we
+!     ! when crossing the Fortran/C++ language boundary with logical values we
 !     ! have a consistent interpretation.  In C/C++ 0=false, 1=true, but this
-!     ! is not defined for F90 and different compilers use different values
+!     ! is not defined for Fortran and different compilers use different values
 !     ! for booleans.
 
 !     ! WARNING: must match corresponding values in ../include/ESMC_Base.h
@@ -426,7 +426,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.91 2004/03/19 20:19:25 theurich Exp $'
+               '$Id: ESMF_Base.F90,v 1.92 2004/03/24 14:54:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1258,7 +1258,7 @@ end function
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
       integer :: status
 
-      call c_ESMC_GetF90Name(base, name, status)
+      call c_ESMC_GetName(base, name, status)
       if (present(rc)) rc = status
 
       end subroutine ESMF_GetName

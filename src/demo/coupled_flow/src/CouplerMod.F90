@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.6 2004/03/18 23:21:24 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.7 2004/03/24 14:54:48 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -121,7 +121,7 @@
     ! Get layout from coupler component
     call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
 
-    call ESMF_StateGetName(importState, statename, rc=rc)
+    call ESMF_StateGet(importState, name=statename, rc=rc)
     call ESMF_StateGetField(importState, "SIE", src_field, rc=rc)
     call ESMF_StateGetField(exportState, "SIE", dst_field, rc=rc)
 
@@ -212,7 +212,7 @@
         ! In this case, the coupling is symmetric - you call Redist either way
         ! we only care about the coupling direction in order to get
         ! the right routehandle selected.
-        call ESMF_StateGetName(importState, statename, rc=rc)
+        call ESMF_StateGet(importState, name=statename, rc=rc)
         if (trim(statename) .eq. "FlowSolver Feedback") then
             routehandle = fromFlow_rh 
         else

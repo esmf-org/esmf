@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.8 2004/03/15 18:37:46 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.9 2004/03/24 14:54:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.8 2004/03/15 18:37:46 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.9 2004/03/24 14:54:35 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -87,7 +87,7 @@
 
       !NEX_UTest
       ! Verify getting the name of an uninitialized Bundle is handled properly.
-      call ESMF_BundleGetName(bundle1, bname1, rc)
+      call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
       write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
       write(name, *) "Getting name of uninitalized Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -97,7 +97,7 @@
 
       !EX_UTest
       !  Verify the Field count query from an uninitialized Bundle is handled
-      call ESMF_BundleGetFieldCount(bundle1, fieldcount, rc);
+      call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc);
       write(failMsg, *) ""
       write(name, *) "Getting Field count from an uninitialized Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -172,7 +172,7 @@
 
       !EX_UTest
       !  Verify that the Field count query from an empty Bundle is handled properly
-      call ESMF_BundleGetFieldCount(bundle2, fieldcount, rc);
+      call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc);
       write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to zero"
       write(name, *) "Getting Field count from an empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.0), name, failMsg, result, ESMF_SRCLINE)
@@ -191,7 +191,7 @@
 
       !NEX_UTest
       !  Verify that the Field count can be queried from a Bundle
-      call ESMF_BundleGetFieldCount(bundle2, fieldcount, rc);
+      call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc);
       write(failMsg, *) ""
       write(name, *) "Getting Field count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.1), name, failMsg, result, ESMF_SRCLINE)
@@ -201,8 +201,7 @@
 
       !EX_UTest
       !  Test Requirement FLD2.5.7 Return Grid
-      ! Commented out until Bug 707065 is fixed 
-      call ESMF_BundleGetGrid(bundle2, grid2, rc);
+      call ESMF_BundleGet(bundle2, grid=grid2, rc=rc);
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -224,7 +223,7 @@
 
       !NEX_UTest
       !  Verify that Fields count can be queried from a Bundle 
-      call ESMF_BundleGetFieldCount(bundle3, fieldcount, rc);
+      call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc);
       write(failMsg, *) "Returned ESMF_FAILURE or field count not equal to three"
       write(name, *) "Getting Field count from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
@@ -236,7 +235,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting first Field by name from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldGetName(returnedfield1, fname1, rc)
+      call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
 
       !NEX_UTest
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
@@ -251,7 +250,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a second Field by index from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldGetName(returnedfield2, fname2, rc)
+      call ESMF_FieldGet(returnedfield2, name=fname2, rc=rc)
       !NEX_UTest
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting a second Field from a Bundle Test continued"
@@ -266,7 +265,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a third Field by index from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldGetName(returnedfield3, fname3, rc)
+      call ESMF_FieldGet(returnedfield3, name=fname3, rc=rc)
       !NEX_UTest
       write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
       write(name, *) "Getting a third Field from a Bundle Test continued"
@@ -307,7 +306,7 @@
 
       !NEX_UTest
       ! Verify that the Bundle name can be queried 
-      call ESMF_BundleGetName(bundle1, bname1, rc)
+      call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Query Bundle Name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname1.eq."atmosphere data"), &

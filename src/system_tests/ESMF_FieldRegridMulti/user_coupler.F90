@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2004/03/18 23:15:49 nscollins Exp $
+! $Id: user_coupler.F90,v 1.4 2004/03/24 14:54:50 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -71,7 +71,7 @@
 
       print *, "User Coupler Init starting"
 
-      call ESMF_StateGetInfo(importState, itemcount=itemcount, rc=rc)
+      call ESMF_StateGet(importState, itemcount=itemcount, rc=rc)
       print *, "Import State contains ", itemcount, " items."
        
       ! Get input data

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.10 2004/03/20 03:55:03 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.11 2004/03/24 14:54:48 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -282,8 +282,8 @@
 !   subcomponents will be described by these States.
 !
 !\begin{verbatim}
-    INimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT,  cnameIN)
-    INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, cnameIN)
+    INimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT,  rc=rc)
+    INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, rc=rc)
 !\end{verbatim}
 !EOP
     ! 
@@ -295,8 +295,8 @@
     !
     ! Create import/export states for FlowSolver Component
     !
-    FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, cnameFS)
-    FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, cnameFS)
+    FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, rc=rc)
+    FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, rc=rc)
 
     !
     ! Initialize the flow solver component, first phase

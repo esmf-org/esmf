@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.69 2004/03/22 21:57:32 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.70 2004/03/24 14:54:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -336,7 +336,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.69 2004/03/22 21:57:32 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.70 2004/03/24 14:54:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1778,7 +1778,7 @@
       if (present(id)) id = numMetricNew
       physgrid%ptr%numMetrics = numMetricNew
 
-      call ESMF_ArraySetName(physgrid%ptr%metrics(numMetricNew), name, status)
+      call ESMF_ArraySet(physgrid%ptr%metrics(numMetricNew), name=name, rc=status)
       if (status /= ESMF_SUCCESS) then
          print *, "ERROR in ESMF_PhysGridSetMetric: error setting metric name"
          return
@@ -1870,7 +1870,7 @@
         found = .false.
         name_loop: do n=1,physgrid%ptr%numMetrics
             
-          call ESMF_ArrayGetName(physgrid%ptr%metrics(n), name_tmp, status)
+          call ESMF_ArrayGet(physgrid%ptr%metrics(n), name=name_tmp, rc=status)
           if(status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysGridGetMetric: error retrieving name"
             return

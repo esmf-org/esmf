@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.13 2004/03/20 03:54:48 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.14 2004/03/24 14:54:34 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -113,7 +113,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGetFieldCount(bundle2, fieldcount, rc);
+    call ESMF_BundleGet(bundle2, fieldCount=fieldcount, rc=rc);
 
     print *, "Bundle example 2 returned, fieldcount =", fieldcount
 !EOC
@@ -137,7 +137,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGetFieldCount(bundle3, fieldcount, rc);
+    call ESMF_BundleGet(bundle3, fieldCount=fieldcount, rc=rc);
 
     print *, "Bundle example 3 returned, fieldcount =", fieldcount
 !EOC
@@ -155,7 +155,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_FieldGetName(returnedfield1, fname1, rc)
+    call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -167,13 +167,13 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_FieldGetName(returnedfield2, fname2, rc)
+    call ESMF_FieldGet(returnedfield2, name=fname2, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGetName(bundle1, bname1, rc)
+    call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
 
     print *, "Bundle example 4 returned, field names = ", &
                    trim(fname1), ", ", trim(fname2)

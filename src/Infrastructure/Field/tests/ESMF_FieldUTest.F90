@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.44 2004/03/18 22:18:57 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.45 2004/03/24 14:54:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.44 2004/03/18 22:18:57 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.45 2004/03/24 14:54:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -114,7 +114,7 @@
 
       !EX_UTest
       ! Verifing that the Field name can be queried from a no data Field
-      call ESMF_FieldGetName(f1, fname, rc=rc)
+      call ESMF_FieldGet(f1, name=fname, rc=rc)
       write(failMsg, *) "default name not generated"
       write(name, *) "Getting name of Field with no data Test"
       call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
@@ -123,8 +123,8 @@
       !EX_UTest
       ! default names unique
       f2 = ESMF_FieldCreateNoData(rc=rc)
-      call ESMF_FieldGetName(f1, fname1, rc=rc)
-      call ESMF_FieldGetName(f2, fname2, rc=rc)
+      call ESMF_FieldGet(f1, name=fname1, rc=rc)
+      call ESMF_FieldGet(f2, name=fname2, rc=rc)
       call ESMF_FieldPrint(f1)
       call ESMF_FieldPrint(f2)
       write(failMsg, *) "default name not unique"
@@ -165,7 +165,7 @@
 
      !EX_UTest
      ! verify that querying the name of a destroyed Field is handled properly.
-     call ESMF_FieldGetName(f1, fname, rc=rc)
+     call ESMF_FieldGet(f1, name=fname, rc=rc)
      write(failMsg, *) ""
      write(name, *) "Getting name of a destroyed Field Test"
      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -191,7 +191,7 @@
 
       !NEX_UTest
       ! Verifing that the Field name can be queried.
-      Call ESMF_FieldGetName(f2, fname, rc=rc)
+      Call ESMF_FieldGet(f2, name=fname, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Field name Test"
       call ESMF_Test((fname.eq."pressure"), name, failMsg, result, ESMF_SRCLINE)
@@ -251,8 +251,8 @@
       ! Bug 705087 "Default Field names not unique"
       f1 = ESMF_FieldCreateNoData(rc=rc)
       f2 = ESMF_FieldCreateNoData(rc=rc)
-      Call ESMF_FieldGetName(f1, fname1, rc=rc)
-      Call ESMF_FieldGetName(f2, fname2, rc=rc)
+      Call ESMF_FieldGet(f1, name=fname1, rc=rc)
+      Call ESMF_FieldGet(f2, name=fname2, rc=rc)
       write(failMsg, *) "Field names not unique"
       write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
@@ -386,7 +386,7 @@
       !EX_UTest
       ! Verify that a Grid cannot be gotten from a Field created with no data
       f5 = ESMF_FieldCreateNoData(rc=rc)
-      call ESMF_FieldGetGrid(f5, grid3, rc=rc)
+      call ESMF_FieldGet(f5, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -406,7 +406,7 @@
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
-      call ESMF_FieldGetGrid(f3, grid3, rc=rc)
+      call ESMF_FieldGet(f3, grid=grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
       call ESMF_GridGet(grid3, name=gname3, rc=rc)
@@ -547,7 +547,7 @@
       ! Cannot be tested until Bug 705247 "Unable to query Data Map from Field" 
       ! is fixed.
       !EX_UTest
-      call ESMF_FieldGetDataMap(f3, dm, rc=rc)
+      call ESMF_FieldGet(f3, datamap=dm, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a DataMap from a Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

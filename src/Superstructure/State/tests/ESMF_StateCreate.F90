@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.4 2004/03/09 14:35:30 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.5 2004/03/24 14:54:48 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -32,7 +32,7 @@
     integer :: x, y, rc
     integer :: timestep
     integer, dimension(2) :: delist
-    character(ESMF_MAXSTR) :: cname, sname, bname, fname
+    character(ESMF_MAXSTR) :: sname, bname, fname
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1, field2
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3, qbundle
@@ -47,10 +47,9 @@
  
     P_START("State Test 1: Empty State")
 
-    cname = "Atmosphere"
     sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, cname, rc=rc)  
+    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StatePrint")
@@ -72,10 +71,9 @@
  
     P_START("State Test 2: Export State")
 
-    cname = "Ocean"
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)  
+    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     bname="Surface pressure"
@@ -135,10 +133,9 @@
  
     P_START("State Test 3: Export State with Placeholder")
 
-    cname = "Ocean"
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state3 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
+    state3 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Downward wind"
@@ -227,10 +224,9 @@
  
     P_START("State Test 5: State with Multiple Placeholders")
 
-    cname = "Sea Ice"
     sname = "Sea Ice Export"
     P_IN("ESMF_StateCreate")
-    state4 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
+    state4 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Surface pressure"
@@ -326,26 +322,23 @@
  
     P_START("State Test 6: Nested States")
 
-    cname = "Primary Coupler"
     sname = "Coupler Statelist"
     P_IN("ESMF_StateCreate")
-    state5 = ESMF_StateCreate(sname, ESMF_STATELIST, cname, rc=rc)  
+    state5 = ESMF_StateCreate(sname, ESMF_STATELIST, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
-    cname = "Simple Atmosphere"
     sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, cname, rc=rc)  
+    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StateAddData (State)")
     call ESMF_StateAddData(state5, state1, rc=rc)
     P_OUT("ESMF_StateAddData (State)")
 
-    cname = "Full Ocean"
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)  
+    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StateAddData (State)")
@@ -389,10 +382,9 @@
                               counts=(/ 5,6 /), rc=rc)
     P_OUT("ESMF_ArrayCreate")
 
-    cname = "Atmosphere"
     sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, cname, rc=rc)  
+    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StateAddData (Array)")

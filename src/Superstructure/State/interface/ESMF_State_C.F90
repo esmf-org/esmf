@@ -1,4 +1,4 @@
-!  $Id: ESMF_State_C.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $
+!  $Id: ESMF_State_C.F90,v 1.2 2004/03/24 14:54:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.1 2003/10/22 20:09:42 cdeluca Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.2 2004/03/24 14:54:39 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -86,7 +86,7 @@
 
    end subroutine f_esmf_stategetdata
 
-   subroutine f_esmf_stategetinfo(statep, name, rc)
+   subroutine f_esmf_stateget(statep, name, rc)
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
 
@@ -94,9 +94,9 @@
        character(*) :: name
        integer :: rc     
 
-       !call ESMF_StateGetInfo(statep, rc)
+       !call ESMF_StateGet(statep, rc)
 
-   end subroutine f_esmf_stategetinfo
+   end subroutine f_esmf_stateget
 
 
    ! TODO: add rest of state entry points

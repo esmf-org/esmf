@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.13 2004/02/10 23:42:07 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.14 2004/03/24 14:54:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.13 2004/02/10 23:42:07 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.14 2004/03/24 14:54:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -183,10 +183,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_GetF90Name - return the object name to an F90 caller
+// !IROUTINE:  c_ESMC_GetName - return the object name to a Fortran caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_getf90name)(
+      void FTN(c_esmc_getname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -198,7 +198,7 @@ extern "C" {
       int nlen) {               // hidden/in - max strlen count for name
 // 
 // !DESCRIPTION:
-//     return the name to an F90 caller.
+//     return the name to a Fortran caller.
 //
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
@@ -215,7 +215,7 @@ extern "C" {
   if (rc) *rc = ESMF_SUCCESS;
   return;
 
-}  // end c_ESMC_GetF90Name
+}  // end c_ESMC_GetName
 
 
 //-----------------------------------------------------------------------------
@@ -281,22 +281,22 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_GetF90ClassName - return the object name to an F90 caller
+// !IROUTINE:  c_ESMC_GetClassName - return the object name to a Fortran caller
 //
 // !INTERFACE:
-      void FTN(c_esmc_getf90classname)(
+      void FTN(c_esmc_getclassname)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
-      char *classname,          // out - F90, non-null terminated string
+      char *classname,          // out - Fortran, non-null terminated string
       int *rc,                  // out - return code
       int nlen) {               // hidden/in - max strlen count for name
 // 
 // !DESCRIPTION:
-//     return the name to an F90 caller.
+//     return the name to a Fortran caller.
 //
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
@@ -312,7 +312,7 @@ extern "C" {
 
   return;
 
-}  // end c_ESMC_GetF90ClassName
+}  // end c_ESMC_GetClassName
 
 
 

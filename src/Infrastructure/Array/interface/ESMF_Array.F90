@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.6 2004/03/18 22:45:28 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.7 2004/03/24 14:54:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
  
-      public ESMF_ArrayGet, ESMF_ArrayGetName, ESMF_ArraySetName
+      public ESMF_ArrayGet, ESMF_ArraySet
 
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
 
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.6 2004/03/18 22:45:28 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.7 2004/03/24 14:54:31 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -260,8 +260,9 @@ end subroutine
          print *, "Warning: strides not supported yet"
          strides(:) = 1
       endif
+
       if (present(name)) then
-         call c_ESMC_ArrayGetName(array, name, status)
+         call c_ESMC_GetName(array, name, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
    
@@ -345,59 +346,6 @@ end subroutine
         if (present(rc)) rc = status
 
         end subroutine ESMF_ArrayGetAxisIndex
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_ArrayGetName - Retrieve the name of a Array
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayGetName(array, name, rc)
-
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!      Returns the name of the array.  If the array was created without
-!      specifying a name, the framework will have assigned it a unique one.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [array]
-!           A {\tt ESMF\_Array} object.
-!     \item [name]
-!           The array name.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_ArrayGetName(array, name, status)
-      if(status .eq. ESMF_FAILURE) then
-        print *, "ERROR in ESMF_ArrayGetName"
-        return
-      endif
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_ArrayGetName
 
 !------------------------------------------------------------------------------
 !BOP
@@ -697,15 +645,15 @@ end subroutine
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArraySetName - Set the name of a Array
+! !IROUTINE: ESMF_ArraySet - Set information about an Array
 !
 ! !INTERFACE:
-      subroutine ESMF_ArraySetName(array, name, rc)
+      subroutine ESMF_ArraySet(array, name, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
-      character (len = *), intent(in) :: name
+      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 
 !
@@ -716,7 +664,7 @@ end subroutine
 !     \begin{description}
 !     \item [array]
 !           A {\tt ESMF\_Array} object.
-!     \item [name]
+!     \item [{[name]}]
 !           The array name.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -737,15 +685,17 @@ end subroutine
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_SetName(array, "Array", name, status)
-      if(status .eq. ESMF_FAILURE) then
-        print *, "ERROR in ESMF_ArraySetName"
-        return
+      if (present(name)) then
+          call c_ESMC_SetName(array, "Array", name, status)
+          if(status .eq. ESMF_FAILURE) then
+            print *, "ERROR in ESMF_ArraySet: error setting Name"
+            return
+          endif
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_ArraySetName
+      end subroutine ESMF_ArraySet
 
 
 !------------------------------------------------------------------------------

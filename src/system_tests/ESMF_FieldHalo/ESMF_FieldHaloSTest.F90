@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.16 2004/03/20 03:55:03 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.17 2004/03/24 14:54:49 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -432,7 +432,7 @@
       ! Get Field from import state
       call ESMF_StateGetData(importState, "DE id", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_FieldGetGrid(field1, grid=grid1, rc=rc)
+      call ESMF_FieldGet(field1, grid=grid1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data Array in the Field

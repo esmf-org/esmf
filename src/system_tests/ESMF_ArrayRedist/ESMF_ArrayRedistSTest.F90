@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.3 2004/02/13 18:31:44 nscollins Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.4 2004/03/24 14:54:48 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -36,7 +36,7 @@
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
-    character(len=ESMF_MAXSTR) :: cname, sname, gname, fname, aname
+    character(len=ESMF_MAXSTR) :: sname, gname, fname, aname
     type(ESMF_DELayout) :: layout0, layout1, layout2
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
@@ -88,9 +88,8 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create the State
-    cname = "Atmosphere"
     sname = "Atmosphere Export State"
-    state1 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
+    state1 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "State Create finished, name = ", trim(sname), " rc =", rc
 
@@ -195,7 +194,7 @@
     !  Array is destroyed. 
 
     call ESMF_StateAddData(state1, array1, rc=rc)
-    call ESMF_ArrayGetName(array1, aname, rc=rc)
+    call ESMF_ArrayGet(array1, name=aname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array added to state"
 

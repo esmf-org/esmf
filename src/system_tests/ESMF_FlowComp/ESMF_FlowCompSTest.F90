@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.8 2004/03/18 23:22:53 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.9 2004/03/24 14:54:50 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -135,7 +135,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1, rc=rc)
+      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, &
                                    rc=rc)

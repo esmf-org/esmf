@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.60 2004/03/18 22:23:58 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.61 2004/03/24 14:54:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.60 2004/03/18 22:23:58 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.61 2004/03/24 14:54:39 nscollins Exp $'
 
 !==============================================================================
 
@@ -1147,7 +1147,7 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
+      call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
@@ -1160,7 +1160,7 @@
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
+      call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
@@ -1282,7 +1282,7 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
+      call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
@@ -1295,7 +1295,7 @@
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
+      call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
  !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
