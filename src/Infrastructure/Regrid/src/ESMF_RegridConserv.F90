@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.48 2004/12/07 23:28:26 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.49 2005/02/28 16:55:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.48 2004/12/07 23:28:26 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.49 2005/02/28 16:55:13 nscollins Exp $'
 
 !==============================================================================
 
@@ -1858,10 +1858,10 @@
       integer ::         &
         n,               &! dummies for addresses
         corner, nextCorner,        &! loop index, next index
-        localrc,         &! error signal
         nCells,          &! search grid size
         numCorners        ! number of corners in each search grid cell
       integer :: nStrt=1
+      !integer :: localrc  ! error signal
 
       logical ::    & 
         reverse,    &! segment in opposite direction of full segment
@@ -2213,21 +2213,21 @@
 !EOPI
 
       ! local variables
-      integer ::         &
-        n,               &! dummies for addresses
-        corner, nextCorner,        &! loop index, next index
-        localrc,         &! error signal
-        nCells,          &! search grid size
-        numCorners        ! number of corners in each search grid cell
+      integer ::            &
+        n,                  &! dummies for addresses
+        corner, nextCorner, &! loop index, next index
+        localrc,            &! error signal
+        nCells,             &! search grid size
+        numCorners           ! number of corners in each search grid cell
       integer :: nStrt=1
 
-      logical ::      & 
+      logical ::    & 
         reverse,    &! segment in opposite direction of full segment
         thresh,     &! flags segments crossing threshold bndy
         outside,    &! true if beg point outside grid
-        found         ! true if grid cell found
+        found        ! true if grid cell found
 
-      real (ESMF_KIND_R8) ::     &
+      real (ESMF_KIND_R8) ::    &
         refx,                   &! temporary for manipulating longitudes
         xb, yb, xe, ye,         &! local coordinates for segment endpoints
         x1, y1, x2, y2,         &! coordinates for grid side endpoints
@@ -2660,11 +2660,11 @@
       integer ::         &
         i, j,            &! dummies for addresses
         corner, nextCorner,        &! loop index, next index
-        localrc,         &! error signal
         iCells, jCells,  &! search grid size
         numCorners        ! number of corners in each search grid cell
       integer :: iStrt=1
       integer :: jStrt=1
+      !integer :: localrc  ! error signal
 
       logical ::     & 
         reverse,     &! segment in opposite direction of full segment
@@ -2683,7 +2683,7 @@
         vec1X, vec1Y,           &! vectors for cross product tests
         vec2X, vec2Y,           &!
         crossProduct             ! cross product to use in various tests 
-      real (ESMF_KIND_R8) :: xMax, yMax
+      !real (ESMF_KIND_R8) :: xMax, yMax
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -3056,7 +3056,7 @@
         vec1X, vec1Y,           &! vectors for cross product tests
         vec2X, vec2Y,           &!
         crossProduct             ! cross product to use in various tests 
-      real (ESMF_KIND_R8) :: xMax, yMax
+      !real (ESMF_KIND_R8) :: xMax, yMax
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
