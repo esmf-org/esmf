@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.8 2003/04/04 15:13:16 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.9 2003/06/07 00:50:09 eschwab Exp $
 !
 ! Example code for a main program Application. 
 
@@ -96,7 +96,7 @@
 
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
-    clock = ESMF_ClockInit()
+    clock = ESMF_ClockSet()
      
     ! Call each Init routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
