@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.49 2005/02/28 16:39:54 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.50 2005/03/04 00:28:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.49 2005/02/28 16:39:54 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.50 2005/03/04 00:28:24 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -117,6 +117,64 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketSetContig"
+//BOPI
+// !IROUTINE:  ESMC_XPacketSetContig - Compute if an XP is contiguous
+//
+// !INTERFACE:
+      void ESMC_XPacket :: ESMC_XPacketSetContig() {
+//
+// !RETURN VALUE:
+//     None.
+//
+// !DESCRIPTION:
+//
+//   Determine if the region of memory described by this XP is contiguous,
+//   and set a flag in the class which can be queried later.
+//
+//EOPI
+// !REQUIREMENTS:  AAAn.n.n
+
+    int i, j, reps;
+
+    // assume the worst.
+    iscontig = false;
+
+    // if the counts are 1 in all dimensions, then this has to be a single
+    // block of memory.
+    reps = 1;
+    for (i=0; i<rank-1; i++)
+        reps *= rep_count[i];
+
+    if (reps == 1) {
+        iscontig = true;
+        return;
+    }
+
+    // it still might be contig even if the repcounts are > 1, if the strides
+    // for each dim match the size of the previous block of memory.
+
+    if (contig_length != stride[0]) 
+        return;
+
+    for (j=1; j<rank-2; j++)
+       if (stride[j] != rep_count[j-1] * stride[j-1]) 
+           return;
+   
+
+    // if there was a mismatch, you don't get here - you've returned above
+    // leaving iscontig false.
+    // if you make it thru the loop and get here, it was contig.
+
+    iscontig = true;
+
+    return;
+
+ } // end ESMC_XPacketSetContig
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_XPacketSetDefault"
 //BOP
 // !IROUTINE:  ESMC_XPacketSetDefault - Initialize an XPacket
@@ -150,6 +208,8 @@
       rep_count[i] = nrep_count[i];
     }
 
+    ESMC_XPacketSetContig();
+        
     return ESMF_SUCCESS;
 
  } // end ESMC_XPacketSetDefault
@@ -183,6 +243,7 @@
        rep_count[i] = 0;
        stride[i]    = 0;
     }
+    iscontig = true;
 
     return ESMF_SUCCESS;
 
@@ -601,8 +662,9 @@
     //printf("intersect: ");
     //this->ESMC_XPacketPrint("");
 
-    rc = ESMF_SUCCESS;
-    return rc;
+    ESMC_XPacketSetContig();
+        
+    return ESMF_SUCCESS;
 
  } // end ESMC_XPacketIntersect
 
@@ -658,8 +720,8 @@
 
           xps = new ESMC_XPacket[nxp];
         
-           *xp_list = xps; 
-           *xp_count = nxp;
+          *xp_list = xps; 
+          *xp_count = nxp;
 
           // there's always 1.
           nextxp = 0;
@@ -730,8 +792,8 @@
 
           xps = new ESMC_XPacket[nxp];
         
-           *xp_list = xps; 
-           *xp_count = nxp;
+          *xp_list = xps; 
+          *xp_count = nxp;
 
           // there's always 1.
           nextxp = 0;
@@ -808,8 +870,10 @@
         break;
     } 
 
-    rc = ESMF_SUCCESS;
-    return rc;
+    for (j=0; j<nxp; j++) 
+        xps[j].ESMC_XPacketSetContig();
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_XPacketFromAxisIndex
 
@@ -842,6 +906,7 @@
 
     int rc = ESMF_FAILURE;
     char msgbuf[ESMF_MAXSTR];
+    int i;
 
     // switch based on array rank  TODO: is this necessary?
     switch (rank) {
@@ -873,8 +938,9 @@
         return (rc);
     } 
 
-    rc = ESMF_SUCCESS;
-    return rc;
+    ESMC_XPacketSetContig();
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_XPacketGlobalToLocal
 
@@ -904,8 +970,8 @@
     char msgbuf[ESMF_MAXSTR];
     char tempbuf[ESMF_MAXSTR];
 
-    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, contig_length=%d, ", 
-                         rank, offset, contig_length);
+    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, iscontig=%s, contig_length=%d, ", 
+                         rank, offset, iscontig?"true":"false", contig_length);
     printf(msgbuf);
  
     sprintf(tempbuf,"strides=(");
@@ -932,15 +998,15 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_XPacketEmpty"
+#define ESMC_METHOD "ESMC_XPacketIsEmpty"
 //BOP
-// !IROUTINE:  ESMC_XPacketEmpty - Return true (1) if xp is empty, 0 otherwise
+// !IROUTINE:  ESMC_XPacketIsEmpty - Return true if xp is empty, false otherwise
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketEmpty(
+      bool ESMC_XPacket::ESMC_XPacketIsEmpty(
 //
 // !RETURN VALUE:
-//    True/False (1)/(0) return code
+//    True/False boolean return code
 //
 // !ARGUMENTS:
       void) {
@@ -952,14 +1018,12 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
-
     if (rep_count[0] == 0)
-        return 1;
+        return true;
   
-    return 0;
+    return false;
 
- } // end ESMC_XPacketEmpty
+ } // end ESMC_XPacketIsEmpty
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

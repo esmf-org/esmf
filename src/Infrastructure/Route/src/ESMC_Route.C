@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.131 2005/03/02 18:44:42 jwolfe Exp $
+//$Id: ESMC_Route.C,v 1.132 2005/03/04 00:28:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.131 2005/03/02 18:44:42 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.132 2005/03/04 00:28:15 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -562,7 +562,7 @@
               // test contiguity of xpacket data   TODO: should come from XP
               // if sending data is contiguous, set the pointer into the data;
               // otherwise create a buffer and pack it if necessary
-              if (sendContigLength == sendStride[0]) {
+              if (sendXP->ESMC_XPacketIsContig()) {
                   sendContig = true;
                   sendBuffer = (char *)sendAddr+(sendOffset*nbytes); 
                   sendBufferSize = sendContigLength*sendRepCount[0] * nbytes;
@@ -590,7 +590,7 @@
               // the receive buffer is a bit more complicated - it depends both
               // on whether the receive buffer is contig and also if the sender
               // and receiver are the same PET.
-              if (recvContigLength == recvStride[0]) {
+              if (recvXP->ESMC_XPacketIsContig()) {
                   recvContig = true;
                   recvBuffer = (char *)recvAddr+(recvOffset*nbytes); 
                   recvBufferSize = recvContigLength*recvRepCount[0] * nbytes;
@@ -1618,7 +1618,7 @@
         intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[i]);
 
         // if there's no intersection, no need to add an entry here
-        if (intersect_XP.ESMC_XPacketEmpty()) {
+        if (intersect_XP.ESMC_XPacketIsEmpty()) {
           continue;
         }
 
@@ -1699,7 +1699,7 @@
         intersect_XP.ESMC_XPacketIntersect(&my_XP[i], &their_XP[0]);
 
         // if there's no intersection, no need to add an entry here
-        if (intersect_XP.ESMC_XPacketEmpty()) 
+        if (intersect_XP.ESMC_XPacketIsEmpty()) 
           continue;
          
         // translate from global to local
@@ -1848,7 +1848,7 @@
           intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersectXP.ESMC_XPacketEmpty()) {
+          if (intersectXP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] theirXP;
               continue;
@@ -1912,7 +1912,7 @@
           intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersectXP.ESMC_XPacketEmpty()) {
+          if (intersectXP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] theirXP;
               continue;
@@ -2092,7 +2092,7 @@
             intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
 
             // if there's no intersection, no need to add an entry here
-            if (intersectXP.ESMC_XPacketEmpty()) {
+            if (intersectXP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] theirXP;
             continue;         // TODO: loop on m -- is this continue
@@ -2181,7 +2181,7 @@
             intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
 
             // if there's no intersection, no need to add an entry here
-            if (intersectXP.ESMC_XPacketEmpty()) {
+            if (intersectXP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] theirXP;
             continue;
@@ -2341,7 +2341,7 @@
           intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP.ESMC_XPacketEmpty()) {
+          if (intersect_XP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] their_XP;
               continue;
@@ -2406,7 +2406,7 @@
           intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP.ESMC_XPacketEmpty()) {
+          if (intersect_XP.ESMC_XPacketIsEmpty()) {
               // free XPs allocated by XPacketFromAxisIndex() routine above
               delete [] their_XP;
               continue;

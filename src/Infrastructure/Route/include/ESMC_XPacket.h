@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.29 2005/02/28 16:36:36 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.30 2005/03/04 00:28:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,12 +55,14 @@
  class ESMC_XPacket {    // does *not* inherit from base.
 
    private:
-     // one of these per memory transfer
+     // one of these blocks describes an N-d hyperslab of data
+     // embedded in a larger N-d array.
 
      int rank;
      int offset;
+     bool iscontig;
      int contig_length;
-     int stride[ESMF_MAXDIM];
+     int stride[ESMF_MAXDIM];        // TODO: this is really only MAXDIM-1
      int rep_count[ESMF_MAXDIM];
      
 // !PUBLIC MEMBER FUNCTIONS:
@@ -83,6 +85,9 @@
 
     int ESMC_XPacketGetOffset(void) { return this->offset; }
 
+    bool ESMC_XPacketIsContig(void) { return this->iscontig; }
+    void ESMC_XPacketSetContig(void);
+
  // miscellaneous fun stuff
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
                               ESMC_XPacket *xpacket2);
@@ -90,7 +95,7 @@
                                   ESMC_AxisIndex *indexlist, int rank,
                                   int *global_start);
                          
-    int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty
+    bool ESMC_XPacketIsEmpty();      // returns true if the xp is empty
     int ESMC_XPacketPrint(const char *options);
 
  // native C++ constructors/destructors
