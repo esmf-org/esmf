@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.2 2003/03/22 05:44:50 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.3 2003/03/26 01:08:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,15 +32,20 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-#if 0
        // keep this for shallow classes, get rid of create/destroy above
        void FTN(c_esmc_timeinit)(ESMC_Time **ptr, int *YY, int *MM, int *DD,
-                                 int *D, int *H, int *M, int *S, int *MS,
-                                 int *US, int *NS,
+                                 int *D, int *H, int *M, ESMF_IKIND_I8 *S,
+                                 int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,
+                                 ESMC_Calendar **cal, int *tz, int *status) {
+           *status = (*ptr)->ESMC_TimeInit(*YY, *MM, *DD, *D, *H, *M, *S, *MS,
+                                           *US, *NS, *d_, *h_, *m_, *s_, *ms_,
+                                           *us_, *ns_, *Sn, *Sd, *cal, *tz);
+       }
 
+#if 0
        void FTN(c_esmc_timeget)(ESMC_Time **ptr,
                                          <value> *value, int *status) {
            *status = (*ptr)->ESMC_TimeGet(&value);
