@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.24 2003/03/21 23:01:37 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.25 2003/03/21 23:14:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.24 2003/03/21 23:01:37 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.25 2003/03/21 23:14:08 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -436,7 +436,7 @@
         printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
         printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
                              (long int)srcaddr, (long int)dstaddr);
-        for (j=0, srcbytes = sleft, rcvbytes = rleft; j<mrank; j++) {
+        for (j=0, srcbytes = sleft, rcvbytes = rleft; j<mrank-1; j++) {
             printf("j=%d, snums[j]=%d, rnums[j]=%d\n", j, snums[j], rnums[j]);
             for (l=0; l<snums[j] || l<rnums[j]; l++, 
                             srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
@@ -446,11 +446,12 @@
                             (long int)((char *)srcaddr+srcbytes), 
                             (long int)((char *)dstaddr+rcvbytes), 
                             srcbytes, rcvbytes);
-                 printf(" sleft=%d, sright=%d, rleft=%d, rright=%d\n", 
+                 printf(" sending %d bytes and receiving %d bytes with DE %d\n", 
+                                   sright-sleft+1, rright-rleft+1, theirdeid);
+
+                 printf(" (sleft=%d, sright=%d, rleft=%d, rright=%d)\n", 
                                    sleft, sright, rleft, rright);
-                 printf(" sending %d bytes and receiving %d bytes with %d\n", 
-                                   sright-sleft, rright-rleft, theirdeid);
-                 printf(" j=%d, sstrides[j]=%d, rstrides[j]=%d\n", 
+                 printf(" (j=%d, sstrides[j]=%d, rstrides[j]=%d)\n", 
                                     j, sstrides[j], rstrides[j]);
 
                 //rc = layout->ESMC_DELayoutSendRecv(mydeid, 
