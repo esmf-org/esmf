@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.28 2004/04/28 23:12:09 cdeluca Exp $
+// $Id: ESMC_Route_F.C,v 1.29 2004/10/05 22:57:51 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -83,11 +83,14 @@ extern "C" {
            void *dst_base_addr = NULL;
            ESMC_DataKind dk;
 
-	   if (((long int)*src != 0) && ((long int)*src != -1))
+	   if (((long int)*src != 0) && ((long int)*src != -1)) {
                (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
-	   if (((long int)*dst != 0) && ((long int)*dst != -1))
+               dk = (*src)->ESMC_LocalArrayGetKind();
+           }
+	   if (((long int)*dst != 0) && ((long int)*dst != -1)) {
                (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
-           dk = (*src)->ESMC_LocalArrayGetKind();
+               dk = (*dst)->ESMC_LocalArrayGetKind();
+           }
 
            *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, dk);
        }
@@ -150,11 +153,14 @@ extern "C" {
        }
 
        void FTN(c_esmc_routeprecomputedomlist)(ESMC_Route **ptr, int *rank, 
-                  int *my_DE, ESMC_DomainList *sendDomainList, 
-                  ESMC_DomainList *recvDomainList, int *status) {
+                  int *myDE, ESMC_DomainList *sendDomainList, 
+                  ESMC_DomainList *recvDomainList, 
+                  ESMC_Logical *hasSrcData, ESMC_Logical *hasDstData,
+                  int *status) {
 
-           *status = (*ptr)->ESMC_RoutePrecomputeDomList(*rank, *my_DE,
-                             sendDomainList, recvDomainList);
+           *status = (*ptr)->ESMC_RoutePrecomputeDomList(*rank, *myDE,
+                             sendDomainList, recvDomainList,
+                             hasSrcData, hasDstData);
        }
 
        void FTN(c_esmc_routegetcached)(int *rank, 
