@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.3 2003/07/11 23:04:31 jwolfe Exp $
+// $Id: ESMC_LocalArray.h,v 1.4 2003/07/15 18:12:54 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ extern "C" {
 // class declaration type
 class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
-   private:
+   protected:
     int rank;                      // dimensionality
     ESMC_DataType type;            // int, real, etc.
     ESMC_DataKind kind;            // short, long

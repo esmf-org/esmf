@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.17 2003/05/02 16:19:34 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.18 2003/07/15 18:18:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,8 +35,9 @@
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
       use ESMF_DELayoutMod
-      use ESMF_ArrayMod
+      use ESMF_LocalArrayMod
       use ESMF_XPacketMod
+      use ESMF_ArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -85,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.17 2003/05/02 16:19:34 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.18 2003/07/15 18:18:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -485,16 +486,16 @@
         ! Translate AxisIndices from F90 to C++
         do j=1,rank
           do i=1,AI_dst_count
-            AI_dst_exc(i,j)%l = AI_dst_exc(i,j)%l - 1
-            AI_dst_exc(i,j)%r = AI_dst_exc(i,j)%r - 1
-            AI_dst_tot(i,j)%l = AI_dst_tot(i,j)%l - 1
-            AI_dst_tot(i,j)%r = AI_dst_tot(i,j)%r - 1
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
           enddo
           do i=1,AI_src_count
-            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l - 1
-            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r - 1
-            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l - 1
-            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r - 1
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
           enddo
         enddo
 
@@ -507,16 +508,16 @@
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
           do i=1,AI_dst_count
-            AI_dst_exc(i,j)%l = AI_dst_exc(i,j)%l + 1
-            AI_dst_exc(i,j)%r = AI_dst_exc(i,j)%r + 1
-            AI_dst_tot(i,j)%l = AI_dst_tot(i,j)%l + 1
-            AI_dst_tot(i,j)%r = AI_dst_tot(i,j)%r + 1
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
           enddo
           do i=1,AI_src_count
-            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l + 1
-            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r + 1
-            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l + 1
-            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r + 1
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
           enddo
         enddo
 
@@ -653,16 +654,16 @@
         ! Translate AxisIndices from F90 to C++
         do j=1,rank
           do i=1,AI_dst_count
-            AI_dst_exc(i,j)%l = AI_dst_exc(i,j)%l - 1
-            AI_dst_exc(i,j)%r = AI_dst_exc(i,j)%r - 1
-            AI_dst_tot(i,j)%l = AI_dst_tot(i,j)%l - 1
-            AI_dst_tot(i,j)%r = AI_dst_tot(i,j)%r - 1
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
           enddo
           do i=1,AI_src_count
-            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l - 1
-            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r - 1
-            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l - 1
-            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r - 1
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
           enddo
         enddo
 
@@ -678,16 +679,16 @@
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
           do i=1,AI_dst_count
-            AI_dst_exc(i,j)%l = AI_dst_exc(i,j)%l + 1
-            AI_dst_exc(i,j)%r = AI_dst_exc(i,j)%r + 1
-            AI_dst_tot(i,j)%l = AI_dst_tot(i,j)%l + 1
-            AI_dst_tot(i,j)%r = AI_dst_tot(i,j)%r + 1
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
           enddo
           do i=1,AI_src_count
-            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l + 1
-            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r + 1
-            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l + 1
-            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r + 1
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
           enddo
         enddo
 
@@ -747,10 +748,10 @@
         ! Translate AxisIndices from F90 to C++
         do j=1,rank
           do i=1,AI_count
-            AI_exc(i,j)%l = AI_exc(i,j)%l - 1
-            AI_exc(i,j)%r = AI_exc(i,j)%r - 1
-            AI_tot(i,j)%l = AI_tot(i,j)%l - 1
-            AI_tot(i,j)%r = AI_tot(i,j)%r - 1
+            AI_exc(i,j)%min = AI_exc(i,j)%min - 1
+            AI_exc(i,j)%max = AI_exc(i,j)%max - 1
+            AI_tot(i,j)%min = AI_tot(i,j)%min - 1
+            AI_tot(i,j)%max = AI_tot(i,j)%max - 1
           enddo
         enddo
 
@@ -765,10 +766,10 @@
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
           do i=1,AI_count
-            AI_exc(i,j)%l = AI_exc(i,j)%l + 1
-            AI_exc(i,j)%r = AI_exc(i,j)%r + 1
-            AI_tot(i,j)%l = AI_tot(i,j)%l + 1
-            AI_tot(i,j)%r = AI_tot(i,j)%r + 1
+            AI_exc(i,j)%min = AI_exc(i,j)%min + 1
+            AI_exc(i,j)%max = AI_exc(i,j)%max + 1
+            AI_tot(i,j)%min = AI_tot(i,j)%min + 1
+            AI_tot(i,j)%max = AI_tot(i,j)%max + 1
           enddo
         enddo
 

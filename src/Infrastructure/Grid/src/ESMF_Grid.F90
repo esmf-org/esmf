@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.60 2003/07/10 23:04:17 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.61 2003/07/15 18:17:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,9 +132,6 @@
     !public ESMF_GridGetRegionID
     public ESMF_GridSetRegionID
     public ESMF_GridHalo
-    public ESMF_GridAllGather
-    public ESMF_GridGather
-    public ESMF_GridScatter
     public ESMF_GridValidate
     public ESMF_GridPrint
     public ESMF_GridComputeDistance
@@ -208,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.60 2003/07/10 23:04:17 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.61 2003/07/15 18:17:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -443,7 +440,7 @@
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
-                                       halo_width, name, rc)
+                                       name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateInternal
@@ -462,7 +459,6 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
-      integer, intent(in), optional :: halo_width
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -536,7 +532,7 @@
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              halo_width, name, status)
+                              name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
@@ -989,7 +985,7 @@
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
-                                            halo_width, name, rc)
+                                            name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1006,7 +1002,6 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
-      integer, intent(in), optional :: halo_width
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1084,8 +1079,7 @@
 
 !     Create the DistGrid
       grid%distgrid = ESMF_DistGridCreate(i_max=i_max, j_max=j_max, &
-                                          layout=layout, halo_width=halo_width, &
-                                          rc=status)
+                                          layout=layout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
         return
@@ -1346,11 +1340,11 @@
       delta(2) = (y_max - y_min) / real(j_max)
       do i = 1,2
         local_min_coord(i) = delta(i) * &
-                             real(grid%distgrid%ptr%MyDE%lcelltot_index(i)%l - 1)
+                             real(grid%distgrid%ptr%MyDE%ai_global(i)%min - 1)
         local_max_coord(i) = delta(i) * &
-                             real(grid%distgrid%ptr%MyDE%lcelltot_index(i)%r)
-        local_nmax(i) = grid%distgrid%ptr%MyDE%lcelltot_index(i)%r &
-                      - grid%distgrid%ptr%MyDE%lcelltot_index(i)%l + 1
+                             real(grid%distgrid%ptr%MyDE%ai_global(i)%max)
+        local_nmax(i) = grid%distgrid%ptr%MyDE%ai_global(i)%max &
+                      - grid%distgrid%ptr%MyDE%ai_global(i)%min + 1
       enddo
       global_min_coord(1)=x_min
       global_max_coord(1)=x_max
@@ -1483,20 +1477,20 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_LocalArray), intent(in) :: array
       integer, intent(in) :: id
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the coordinates exist already and are being
-!     passed in through an {\tt ESMF\_Array}.
+!     passed in through an {\tt ESMF\_LocalArray}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
-!          ESMF Array of data.
+!          ESMF LocalArray of data.
 !     \item[{[id]}]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
@@ -1579,15 +1573,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetAllAxisIndex - Get array of AxisIndices from a Grid
+! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetAllAxisIndex(grid, AI, AI_tot, rc)
+      subroutine ESMF_GridGetAllAxisIndex(grid, global_ai, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
-      type(ESMF_AxisIndex), dimension(:,:), optional, pointer :: AI_tot
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: global_ai
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1597,8 +1590,8 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[AI]}]
-!          Array of {\tt ESMF\_AxisIndices} corresponding to the {\tt ESMF\_Grid}.
+!     \item[{[global\_ai]}]
+!          Global axis indices for all DE's.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1617,10 +1610,10 @@
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrid%ptr, AI, AI_tot, &
+      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrid%ptr, global_ai, &
                                         status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: distgrid get"
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: distgrid get all axis index"
         return
       endif
 
@@ -1702,16 +1695,16 @@
 !     \item[grid]
 !          Class to be used.
 !     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_Array} of global identifiers to be translated.
+!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers to be translated.
 !          Infers translating between positions in memory.
 !     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_Array} of local identifiers corresponding to
+!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers corresponding to
 !          global identifiers.
 !     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_Array} of global identifiers to be translated.
+!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers to be translated.
 !          Infers translating between indices in ij space.
 !     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_Array} of local identifiers corresponding to
+!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers corresponding to
 !          global identifiers.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1768,16 +1761,16 @@
 !     \item[grid]
 !          Class to be used.
 !     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_Array} of local identifiers to be translated.
+!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be translated.
 !          Infers translating between positions in memory.
 !     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_Array} of global identifiers corresponding to
+!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers corresponding to
 !          local identifiers.
 !     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_Array} of local identifiers to be translated.
+!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers to be translated.
 !          Infers translating between indices in ij space.
 !     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_Array} of global identifiers corresponding to
+!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers corresponding to
 !          local identifiers.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1887,9 +1880,9 @@
       integer :: ncoord_locs
       integer, dimension(6) :: coord_loc
       integer :: DE_id
-      integer, dimension(ESMF_MAXGRIDDIM) :: gcell_dim
-      integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_end
+      integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
+      integer, dimension(ESMF_MAXGRIDDIM) :: gcell_start
+      integer, dimension(ESMF_MAXGRIDDIM) :: gcell_end
       real :: delta1
       real :: delta2
       real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords
@@ -1911,15 +1904,15 @@
 !     Get distgrid information, including global size in each direction and local
 !     grid size indexed globally
       call ESMF_DistGridGet(grid%distgrid%ptr, &
-                            gcell_dim=gcell_dim, rc=status)
+                            global_cell_dim=global_cell_dim, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get"
         return
       endif
       DE_id = grid%distgrid%ptr%MyDE%MyDE
       call ESMF_DistGridGetCounts(grid%distgrid%ptr, DE_id, &
-                                  lcellexc_start=lcellexc_start, &
-                                  lcellexc_end=lcellexc_end, &
+                                  gcell_start=gcell_start, &
+                                  gcell_end=gcell_end, &
                                   rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get counts"
@@ -1936,16 +1929,16 @@
       endif
 
 !     Calculate global cell sizes
-      if (gcell_dim(1).ne.0) then
-        delta1 = (global_max_coords(1)-global_min_coords(1)) / real(gcell_dim(1))
+      if (global_cell_dim(1).ne.0) then
+        delta1 = (global_max_coords(1)-global_min_coords(1)) / real(global_cell_dim(1))
       else
-        print *, "ERROR in ESMF_GridSetCoordCompute: gcell_dim1=0"
+        print *, "ERROR in ESMF_GridSetCoordCompute: global_cell_dim1=0"
         return
       endif
-      if (gcell_dim(2).ne.0) then
-        delta2 = (global_max_coords(2)-global_min_coords(2)) / real(gcell_dim(2))
+      if (global_cell_dim(2).ne.0) then
+        delta2 = (global_max_coords(2)-global_min_coords(2)) / real(global_cell_dim(2))
       else
-        print *, "ERROR in ESMF_GridSetCoordCompute: gcell_dim2=0"
+        print *, "ERROR in ESMF_GridSetCoordCompute: global_cell_dim2=0"
         return
       endif
 
@@ -1955,8 +1948,8 @@
       ncoord_locs = 2
       call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id)%ptr, &
                                  ncoord_locs, coord_loc, &
-                                 lcellexc_start(1), lcellexc_end(1), &
-                                 lcellexc_start(2), lcellexc_end(2), &
+                                 gcell_start(1), gcell_end(1), &
+                                 gcell_start(2), gcell_end(2), &
                                  delta1, delta2, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid construct"
@@ -2113,7 +2106,7 @@
 
       ! Get distgrid info with global coordinate counts
       if(present(global_nmax)) then
-        call ESMF_DistGridGet(gridp%distgrid%ptr, gcell_dim=global_nmax, &
+        call ESMF_DistGridGet(gridp%distgrid%ptr, global_cell_dim=global_nmax, &
                               rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get"
@@ -2215,20 +2208,20 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_LocalArray), intent(in) :: array
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the logical mask data exists already and is
-!     being passed in through an {\tt ESMF\_Array}.
+!     being passed in through an {\tt ESMF\_LocalArray}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
-!          ESMF Array of data.
+!          ESMF LocalArray of data.
 !     \item [{[name]}]
 !           {\tt LMask} name.
 !     \item[{[rc]}]
@@ -2365,20 +2358,20 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_LocalArray), intent(in) :: array
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the multiplicative mask data exists already
-!     and is being passed in through an {\tt ESMF\_Array}.
+!     and is being passed in through an {\tt ESMF\_LocalArray}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
-!          ESMF Array of data.
+!          ESMF LocalArray of data.
 !     \item [{[name]}]
 !           {\tt ESMF\_MMask} name.
 !     \item[{[rc]}]
@@ -2516,20 +2509,20 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_LocalArray), intent(in) :: array
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the metric data exists already and is being
-!     passed in through an {\tt ESMF\_Array}.
+!     passed in through an {\tt ESMF\_LocalArray}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
-!          ESMF Array of data.
+!          ESMF LocalArray of data.
 !     \item [{[name]}]
 !           {\tt ESMF\_Metric} name.
 !     \item[{[rc]}]
@@ -2666,20 +2659,20 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_LocalArray), intent(in) :: array
       character (len=*), intent(in) :: name  ! TODO: optional?
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the region identifier data exists already
-!     and is being passed in through an {\tt ESMF\_Array}.
+!     and is being passed in through an {\tt ESMF\_LocalArray}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
-!          ESMF Array of data.
+!          ESMF LocalArray of data.
 !     \item [{[name]}]
 !           {\tt ESMF\_RegionID} name.
 !     \item[{[rc]}]
@@ -2773,200 +2766,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridAllGather - Data AllGather operation on a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridAllGather(grid, srcarray, dstarray, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(inout) :: srcarray
-      type(ESMF_Array), intent(out) :: dstarray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Call {\tt ESMF\_DistGrid} routines to perform a AllGather operation over the{\tt ESMF\_Grid}. 
-!
-!     \begin{description}
-!     \item [grid]
-!           {\tt ESMF\_Grid} on which data is defined.
-!     \item [srcarray]
-!           {\tt ESMF\_Array} containing data to be allgather'ed.  The data inside the
-!           array is not altered, but annotation is attached to the array
-!           for later use (thus the intent must be 'inout'.)
-! 
-!     \item [dstarray]
-!           {\tt ESMF\_Array} containing the resulting data.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Call DistGrid method to perform actual work
-      call ESMF_DistGridAllGather(grid%ptr%distgrid%ptr, srcarray, dstarray, &
-                                                                       status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in GridAllGather: DistGrid AllGather returned failure"
-        return
-      endif
-
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridAllGather
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridGather - Data Gather operation on a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridGather(grid, srcarray, deid, dstarray, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_Array), intent(inout) :: srcarray
-      integer, intent(in) :: deid
-      type(ESMF_Array), intent(out) :: dstarray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Call {\tt ESMF\_DistGrid} routines to perform a Gather operation over the 
-!     data in a {\tt ESMF\_Grid}.  It returns the data in the {\tt dstarray}.
-!
-!     \begin{description}
-!     \item [grid]
-!           {\tt ESMF\_Grid} on which data is defined.
-!     \item [srcarray]
-!           {\tt ESMF\_Array} containing data to be gathered.  The data inside the
-!           array is not altered, but annotation is attached to the array
-!           for later use (thus the intent must be 'inout'.)
-!     \item [deid]
-!           Destination {\tt ESMF\_DE} number to gather array onto.  The {\tt dstarray}
-!           return object is only valid on this {\tt ESMF\_DE}.  On all other {\tt ESMF\_DEs in} this
-!           layout the {\tt dstarray} return is an invalid {\tt ESMF\_Array}.
-!     \item [dstarray]
-!           {\tt ESMF\_Array} containing the resulting data on {\tt ESMF\_DE} {\tt deid}.  On all other
-!           {\tt ESMF\_DE} numbers in this it is an invalid array.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Call DistGrid method to perform actual work
-      call ESMF_DistGridGather(grid%ptr%distgrid%ptr, srcarray, deid, &
-                                                             dstarray, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in GridGather: DistGrid Gather returned failure"
-        return
-      endif
-
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridGather
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridScatter - Data Scatter operation on a Grid
-
-! !INTERFACE:
-      subroutine ESMF_GridScatter(grid, deid, srcarray, dimorder, dstarray, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: deid
-      type(ESMF_Array), intent(inout) :: srcarray
-      integer, dimension(:), intent(in) :: dimorder
-      type(ESMF_Array), intent(out) :: dstarray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Call {\tt ESMF\_DistGrid} routines to perform a Scatter operation over the 
-!     data in a {\tt ESMF\_Grid}.  It returns the data in the {\tt dstarray}.
-!
-!     \begin{description}
-!     \item [grid]
-!           {\tt ESMF\_Grid} on which output data will be defined.
-!     \item [deid]
-!           Destination {\tt ESMF\_DE} number to scatter array from.  The {\tt srcarray}
-!           input object is only valid on this {\tt ESMF\_D}.  On all other {\tt ESMF\_DE}s in this
-!           layout the {\tt srcarray} argument is ignored.
-!     \item [srcarray]
-!           {\tt ESMF\_Array} containing data to be scattered.  The data inside the
-!           array is not altered, but annotation is attached to the array
-!           for later use (thus the intent must be 'inout'.)
-!     \item [dimorder]
-!           Integer dimension list same length as rank of srcarray, specifying 
-!           how to spread dimensions of input array to output arrays.
-!           0 indicates no decomposition, 1 to Ndims indicate index order.
-!     \item [dstarray]
-!           {\tt ESMF\_Array} containing the resulting data on {\tt ESMF\_DE} {\tt deid}.  On all other
-!           {\tt ESMF\_DE} numbers this is an invalid array.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Call DistGrid method to perform actual work
-      call ESMF_DistGridScatter(grid%ptr%distgrid%ptr, deid, srcarray, &
-                                                    dimorder, dstarray, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in GridScatter: DistGrid Scatter returned failure"
-        return
-      endif
-
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridScatter
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_GridHalo - Data Halo operation on a Grid
 
 ! !INTERFACE:
@@ -2975,19 +2774,19 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      type(ESMF_Array) :: array
+      type(ESMF_LocalArray) :: array
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Call {\tt ESMF\_DistGrid} routines to perform a Halo operation over the data
-!     in a {\tt ESMF\_Grid}.  This routine updates the data inside the {\tt ESMF\_Array}
+!     in a {\tt ESMF\_Grid}.  This routine updates the data inside the {\tt ESMF\_LocalArray}
 !     so there is no separate return argument.
 !
 !     \begin{description}
 !     \item [grid]
 !           {\tt ESMF\_Grid} on which data is defined.
 !     \item [array]
-!           {\tt ESMF\_Array} containing data to be haloed.
+!           {\tt ESMF\_LocalArray} containing data to be haloed.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !

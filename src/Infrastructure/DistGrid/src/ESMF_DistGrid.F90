@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.53 2003/07/09 17:28:23 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.54 2003/07/15 18:16:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_DELayoutMod
-      use ESMF_ArrayMod
+      use ESMF_LocalArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -136,7 +136,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.53 2003/07/09 17:28:23 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.54 2003/07/15 18:16:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -564,8 +564,8 @@
       gcell_dim(2) = j_max
       call ESMF_DistGridSet(distgrid, &
                             covers_domain=.true., &
-                            gcell_count=i_max*j_max, &
-                            gcell_dim=gcell_dim, &
+                            global_cell_count=i_max*j_max, &
+                            global_cell_dim=gcell_dim, &
                             rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set"
@@ -1213,7 +1213,7 @@
 !     if present, get information from distgrid derived type
       if(present(MyDE)) MyDE = distgrid%myDE%MyDE
 
-      if(present(local_cell_count))
+      if(present(local_cell_count)) &
                  local_cell_count = distgrid%myDE%local_cell_count
 
       if(present(global_start)) global_start = distgrid%myDE%global_start

@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.30 2003/07/07 20:37:02 rstaufer Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.31 2003/07/15 18:17:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_ArrayMod
+      use ESMF_LocalArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -72,7 +72,7 @@
         integer :: num_faces       ! likely assume same as num_corners
                                    ! but might specify storage of only
                                    ! 2 of 4 faces, for example
-        type (ESMF_Array), pointer ::      &
+        type (ESMF_LocalArray), pointer ::      &
            center_coord,          &! coordinates of centers each cell
            corner_coord,          &! coordinates of corners each cell
            face_coord              ! coords of face centers each cell
@@ -80,26 +80,26 @@
         integer :: num_metrics     ! counter for number of metrics
         character (len=ESMF_MAXSTR), dimension(:), pointer :: &
            metric_names            ! array of names for each metric
-        type (ESMF_Array), dimension(:), pointer ::      &
+        type (ESMF_LocalArray), dimension(:), pointer ::      &
            metrics                 ! an array of defined grid metrics
 
         integer :: num_lmasks      ! counter for number of logical masks
         character (len=ESMF_MAXSTR), dimension(:), pointer :: &
            lmask_names             ! names for each defined logical mask
-        type (ESMF_Array), dimension(:), pointer ::      & 
+        type (ESMF_LocalArray), dimension(:), pointer ::      & 
            lmask                   ! array of defined logical masks 
 
         integer :: num_mmasks      ! counter for number of multiplicative masks
         character (len=ESMF_MAXSTR), dimension(:), pointer :: &
            mmask_names             ! names for each multiplicative mask
-        type (ESMF_Array), dimension(:), pointer ::      &
+        type (ESMF_LocalArray), dimension(:), pointer ::      &
            mmask                   ! array of defined multiplicative masks
 
         integer :: num_region_ids  ! counter for the number of region 
                                    ! identifiers
         character (len=ESMF_MAXSTR), dimension(:), pointer :: &
            region_id_names         ! names associated with each region id
-        type (ESMF_Array), pointer ::      &
+        type (ESMF_LocalArray), pointer ::      &
            region_id               ! array assigning region identifier
                                    ! to each cell
 
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.30 2003/07/07 20:37:02 rstaufer Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.31 2003/07/15 18:17:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1101,7 +1101,7 @@
 
       type(ESMF_PhysGridType), intent(in) :: physgrid
 
-      type(ESMF_Array), pointer, optional :: &
+      type(ESMF_LocalArray), pointer, optional :: &
          center_coord,       &! coordinates for each cell center
          corner_coord,       &! coordinates for corners of each cell
          face_coord           ! coordinates for face centers of each cell
@@ -1174,7 +1174,7 @@
 
       type(ESMF_PhysGridType), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in), target, optional :: &
+      type(ESMF_LocalArray), intent(in), target, optional :: &
          center_coord,       &! coordinates for each cell center
          corner_coord,       &! coordinates for corners of each cell
          face_coord           ! coordinates for face centers of each cell
@@ -1298,7 +1298,7 @@
       integer :: l1, l2
       logical :: rcpresent=.FALSE.                ! Return code present
       real(selected_real_kind(6,45)), dimension(:,:,:), pointer :: temp
-      type(ESMF_Array), target :: array_temp
+      type(ESMF_LocalArray), target :: array_temp
       
 
 !     Initialize return code
@@ -1332,7 +1332,7 @@
                            delta1*0.5*real(global_n1+global_n1-1)
             enddo
           enddo
-          array_temp = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
           physgrid%center_coord => array_temp 
 !         nullify(temp)
 !         deallocate(temp)    ! TODO: figure out how to load one array
@@ -1345,7 +1345,7 @@
                            delta2*0.5*real(global_n2+global_n2-1)
             enddo
           enddo
-          array_temp = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
           physgrid%center_coord => array_temp 
           nullify(temp)
 !         deallocate(temp)
@@ -1361,7 +1361,7 @@
 
       enddo
 
-!     call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
+!     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridSetCoordInternal: TODO"
         return
@@ -1382,7 +1382,7 @@
 
       type(ESMF_PhysGridType), intent(in) :: physgrid
 
-      type(ESMF_Array), pointer :: metric_array
+      type(ESMF_LocalArray), pointer :: metric_array
 
       character(*), intent(in), optional :: name
 
@@ -1465,7 +1465,7 @@
 
       type(ESMF_PhysGridType), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in), target :: &
+      type(ESMF_LocalArray), intent(in), target :: &
          metric_array         ! array containing metric value for each cell
 
       character(*), intent(in) :: name ! name to assign to metric
@@ -1500,7 +1500,7 @@
       integer :: i, n
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type(ESMF_Array), dimension(:), allocatable, target :: temp_metrics
+      type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_metrics
                                              ! temporary array of metrics
 
 !     Initialize return code
@@ -1558,7 +1558,7 @@
 
       type(ESMF_PhysGridType), intent(in) :: physgrid
 
-      type(ESMF_Array), pointer :: lmask_array
+      type(ESMF_LocalArray), pointer :: lmask_array
 
       character(*), intent(in), optional :: name
 
@@ -1640,7 +1640,7 @@
 
       type(ESMF_PhysGridType), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in), target :: &
+      type(ESMF_LocalArray), intent(in), target :: &
          lmask_array         ! array containing logical mask value for each cell
 
       character(*), intent(in) :: name ! name to assign to logical mask
@@ -1675,7 +1675,7 @@
       integer :: i, n
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type(ESMF_Array), dimension(:), allocatable, target :: temp_lmask
+      type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_lmask
                                              ! temporary array of lmasks
 
 !     Initialize return code
@@ -1733,7 +1733,7 @@
 
       type(ESMF_PhysGridType), intent(in) :: physgrid
 
-      type(ESMF_Array), pointer :: mmask_array
+      type(ESMF_LocalArray), pointer :: mmask_array
 
       character(*), intent(in), optional :: name
 
@@ -1815,7 +1815,7 @@
 
       type(ESMF_PhysGridType), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in), target :: &
+      type(ESMF_LocalArray), intent(in), target :: &
          mmask_array         ! array containing multiplicative mask value for each cell
 
       character(*), intent(in) :: name ! name to assign to multiplicative mask
@@ -1850,7 +1850,7 @@
       integer :: i, n
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type(ESMF_Array), dimension(:), allocatable, target :: temp_mmask
+      type(ESMF_LocalArray), dimension(:), allocatable, target :: temp_mmask
                                              ! temporary array of mmasks
 
 !     Initialize return code
@@ -1909,7 +1909,7 @@
 
       type(ESMF_PhysGridType), intent(in) :: physgrid
 
-      type(ESMF_Array), pointer :: region_array
+      type(ESMF_LocalArray), pointer :: region_array
 
       character(*), dimension(:), intent(out) :: region_names
 
@@ -1965,7 +1965,7 @@
 
       type(ESMF_PhysGridType), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in), target :: &
+      type(ESMF_LocalArray), intent(in), target :: &
          region_array         ! array containing region ids for each cell
 
       character(*), dimension(:), intent(in), target :: &

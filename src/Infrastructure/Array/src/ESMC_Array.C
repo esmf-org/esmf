@@ -29,14 +29,13 @@
 #include <assert.h>
 // associated class definition file
 #include "ESMC_Array.h"
-#include "ESMC_Alloc.h"
 #include "ESMC_DELayout.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.1 2003/07/10 18:46:14 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.2 2003/07/15 18:12:30 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -640,8 +639,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DomainType dt,                     // in - domain type, C or F90
-      struct ESMC_AxisIndex *indexlist) {     // in - values to set
+      ESMC_DomainType dt,              // in - domain type, C or F90
+      struct ESMC_AxisIndex *ai) {     // in - values to set
 //
 // !DESCRIPTION:
 //     Sets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
@@ -655,7 +654,7 @@
      int i;
 
      for (i=0; i<this->rank; i++) {
-         this->ai_comp[i] = indexlist[i];  // TODO: set all?
+         this->ai_comp[i] = ai[i];  // TODO: set all?
      }
 
      return ESMF_SUCCESS;
@@ -673,8 +672,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DomainType dt,                        // out - domain type, C or F90
-      struct ESMC_AxisIndex *indexlist) const {  // out - values to get
+      ESMC_DomainType dt,                 // out - domain type, C or F90
+      struct ESMC_AxisIndex *ai) const {  // out - values to get
 //
 // !DESCRIPTION:
 //     Gets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
@@ -688,7 +687,7 @@
      int i;
 
      for (i=0; i<this->rank; i++) {
-         indexlist[i] = this->ai_comp[i];   // TODO: interface to get any ai
+         ai[i] = this->ai_comp[i];   // TODO: interface to get any ai
      }
 
      return ESMF_SUCCESS;
@@ -707,6 +706,7 @@
 //
 // !ARGUMENTS:
       ESMC_DELayout *layout,     // in  - layout (temporarily)
+      ESMC_AxisIndex *ai_global, // in  - do we need?  jw
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp) {         // in  - size of decomp array
@@ -761,7 +761,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_local[i].min - ai_local[i].min + 1;
-                lstart[i] = ai_comp[i].gstart + ai_local[i].min;
+                lstart[i] = ai_global[i].min + ai_local[i].min;  // jw?
               }
               int local, global;
               for (j=0; j<lmax[1]; j++) {
@@ -792,7 +792,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
+                lstart[i] = ai_global[i].min + ai_local[i].min;
               }
               int local, global;
               for (k=0; k<lmax[2]; k++) {
@@ -821,7 +821,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_local[i].min - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
+                lstart[i] = ai_global[i].min + ai_local[i].min;
               }
               int local, global;
               for (l=0; l<lmax[3]; l++) {
@@ -880,7 +880,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_comp[i].gstart + ai_local[i].min;
+                lstart[i] = ai_global[i].min + ai_local[i].min;
               }
               int local, global;
               for (j=0; j<lmax[1]; j++) {
@@ -911,7 +911,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
+                lstart[i] = ai_global[i].min + ai_local[i].min;
               }
               int local, global;
               for (k=0; k<lmax[2]; k++) {
@@ -940,7 +940,7 @@
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
+                lstart[i] = ai_global[i].min + ai_local[i].min;
               }
               int local, global;
               for (l=0; l<lmax[3]; l++) {
@@ -1296,6 +1296,7 @@
 //
 // !ARGUMENTS:
       ESMC_DELayout *layout,     // in  - layout (temporarily)
+      ESMC_AxisIndex *ai_global, // in  - do we need?  jw
       int rank_trans[],          // in  - translation of old ranks to new
                                  //       Array
       int size_rank_trans,       // in  - size of rank_trans array
@@ -1362,7 +1363,8 @@
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai_comp[i].max 
                         - RedistArray->ai_comp[i].min + 1;
-                lstart[i] = RedistArray->ai_comp[i].gstart  // jw nasty
+                lstart[i] = RedistArray->ai_comp[i].stride  // jw nasty -- this is
+                  // just here so it will compile
                           + RedistArray->ai_comp[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
@@ -1391,7 +1393,7 @@
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai_local[i].max
                         - RedistArray->ai_local[i].min + 1;
-                lstart[i] = RedistArray->ai_local[i].gstart
+                lstart[i] = ai_global[i].min   //  jw? need to look at this
                           + RedistArray->ai_local[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
@@ -1426,7 +1428,7 @@
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai_local[i].max
                         - RedistArray->ai_local[i].min + 1;
-                lstart[i] = RedistArray->ai_local[i].gstart
+                lstart[i] = ai_global[i].min  // jw need to look at this
                           + RedistArray->ai_local[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;

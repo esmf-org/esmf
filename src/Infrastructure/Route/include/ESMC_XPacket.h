@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.18 2003/07/09 17:43:14 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.19 2003/07/15 18:18:10 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Array.h>
+ #include <ESMC_LocalArray.h>
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -79,9 +79,11 @@
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
                               ESMC_XPacket *xpacket2);
     int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
+                                  struct ESMC_AxisIndex *global_ai,
                                   int size_axisindex);
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
-                                  ESMC_AxisIndex *indexlist, int rank);
+                                  ESMC_AxisIndex *indexlist,
+                                  ESMC_AxisIndex *global_ai, int rank);
                          
  
     int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty

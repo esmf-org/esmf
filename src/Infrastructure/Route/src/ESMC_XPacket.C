@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.25 2003/07/09 17:47:09 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.26 2003/07/15 18:19:07 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.25 2003/07/09 17:47:09 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.26 2003/07/15 18:19:07 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -293,7 +293,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_AxisIndex *indexlist,  // in  - set of AxisIndices
+      ESMC_AxisIndex *indexlist,  // in  - set of local AxisIndices
+      ESMC_AxisIndex *global_ai,  // in  - set of global AxisIndices
       int size_axisindex) {       // in  - size of AxisIndex array
 //
 // !DESCRIPTION:
@@ -320,15 +321,15 @@
           this->rank = 2;
           // calculate global offsets and contig_lengths for the index space
           for (i=0; i<size_axisindex; i++) {
-   //printf("incoming AxisIndex: [%d] offset=%d, contig_length=%d, gstart=%d, max=%d\n",
-   // i, indexlist[i].l, indexlist[i].r, indexlist[i].gstart, indexlist[i].max);
-            global_l[i] = indexlist[i].l + indexlist[i].gstart;
-            global_r[i] = indexlist[i].r + indexlist[i].gstart;
+   //printf("incoming AxisIndex: [%d] offset=%d, contig_length=%d, stride=%d",
+   // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
+            global_l[i] = indexlist[i].min + global_ai[i].min;  // jw?
+            global_r[i] = indexlist[i].max + global_ai[i].min;  // jw?
           }
-          this->offset  = global_l[1]*indexlist[0].max + global_l[0];
-          this->contig_length = global_l[1]*indexlist[0].max + global_r[0];
-          this->stride[0] = indexlist[0].max;
-          this->rep_count[0] = indexlist[1].r - indexlist[1].l + 1;
+          this->offset  = global_l[1]*global_ai[0].stride + global_l[0];
+          this->contig_length = global_l[1]*global_ai[0].stride + global_r[0];
+          this->stride[0] = global_ai[0].stride;
+          this->rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
  //    printf("outgoing ");
  //    this->ESMC_XPacketPrint();
         }
@@ -368,7 +369,8 @@
 //
 // !ARGUMENTS:
       ESMC_XPacket *global_XP,     // in  - global XPacket
-      ESMC_AxisIndex *indexlist,   // in  - set of AxisIndices
+      ESMC_AxisIndex *indexlist,   // in  - set of local AxisIndices
+      ESMC_AxisIndex *global_ai,   // in  - set of global AxisIndices
       int rank) {                  // in  - rank of AxisIndex array
 //
 // !DESCRIPTION:
@@ -389,13 +391,13 @@
       break;
       case 2:
         {
-          int my_stride = indexlist[0].r - indexlist[0].l + 1;
-          int my_row = global_XP->offset/indexlist[0].max;
-          int my_offset = global_XP->offset - my_row*indexlist[0].max
-                      - indexlist[0].gstart;
-          int my_contig_length = global_XP->contig_length - my_row*indexlist[0].max
-                       - indexlist[0].gstart;
-          my_row      = my_row - indexlist[1].gstart;
+          int my_stride = indexlist[0].max - indexlist[0].min + 1;
+          int my_row = global_XP->offset/global_ai[0].stride;
+          int my_offset = global_XP->offset - my_row*global_ai[0].stride
+                        - global_ai[0].min;
+          int my_contig_length = global_XP->contig_length - my_row*global_ai[0].stride
+                       - global_ai[0].min;
+          my_row      = my_row - global_ai[1].min;
           this->offset  = my_row*my_stride + my_offset;
           this->contig_length = my_row*my_stride + my_contig_length;
           this->stride[0] = my_stride;

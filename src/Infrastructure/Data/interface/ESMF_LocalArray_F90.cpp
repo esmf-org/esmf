@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/07/11 23:05:18 jwolfe Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/07/15 18:16:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,13 +104,13 @@
                             ESMF_DOMAIN_EXCLUSIVE     = ESMF_DomainType(3)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_LocalArraySpec
+!     ! ESMF_ArraySpec
 !
 !     ! Data array specification, with no associated data buffer.
 
-      type ESMF_LocalArraySpec
+      type ESMF_ArraySpec
       sequence
-      private
+      !!private
    
         integer :: rank                     ! number of dimensions
         type(ESMF_DataType) :: type         ! real/float, integer, etc enum
@@ -143,8 +143,8 @@ ArrayAllTypeMacro()
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF
-      public ESMF_LocalArraySpec, ESMF_LocalArray
+      public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
+      public ESMF_ArraySpec, ESMF_LocalArray
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -176,7 +176,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/07/11 23:05:18 jwolfe Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/07/15 18:16:24 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -1117,41 +1117,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LocalArrayReorder(array, newarrayspec, newarray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_LocalArray), intent(inout) :: array 
-      type(ESMF_ArraySpec), intent(in) :: newarrayspec
-      type(ESMF_LocalArray), intent(out):: newarray   
-      integer, intent(out), optional :: rc       
-!
-! !DESCRIPTION:
-!      Used to alter the local memory ordering (layout) of this
-!      {\tt ESMF\_LocalArray}.
-!
-!  !TODO: remove this note before generating user documentation
-!
-!      (i am not sure this makes sense now, or that the routine should be
-!      in this class.  but i am leaving this here as a reminder that we
-!      might need some low level reorder functions.  maybe the argument
-!      should be another array or an arrayspec which describes what you
-!      want, and the input array is what exists, and this routine can then
-!      make one into the other.   is this a type of create?  or is this
-!      a copy?)
-!
-!EOP
-! !REQUIREMENTS:
-
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_LocalArrayReorder
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-     subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
+     subroutine ESMF_LocalArraySpecInit(as, rank, type, kind, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1216,7 +1182,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArraySpecInit
+        end subroutine ESMF_LocalArraySpecInit
 
 
 
@@ -1346,7 +1312,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
+      subroutine ESMF_LocalArraySpecGet(as, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: as
@@ -1406,7 +1372,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArraySpecGet
+        end subroutine ESMF_LocalArraySpecGet
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.35 2003/07/09 17:29:16 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.36 2003/07/15 18:17:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.35 2003/07/09 17:29:16 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.36 2003/07/15 18:17:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1003,7 +1003,7 @@
       endif 
 
       do i=1, rank
-        counts(i) = index(i)%r - index(i)%l + 1
+        counts(i) = index(i)%max - index(i)%min + 1
       enddo
 
       array = ESMF_ArrayCreate(arrayspec, counts, status) 
@@ -2079,8 +2079,7 @@
      
           thislength = dimlengths(thisdim)
      
-          call ESMF_AxisIndexInit(axis(i), 0, thislength, thislength, &
-                                                         thisdim, 0, rc=status)
+          call ESMF_AxisIndexSet(axis(i), 1, thislength, thislength, rc=status)
      
       enddo
 
@@ -2091,11 +2090,12 @@
         return
       endif 
 
-      ! Call Grid method to perform actual work
-      call ESMF_GridAllGather(ftypep%grid, ftypep%localfield%localdata, &
-                              array, status)
+      ! Call Array method to perform actual work
+!jw      call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
+!jw                               array, status)
+!  need to get layout from Grid and decompids
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldAllGather: Grid AllGather returned failure"
+        print *, "ERROR in FieldAllGather: Array AllGather returned failure"
         return
       endif 
 
@@ -2184,8 +2184,7 @@
 
           thislength = dimlengths(thisdim)
      
-          call ESMF_AxisIndexInit(axis(i), 0, thislength, thislength, &
-                                                         thisdim, 0, rc=status)
+          call ESMF_AxisIndexSet(axis(i), 1, thislength, thislength, rc=status)
      
       enddo
 
@@ -2196,11 +2195,12 @@
         return
       endif 
 
-      ! Call Grid method to perform actual work
-      call ESMF_GridGather(ftypep%grid, ftypep%localfield%localdata, &
-                                        destination_de, array, status)
+      ! Call Array method to perform actual work
+!jw      call ESMF_ArrayGather(ftypep%localfield%localdata, layout, decompids, &
+!jw                            destination_de, array, status)
+!  needs layout and decompids
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldGather: Grid Gather returned failure"
+        print *, "ERROR in FieldGather: Array Gather returned failure"
         return
       endif 
 
@@ -2280,11 +2280,12 @@
         return
       endif 
 
-      ! Call Grid method to perform actual work
-      call ESMF_GridScatter(field%ftypep%grid, source_de, array, &
-                                       dimorder, dstarray, status)
+      ! Call Array method to perform actual work
+!jw      call ESMF_ArrayScatter(array, layout, decompids, source_de, dstarray,
+!jw                             status)
+!  need to get layout and decompids
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldScatter: Grid Scatter returned failure"
+        print *, "ERROR in FieldScatter: Array Scatter returned failure"
         return
       endif 
 
@@ -2378,9 +2379,7 @@
       endif 
 
       ! set up things we need to find a cached route or precompute one
-      call ESMF_GridGetAllAxisIndex(ftypep%grid, src_AI, AI_tot=dst_AI)
-      call ESMF_DELayoutGetSize(layout, nx, ny);
-      AI_count = nx * ny
+!jw  need to get all AI's for all DE's
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
@@ -2652,14 +2651,14 @@
 
       ! set up things we need to find a cached route or precompute one
       if (hassrcdata) then
-          call ESMF_GridGetAllAxisIndex(stypep%grid, src_AI_exc, src_AI_tot)
+!jw  need to get all src AI's
           call ESMF_DELayoutGetSize(srclayout, nx, ny);
           AI_snd_count = nx * ny
       else
           AI_snd_count = 0
       endif
       if (hasdstdata) then
-          call ESMF_GridGetAllAxisIndex(dtypep%grid, dst_AI_exc, dst_AI_tot)
+!jw  need to get all dst AI's
           call ESMF_DELayoutGetSize(dstlayout, nx, ny);
           AI_rcv_count = nx * ny
       else

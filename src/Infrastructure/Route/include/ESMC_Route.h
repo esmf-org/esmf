@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.20 2003/05/02 16:19:33 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.21 2003/07/15 18:17:56 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,13 +105,15 @@
  // initialize the communication routines in this route object
     int ESMC_RoutePrecompute(int rank, int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
-                       int AI_rcv_count, ESMC_DELayout *layout_rcv,
-                       int my_DE_snd, 
+                       ESMC_AxisIndex *global_ai_rcv_, int AI_rcv_count,
+                       ESMC_DELayout *layout_rcv, int my_DE_snd, 
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
-                       int AI_snd_count, ESMC_DELayout *layout_snd);
+                       ESMC_AxisIndex *global_ai_snd, int AI_snd_count,
+                       ESMC_DELayout *layout_snd);
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
-                                 ESMC_AxisIndex *AI_tot, int AI_count, 
-                                 ESMC_DELayout *layout);
+                                 ESMC_AxisIndex *AI_tot, 
+                                 ESMC_AxisIndex *global_ai,
+                                 int AI_count, ESMC_DELayout *layout);
 
  // execute the communication routines set up in this route object
     int ESMC_RouteRun(void *srcaddr, void *dstaddr);
