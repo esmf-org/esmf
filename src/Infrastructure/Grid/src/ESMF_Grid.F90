@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.196 2004/11/23 00:40:47 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.197 2004/11/29 20:33:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.196 2004/11/23 00:40:47 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.197 2004/11/29 20:33:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1447,7 +1447,7 @@
                                         globalStartPerDEPerDim, &
                                         maxLocalCellCountPerDim, &
                                         cellCountPerDEPerDim, periodic, &
-                                        name, rc)
+                                        delayout, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1470,6 +1470,7 @@
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: cellCountPerDEPerDim
       type(ESMF_Logical), intent(out), dimension(:), optional :: periodic
+      type(ESMF_DELayout), intent(out), optional :: delayout
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1522,6 +1523,8 @@
 !          2-D array of grid counts on each DE and in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
+!     \item[{[delayout]}]
+!          {\tt delayout} that this {\tt grid} was distributed over.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1572,7 +1575,8 @@
             present(globalStartPerDEPerDim ) .OR. &
             present(maxLocalCellCountPerDim) .OR. &
             present(cellCountPerDEPerDim   ) .OR. &
-            present(periodic               )) then
+            present(periodic               ) .OR. &
+            present(delayout               )) then
           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
                                     "Unknown grid structure", &
                                     ESMF_CONTEXT, rc)) return
@@ -1588,7 +1592,8 @@
                             coordorder, dimCount, minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim, globalCellCountPerDim, &
                             globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                            cellCountPerDEPerDim, periodic, name=name, rc=localrc)
+                            cellCountPerDEPerDim, periodic, delayout=delayout, &
+                            name=name, rc=localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
