@@ -63,8 +63,9 @@
       nDE = ESMF_ConfigGetInt ( cf, rc, label ='Number_of_DEs:', default=7 )
       tau = ESMF_ConfigGetFloat ( cf, rc, &
            label ='Relaxation_time_scale_in_days:')
-      answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', rc )
-      call ESMF_ConfigGetString ( cf, 'restart_file_name:', fname, rc )
+      answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', &
+                                    rc = rc )
+      call ESMF_ConfigGetString ( cf, fname ,'restart_file_name:', rc = rc )
 
 
 ! NOTE: A non-zero rc is returned when an attribute is not found - unless
