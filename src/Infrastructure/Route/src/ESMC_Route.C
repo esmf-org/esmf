@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.123 2004/12/24 18:08:05 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.124 2005/01/11 00:06:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,6 @@
  #include <ESMC_Start.h>
  #include <stdio.h>
  #include <stdlib.h>
- #include <iostream.h>
 
  // associated class definition file
  #include <ESMC_Route.h>
@@ -34,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.123 2004/12/24 18:08:05 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.124 2005/01/11 00:06:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -684,8 +683,7 @@ static int maxroutes = 10;
 // !ARGUMENTS:
       void *srcaddr,       // in, local send buffer base address
       void *dstaddr,       // in, local receive buffer base address
-      ESMC_DataKind dk,    // in, data kind for both src & dest
-      ESMC_RouteOptions options) {       // in, communications options
+      ESMC_DataKind dk) {  // in, data kind for both src & dest
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
@@ -723,18 +721,15 @@ static int maxroutes = 10;
     char **srcbufstart, **rcvbufstart;
     vmk_commhandle **handle;
 
-    // if running async, compute total number of xpackets to be sent.
-    if (options & ESMC_ROUTE_OPTION_ASYNC) {
-        sendRT->ESMC_RTableGetTotalCount(&xpscount);
-        recvRT->ESMC_RTableGetTotalCount(&xprcount);
-        xpcount = xpscount + xprcount;
-        if ((xpcount < 0) || (xpcount > (1<<24))) {
-            sprintf(msgbuf, "computed bad xp counts: %d\n", xpcount);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
-            return (rc);
-        }
-    } else
-        xpcount = 1;
+    // compute total number of xpackets to be sent.
+    sendRT->ESMC_RTableGetTotalCount(&xpscount);
+    recvRT->ESMC_RTableGetTotalCount(&xprcount);
+    xpcount = xpscount + xprcount;
+    if ((xpcount < 0) || (xpcount > (1<<24))) {
+        sprintf(msgbuf, "computed bad xp counts: %d\n", xpcount);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        return (rc);
+    }
 
     // if the total number of possible outstanding communications requests
     // is less than the limit, use local stack buffers.  if it is larger,
@@ -752,10 +747,10 @@ static int maxroutes = 10;
     mypet = vm->vmk_mypet();
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
+    //printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
 
     //printf("Ready to run Route on PET %d, commtable count = %d:\n", mypet, ccount);  
-    //printf("ESMC_RouteRun data address arguments: %p, %p\n", srcaddr, dstaddr);
-    //ESMC_RoutePrint("brief");
+    // ESMC_RoutePrint("");
     
     
     int req=0; // reset request counter
@@ -853,7 +848,7 @@ static int maxroutes = 10;
            nbytes = ESMC_DataKindSize(dk);
 
            // test compacting the xpacket info
-           if ((scontig_length == sstride[0]) || (srctcount == 1)) {
+           if (scontig_length == sstride[0]) {
                srcbufstart[req] = (char *)srcaddr+(soffset*nbytes); 
            } else {
 	     // allocate temporary buffers
@@ -896,7 +891,7 @@ static int maxroutes = 10;
                }
              }
            } 
-           if ((rcontig_length == rstride[0]) || (rcvtcount == 1)) {
+           if (rcontig_length == rstride[0]) {
                rcvbufstart[req] = (char *)dstaddr+(roffset*nbytes); 
            } else {
 	     // allocate temporary buffers
@@ -908,7 +903,7 @@ static int maxroutes = 10;
            } 
 
            handle[req] = NULL;
-           if (mypet == theirpet)
+           if(mypet == theirpet)
 	      rcvbuf = srcbufstart[req];
 	   else {
               //delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
@@ -916,192 +911,148 @@ static int maxroutes = 10;
               //   mypet, theirdeid, ESMF_TRUE);
  // printf("dispatching sendrecv req %d, PET=%d, them=%d, srcbytes=%d, rcvbytes=%d\n", 
  //             req, mypet, theirpet, srctcount*nbytes, rcvtcount*nbytes);
-                if (options & ESMC_ROUTE_OPTION_ASYNC) {
-                  vm->vmk_sendrecv(srcbufstart[req], srctcount*nbytes, theirpet,
-                  rcvbufstart[req], rcvtcount*nbytes, theirpet, &handle[req]);
-		} else {
-                  vm->vmk_sendrecv(srcbufstart[0], srctcount*nbytes, theirpet,
-                  rcvbufstart[0], rcvtcount*nbytes, theirpet);
-		}
+              vm->vmk_sendrecv(srcbufstart[req], srctcount*nbytes, theirpet,
+                rcvbufstart[req], rcvtcount*nbytes, theirpet, &handle[req]);
+//              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirpet,
+//                rcvbufstart, rcvtcount*nbytes, theirpet);
             }
             
-	   // for non-async case, copyout now
-           if ((options & ESMC_ROUTE_OPTION_ASYNC) == 0) {
-    	   // copy out of the receive buffer
-               if ((rcontig_length != rstride[0]) && (rcvtcount > 1) || (mypet == theirpet)) {
-                 switch (rrank) {
-                   case 2:
-                     rcvitems = roffset;
-                     for (l=0; l<rrep_count[0] ; l++, rcvitems += rstride[0]) {
-    
-                          rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
-                          memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
-                          rcvbuf += rcontig_length*nbytes;
-                     }
-                     break;
-                   case 3:
-                     for (k=0; k<rrep_count[1]; k++, roffset += rstride[1]) {
-                       rcvitems = roffset;
-                       for (l=0; l<rrep_count[0]; l++, rcvitems += rstride[0]) {
-    
-                            rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
-                            memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
-                            rcvbuf += rcontig_length*nbytes;
-                       }
-                     }
-                     break;
-                   default:
-                     sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
-                     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                                             msgbuf, &rc);
-                     return (rc);
-                 }
-               }
-               if ((scontig_length != sstride[0]) && (srctcount != 1) && srcbufstart[req])
-                   free(srcbufstart[req]);
-               if ((rcontig_length != rstride[0]) && (rcvtcount != 1) && rcvbufstart[req])
-                   free(rcvbufstart[req]);
-	   } else 
-
-                ++req;
+            ++req;
 
 	}
 
     }
 
-    
-    if (options & ESMC_ROUTE_OPTION_ASYNC) {
-        req=0; // reset request counter
-    
-        // for each destination in the comm table
-        for (i=0; i<ccount; i++) {
-    
-            // find out who the next id is 
-            rc = ct->ESMC_CommTableGetPartner(i, &theirpet, &needed);
-            if (!needed) {
-      //       printf("RouteRun: comm partner %d not needed, looping\n", theirpet);
-                continue;
+    req=0; // reset request counter
+
+    // for each destination in the comm table
+    for (i=0; i<ccount; i++) {
+
+        // find out who the next id is 
+        rc = ct->ESMC_CommTableGetPartner(i, &theirpet, &needed);
+        if (!needed) {
+  //       printf("RouteRun: comm partner %d not needed, looping\n", theirpet);
+            continue;
+        } else {
+  //       printf("RouteRun: comm partner %d needed %d\n", theirpet, needed);
+        }
+       
+        // find total number of xpackets
+	rc = recvRT->ESMC_RTableGetCount(theirpet, &xrcount);
+	rc = sendRT->ESMC_RTableGetCount(theirpet, &xscount);
+
+        xmcount = MAX(xrcount, xscount);
+        for (m=0, ixs=0, ixr=0; m < xmcount; m++, ixs++, ixr++){
+
+            // look up the corresponding send/recv xpackets in the rtables
+
+            if (ixs < xscount) {
+                rc = sendRT->ESMC_RTableGetEntry(theirpet, ixs, &sendxp);
+                rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
+                                             sstride, srep_count);
+  //              printf("RouteRun: sendxp\n");
+  //              sendxp->ESMC_XPacketPrint();
             } else {
-      //       printf("RouteRun: comm partner %d needed %d\n", theirpet, needed);
+                sendxp = NULL;
+                srank = 0;
+                soffset=0; scontig_length=0;
+                for(j=0; j<ESMF_MAXDIM; j++) {
+                    srep_count[j]=0;
+		    sstride[j]=0;
+                }
+  //              printf("nothing to send\n");
             }
-           
-            // find total number of xpackets
-    	rc = recvRT->ESMC_RTableGetCount(theirpet, &xrcount);
-    	rc = sendRT->ESMC_RTableGetCount(theirpet, &xscount);
-    
-            xmcount = MAX(xrcount, xscount);
-            for (m=0, ixs=0, ixr=0; m < xmcount; m++, ixs++, ixr++){
-    
-                // look up the corresponding send/recv xpackets in the rtables
-    
-                if (ixs < xscount) {
-                    rc = sendRT->ESMC_RTableGetEntry(theirpet, ixs, &sendxp);
-                    rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
-                                                 sstride, srep_count);
-      //              printf("RouteRun: sendxp\n");
-      //              sendxp->ESMC_XPacketPrint();
-                } else {
-                    sendxp = NULL;
-                    srank = 0;
-                    soffset=0; scontig_length=0;
-                    for(j=0; j<ESMF_MAXDIM; j++) {
-                        srep_count[j]=0;
-    		    sstride[j]=0;
-                    }
-      //              printf("nothing to send\n");
+  //          printf("soffset: %d\n", soffset);
+
+            if (ixr < xrcount) {
+                rc = recvRT->ESMC_RTableGetEntry(theirpet, ixr, &recvxp);
+                rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
+                                             rstride, rrep_count);
+  //               printf("RouteRun: recvxp\n");
+  //               recvxp->ESMC_XPacketPrint();
+            } else {
+                recvxp = NULL;
+                rrank = 0;
+		roffset=0; rcontig_length=0;
+                for(j=0; j<ESMF_MAXDIM; j++) {
+                    rrep_count[j]=0;
+                    rstride[j]=0;
                 }
-      //          printf("soffset: %d\n", soffset);
-    
-                if (ixr < xrcount) {
-                    rc = recvRT->ESMC_RTableGetEntry(theirpet, ixr, &recvxp);
-                    rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
-                                                 rstride, rrep_count);
-      //               printf("RouteRun: recvxp\n");
-      //               recvxp->ESMC_XPacketPrint();
-                } else {
-                    recvxp = NULL;
-                    rrank = 0;
-    		roffset=0; rcontig_length=0;
-                    for(j=0; j<ESMF_MAXDIM; j++) {
-                        rrep_count[j]=0;
-                        rstride[j]=0;
-                    }
-      //              printf("nothing to recv\n");
-                }
-      //          printf("roffset: %d\n", roffset);
-            
-           
-                // ready to call the comm routines - multiple times, one for
-                //  each disjoint memory piece.
-         
-                // if sendxp == NULL, nothing to send
-                // if recvxp == NULL, nothing to recv
-                // (but one way communication is certainly possible)
-    
-               // TODO: for now, ranks must match.
-               mrank = MAX(srank, rrank);
-               //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
-               //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
-               //                     (long int)srcaddr, (long int)dstaddr);
-    
-    	   // Count the total number of points to send/recv.  set count to 0
-               // if this PE has nothing to send or receive (which is a possible
-               // case which must be handled).
-    	   srctcount = sendxp ? scontig_length : 0;
-    	   rcvtcount = recvxp ? rcontig_length : 0;
-               for (j=0; j<mrank-1; j++) {
-                   if (sendxp) srctcount *= srep_count[j];
-                   if (recvxp) rcvtcount *= rrep_count[j];
-               }
-    
-               nbytes = ESMC_DataKindSize(dk);
-    
-               if(mypet == theirpet)
-    	      rcvbuf = srcbufstart[req];
-               else
-    	      rcvbuf = rcvbufstart[req];
+  //              printf("nothing to recv\n");
+            }
+  //          printf("roffset: %d\n", roffset);
         
-      //printf("waiting for sendrecv req %d, PET=%d\n", req, mypet);
-               vm->vmk_wait(&handle[req]);
-               
-    	   // copy out of the receive buffer
-               if ((rcontig_length != rstride[0]) && (rcvtcount > 1) || (mypet == theirpet)) {
-                 switch (rrank) {
-                   case 2:
-                     rcvitems = roffset;
-                     for (l=0; l<rrep_count[0] ; l++, rcvitems += rstride[0]) {
+       
+            // ready to call the comm routines - multiple times, one for
+            //  each disjoint memory piece.
+     
+            // if sendxp == NULL, nothing to send
+            // if recvxp == NULL, nothing to recv
+            // (but one way communication is certainly possible)
+
+           // TODO: for now, ranks must match.
+           mrank = MAX(srank, rrank);
+           //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
+           //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
+           //                     (long int)srcaddr, (long int)dstaddr);
+
+	   // Count the total number of points to send/recv.  set count to 0
+           // if this PE has nothing to send or receive (which is a possible
+           // case which must be handled).
+	   srctcount = sendxp ? scontig_length : 0;
+	   rcvtcount = recvxp ? rcontig_length : 0;
+           for (j=0; j<mrank-1; j++) {
+               if (sendxp) srctcount *= srep_count[j];
+               if (recvxp) rcvtcount *= rrep_count[j];
+           }
+
+           nbytes = ESMC_DataKindSize(dk);
+
+           if(mypet == theirpet)
+	      rcvbuf = srcbufstart[req];
+           else
+	      rcvbuf = rcvbufstart[req];
     
-                          rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
-                          memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
-                          rcvbuf += rcontig_length*nbytes;
-                     }
-                     break;
-                   case 3:
-                     for (k=0; k<rrep_count[1]; k++, roffset += rstride[1]) {
-                       rcvitems = roffset;
-                       for (l=0; l<rrep_count[0]; l++, rcvitems += rstride[0]) {
-    
-                            rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
-                            memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
-                            rcvbuf += rcontig_length*nbytes;
-                       }
-                     }
-                     break;
-                   default:
-                     sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
-                     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                                             msgbuf, &rc);
-                     return (rc);
+  //printf("waiting for sendrecv req %d, PET=%d\n", req, mypet);
+           vm->vmk_wait(&handle[req]);
+           
+           // copy out of the recv buffer
+	   if(rcvtcount > 0) {
+             switch (rrank) {
+               case 2:
+                 rcvitems = roffset;
+                 for (l=0; l<rrep_count[0] ; l++, rcvitems += rstride[0]) {
+
+                      rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
+                      memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
+                      rcvbuf += rcontig_length*nbytes;
                  }
-               }
-               if ((scontig_length != sstride[0]) && (srctcount != 1) && srcbufstart[req])
-                   free(srcbufstart[req]);
-               if ((rcontig_length != rstride[0]) && (rcvtcount != 1) && rcvbufstart[req])
-                   free(rcvbufstart[req]);
-    
-               ++req;
-    	    }
-    	}
+                 break;
+               case 3:
+                 for (k=0; k<rrep_count[1]; k++, roffset += rstride[1]) {
+                   rcvitems = roffset;
+                   for (l=0; l<rrep_count[0]; l++, rcvitems += rstride[0]) {
+
+                        rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
+                        memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
+                        rcvbuf += rcontig_length*nbytes;
+                   }
+                 }
+                 break;
+               default:
+                 sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
+                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                                         msgbuf, &rc);
+                 return (rc);
+             }
+           }
+           if ((scontig_length != sstride[0]) && srcbufstart[req])
+               free(srcbufstart[req]);
+           if ((rcontig_length != rstride[0]) && rcvbufstart[req])
+               free(rcvbufstart[req]);
+
+           ++req;
+	}
 
     }
 
@@ -1447,8 +1398,7 @@ static int maxroutes = 10;
   //        printf("Match1: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
-	     cout << "theirDE = " << theirDE << ", parentDE = " 
-                  << theirMatchingPET << endl;
+	     printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
 
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
@@ -1512,8 +1462,7 @@ static int maxroutes = 10;
   //        printf("Match2: %d, %d\n", theirDE, theirMatchingPET);
           //theirMatchingPET = theirDE;     // temporarily
           if (theirMatchingPET != theirDE) 
-	     cout << "theirDE = " << theirDE << ", parentDE = " 
-                  << theirMatchingPET << endl;
+	     printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
 
           // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
@@ -1691,8 +1640,7 @@ static int maxroutes = 10;
           dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
-             cout << "theirDE = " << theirDE << ", parentDE = "
-                  << theirMatchingPET << endl;
+	     printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
     
           // loop over the number of AI's for their DE
           for (m=0; m<dstAICountPerDE[theirDE]; m++) {
@@ -1781,8 +1729,7 @@ static int maxroutes = 10;
           srcdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
                                                   &theirMatchingPET, 1);
           if (theirMatchingPET != theirDE)
-             cout << "theirDE = " << theirDE << ", parentDE = "
-                  << theirMatchingPET << endl;
+	     printf("theirDE = %d, parentDE = %d\n", theirDE, theirMatchingPET);
 
           // loop over the number of AI's for their DE
           for (m=0; m<srcAICountPerDE[theirDE]; m++) {
@@ -1945,8 +1892,7 @@ static int maxroutes = 10;
  //         printf("Match1: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
-	     cout << "their_de = " << their_de << ", parent_de = " 
-                  << their_matching_pet << endl;
+	     printf("theirDE = %d, parentDE = %d\n", their_de, their_matching_pet);
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
@@ -2011,8 +1957,7 @@ static int maxroutes = 10;
   //        printf("Match2: %d, %d\n", their_de, their_matching_pet);
           //their_matching_pet = their_de;     // temporarily
           if (their_matching_pet != their_de) 
-	     cout << "their_de = " << their_de << ", parent_de = " 
-                  << their_matching_pet << endl;
+	     printf("theirDE = %d, parentDE = %d\n", their_de, their_matching_pet);
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
@@ -2250,7 +2195,9 @@ static int maxroutes = 10;
     sprintf(msgbuf," Routeid = %d\n", routeid);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
-    // TODO: print something about the attached VM?
+//    sprintf(msgbuf," DELayout:\n");
+//    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+//    rc = layout->ESMC_DELayoutPrint(); // options);  // doesn't take opts yet
     sprintf(msgbuf," Send table:\n");
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
