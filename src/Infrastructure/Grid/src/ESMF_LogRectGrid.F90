@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.49 2004/03/23 17:56:52 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.50 2004/03/24 16:01:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2860,7 +2860,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
-                                     cornerCoord, faceCoord, total, rc)
+                                     cornerCoord, faceCoord, reorder, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2869,6 +2869,7 @@
       type(ESMF_Array), dimension(:), pointer, optional :: centerCoord
       type(ESMF_Array), dimension(:,:), pointer, optional :: cornerCoord
       type(ESMF_Array), optional :: faceCoord
+      logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
@@ -2899,6 +2900,10 @@
 !          be defined first, followed by the face index.  Faces should
 !          be numbered consistently with corners.  For example, face 1 should
 !          correspond to the face between corners 1,2.
+!     \item[{[reorder]}]
+!          Logical.  If TRUE, reorder any results using the GridOrder before
+!          returning.  If FALSE do not reorder.  The default value is TRUE
+!          and users should not need to reset this for most applications.
 !     \item[{[total]}]
 !          Logical. If TRUE, return the total coordinates including internally
 !          generated boundary cells. If FALSE return the
@@ -2916,6 +2921,7 @@
       integer :: horzPhysIdUse, vertPhysIdUse
       integer :: aSize, gridRank, index
       integer, dimension(3) :: order
+      logical :: reorderUse
       type(ESMF_Array), dimension(:), pointer :: coord
       type(ESMF_Array), dimension(:,:), pointer :: coord2
 
@@ -2936,6 +2942,8 @@
       ! Initialize other variables
       horzPhysIdUse = -1
       vertPhysIdUse = -1
+      reorderUse    = .TRUE.
+      if (present(reorder)) reorderUse = reorder
 
       ! Get the grid rank -- to check if there is a vertical grid available
       gridRank = grid%ptr%dimCount
@@ -2996,10 +3004,16 @@
             return
           endif
         endif
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
-        do i = 1,aSize
-          centerCoord(order(i)) = coord(i)
-        enddo
+        if (reorderUse) then
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
+          do i = 1,aSize
+            centerCoord(order(i)) = coord(i)
+          enddo
+        else
+          do i = 1,aSize
+            centerCoord(i) = coord(i)
+          enddo
+        endif
         deallocate(coord)
       endif
 
@@ -3025,10 +3039,16 @@
             return
           endif
         endif
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
-        do i = 1,aSize
-          cornerCoord(:,order(i)) = coord2(:,i)
-        enddo
+        if (reorderUse) then
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
+          do i = 1,aSize
+            cornerCoord(:,order(i)) = coord2(:,i)
+          enddo
+        else
+          do i = 1,aSize
+            cornerCoord(:,i) = coord2(:,i)
+          enddo
+        endif
         deallocate(coord2)
       endif
 
@@ -3089,7 +3109,8 @@
       subroutine ESMF_LRGridGetDE(grid, horzRelLoc, vertRelLoc, &
                                   myDE, localCellCount, localCellCountPerDim, &
                                   minLocalCoordPerDim, maxLocalCoordPerDim, &
-                                  globalStartPerDim, globalAIPerDim, total, rc)
+                                  globalStartPerDim, globalAIPerDim, reorder, &
+                                  total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -3105,6 +3126,7 @@
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
       type(ESMF_AxisIndex), dimension(:), intent(inout), &
                                             optional :: globalAIPerDim
+      logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -3141,6 +3163,10 @@
 !          Global index of starting counts for each dimension.
 !     \item[{[globalAIPerDim]}]
 !          Global axis indices for each dimension.
+!     \item[{[reorder]}]
+!          Logical.  If TRUE, reorder any results using the GridOrder before
+!          returning.  If FALSE do not reorder.  The default value is TRUE
+!          and users should not need to reset this for most applications.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
 !          The default is the computational regime.
@@ -3160,6 +3186,7 @@
       integer :: horzCellCount, vertCellCount
       integer, dimension(3) :: localCellCountPerDimUse, &
                                globalStartPerDimUse, order
+      logical :: reorderUse
       real(ESMF_KIND_R8), dimension(3) :: minLCPDUse, maxLCPDUse
       type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
       type(ESMF_PhysCoord) :: coord
@@ -3183,6 +3210,8 @@
       vertDistIdUse = -1
       horzPhysIdUse = -1
       vertPhysIdUse = -1
+      reorderUse    = .TRUE.
+      if (present(reorder)) reorderUse = reorder
 
       ! Get the grid rank -- to check if there is a vertical grid available
       gridRank = grid%ptr%dimCount
@@ -3291,15 +3320,26 @@
           endif
         endif
         ! load local values into return arguments
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
-        do i = 1,aSize
-          if (present(localCellCountPerDim)) &
-                      localCellCountPerDim(order(i)) = localCellCountPerDimUse(i)
-          if (present(   globalStartPerDim)) &
-                         globalStartPerDim(order(i)) =    globalStartPerDimUse(i)
-          if (present(      globalAIPerDim)) &
-                            globalAIPerDim(order(i)) =       globalAIPerDimUse(i)
-        enddo
+        if (reorderUse) then
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
+          do i = 1,aSize
+            if (present(localCellCountPerDim)) &
+                localCellCountPerDim(order(i)) = localCellCountPerDimUse(i)
+            if (present(   globalStartPerDim)) &
+                globalStartPerDim(order(i)) =    globalStartPerDimUse(i)
+            if (present(      globalAIPerDim)) &
+                globalAIPerDim(order(i)) =       globalAIPerDimUse(i)
+          enddo
+        else
+          do i = 1,aSize
+            if (present(localCellCountPerDim)) &
+                localCellCountPerDim(i) = localCellCountPerDimUse(i)
+            if (present(   globalStartPerDim)) &
+                globalStartPerDim(i) =    globalStartPerDimUse(i)
+            if (present(      globalAIPerDim)) &
+                globalAIPerDim(i) =       globalAIPerDimUse(i)
+          enddo
+        endif
       endif
 
       ! now make PhysGrid calls
@@ -3327,10 +3367,16 @@
             return
           endif
         endif
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
-        do i = 1,aSize
-          minLocalCoordPerDim(order(i)) = minLCPDUse(i)
-        enddo
+        if (reorderUse) then
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
+          do i = 1,aSize
+            minLocalCoordPerDim(order(i)) = minLCPDUse(i)
+          enddo
+        else
+          do i = 1,aSize
+            minLocalCoordPerDim(i) = minLCPDUse(i)
+          enddo
+        endif
       endif
 
       if (present(maxLocalCoordPerDim)) then
@@ -3357,10 +3403,16 @@
             return
           endif
         endif
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
-        do i = 1,aSize
-          maxLocalCoordPerDim(order(i)) = maxLCPDUse(i)
-        enddo
+        if (reorderUse) then
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
+          do i = 1,aSize
+            maxLocalCoordPerDim(order(i)) = maxLCPDUse(i)
+          enddo
+        else
+          do i = 1,aSize
+            maxLocalCoordPerDim(i) = maxLCPDUse(i)
+          enddo
+        endif
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -3516,7 +3568,7 @@
       endif
 
       ! Load temp values into input array and clean up
-      order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+      order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
       if (aSize.ge.2) then
         globalAI(:,order(1)) = horzAI(:,1)
         globalAI(:,order(2)) = horzAI(:,2)
@@ -3645,7 +3697,7 @@
         aSize = max(aSize, tempSize)
         allocate(gtemp2D(tempSize,tempSize2))
         allocate(ltemp2D(tempSize,tempSize2))
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtemp2D(:,i) = global2D(:,order(i))
         enddo
@@ -3660,7 +3712,7 @@
         aSize = max(aSize, tempSize)
         allocate(gtempAI2D(tempSize,tempSize2))
         allocate(ltempAI2D(tempSize,tempSize2))
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtempAI2D(:,i) = globalAI2D(:,order(i))
         enddo
@@ -3763,7 +3815,7 @@
           endif
         endif
         tempSize2 = size(global2D,2)
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           local2D(:,order(i)) = ltemp2D(:,i)
         enddo
@@ -3814,7 +3866,7 @@
           endif
         endif
         tempSize2 = size(globalAI2D,2)
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           localAI2D(:,order(i)) = ltempAI2D(:,i)
         enddo
@@ -3938,7 +3990,7 @@
         aSize = max(aSize, tempSize)
         allocate(gtemp2D(tempSize,tempSize2))
         allocate(ltemp2D(tempSize,tempSize2))
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           ltemp2D(:,i) = local2D(:,order(i))
         enddo
@@ -3953,7 +4005,7 @@
         aSize = max(aSize, tempSize)
         allocate(gtempAI2D(tempSize,tempSize2))
         allocate(ltempAI2D(tempSize,tempSize2))
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           ltempAI2D(:,i) = localAI2D(:,order(i))
         enddo
@@ -4039,7 +4091,7 @@
           endif
         endif
         tempSize2 = size(local2D,2)
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           global2D(:,order(i)) = gtemp2D(:,i)
         enddo
@@ -4087,7 +4139,7 @@
           endif
         endif
         tempSize2 = size(localAI2D,2)
-        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           globalAI2D(:,order(i)) = gtempAI2D(:,i)
         enddo
@@ -4570,14 +4622,14 @@
       ! Get global coordinate extents
       if (present(minGlobalCoordPerDim)) then
         aSize = min(gridRank, size(minGlobalCoordPerDim))
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
         do i=1,aSize
           minGlobalCoordPerDim(order(i)) = gridp%minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
         aSize = min(gridRank, size(maxGlobalCoordPerDim))
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
         do i=1,aSize
           maxGlobalCoordPerDim(order(i)) = gridp%maxGlobalCoordPerDim(i)
         enddo
@@ -4586,7 +4638,7 @@
       ! get the periodicity
       if (present(periodic)) then
         aSize = min(gridRank, size(periodic))
-        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
         do i=1,aSize
           periodic(order(i)) = gridp%periodic(i)
         enddo
@@ -4659,7 +4711,7 @@
               return
             endif
           endif
-          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             globalCellCountPerDim(order(i)) = gCCPDUse(i)
           enddo
@@ -4685,7 +4737,7 @@
               return
             endif
           endif
-          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             globalStartPerDEPerDim(:,order(i)) = gSPDEPDUse(:,i)
           enddo
@@ -4711,7 +4763,7 @@
               return
             endif
           endif
-          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             maxLocalCellCountPerDim(order(i)) = mLCCPDUse(i)
           enddo
@@ -4735,7 +4787,7 @@
               return
             endif
           endif
-          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+          order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             cellCountPerDEPerDim(:,order(i)) = cCPDEPDUse(:,i)
           enddo
