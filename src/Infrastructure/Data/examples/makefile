@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002/12/09 23:16:39 nscollins Exp $ 
+# $Id: makefile,v 1.4 2002/12/09 23:18:48 nscollins Exp $ 
 
 ALL: 
 
@@ -52,15 +52,4 @@ RUN_ESMF_ArrayCreateExUNI:
 
 ESMF_ArrayCreateEx.rm:
 	echo "ESMF_ArrayCreateEx.rm target called here."
-
-
-# local for halem
-doit:
-	rm -f ESMF_ArrayCreateEx.o ESMF_ArrayCreateEx
-	f90 -c -I/u1/nancy/esmf/esmf/mod/modg/alpha -g -assume gfullpath  -free -cpp -I/u1/nancy/esmf/esmf/src/Infrastructure/Data/examples -I/u1/nancy/esmf/esmf/src/Infrastructure/Data/examples/../include -I/u1/nancy/esmf/esmf -I/u1/nancy/esmf/esmf/src/include -I/usr/local/include -I/u1/nancy/esmf/esmf/build/alpha -I/u1/nancy/esmf/esmf/include -I/u1/nancy/esmf/esmf/mod/modg/alpha  -I/u1/nancy/esmf/esmf/timing /u1/nancy/esmf/esmf/src/Infrastructure/Data/examples/ESMF_ArrayCreateEx.F90
-	f90 -L/u1/nancy/esmf/esmf/lib/libg/alpha -v -o ESMF_ArrayCreateEx ESMF_ArrayCreateEx.o -L/u1/nancy/esmf/esmf/lib/libg/alpha -lesmf -L/usr/ccs/lib/cmplrs/cxx -lcxx  -L/usr/opt/mpi/lib -lmpi    
-
-
-#	/usr/bin/cc -L/u1/nancy/esmf/esmf/lib/libg/alpha -v -o ESMC_ArrayCreateEx ESMC_ArrayCreateEx.o -L/u1/nancy/esmf/esmf/lib/libg/alpha -L/usr/ccs/lib/cmplrs/cxx -L/usr/opt/mpi/lib /usr/lib/cmplrs/fort90/for_main.o -O4 -lesmf -lcxx -lmpi -qlshpf -lUfor -lfor -lFutil -lm -lots -lm_c32 -lmld -lexc 
-#	/usr/lib/cmplrs/cc/ld -o ESMC_ArrayCreateEx -L/u1/nancy/esmf/esmf/lib/libg/alpha -L/u1/nancy/esmf/esmf/lib/libg/alpha -L/usr/ccs/lib/cmplrs/cxx -L/usr/opt/mpi/lib -g0 -O4 -call_shared /usr/lib/cmplrs/cc/crt0.o ESMC_ArrayCreateEx.o /usr/lib/cmplrs/fort90/for_main.o -lesmf -lcxx -lmpi -qlshpf -lUfor -lfor -lFutil -lm -lots -lm_c32 -lmld -lexc -lc 
 
