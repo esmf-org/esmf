@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.6 2003/09/09 21:45:15 flanigan Exp $
+#  $Id: common.mk,v 1.7 2003/09/09 22:17:25 flanigan Exp $
 #
 #  common.mk
 #
@@ -62,7 +62,7 @@ ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
-ESMC_OBJDIR	= ${ESMC_MODDIR}
+ESMC_OBJDIR	= ${ESMF_MODDIR}
 ESMC_TESTDIR	= $(ESMF_BUILD)/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
 ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD_DIR)/build/doc
