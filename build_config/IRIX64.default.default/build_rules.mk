@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2004/03/16 18:00:53 nscollins Exp $
+# $Id: build_rules.mk,v 1.5 2004/03/16 23:08:58 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -76,6 +76,8 @@ LD		   = ld -n32
 #
 # C and Fortran compiler
 #
+C_CC		   = CC -n32 -mp -woff 1164 -LANG:std
+C_FC		   = f90 -cpp -n32 -mp -macro_expand
 C_CLINKER	   = cc  -n32 -mp -Wl,-woff,84,-woff,85,-woff,134 -MP:open_mp=ON
 C_FLINKER	   = f90  -n32 -mp -Wl,-woff,84,-woff,85,-woff,134 -MP:open_mp=ON
 #
@@ -100,6 +102,8 @@ LD		   = ld -64
 #
 # C and Fortran compiler 
 #
+C_CC		   = CC -64 -mp -woff 1164 -no_prelink -ptused -LANG:std
+C_FC		   = f90 -cpp -64 -mp -macro_expand
 C_CLINKER	   = cc  -64 -mp -Wl,-woff,84,-woff,85,-woff,134 -MP:open_mp=ON
 C_FLINKER	   = f90  -64 -mp -Wl,-woff,84,-woff,85,-woff,134 -MP:open_mp=ON
 #
