@@ -1,10 +1,10 @@
 &input
      i_max = 160,         j_max = 80,
-     x_min = 0.0,         x_max = 200.0,
-     y_min = 0.0,         y_max = 050.0,
+     x_min = 0.0,         x_max = 2.0e+05,
+     y_min = 0.0,         y_max = 5.0e+04,
      uin = 00.5,          rhoin = 6.0,           siein = 2.0e+02,
      vin2 = 04.5,         rhoin2 = 2.0,          siein2 = 6.0e+02, 
-     gamma = 1.100,       akb = 0.2,
+     gamma = 1.100,       akb = 0.2e+03,
      q0 = 0.15,           
      u0 = 00.5,           v0 = 0.0,
      sie0 = 2.0e+02,      rho0 = 6.0,
