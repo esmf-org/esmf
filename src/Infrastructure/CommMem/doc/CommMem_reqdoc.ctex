@@ -1,4 +1,4 @@
-% $Id: CommMem_reqdoc.ctex,v 1.1 2002/08/28 21:15:07 eschwab Exp $
+% $Id: CommMem_reqdoc.ctex,v 1.2 2002/10/08 17:24:42 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -77,7 +77,7 @@
 \input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 #endif
 
-%\section{\longname Background}
+%\section{Background}
 #ifdef STANDALONE
 \input{CommMem_background}
 #elif defined(CONSTITUENT)
@@ -85,7 +85,7 @@
 #endif
 
 #ifdef STANDALONE
-\section{\longname Terms}
+\section{Terms}
 \input{CommMem_terms}
 #endif
 
