@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.12 2004/03/24 18:24:43 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.13 2004/04/01 15:03:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.12 2004/03/24 18:24:43 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.13 2004/04/01 15:03:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -283,7 +283,7 @@ contains
         DEtoPET, len, cyclic, status)
     endif
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCreate1D error"
+      print *, "c_ESMC_newDELayoutCreate error"
       return
     endif
     
@@ -1025,7 +1025,7 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCreateData error"
+      print *, "c_ESMC_newDELayoutDataCreate error"
       return
     endif
 
@@ -1100,7 +1100,7 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCreateData error"
+      print *, "c_ESMC_newDELayoutDataCreate error"
       return
     endif
 
@@ -1175,7 +1175,7 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCreateData error"
+      print *, "c_ESMC_newDELayoutDataCreate error"
       return
     endif
 
