@@ -1,4 +1,4 @@
-% $Id: PhysGrid_implnotes.tex,v 1.2 2003/11/14 21:03:46 jwolfe Exp $
+% $Id: PhysGrid_implnotes.tex,v 1.3 2003/11/17 20:49:18 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -11,12 +11,12 @@
 % <Describe class function and relation to other classes.>
 
 
-The PhysGrid class is itself internal and is aggregated by the Grid
+The PhysGrid class is itself private and is part of the Grid
 class.  It is designed to contain all information describing physical
 properties of the Grid, as well as methods to initialize them and to
 calculate user-requested metrics.
 
-The PhysGrid class contains the following internal classes:
+The PhysGrid class contains the following private classes:
 \begin{itemize}
 
 \item {\bf ESMF\_GridMask} Data type describing masks for a PhysGrid.  Masks
@@ -28,10 +28,11 @@ coordinate attributes like names and flags for special properties of a
 coordinate axis.  This information is used by PhysGrid and Grid to help
 describe the complete physical properties of a grid.
 
-\item {\bf ESMF\_PhysLocation} Physical locations for a set of points defining the grid.
+\item {\bf ESMF\_PhysLocation} Physical locations for a set of points defining
+the grid.
 
-\item {\bf ESMF\_PhysRegion} Physical locations for a set of points defining regions of
-the grid (e.g. cell vertices or domains of influence).
+\item {\bf ESMF\_PhysRegion} Physical locations for a set of points defining
+regions of the grid (e.g. cell vertices or domains of influence).
 \end{itemize}
 
 
@@ -50,14 +51,12 @@ of the corresponding Field data.
 
 The PhysGrid class maintains a local physical representation of a Grid,
 including all necessary data and masks.  PhysGrids can represent subGrids
-of a single Grid and be aggregated by the same Grid object. The PhysGrid
+of a single Grid and be contained by the same Grid object. The PhysGrid
 class must have methods that can internally generate a variety of
 computational grids in a distributed environment from relatively simple
 input.  The PhysGrid data has to be accessible to the ESMF user in a
 variety of specified ways or metrics, and it must have the capability to
 attach a number of masks or identifiers.  Please note that the PhysGrid class
-is designed to be an internal class; all access to its contents are via
+is designed to be an private class; all access to its contents are via
 Grid methods.
 
-
-The PhysGrid class is aggregated by the Grid class.

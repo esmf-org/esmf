@@ -1,4 +1,4 @@
-% $Id: DistGrid_implnotes.tex,v 1.2 2003/11/13 23:42:00 jwolfe Exp $
+% $Id: DistGrid_implnotes.tex,v 1.3 2003/11/17 20:48:25 jwolfe Exp $
 
 %\subsection{Implementation Notes}
 
@@ -11,7 +11,7 @@ values. It interacts closely with the PhysGrid object.
 
 \item {\bf DistGrid Internal Classes}
 
-The DistGrid class aggregates the DELayout class as well as two internal subclasses,
+The DistGrid class contains the DELayout class as well as two private subclasses,
 the DistGridGlobal and DistGridLocal classes.  The separation between DistGridGlobal
 and DistGridLocal allows the code to clearly differentiate between functions which
 operate internal to a single DE on a local decomposition of data, and those which

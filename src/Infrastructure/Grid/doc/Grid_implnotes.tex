@@ -1,11 +1,11 @@
-% $Id: Grid_implnotes.tex,v 1.3 2003/11/14 21:03:17 jwolfe Exp $
+% $Id: Grid_implnotes.tex,v 1.4 2003/11/17 20:48:57 jwolfe Exp $
 
 %\subsection{Design and Implementation Notes}
 
 Overall Grid design strategy...
 
 \subsubsection{Grid Classes}
-The Grid class aggregates two internal classes: the DistGrid (Distributed
+The Grid class contains two internal classes: the DistGrid (Distributed
 Grid) class and the PhysGrid (Physical Grid) class.  The separation into two
 classes allows the code to differentiate between functions which define the
 local decomposition of data and the local representation of the grid.  The Grid
@@ -17,13 +17,13 @@ functions.  Each Grid contains at least one DistGrid and one PhysGrid:
 \item {\bf DistGrid} The DistGrid class maintains the relationship of how
 a DELayout maps onto a Grid representation and how that Grid is distributed.
 DistGrids can represent the same Grid but have different mappings (staggerings)
-and can be aggregated by the same Grid object. The DistGrid class maintains the
+and can be contained by the same Grid object. The DistGrid class represents the
 mapping between the global Grid and the local data distribution;  it has
 methods to aid in the collection and communication of global data.
 \item {\bf PhysGrid} The PhysGrid class maintains a local physical
 representation of a Grid, including all necessary data and masks.  PhysGrids
 can represent subGrids, like vertical Grids, of a single Grid and be
-aggregated by the same Grid object.
+contained by the same Grid object.
 \end{itemize}
 
 Some methods which have a Grid interface are actually implemented
