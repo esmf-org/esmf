@@ -1,4 +1,4 @@
-// $Id: ESMC_Perf.C,v 1.4 2003/03/24 18:20:57 ekluz Exp $
+// $Id: ESMC_Perf.C,v 1.5 2003/04/02 19:51:50 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Perf.C,v 1.4 2003/03/24 18:20:57 ekluz Exp $";
+ static const char *const version = "$Id: ESMC_Perf.C,v 1.5 2003/04/02 19:51:50 flanigan Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -59,7 +59,7 @@
 //
 // !DESCRIPTION:
 //      Create a new Perf object. Allocates memory for a new Perf
-//      object and uses the internal routine ESMC_PerfContruct to
+//      object and uses the internal routine ESMC\_PerfConstruct to
 //      initialize it.
 //
 //EOP
@@ -86,7 +86,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Perf object previously allocated
-//      via an ESMC_PerfCreate routine.
+//      via an ESMC\_PerfCreate routine.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -251,7 +251,7 @@
 //
 // !DESCRIPTION:
 //      Validates that a Perf is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -278,7 +278,7 @@
 //
 // !DESCRIPTION:
 //      Print information about a Perf.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n

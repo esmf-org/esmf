@@ -1,4 +1,4 @@
-% $Id: PerfProf_desdoc.ctex,v 1.8 2003/04/02 19:51:45 flanigan Exp $
+% $Id: 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,28 +44,28 @@
 #ifdef STANDALONE
 \input{PerfProf_syn}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/PerfProf_syn}
+\input{../Infrastructure/PerfProf/doc/PerfProf_syn}
 #endif
 
 %\section{Algorithmic Description}
 #ifdef STANDALONE
 %\input{PerfProf_alg}
 #elif defined(CONSTITUENT)
-%\input{../src/Infrastructure/PerfProf/doc/PerfProf_alg}
+%\input{../Infrastructure/PerfProf/doc/PerfProf_alg}
 #endif
 
 \section{Object Model}
 #ifdef STANDALONE
 \input{PerfProf_obj}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/PerfProf_obj}
+\input{../Infrastructure/PerfProf/doc/PerfProf_obj}
 #endif
 
 \section{Global Parameters and Definitions}
 #ifdef STANDALONE
 \input{PerfProf_param}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/PerfProf_param}
+\input{../Infrastructure/PerfProf/doc/PerfProf_param}
 #endif
 
 \section{Perf Design}
@@ -74,28 +74,28 @@
 #ifdef STANDALONE
 \input{Perf_desc}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Perf_desc}
+\input{../Infrastructure/PerfProf/doc/Perf_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Perf_design}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Perf_design}
+\input{../Infrastructure/PerfProf/doc/Perf_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Perf_def}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Perf_def}
+\input{../Infrastructure/PerfProf/doc/Perf_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Perf_rest}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Perf_rest}
+\input{../Infrastructure/PerfProf/doc/Perf_rest}
 #endif
 
 \subsection{Class API}
@@ -103,8 +103,8 @@
 \input{ESMC_Perf_chapi}
 \input{ESMC_Perf_ccapi}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/ESMC_Perf_chapi}
-\input{../src/Infrastructure/PerfProf/doc/ESMC_Perf_ccapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_Perf_chapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_Perf_ccapi}
 #endif
 
 \section{Segment Design}
@@ -113,28 +113,28 @@
 #ifdef STANDALONE
 \input{Segment_desc}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Segment_desc}
+\input{../Infrastructure/PerfProf/doc/Segment_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Segment_design}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Segment_design}
+\input{../Infrastructure/PerfProf/doc/Segment_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Segment_def}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Segment_def}
+\input{../Infrastructure/PerfProf/doc/Segment_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Segment_rest}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Segment_rest}
+\input{../Infrastructure/PerfProf/doc/Segment_rest}
 #endif
 
 \subsection{Class API}
@@ -142,8 +142,8 @@
 \input{ESMC_Segment_chapi}
 \input{ESMC_Segment_ccapi}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/ESMC_Segment_chapi}
-\input{../src/Infrastructure/PerfProf/doc/ESMC_Segment_ccapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_Segment_chapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_Segment_ccapi}
 #endif
 
 \section{HWMonitor Design}
@@ -152,35 +152,35 @@
 #ifdef STANDALONE
 \input{HWMonitor_desc}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/HWMonitor_desc}
+\input{../Infrastructure/PerfProf/doc/HWMonitor_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{HWMonitor_design}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/HWMonitor_design}
+\input{../Infrastructure/PerfProf/doc/HWMonitor_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{HWMonitor_def}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/HWMonitor_def}
+\input{../Infrastructure/PerfProf/doc/HWMonitor_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{HWMonitor_rest}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/HWMonitor_rest}
+\input{../Infrastructure/PerfProf/doc/HWMonitor_rest}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 \input{HWMonitor_ccparam}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/HWMonitor_ccparam}
+\input{../Infrastructure/PerfProf/doc/HWMonitor_ccparam}
 #endif
 
 
@@ -189,8 +189,8 @@
 \input{ESMC_HWMonitor_chapi}
 \input{ESMC_HWMonitor_ccapi}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/ESMC_HWMonitor_chapi}
-\input{../src/Infrastructure/PerfProf/doc/ESMC_HWMonitor_ccapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_HWMonitor_chapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_HWMonitor_ccapi}
 #endif
 
 \section{Timer Design}
@@ -199,28 +199,28 @@
 #ifdef STANDALONE
 \input{Timer_desc}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Timer_desc}
+\input{../Infrastructure/PerfProf/doc/Timer_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{Timer_design}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Timer_design}
+\input{../Infrastructure/PerfProf/doc/Timer_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{Timer_def}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Timer_def}
+\input{../Infrastructure/PerfProf/doc/Timer_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{Timer_rest}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Timer_rest}
+\input{../Infrastructure/PerfProf/doc/Timer_rest}
 #endif
 
 \subsection{Class API}
@@ -228,8 +228,8 @@
 \input{ESMC_Timer_chapi}
 \input{ESMC_Timer_ccapi}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/ESMC_Timer_chapi}
-\input{../src/Infrastructure/PerfProf/doc/ESMC_Timer_ccapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_Timer_chapi}
+\input{../Infrastructure/PerfProf/doc/ESMC_Timer_ccapi}
 #endif
 
 \section{Perf F90 Interface}
@@ -238,7 +238,7 @@
 #ifdef STANDALONE
 \input{Perf_fex}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Perf_fex}
+\input{../Infrastructure/PerfProf/doc/Perf_fex}
 #endif
 
 \section{Perf C++ Interface}
@@ -247,7 +247,7 @@
 #ifdef STANDALONE
 \input{Perf_ccex}
 #elif defined(CONSTITUENT)
-\input{../src/Infrastructure/PerfProf/doc/Perf_ccex}
+\input{../Infrastructure/PerfProf/doc/Perf_ccex}
 #endif
 
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-// $Id: ESMC_Segment.h,v 1.1 2003/03/24 18:20:56 ekluz Exp $
+// $Id: ESMC_Segment.h,v 1.2 2003/04/02 19:51:47 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Segment members and declares method 
-// signatures (prototypes).  The companion file ESMC_Segment.C contains
+// signatures (prototypes).  The companion file ESMC\_Segment.C contains
 // the definitions (full code bodies) for the Segment methods.
 //
 // < insert a paragraph or two explaining what you'll find in this file >
@@ -185,7 +185,7 @@ USED
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Segment object previously allocated
-//      via an ESMC_SegmentCreate routine.
+//      via an ESMC\_SegmentCreate routine.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2003/03/31 20:44:53 flanigan Exp $ 
+# $Id: makefile,v 1.20 2003/04/02 19:51:52 flanigan Exp $ 
 ALL: lib 
 
 
@@ -38,11 +38,17 @@ include $(ESMF_DIR)/makefile
 
 refdoc : $(ESMC_DOCDIR)/ESMF_refdoc.pdf
 
+cleanref : 
+	rm -f $(ESMC_DOCDIR)/ESMF_refdoc.*
+
+
 DIRS = 
 
 CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc
 CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi  ESMF_reqdoc.tex ESMF_refdoc.tex
 CLOBBERDIRS = 
+
+refdoc : $(ESMC_DOCDIR)/ESMF_refdoc.pdf
 
 
 # Dvi files

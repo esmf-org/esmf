@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/03/25 00:18:18 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/04/02 19:51:47 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -14,15 +14,15 @@ LOCDIR	  = src/Infrastructure/PerfProf/doc
 
 DVIFILES  = \
 		${ESMC_DOCDIR}/PerfProf_reqdoc.dvi \
-		${ESMC_DOCDIR}/PerfProf_desdoc.dvi 
-#		${ESMC_DOCDIR}/PerfProf_refdoc.dvi
+		${ESMC_DOCDIR}/PerfProf_desdoc.dvi \
+		${ESMC_DOCDIR}/PerfProf_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
 		${ESMC_DOCDIR}/PerfProf_reqdoc \
-		${ESMC_DOCDIR}/PerfProf_desdoc 
-#		${ESMC_DOCDIR}/PerfProf_refdoc
+		${ESMC_DOCDIR}/PerfProf_desdoc \
+		${ESMC_DOCDIR}/PerfProf_refdoc
 
 #
 # Tex Files to make
@@ -44,21 +44,21 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = PerfProf_desdoc PerfProd_reqdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi PerfProf_reqdoc.tex PerfProf_desdoc.tex
+CLEANDIRS   = PerfProf_desdoc PerfProf_reqdoc PerfProf_refdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi PerfProf_reqdoc.tex PerfProf_desdoc.tex PerfProf_refdoc.tex
 CLOBBERDIRS =
 
 
 # Dvi files
-${ESMC_DOCDIR}/PerfProf_desdoc.dvi:
+${ESMC_DOCDIR}/PerfProf_desdoc.dvi:  PerfProf_desdoc.ctex
 	${DO_LATEX} PerfProf des
 	mv -f PerfProf_desdoc.dvi ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/PerfProf_reqdoc.dvi:
+${ESMC_DOCDIR}/PerfProf_reqdoc.dvi: PerfProf_reqdoc.ctex
 	${DO_LATEX} PerfProf req
 	mv -f PerfProf_reqdoc.dvi ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/PerfProf_refdoc.dvi:
+${ESMC_DOCDIR}/PerfProf_refdoc.dvi: PerfProf_refdoc.ctex
 	${DO_LATEX} PerfProf ref
 	mv -f PerfProf_refdoc.dvi ${ESMC_DOCDIR}
 

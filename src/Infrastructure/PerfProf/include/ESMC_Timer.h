@@ -1,4 +1,4 @@
-// $Id: ESMC_Timer.h,v 1.3 2003/03/24 18:20:56 ekluz Exp $
+// $Id: ESMC_Timer.h,v 1.4 2003/04/02 19:51:48 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Timer members and declares method 
-// signatures (prototypes).  The companion file ESMC_Timer.C contains
+// signatures (prototypes).  The companion file ESMC\_Timer.C contains
 // the definitions (full code bodies) for the Timer methods.
 //
 // 
@@ -113,7 +113,7 @@
 //      ESMF routine which only initializes Timer values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_TimerCreate.
+//      Construct/Destruct.  Can be overloaded like ESMC\_TimerCreate.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes

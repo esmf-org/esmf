@@ -1,4 +1,4 @@
-% $Id: CommMem_refdoc.ctex,v 1.1 2003/03/31 20:44:46 flanigan Exp $
+% $Id: CommMem_refdoc.ctex,v 1.2 2003/04/02 19:51:42 flanigan Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,28 +44,28 @@
 #ifdef STANDALONE
 \input{CommMem_syn}
 #elif defined(CONSTITUENT)
-\input{comppath/CommMem_syn}
+\input{../Infrastructure/CommMem/doc/CommMem_syn}
 #endif
 
 %\section{Algorithmic Description}
 #ifdef STANDALONE
 %\input{CommMem_alg}
 #elif defined(CONSTITUENT)
-%\input{comppath/CommMem_alg}
+%\input{../Infrastructure/CommMem/doc/CommMem_alg}
 #endif
 
-\section{Object Model}
-#ifdef STANDALONE
-\input{CommMem_obj}
-#elif defined(CONSTITUENT)
-\input{comppath/CommMem_obj}
-#endif
+% \section{Object Model}
+% #ifdef STANDALONE
+% \input{CommMem_obj}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/CommMem/doc/CommMem_obj}
+% #endif
 
 \section{Global Parameters and Definitions}
 #ifdef STANDALONE
 \input{CommMem_param}
 #elif defined(CONSTITUENT)
-\input{comppath/CommMem_param}
+\input{../Infrastructure/CommMem/doc/CommMem_param}
 #endif
 
 \section{Machine Class Design}
@@ -74,28 +74,28 @@
 #ifdef STANDALONE
 \input{ESMC_Machine_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Machine_desc}
+\input{../Infrastructure/CommMem/doc/ESMC_Machine_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{ESMC_Machine_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Machine_design}
+\input{../Infrastructure/CommMem/doc/ESMC_Machine_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{ESMC_Machine_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Machine_def}
+\input{../Infrastructure/CommMem/doc/ESMC_Machine_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_Machine_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Machine_rest}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_rest}
 #endif
 
 \section{Machine Class F90 Interface}
@@ -104,21 +104,21 @@
 #ifdef STANDALONE
 %\input{ESMC_Machine_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Machine_fex}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_Machine_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Machine_fparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_Machine_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Machine_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_fapi}
 #endif
 
 \section{Machine Class C++ Interface}
@@ -127,14 +127,14 @@
 #ifdef STANDALONE
 \input{ESMC_Machine_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Machine_ccex}
+\input{../Infrastructure/CommMem/doc/ESMC_Machine_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_Machine_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Machine_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_ccparam}
 #endif
 
 %\subsection{Class API}
@@ -142,8 +142,8 @@
 \input{ESMC_Machine_chapi}
 \input{ESMC_Machine_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Machine_chapi}
-\input{comppath/ESMC_Machine_ccapi}
+\input{../Infrastructure/CommMem/doc/ESMC_Machine_chapi}
+\input{../Infrastructure/CommMem/doc/ESMC_Machine_ccapi}
 #endif
 
 \section{PE Class Design}
@@ -152,28 +152,28 @@
 #ifdef STANDALONE
 \input{ESMC_PE_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PE_desc}
+\input{../Infrastructure/CommMem/doc/ESMC_PE_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{ESMC_PE_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PE_design}
+\input{../Infrastructure/CommMem/doc/ESMC_PE_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{ESMC_PE_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PE_def}
+\input{../Infrastructure/CommMem/doc/ESMC_PE_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_PE_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PE_rest}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_rest}
 #endif
 
 \section{PE Class F90 Interface}
@@ -182,21 +182,21 @@
 #ifdef STANDALONE
 %\input{ESMC_PE_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PE_fex}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PE_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PE_fparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_PE_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PE_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_fapi}
 #endif
 
 \section{PE Class C++ Interface}
@@ -205,14 +205,14 @@
 #ifdef STANDALONE
 \input{ESMC_PE_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PE_ccex}
+\input{../Infrastructure/CommMem/doc/ESMC_PE_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PE_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PE_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_ccparam}
 #endif
 
 %\subsection{Class API}
@@ -220,8 +220,8 @@
 \input{ESMC_PE_chapi}
 \input{ESMC_PE_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PE_chapi}
-\input{comppath/ESMC_PE_ccapi}
+\input{../Infrastructure/CommMem/doc/ESMC_PE_chapi}
+\input{../Infrastructure/CommMem/doc/ESMC_PE_ccapi}
 #endif
 
 \section{DE Class Design}
@@ -230,28 +230,28 @@
 #ifdef STANDALONE
 \input{ESMC_DE_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DE_desc}
+\input{../Infrastructure/CommMem/doc/ESMC_DE_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{ESMC_DE_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DE_design}
+\input{../Infrastructure/CommMem/doc/ESMC_DE_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{ESMC_DE_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DE_def}
+\input{../Infrastructure/CommMem/doc/ESMC_DE_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_DE_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DE_rest}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_rest}
 #endif
 
 \section{DE Class F90 Interface}
@@ -260,21 +260,21 @@
 #ifdef STANDALONE
 %\input{ESMC_DE_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DE_fex}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DE_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DE_fparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_DE_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DE_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_fapi}
 #endif
 
 \section{DE Class C++ Interface}
@@ -283,14 +283,14 @@
 #ifdef STANDALONE
 \input{ESMC_DE_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DE_ccex}
+\input{../Infrastructure/CommMem/doc/ESMC_DE_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DE_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DE_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_ccparam}
 #endif
 
 %\subsection{Class API}
@@ -298,8 +298,8 @@
 \input{ESMC_DE_chapi}
 \input{ESMC_DE_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DE_chapi}
-\input{comppath/ESMC_DE_ccapi}
+\input{../Infrastructure/CommMem/doc/ESMC_DE_chapi}
+\input{../Infrastructure/CommMem/doc/ESMC_DE_ccapi}
 #endif
 
 \section{PEList Class Design}
@@ -308,28 +308,28 @@
 #ifdef STANDALONE
 \input{ESMC_PEList_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PEList_desc}
+\input{../Infrastructure/CommMem/doc/ESMC_PEList_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{ESMC_PEList_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PEList_design}
+\input{../Infrastructure/CommMem/doc/ESMC_PEList_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{ESMC_PEList_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PEList_def}
+\input{../Infrastructure/CommMem/doc/ESMC_PEList_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_PEList_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PEList_rest}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_rest}
 #endif
 
 \section{PEList Class F90 Interface}
@@ -338,21 +338,21 @@
 #ifdef STANDALONE
 %\input{ESMC_PEList_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PEList_fex}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PEList_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PEList_fparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_PEList_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PEList_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_fapi}
 #endif
 
 \section{PEList Class C++ Interface}
@@ -361,14 +361,14 @@
 #ifdef STANDALONE
 \input{ESMC_PEList_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PEList_ccex}
+\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PEList_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_PEList_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccparam}
 #endif
 
 %\subsection{Class API}
@@ -376,8 +376,8 @@
 \input{ESMC_PEList_chapi}
 \input{ESMC_PEList_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_PEList_chapi}
-\input{comppath/ESMC_PEList_ccapi}
+\input{../Infrastructure/CommMem/doc/ESMC_PEList_chapi}
+\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccapi}
 #endif
 
 \section{DELayout Class Design}
@@ -386,28 +386,28 @@
 #ifdef STANDALONE
 \input{ESMC_DELayout_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DELayout_desc}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{ESMC_DELayout_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DELayout_design}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{ESMC_DELayout_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DELayout_def}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_DELayout_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DELayout_rest}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_rest}
 #endif
 
 \section{DELayout Class F90 Interface}
@@ -416,21 +416,21 @@
 #ifdef STANDALONE
 %\input{ESMC_DELayout_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DELayout_fex}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DELayout_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DELayout_fparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_DELayout_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DELayout_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fapi}
 #endif
 
 \section{DELayout Class C++ Interface}
@@ -439,14 +439,14 @@
 #ifdef STANDALONE
 \input{ESMC_DELayout_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DELayout_ccex}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DELayout_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_DELayout_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccparam}
 #endif
 
 %\subsection{Class API}
@@ -454,8 +454,8 @@
 \input{ESMC_DELayout_chapi}
 \input{ESMC_DELayout_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_DELayout_chapi}
-\input{comppath/ESMC_DELayout_ccapi}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_chapi}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccapi}
 #endif
 
 \section{Comm Class Design}
@@ -464,28 +464,28 @@
 #ifdef STANDALONE
 \input{ESMC_Comm_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Comm_desc}
+\input{../Infrastructure/CommMem/doc/ESMC_Comm_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{ESMC_Comm_design}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Comm_design}
+\input{../Infrastructure/CommMem/doc/ESMC_Comm_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
 \input{ESMC_Comm_def}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Comm_def}
+\input{../Infrastructure/CommMem/doc/ESMC_Comm_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_Comm_rest}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Comm_rest}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_rest}
 #endif
 
 \section{Comm Class F90 Interface}
@@ -494,21 +494,21 @@
 #ifdef STANDALONE
 %\input{ESMC_Comm_fex}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Comm_fex}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_Comm_fparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Comm_fparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_Comm_fapi}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Comm_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_fapi}
 #endif
 
 \section{Comm Class C++ Interface}
@@ -517,14 +517,14 @@
 #ifdef STANDALONE
 \input{ESMC_Comm_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Comm_ccex}
+\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_Comm_ccparam}
 #elif defined(CONSTITUENT)
-%\input{comppath/ESMC_Comm_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccparam}
 #endif
 
 %\subsection{Class API}
@@ -532,8 +532,8 @@
 \input{ESMC_Comm_chapi}
 \input{ESMC_Comm_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/ESMC_Comm_chapi}
-\input{comppath/ESMC_Comm_ccapi}
+\input{../Infrastructure/CommMem/doc/ESMC_Comm_chapi}
+\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccapi}
 #endif
 
 #ifdef STANDALONE

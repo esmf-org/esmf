@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/25 00:17:48 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/04/02 19:51:43 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -14,15 +14,15 @@ LOCDIR	  = src/Infrastructure/CommMem/doc
 
 DVIFILES  = \
 		${ESMC_DOCDIR}/CommMem_reqdoc.dvi \
-		${ESMC_DOCDIR}/CommMem_desdoc.dvi 
-#		${ESMC_DOCDIR}/CommMem_refdoc.dvi
+		${ESMC_DOCDIR}/CommMem_desdoc.dvi \
+		${ESMC_DOCDIR}/CommMem_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
 		${ESMC_DOCDIR}/CommMem_reqdoc \
-		${ESMC_DOCDIR}/CommMem_desdoc 
-#		${ESMC_DOCDIR}/CommMem_refdoc
+		${ESMC_DOCDIR}/CommMem_desdoc \
+		${ESMC_DOCDIR}/CommMem_refdoc
 
 #
 # Tex Files to make
@@ -45,7 +45,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   = 
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi CommMem_desdoc.tex CommMem_reqdoc.tex
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi CommMem_desdoc.tex CommMem_reqdoc.tex CommMem_refdoc.tex
 CLOBBERDIRS =
 
 # Dvi files

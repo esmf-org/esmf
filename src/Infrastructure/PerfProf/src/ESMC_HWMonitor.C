@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.6 2003/03/24 18:20:57 ekluz Exp $
+// $Id: ESMC_HWMonitor.C,v 1.7 2003/04/02 19:51:49 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ HWMonitor methods declared
-// in the companion file ESMC_HWMonitor.h
+// in the companion file ESMC\_HWMonitor.h
 //
 // Hardware monitor provides performance profiling of hardware
 // specifics for sections of user code (cache misses, floating point
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.6 2003/03/24 18:20:57 ekluz Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.7 2003/04/02 19:51:49 flanigan Exp $";
 //-------------------------------------------------------------------------
 
 //

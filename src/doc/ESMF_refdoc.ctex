@@ -179,22 +179,21 @@
 
 
 %====================================================================================================
-%% \newpage
-%% \begin{htmlonly}
-%% \addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
-%% \end{htmlonly}
-%% \part{Infrastructure Utilities: Communication and Memory Kernels}
-%% \label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
+\end{htmlonly}
+\part{Infrastructure Utilities: Communication and Memory Kernels}
+\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
 
-%% \setcounter{section}{0}
-%% \renewcommand{\thesection}{\shortname\arabic{section}}
-%% \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%% \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%% #include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
+#include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
 
 %====================================================================================================
-
 %\newpage
 %\begin{htmlonly}
 %\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
@@ -209,21 +208,24 @@
 
 % replace % with # below to uncomment
 %include "../Infrastructure/ConfigAttr/doc/ConfigAttr_reqdoc.ctex"
+
+
 %====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Performance Profiling}
-%\label{part:Infrastructure_Utilities:_Performance_Profiling}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
+\end{htmlonly}
+\part{Infrastructure Utilities: Performance Profiling}
+\label{part:Infrastructure_Utilities:_Performance_Profiling}
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%#include "../Infrastructure/PerfProf/doc/PerfProf_desdoc.ctex"
+#include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
+%====================================================================================================
 %\newpage
 %\begin{htmlonly}
 %\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
@@ -238,6 +240,7 @@
 
 %#include "../Infrastructure/LogErr/doc/Log_desdoc.ctex"
 
+%====================================================================================================
 %\newpage
 %\begin{htmlonly}
 %\addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
