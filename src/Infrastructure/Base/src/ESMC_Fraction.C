@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.8 2004/12/10 22:50:20 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.9 2004/12/17 00:49:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.8 2004/12/10 22:50:20 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.9 2004/12/17 00:49:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -407,8 +407,15 @@
     // TODO:  Consider making n/d of type ESMF_KIND_I8.
     // used by ESMC_BaseTimeGet()
 
-    ESMF_KIND_I8 conversion = (ESMF_KIND_I8) w * denominator +
-          ((ESMF_KIND_I8) n * (ESMF_KIND_I8) denominator) / (ESMF_KIND_I8) d;
+    ESMF_KIND_I8 w_i8 = w;                      // TODO: ensures 
+    ESMF_KIND_I8 n_i8 = n;                      //         correct
+    ESMF_KIND_I8 d_i8 = d;                      //           cast
+    ESMF_KIND_I8 denominator_i8 = denominator;  //             on Cray X1 !
+    ESMF_KIND_I8 conversion = w_i8 * denominator_i8 +
+                                (n_i8 * denominator_i8) / d_i8;
+//    ESMF_KIND_I8 conversion = (ESMF_KIND_I8) w * denominator +
+//          ((ESMF_KIND_I8) n * (ESMF_KIND_I8) denominator) / (ESMF_KIND_I8) d;
+
     if (conversion < INT_MIN || conversion > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "For conversion=%lld out-of-range with respect to "
@@ -975,7 +982,11 @@
     // check remainder and add back
     if ((remainder = n % divisor) != 0) {
       // upper bounds check of (d * divisor)
-      denominator = (ESMF_KIND_I8) d * (ESMF_KIND_I8) divisor; // must do it!
+      ESMF_KIND_I8 d_i8 = d;              // TODO: ensures correct
+      ESMF_KIND_I8 divisor_i8 = divisor;  //         cast on
+      denominator = d_i8 * divisor_i8;    //           Cray X1 !
+      //denominator = (ESMF_KIND_I8) d * (ESMF_KIND_I8) divisor; // must do it!
+
       if (denominator < INT_MIN || denominator > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "; denominator value abs(%lld) > %d, won't fit in "
