@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.36 2003/09/05 22:40:52 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.37 2003/09/05 23:12:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.36 2003/09/05 22:40:52 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.37 2003/09/05 23:12:04 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,6 +63,7 @@
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2
       type(ESMF_Time) :: startTime, stopTime, startTime2
+      type(ESMF_Time) :: currentTime, previousTime
 
 
       ! perform exhaustive tests here;
@@ -363,7 +364,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
-      !NEX
+      !EX
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -377,6 +378,16 @@
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "bool = ", bool
 
+      ! ----------------------------------------------------------------------------
+
+      ! The following code does not compile
+      ! write(name, *) "Get previous time and verify Test"
+      ! ESMF_ClockGet(clock, currTime=currentTime, rc=rc)
+      ! call ESMF_ClockAdvance(clock, rc=rc)
+      ! write(failMsg, *) " Returned ESMF_FAILURE and/or currTime != prevTime"
+      ! ESMF_ClockGet(clock, prevTime=previousTime, rc=rc)
+      ! call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(currentTime.eq.previousTime)), &
+                      ! name, failMsg, result, ESMF_SRCLINE)
 
 
       ! ----------------------------------------------------------------------------
