@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.8 2005/01/13 22:05:06 jwolfe Exp $
+// $Id: ESMC_Init.h,v 1.9 2005/03/14 23:55:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,8 @@ enum ESMC_MainLanguage { ESMF_MAIN_C=1, ESMF_MAIN_F90 };
 // prototypes for C routines
 int ESMC_Initialize(char *defaultConfigFilename,
                     ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR,
-                    char *defaultLogFilename=NULL);
+                    char *defaultLogFilename=NULL,
+                    ESMC_LogType defaultLogType=ESMC_LOG_SINGLE);
 int ESMC_Initialize(ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR);
 int ESMC_Initialize(int argc, char **argv, 
                     ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR);

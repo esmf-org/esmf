@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.h,v 1.1 2004/12/08 17:53:11 nscollins Exp $
+// $Id: ESMC_Test.h,v 1.2 2005/03/14 23:56:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,8 +40,16 @@
 //
 // !PUBLIC MEMBER FUNCTIONS:
 
+// TODO: These need an optional Log argument.
+int ESMC_TestStart(char *file, int line, int only = 1);
+int ESMC_TestEnd(int result, char *file, int line, int only = 1);
+
 int ESMC_Test(int condition, char *name, char *failMsg, int *result, 
                                          char *file, int line, int only = 1);
+
+bool ESMC_TestNumPETs(int petCount, char *file, int line, int only = 1);
+bool ESMC_TestMinPETs(int petCount, char *file, int line, int only = 1);
+bool ESMC_TestMaxPETs(int petCount, char *file, int line, int only = 1);
 
 //EOP
 
