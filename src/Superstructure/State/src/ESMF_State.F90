@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.8 2004/01/28 00:35:42 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.9 2004/01/28 20:31:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -277,7 +277,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.8 2004/01/28 00:35:42 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.9 2004/01/28 20:31:35 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -870,9 +870,9 @@ end function
         endif
 
         ! Initialize the base object, set the name, etc.
-        call ESMF_BaseCreate(stypep%base, "States", statename, 0, status)
+        call ESMF_BaseCreate(stypep%base, "State", statename, 0, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateConstructEmpty: SetName"
+          print *, "ERROR in ESMF_StateConstructEmpty: BaseCreate failed"
           return
         endif
 
@@ -925,7 +925,7 @@ end function
 !EOPI
 ! !REQUIREMENTS:
 
-!       local vars
+        ! Local vars
         type(ESMF_StateData), pointer :: nextitem
         integer :: i
         integer :: status                   ! local error status
@@ -979,7 +979,14 @@ end function
         endif
         stypep%alloccount = 0
 
-!       set return code if user specified it
+        ! Release the base object
+        call ESMF_BaseDestroy(stypep%base, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateDestruct: BaseDestroy failed"
+          return
+        endif
+
+        ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StateDestruct
