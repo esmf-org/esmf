@@ -1,4 +1,4 @@
- $Id: README,v 1.42 2003/11/13 21:18:32 svasquez Exp $
+ $Id: README,v 1.43 2004/02/06 23:42:18 nscollins Exp $
 ================================================================================
                                    README
 
@@ -6,7 +6,7 @@
 
 ================================================================================
 
-README file for ESMF v1.0.4 release.
+README file for ESMF v1.0.5 release.
 
 The files contained here include the ESMF source code and build system.
 
