@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.27 2004/03/19 13:50:49 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.28 2004/03/19 14:08:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.27 2004/03/19 13:50:49 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.28 2004/03/19 14:08:28 theurich Exp $'
 
 !==============================================================================
 !
@@ -1142,9 +1142,9 @@
     endif
 
     ! call CompClass method
-    call ESMF_CompReturn(gridcomp%compp, status)
+    call ESMF_CompWait(gridcomp%compp, status)
     if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompReturn error"
+      print *, "ESMF_CompWait error"
       return
     endif
 
