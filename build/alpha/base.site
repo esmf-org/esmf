@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.4 2003/01/09 21:57:39 nscollins Exp $ 
+# $Id: base.site,v 1.5 2003/02/07 22:26:15 jwolfe Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -31,7 +31,7 @@ HDF_INCLUDE    = -I/usr/ulocal/HDF4.1r5/include
 #
 MPI_LIB        = -L/usr/opt/mpi/lib -lmpi
 MPI_INCLUDE    = -I/usr/opt/mpi/include
-MPIRUN         = ${ESMF_DIR}/src/Infrastructure/mpiuni/mpirun
+MPIRUN         = ${ESMF_DIR}/scripts/mpirun.alpha
 MPI64_LIB      = 
 
 # For pthreads (or omp)
