@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.13 2003/04/05 01:55:33 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.14 2003/04/07 19:38:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.13 2003/04/05 01:55:33 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.14 2003/04/07 19:38:18 eschwab Exp $'
 
 !==============================================================================
 
@@ -138,13 +138,13 @@
       integer, intent(in), optional :: MS
       integer, intent(in), optional :: US
       integer, intent(in), optional :: NS
-      real, intent(in), optional :: d_
-      real, intent(in), optional :: h_
-      real, intent(in), optional :: m_
-      real, intent(in), optional :: s_
-      real, intent(in), optional :: ms_
-      real, intent(in), optional :: us_
-      real, intent(in), optional :: ns_
+      double precision, intent(in), optional :: d_
+      double precision, intent(in), optional :: h_
+      double precision, intent(in), optional :: m_
+      double precision, intent(in), optional :: s_
+      double precision, intent(in), optional :: ms_
+      double precision, intent(in), optional :: us_
+      double precision, intent(in), optional :: ns_
       integer, intent(in), optional :: Sn
       integer, intent(in), optional :: Sd
       type(ESMF_Calendar), intent(in), optional :: cal
@@ -180,19 +180,19 @@
 !     \item[{[NS]}]
 !          Integer nanoseconds
 !     \item[{[d\_]}]
-!          Real days
+!          Double precision days
 !     \item[{[h\_]}]
-!          Real hours
+!          Double precision hours
 !     \item[{[m\_]}]
-!          Real minutes
+!          Double precision minutes
 !     \item[{[s\_]}]
-!          Real seconds
+!          Double precision seconds
 !     \item[{[ms\_]}]
-!          Real milliseconds
+!          Double precision milliseconds
 !     \item[{[us\_]}]
-!          Real microseconds
+!          Double precision microseconds
 !     \item[{[ns\_]}]
-!          Real nanoseconds
+!          Double precision nanoseconds
 !     \item[{[Sn]}]
 !          Integer fractional seconds - numerator
 !     \item[{[Sd]}]
@@ -244,13 +244,13 @@
       integer, intent(out), optional :: MS
       integer, intent(out), optional :: US
       integer, intent(out), optional :: NS
-      real, intent(out), optional :: d_
-      real, intent(out), optional :: h_
-      real, intent(out), optional :: m_
-      real, intent(out), optional :: s_
-      real, intent(out), optional :: ms_
-      real, intent(out), optional :: us_
-      real, intent(out), optional :: ns_
+      double precision, intent(out), optional :: d_
+      double precision, intent(out), optional :: h_
+      double precision, intent(out), optional :: m_
+      double precision, intent(out), optional :: s_
+      double precision, intent(out), optional :: ms_
+      double precision, intent(out), optional :: us_
+      double precision, intent(out), optional :: ns_
       integer, intent(out), optional :: Sn
       integer, intent(out), optional :: Sd
       integer, intent(out), optional :: rc
@@ -284,19 +284,19 @@
 !     \item[{[NS]}]
 !          Integer nanoseconds
 !     \item[{[d\_]}]
-!          Real days
+!          Double precision days
 !     \item[{[h\_]}]
-!          Real hours
+!          Double precision hours
 !     \item[{[m\_]}]
-!          Real minutes
+!          Double precision minutes
 !     \item[{[s\_]}]
-!          Real seconds
+!          Double precision seconds
 !     \item[{[ms\_]}]
-!          Real milliseconds
+!          Double precision milliseconds
 !     \item[{[us\_]}]
-!          Real microseconds
+!          Double precision microseconds
 !     \item[{[ns\_]}]
-!          Real nanoseconds
+!          Double precision nanoseconds
 !     \item[{[Sn]}]
 !          Integer fractional seconds - numerator
 !     \item[{[Sd]}]
@@ -335,13 +335,13 @@
       integer, intent(in), optional :: MS
       integer, intent(in), optional :: US
       integer, intent(in), optional :: NS
-      real, intent(in), optional :: d_
-      real, intent(in), optional :: h_
-      real, intent(in), optional :: m_
-      real, intent(in), optional :: s_
-      real, intent(in), optional :: ms_
-      real, intent(in), optional :: us_
-      real, intent(in), optional :: ns_
+      double precision, intent(in), optional :: d_
+      double precision, intent(in), optional :: h_
+      double precision, intent(in), optional :: m_
+      double precision, intent(in), optional :: s_
+      double precision, intent(in), optional :: ms_
+      double precision, intent(in), optional :: us_
+      double precision, intent(in), optional :: ns_
       integer, intent(in), optional :: Sn
       integer, intent(in), optional :: Sd
       integer, intent(in), optional :: rc
@@ -375,19 +375,19 @@
 !     \item[{[NS]}]
 !          Integer nanoseconds
 !     \item[{[d\_]}]
-!          Real days
+!          Double precision days
 !     \item[{[h\_]}]
-!          Real hours
+!          Double precision hours
 !     \item[{[m\_]}]
-!          Real minutes
+!          Double precision minutes
 !     \item[{[s\_]}]
-!          Real seconds
+!          Double precision seconds
 !     \item[{[ms\_]}]
-!          Real milliseconds
+!          Double precision milliseconds
 !     \item[{[us\_]}]
-!          Real microseconds
+!          Double precision microseconds
 !     \item[{[ns\_]}]
-!          Real nanoseconds
+!          Double precision nanoseconds
 !     \item[{[Sn]}]
 !          Integer fractional seconds - numerator
 !     \item[{[Sd]}]
@@ -617,11 +617,11 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      real, intent(out) :: DayOfYear
+      double precision, intent(out) :: DayOfYear
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the day of the year the given {\tt Time} instant falls on (1.x-365.x)
+!     Get the day of the year the given {\tt Time} instant falls on (0.x-364.x)
 !     Returned as floating point value; fractional part represents the
 !     time of day. 
 !
@@ -630,7 +630,7 @@
 !     \item[time]
 !          The object instance to query
 !     \item[DayOfYear]
-!          The {\tt Time} instant's day of the year (1.x-365.x)
+!          The {\tt Time} instant's day of the year (0.x-364.x)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

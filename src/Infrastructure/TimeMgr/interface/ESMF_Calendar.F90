@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.9 2003/04/02 17:24:55 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.10 2003/04/07 19:38:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.9 2003/04/02 17:24:55 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.10 2003/04/07 19:38:16 eschwab Exp $'
 
 !==============================================================================
 
@@ -242,13 +242,13 @@
       integer, intent(in), optional :: MS
       integer, intent(in), optional :: US
       integer, intent(in), optional :: NS
-      real, intent(in), optional :: d_
-      real, intent(in), optional :: h_
-      real, intent(in), optional :: m_
-      real, intent(in), optional :: s_
-      real, intent(in), optional :: ms_
-      real, intent(in), optional :: us_
-      real, intent(in), optional :: ns_
+      double precision, intent(in), optional :: d_
+      double precision, intent(in), optional :: h_
+      double precision, intent(in), optional :: m_
+      double precision, intent(in), optional :: s_
+      double precision, intent(in), optional :: ms_
+      double precision, intent(in), optional :: us_
+      double precision, intent(in), optional :: ns_
       integer, intent(in), optional :: Sn
       integer, intent(in), optional :: Sd
       type(ESMF_BaseTime), intent(inout) :: basetime
@@ -281,19 +281,19 @@
 !     \item[{[NS]}]
 !          Integer nanoseconds
 !     \item[{[d\_]}]
-!          Real days
+!          Double precision days
 !     \item[{[h\_]}]
-!          Real hours
+!          Double precision hours
 !     \item[{[m\_]}]
-!          Real minutes
+!          Double precision minutes
 !     \item[{[s\_]}]
-!          Real seconds
+!          Double precision seconds
 !     \item[{[ms\_]}]
-!          Real milliseconds
+!          Double precision milliseconds
 !     \item[{[us\_]}]
-!          Real microseconds
+!          Double precision microseconds
 !     \item[{[ns\_]}]
-!          Real nanoseconds
+!          Double precision nanoseconds
 !     \item[{[Sn]}]
 !          Integer fractional seconds - numerator
 !     \item[{[Sd]}]
@@ -339,13 +339,13 @@
       integer, intent(out), optional :: MS
       integer, intent(out), optional :: US
       integer, intent(out), optional :: NS
-      real, intent(out), optional :: d_
-      real, intent(out), optional :: h_
-      real, intent(out), optional :: m_
-      real, intent(out), optional :: s_
-      real, intent(out), optional :: ms_
-      real, intent(out), optional :: us_
-      real, intent(out), optional :: ns_
+      double precision, intent(out), optional :: d_
+      double precision, intent(out), optional :: h_
+      double precision, intent(out), optional :: m_
+      double precision, intent(out), optional :: s_
+      double precision, intent(out), optional :: ms_
+      double precision, intent(out), optional :: us_
+      double precision, intent(out), optional :: ns_
       integer, intent(out), optional :: Sn
       integer, intent(out), optional :: Sd
       integer, intent(out), optional :: rc
@@ -379,19 +379,19 @@
 !     \item[{[NS]}]
 !          Integer nanoseconds
 !     \item[{[d\_]}]
-!          Real days
+!          Double precision days
 !     \item[{[h\_]}]
-!          Real hours
+!          Double precision hours
 !     \item[{[m\_]}]
-!          Real minutes
+!          Double precision minutes
 !     \item[{[s\_]}]
-!          Real seconds
+!          Double precision seconds
 !     \item[{[ms\_]}]
-!          Real milliseconds
+!          Double precision milliseconds
 !     \item[{[us\_]}]
-!          Real microseconds
+!          Double precision microseconds
 !     \item[{[ns\_]}]
-!          Real nanoseconds
+!          Double precision nanoseconds
 !     \item[{[Sn]}]
 !          Integer fractional seconds - numerator
 !     \item[{[Sd]}]
