@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.14 2003/04/09 21:30:04 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.15 2003/04/15 16:47:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.14 2003/04/09 21:30:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.15 2003/04/15 16:47:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1219,10 +1219,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Read - restore BaseTime state
+// !IROUTINE:  ESMC_BaseTimeRead - restore BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_Read(
+      int ESMC_BaseTime::ESMC_BaseTimeRead(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1244,14 +1244,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Read
+}  // end ESMC_BaseTimeRead
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Write - save BaseTime state
+// !IROUTINE:  ESMC_BaseTimeWrite - save BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_Write(
+      int ESMC_BaseTime::ESMC_BaseTimeWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1269,7 +1269,8 @@
 
     if (S  == ESMC_NULL_POINTER || Sn == ESMC_NULL_POINTER ||
         Sd == ESMC_NULL_POINTER) {
-      cout << "ESMC_BaseTime::ESMC_Write(): null pointer(s) passed in" << endl;
+      cout << "ESMC_BaseTime::ESMC_BaseTimeWrite(): null pointer(s) passed in "
+           << endl;
       return(ESMF_FAILURE);
     }
 
@@ -1279,14 +1280,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Write
+}  // end ESMC_BaseTimeWrite
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Validate - validate BaseTime state
+// !IROUTINE:  ESMC_BaseTimeValidate - validate BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_Validate(
+      int ESMC_BaseTime::ESMC_BaseTimeValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1304,14 +1305,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Validate
+}  // end ESMC_BaseTimeValidate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Print - print BaseTime state
+// !IROUTINE:  ESMC_BaseTimePrint - print BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_Print(
+      int ESMC_BaseTime::ESMC_BaseTimePrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1333,7 +1334,7 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Print
+}  // end ESMC_BaseTimePrint
 
 //-------------------------------------------------------------------------
 //BOP

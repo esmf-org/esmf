@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.15 2003/04/09 15:25:22 flanigan Exp $
+// $Id: ESMC_Time.C,v 1.16 2003/04/15 16:47:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.15 2003/04/09 15:25:22 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.16 2003/04/15 16:47:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -838,10 +838,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Read - restore Time state
+// !IROUTINE:  ESMC_TimeRead - restore Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_Read(
+      int ESMC_Time::ESMC_TimeRead(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -862,12 +862,12 @@
     int rc;
 
     if (cal == ESMC_NULL_POINTER) {
-      cout << "ESMC_Time::ESMC_Read(): null pointer passed in" << endl;
+      cout << "ESMC_Time::ESMC_TimeRead(): null pointer passed in" << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Read() first
-    rc = ESMC_BaseTime::ESMC_Read(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeRead(S, Sn, Sd);
 
     Calendar = cal;  // TODO?: this only restores calendar pointer; component
                      // must be sure to restore corresponding calendar first
@@ -875,14 +875,14 @@
   
     return(rc);
 
- }  // end ESMC_Read
+ }  // end ESMC_TimeRead
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Write - return Time state
+// !IROUTINE:  ESMC_TimeWrite - return Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_Write(
+      int ESMC_Time::ESMC_TimeWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -905,12 +905,12 @@
     if (S  == ESMC_NULL_POINTER || Sn  == ESMC_NULL_POINTER ||
         Sd == ESMC_NULL_POINTER || cal == ESMC_NULL_POINTER ||
         timezone == ESMC_NULL_POINTER) {
-      cout << "ESMC_Time::ESMC_Write(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Time::ESMC_TimeWrite(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Write() first
-    rc = ESMC_BaseTime::ESMC_Write(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeWrite(S, Sn, Sd);
 
     cal = Calendar;  // TODO?: this only saves calendar pointer; component
                      // must be sure to save corresponding calendar
@@ -918,14 +918,14 @@
   
     return(rc);
 
- }  // end ESMC_Write
+ }  // end ESMC_TimeWrite
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Validate - validate Time state
+// !IROUTINE:  ESMC_TimeValidate - validate Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_Validate(
+      int ESMC_Time::ESMC_TimeValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -942,14 +942,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_Validate
+ }  // end ESMC_TimeValidate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Print - print Time state
+// !IROUTINE:  ESMC_TimePrint - print Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_Print(
+      int ESMC_Time::ESMC_TimePrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -964,18 +964,16 @@
 // !REQUIREMENTS:  
 
     cout << "Time -----------------------------------" << endl;
-    ESMC_BaseTime::ESMC_Print(options);
+    ESMC_BaseTime::ESMC_BaseTimePrint(options);
     if (Calendar != ESMC_NULL_POINTER) {
-      Calendar->ESMC_Calendar::ESMC_Print(options);
-              //^^^^^^^^^^^^^^^TODO: override virtual function
-              // mechanism to support F90 interface ?
+      Calendar->ESMC_CalendarPrint(options);
     }
     cout << "Timezone = " << Timezone << endl;
     cout << "end Time -------------------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_Print
+ }  // end ESMC_TimePrint
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.8 2003/04/02 17:24:52 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.9 2003/04/15 16:47:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -161,28 +161,28 @@ class ESMC_Alarm {
     // for persistence/checkpointing
 
     // restore state
-    virtual int ESMC_Read(ESMC_TimeInterval *ringInterval,
-                          ESMC_Time         *ringTime,
-                          ESMC_Time         *prevRingTime,
-                          ESMC_Time         *stopTime,
-                          bool              ringing,
-                          bool              enabled,
-                          int               id);
+    int ESMC_AlarmRead(ESMC_TimeInterval *ringInterval,
+                       ESMC_Time         *ringTime,
+                       ESMC_Time         *prevRingTime,
+                       ESMC_Time         *stopTime,
+                       bool              ringing,
+                       bool              enabled,
+                       int               id);
 
     // save state
-    virtual int ESMC_Write(ESMC_TimeInterval *ringInterval,
-                           ESMC_Time         *ringTime,
-                           ESMC_Time         *prevRingTime,
-                           ESMC_Time         *stopTime,
-                           bool              *ringing,
-                           bool              *enabled,
-                           int               *id) const;
+    int ESMC_AlarmWrite(ESMC_TimeInterval *ringInterval,
+                        ESMC_Time         *ringTime,
+                        ESMC_Time         *prevRingTime,
+                        ESMC_Time         *stopTime,
+                        bool              *ringing,
+                        bool              *enabled,
+                        int               *id) const;
 
     // internal validation
-    virtual int ESMC_Validate(const char *options=0) const;
+    int ESMC_AlarmValidate(const char *options=0) const;
 
     // for testing/debugging
-    virtual int ESMC_Print(const char *options=0) const;
+    int ESMC_AlarmPrint(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Alarm(void);

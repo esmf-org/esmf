@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.13 2003/04/11 23:49:04 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.14 2003/04/15 16:47:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.13 2003/04/11 23:49:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.14 2003/04/15 16:47:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -372,10 +372,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Read - restore Calendar state
+// !IROUTINE:  ESMC_CalendarRead - restore Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_Read(
+      int ESMC_Calendar::ESMC_CalendarRead(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -395,7 +395,8 @@
 // !REQUIREMENTS:
 
     if (daysPerMonth == ESMC_NULL_POINTER) {
-      cout << "ESMC_Calendar::ESMC_Read(): null pointer passed in" << endl;
+      cout << "ESMC_Calendar::ESMC_CalendarRead(): null pointer passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
 
@@ -412,14 +413,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Read
+}  // end ESMC_CalendarRead
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Write - save Calendar state
+// !IROUTINE:  ESMC_CalendarWrite - save Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_Write(
+      int ESMC_Calendar::ESMC_CalendarWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -444,7 +445,8 @@
         daysPerYear   == ESMC_NULL_POINTER ||
         daysPerYearDn == ESMC_NULL_POINTER ||
         daysPerYearDd == ESMC_NULL_POINTER) {
-      cout << "ESMC_Calendar::ESMC_Write(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Calendar::ESMC_CalendarWrite(): null pointer(s) passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
 
@@ -460,14 +462,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Write
+}  // end ESMC_CalendarWrite
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Validate - validate Calendar state
+// !IROUTINE:  ESMC_CalendarValidate - validate Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_Validate(const char *options) const {
+      int ESMC_Calendar::ESMC_CalendarValidate(const char *options) const {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -484,14 +486,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Validate
+}  // end ESMC_CalendarValidate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Print - print Calendar state
+// !IROUTINE:  ESMC_CalendarPrint - print Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_Print(const char *options) const {
+      int ESMC_Calendar::ESMC_CalendarPrint(const char *options) const {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -519,7 +521,7 @@
     
     return(ESMF_SUCCESS);
 
-}  // end ESMC_Print
+}  // end ESMC_CalendarPrint
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.8 2003/04/05 01:48:50 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.9 2003/04/15 16:47:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -149,31 +149,31 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    virtual int ESMC_Read(ESMC_TimeInterval *timeStep,
-                          ESMC_Time         *startTime,
-                          ESMC_Time         *stopTime,
-                          ESMC_Time         *refTime,
-                          ESMC_Time         *currTime,
-                          ESMC_Time         *prevTime,
-                          ESMF_IKIND_I8      advanceCount,
-                          ESMC_Alarm        *alarmList[],
-                          int                numAlarms );
+    int ESMC_ClockRead(ESMC_TimeInterval *timeStep,
+                       ESMC_Time         *startTime,
+                       ESMC_Time         *stopTime,
+                       ESMC_Time         *refTime,
+                       ESMC_Time         *currTime,
+                       ESMC_Time         *prevTime,
+                       ESMF_IKIND_I8      advanceCount,
+                       ESMC_Alarm        *alarmList[],
+                       int                numAlarms );
 
-    virtual int ESMC_Write(ESMC_TimeInterval *timeStep,
-                           ESMC_Time         *startTime,
-                           ESMC_Time         *stopTime,
-                           ESMC_Time         *refTime,
-                           ESMC_Time         *currTime,
-                           ESMC_Time         *prevTime,
-                           ESMF_IKIND_I8     *advanceCount,
-                           ESMC_Alarm        *alarmList[],
-                           int               *numAlarms ) const;
+    int ESMC_ClockWrite(ESMC_TimeInterval *timeStep,
+                        ESMC_Time         *startTime,
+                        ESMC_Time         *stopTime,
+                        ESMC_Time         *refTime,
+                        ESMC_Time         *currTime,
+                        ESMC_Time         *prevTime,
+                        ESMF_IKIND_I8     *advanceCount,
+                        ESMC_Alarm        *alarmList[],
+                        int               *numAlarms ) const;
 
     // internal validation
-    virtual int ESMC_Validate(const char *options=0) const;
+    int ESMC_ClockValidate(const char *options=0) const;
 
     // for testing/debugging
-    virtual int ESMC_Print(const char *options=0) const;
+    int ESMC_ClockPrint(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Clock(void);

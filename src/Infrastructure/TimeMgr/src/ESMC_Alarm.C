@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.9 2003/04/02 20:15:14 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.10 2003/04/15 16:47:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.9 2003/04/02 20:15:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.10 2003/04/15 16:47:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -460,10 +460,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Read - restore contents of an Alarm
+// !IROUTINE:  ESMC_AlarmRead - restore contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_Read(
+      int ESMC_Alarm::ESMC_AlarmRead(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -487,7 +487,7 @@
     if (ringInterval == ESMC_NULL_POINTER || ringTime == ESMC_NULL_POINTER ||
         prevRingTime == ESMC_NULL_POINTER || stopTime == ESMC_NULL_POINTER ) {
       // TODO: log error
-      cout << "ESMC_Alarm::ESMC_Read(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Alarm::ESMC_AlarmRead(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
 
@@ -501,14 +501,14 @@
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_Read
+ } // end ESMC_AlarmRead
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Write - save contents of an Alarm
+// !IROUTINE:  ESMC_AlarmWrite - save contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_Write(
+      int ESMC_Alarm::ESMC_AlarmWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -534,7 +534,8 @@
         ringing      == ESMC_NULL_POINTER || enabled  == ESMC_NULL_POINTER ||
         id           == ESMC_NULL_POINTER) {
       // TODO: log error
-      cout << "ESMC_Alarm::ESMC_Write(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Alarm::ESMC_AlarmWrite(): null pointer(s) passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
 
@@ -548,14 +549,14 @@
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_Write
+ } // end ESMC_AlarmWrite
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Validate - internal consistency check for an Alarm
+// !IROUTINE:  ESMC_AlarmValidate - internal consistency check for an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_Validate(
+      int ESMC_Alarm::ESMC_AlarmValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -576,14 +577,14 @@
 //
     return(ESMF_SUCCESS);
 
- } // end ESMC_Validate
+ } // end ESMC_AlarmValidate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Print - print contents of an Alarm
+// !IROUTINE:  ESMC_AlarmPrint - print contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_Print(
+      int ESMC_Alarm::ESMC_AlarmPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -598,10 +599,11 @@
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     cout << "Alarm ----------------------------------" << endl;
-    cout << "RingInterval = " << endl; RingInterval.ESMC_Print(options);
-    cout << "RingTime = "     << endl; RingTime.ESMC_Print(options);
-    cout << "PrevRingTime = " << endl; PrevRingTime.ESMC_Print(options);
-    cout << "StopTime = "     << endl; StopTime.ESMC_Print(options);
+    cout << "RingInterval = " << endl;
+                                 RingInterval.ESMC_TimeIntervalPrint(options);
+    cout << "RingTime = "     << endl; RingTime.ESMC_TimePrint(options);
+    cout << "PrevRingTime = " << endl; PrevRingTime.ESMC_TimePrint(options);
+    cout << "StopTime = "     << endl; StopTime.ESMC_TimePrint(options);
     cout << "Ringing = "      << Ringing << endl;
     cout << "Enabled = "      << Enabled << endl;
     cout << "ID = "           << ID << endl;
@@ -611,7 +613,7 @@
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_Print
+ } // end ESMC_AlarmPrint
 
 //-------------------------------------------------------------------------
 //BOP

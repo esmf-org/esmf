@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.13 2003/04/05 01:51:42 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.14 2003/04/15 16:47:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.13 2003/04/05 01:51:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.14 2003/04/15 16:47:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -482,10 +482,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Read - restore contents of a Clock
+// !IROUTINE:  ESMC_ClockRead - restore contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_Read(
+      int ESMC_Clock::ESMC_ClockRead(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -513,7 +513,7 @@
         stopTime  == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
         currTime  == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
         alarmList == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_Read(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Clock::ESMC_ClockRead(): null pointer(s) passed in" << endl;
       return(ESMF_FAILURE);
     }
     
@@ -531,14 +531,14 @@
     
     return(ESMF_SUCCESS);
 
- } // end ESMC_Read
+ } // end ESMC_ClockRead
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Write - save contents of a Clock
+// !IROUTINE:  ESMC_ClockWrite - save contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_Write(
+      int ESMC_Clock::ESMC_ClockWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -567,7 +567,8 @@
         currTime     == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
         advanceCount == ESMC_NULL_POINTER || alarmList == ESMC_NULL_POINTER ||
         numAlarms    == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_Write(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Clock::ESMC_ClockWrite(): null pointer(s) passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
     
@@ -584,14 +585,14 @@
                                // sure Alarms are saved afterward
     return(ESMF_SUCCESS);
 
- } // end ESMC_Write
+ } // end ESMC_ClockWrite
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Validate - internal consistency check for a Clock
+// !IROUTINE:  ESMC_ClockValidate - internal consistency check for a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_Validate(
+      int ESMC_Clock::ESMC_ClockValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -612,14 +613,14 @@
 //
     return(ESMF_SUCCESS);
 
- } // end ESMC_Validate
+ } // end ESMC_ClockValidate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Print - print contents of a Clock
+// !IROUTINE:  ESMC_ClockPrint - print contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_Print(
+      int ESMC_Clock::ESMC_ClockPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -634,19 +635,17 @@
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
     cout << "Clock ----------------------------------" << endl;
-    cout << "TimeStep = "  << endl; TimeStep.ESMC_Print(options);
-    cout << "StartTime = " << endl; StartTime.ESMC_Print(options);
-    cout << "StopTime = "  << endl; StopTime.ESMC_Print(options);
-    cout << "RefTime = "   << endl; RefTime.ESMC_Print(options);
-    cout << "CurrTime = "  << endl; CurrTime.ESMC_Print(options);
-    cout << "PrevTime = "  << endl; PrevTime.ESMC_Print(options);
+    cout << "TimeStep = "  << endl; TimeStep.ESMC_TimeIntervalPrint(options);
+    cout << "StartTime = " << endl; StartTime.ESMC_TimePrint(options);
+    cout << "StopTime = "  << endl; StopTime.ESMC_TimePrint(options);
+    cout << "RefTime = "   << endl; RefTime.ESMC_TimePrint(options);
+    cout << "CurrTime = "  << endl; CurrTime.ESMC_TimePrint(options);
+    cout << "PrevTime = "  << endl; PrevTime.ESMC_TimePrint(options);
     cout << "AdvanceCount = " << AdvanceCount << endl;
     cout << "NumAlarms = "    << NumAlarms << endl;
     cout << "AlarmList = " << endl;
     for (int i=0; i<NumAlarms; i++) {
-      cout << AlarmList[i]->ESMC_Alarm::ESMC_Print(options);
-                         // ^^^^^^^^^^^^ TODO: override virtual function
-                         // mechanism to support F90 interface
+      cout << AlarmList[i]->ESMC_AlarmPrint(options);
     }
     cout << "end Clock ------------------------------" << endl << endl;
 
@@ -654,7 +653,7 @@
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_Print
+ } // end ESMC_ClockPrint
 
 //-------------------------------------------------------------------------
 //BOP

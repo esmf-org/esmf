@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.6 2003/04/02 17:24:54 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.7 2003/04/15 16:47:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,9 +130,9 @@ extern "C" {
                                   bool *enabled,
                                   int  *id,
                                   int  *status) {
-           *status = (ptr)->ESMC_Alarm::ESMC_Read(ringInterval, ringTime,
-                                                  prevRingTime, stopTime,
-                                                  *ringing, *enabled, *id);
+           *status = (ptr)->ESMC_AlarmRead(ringInterval, ringTime,
+                                           prevRingTime, stopTime,
+                                           *ringing, *enabled, *id);
        }
 
        void FTN(c_esmc_alarmwrite)(ESMC_Alarm *ptr,
@@ -144,18 +144,18 @@ extern "C" {
                                    bool *enabled,
                                    int  *id,
                                    int  *status) {
-           *status = (ptr)->ESMC_Alarm::ESMC_Write(ringInterval, ringTime,
-                                                   prevRingTime, stopTime,
-                                                   ringing, enabled, id);
+           *status = (ptr)->ESMC_AlarmWrite(ringInterval, ringTime,
+                                            prevRingTime, stopTime,
+                                            ringing, enabled, id);
        }
 
        void FTN(c_esmc_alarmvalidate)(ESMC_Alarm *ptr, const char *opts,
                                       int *status) {
-           *status = (ptr)->ESMC_Alarm::ESMC_Validate(opts);
+           *status = (ptr)->ESMC_AlarmValidate(opts);
        }
 
        void FTN(c_esmc_alarmprint)(ESMC_Alarm *ptr, const char *opts,
                                    int *status) {
-           *status = (ptr)->ESMC_Alarm::ESMC_Print(opts);
+           *status = (ptr)->ESMC_AlarmPrint(opts);
        }
 };

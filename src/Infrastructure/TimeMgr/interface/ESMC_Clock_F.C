@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.8 2003/04/02 22:48:50 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.9 2003/04/15 16:47:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,11 +130,11 @@ extern "C" {
                                   ESMF_IKIND_I8 *advanceCount,
                                   ESMC_Alarm *alarmList[],
                                   int *numAlarms, int *status) {
-           *status = (ptr)->ESMC_Clock::ESMC_Read(timeStep, startTime,
-                                                  stopTime, refTime,
-                                                  currTime, prevTime,
-                                                  *advanceCount, alarmList,
-                                                  *numAlarms);
+           *status = (ptr)->ESMC_ClockRead(timeStep, startTime,
+                                           stopTime, refTime,
+                                           currTime, prevTime,
+                                           *advanceCount, alarmList,
+                                           *numAlarms);
        }
 
        void FTN(c_esmc_clockwrite)(ESMC_Clock *ptr, 
@@ -147,20 +147,20 @@ extern "C" {
                                    ESMF_IKIND_I8 *advanceCount,
                                    ESMC_Alarm *alarmList[],
                                    int *numAlarms, int *status) {
-           *status = (ptr)->ESMC_Clock::ESMC_Write(timeStep, startTime,
-                                                   stopTime, refTime,
-                                                   currTime, prevTime,
-                                                   advanceCount, alarmList,
-                                                   numAlarms);
+           *status = (ptr)->ESMC_ClockWrite(timeStep, startTime,
+                                            stopTime, refTime,
+                                            currTime, prevTime,
+                                            advanceCount, alarmList,
+                                            numAlarms);
        }
 
        void FTN(c_esmc_clockvalidate)(ESMC_Clock *ptr, const char *opts,
                                       int *status) {
-           *status = (ptr)->ESMC_Clock::ESMC_Validate(opts);
+           *status = (ptr)->ESMC_ClockValidate(opts);
        }
 
        void FTN(c_esmc_clockprint)(ESMC_Clock *ptr, const char *opts,
                                    int *status) {
-           *status = (ptr)->ESMC_Clock::ESMC_Print(opts);
+           *status = (ptr)->ESMC_ClockPrint(opts);
        }
 };

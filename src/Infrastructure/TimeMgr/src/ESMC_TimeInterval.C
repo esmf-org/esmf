@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.12 2003/04/09 15:17:59 flanigan Exp $
+// $Id: ESMC_TimeInterval.C,v 1.13 2003/04/15 16:47:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.12 2003/04/09 15:17:59 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.13 2003/04/15 16:47:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -423,10 +423,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Read - restore TimeInterval state
+// !IROUTINE:  ESMC_TimeIntervalRead - restore TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_Read(
+      int ESMC_TimeInterval::ESMC_TimeIntervalRead(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -446,26 +446,27 @@
     int rc;
 
     if (cal == ESMC_NULL_POINTER) {
-      cout << "ESMC_TimeInterval::ESMC_Read(): null pointer passed in" << endl;
+      cout << "ESMC_TimeInterval::ESMC_TimeIntervalRead(): null pointer "
+           << "passed in" << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Read() first
-    rc = ESMC_BaseTime::ESMC_Read(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeRead(S, Sn, Sd);
 
     Calendar = cal;  // TODO?: this only restores calendar pointer; component
                      // must be sure to restore corresponding calendar first
   
     return(rc);
 
- }  // end ESMC_Read
+ }  // end ESMC_TimeIntervalRead
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Write - return TimeInterval state
+// !IROUTINE:  ESMC_TimeIntervalWrite - return TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_Write(
+      int ESMC_TimeInterval::ESMC_TimeIntervalWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -486,27 +487,27 @@
 
     if (S  == ESMC_NULL_POINTER || Sn  == ESMC_NULL_POINTER ||
         Sd == ESMC_NULL_POINTER || cal == ESMC_NULL_POINTER) {
-      cout << "ESMC_TimeInterval::ESMC_Write(): null pointer(s) passed in"
-           << endl;
+      cout << "ESMC_TimeInterval::ESMC_TimeIntervalWrite(): null pointer(s) "
+           << "passed in" << endl;
       return(ESMF_FAILURE);
     }
 
     // use base class Write() first
-    rc = ESMC_BaseTime::ESMC_Write(S, Sn, Sd);
+    rc = ESMC_BaseTime::ESMC_BaseTimeWrite(S, Sn, Sd);
 
     cal = Calendar;  // TODO?: this only saves calendar pointer; component
                      // must be sure to save corresponding calendar
   
     return(rc);
 
- }  // end ESMC_Write
+ }  // end ESMC_TimeIntervalWrite
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Validate - validate TimeInterval state
+// !IROUTINE:  ESMC_TimeIntervalValidate - validate TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_Validate(
+      int ESMC_TimeInterval::ESMC_TimeIntervalValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -523,14 +524,14 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_Validate
+ }  // end ESMC_TimeIntervalValidate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Print - print Time state
+// !IROUTINE:  ESMC_TimeIntervalPrint - print TimeInterval state
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_Print(
+      int ESMC_TimeInterval::ESMC_TimeIntervalPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -545,17 +546,15 @@
 // !REQUIREMENTS:  
 
     cout << "TimeInterval ---------------------------" << endl;
-    ESMC_BaseTime::ESMC_Print(options);
+    ESMC_BaseTime::ESMC_BaseTimePrint(options);
     if (Calendar != ESMC_NULL_POINTER) {
-      Calendar->ESMC_Calendar::ESMC_Print(options);
-              //^^^^^^^^^^^^^^^TODO: override virtual function
-              // mechanism to support F90 interface ?
+      Calendar->ESMC_CalendarPrint(options);
     }
     cout << "end TimeInterval -----------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
 
- }  // end ESMC_Print
+ }  // end ESMC_TimeIntervalPrint
 
 //-------------------------------------------------------------------------
 //BOP
