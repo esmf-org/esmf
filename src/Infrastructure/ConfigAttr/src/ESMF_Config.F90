@@ -214,22 +214,23 @@
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
 
-     integer,   parameter :: LSZ = 256
-     integer,   parameter :: MSZ = 200
-     integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
-
-     character, parameter :: BLK = achar(32)   ! blank (space)
-     character, parameter :: TAB = achar(09)   ! TAB
-     character, parameter :: EOL = achar(10)   ! end of line mark (newline)
-     character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
-     character, parameter :: NULL= achar(00)   ! what it says
-
-     character(len=*), parameter :: myname='ESMF_ConfigMod'
+       integer,   parameter :: LSZ = 256
+       integer,   parameter :: MSZ = 200
+       integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
+       
+       character, parameter :: BLK = achar(32)   ! blank (space)
+       character, parameter :: TAB = achar(09)   ! TAB
+       character, parameter :: EOL = achar(10)   ! end of line mark (newline)
+       character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
+       character, parameter :: NULL= achar(00)   ! what it says
+       
+       character(len=*), parameter :: myname='ESMF_ConfigMod'
 !-----------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! !OPEQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_Config
+          sequence
           private
           integer :: nbuf                              ! actual size of buffer
           character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file?
@@ -238,7 +239,7 @@
                                                        ! on buffer
        end type ESMF_Config
 
-      contains
+     contains
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
@@ -248,7 +249,7 @@
 !
 ! !INTERFACE:
 
-    type(ESMF_Config) function ESMF_ConfigCreate( rc )
+       type(ESMF_Config) function ESMF_ConfigCreate( rc )
 
       implicit none
 
@@ -662,7 +663,15 @@
       integer       ib, ie, iret
       
       iret = 0
-      
+
+! Default setting
+      if( present( default ) ) then 
+         string = default
+      else
+         string = BLK
+      endif
+
+! Processing
       if(present( label )) then
          call ESMF_ConfigFindLabel( cf, label, iret )
          if ( iret /= 0 ) then
@@ -738,6 +747,14 @@
       
       iret = 0
 
+! Default setting
+      if( present( default ) ) then 
+         ESMF_ConfigGetFloat = default
+      else
+         ESMF_ConfigGetFloat = 0.0
+      endif
+
+! Processing
       if (present (label ) ) then
          call ESMF_ConfigGetString( cf, string, label, rc = iret )
       else
@@ -748,14 +765,11 @@
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
       end if
-      if ( iret .ne. 0 ) then
-         if ( present ( default ) ) then
-            x = default
-         else
-            x = 0.
-         endif
+
+      if ( iret .eq. 0 ) then
+         ESMF_ConfigGetFloat = x
       endif
-      ESMF_ConfigGetFloat = x
+
       if( present( rc )) rc = iret 
       return
 
@@ -795,6 +809,9 @@
       integer iret, i 
       
       iret = 0
+
+
+
       
       if (nsize<=0) then
          print *,myname_,' invalid SIZE =', nsize
@@ -803,6 +820,14 @@
          return
       endif
        
+! Default setting
+      if( present( default ) ) then 
+         array(1:nsize) = default
+      else
+         array(1:nsize) = 0.0
+      endif
+
+! Processing
       do i = 1, nsize
          
          if (present( label )) then
@@ -855,6 +880,14 @@
 
       iret = 0
 
+! Default setting
+      if( present( default ) ) then 
+         ESMF_ConfigGetInt = default
+      else
+         ESMF_ConfigGetInt = 0
+      endif
+
+! Processing
       if (present (label ) ) then
          call ESMF_ConfigGetString( cf, string, label, rc = iret )
       else
@@ -875,7 +908,10 @@
          endif
       endif
 
-      ESMF_ConfigGetInt = n
+      if ( iret == 0 ) then
+         ESMF_ConfigGetInt = n
+      endif
+
       if( present( rc )) rc = iret
       
       return
@@ -913,7 +949,7 @@
       integer iret, i 
       
       iret = 0
-      
+
       if (nsize<=0) then
          print *,myname_,' invalid SIZE =', nsize
          iret = -1
@@ -921,6 +957,14 @@
          return
       endif
        
+ ! Default setting
+      if( present( default ) ) then 
+         array(1:nsize) = default
+      else
+         array(1:nsize) = 0
+      endif
+
+! Processing 
       do i = 1, nsize
          
          if (present( label )) then
@@ -977,6 +1021,14 @@
 
       iret = 0
 
+! Default setting
+      if( present( default ) ) then 
+         ESMF_ConfigGetChar = default
+      else
+         ESMF_ConfigGetChar = BLK
+      endif
+
+! Processing
       if (present (label ) ) then
          call ESMF_ConfigGetString( cf, string, label, rc = iret )
       else
