@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.50 2004/10/07 17:45:22 nscollins Exp $
+# $Id: makefile,v 1.51 2004/10/07 19:20:16 svasquez Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -44,13 +44,13 @@ all       : info info_h chk_dir build_libs shared
 # Prints information about the system and version of ESMF being compiled
 #-------------------------------------------------------------------------------
 script_info:
-	-@if [ -n "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
-	  echo "C Compiler version:" ; ${C_CCV} ; fi
-	-@if [ -n "${CXX_CCV}" -a "${CXX_CCV}" != "unknown" ] ; then \
-	  echo "C++ Compiler version:" ; ${CXX_CCV} ; fi
-	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
-	  echo "Fortran Compiler version:" ; ${C_FCV} ; fi
 	-@echo " "
+	-@if [ -n "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
+	  echo "C Compiler version:" ; ${C_CCV} ; echo "" ; fi
+	-@if [ -n "${CXX_CCV}" -a "${CXX_CCV}" != "unknown" ] ; then \
+	  echo "C++ Compiler version:" ; ${CXX_CCV} ; echo "" ; fi
+	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
+	  echo "Fortran Compiler version:" ; ${C_FCV} ; echo "" ; fi
 	-@if [ -f ${ESMF_DIR}/src/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
 	-@echo "ESMF_DIR: ${ESMF_TOP_DIR}"
