@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2004/04/07 22:09:10 svasquez Exp $
+# $Id: makefile,v 1.17 2004/04/21 19:56:16 svasquez Exp $
 
 ALL:  build_tests
 
@@ -18,7 +18,8 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_AlarmUTest \
 		$(ESMC_TESTDIR)/ESMF_ClockUTest \
 		$(ESMC_TESTDIR)/ESMF_CalendarUTest \
 		$(ESMC_TESTDIR)/ESMF_CalRangeUTest \
-		$(ESMC_TESTDIR)/ESMF_TimeIntervalUTest
+		$(ESMC_TESTDIR)/ESMF_TimeIntervalUTest \
+		$(ESMC_TESTDIR)/ESMF_TimeUTest
 #	        $(ESMC_TESTDIR)/ESMC_ClockUTest 
 # remove temporarily
 
@@ -26,21 +27,24 @@ TESTS_RUN     = RUN_ESMF_AlarmUTest \
 		RUN_ESMF_ClockUTest \
 		RUN_ESMF_CalendarUTest \
 		RUN_ESMF_CalRangeUTest \
-		RUN_ESMF_TimeIntervalUTest
+		RUN_ESMF_TimeIntervalUTest \
+		RUN_ESMF_TimeUTest
 #		RUN_ESMC_ClockUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_AlarmUTestUNI \
 		RUN_ESMF_ClockUTestUNI \
 		RUN_ESMF_CalendarUTestUNI \
 		RUN_ESMF_CalRangeUTestUNI \
-		RUN_ESMF_TimeIntervalUTestUNI
+		RUN_ESMF_TimeIntervalUTestUNI \
+		RUN_ESMF_TimeUTestUNI
 #		RUN_ESMC_ClockUTestUNI 
 
 TESTS_RM      = ESMF_AlarmUTest.rm \
 		ESMF_ClockUTest.rm \
 		ESMF_CalendarUTest.rm \
 		ESMF_CalRangeUTest.rm \
-		ESMF_TimeIntervalUTest.rm
+		ESMF_TimeIntervalUTest.rm \
+		ESMF_TimeUTest.rm
 #               ESMC_ClockUTest.rm
 
 include ${ESMF_DIR}/makefile
@@ -150,4 +154,20 @@ RUN_ESMF_TimeIntervalUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest > $(ESMC_TESTDIR)/ESMF_TimeIntervalUTest.stdout
 
 ESMF_TimeIntervalUTest.rm:
-	echo "ESMF_CalRangeTest.rm target called here."
+	echo "ESMF_TimeIntervalUTest.rm target called here."
+
+
+#
+#
+#
+
+RUN_ESMF_TimeUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_TimeUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_TimeUTest > $(ESMC_TESTDIR)/ESMF_TimeUTest.stdout
+
+RUN_ESMF_TimeUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_TimeUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_TimeUTest > $(ESMC_TESTDIR)/ESMF_TimeUTest.stdout
+
+ESMF_TimeUTest.rm:
+	echo "ESMF_TimeUTest.rm target called here."
