@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.12 2004/06/16 13:04:09 nscollins Exp $
+! $Id: ESMF_ArrayGetEx.F90,v 1.1 2004/06/16 13:04:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,13 +10,13 @@
 !
 !==============================================================================
 
-    program ESMF_ArrayCreateEx
+    program ESMF_ArrayGetEx
 
 !-------------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
-! !PROGRAM: ESMF_ArrayCreateEx - Examples of Array Creation
+! !PROGRAM: ESMF_ArrayGetEx - Examples of Array Usage
 !
 ! !DESCRIPTION:
 !
@@ -41,18 +41,6 @@
     integer :: finalrc 
     finalrc = ESMF_SUCCESS
 
-!BOE
-!\subsubsection{Create an Array based on existing data}
-
-!  Create an {\tt ESMF\_Array} based on an existing, allocated Fortran 
-!  pointer.  The data is type Integer, one dimensional.
-!  The {\tt ESMF\_DATA_REF} flag means the framework will not make
-!  a copy of the data area but will use this memory directly.
-!  When the {\tt ESMF\_Array} is deleted the data area will remain
-!  and must be deallocated by the user when the space is not needed.
-!EOE
-
-!BOC
     ! Allocate and set initial data values
     ni = 15 
     allocate(intptr(ni))
@@ -61,19 +49,35 @@
     enddo
 
     array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
+!BOE
+!\subsubsection{Print Array contents}
+    
+!  Print the data contents of an {\tt ESMF\_Array}.
+!EOE
+
+!BOC
+    call ESMF_ArrayPrint(array1, rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 
-    call ESMF_ArrayPrint(array1, rc=rc)
+!BOE
+!\subsubsection{Get a pointer to the Array contents}
+    
+!  Associate a Fortran pointer with the data from an {\tt ESMF\_Array}.
+!  Point directly at the data contents; do not make a separate copy.
+!EOE
 
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
-
+!BOC
     call ESMF_ArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
+!EOC
 
     print *, "array 1 getdata returned"
 
@@ -100,20 +104,6 @@
         finalrc = ESMF_FAILURE
     end if
 
-!BOE    
-!\subsubsection{Create an Array and copy existing data}
-
-!  Create an {\tt ESMF\_Array} based on an existing, allocated Fortran
-!  pointer.  The data is type Integer, one dimensional.
-!  The {\tt ESMF\_DATA_COPY} flag means the framework will make
-!  a copy of the data area and will be independent of the original
-!  data array.
-!  When the {\tt ESMF\_Array} is deleted this data area will be 
-!  deallocated by the framework.  The user can user or delete the
-!  original data area independently of this {\tt ESMF\_Array}.
-!EOE
-
-!BOC
     ! Allocate and set initial data values
     ni = 5 
     nj = 3 
@@ -123,12 +113,9 @@
        realptr(i,j) = i + ((j-1)*ni) + 0.1
      enddo
     enddo
-!EOC
     print *, "realptr data = ", realptr
 
-!BOC
     array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_COPY, rc=rc)
-!EOC
 
     print *, "array 2 create returned"
 
@@ -145,7 +132,19 @@
         print *, "FAILED"
     end if
 
+!BOE
+!\subsubsection{Get a pointer to a copy of the Array contents}
+    
+!  Associate a Fortran pointer with the data from an {\tt ESMF\_Array}.
+!  Allocate and copy the existing data into a separate buffer and return
+!  that space.  It can be manipulated independently from the 
+!  {\tt ESMF\_Array} contents.  It must be deallocated by the user when
+!  no longer needed.
+!EOE
+
+!BOC
     call ESMF_ArrayGetData(array2, realptr2, ESMF_DATA_COPY, rc)
+!EOC
 
     print *, "array 2 getdata returned"
 
@@ -163,30 +162,19 @@
         finalrc = ESMF_FAILURE
     end if
 
-!BOE    
-!\subsubsection{Create an Array and allocate data space}
-
-!  Create an {\tt ESMF\_Array} based on a description of the data.
-!  The framework will allocate the data space itself.  
-!  When the {\tt ESMF\_Array} is deleted this data area will be 
-!  deallocated by the framework.
-!EOE
-
-!BOC
     arank = 2
     atype = ESMF_DATA_REAL
     akind = ESMF_R8
 
     call ESMF_ArraySpecSet(arrayspec, arank, atype, akind)
     array2 = ESMF_ArrayCreate(arrayspec, (/10, 20 /), rc=rc)
-!EOC
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-        print *, "PASS: ESMF_ArrayCreateEx.F90"
+        print *, "PASS: ESMF_ArrayGetEx.F90"
     else
-        print *, "FAIL: ESMF_ArrayCreateEx.F90"
+        print *, "FAIL: ESMF_ArrayGetEx.F90"
     end if
 !BOC
-    end program ESMF_ArrayCreateEx
+    end program ESMF_ArrayGetEx
 !EOC
     
