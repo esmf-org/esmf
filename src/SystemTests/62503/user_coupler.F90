@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2003/04/14 14:51:45 nscollins Exp $
+! $Id: user_coupler.F90,v 1.4 2003/07/22 19:52:17 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -117,9 +117,9 @@
         call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
 
-        ! These are fields on different layouts - call Route to rearrange
+        ! These are fields on different layouts - call Redist to rearrange
         !  the data using the Comm routines.
-        call ESMF_FieldRoute(humidity1, humidity2, cpllayout, status)
+        call ESMF_FieldRedist(humidity1, humidity2, cpllayout, status)
 
 
         ! Set output data

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.5 2003/05/02 14:30:15 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.6 2003/07/22 19:52:17 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -158,9 +158,9 @@
            call ESMF_StateGetData(mysource, datanames(i), srcfield, rc=status)
            call ESMF_StateGetData(mydest, datanames(i), dstfield, rc=status)
 
-           ! These are fields on different layouts - call Route to rearrange
+           ! These are fields on different layouts - call Redist to rearrange
            !  the data using the Comm routines.
-           call ESMF_FieldRoute(srcfield, dstfield, cpllayout, status)
+           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, status)
 
            !call ESMF_FieldHalo(dstfield, rc)
 
