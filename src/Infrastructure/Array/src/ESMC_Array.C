@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.13 2003/08/01 16:25:55 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.14 2003/08/14 21:52:51 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -861,19 +861,19 @@
          if (total) {
              total[ij].min = 0;
              total[ij].max = count + halo_widths[j][0] + halo_widths[j][1];
-             total[ij].stride = 1;
+             total[ij].stride = count + halo_widths[j][0] + halo_widths[j][1] + 1;
          }
 
          if (comp) {
              comp[ij].min = halo_widths[j][0];
              comp[ij].max = count + halo_widths[j][0];
-             comp[ij].stride = 1;
+             comp[ij].stride = count + halo_widths[j][0] + halo_widths[j][1] + 1;
          }
 
          if (excl) {
              excl[i].min = halo_widths[j][0] + halo_widths[j][1];
              excl[i].max = count - halo_widths[j][0];
-             excl[i].stride = 1;
+             excl[i].stride = count + halo_widths[j][0] + halo_widths[j][1] + 1;
          }
        }
      }
