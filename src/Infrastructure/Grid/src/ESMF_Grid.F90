@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.32 2003/02/21 17:40:11 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.33 2003/02/21 21:11:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,17 +46,6 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-!------------------------------------------------------------------------------
-!     ! ESMF_GridConfig
-!
-!     ! Description of ESMF_GridConfig
-
-      type ESMF_GridConfig
-      sequence
-      private
-        integer :: dummy
-!       < insert other class members here >
-      end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_GridType
@@ -85,6 +74,9 @@
                                             ! necessary to support
                                             ! staggering, vertical
                                             ! grids, background grids
+        logical, dimension(3) :: periodic   ! logical identifier to indicate
+                                            ! periodic boundary conditions in
+                                            ! each direction
         type (ESMF_PhysGridType), dimension(:), pointer :: &
            physgrids         ! grid info for all grid descriptions necessary
                              ! to define horizontal, staggered and vertical grids
@@ -109,7 +101,6 @@
 !
 ! !PUBLIC TYPES:
 
-      public ESMF_GridConfig
       public ESMF_Grid
       public ESMF_GridType
 
@@ -127,8 +118,8 @@
     public ESMF_GridGetDE    ! temporary to access DistGrid from above
     public ESMF_GridGlobalToLocalIndex
     public ESMF_GridLocalToGlobalIndex
-    !public ESMF_GridGetInfo
-    public ESMF_GridSetInfo
+    public ESMF_GridGet
+    public ESMF_GridSet
     !public ESMF_GridGetLMask
     public ESMF_GridSetLMask
     !public ESMF_GridGetMMask
@@ -164,9 +155,11 @@
       ESMF_GridStagger_A              =  1, &! Arakawa A (centered velocity)
       ESMF_GridStagger_B              =  2, &! Arakawa B (velocities at grid corner)
       ESMF_GridStagger_C              =  3, &! Arakawa C (velocities at cell faces)
-      ESMF_GridStagger_Z              =  4, &! C grid equiv for geodesic grid
-      ESMF_GridStagger_VertCenter     =  5, &! vert velocity at vertical midpoints
-      ESMF_GridStagger_VertFace       =  6   ! vert velocity/Pgrad at top(bottom)face
+      ESMF_GridStagger_D              =  4, &! Arakawa D
+      ESMF_GridStagger_E              =  5, &! Arakawa E
+      ESMF_GridStagger_Z              =  6, &! C grid equiv for geodesic grid
+      ESMF_GridStagger_VertCenter     =  7, &! vert velocity at vertical midpoints
+      ESMF_GridStagger_VertFace       =  8   ! vert velocity/Pgrad at top(bottom)face
 
    integer, parameter, public ::            &! recognized coordinate systems
       ESMF_CoordSystem_Unknown        =  0, &! unknown or undefined coord system
@@ -206,7 +199,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.32 2003/02/21 17:40:11 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.33 2003/02/21 21:11:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -352,7 +345,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateEmpty - Create a new Grid with no data
+! !IROUTINE: ESMF_GridCreateEmpty - Create a new Grid with no contents
 
 ! !INTERFACE:
       function ESMF_GridCreateEmpty(name, rc)
@@ -366,7 +359,8 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object and constructs its
-!     internals.  Return a pointer to the new {\tt Grid}.
+!     internals, but does not fill in any contents.  Return a pointer to
+!     the new {\tt Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -424,6 +418,7 @@
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
+                                       halo_width, &
                                        x_min, x_max, y_min, y_max, name, rc)
 !
 ! !RETURN VALUE:
@@ -441,6 +436,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
+      integer, intent(in), optional :: halo_width
       real, intent(in), optional :: x_min
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
@@ -522,6 +518,7 @@
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
+                              halo_width, &
                               x_min, x_max, y_min, y_max, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
@@ -951,6 +948,7 @@
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
+                                            halo_width, &
                                             x_min, x_max, y_min, y_max, name, rc)
 !
 ! !ARGUMENTS:
@@ -966,6 +964,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
+      integer, intent(in), optional :: halo_width
       real, intent(in), optional :: x_min
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
@@ -1041,17 +1040,17 @@
       endif
 
 !     Fill in grid derived type with subroutine arguments
-      call ESMF_GridSetInfo(grid, horz_gridtype, vert_gridtype, &
-                            horz_stagger, vert_stagger, &
-                            horz_coord_system, vert_coord_system, status)
+      call ESMF_GridSet(grid, horz_gridtype, vert_gridtype, &
+                        horz_stagger, vert_stagger, &
+                        horz_coord_system, vert_coord_system, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridConstructInternal: Grid set info"
+        print *, "ERROR in ESMF_GridConstructInternal: Grid set"
         return
       endif
 
 !     Create the DistGrid
       grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
-                                          layout=layout, &
+                                          layout=layout, halo_width=halo_width, &
                                           i_max=i_max, j_max=j_max, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
@@ -1148,6 +1147,9 @@
       grid%vert_coord_system = ESMF_CoordSystem_Unknown
       grid%coord_order = ESMF_CoordOrder_Unknown
       grid%num_physgrids = 0
+      grid%periodic(1) = .FALSE.
+      grid%periodic(2) = .FALSE.
+      grid%periodic(3) = .FALSE.
       nullify(grid%physgrids)
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1286,13 +1288,19 @@
       physgrid_id = grid%num_physgrids 
 
       delta1 = (x_max - x_min) / real(i_max)
-      local_min_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%start-1)
-      local_max_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%end)
-      local_nmax1 = grid%distgrid%ptr%MyDE%n_dir1%size
+      local_min_coord1 = delta1 * &
+                         real(grid%distgrid%ptr%MyDE%lcelltot_index(1)%l - 1)
+      local_max_coord1 = delta1 * &
+                         real(grid%distgrid%ptr%MyDE%lcelltot_index(1)%r)
+      local_nmax1 = grid%distgrid%ptr%MyDE%lcelltot_index(1)%r &
+                  - grid%distgrid%ptr%MyDE%lcelltot_index(1)%l + 1
       delta2 = (y_max - y_min) / real(j_max)
-      local_min_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%start-1)
-      local_max_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%end)
-      local_nmax2 = grid%distgrid%ptr%MyDE%n_dir2%size
+      local_min_coord2 = delta2 * &
+                         real(grid%distgrid%ptr%MyDE%lcelltot_index(2)%l - 1)
+      local_max_coord2 = delta2 * &
+                         real(grid%distgrid%ptr%MyDE%lcelltot_index(2)%r)
+      local_nmax2 = grid%distgrid%ptr%MyDE%lcelltot_index(2)%r &
+                  - grid%distgrid%ptr%MyDE%lcelltot_index(2)%l + 1
       call ESMF_PhysGridConstruct(grid%physgrids(physgrid_id), &
                                   local_min_coord1=local_min_coord1, &
                                   local_max_coord1=local_max_coord1, &
@@ -1462,35 +1470,23 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, MyDE, MyDEx, MyDEy, &
-                                DE_E, DE_W, DE_N, DE_S, &
-                                DE_NE, DE_NW, DE_SE, DE_SW, &
-                                lsize, gstart, &
-                                n_dir1_start, n_dir1_end, n_dir1_size, &
-                                n_dir2_start, n_dir2_end, n_dir2_size, &
+      subroutine ESMF_GridGetDE(grid, MyDE, &
+                                lcelltot_count, lcellexc_count, &
+                                gcelltot_start, gcellexc_start, &
+                                lcelltot_index, lcellexc_index, &
                                 rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       integer, intent(inout), optional :: MyDE
-      integer, intent(inout), optional :: MyDEx
-      integer, intent(inout), optional :: MyDEy
-      integer, intent(inout), optional :: DE_E
-      integer, intent(inout), optional :: DE_W
-      integer, intent(inout), optional :: DE_N
-      integer, intent(inout), optional :: DE_S
-      integer, intent(inout), optional :: DE_NE
-      integer, intent(inout), optional :: DE_NW
-      integer, intent(inout), optional :: DE_SE
-      integer, intent(inout), optional :: DE_SW
-      integer, intent(inout), optional :: lsize
-      integer, intent(inout), optional :: gstart
-      integer, intent(inout), optional :: n_dir1_start
-      integer, intent(inout), optional :: n_dir1_end
-      integer, intent(inout), optional :: n_dir1_size
-      integer, intent(inout), optional :: n_dir2_start
-      integer, intent(inout), optional :: n_dir2_end
-      integer, intent(inout), optional :: n_dir2_size
+      integer, intent(inout), optional :: lcelltot_count
+      integer, intent(inout), optional :: lcellexc_count
+      integer, intent(inout), optional :: gcelltot_start
+      integer, intent(inout), optional :: gcellexc_start
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
+                        optional :: lcelltot_index
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
+                        optional :: lcellexc_index
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1502,42 +1498,14 @@
 !          Class to be queried.
 !     \item[[MyDE]]
 !          Identifier for this DE.
-!     \item[[MyDEx]]
-!          Identifier for this DE's position in the 1st dir decomposition.
-!     \item[[MyDEy]]
-!          Identifier for this DE's position in the 2nd dir decomposition.
-!     \item[[DE\_E]]
-!          Identifier for the DE to the east of this DE.
-!     \item[[DE\_W]]
-!          Identifier for the DE to the west of this DE.
-!     \item[[DE\_N]]
-!          Identifier for the DE to the north of this DE.
-!     \item[[DE\_S]]
-!          Identifier for the DE to the south of this DE.
-!     \item[[DE\_NE]]
-!          Identifier for the DE to the northeast of this DE.
-!     \item[[DE\_NW]]
-!          Identifier for the DE to the northwest of this DE.
-!     \item[[DE\_SE]]
-!          Identifier for the DE to the southeast of this DE.
-!     \item[[DE\_SW]]
-!          Identifier for the DE to the southwest of this DE.
-!     \item[[lsize]]
-!          Local (on this DE) number of cells.
-!     \item[[gstart]]
-!          Global index of starting count.
-!     \item[[n\_dir1\_start]]
-!          Starting index of this DE in 1st dir decomposition.
-!     \item[[n\_dir1\_end]]
-!          Ending index of this DE in 1st dir decomposition.
-!     \item[[n\_dir1\_size]]
-!          Size of the 1st dir decomposition on this DE.
-!     \item[[n\_dir2\_start]]
-!          Starting index of this DE in 2nd dir decomposition.
-!     \item[[n\_dir2\_end]]
-!          Ending index of this DE in 2nd dir decomposition.
-!     \item[[n\_dir2\_size]]
-!          Size of the 2nd dir decomposition on this DE.
+!     \item[[lcelltot\_count]]
+!          Local (on this DE) number of total cells.
+!     \item[[lcellexc\_count]]
+!          Local (on this DE) number of exclusive cells.
+!     \item[[gcelltot\_start]]
+!          Global index of starting count for total cells.
+!     \item[[gcellexc\_start]]
+!          Global index of starting count for exclusive cells.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1556,12 +1524,10 @@
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, MyDEx, MyDEy, &
-                              DE_E, DE_W, DE_N, DE_S, &
-                              DE_NE, DE_NW, DE_SE, DE_SW, &
-                              lsize, gstart, &
-                              n_dir1_start, n_dir1_end, n_dir1_size, &
-                              n_dir2_start, n_dir2_end, n_dir2_size, &
+      call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, &
+                              lcelltot_count, lcellexc_count, &
+                              gcelltot_start,  gcellexc_start, &
+                              lcelltot_index, lcellexc_index, &
                               status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
@@ -1758,12 +1724,9 @@
       integer :: ncoord_locs
       integer, dimension(6) :: coord_loc
       integer :: DE_id
-      integer :: global_nmin1
-      integer :: global_nmax1
-      integer :: global_nmin2
-      integer :: global_nmax2
-      integer :: gsize_dir1
-      integer :: gsize_dir2
+      integer, dimension(ESMF_MAXGRIDDIM) :: gcell_dim
+      integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_start
+      integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_end
       real :: delta1
       real :: delta2
       real :: global_min_coord1
@@ -1786,46 +1749,43 @@
      
 !     Get distgrid information, including global size in each direction and local
 !     grid size indexed globally
-      call ESMF_DistGridGetInfo(grid%distgrid%ptr, &
-                                gsize_dir1=gsize_dir1, &
-                                gsize_dir2=gsize_dir2, rc=status)
+      call ESMF_DistGridGet(grid%distgrid%ptr, &
+                            gcell_dim=gcell_dim, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get info"
+        print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get"
         return
       endif
       DE_id = grid%distgrid%ptr%MyDE%MyDE
       call ESMF_DistGridGetCounts(grid%distgrid%ptr, DE_id, &
-                                  global_start_dir1=global_nmin1, &
-                                  global_end_dir1=global_nmax1, &
-                                  global_start_dir2=global_nmin2, &
-                                  global_end_dir2=global_nmax2, rc=status)
+                                  lcellexc_start, lcellexc_end, &
+                                  rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get counts"
         return
       endif
 
 !     Get physgrid info with global coordinate extents
-      call ESMF_PhysGridGetInfo(grid%physgrids(physgrid_id), &
-                                global_min_coord1=global_min_coord1, &
-                                global_max_coord1=global_max_coord1, &
-                                global_min_coord2=global_min_coord2, &
-                                global_max_coord2=global_max_coord2, rc=status)
+      call ESMF_PhysGridGet(grid%physgrids(physgrid_id), &
+                            global_min_coord1=global_min_coord1, &
+                            global_max_coord1=global_max_coord1, &
+                            global_min_coord2=global_min_coord2, &
+                            global_max_coord2=global_max_coord2, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid get info"
+        print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid get"
         return
       endif
 
 !     Calculate global cell sizes
-      if (gsize_dir1.ne.0) then
-        delta1 = (global_max_coord1 - global_min_coord1) / real(gsize_dir1)
+      if (gcell_dim(1).ne.0) then
+        delta1 = (global_max_coord1 - global_min_coord1) / real(gcell_dim(1))
       else
-        print *, "ERROR in ESMF_GridSetCoordCompute: gsize_dir1=0"
+        print *, "ERROR in ESMF_GridSetCoordCompute: gcell_dim1=0"
         return
       endif
-      if (gsize_dir2.ne.0) then
-        delta2 = (global_max_coord2 - global_min_coord2) / real(gsize_dir2)
+      if (gcell_dim(2).ne.0) then
+        delta2 = (global_max_coord2 - global_min_coord2) / real(gcell_dim(2))
       else
-        print *, "ERROR in ESMF_GridSetCoordCompute: gsize_dir2=0"
+        print *, "ERROR in ESMF_GridSetCoordCompute: gcell_dim2=0"
         return
       endif
 
@@ -1835,8 +1795,8 @@
       ncoord_locs = 2
       call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), &
                                  ncoord_locs, coord_loc, &
-                                 global_nmin1, global_nmax1, &
-                                 global_nmin2, global_nmax2, &
+                                 lcellexc_start(1), lcellexc_end(1), &
+                                 lcellexc_start(2), lcellexc_end(2), &
                                  delta1, delta2, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid construct"
@@ -1891,13 +1851,13 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetInfo - Gets a variety of information about the grid
+! !IROUTINE: ESMF_GridGet - Gets a variety of information about the grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetInfo(grid, horz_gridtype, vert_gridtype, &
-                                  horz_stagger, vert_stagger, &
-                                  horz_coord_system, vert_coord_system, &
-                                  coord_order, rc)
+      subroutine ESMF_GridGet(grid, horz_gridtype, vert_gridtype, &
+                              horz_stagger, vert_stagger, &
+                              horz_coord_system, vert_coord_system, &
+                              coord_order, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1959,17 +1919,17 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridGetInfo
+      end subroutine ESMF_GridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetInfo - Sets a variety of information about the grid
+! !IROUTINE: ESMF_GridSet - Sets a variety of information about the grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetInfo(grid, horz_gridtype, vert_gridtype, &
-                                  horz_stagger, vert_stagger, &
-                                  horz_coord_system, vert_coord_system, &
-                                  coord_order, rc)
+      subroutine ESMF_GridSet(grid, horz_gridtype, vert_gridtype, &
+                              horz_stagger, vert_stagger, &
+                              horz_coord_system, vert_coord_system, &
+                              coord_order, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -2031,7 +1991,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridSetInfo
+      end subroutine ESMF_GridSet
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2641,7 +2601,7 @@
       endif
 
       ! Call DistGrid method to perform actual work
-      call ESMF_DistGridHalo(grid%ptr%distgrid, array, status)
+      call ESMF_DistGridHalo(grid%ptr%distgrid%ptr, array, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in GridHalo: DistGrid Halo returned failure"
         return
@@ -2651,7 +2611,6 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridHalo
-
 
 !------------------------------------------------------------------------------
 !BOP
