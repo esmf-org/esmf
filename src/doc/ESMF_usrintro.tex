@@ -6,25 +6,27 @@ Application Programming Interface (API), and to demonstrate the viability
 of the ESMF architecture and implementation.  For this release, we have focused 
 on implementing major architectural features and basic functionality.  The 
 current performance characteristics and memory requirements of the software 
-are unlikely to resemble those in later releases.
+are unlikely to resemble those in later releases.  
+
+We are relying on Earth system modelers to provide us with the feedback necessary 
+to realize this goal.  Section \ref{sec:Support} of this document includes 
+instructions on submitting comments on ESMF v1.0 to our development team.
 
 Our next major release, ESMF v2.0, will occur in April 2004.  At that time, 
 the {\it ESMF User Guide} will be expanded to include a comprehensive section 
 on how to adapt application codes for the framework, and support staff will be 
-available to assist users with ESMF adoption.  We do not anticipate preparing other public
-releases or patches for v1.0 between now and the next release - our focus
-will be on developing an easy to use, production-quality product.  We are 
-relying on Earth system modelers to provide us with the feedback necessary 
-to realize this goal.  Section \ref{sec:Support} of this document includes 
-instructions on submitting comments on ESMF v1.0 to our development team.
+available to assist users with ESMF adoption.  We anticipate, but have 
+not scheduled, other public releases and patches between now and ESMF v2.0.  
+Our development focus will be on developing an easy to use, production-quality 
+product.  
 
 \section{What is the Earth System Modeling Framework?}
 
 The Earth System Modeling Framework (ESMF) is a structured collection of 
 software building blocks that can be used or customized to develop 
 Earth system model components, and assemble them into applications.  
-The simplest view of the ESMF is that it consists of an
-{\it infrastructure} of utilities and data structures for creating 
+The simplest view of the ESMF is that it consists of an {\it infrastructure} 
+of utilities and data structures for creating 
 model components, and a {\it superstructure} for coupling them.  
 User code sits between these two layers, making calls to the infrastructure
 libraries beneath it and being scheduled and synchronized by the 
