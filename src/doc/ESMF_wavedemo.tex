@@ -6,6 +6,20 @@ illustrates usage of both the ESMF infrastructure and superstructure.
 
 \subsubsection{Coupled Wave Demonstration Description}
 
+One gridded component will solve the compressible time-dependent fluid 
+flow equations.  The algorithm applies an explicit solution technique to 
+a staggered, Arakawa C gridtype.  We will assume the grid is cartesian, 
+uniform and logically rectangular.  State variables, including density, 
+pressure, viscosity and temperature, are located at cell-centers, while 
+velocities are located at cell faces.  This component will be 
+initialized with a steady-state, one-dimensional flow.  The second 
+gridded component will inject fluid into the first normal to the flow 
+along one of the boundaries.  The injected fluid will have arbitrary 
+velocity, temperature, density and duration, effectively setting some of 
+the boundary conditions for the first component.  This component will 
+sit on a different cartesian grid to provide a test of the regrid 
+functionality.
+
 \subsubsection{Running the Coupled Wave Demonstration}
 
 

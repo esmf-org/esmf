@@ -1,10 +1,10 @@
-% $Id: ESMF_shareobj.tex,v 1.1 2003/03/17 21:15:57 btwomack Exp $
+% $Id: ESMF_shareobj.tex,v 1.2 2003/04/09 17:08:27 cdeluca Exp $
 
 \subsection{Shared Objects}
 
-\subsubsection{What is a Shared Object?}
+ESMF uses shared objects as opposed to statically linked libraries.                                           
 
-In simplest terms a shared object is a type of UNIX software library. Under Linux it is also know as a shared library. There are three main types of software libraries for the UNIX operating system:
+In simplest terms a shared object is a type of UNIX software library. Under Linux it is also known as a shared library. There are three main types of software libraries for the UNIX operating system:
 
 Shared object libraries -- are libraries that are loaded by the first program that uses it. All programs that start afterwards automatically use the existing shared library. The library is kept in memory as long as any active program is still using it. Using shared libraries you can: 
 \begin{itemize}
@@ -14,14 +14,6 @@ Shared object libraries -- are libraries that are loaded by the first program th
 \end{itemize}
 
 Shared objects libraries have two different names: the \emph{soname} and the \emph{real name}. The \emph{soname} consists of the prefix \emph{"lib"}, followed by the name of the library, a \emph{".so"} followed by another dot, and a number indicating the major version number. The \emph{soname} may be fully qualified by prefixing path information. The \emph{real name} is the actual file name containing the compiled code for the library. The real name adds a dot, a minor number, another dot, and the release number, to the \emph{soname}. (The release number and the associated dot are optional.)
-
-Statically linked libraries -- are linked together with the main application into a single executable image at compile time. The size of the final executable can become quite large and the entire application image, including all libraries, is loaded into memory at the start of execution. Static libraries generally start with the letters \emph{lib}, and have the extension \emph{.a}
-
-Dynamically loaded libraries -- are designed to defer loading of the library until it is needed during runtime execution. It also allows the library to be unloaded from memory when it is no longer needed by the application. Both static and shared libraries can be used as dynamically loaded libraries. They are not really a different kind of library format. The difference is in how the libraries are used by programmers. Dynamically loaded libraries require slightly more effort by the application developer to use and many programs don't need the flexibility they offer.
-
-\subsubsection{Why is ESMF using shared object libraries?} 
-
-ESMF must support many applications that run on a variety of platforms and written in multiple languages. For programmers who are developing libraries, shared libraries are the recommended format.  
 
 The use of shared object libraries:
 \begin{itemize}

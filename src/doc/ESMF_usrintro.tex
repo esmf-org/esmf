@@ -1,33 +1,54 @@
-\section{Introduction to the Earth System Modeling Framework}
+\section{What is the Earth System Modeling Framework?}
 
-The Earth System Modeling Framework (ESMF) is a structured collection of software 
-building blocks that can be used or customized to develop model components, assemble 
-them into an application, and run the application.  The functional split between developing 
-and combining components is the foremost feature of the ESMF architecture.  The 
-simplest view of the ESMF is that it consists of a layered {\it infrastructure} of 
-utilities and data structures for building model components and a {\it superstructure} 
-for coupling them.  
+The Earth System Modeling Framework (ESMF) is a structured collection of 
+software building blocks that can be used or customized to develop 
+Earth system model components, and assemble them into applications.  
+The simplest view of the ESMF is that it consists of an
+{\it infrastructure} of utilities and data structures for creating 
+model components, and a {\it superstructure} for coupling them.  
+User code sits between these two layers, making calls to the infrastructure
+libraries beneath it and being scheduled and synchronized by the 
+superstructure above it.  The configuration resembles a sandwich, as
+shown in Figure 1.
 
-This {\it ESMF User Guide} will eventually serve as an introduction for the new ESMF 
-user and as a reference for the experienced user.  Since ESMF Release 1.0 is the first 
-public ESMF release, and is a prototype rather than a production-ready package, 
-we will assume you are a 
-potential user interested in learning more about the ESMF software.  This edition
-of the {\it User Guide} is designed to guide you through that process.  It contains 
-a {\it Quick Start} section that explains how to install the ESMF software and 
-run examples, and an architectural overview that describes the framework's basic 
-goals and features.  To help you become familiar with ESMF terminology, the 
-{\it User Guide} also includes a glossary.
+The ESMF architecture is scalable, flexible paradigm for building highly 
+complex climate, weather, and related applications from components such
+as atmospheric models, land models, and data assimilation systems.  The 
+ESMF is not a single master application into which all components must fit; 
+rather it is a way of developing components so that they can be used 
+in many different user-written applications.  Model components that adopt 
+ESMF are usable in different contexts without code modification, and may be
+incorporated into other ESMF-based modeling systems within the Earth 
+science community.  In addition to the high-level organization ESMF
+offers, it provides a set of robust, portable, performance 
+optimized libraries for regridding, data transfers, I/O, time management, 
+and other common functions.  ESMF users may choose to extensively rewrite 
+their codes to take advantage of the ESMF infrastructure, or they may 
+decide to simply wrap components in ESMF interfaces in order to
+adopt the ESMF architecture and coupling services.
+
+\section{The ESMF User Guide for Release 1.0}
+
+This {\it ESMF User Guide} will eventually serve as an introduction for the 
+new ESMF user and as a reference for the experienced user.  Since ESMF 
+Release 1.0 is the first public ESMF release, and is a prototype rather than 
+a production-ready package, we assume you are a potential user interested in 
+learning more about the ESMF software.  This edition of the {\it User Guide} 
+is designed to guide you through that process.  
 
 The purpose of ESMF Release 1.0 is to provide a first look at the ESMF
 Application Programming Interface (API), and to demonstrate the viability 
-of the ESMF architecture and implementation.  We encourage you to run a 
-demonstration program, {\tt ESMF\_COUPLED\_WAVE}, that illustrates both ESMF 
-utilities and coupling services.  This program is described in section \ref{sec:demo}.  
-
-Those curious about specific interfaces should refer to the {\it ESMF Reference 
-Manual for Fortran90}, which contains a detailed listing and description of 
-the ESMF API.
+of the ESMF architecture and implementation.  Section \ref{sec:QuickStart} contains 
+a {\it Quick Start} guide that explains how to install the ESMF software and 
+run a demonstration program, {\tt ESMF\_COUPLED\_WAVE}, that illustrates both ESMF 
+utilities and coupling services.  Section \ref{sec:ArchOver} is an 
+architectural overview that describes the framework's basic goals and features.  
+More detail on ESMF structure and operation, such as a description of the 
+directory structure and how to run the ESMF self-tests, is provided in Section 
+\ref{sec:TechOver}.  Section \ref{sec:Adoption} looks ahead to the steps 
+required to adapt a component for use within ESMF.  Finally, to help you become 
+familiar with ESMF terminology, the last section in the {\it User Guide} is 
+a glossary.  
 
 While we are delighted to have potential users experiment with ESMF, the
 ESMF team can offer only limited support to those who are trying to incorporate 
@@ -41,9 +62,23 @@ those in later releases.
 Our next major release will occur in April 2004.  At that time, the {\it ESMF 
 User Guide} will be expanded to include a comprehensive section on how to adapt 
 application codes for the framework, and support staff will be available to 
-assist users with ESMF adoption.  In the interim, we are relying on Earth
-system modelers to provide us with the design feedback essential for creating a 
-shared, easy to use, high performance software framework.  
+assist users with ESMF adoption.  We do not anticipate preparing other public
+releases or patches for Release 1.0 between now and the next release - our focus
+will be on developing the ESMF software and making Release 2.0 a robust, portable,
+high -performance product.  We are relying on Earth system modelers to provide 
+us with the design feedback essential for creating a shared, easy to use, high 
+performance software framework.  
+
+Those curious about specific interfaces should refer to the {\it ESMF Reference 
+Manual for Fortran90}, which contains a detailed listing and description of 
+the ESMF API.
+
+
+
+
+
+
+
 
 
 
