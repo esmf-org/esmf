@@ -2,7 +2,7 @@
 !           NASA Earth System Modeling Framework Project (ESMF)          !
 !            NASA/GSFC, Data Assimilation Office, Code 910.3             !
 !-------------------------------------------------------------------------
-!BOI
+!
 !
 ! !TITLE: ESMF Congiguration Management Test File \\ Version 1.01
 !
@@ -14,12 +14,12 @@
 !
 !
 ! This test file provides tests for ESMF Configuration Management System
-! implemented in ESMF_ConfigMod.F90.
+! implemented in ESMF\_ConfigMod.F90..
 !
 ! !REVISION HISTORY:
 !
 !       7apr2003 Leonid Zaslavsky Created. 
-!EOI_______________________________________________________________________
+!------------------------------------------------------------------------
 
     program ESMF_Config_Test
 
