@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.66 2004/12/28 07:19:21 theurich Exp $
+! $Id: ESMF_FieldComm.F90,v 1.67 2005/01/15 00:12:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.66 2004/12/28 07:19:21 theurich Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.67 2005/01/15 00:12:35 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1388,7 +1388,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldScatter"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldScatter - Data scatter operation on a Field
 
 ! !INTERFACE:
@@ -1442,7 +1442,7 @@
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
