@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.30 2004/12/17 18:19:45 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.31 2005/02/14 23:38:18 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.30 2004/12/17 18:19:45 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.31 2005/02/14 23:38:18 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -199,15 +199,15 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
           des[i].connect_de = new int[2];
           des[i].connect_w  = new int[2];
           des[i].connect_de[0] = ndes-1;
-          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
           des[i].connect_de[1] = 1;
-          des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
+          des[i].connect_w[1] = ESMC_CWGHT_NORMAL;
         }else{
           des[i].nconnect = 1;
           des[i].connect_de = new int[1];
           des[i].connect_w  = new int[1];
           des[i].connect_de[0] = 1;
-          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
         }
       }else if (i==ndes-1){
         if (cyclic==ESMF_TRUE){
@@ -215,24 +215,24 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
           des[i].connect_de = new int[2];
           des[i].connect_w  = new int[2];
           des[i].connect_de[0] = i-1;
-          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
           des[i].connect_de[1] = 0;
-          des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
+          des[i].connect_w[1] = ESMC_CWGHT_NORMAL;
         }else{
           des[i].nconnect = 1;
           des[i].connect_de = new int[1];
           des[i].connect_w  = new int[1];
           des[i].connect_de[0] = 0;
-          des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+          des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
         }
       }else{
         des[i].nconnect = 2;
         des[i].connect_de = new int[2];
         des[i].connect_w  = new int[2];
         des[i].connect_de[0] = i-1;
-        des[i].connect_w[0] = ESMF_CWGHT_NORMAL;
+        des[i].connect_w[0] = ESMC_CWGHT_NORMAL;
         des[i].connect_de[1] = i+1;
-        des[i].connect_w[1] = ESMF_CWGHT_NORMAL;
+        des[i].connect_w[1] = ESMC_CWGHT_NORMAL;
       }        
     }
   } else  {
@@ -240,7 +240,7 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
      des[0].connect_de = new int[1];
      des[0].connect_w  = new int[1];
      des[0].connect_de[0] = 0;
-     des[0].connect_w[0] = ESMF_CWGHT_NORMAL;
+     des[0].connect_w[0] = ESMC_CWGHT_NORMAL;
   }
 	
   // Setup the dimensionality and coordinates of this layout. This information

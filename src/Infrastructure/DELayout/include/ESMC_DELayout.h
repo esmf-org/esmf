@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.18 2004/12/07 17:15:41 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.19 2005/02/14 23:37:32 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 #include <ESMC_VM.h>  
 
 // normal connection weight
-const int ESMF_CWGHT_NORMAL = 50;
+const int ESMC_CWGHT_NORMAL = 50;
 
 // parameters for asynchronous/sync communication 
 // keep in sync w/ fortran declaration
