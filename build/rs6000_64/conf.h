@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.5 2003/02/24 05:12:50 nscollins Exp $"
+"$Id: conf.h,v 1.6 2003/02/25 18:01:04 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -18,9 +18,9 @@
 #define ESMC_HAVE_STRING_H 
 #define ESMC_HAVE_STRINGS_H 
 #define ESMC_HAVE_MALLOC_H 
-#define _POSIX_SOURCE
+#define _POSIX_SOURCE 
 #define ESMC_HAVE_DRAND48  
-#define ESMC_HAVE_GETDOMAINNAME  
+#define ESMC_HAVE_GETDOMAINNAME 
 #if !defined(_XOPEN_SOURCE)
 #define _XOPEN_SOURCE 
 #endif
@@ -35,7 +35,7 @@
 #define ESMC_HAVE_STRINGS_H
 #define ESMC_HAVE_DOUBLE_ALIGN_MALLOC
 
-#define ESMC_HAVE_OMP_THREADS 1
+#define ESMC_HAVE_PTHREADS 1
 #define ESMC_HAVE_MPI 1
 
 #define ESMC_SUBSTITUTE_CTRL_CHARS 1
@@ -55,7 +55,7 @@
 
 #define ESMC_USE_DBX_DEBUGGER
 #define ESMC_HAVE_SYS_RESOURCE_H
-#define ESMC_SIZEOF_VOIDP 4
+#define ESMC_SIZEOF_VOIDP 8
 #define ESMC_SIZEOF_INT 4
 #define ESMC_SIZEOF_DOUBLE 8
 
@@ -70,8 +70,8 @@
 
 #define ESMC_USE_A_FOR_DEBUGGER
 
-#define ESMF_IS_64BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 64
-#define ESMF_F90_PTR_PLUS_RANK 24
+#define ESMF_IS_32BIT_MACHINE 1
+#define ESMF_F90_PTR_BASE_SIZE 32
+#define ESMF_F90_PTR_PLUS_RANK 12
 
 #endif

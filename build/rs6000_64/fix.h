@@ -1,4 +1,4 @@
-/*$Id: fix.h,v 1.1 2001/11/13 18:35:48 dneckels Exp $*/
+/*$Id: fix.h,v 1.2 2003/02/25 18:01:05 nscollins Exp $*/
 
 /*
     This fixes various things in system files that are incomplete, for 
@@ -12,8 +12,6 @@
 
 #if !defined(ESMC_FIX_H)
 #define ESMC_FIX_H
-
-#include "MC.h"
 
 /*
   This prototype lets us resolve the datastructure 'rusage' only in
@@ -37,3 +35,10 @@ extern int    strcasecmp(const char *, const char *);
 extern int    getrusage(int,s_rusage);
 #endif
 #endif
+
+
+
+
+
+
+

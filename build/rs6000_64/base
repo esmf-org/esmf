@@ -1,4 +1,4 @@
-# $Id: base,v 1.4 2003/02/11 16:58:12 nscollins Exp $ 
+# $Id: base,v 1.5 2003/02/25 18:01:01 nscollins Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
@@ -6,10 +6,10 @@ include ${ESMF_DIR}/build/common
 #########
 
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 -qfree ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F -qfree ${FFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${ESMC_INCLUDE} $<
 
 .f90.o:
 	${FC} -c ${FOPTFLAGS} -qfixed=132 -qsuffix=cpp=f90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
@@ -24,12 +24,12 @@ include ${ESMF_DIR}/build/common
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 -qfree ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F -qfree ${FFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
@@ -53,33 +53,4 @@ include ${ESMF_DIR}/build/common
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
-#########
-
-# This F.f rule ensures that the old *.f files are removed.
-
-# old, still needed on this arch??  nsc 11feb03
-##
-##.F.f:
-##	-${RM} $*.f __$*.c
-##	-cp $*.F __$*.c
-##	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-##	-${RM} __$*.c
-##
-##.F.o:
-##	-${RM} $*.f __$*.c
-##	-cp $< __$*.c
-##	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-##	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
-##	-${RM} $*.f __$*.c
-##
-##.F.a:
-##	-${RM} $*.f __$*.c
-##	-cp $< __$*.c
-##	-${CC} ${FCPPFLAGS} -E  __$*.c | grep -v '^ *#' > $*.f
-##	-${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} $*.f
-##	-${AR} cr ${LIBNAME} $*.o
-##	-${RM} $*.f __$*.c
-##
-
 shared:
-
