@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.61 2004/12/18 00:56:57 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.62 2004/12/22 20:46:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.61 2004/12/18 00:56:57 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.62 2004/12/22 20:46:21 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -677,7 +677,7 @@
       local_array%this%ptr = array%this%ptr
 
       ! Execute the communications call.
-      call ESMF_RouteRun(route, local_array, local_array, status)
+      call ESMF_RouteRun(route, local_array, local_array, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1021,7 +1021,7 @@
       ! Execute the communications call.
       dstLocalArray = dstArray
       srcLocalArray = srcArray
-      call ESMF_RouteRun(route, srcLocalArray, dstLocalArray, status)
+      call ESMF_RouteRun(route, srcLocalArray, dstLocalArray, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
