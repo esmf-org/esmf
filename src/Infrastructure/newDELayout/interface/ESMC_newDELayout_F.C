@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.10 2004/04/06 17:17:22 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.11 2004/04/08 15:15:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,6 +91,25 @@ extern "C" {
     // Done sorting out non-present F90 optional arguments.
     int rc = (*ptr)->ESMC_newDELayoutGetDE(*DEid, DEcoord, *len_coord, 
       DEcde, *len_cde, DEcw, *len_cw, nDEc);
+    if (status != ESMC_NULL_POINTER) 
+      *status = rc;
+  }
+
+  void FTN(c_esmc_newdelayoutgetdematch)(ESMC_newDELayout **ptr,
+    int *DEid, ESMC_newDELayout **ptrMatch, int *deMatchCount, int *deMatchList,
+    int *len_deMatchList, int *status){
+    // Sort out the non-present F90 optional arguments. 
+    // The detection of non-present F90 optional arguemtns is compiler/platform
+    // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
+    // Since the actual C++ methods expect non-present arguments to be
+    // indicated by a pointer to NULL all we need to do here is set those 
+    // that point to (NULL - 1) [which is available as macro ESMC_BAD_POINTER]
+    // to NULL as well before passing them down further.
+    (void*)deMatchCount 
+      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : deMatchCount;
+    // Done sorting out non-present F90 optional arguments.
+    int rc = (*ptr)->ESMC_newDELayoutGetDEMatch(*DEid, **ptrMatch, deMatchCount,
+      deMatchList, *len_deMatchList);
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
   }

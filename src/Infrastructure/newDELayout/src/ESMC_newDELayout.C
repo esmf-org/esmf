@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.10 2004/04/06 17:17:22 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.11 2004/04/08 15:15:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.10 2004/04/06 17:17:22 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.11 2004/04/08 15:15:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -235,6 +235,11 @@ int ESMC_newDELayout::ESMC_newDELayoutConstruct1D(ESMC_VM &vm, int nDEs,
   // Fill local part of layout object
   int mypet = vm.vmachine_mypet();    // get my PET id
   ESMC_newDELayoutFillLocal(mypet);
+  // Now that the layout is pretty much set up it is time to go through once
+  // more to set the correct pids to provide a means to identify the virtual
+  // memory space in which the DEs operate.
+  for (int i=0; i<ndes; i++)
+    des[i].pid = vm.vmachine_pid(des[i].petid);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -310,6 +315,11 @@ int ESMC_newDELayout::ESMC_newDELayoutConstructND(ESMC_VM &vm, int *nDEs,
   // Fill local part of layout object
   int mypet = vm.vmachine_mypet();    // get my PET id
   ESMC_newDELayoutFillLocal(mypet);
+  // Now that the layout is pretty much set up it is time to go through once
+  // more to set the correct pids to provide a means to identify the virtual
+  // memory space in which the DEs operate.
+  for (int i=0; i<ndes; i++)
+    des[i].pid = vm.vmachine_pid(des[i].petid);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -441,6 +451,52 @@ int ESMC_newDELayout::ESMC_newDELayoutGetDE(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_newDELayoutGetDEMatch
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGetDEMatch(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  int DEid,                     // in  - DE id of DE to be queried
+  ESMC_newDELayout &layoutMatch,// in  - layout to match against
+  int *deMatchCount,            // out - number of matching DEs in layoutMatch
+  int *deMatchList,             // out - list of matching DEs in layoutMatch
+  int len_deMatchList           // in  - size of deMatchList
+  ){              
+//
+// !DESCRIPTION:
+//    Get information about a DELayout object
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int *tempMatchList = new int[layoutMatch.ndes]; // maximum number of DEs
+  int tempMatchCount = 0;
+  int comparePID = des[DEid].pid;
+  int j=0;
+  for (int i=0; i<layoutMatch.ndes; i++)
+    if (layoutMatch.des[i].pid == comparePID){
+      tempMatchList[j] = i;
+      ++j;
+    }
+  // now j is equal to the number of DEs in layoutMatch which operate in the 
+  // same virtual memory space as "DEid" does in this layout.
+  if (deMatchCount != ESMC_NULL_POINTER)
+    *deMatchCount = j;
+  if (len_deMatchList >= j)
+    for (int i=0; i<j; i++)
+      deMatchList[i] = tempMatchList[i];
+  delete [] tempMatchList;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_newDELayoutMyDE
 //
 // !INTERFACE:
@@ -488,8 +544,8 @@ int ESMC_newDELayout::ESMC_newDELayoutPrint(){
   printf("myvm = %p\n", myvm);
   printf("ndes = %d\n", ndes);
   for (int i=0; i<ndes; i++){
-    printf("  des[%d]: deid=%d, petid=%d, nconnect=%d\n", i, 
-      des[i].deid, des[i].petid, des[i].nconnect);
+    printf("  des[%d]: deid=%d, petid=%d, pid=%d, nconnect=%d\n", i, 
+      des[i].deid, des[i].petid, des[i].pid, des[i].nconnect);
     for (int j=0; j<des[i].nconnect; j++)
       printf("      connect_de[%d]=%d, weight=%d\n", j, des[i].connect_de[j],
         des[i].connect_w[j]);

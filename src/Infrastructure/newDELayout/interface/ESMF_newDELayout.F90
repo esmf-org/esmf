@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.18 2004/04/06 17:17:22 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.19 2004/04/08 15:15:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,6 +122,7 @@
       
       public ESMF_newDELayoutGet
       public ESMF_newDELayoutGetDE
+      public ESMF_newDELayoutGetDEMatch
       
       public ESMF_newDELayoutPrint
       
@@ -140,7 +141,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.18 2004/04/06 17:17:22 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.19 2004/04/08 15:15:51 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -639,6 +640,83 @@ contains
     if (rcpresent) rc = ESMF_SUCCESS
 
   end subroutine ESMF_newDELayoutGetDE
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_newDELayoutGetDEMatch - Match DE's between Layouts
+
+! !INTERFACE:
+  subroutine ESMF_newDELayoutGetDEMatch(delayout, de, delayoutMatch, &
+    deMatchCount, deMatchList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_newDELayout), intent(in)            :: delayout
+    integer,                intent(in)            :: de
+    type(ESMF_newDELayout), intent(in)            :: delayoutMatch
+    integer,                intent(out), optional :: deMatchCount
+    integer, target,        intent(out), optional :: deMatchList(:)
+    integer,                intent(out), optional :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Get DE specific internal info
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          DELayout object.
+!     \item[de]
+!          Id uniquely specifying the DE within this DELayout.
+!     \item[delayoutMatch] 
+!          DELayout object to find matching DEs in.
+!     \item[{[deMatchCount]}]
+!          Number of DEs in delayoutMatch to share virtual memory space with de.
+!     \item[{[deMatchList]}]
+!          List of DEs in delayoutMatch that share virtual memory space with de.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status       ! local error status
+    logical :: rcpresent
+    integer :: len_deMatchList
+    integer, target :: dummy(0)     ! used to satisfy the C interface...
+    integer, pointer:: opt_deMatchList(:)
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+    
+    ! Deal with optional array arguments
+    ! TODO: make sure that this pointer, target stuff is a portable way of 
+    ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
+    if (present(deMatchList)) then
+      len_deMatchList = size(deMatchList)
+      opt_deMatchList => deMatchList
+    else
+      len_deMatchList = 0
+      opt_deMatchList => dummy
+    endif
+    ! Routine which interfaces to the C++ creation routine.
+    call c_ESMC_newDELayoutGetDEMatch(delayout, de, delayoutMatch, &
+      deMatchCount, opt_deMatchList, len_deMatchList, status)
+    if (status /= ESMF_SUCCESS) then
+      print *, "c_ESMC_newDELayoutGetDEMatch error"
+      return
+    endif
+
+    ! set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_newDELayoutGetDEMatch
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------

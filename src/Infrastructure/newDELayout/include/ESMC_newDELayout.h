@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.9 2004/04/06 17:17:22 theurich Exp $
+// $Id: ESMC_newDELayout.h,v 1.10 2004/04/08 15:15:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@ class ESMC_newDELayout;
 typedef struct{
   int deid;         // DE's external id number (in case not base zero)
   int petid;        // Id of the PET associated with this DE
+  int pid;          // absolute process ID, specifying virtual memory space
   int nconnect;     // number of connections from this DE
   int *connect_de;  // connected DEs 
   int *connect_w;   // connection weight
@@ -78,6 +79,8 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_Logical *logRectFlag, int *deCountPerDim, int len_deCountPerDim);
     int ESMC_newDELayoutGetDE(int DEid, int *DEcoord, int len_coord, 
       int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc);
+    int ESMC_newDELayoutGetDEMatch(int DEid, ESMC_newDELayout &layoutMatch,
+      int *deMatchCount, int *deMatchList, int len_deMatchList);
     int ESMC_newDELayoutMyDE(int DE, ESMC_Logical *value);
     // IO
     int ESMC_newDELayoutPrint(void);
