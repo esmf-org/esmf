@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.10 2004/06/22 22:04:20 jwolfe Exp $
+% $Id: Grid_options.tex,v 1.11 2004/06/22 22:31:59 jwolfe Exp $
 
 % \subsubsection{ESMF\_GridStructure}
 % 
@@ -22,20 +22,20 @@
 % \end{description}
 
 
-% \subsubsection{ESMF\_GridType}
-% 
-% {\sf DESCRIPTION:\\}
-% Grid types supported by ESMF.  In general, we expect each GridType to have
-% its own explicit Create function.
-% 
-% Valid values are:
-% \begin{description}
-%    \item [ESMF\_GRID\_TYPE\_LATLON]
-%          Latitude/longitude grid
-% 
-%    \item [ESMF\_GRID\_TYPE\_LATLON\_UNI]
-%          Uniform latitude/longitude grid
-% 
+ \subsubsection{ESMF\_GridType}
+ 
+ {\sf DESCRIPTION:\\}
+ Grid types supported by ESMF.  In general, we expect each GridType to have
+ its own explicit Create function.
+ 
+ Valid values are:
+ \begin{description}
+    \item [ESMF\_GRID\_TYPE\_LATLON]
+          Latitude/longitude grid
+ 
+    \item [ESMF\_GRID\_TYPE\_LATLON\_UNI]
+          Uniform latitude/longitude grid
+ 
 %    \item [ESMF\_GRID\_TYPE\_LATLON\_GAUSS]
 %          Latitude/Longitude grid with gaussian-spaced latitudes
 %    \item [ESMF\_GRID\_TYPE\_LATLON\_MERC]
@@ -47,12 +47,12 @@
 %          Displaced-pole dipole grid
 %    \item [ESMF\_GRID\_TYPE\_TRIPOLE]
 %          Tripolar grids
-%    \item [ESMF\_GRID\_TYPE\_XY]
-%          XY cartesian grid with variable or unequal spacing
-% 
-%    \item [ESMF\_GRID\_TYPE\_XY\_UNI]
-%          XY cartesian grid with equal spacing
-% 
+    \item [ESMF\_GRID\_TYPE\_XY]
+          XY cartesian grid with variable or unequal spacing
+ 
+    \item [ESMF\_GRID\_TYPE\_XY\_UNI]
+          XY cartesian grid with equal spacing
+ 
 %    \item [ESMF\_GRID\_TYPE\_DATASTREAM]
 %          Data stream - set of locations
 %    \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
@@ -67,10 +67,44 @@
 %          Cubed sphere grid
 %    \item [ESMF\_GRID\_TYPE\_EXCHANGE]
 %          Intersection of two grids, which is itself a grid
-%    \item [ESMF\_GRID\_TYPE\_UNKNOWN]
-%          Unknown or undefined grid.
+    \item [ESMF\_GRID\_TYPE\_UNKNOWN]
+          Unknown or undefined grid.
 
-% \end{description}
+ \end{description}
+
+
+ \subsubsection{ESMF\_GridVertType}
+ 
+ {\sf DESCRIPTION:\\}
+ Vertical grid types supported by ESMF.  In general, we expect each GridVertType
+ to have its own explicit Add subroutine.
+ 
+ Valid values are:
+ \begin{description}
+    \item [ESMF\_GRID\_TYPE\_VERT\_HEIGHT]
+          Vertical grid with zero coordinate at bottom
+    \item [ESMF\_GRID\_TYPE\_VERT\_UNKNOWN]
+          Unknown or undefined vertical grid
+%   \item [ESMF\_GRID\_TYPE\_VERT\_USER]
+%         User-defined vertical grid
+%   \item [ESMF\_GRID\_TYPE\_VERT\_DEPTH]
+%         Vertical grid with zero coordinate at top surface
+%   \item [ESMF\_GRID\_TYPE\_VERT\_PRESSURE]
+%         Vertical grid with pressure coordinates
+%   \item [ESMF\_GRID\_TYPE\_VERT\_SIGMA]
+%         Vertical grid with sigma coordinates
+%   \item [ESMF\_GRID\_TYPE\_VERT\_THETA]
+%         Vertical grid with theta coordinates
+%   \item [ESMF\_GRID\_TYPE\_VERT\_ETA]
+%         Vertical grid with eta coordinates
+%   \item [ESMF\_GRID\_TYPE\_VERT\_ISOPYCNAL]
+%         Vertical grid with density coordinates
+%   \item [ESMF\_GRID\_TYPE\_VERT\_HYBRID]
+%         Vertical grid with hybrid coordinates
+%   \item [ESMF\_GRID\_TYPE\_VERT\_LAGRANGIAN]
+%         Vertical grid with lagrangian coordinates
+
+ \end{description}
 
 \subsubsection{ESMF\_CoordIndex}
 
