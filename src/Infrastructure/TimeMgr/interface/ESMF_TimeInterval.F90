@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.47 2004/02/11 21:48:55 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.48 2004/03/05 00:55:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.47 2004/02/11 21:48:55 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.48 2004/03/05 00:55:34 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1482,9 +1482,8 @@
 !
 !EOPI
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeSum(timeInterval1, timeInterval2, &
-                              ESMF_TimeIntervalSum)
+      call c_ESMC_TimeIntervalSum(timeInterval1, timeInterval2, &
+                                  ESMF_TimeIntervalSum)
 
       end function ESMF_TimeIntervalSum
 
@@ -1509,9 +1508,8 @@
 !EOPI
 ! !REQUIREMENTS:
 
-      ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeDiff(timeInterval1, timeInterval2, &
-                               ESMF_TimeIntervalDiff)
+      call c_ESMC_TimeIntervalDiff(timeInterval1, timeInterval2, &
+                                   ESMF_TimeIntervalDiff)
 
       end function ESMF_TimeIntervalDiff
 
