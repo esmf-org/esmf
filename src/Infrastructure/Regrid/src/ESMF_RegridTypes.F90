@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.17 2003/09/24 22:59:13 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.18 2003/11/07 00:01:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod      ! ESMF base   class
+      use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayBaseMod  ! ESMF array  class
       use ESMF_ArrayExpandMod  ! ESMF array  class
@@ -141,18 +142,20 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-    public ESMF_RegridAddLink      ! Adds address pair and weight to regrid
-    public ESMF_RegridTypeGet      ! returns a regrid attribute
-    public ESMF_RegridTypeSet      ! sets    a regrid attribute
-    public ESMF_RegridConstructEmpty  ! creates an empty regrid structure
-    public ESMF_RegridDestruct     ! deallocate memory associated with a regrid
+    public ESMF_RegridAddLink        ! Adds address pair and weight to regrid
+    public ESMF_RegridRouteConstruct ! Constructs a Route used by Regrid to
+                                     ! gather data
+    public ESMF_RegridTypeGet        ! returns a regrid attribute
+    public ESMF_RegridTypeSet        ! sets    a regrid attribute
+    public ESMF_RegridConstructEmpty ! creates an empty regrid structure
+    public ESMF_RegridDestruct       ! deallocate memory associated with a regrid
 
 !
 !EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.17 2003/09/24 22:59:13 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.18 2003/11/07 00:01:38 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -250,28 +253,145 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_RegridRouteConstruct - Constructs a Route used to gather data
+
+! !INTERFACE:
+      function ESMF_RegridRouteConstruct(srcGrid, dstGrid, srcRelLoc, dstRelLoc, &
+                                         recvDomainList, total, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Route) :: ESMF_RegridRouteConstruct
+!
+! !ARGUMENTS:
+
+      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_Grid), intent(in) :: dstGrid
+      type(ESMF_RelLoc), intent(inout) :: srcRelLoc
+      type(ESMF_RelLoc), intent(inout) :: dstRelLoc
+      type(ESMF_DomainList), intent(inout) :: recvDomainList
+      logical, intent(in), optional :: total
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Adds an address pair and regrid weight to an existing regrid.
+!
+!     The arguments are:
+!     \begin{description}
+
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+!TODO: Leave here or move to Route?
+      logical :: rcpresent
+      integer :: status
+      integer :: myDE
+      logical :: totalUse
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dstMin, dstMax
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: srcMin, srcMax
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
+      type(ESMF_DELayout) :: srcDELayout
+      type(ESMF_DomainList) :: sendDomainList
+      type(ESMF_Route) :: route
+
+!     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     use optional arguments if present
+      totalUse = .false.
+      if(present(total)) totalUse = total
+
+      call ESMF_GridGetDELayout(srcGrid, srcDELayout, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridConstructBilinear: GridGetDELayout ", &
+                 "returned failure"
+        return
+      endif
+      call ESMF_DELayoutGetDEID(srcDELayout, myDE, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridConstructBilinear: DELayoutGetDEID ", &
+                 "returned failure"
+        return
+      endif
+
+      ! Extract some layout information for use in this regrid.
+      call ESMF_GridGetDE(srcGrid, ai_global=myAI, total=totalUse, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
+                 "returned failure"
+        return
+      endif
+
+      ! From each grid get the bounding box information on this DE
+      call ESMF_GridGetPhysGrid(srcGrid, relloc=srcRelLoc, localMin=srcMin, &
+                                localMax=srcMax, rc=status)
+      call ESMF_GridGetPhysGrid(dstGrid, relloc=dstRelLoc, localMin=dstMin, &
+                                localMax=dstMax, rc=status)
+
+      ! calculate intersections
+      call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
+                                     myAI, sendDomainList, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridRouteConstruct: GridBoxIntersectSend ", &
+                 "returned failure"
+        return
+      endif
+      call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
+                                     recvDomainList, total=totalUse, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridRouteConstruct: GridBoxIntersectRecv ", &
+                 "returned failure"
+        return
+      endif
+
+      ! Create Route
+      ! TODO: this must be either a parent layout, or the src and dst layouts
+      !  must be identical.
+      route = ESMF_RouteCreate(srcDELayout, status)
+      call ESMF_RoutePrecomputeDomList(route, 2, myDE, sendDomainList, &
+                                       recvDomainList, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridRouteConstruct: ", &
+                 "RoutePrecomputeDomList returned failure"
+        return
+      endif
+      ! set size of recv items in Route
+      call ESMF_RouteSetRecvItems(route, recvDomainList%total_points, status)
+
+      ESMF_RegridRouteConstruct = route
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_RegridRouteConstruct
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_RegridTypeGet - Get attribute of a Regrid type
 
 ! !INTERFACE:
-      subroutine ESMF_RegridTypeGet(regrid, name,                &
-                                    srcarray, dstarray,        &
-                                    srcgrid,  dstgrid,         &
-                                    srcdatamap,  dstdatamap,   &
+      subroutine ESMF_RegridTypeGet(regrid, name, srcarray, dstarray, &
+                                    srcgrid,  dstgrid, srcdatamap, dstdatamap, &
                                     method, num_links , gather, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_RegridType), intent(in) :: regrid
-
-      character (*),      intent(out), optional :: name
-      type (ESMF_Array),  intent(out), optional :: srcarray, dstarray
-      type (ESMF_Grid),   intent(out), optional :: srcgrid,  dstgrid
-      type (ESMF_DataMap),  intent(out), optional :: srcdatamap,  dstdatamap
-      integer,            intent(out), optional :: method
-      integer,            intent(out), optional :: num_links
-      type (ESMF_Route),  intent(out), optional :: gather
-
-      integer,            intent(out), optional :: rc
+      character (*), intent(out), optional :: name
+      type (ESMF_Array), intent(out), optional :: srcarray, dstarray
+      type (ESMF_Grid), intent(out), optional :: srcgrid,  dstgrid
+      type (ESMF_DataMap), intent(out), optional :: srcdatamap,  dstdatamap
+      integer, intent(out), optional :: method
+      integer, intent(out), optional :: num_links
+      type (ESMF_Route), intent(out), optional :: gather
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
