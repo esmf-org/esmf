@@ -245,6 +245,19 @@ handling utilities for fatal erros to be classified as
 {\it well-behaved} ESMF components.
 \end{reqlist}
 
+\sreq{Parallel race-condition error handling}
+Error handling code to detect race-conditions and other problems associated 
+with parallelism shall be included.
+\label{req:gr:error_handling}
+\begin{reqlist}
+  {\bf Priority:} 1. \\
+  {\bf Source:} Required by all codes. \\
+  {\bf Status:} Approved-1. \\
+  {\bf Verification:} System test.
+  {\bf Notes} This could be acheieved through assertions and ordering/bookeeping
+counters on messaging on communication operations.
+\end{reqlist}
+
 \sreq{Modularity}
 Layers of the framework will be designed to adapt to restructuring of
 other parts of the framework and user-supplied components.  For
