@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.72 2004/04/30 21:42:42 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.73 2004/05/10 15:47:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,8 +42,8 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod         ! ESMF base   class
-      use ESMF_DataMapMod      ! ESMF datamap class
-      use ESMF_DELayoutMod  ! ESMF DE layout class
+      use ESMF_ArrayDataMapMod ! ESMF array datamap class
+      use ESMF_DELayoutMod     ! ESMF DE layout class
       use ESMF_ArrayMod        ! ESMF array  class
       use ESMF_ArrayGetMod     ! ESMF array  class
       use ESMF_DistGridMod     ! ESMF distributed grid class
@@ -52,6 +52,7 @@
       use ESMF_RHandleMod      ! ESMF route handle class
       use ESMF_RouteMod        ! ESMF route  class
       use ESMF_ArrayCommMod    ! ESMF array comm class
+      use ESMF_FieldDataMapMod ! ESMF field datamap class
       use ESMF_FieldMod        ! ESMF field  class
       use ESMF_BundleMod       ! ESMF bundle class
       use ESMF_RegridTypesMod  ! ESMF regrid data types and utilities
@@ -105,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.72 2004/04/30 21:42:42 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.73 2004/05/10 15:47:10 nscollins Exp $'
 
 !==============================================================================
 
@@ -128,10 +129,10 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
       type(ESMF_Grid), intent(inout) :: srcgrid
-      type(ESMF_DataMap), intent(in) :: srcdatamap
+      type(ESMF_FieldDataMap), intent(in) :: srcdatamap
       type(ESMF_Array), intent(inout) :: dstarray
       type(ESMF_Grid), intent(inout) :: dstgrid
-      type(ESMF_DataMap), intent(in) :: dstdatamap
+      type(ESMF_FieldDataMap), intent(in) :: dstdatamap
       type(ESMF_DELayout), intent(in) :: parentDELayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in) :: regridmethod
@@ -164,13 +165,13 @@
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.
 !     \item [srcdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array maps to
+!           {\tt ESMF\_FieldDataMap} which describes how the array maps to
 !           the specified source grid.
 !     \item [dstgrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           destination array should be decomposed.
 !     \item [dstdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array should map to
+!           {\tt ESMF\_FieldDataMap} which describes how the array should map to
 !           the specified destination grid.
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
@@ -338,8 +339,8 @@
 
       type(ESMF_Array), intent(in) :: srcarray    ! array to be regridded
       type(ESMF_Array), intent(inout) :: dstarray   ! resulting regridded array
-      type (ESMF_DataMap), intent(in) :: srcDatamap
-      type (ESMF_DataMap), intent(in) :: dstDatamap
+      type (ESMF_FieldDataMap), intent(in) :: srcDatamap
+      type (ESMF_FieldDataMap), intent(in) :: dstDatamap
       type(ESMF_RouteHandle), intent(in) :: routehandle 
                                                   ! precomputed regrid structure
                                                   ! with regridding info
@@ -418,8 +419,8 @@
 
      allocate(dstDimOrder(rank))
      allocate(srcDimOrder(rank))
-     call ESMF_DataMapGet(dstDataMap, dataIorder=dstDimOrder, rc=status)
-     call ESMF_DataMapGet(srcDataMap, dataIorder=srcDimOrder, rc=status)
+     call ESMF_FieldDataMapGet(dstDataMap, dataIndices=dstDimOrder, rc=status)
+     call ESMF_FieldDataMapGet(srcDataMap, dataIndices=srcDimOrder, rc=status)
 
      ! break out here by rank   TODO: compare datarank to regridrank (or
      !                                compare datamaps)
@@ -601,7 +602,7 @@
       character (*),        intent(out), optional :: name
       type (ESMF_Array),    intent(out), optional :: srcArray, dstArray
       type (ESMF_Grid),     intent(out), optional :: srcGrid,  dstGrid
-      type (ESMF_DataMap),  intent(out), optional :: srcDatamap,  dstDatamap
+      type (ESMF_FieldDataMap),  intent(out), optional :: srcDatamap,  dstDatamap
       integer,              intent(out), optional :: method
       integer,              intent(out), optional :: numLinks
       type (ESMF_Route),    intent(out), optional :: gather
@@ -873,9 +874,9 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
       type(ESMF_Grid), intent(inout) :: srcgrid
-      type(ESMF_DataMap), intent(in) :: srcdatamap
+      type(ESMF_FieldDataMap), intent(in) :: srcdatamap
       type(ESMF_Grid), intent(inout) :: dstgrid
-      type(ESMF_DataMap), intent(in) :: dstdatamap
+      type(ESMF_FieldDataMap), intent(in) :: dstdatamap
       type(ESMF_DELayout) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in) :: regridtype
@@ -893,13 +894,13 @@
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.  
 !     \item [srcdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array maps to
+!           {\tt ESMF\_FieldDataMap} which describes how the array maps to
 !           the specified source grid.
 !     \item [dstgrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           destination array should be decomposed.  
 !     \item [dstdatamap]
-!           {\tt ESMF\_DataMap} which describes how the array should map to
+!           {\tt ESMF\_FieldDataMap} which describes how the array should map to
 !           the specified destination grid.
 !     \item [parentDElayout]
 !           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
@@ -967,8 +968,8 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: srcarray
       type(ESMF_Array), intent(inout) :: dstarray
-      type(ESMF_DataMap), intent(inout) :: srcDataMap
-      type(ESMF_DataMap), intent(inout) :: dstDataMap
+      type(ESMF_FieldDataMap), intent(inout) :: srcDataMap
+      type(ESMF_FieldDataMap), intent(inout) :: dstDataMap
       type(ESMF_RouteHandle), intent(in) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask

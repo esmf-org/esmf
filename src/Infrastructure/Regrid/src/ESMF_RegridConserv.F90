@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.25 2004/05/10 12:56:49 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.26 2004/05/10 15:47:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,13 +33,14 @@
 ! !USES:
       use ESMF_BaseMod        ! ESMF base   class
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_ArrayMod       ! ESMF array  class
       use ESMF_ArrayGetMod    ! ESMF array  class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical grid domain class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       use ESMF_GridMod        ! ESMF grid   class
+      use ESMF_FieldDataMapMod
       use ESMF_FieldMod       ! ESMF field  class
       use ESMF_BundleMod      ! ESMF bundle class
       use ESMF_RegridTypesMod ! ESMF regrid data structures
@@ -71,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.25 2004/05/10 12:56:49 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.26 2004/05/10 15:47:11 nscollins Exp $'
 
 !==============================================================================
 
@@ -97,10 +98,10 @@
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
       type(ESMF_Grid), intent(in) :: srcGrid
-      type(ESMF_DataMap), intent(in) :: srcDataMap
+      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
       type(ESMF_Array), intent(in) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_DataMap), intent(in) :: dstDataMap
+      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
       type(ESMF_DELayout), intent(in) :: parentDELayout
       type(ESMF_Mask), intent(in), optional :: srcMask
       type(ESMF_Mask), intent(in), optional :: dstMask
@@ -259,7 +260,7 @@
 
       ! get destination grid info
       !TODO: Get grid masks?
-      call ESMF_DataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructConserv: DataMapGetRelloc ", &
                  "returned failure"
@@ -296,7 +297,7 @@
                              ESMF_DATA_REF, status)
 
       ! get source grid info
-      call ESMF_DataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructConserv: DataMapGetRelloc ", &
                  "returned failure"

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.43 2004/05/07 16:06:56 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.44 2004/05/10 15:47:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
       use ESMF_BaseMod       ! ESMF base   class
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_ArrayMod      ! ESMF array  class
       use ESMF_DistGridMod   ! ESMF distributed grid class
       use ESMF_PhysGridMod   ! ESMF physical grid class
@@ -53,6 +53,7 @@
       use ESMF_GridMod       ! ESMF grid   class
       use ESMF_RHandleMod    ! ESMF route handle class
       use ESMF_RouteMod      ! ESMF route  class
+      use ESMF_FieldDataMapMod
       use ESMF_ArrayCommMod
 
       implicit none
@@ -75,7 +76,7 @@
            srcGrid,    &! source grid
            dstGrid      ! destination grid
 
-        type (ESMF_DataMap) :: &
+        type (ESMF_FieldDataMap) :: &
            srcDatamap,    &! source datamap
            dstDatamap      ! destination datamap
 
@@ -160,7 +161,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.43 2004/05/07 16:06:56 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.44 2004/05/10 15:47:11 nscollins Exp $'
 
 !==============================================================================
 !
@@ -397,9 +398,9 @@
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DomainList), intent(inout) :: recvDomainList
       type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_DataMap), intent(in) :: srcDatamap
+      type(ESMF_FieldDataMap), intent(in) :: srcDatamap
       type(ESMF_Array), intent(in), optional :: srcArray
-      type(ESMF_DataMap), intent(in), optional :: dstDatamap
+      type(ESMF_FieldDataMap), intent(in), optional :: dstDatamap
       type(ESMF_Array), intent(in), optional :: dstArray
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
@@ -461,7 +462,7 @@
       ! Extract some layout information for use in this regrid.
       call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
       allocate (myAI(gridrank))
-      call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           globalAIPerDim=myAI, reorder=reorder, &
                           total=totalUse, rc=status)
@@ -478,12 +479,12 @@
       call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=status)
       allocate (dstMin(gridrank))
       allocate (dstMax(gridrank))
-      call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=srcMin, &
                           maxLocalCoordPerDim=srcMax, &
                           reorder=.false., rc=status)
-      call ESMF_DataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=status)
       call ESMF_GridGetDE(dstGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=dstMin, &
                           maxLocalCoordPerDim=dstMax, &
@@ -517,7 +518,7 @@
         else
           call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=status)
         endif
-        call ESMF_DataMapGet(srcDataMap, dataIorder=dimOrder, rc=status)
+        call ESMF_FieldDataMapGet(srcDataMap, dataIndices=dimOrder, rc=status)
         do i = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
             myAI(j) = sendDomainList%domains(i)%ai(j)
@@ -625,7 +626,7 @@
       character (*), intent(out), optional :: name
       type (ESMF_Array), intent(out), optional :: srcArray, dstArray
       type (ESMF_Grid), intent(out), optional :: srcGrid,  dstGrid
-      type (ESMF_DataMap), intent(out), optional :: srcDatamap,  dstDatamap
+      type (ESMF_FieldDataMap), intent(out), optional :: srcDatamap,  dstDatamap
       integer, intent(out), optional :: method
       integer, intent(out), optional :: numLinks
       type (ESMF_Route), intent(out), optional :: gather
@@ -733,7 +734,7 @@
       character (*),       intent(in ), optional :: name
       type (ESMF_Array),   intent(in ), optional :: srcArray,   dstArray
       type (ESMF_Grid),    intent(in ), optional :: srcGrid,    dstGrid
-      type (ESMF_DataMap), intent(in ), optional :: srcDatamap, dstDatamap
+      type (ESMF_FieldDataMap), intent(in ), optional :: srcDatamap, dstDatamap
       integer,             intent(in ), optional :: method
       integer,             intent(in ), optional :: numLinks
       type (ESMF_Route),   intent(in ), optional :: gather
