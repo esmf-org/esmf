@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.9 2004/02/23 16:11:02 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.10 2004/05/26 08:53:33 nscollins Exp $
 
 
 !-------------------------------------------------------------------------
@@ -36,6 +36,7 @@
 !   !
 !   ! Creation of a state, might also be from a query of a component.
 !   !
+    call ESMF_Initialize(rc=rc)
  
     print *, "State Example 1: Import State"
 
@@ -43,6 +44,15 @@
     compname = "Atmosphere"
     state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(compname)
+
+    print *, "about to query for a nonexistent entry"
+    if (ESMF_StateIsNeeded(state1, "fred", rc)) then 
+      print *, "apparently returned true in error"
+    else
+      print *, "returned false w/o setting error"
+    endif
+    print *, "about to destroy an uninit state"
+    call ESMF_StateDestroy(state4, rc)
 
     ! Data would be added here and the State reused inside the run
     !  routine of a sequential application.
@@ -198,6 +208,7 @@
     print *, "State Destroy returned", rc
     print *, "State Example 5 finished"
 
+    call ESMF_Finalize(rc)
 !-------------------------------------------------------------------------
 !   ! Similar flags exist for "Ready" and for "Valid" to mark each data
 !   !  item as ready or having been validated, to help synchronize data
