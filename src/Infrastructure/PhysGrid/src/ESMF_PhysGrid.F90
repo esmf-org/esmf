@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.59 2004/01/07 18:31:23 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.60 2004/01/07 21:36:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -334,7 +334,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.59 2004/01/07 18:31:23 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.60 2004/01/07 21:36:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -813,7 +813,7 @@
          physgrid%ptr%coords(dimOrder) = physCoord
       else
          order_loop: do idim = 1,physgrid%ptr%numDims
-            if (.not. associated(physgrid%ptr%coords(idim))) then
+            if (.not.associated(physgrid%ptr%coords(idim)%ptr)) then
                physgrid%ptr%coords(idim) = physCoord
                exit order_loop
             endif
