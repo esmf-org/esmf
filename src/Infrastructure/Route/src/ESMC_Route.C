@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.122 2004/12/22 00:40:29 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.123 2004/12/24 18:08:05 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.122 2004/12/22 00:40:29 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.123 2004/12/24 18:08:05 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -928,8 +928,7 @@ static int maxroutes = 10;
 	   // for non-async case, copyout now
            if ((options & ESMC_ROUTE_OPTION_ASYNC) == 0) {
     	   // copy out of the receive buffer
-               if ((rcontig_length != rstride[0]) && (rcvtcount != 1) && 
-    	       (rcvtcount > 0) && (mypet != theirpet)) {
+               if ((rcontig_length != rstride[0]) && (rcvtcount > 1) || (mypet == theirpet)) {
                  switch (rrank) {
                    case 2:
                      rcvitems = roffset;
@@ -1066,8 +1065,7 @@ static int maxroutes = 10;
                vm->vmk_wait(&handle[req]);
                
     	   // copy out of the receive buffer
-               if ((rcontig_length != rstride[0]) && (rcvtcount != 1) && 
-    	       (rcvtcount > 0)) {
+               if ((rcontig_length != rstride[0]) && (rcvtcount > 1) || (mypet == theirpet)) {
                  switch (rrank) {
                    case 2:
                      rcvitems = roffset;
