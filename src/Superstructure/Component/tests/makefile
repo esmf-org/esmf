@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2004/08/03 19:33:52 nscollins Exp $ 
+# $Id: makefile,v 1.22 2004/11/02 17:10:54 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -131,7 +131,7 @@ ESMF_UserGComp_F.o : ESMF_UserGComp.o
 
 $(ESMC_TESTDIR)/ESMC_CompRun: ESMF_UserGComp.o ESMF_UserGComp_F.o ESMC_CompRun.o
 	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompRun ESMC_CompRun.o \
-         ESMF_UserGComp.o ESMF_UserGComp_F.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
+         ESMF_UserGComp.o ESMF_UserGComp_F.o -lesmf ${CXXF90LIBS} ${MPI_LIB} \
          ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMC_CompRun.o ESMF_UserGComp_F.o ESMF_UserGComp.o
 
