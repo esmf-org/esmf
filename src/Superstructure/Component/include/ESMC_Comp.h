@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.19 2004/04/23 21:49:37 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.20 2004/04/30 19:06:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,6 +130,7 @@ extern "C" {
    void FTN(f_esmf_compget)(ESMC_Comp *compp, ESMC_CompType *ctype, int *rc);
    void FTN(f_esmf_compreplicate)(ESMC_Comp *compp, ESMC_Comp *compp_src, 
      void *vm, int *rc);
+   void FTN(f_esmf_compcopy)(ESMC_Comp *compp, ESMC_Comp *compp_src, int *rc);
    void FTN(f_esmf_compdelete)(ESMC_Comp *compp, int *rc);
    void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc, int nlen);
    void FTN(f_esmf_compdestroy)(ESMC_Comp *compp, char *name, int *rc, int nlen);
