@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.14 2003/08/05 18:04:56 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.15 2003/08/15 21:33:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,11 +91,12 @@
       public ESMF_ArrayPrint
 !EOP
 
+      public assignment(=)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.14 2003/08/05 18:04:56 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.15 2003/08/15 21:33:53 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -139,11 +140,22 @@
 !EOP
       end interface
 
+interface assignment (=)
+ module procedure ESMF_aras
+end interface
+
 !==============================================================================
 
       contains
 
 !==============================================================================
+
+subroutine ESMF_aras(daval, saval)
+ type(ESMF_LocalArray), intent(out) :: daval
+ type(ESMF_Array), intent(in) :: saval
+
+ daval%this = saval%this
+end subroutine
 
 
 !------------------------------------------------------------------------------
