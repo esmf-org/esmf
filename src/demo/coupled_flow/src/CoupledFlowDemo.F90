@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.15 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.16 2004/05/25 09:39:28 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -134,9 +134,9 @@
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
     real(ESMF_KIND_R8) :: mincoords(ESMF_MAXGRIDDIM), maxcoords(ESMF_MAXGRIDDIM)
     integer :: counts(ESMF_MAXGRIDDIM)
-    type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-    type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-    type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+    type(ESMF_GridType) :: horz_gridtype
+    type(ESMF_GridHorzStagger) :: horz_stagger
+    type(ESMF_CoordSystem) :: horz_coord_system
     type(ESMF_VM) :: vm
     integer :: halo_width = 1
 
@@ -234,39 +234,25 @@
                                globalCellCountPerDim=counts, &
                                minGlobalCoordPerDim=mincoords, &
                                maxGlobalCoordPerDim=maxcoords, &
-                               horzGridType=horz_gridtype, &
-                               vertGridType=vert_gridtype, &       
                                horzStagger=horz_stagger, &      
-                               vertStagger=vert_stagger, &
-                               horzCoordSystem=horz_coord_system, &
-                               vertCoordSystem=vert_coord_system, &
                                rc=rc)
 
-    gridIN = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+    gridIN = ESMF_GridCreateHorz_XYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
-                             delayout=layoutIN, &
-                             horzGridType=horz_gridtype, &
-                             vertGridType=vert_gridtype, &       
                              horzStagger=horz_stagger, &      
-                             vertStagger=vert_stagger, &
-                             horzCoordSystem=horz_coord_system, &
-                             vertCoordSystem=vert_coord_system, &
                              name="Injector grid", rc=rc)
+    call ESMF_GridDistribute(gridIN, delayout=layoutIN, rc=rc)
+
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
 
-    gridFS = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+    gridFS = ESMF_GridCreateHorz_XYUni(counts=counts, &
                              minGlobalCoordPerDim=mincoords, &
                              maxGlobalCoordPerDim=maxcoords, &
-                             delayout=layoutFS, &
-                             horzGridType=horz_gridtype, &
-                             vertGridType=vert_gridtype, &       
                              horzStagger=horz_stagger, &      
-                             vertStagger=vert_stagger, &
-                             horzCoordSystem=horz_coord_system, &
-                             vertCoordSystem=vert_coord_system, &
                              name="Flow Solver grid", rc=rc)
+    call ESMF_GridDistribute(gridFS, delayout=layoutFS, rc=rc)
 
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
 

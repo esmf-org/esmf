@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.15 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.16 2004/05/25 09:39:27 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -207,14 +207,13 @@
       g_min(2) = y_min
       g_max(1) = x_max
       g_max(2) = y_max
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
-                             delayout=layoutTop, &   
-                             horzGridType=ESMF_GridType_XY, &
-                             horzStagger=ESMF_GridStagger_C_NE, &
-                             horzCoordSystem=ESMF_CoordSystem_Cartesian, &
+                             horzStagger=ESMF_GRID_HORZ_STAGGER_C_NE, &
                              name="source grid", rc=rc)
+      call ESMF_GridDistribute(grid, delayout=layoutTop, rc=rc)
+
 !\end{verbatim}
 !     The Grid can then be attached to the Gridded Component with a Set call:
 !\begin{verbatim}
