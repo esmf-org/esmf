@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.31 2003/07/01 20:34:29 nscollins Exp $ 
+# $Id: base_variables,v 1.32 2003/07/01 20:41:34 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -27,8 +27,8 @@ STRICT			= -qstrict
 FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 F_FREECPP               = -qsuffix=cpp=F90
-F_FIXCPP                = -qsuffix=f=F
-F_FREENOCPP             = -qfixed=132 -qsuffix=cpp=f90
+F_FIXCPP                = -qfixed=132 -qsuffix=cpp=f90
+F_FREENOCPP             = -qsuffix=f=F
 F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
 # ######################### C and Fortran compiler ########################
 #
