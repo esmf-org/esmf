@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.1 2002/11/14 18:14:36 cdeluca Exp $
+// $Id: ESMC_HWMonitor.C,v 1.2 2002/11/14 22:35:18 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,14 +8,14 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMC HW_Monitor method code (body) file
+// ESMC HWMonitor method code (body) file
 
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ HW_Monitor methods declared
-// in the companion file ESMC_HW_Monitor.h
+// The code in this file implements the C++ HWMonitor methods declared
+// in the companion file ESMC_HWMonitor.h
 //
 // Hardware monitor provides performance profiling of hardware
 // specifics for sections of user code (cache misses, floating point
@@ -30,35 +30,35 @@
  #include <ESMC_Util.h>
 
  // associated class definition file
- #include <ESMC_HW_Monitor.h>
+ #include <ESMC_HWMonitor.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.1 2002/11/14 18:14:36 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.2 2002/11/14 22:35:18 ekluz Exp $";
 //-------------------------------------------------------------------------
 
 //
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 //
-// This section includes all the HW_Monitor routines
+// This section includes all the HWMonitor routines
 //
 //
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_MonitorInit - initializes a HW_Monitor object
+// !IROUTINE:  ESMC_HWMonitorInit - initializes a HWMonitor object
 //
 // !INTERFACE:
-      int ESMC_HW_Monitor::ESMC_HW_MonitorInit( void ) {
+      int ESMC_HWMonitor::ESMC_HWMonitorInit( void ) {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes HW_Monitor values; it does not
+//      ESMF routine which only initializes HWMonitor values; it does not
 //      allocate any resources.
 //
 //EOP
@@ -72,14 +72,14 @@
 #else
 #endif
 
- } // end ESMC_HW_MonitorInit
+ } // end ESMC_HWMonitorInit
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_MonitorValidate - internal consistency check for a HW_Monitor
+// !IROUTINE:  ESMC_HWMonitorValidate - internal consistency check for a HWMonitor
 //
 // !INTERFACE:
-      int ESMC_HW_Monitor::ESMC_HW_MonitorValidate(
+      int ESMC_HWMonitor::ESMC_HWMonitorValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -88,7 +88,7 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a HW_Monitor is internally consistent.
+//      Validates that a HWMonitor is internally consistent.
 //      Returns error code if problems are found.  ESMC_Base class method.
 //
 //EOP
@@ -98,15 +98,15 @@
 //  code goes here
 //
 
- } // end ESMC_HW_MonitorValidate
+ } // end ESMC_HWMonitorValidate
 
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_MonitorPrint - print contents of a HW_Monitor
+// !IROUTINE:  ESMC_HWMonitorPrint - print contents of a HWMonitor
 //
 // !INTERFACE:
-      int ESMC_HW_Monitor::ESMC_HW_MonitorPrint(
+      int ESMC_HWMonitor::ESMC_HWMonitorPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -115,7 +115,7 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a HW_Monitor.  The options control the
+//      Print information about a HWMonitor.  The options control the
 //      type of information and level of detail.  ESMC_Base class method.
 //
 //EOP
@@ -125,14 +125,14 @@
 //  code goes here
 //
 
- } // end ESMC_HW_MonitorPrint
+ } // end ESMC_HWMonitorPrint
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_MonitorBegin - Begin hardware monitoring
+// !IROUTINE:  ESMC_HWMonitorBegin - Begin hardware monitoring
 //
 // !INTERFACE:
-      ESMC_HW_Monitor::ESMC_HW_MonitorBegin(void) {
+      ESMC_HWMonitor::ESMC_HWMonitorBegin(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -147,15 +147,15 @@
 //  code goes here
 //
 
- } // end ESMC_HW_MonitorBegin
+ } // end ESMC_HWMonitorBegin
 
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_MonitorEnd - End hardware monitoring
+// !IROUTINE:  ESMC_HWMonitorEnd - End hardware monitoring
 //
 // !INTERFACE:
-      ESMC_HW_Monitor::ESMC_HW_MonitorEnd(void) {
+      ESMC_HWMonitor::ESMC_HWMonitorEnd(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -170,15 +170,15 @@
 //  code goes here
 //
 
- } // end ESMC_HW_MonitorEnd
+ } // end ESMC_HWMonitorEnd
 
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_MonitorReport - Report hardware monitoring to log.
+// !IROUTINE:  ESMC_HWMonitorReport - Report hardware monitoring to log.
 //
 // !INTERFACE:
-      ESMC_HW_Monitor::ESMC_HW_MonitorReport(void) {
+      ESMC_HWMonitor::ESMC_HWMonitorReport(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -193,14 +193,14 @@
 //  code goes here
 //
 
- } // end ESMC_HW_MonitorReport
+ } // end ESMC_HWMonitorReport
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_HW_Monitor - native C++ constructor
+// !IROUTINE:  ESMC_HWMonitor - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_HW_Monitor::ESMC_HW_Monitor(void) {
+      ESMC_HWMonitor::ESMC_HWMonitor(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -216,5 +216,5 @@
 //  code goes here
 //
 
- } // end ESMC_HW_Monitor
+ } // end ESMC_HWMonitor
 
