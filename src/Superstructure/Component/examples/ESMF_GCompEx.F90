@@ -1,33 +1,51 @@
-! $Id: ESMF_GCompEx.F90,v 1.20 2004/06/15 15:33:21 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.21 2004/06/15 16:02:54 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
 !-------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
-!-------------------------------------------------------------------------
-
-!BOP
+!==============================================================================
+!BOC
+! !PROGRAM: ESMF_GCompEx.F90 - Gridded Component example
 !
 ! !DESCRIPTION:
-!  One of many possible examples of a Gridded component.
-!  Also see the Programming Model section of this document.
 !
+!   The skeleton of one of many possible Gridded component models.
 !
-!EOP
-!BOC
-!   ! Example module showing Gridded Comp calls to the Component routines.
+!-----------------------------------------------------------------------------
+
+    ! Example Gridded Component
     module ESMF_GriddedCompEx
     
-!   ! ESMF Framework module
+    ! ESMF Framework module
     use ESMF_Mod
     implicit none
     public GComp_SetServices
+
     contains
-!-------------------------------------------------------------------------
-!   !  The SetServices routine sets the subroutines to be called
-!   !   as the init, run, and finalize routines.  Note that these are
-!   !   private to the module.
- 
+!EOC
+
+!BOP
+!\subsubsection{Specifying a SetServices Routine}
+!
+! Every {\tt ESMF\_GridComp} is required to provide and document
+! the setservices routine.  It can have any name, but must
+! follow the declaration below: a subroutine which takes an
+! {\tt ESMF\_GridComp} as the first argument, and
+! an integer return code as the second.
+!
+! It must call the ESMF routines {\tt ESMF\_GridCompSetEntryPoint()} to
+! register with the framework what subroutines should be called when
+! it is time to Initialize, Run, and Finalize the component.  There are
+! additional routines which can be registered as well, for checkpoint
+! and restart functions.
+!
+! Note that the actual subroutines being registered do not have to be
+! public to this module; only the {\tt SetServices} routine itself must
+! be available to be used by other code.
+!EOP
+
+!BOC
     subroutine GComp_SetServices(comp, rc)
         type(ESMF_GridComp) :: comp
         integer :: rc
@@ -41,12 +59,28 @@
         ! to be passed in to the routines above:
         ! call ESMF_GridCompSetData(comp, mydatablock, rc)
 
-    end subroutine
+        rc = ESMF_SUCCESS
 
-!-------------------------------------------------------------------------
-!   !  Gridded Comp Component created by higher level calls, here is the
-!   !   Initialization routine.
+    end subroutine
+!EOC
+
+!BOP
+!\subsubsection{The Initialization Routine}
+!
+! When a higher level component is ready to begin using this component,
+! it will call the initialization routine.  The component writer must
+! supply a subroutine with the exact calling sequence below; no arguments
+! can be optional, and the types and order must match.
+!
+! At initialization time the component can allocate data space, open
+! data files, set up initial conditions; anything it needs to do to
+! prepare to run.
+!
+! The {\tt rc} return code should be set if an error occurs, otherwise
+! the value {\tt ESMF\_SUCCESS} should be returned.
+!EOP
     
+!BOC
     subroutine GComp_Init(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
@@ -62,12 +96,33 @@
         !call ESMF_StateAddBundle(exportState, bundle, rc)
         print *, "Gridded Comp Init returning"
    
-    end subroutine GComp_Init
+        rc = ESMF_SUCCESS
 
-!-------------------------------------------------------------------------
-!   !  The Run routine where data is exchanged.
-!   !
- 
+    end subroutine GComp_Init
+!EOC
+
+!BOP
+!\subsubsection{The Run Routine}
+! 
+! During the execution loop, the run routine may be called many times.
+! Each time it should read data from the {\tt importState}, use the
+! {\tt clock} to determine what the current time is in the calling
+! component, compute new values or process the data,
+! and produce any output and place it in the {\tt exportState}. 
+! 
+! When a higher level component is ready to use this component
+! it will call the run routine.  The component writer must
+! supply a subroutine with the exact calling sequence below; 
+! no arguments can be optional, and the types and order must match.
+!
+! It is expected this is where the bulk of the model computation
+! or data analysis will occur.
+!   
+! The {\tt rc} return code should be set if an error occurs, otherwise
+! the value {\tt ESMF\_SUCCESS} should be returned.
+!EOP    
+        
+!BOC    
     subroutine GComp_Run(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
@@ -84,12 +139,24 @@
 
         print *, "Gridded Comp Run returning"
 
-    end subroutine GComp_Run
+        rc = ESMF_SUCCESS
 
-!-------------------------------------------------------------------------
-!   !  The Finalization routine where things are deleted and cleaned up.
-!   !
- 
+    end subroutine GComp_Run
+!EOC
+
+!BOP
+!\subsubsection{The Finalization Routine}
+!
+! At the end of the execution, each component will have a chance to
+! deallocate data space, close open files, flush final results.
+! These should be placed in the finalization routine.
+!
+! The {\tt rc} return code should be set if an error occurs, otherwise
+! the value {\tt ESMF\_SUCCESS} should be returned.
+!
+!EOP
+
+!BOC
     subroutine GComp_Final(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importState, exportState
@@ -102,11 +169,16 @@
 
         print *, "Gridded Comp Final returning"
    
+        rc = ESMF_SUCCESS
+
     end subroutine GComp_Final
 
     end module ESMF_GriddedCompEx
+!EOC
 
 !-------------------------------------------------------------------------
+! Note - the program below is here only to make this an executable
+! program.  It should not appear in the documentation for a Gridded Component.
 !-------------------------------------------------------------------------
 
     program ESMF_AppMainEx
