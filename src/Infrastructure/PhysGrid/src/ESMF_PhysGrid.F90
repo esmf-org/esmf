@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.15 2003/01/10 16:55:33 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.16 2003/01/10 18:31:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.15 2003/01/10 16:55:33 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.16 2003/01/10 18:31:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -808,7 +808,7 @@
         rc = ESMF_FAILURE
       endif
 
-!     if present, set information filling in physgrid derived type
+!     if present, get information from physgrid derived type
       if(present(local_min_coord1)) &
                  local_min_coord1 = physgrid%local_min_coord1
       if(present(local_max_coord1)) &
@@ -1180,7 +1180,7 @@
           physgrid%center_coord1 = ESMF_ArrayCreate(temp, ESMF_NO_COPY, rc)
           nullify(temp)
 !         deallocate(temp)
-          call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
+!         call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
         case (ESMF_CellLoc_Center_Y)
           l1 = global_nmax1 - global_nmin1 + 1
           l2 = global_nmax2 - global_nmin2 + 1
@@ -1208,7 +1208,7 @@
 
       enddo
 
-      call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
+!     call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridSetCoordInternal: TODO"
         return

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.16 2003/01/10 16:55:09 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.17 2003/01/10 18:31:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,6 +108,7 @@
         integer :: DE_SE    ! identifier for DE to the southeast
         integer :: DE_SW    ! identifier for DE to the southwest
         integer :: lsize                  ! local (on this DE) number of cells
+        integer :: gstart                 ! global index of starting count
         type (ESMF_DecompAxis) :: n_dir1  ! local cell count in 1st dir, in
                                           ! global index
         type (ESMF_DecompAxis) :: n_dir2  ! local cell count in 2nd dir, in
@@ -181,7 +182,7 @@
     public ESMF_DistGridSetInfo
     public ESMF_DistGridGetCounts
     public ESMF_DistGridSetCounts
-!    public ESMF_DistGridGetDE
+    public ESMF_DistGridGetDE
     public ESMF_DistGridSetDE
     public ESMF_DistGridSetDecomp
     public ESMF_DistGridGetValue
@@ -194,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.16 2003/01/10 16:55:09 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.17 2003/01/10 18:31:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -538,6 +539,7 @@
       distgrid%MyDE%DE_SE = 0
       distgrid%MyDE%DE_SW = 0
       distgrid%MyDE%lsize = 0
+      distgrid%MyDE%gstart = 0
       distgrid%MyDE%n_dir1%start = 0
       distgrid%MyDE%n_dir1%end = 0
       distgrid%MyDE%n_dir1%size = 0
@@ -1200,10 +1202,128 @@
         enddo
         global_s = global_e + 1
       enddo
+      global_s = 0
+      do j = 1,nDE_j
+        do i = 1,nDE_i
+          de = (j-1)*nDE_j + i
+          distgrid%gstart(de) = global_s
+          global_s = global_s + distgrid%size1(de)*distgrid%size2(de)
+          write(*,*) 'de, distgrid%gstart', de, distgrid%gstart(de)
+        enddo
+      enddo
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSetCountsInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridGetDE - Get DE information for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetDE(distgrid, MyDE, MyDEx, MyDEy, &
+                                    DE_E, DE_W, DE_N, DE_S, &
+                                    DE_NE, DE_NW, DE_SE, DE_SW, &
+                                    lsize, gstart, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(inout), optional :: MyDE
+      integer, intent(inout), optional :: MyDEx
+      integer, intent(inout), optional :: MyDEy
+      integer, intent(inout), optional :: DE_E
+      integer, intent(inout), optional :: DE_W
+      integer, intent(inout), optional :: DE_N
+      integer, intent(inout), optional :: DE_S
+      integer, intent(inout), optional :: DE_NE
+      integer, intent(inout), optional :: DE_NW
+      integer, intent(inout), optional :: DE_SE
+      integer, intent(inout), optional :: DE_SW
+      integer, intent(inout), optional :: lsize
+      integer, intent(inout), optional :: gstart
+! TODO: figure out format for getting deeper derived type info, N_DIR1 N_DIR2
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get a DistGrid attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be modified.
+!     \item[[MyDE]] 
+!          
+!     \item[[MyDEx]] 
+!          
+!     \item[[MyDEy]] 
+!          
+!     \item[[DE_E]] 
+!          
+!     \item[[DE_W]] 
+!          
+!     \item[[DE_N]] 
+!          
+!     \item[[DE_S]] 
+!          
+!     \item[[DE_NE]] 
+!          
+!     \item[[DE_NW]] 
+!          
+!     \item[[DE_SE]] 
+!          
+!     \item[[DE_SW]] 
+!          
+!     \item[[lsize]] 
+!          
+!     \item[[gstart]] 
+!          
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: DE_id, DEx, DEy
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call ESMF_LayoutGetDEPosition(distgrid%layout, DEx, DEy, status)
+      call ESMF_LayoutGetDEid(distgrid%layout, DE_id, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridGetDE: layout get position"
+        return
+      endif
+      DE_id = DE_id + 1    ! TODO:  have to add one to go from C
+      DEx = DEx + 1
+      DEy = DEy + 1
+
+!     if present, get information from physgrid derived type
+      if(present(MyDE)) MyDE = distgrid%myDE%MyDE
+      if(present(MyDEx)) MyDEx = distgrid%myDE%MyDEx
+      if(present(MyDEy)) MyDEy = distgrid%myDE%MyDEy
+      if(present(DE_E)) DE_E = distgrid%myDE%DE_E
+      if(present(DE_W)) DE_W = distgrid%myDE%DE_W
+      if(present(DE_N)) DE_N = distgrid%myDE%DE_N
+      if(present(DE_S)) DE_S = distgrid%myDE%DE_S
+      if(present(DE_NE)) DE_NE = distgrid%myDE%DE_NE
+      if(present(DE_NW)) DE_NW = distgrid%myDE%DE_NW
+      if(present(DE_SE)) DE_SE = distgrid%myDE%DE_SE
+      if(present(DE_SW)) DE_SW = distgrid%myDE%DE_SW
+      if(present(lsize)) lsize = distgrid%myDE%lsize
+      if(present(gstart)) gstart = distgrid%myDE%gstart
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetDE
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1264,8 +1384,7 @@
 !     distgrid%DEx(DE_id) = DEx
 !     distgrid%DEy(DE_id) = DEy
 
-      distgrid%MyDE%n_dir1%start = distgrid%start1(DE_id) ! TODO: global_dirs
-                                                              ! should be an array
+      distgrid%MyDE%n_dir1%start = distgrid%start1(DE_id)
       distgrid%MyDE%n_dir1%end = distgrid%end1(DE_id)
       distgrid%MyDE%n_dir1%size = distgrid%size1(DE_id)
       distgrid%MyDE%n_dir2%start = distgrid%start2(DE_id)
@@ -1273,6 +1392,7 @@
       distgrid%MyDE%n_dir2%size = distgrid%size2(DE_id)
       distgrid%MyDE%lsize = distgrid%MyDE%n_dir1%size * &
                             distgrid%MyDE%n_dir2%size
+      distgrid%MyDE%gstart = distgrid%gstart(DE_id)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
