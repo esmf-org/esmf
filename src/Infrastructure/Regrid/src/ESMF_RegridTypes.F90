@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.39 2004/04/14 15:25:53 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.40 2004/04/27 23:08:51 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.39 2004/04/14 15:25:53 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.40 2004/04/27 23:08:51 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -346,9 +346,10 @@
 
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
-                                         recvDomainList, srcDatamap, srcArray, &
-                                         dstDatamap, dstArray, reorder, total, &
-                                         rc)
+                                         recvDomainList, parentDELayout, &
+                                         srcDatamap, srcArray, &
+                                         dstDatamap, dstArray, &
+                                         reorder, total, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RegridRouteConstruct
@@ -359,6 +360,7 @@
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DomainList), intent(inout) :: recvDomainList
+      type(ESMF_newDELayout), intent(in) :: parentDELayout
       type(ESMF_DataMap), intent(in) :: srcDatamap
       type(ESMF_Array), intent(in), optional :: srcArray
       type(ESMF_DataMap), intent(in), optional :: dstDatamap
@@ -548,9 +550,7 @@
       endif
 
       ! Create Route
-      ! TODO: this must be either a parent layout, or the src and dst layouts
-      !  must be identical.
-      route = ESMF_RouteCreate(srcDELayout, status)
+      route = ESMF_RouteCreate(parentDELayout, status)
       call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, sendDomainList, &
                                        recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then

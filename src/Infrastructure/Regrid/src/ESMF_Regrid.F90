@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.69 2004/04/23 17:19:28 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.70 2004/04/27 23:07:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.69 2004/04/23 17:19:28 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.70 2004/04/27 23:07:47 jwolfe Exp $'
 
 !==============================================================================
 
@@ -122,7 +122,7 @@
 ! !INTERFACE:
       subroutine ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &
                                    dstarray, dstgrid, dstdatamap, &
-                                   routehandle, regridmethod, &
+                                   parentDELayout, routehandle, regridmethod, &
                                    srcmask, dstmask, rc)
 !
 ! !ARGUMENTS:
@@ -132,6 +132,7 @@
       type(ESMF_Array), intent(inout) :: dstarray
       type(ESMF_Grid), intent(inout) :: dstgrid
       type(ESMF_DataMap), intent(in) :: dstdatamap
+      type(ESMF_newDELayout), intent(in) :: parentDELayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in), optional :: regridmethod
       type(ESMF_Mask), intent(in), optional :: srcmask
@@ -259,7 +260,8 @@
           routehandle = ESMF_RegridConstructBilinear( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
-                                              srcmask, dstmask, rc=status)
+                                              parentDELayout, srcmask, dstmask, &
+                                              rc=status)
 
       !-------------
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
@@ -272,7 +274,8 @@
           routehandle = ESMF_RegridConstructConserv( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
-                                              srcmask, dstmask, order=1, rc=status)
+                                              parentDELayout, srcmask, dstmask, &
+                                              order=1, rc=status)
       !-------------
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
       !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
@@ -306,7 +309,8 @@
           routehandle = ESMF_RegridConstructLinear( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
-                                              srcmask, dstmask, rc=status)
+                                              parentDELayout, srcmask, dstmask, &
+                                              rc=status)
       !-------------
       case(ESMF_RegridMethod_Spline) ! cubic spline for 1-d regridding
          print *, "ERROR in ESMF_RegridCreate: ", &
@@ -955,7 +959,7 @@
 
         call ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &   
                                dstarray, dstgrid, dstdatamap, &
-                               routehandle, regridtype, &
+                               parentDELayout, routehandle, regridtype, &
                                srcmask, dstmask, status)
 
         ! set return code if user specified it
