@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.11 2003/07/25 14:32:03 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.12 2003/07/25 17:51:38 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,8 +23,8 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Log members and declares all class
-// data and methods.  All methods, except for the SetVerbosity method, which is
-// inlined are defined in the companion file ESMC\_LogErr.C
+// data and methods.  All methods, except for the Set and Get methods, which
+// are inlined, are defined in the companion file ESMC\_LogErr.C
 //
 // !USES:
 
@@ -107,18 +107,18 @@ class ESMC_Log {
     int ESMC_LogGetUnit();
     void ESMC_LogCloseCFile();
     void ESMC_LogCloseFortFile();
-    inline void ESMC_LogSetFlush();
-    inline ESMC_Logical ESMC_LogGetFlush();
-    inline void ESMC_LogSetNotFlush();
-    inline void ESMC_LogSetVerbose();
-    inline ESMC_Logical ESMC_LogGetVerbose();
-    inline void ESMC_LogSetNotVerbose();
-    inline void ESMC_LogSetHaltOnErr();
-    inline ESMC_Logical ESMC_LogGetHaltOnErr();
-    inline void ESMC_LogSetNotHaltOnErr();
-    inline void ESMC_LogSetHaltOnWarn();
-    inline ESMC_Logical ESMC_LogGetHaltOnWarn();
-    inline void ESMC_LogSetNotHaltOnWarn();
+    void ESMC_LogSetFlush();
+    ESMC_Logical ESMC_LogGetFlush() const;
+    void ESMC_LogSetNotFlush();
+    void ESMC_LogSetVerbose();
+    ESMC_Logical ESMC_LogGetVerbose() const;
+    void ESMC_LogSetNotVerbose();
+    void ESMC_LogSetHaltOnErr();
+    ESMC_Logical ESMC_LogGetHaltOnErr() const;
+    void ESMC_LogSetNotHaltOnErr();
+    void ESMC_LogSetHaltOnWarn();
+    ESMC_Logical ESMC_LogGetHaltOnWarn() const;
+    void ESMC_LogSetNotHaltOnWarn();
     void ESMC_LogWarnMsg_(int errCode, int line, char file[],
                      char dir[], char msg[]);
     void ESMC_LogWarn_(int errCode, int line, char file[],
@@ -161,12 +161,12 @@ inline void ESMC_Log::ESMC_LogSetFlush(
 // !IROUTINE: ESMC_LogGetFlush() - returns the flush variable 
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetFlush(
+ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
 
 // !ARGUMENTS
 //   none
 
-   ) 
+   ) const 
 
 // !DESCRIPTION: 
 // Returns the flush variable 
@@ -229,11 +229,11 @@ inline void ESMC_Log::ESMC_LogSetVerbose(
 //
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
+ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
 
 // !ARGUMENTS
 //   none
-  )
+  ) const
 
 // !DESCRIPTION:
 // Returns  verbose value 
@@ -296,11 +296,11 @@ inline void ESMC_Log::ESMC_LogSetHaltOnErr(
 //
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
+ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
 
 // !ARGUMENTS
 //   none
-  )
+  ) const
 
 // !DESCRIPTION:
 // Returns haltOnErr
@@ -364,11 +364,11 @@ inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
 //
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
+ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
 
 // !ARGUMENTS
 //   none
-  )
+  ) const
 
 // !DESCRIPTION:
 // Returns haltOnWarn
