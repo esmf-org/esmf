@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.6 2004/04/08 20:07:04 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.7 2004/04/09 15:37:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,13 +10,19 @@
 !
 !==============================================================================
 !
-
+!     ESMF LogErr Module
+      module ESMF_LogErrMod
+!
+!==============================================================================
+!
+! This file contains the LogErr class definition and all LogErr class
+! methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
 #include "ESMF.h"
 #include "ESMF_Macros.inc"
 #include "ESMF_LogConstants.inc"
-module ESMF_LogErrMod
-
-   use ESMF_BaseMod
 
 !BOPI
 !============================================================================
@@ -29,6 +35,10 @@ module ESMF_LogErrMod
 ! This file contains the interface code written in Fortran.  It also contains
 ! some utility functions used by the {\tt ESMF\_Log} class.
 !
+!------------------------------------------------------------------------------
+! !USES:
+   use ESMF_BaseMod
+
 !EOPI
    implicit none
    private
@@ -242,15 +252,15 @@ end subroutine ESMF_LogOpen
 		f=adjustl(__FILE__)
 		if ((present(module)).and.(present(method))) then
 		  	WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
-			100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
+                        100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
 			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
 			lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string		
-		else if ((present(module)).and.not(present(method))) then
+		else if ((present(module)).and. .not.(present(method))) then
 		  	WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,string
 			101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
 			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
 			lt,"    ",f,__LINE__,"  ",tmodule,string
-		else if (not(present(module)).and.(present(method))) then
+		else if (.not.(present(module)).and.(present(method))) then
 		  	WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,string
 			102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
 			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
