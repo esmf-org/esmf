@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.6 2002/01/25 20:38:38 dneckels Exp $ 
+# $Id: base.site,v 1.7 2003/02/25 19:46:45 nscollins Exp $ 
 
 #  This file contains site-specific information.  The definitions below
 #  should be changed to match the locations of libraries at your site.
@@ -27,7 +27,7 @@ LAPACK_LIB     = -lcomplib.sgimath
 # or SGI's version of MPI you MUST retain it.
 #
 ESMC_MPIRUN      = mpirun 
-MPI_LIB        = -lmpi
+MPI_LIB        = -lmpi -lmpi++
 MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
 MPIRUN          = ${ESMC_MPIRUN}
 # The following is for mpiuni
