@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2004/03/16 15:44:26 nscollins Exp $
+# $Id: build_rules.mk,v 1.6 2004/03/16 18:00:54 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -67,7 +67,8 @@ RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
 SH_LD		   = pgcc 
-# ######################### C and Fortran compiler ########################
+#
+# C and Fortran compiler 
 #
 ifneq ($(ESMF_COMM),mpich)
 C_CC		   = pgcc -mp
@@ -91,24 +92,26 @@ C_FLINKER	   = ${C_FC}
 C_CCV		   = ${C_CC} -V
 C_FCV              = ${C_FC} -V
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
-#C_SYS_LIB	   = -ldl -lc -lf2c -lm
-#C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
+
+F_FREECPP          = -Mpreprocess -Mfreeform
+F_FIXCPP           = -Mpreprocess -Mnofreeform
+F_FREENOCPP        = -Mfreeform
+F_FIXNOCPP         = -Mnofreeform
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
-# ########################## C++ compiler ##################################
+#
+# C++ compiler 
 #
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = ${CXX_CC}
 CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} -V
-#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = ${CXX_FC} -mp
 C_F90CXXLIBS       = -lpgc -lstd -lC
 C_CXXF90LD         = ${CXX_CC} 
@@ -126,9 +129,9 @@ GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
-##################################################################################
+###############################################################################
 
-PARCH		   = linux
+PARCH		   = linux_pgi
 
 SL_SUFFIX   =
 SL_LIBOPTS  =
@@ -138,56 +141,6 @@ SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
 SL_LIBS_TO_MAKE = libesmf 
 
-
-#########
-
-.F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
-
-.F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
-
-.f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mnofreeform ${ESMC_INCLUDE} $<
-
-.f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -Mnofreeform ${ESMC_INCLUDE} $<
-
-.c.o:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.C.o:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mnofreeform ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -Mnofreeform ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.C.a:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
 
 #############
 #

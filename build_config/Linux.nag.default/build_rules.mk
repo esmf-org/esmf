@@ -1,6 +1,6 @@
-#  $Id: build_rules.mk,v 1.6 2004/03/15 18:26:41 nscollins Exp $
+#  $Id: build_rules.mk,v 1.7 2004/03/16 18:00:53 nscollins Exp $
 #
-#  Linus.nag.default.mk
+#  Linux.nag.default.mk
 #
 
 
@@ -27,12 +27,6 @@ endif
 
 ############################################################
 #
-#  File base.site
-#
-#
-
-#  This file contains site-specific information.  The definitions below
-#  should be changed to match the locations of libraries at your site.
 #  The following naming convention is used:
 #     XXX_LIB - location of library XXX
 #     XXX_INCLUDE - directory for include files needed for library XXX
@@ -85,21 +79,21 @@ SH_LD		   = cc
 ifeq ($(ESMF_COMM),mpich)
 C_CC		   = mpicc
 C_FC		   = mpif90
-C_CLINKER	   = mpicc
-C_FLINKER	   = mpif90
+C_CLINKER	   = ${C_CC}
+C_FLINKER	   = ${C_FC}
 CXX_CC		   = mpiCC -fPIC
-CXX_FC		   = mpif90
+CXX_FC		   = ${C_FC}
 CXX_CLINKER	   = mpiCC
 CXX_FLINKER	   = mpiCC
-C_F90CXXLD         = mpif90
+C_F90CXXLD         = ${C_FC}
 C_CXXF90LD         = mpiCC
 else
 C_CC		   = cc
 C_FC		   = f90
-C_CLINKER	   = cc
-C_FLINKER	   = f90
+C_CLINKER	   = ${C_CC}
+C_FLINKER	   = ${C_FC}
 CXX_CC		   = CC -fPIC
-CXX_FC		   = f90
+CXX_FC		   = ${C_FC}
 CXX_CLINKER	   = CC
 CXX_FLINKER	   = CC
 C_F90CXXLD         = g++
@@ -119,7 +113,6 @@ G_FOPTFLAGS	   = -g
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
 # ########################## Fortran compiler ##############################
-#
 #FFLAGS          = -w=x77 -kind=byte -dusty -mismatch_all-gline
 FFLAGS          = -kind=byte -dusty
 F_FREECPP       = -free -fpp
@@ -161,76 +154,10 @@ SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
 SL_LIBS_TO_MAKE = libesmf 
 
-############################################################
-#
-#  File base
-#
-#
-
-libc: ${LIBNAME}(${OBJSC})
-libf: ${LIBNAME}(${OBJSF})
-
-
 
 #############
 #
 # Set shared dependent on build_shared to build .so lib.
 #
 shared: 
-
-
-
-#########
-
-.F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
-
-.f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
-
-.c.o:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.C.o:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FREECPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FIXCPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.C.a:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-#############
-
-
 

@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.4 2004/03/04 22:34:15 nscollins Exp $
+# $Id: build_rules.mk,v 1.5 2004/03/16 18:00:53 nscollins Exp $
 #
-# Linux.default.default.mk
+# Linux.lahey.default.mk
 #
 #
 
@@ -27,17 +27,6 @@ endif
 
 ############################################################
 #
-# File base.site
-#
-
-#
-#  This file contains site-specific information.  The definitions below
-#  should be changed to match the locations of libraries at your site.
-#  The following naming convention is used:
-#     XXX_LIB - location of library XXX
-#     XXX_INCLUDE - directory for include files needed for library XXX
-#
-
 # Location of MPI (Message Passing Interface) software
 
 ifeq ($(ESMF_COMM),lam)
@@ -70,11 +59,6 @@ THREAD_LIB      = -lpthread
 
 ############################################################
 #
-#  File Base_variables
-#
-
-#
-#     See the file build/base_variables.defs for a complete explanation of all these fields
 #
 AR		   = ar
 AR_FLAGS	   = cr
@@ -85,7 +69,8 @@ RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
 SH_LD		   = gcc
-# ######################### C and Fortran compiler ########################
+#
+# C and Fortran compiler 
 #
 C_CC		   = gcc
 C_FC		   = lf95
@@ -105,13 +90,15 @@ G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
-# ########################## Fortran compiler ##############################   
+#
+# Fortran compiler 
 #
 F_FREECPP          = --nfix -Cpp
 F_FIXCPP           = --fix -Cpp
 F_FREENOCPP        = --nfix 
 F_FIXNOCPP         = --fix
-# ########################## C++ compiler ##################################
+#
+# C++ compiler 
 #
 CXX_CC		   = g++ -fPIC
 CXX_FC		   = lf95
@@ -127,6 +114,11 @@ CXX_SYS_LIB	   = -ldl -lc -lm
 
 C_F90CXXLD         = lf95 -verbose
 
+<<<<<<< build_rules.mk
+C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/2.96 \
+                     -Wl,-rpath /usr/local/lf9560/lib \
+                     -L/usr/lib/gcc-lib/i386-redhat-linux/2.96 -lstdc++ -lgcc -lg2c
+=======
 C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -Wl,-rpath /usr/local/lf9560/lib \
                      -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
@@ -135,6 +127,7 @@ C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
 #                   -Wl,-rpath /usr/local/lf9560/lib \
 #                   -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2-91.66 \
 #                   -lstdc++ -lgcc -lg2c
+>>>>>>> 1.3
 #C_F90CXXLIBS       = -lstdc++ -L/usr/lib/gcc-lib/i386-glibc21-linux/egcs-2.91.66 -lgcc 
 #C_F90CXXLIBS       = /usr/lib/gcc-lib/i386-redhat-linux/2.96/libgcc.a \
 #                     /usr/lib/gcc-lib/i386-redhat-linux/2.96/libstdc++.a 
@@ -143,7 +136,6 @@ C_CXXF90LD         = g++
 
 C_CXXF90LIBS       = -L/usr/local/lf9560/lib -lfj9i6 -lfj9ipp -lfj9f6 -lfj9fpp \
                       -lfj9e6 -lfccx86_6a
-#C_CXXF90LIBS       = 
 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
@@ -157,7 +149,7 @@ GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
-##################################################################################
+##############################################################################
 
 PARCH		   = linux_lf95
 
@@ -170,64 +162,6 @@ SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
 SL_LIBS_TO_MAKE = libesmf 
 
 ############################################################
-#
-# File base
-#
-
-libc: ${LIBNAME}(${OBJSC})
-libf: ${LIBNAME}(${OBJSF})
-
-#########
-
-.F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --nfix ${ESMC_INCLUDE} $<
-
-.F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} --nfix ${ESMC_INCLUDE} $<
-
-.f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --fix ${ESMC_INCLUDE} $<
-
-.f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} --fix ${ESMC_INCLUDE} $<
-
-.c.o:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.C.o:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --nfix ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} --nfix ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --fix ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} --fix ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.C.a:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-#############
 #
 # Set shared dependent on build_shared to build .so lib.
 #

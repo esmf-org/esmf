@@ -1,6 +1,6 @@
-# $Id: build_rules.mk,v 1.4 2004/03/15 19:39:06 nscollins Exp $
+# $Id: build_rules.mk,v 1.5 2004/03/16 18:00:54 nscollins Exp $
 #
-# SunOs.default.default.mk
+# SunOS.default.default.mk
 #
 
 
@@ -17,13 +17,6 @@ endif
 
 
 ############################################################
-#
-# File base.site
-#
-
-#
-#  This file contains site-specific information.  The definitions below
-#  should be changed to match the locations of libraries at your site.
 #  The following naming convention is used:
 #     XXX_LIB - location of library XXX
 #     XXX_INCLUDE - directory for include files needed for library XXX
@@ -54,12 +47,6 @@ THREAD_LIB     =
 
 ############################################################
 #
-# File base_variables
-#
-
-#
-#     See the file build/base_variables.defs for a complete explanation of all these fields
-#
 AR		   = /usr/ccs/bin/ar
 AR_FLAGS	   = cr
 RM		   = rm -f
@@ -68,7 +55,8 @@ RANLIB		   = /usr/ccs/bin/ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
 SH_LD		   = /opt/SUNWspro/bin/CC 
-# ######################### C and Fortran compiler ########################
+#
+# C and Fortran compiler 
 #
 C_CC		   = /opt/SUNWspro/bin/cc -KPIC -dalign -xtarget=native
 C_FC		   = /opt/SUNWspro/bin/f90 -openmp -xpp=cpp -dalign
@@ -87,13 +75,15 @@ G_FOPTFLAGS	   =
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -fast -xO4 -fsimple=2 -xtarget=native
 O_FOPTFLAGS	   = -fast
-# ########################## Fortran compiler ##############################
+#
+# Fortran compiler 
 #
 F_FREECPP               = -free -fpp
 F_FIXCPP                = -fixed -fpp
 F_FREENOCPP             = -free
 F_FIXNOCPP              = -fixed
-# ########################## C++ compiler ##################################
+#
+# C++ compiler 
 #
 CXX_CC		   = /opt/SUNWspro/bin/CC -instances=static
 CXX_FC		   = /opt/SUNWspro/bin/f90 -openmp
@@ -102,13 +92,15 @@ CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = /opt/SUNWspro/bin/CC 
 CXX_FLINKER	   = /opt/SUNWspro/bin/CC 
 CXX_CCV		   = ${CXX_CC} -V
-#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = /opt/SUNWspro/bin/f90 -openmp
-C_F90CXXLIBS       = -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath -lCrun -lCstd -lCrun -lm -lcx -lc
+C_F90CXXLIBS       = -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai \
+		     -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath \
+                     -lCrun -lCstd -lCrun -lm -lcx -lc
 C_CXXF90LD         = /opt/SUNWspro/bin/CC
-C_CXXF90LIBS       = -L/opt/SUNWspro/lib -lfui -lfai -lfai2 -lfsumai -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai -lfsu -lsunmath -lm -lc
+C_CXXF90LIBS       = -L/opt/SUNWspro/lib -lfui -lfai -lfai2 -lfsumai \
+                     -lfprodai -lfminlai -lfmaxlai -lfminvai -lfmaxvai \
+                     -lfsu -lsunmath -lm -lc
 C_CXXSO            = /opt/SUNWspro/bin/CC -G
 C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc
 # ------------------------- BOPT - g_c++ options ------------------------------
@@ -123,7 +115,7 @@ GCOMP_FOPTFLAGS	   =
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
-##################################################################################
+###############################################################################
 
 PARCH		   = solaris
 
@@ -134,68 +126,6 @@ SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
 SL_LIBS_TO_MAKE = libesmf 
-
-
-
-############################################################
-#
-# File base
-#
-
-libc: ${LIBNAME}(${OBJSC})
-libf: ${LIBNAME}(${OBJSF})
-
-#########
-
-.F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -free ${ESMC_INCLUDE} $<
-
-.F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} -free ${ESMC_INCLUDE} $<
-
-.f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -fixed ${ESMC_INCLUDE} $<
-
-.f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -fixed ${ESMC_INCLUDE} $<
-
-.c.o:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.C.o:
-	echo big .C to .o rule, remove mpi_include when CFLAGS starts working
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -free ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} -free ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -fixed ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} -fixed ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.C.a:
-	echo big .C to .a rule, remove mpi_include when CFLAGS starts working
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
 
 
 #############

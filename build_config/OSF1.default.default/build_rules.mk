@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.6 2004/03/04 22:34:15 nscollins Exp $
+#  $Id: build_rules.mk,v 1.7 2004/03/16 18:00:54 nscollins Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -22,12 +22,6 @@ endif
 
 ############################################################
 #
-#  File base.site
-#
-
-#
-#  This file contains site-specific information.  The definitions below
-#  should be changed to match the locations of libraries at your site.
 #  The following naming convention is used:
 #     XXX_LIB - location of library XXX
 #     XXX_INCLUDE - directory for include files needed for library XXX
@@ -35,11 +29,6 @@ endif
 # Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
 # for information on retrieving them.
 #
-# Important: If you use the IBM version of lapack you must include 
-#  -lessl at the end of the line defining the BLAS libraries.
-#
-#  If you list -lessl or -lesslp2 below you must have -DESMC_HAVE_ESSL listed in the 
-# PCONF line at the bottom of this file.
 #
 BLAS_LIB         = 
 LAPACK_LIB       = -L/usr/lib -lcxml
@@ -66,12 +55,6 @@ THREAD_LIB        = -lpthread -lrt
 
 ############################################################
 #
-# File base_variables
-#
-
-#
-#     See the file build/base_variables.defs for a complete explanation of all these fields
-#
 AR			= ar
 AR_FLAGS		= cr
 AR_EXTRACT              = -x 
@@ -80,7 +63,8 @@ OMAKE			= ${MAKE}
 RANLIB			= ranlib
 SHELL			= /bin/sh
 SED			= /bin/sed
-# ######################### Fortran compiler options ######################
+#
+# Fortran compiler options 
 #
 AR32_64			= ${AR}
 BIG_ENDIAN		= -convert big_endian
@@ -99,7 +83,8 @@ F_FREECPP               = -free -cpp
 F_FIXCPP                = -cpp -extend_source
 F_FREENOCPP             = -free
 F_FIXNOCPP              = -extend_source
-# ######################### C and Fortran compiler ########################
+#
+# C and Fortran compiler 
 #
 C_CC			= cc
 C_FC			= f90
@@ -117,7 +102,8 @@ G_FOPTFLAGS		= -g -assume gfullpath
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS		= -O3 -w -pthread
 O_FOPTFLAGS		= -O3 -w
-# ########################## C++ compiler ##################################
+#
+# C++ compiler 
 #
 CXX_CC		   = cxx -x cxx
 CXX_FC		   = f90
@@ -143,7 +129,7 @@ GCOMP_FOPTFLAGS		= -g  -qfullpath
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
 OCOMP_FOPTFLAGS		= -O3
-################################################################################
+###############################################################################
 
 PARCH			= alpha
 
@@ -155,60 +141,7 @@ SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
 SL_LIBS_TO_MAKE = libesmf 
 
-############################################################
-#
-#  File base
-#
 
-#########
-
-.F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -free -cpp ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -free  ${FFLAGS} ${ESMC_INCLUDE} $<
-
-.f90.o:
-	${FC} -c ${FOPTFLAGS} -extend_source -cpp ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.f.o:
-	${FC} -c ${FOPTFLAGS} -extend_source ${FFLAGS} ${ESMC_INCLUDE} $<
-
-.c.o:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.C.o:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -free -cpp ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -free ${FFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f90.a:
-	${FC} -c ${FOPTFLAGS} -extend_source -cpp ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.a:
-	${FC} -c ${FOPTFLAGS} -extend_source ${FFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.C.a:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
 #
 # set shared dependent on build_shared to build .so lib
 #

@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.3 2004/03/04 22:34:15 nscollins Exp $
+#  $Id: build_rules.mk,v 1.4 2004/03/16 18:00:53 nscollins Exp $
 #
 #  Linus.absoft.default.mk
 #
@@ -27,17 +27,6 @@ endif
 
 ############################################################
 #
-#  File base.site
-#
-#
-
-#  This file contains site-specific information.  The definitions below
-#  should be changed to match the locations of libraries at your site.
-#  The following naming convention is used:
-#     XXX_LIB - location of library XXX
-#     XXX_INCLUDE - directory for include files needed for library XXX
-#
-
 # Location of MPI (Message Passing Interface) software
 
 # comment in one or the other, depending on whether you have
@@ -75,13 +64,7 @@ THREAD_LIB      =
 
 ############################################################
 #
-#  File base_variables
-#
-#
 
-#
-#     See the file build/base_variables.defs for a complete explanation of all these fields
-#
 AR		   = ar
 AR_FLAGS	   = cr
 RM		   = rm -f
@@ -90,7 +73,8 @@ RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /usr/bin/sed
 SH_LD		   = cc
-# ######################### C and Fortran compiler ########################
+#
+# C and Fortran compiler 
 #
 ifneq ($(ESMF_COMM),mpich)
 C_CC                = cc
@@ -114,7 +98,7 @@ C_FLINKER	   = ${C_FC}
 C_CCV		   = ${C_CC} --version
 C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-#C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
+#Use /usr/lib/libf2c.a if that's what your f77 uses.
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g 
@@ -164,76 +148,11 @@ SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
 SL_LIBS_TO_MAKE = libesmf 
 
-############################################################
-#
-#  File base
-#
-#
-
-libc: ${LIBNAME}(${OBJSC})
-libf: ${LIBNAME}(${OBJSF})
-
-
 
 #############
 #
 # Set shared dependent on build_shared to build .so lib.
 #
 shared: 
-
-
-
-#########
-
-.F90.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F.o:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
-
-.f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
-
-.c.o:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.C.o:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-
-.F90.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FREECPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.a:
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FIXCPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.C.a:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-#############
-
 
 

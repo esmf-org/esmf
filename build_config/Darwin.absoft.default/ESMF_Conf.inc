@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.2 2004/02/11 22:01:46 eschwab Exp $
+$Id: ESMF_Conf.inc,v 1.3 2004/03/16 18:00:52 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,3 +16,4 @@ to crash when trying to "Get" a time or timeinterval or their properties.
 #endif
 
 #define ESMF_NO_INITIALIZERS 1
+
