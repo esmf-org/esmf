@@ -1,76 +1,76 @@
-% $Id: Grid_options.tex,v 1.7 2004/05/24 22:57:50 jwolfe Exp $
+% $Id: Grid_options.tex,v 1.8 2004/06/01 20:36:45 jwolfe Exp $
 
-\subsubsection{ESMF\_GridStructure}
+% \subsubsection{ESMF\_GridStructure}
+% 
+% {\sf DESCRIPTION:\\}
+% General Grid structures supported by ESMF.
+% 
+% Valid values are:
+% \begin{description}
+%    \item [ESMF\_GRID\_STRUCTURE\_LOGRECT]
+%          Logically rectangular grid.  This infers a single block grid.
+% 
+%    \item [ESMF\_GRID\_STRUCTURE\_LOGRECTBLK]
+%          Logically rectangular blocked grid.
+%    \item [ESMF\_GRID\_STRUCTURE\_UNSTRUCT]
+%          Unstructured grid.
+%    \item [ESMF\_GRID\_STRUCTURE\_USER]
+%          User-defined grid.
+% 
+%    \item [ESMF\_GRID\_STRUCTURE\_UNKNOWN]
+%          Unknown or undefined grid.
+% \end{description}
 
-{\sf DESCRIPTION:\\}
-General Grid structures supported by ESMF.
 
-Valid values are:
-\begin{description}
-   \item [ESMF\_GRID\_STRUCTURE\_LOGRECT]
-         Logically rectangular grid.  This infers a single block grid.
+% \subsubsection{ESMF\_GridType}
+% 
+% {\sf DESCRIPTION:\\}
+% Grid types supported by ESMF.  In general, we expect each GridType to have
+% its own explicit Create function.
+% 
+% Valid values are:
+% \begin{description}
+%    \item [ESMF\_GRID\_TYPE\_LATLON]
+%          Latitude/longitude grid
+% 
+%    \item [ESMF\_GRID\_TYPE\_LATLON\_UNI]
+%          Uniform latitude/longitude grid
+% 
+%    \item [ESMF\_GRID\_TYPE\_LATLON\_GAUSS]
+%          Latitude/Longitude grid with gaussian-spaced latitudes
+%    \item [ESMF\_GRID\_TYPE\_LATLON\_MERC]
+%          Latitude/Longitude grid with Mercator-spaced latitudes
+%    \item [ESMF\_GRID\_TYPE\_REDUCED]
+%          Latitude/Longitude grid where the number of longitudinal points is a
+%          function of the latitude
+%    \item [ESMF\_GRID\_TYPE\_DIPOLE]
+%          Displaced-pole dipole grid
+%    \item [ESMF\_GRID\_TYPE\_TRIPOLE]
+%          Tripolar grids
+%    \item [ESMF\_GRID\_TYPE\_XY]
+%          XY cartesian grid with variable or unequal spacing
+% 
+%    \item [ESMF\_GRID\_TYPE\_XY\_UNI]
+%          XY cartesian grid with equal spacing
+% 
+%    \item [ESMF\_GRID\_TYPE\_DATASTREAM]
+%          Data stream - set of locations
+%    \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
+%          Mixed Fourier Space/Physcal Space grid
+%    \item [ESMF\_GRID\_TYPE\_SPHER\_SPECT]
+%          Spectral space for spherical harmonics
+%    \item [ESMF\_GRID\_TYPE\_CART\_SPECT]
+%          Spectral space for cartesian coordinates
+%    \item [ESMF\_GRID\_TYPE\_GEODESIC]
+%          Spherical geodesic grid
+%    \item [ESMF\_GRID\_TYPE\_CUBEDSPHERE]
+%          Cubed sphere grid
+%    \item [ESMF\_GRID\_TYPE\_EXCHANGE]
+%          Intersection of two grids, which is itself a grid
+%    \item [ESMF\_GRID\_TYPE\_UNKNOWN]
+%          Unknown or undefined grid.
 
-%  \item [ESMF\_GRID\_STRUCTURE\_LOGRECTBLK]
-%        Logically rectangular blocked grid.
-%  \item [ESMF\_GRID\_STRUCTURE\_UNSTRUCT]
-%        Unstructured grid.
-   \item [ESMF\_GRID\_STRUCTURE\_USER]
-         User-defined grid.
-
-   \item [ESMF\_GRID\_STRUCTURE\_UNKNOWN]
-         Unknown or undefined grid.
-\end{description}
-
-
-\subsubsection{ESMF\_GridType}
-
-{\sf DESCRIPTION:\\}
-Grid types supported by ESMF.  In general, we expect each GridType to have
-its own explicit Create function.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_GRID\_TYPE\_LATLON]
-         Latitude/longitude grid
-
-   \item [ESMF\_GRID\_TYPE\_LATLON\_UNI]
-         Uniform latitude/longitude grid
-
-%  \item [ESMF\_GRID\_TYPE\_LATLON\_GAUSS]
-%        Latitude/Longitude grid with gaussian-spaced latitudes
-%  \item [ESMF\_GRID\_TYPE\_LATLON\_MERC]
-%        Latitude/Longitude grid with Mercator-spaced latitudes
-%  \item [ESMF\_GRID\_TYPE\_REDUCED]
-%        Latitude/Longitude grid where the number of longitudinal points is a
-%        function of the latitude
-%  \item [ESMF\_GRID\_TYPE\_DIPOLE]
-%        Displaced-pole dipole grid
-%  \item [ESMF\_GRID\_TYPE\_TRIPOLE]
-%        Tripolar grids
-   \item [ESMF\_GRID\_TYPE\_XY]
-         XY cartesian grid with variable or unequal spacing
-
-   \item [ESMF\_GRID\_TYPE\_XY\_UNI]
-         XY cartesian grid with equal spacing
-
-%  \item [ESMF\_GRID\_TYPE\_DATASTREAM]
-%        Data stream - set of locations
-%  \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
-%        Mixed Fourier Space/Physcal Space grid
-%  \item [ESMF\_GRID\_TYPE\_SPHER\_SPECT]
-%        Spectral space for spherical harmonics
-%  \item [ESMF\_GRID\_TYPE\_CART\_SPECT]
-%        Spectral space for cartesian coordinates
-%  \item [ESMF\_GRID\_TYPE\_GEODESIC]
-%        Spherical geodesic grid
-%  \item [ESMF\_GRID\_TYPE\_CUBEDSPHERE]
-%        Cubed sphere grid
-%  \item [ESMF\_GRID\_TYPE\_EXCHANGE]
-%        Intersection of two grids, which is itself a grid
-   \item [ESMF\_GRID\_TYPE\_UNKNOWN]
-         Unknown or undefined grid.
-
-\end{description}
+% \end{description}
 
 \subsubsection{ESMF\_GridHorzStagger}
 
@@ -256,13 +256,14 @@ Valid values are:
          For a 2D grid, this defaults to IJ mapping.
 
    \item [ESMF\_COORD\_ORDER\_XZY]
-         The coordinates are ordered XZY.  For a 2D grid, this defaults to IJ mapping to XY.
+         The coordinates are ordered XZY.  For a 2D grid, this defaults to IJ 
+         mapping to XY.
 
    \item [ESMF\_COORD\_ORDER\_YXZ]
          IJK maps to YXZ.  For a 2D grid, this defaults to IJ mapping to YX.
 
    \item [ESMF\_COORD\_ORDER\_YZX]
-         IJK maps to YZX.  For a 2D grid, this defaults to
+         IJK maps to YZX.  For a 2D grid, this defaults to ??
 
    \item [ESMF\_COORD\_ORDER\_ZXY]
          IJK maps to ZXY.
@@ -339,23 +340,26 @@ Valid values are:
          Unknown or undefined coordinate system.
 \end{description}
 
-\subsubsection{ESMF\_GridMaskType}
 
-{\sf DESCRIPTION:\\}
-Supported types of grid masks.
+% \subsubsection{ESMF\_GridMaskType}
+% 
+% {\sf DESCRIPTION:\\}
+% Supported types of grid masks.
+% 
+% Valid values are:
+% \begin{description}
+%    \item [ESMF\_GRID\_MASKTYPE\_LOGICAL]
+%          Logical mask.
+%    \item [ESMF\_GRID\_MASKTYPE\_MULT]
+%          Multiplicative mask.
+%    \item [ESMF\_GRID\_MASKTYPE\_REGION\_ID]
+%          Integer assigning unique ID to each point.
+%    \item [ESMF\_GRID\_MASKTYPE\_UNKNOWN]
+%          Unknown or undefined mask type.
+% \end{description}
 
-Valid values are:
-\begin{description}
-   \item [ESMF\_GRID\_MASKTYPE\_LOGICAL]
-         Logical mask.
-   \item [ESMF\_GRID\_MASKTYPE\_MULT]
-         Multiplicative mask.
-   \item [ESMF\_GRID\_MASKTYPE\_REGION\_ID]
-         Integer assigning unique ID to each point.
-   \item [ESMF\_GRID\_MASKTYPE\_UNKNOWN]
-         Unknown or undefined mask type.
-\end{description}
 
+\subsubsection{ESMF\_RegionType}
 
 {\sf DESCRIPTION:\\}
 Supported types of grid regions.
