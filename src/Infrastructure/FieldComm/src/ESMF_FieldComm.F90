@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.8 2004/03/04 23:49:43 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.9 2004/03/05 16:35:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.8 2004/03/04 23:49:43 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.9 2004/03/05 16:35:38 svasquez Exp $'
 
 !==============================================================================
 !
@@ -479,11 +479,11 @@
 !           {\tt ESMF\_RouteHandle} containing index to precomputed 
 !           information for the Halo operation on this {\tt ESMF\_Field}.
 !           This handle must be supplied at run time to execute the Halo.
-!     \item [{halodirection]}]
+!     \item [{[halodirection]}]
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
 !           along all boundaries.
-!     \item [{blocking]}]
+!     \item [{[blocking]}]
 !           Specify that the communications will be blocking, nonblocking,
 !           or that the option will be specified at run time.  If not 
 !           specified, the default is blocking.
