@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.5 2003/11/11 19:01:47 nscollins Exp $
+#  $Id: build_rules.mk,v 1.6 2003/11/11 20:17:37 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -141,6 +141,9 @@ O_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIVE)
 # ########################## C++ compiler ##################################
 #
+###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003  
+###   (NOT true anymore - see below)
+###
 ###  on one of our rs6000s the mpCC_r system cover script will not find 
 ###  the actual xlC_r compiler without adding the dir /usr/vacpp/bin to 
 ###  your search path.  on the other rs6000 it works as expected
@@ -151,7 +154,6 @@ FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS} $(FCPP_EXHAUSTIV
 ###  so i am choosing to go back to calling mpCC_r and putting up with
 ###  the user support problems i know this is going to cause.   nsc 4/2/2003
 ###
-###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003
 CXX_CC			= mpCC_r 
 CXX_FC			= mpxlf90_r
 CXX_CLINKER_SLFLAG	= -L
