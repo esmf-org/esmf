@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.29 2003/04/04 16:03:50 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.30 2003/04/08 22:47:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
       integer, parameter :: ESMF_MAXSTR = 128
       integer, parameter :: ESMF_MAXDIM = 7, &
-                            ESMF_MAXDECOMPDIM=2, &
+                            ESMF_MAXDECOMPDIM=3, &
                             ESMF_MAXGRIDDIM=2
      
       integer, parameter :: ESMF_MAJOR_VERSION = 0
@@ -171,10 +171,11 @@
           integer*8 :: base_ptr
       end type
 
+      integer :: global_count = 0
+
       type ESMF_Base
       sequence
       private
-         integer :: inst_count
          integer :: ID
          integer :: ref_count
          type (ESMF_Status) :: base_status
@@ -218,12 +219,8 @@
 !     routines need to be specialized by the higher level objects.
 !
 !   Base class methods
-!      public ESMF_BaseInit
-!      public ESMF_BaseCreate
-!     no need for create, is there?  maybe for attribs if not inline?
-!      public ESMF_BaseDestroy
-!      public ESMF_BaseConstruct 
-!      public ESMF_BaseDestruct
+       public ESMF_BaseInit
+   
 !      public ESMF_BaseGetConfig
 !      public ESMF_BaseSetConfig
 
@@ -275,7 +272,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.29 2003/04/04 16:03:50 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.30 2003/04/08 22:47:28 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -296,8 +293,9 @@ interface operator (.ne.)
  module procedure ESMF_opne
 end interface
 
-      contains
+!------------------------------------------------------------------------------
 
+      contains
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
@@ -368,6 +366,59 @@ function ESMF_opne(op1, op2)
  ESMF_opne = (op1%ptr .ne. op2%ptr)
 end function
 
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+! 
+! Base methods
+!
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_BaseInit - initialize a Base object
+!
+! !INTERFACE:
+      subroutine ESMF_BaseInit(base, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base) :: base                 
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Set initial state on a Base object.
+!
+!     \begin{description}
+!     \item [base]
+!           In the Fortran interface, this must in fact be a {\tt Base}
+!           derived type object.  It is expected that all specialized 
+!           derived types will include a {\tt Base} object as the first
+!           entry.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+
+      logical :: rcpresent                          ! Return code present   
+
+!     !Initialize return code
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      global_count = global_count + 1
+      base%ID = global_count
+      base%ref_count = 1
+      base%base_status = ESMF_STATE_READY
+      base%name = "undefined"
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BaseInit
 
 !------------------------------------------------------------------------------
 !BOP
