@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.20 2004/03/20 03:54:51 cdeluca Exp $
+! $Id: ESMF_GridTypes.F90,v 1.21 2004/03/22 23:51:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -405,20 +405,32 @@
       ESMF_CoordIndex_Local   = ESMF_CoordIndex( 1), &
       ESMF_CoordIndex_Global  = ESMF_CoordIndex( 2)
 
-   integer, dimension(6, 3), parameter, public :: &
-      gridOrder = reshape((/ 1, 2, 3, &
+   integer, dimension(3, 6, 3), parameter, public :: &
+      gridOrder = reshape((/ 1, 1, 1, &
+                             1, 1, 1, &
+                             1, 1, 1, &
+                             1, 1, 1, &
+                             1, 1, 1, &
+                             1, 1, 1, &
+                             1, 2, 1, &
+                             1, 2, 1, &
+                             2, 1, 1, &
+                             2, 1, 1, &
+                             1, 2, 1, &
+                             2, 1, 1, &
+                             1, 2, 3, &
                              1, 3, 2, &
                              2, 1, 3, &
                              2, 3, 1, &
                              3, 1, 2, &
-                             3, 2, 1  /), (/ 6, 3 /))
+                             3, 2, 1  /), (/ 3, 6, 3 /))
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.20 2004/03/20 03:54:51 cdeluca Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.21 2004/03/22 23:51:55 jwolfe Exp $'
 
 !==============================================================================
 !
