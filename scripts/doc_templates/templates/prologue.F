@@ -1,3 +1,4 @@
+! $Id: prologue.F,v 1.2 2002/07/25 17:20:13 eschwab Exp $
 !
 ! ProTeX sample FORTRAN source: Style 1
 !
@@ -16,7 +17,7 @@
 !-------------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE:  
+! !ROUTINE:  
 ! 
 ! !INTERFACE:
 !
