@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.14 2003/07/25 19:58:26 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.15 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,113 +32,87 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       // keep this for shallow classes, get rid of create/destroy above
+       void FTN(c_esmc_clocksetup)(ESMC_Clock *ptr,
+                                   ESMC_TimeInterval *timeStep,
+                                   ESMC_Time *startTime,
+                                   ESMC_Time *stopTime,
+                                   ESMC_Time *refTime,
+                                   int *status) {
+          int rc = (ptr)->ESMC_ClockSetup(timeStep, startTime, stopTime,
+                                          refTime);
+          if (status != ESMC_NULL_POINTER) *status = rc;
+       }
+
        void FTN(c_esmc_clockset)(ESMC_Clock *ptr,
                                  ESMC_TimeInterval *timeStep,
                                  ESMC_Time *startTime,
                                  ESMC_Time *stopTime,
                                  ESMC_Time *refTime,
+                                 ESMC_Time *currTime,
+                                 ESMF_IKIND_I8 *advanceCount,
                                  int *status) {
-           *status = (ptr)->ESMC_ClockSet(timeStep, startTime, stopTime,
-                                          refTime);
+          int rc = (ptr)->ESMC_ClockSet(timeStep, startTime, stopTime,
+                                        refTime, currTime, advanceCount);
+          if (status != ESMC_NULL_POINTER) *status = rc;
+       }
+
+       void FTN(c_esmc_clockget)(ESMC_Clock *ptr,
+                                 ESMC_TimeInterval *timeStep,
+                                 ESMC_Time *startTime,
+                                 ESMC_Time *stopTime,
+                                 ESMC_Time *refTime,
+                                 ESMC_Time *currTime,
+                                 ESMC_Time *prevTime,
+                                 ESMC_Time *currSimTime,
+                                 ESMC_Time *prevSimTime,
+                                 ESMF_IKIND_I8 *advanceCount,
+                                 int *numAlarms,
+                                 int *status) {
+          int rc = (ptr)->ESMC_ClockGet(timeStep, startTime, stopTime,
+                                        refTime, currTime, prevTime,
+                                        currSimTime, prevSimTime,
+                                        advanceCount, numAlarms);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_clockaddalarm)(ESMC_Clock *ptr,
                                       ESMC_Alarm *alarm,
                                       int *status) {
-           *status = (ptr)->ESMC_ClockAddAlarm(alarm);
+          int rc = (ptr)->ESMC_ClockAddAlarm(alarm);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_clockgetalarmlist)(ESMC_Clock *ptr,
-                                          ESMC_Alarm **alarmList,
-                                          int *numAlarms, int *status) {
-           *status = (ptr)->ESMC_ClockGetAlarmList(alarmList, numAlarms);
+       void FTN(c_esmc_clockgetalarm)(ESMC_Clock *ptr,
+                                      int *i,
+                                      ESMC_Alarm **alarm,
+                                      int *status) {
+          int rc = (ptr)->ESMC_ClockGetAlarm(*i, alarm);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_clockgetnumalarms)(ESMC_Clock *ptr,
-                                          int *numAlarms, int *status) {
-           *status = (ptr)->ESMC_ClockGetNumAlarms(numAlarms);
-       }
-
-       void FTN(c_esmc_clocksynctorealtime)(ESMC_Clock *ptr, int *status) {
-           *status = (ptr)->ESMC_ClockSyncToRealTime();
+       void FTN(c_esmc_clockgetringingalarm)(ESMC_Clock *ptr,
+                                             int *i,
+                                             ESMC_Alarm **alarm,
+                                             int *status) {
+          int rc = (ptr)->ESMC_ClockGetRingingAlarm(*i, alarm);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_clockadvance)(ESMC_Clock *ptr,
-                                     ESMC_Alarm *ringingList,
+                                     ESMC_TimeInterval *timeStep,
                                      int *numRingingAlarms, int *status) {
-           *status = (ptr)->ESMC_ClockAdvance(ringingList, numRingingAlarms);
+          int rc = (ptr)->ESMC_ClockAdvance(timeStep, numRingingAlarms);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_clockisstoptime)(ESMC_Clock *ptr, 
                                       int *esmf_clockIsStopTime, int *status) {
-           *esmf_clockIsStopTime = (int) (ptr)->ESMC_ClockIsStopTime(status);
+          *esmf_clockIsStopTime = (int) (ptr)->ESMC_ClockIsStopTime(status);
        }
 
-       void FTN(c_esmc_clockgetadvancecount)(ESMC_Clock *ptr, 
-                                             ESMF_IKIND_I8 *advanceCount,
-                                             int *status) {
-           *status = (ptr)->ESMC_ClockGetAdvanceCount(advanceCount);
-       }
-
-       void FTN(c_esmc_clockgettimestep)(ESMC_Clock *ptr, 
-                                         ESMC_TimeInterval *timeStep,
-                                         int *status) {
-           *status = (ptr)->ESMC_ClockGetTimeStep(timeStep);
-       }
-
-       void FTN(c_esmc_clocksettimestep)(ESMC_Clock *ptr, 
-                                         ESMC_TimeInterval *timeStep,
-                                         int *status) {
-           *status = (ptr)->ESMC_ClockSetTimeStep(timeStep);
-       }
-
-       void FTN(c_esmc_clockgetcurrtime)(ESMC_Clock *ptr, 
-                                         ESMC_Time *currTime,
-                                         int *status) {
-           *status = (ptr)->ESMC_ClockGetCurrTime(currTime);
-       }
-
-       void FTN(c_esmc_clocksetcurrtime)(ESMC_Clock *ptr, 
-                                         ESMC_Time *currTime,
-                                         int *status) {
-           *status = (ptr)->ESMC_ClockSetCurrTime(currTime);
-       }
-
-       void FTN(c_esmc_clockgetstarttime)(ESMC_Clock *ptr, 
-                                          ESMC_Time *startTime,
-                                          int *status) {
-           *status = (ptr)->ESMC_ClockGetStartTime(startTime);
-       }
-
-       void FTN(c_esmc_clockgetstoptime)(ESMC_Clock *ptr, 
-                                         ESMC_Time *stopTime,
-                                         int *status) {
-           *status = (ptr)->ESMC_ClockGetStopTime(stopTime);
-       }
-
-       void FTN(c_esmc_clockgetreftime)(ESMC_Clock *ptr, 
-                                        ESMC_Time *refTime,
-                                        int *status) {
-           *status = (ptr)->ESMC_ClockGetRefTime(refTime);
-       }
-
-       void FTN(c_esmc_clockgetprevtime)(ESMC_Clock *ptr, 
-                                         ESMC_Time *prevTime,
-                                         int *status) {
-           *status = (ptr)->ESMC_ClockGetPrevTime(prevTime);
-       }
-
-       void FTN(c_esmc_clockgetcurrsimtime)(ESMC_Clock *ptr, 
-                                            ESMC_TimeInterval *currSimTime,
-                                            int *status) {
-           *status = (ptr)->ESMC_ClockGetCurrSimTime(currSimTime);
-       }
-
-       void FTN(c_esmc_clockgetprevsimtime)(ESMC_Clock *ptr, 
-                                            ESMC_TimeInterval *prevSimTime,
-                                            int *status) {
-           *status = (ptr)->ESMC_ClockGetPrevSimTime(prevSimTime);
+       void FTN(c_esmc_clocksynctorealtime)(ESMC_Clock *ptr, int *status) {
+          int rc = (ptr)->ESMC_ClockSyncToRealTime();
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_clockreadrestart)(ESMC_Clock *ptr, 
@@ -149,13 +123,15 @@ extern "C" {
                                          ESMC_Time *currTime,
                                          ESMC_Time *prevTime,
                                          ESMF_IKIND_I8 *advanceCount,
+                                         int *numAlarms,
                                          ESMC_Alarm *alarmList[],
-                                         int *numAlarms, int *status) {
-           *status = (ptr)->ESMC_ClockReadRestart(timeStep, startTime,
-                                                  stopTime, refTime,
-                                                  currTime, prevTime,
-                                                  *advanceCount, alarmList,
-                                                  *numAlarms);
+                                         int *status) {
+          int rc = (ptr)->ESMC_ClockReadRestart(timeStep, startTime,
+                                                stopTime, refTime,
+                                                currTime, prevTime,
+                                                *advanceCount, *numAlarms,
+                                                alarmList);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_clockwriterestart)(ESMC_Clock *ptr, 
@@ -166,22 +142,26 @@ extern "C" {
                                           ESMC_Time *currTime,
                                           ESMC_Time *prevTime,
                                           ESMF_IKIND_I8 *advanceCount,
+                                          int *numAlarms,
                                           ESMC_Alarm *alarmList[],
-                                          int *numAlarms, int *status) {
-           *status = (ptr)->ESMC_ClockWriteRestart(timeStep, startTime,
-                                                   stopTime, refTime,
-                                                   currTime, prevTime,
-                                                   advanceCount, alarmList,
-                                                   numAlarms);
+                                          int *status) {
+          int rc = (ptr)->ESMC_ClockWriteRestart(timeStep, startTime,
+                                                 stopTime, refTime,
+                                                 currTime, prevTime,
+                                                 advanceCount, numAlarms, 
+                                                 alarmList);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_clockvalidate)(ESMC_Clock *ptr, const char *opts,
+       void FTN(c_esmc_clockvalidate)(ESMC_Clock *ptr, const char *options,
                                       int *status) {
-           *status = (ptr)->ESMC_ClockValidate(opts);
+          int rc = (ptr)->ESMC_ClockValidate(options);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_clockprint)(ESMC_Clock *ptr, const char *opts,
+       void FTN(c_esmc_clockprint)(ESMC_Clock *ptr, const char *options,
                                    int *status) {
-           *status = (ptr)->ESMC_ClockPrint(opts);
+          int rc = (ptr)->ESMC_ClockPrint(options);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 };

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.17 2003/07/25 19:58:26 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.18 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,132 +33,97 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_timeget)(ESMC_Time *ptr,
-                                int *YR, ESMF_IKIND_I8 *YRl,
-                                int *MM, int *DD,
-                                int *D, ESMF_IKIND_I8 *Dl,
-                                int *H, int *M,
-                                int *S, ESMF_IKIND_I8 *Sl,
-                                int *MS, int *US, int *NS,
-                                double *d_, double *h_, double *m_,
-                                double *s_, double *ms_, double *us_,
-                                double *ns_, int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_TimeGet(YR, YRl, MM, DD, D, Dl, H, M, S, Sl,
-                                         MS, US, NS, d_, h_, m_, s_,
-                                         ms_, us_, ns_, Sn, Sd);
-       }
-
        void FTN(c_esmc_timeset)(ESMC_Time *ptr,
-                                int *YR, ESMF_IKIND_I8 *YRl,
-                                int *MM, int *DD,
-                                int *D, ESMF_IKIND_I8 *Dl,
-                                int *H, int *M,
-                                int *S, ESMF_IKIND_I8 *Sl,
-                                int *MS, int *US, int *NS,
-                                double *d_, double *h_, double *m_,
-                                double *s_, double *ms_, double *us_,
-                                double *ns_, int *Sn, int *Sd,
-                                ESMC_Calendar *cal, int *tz, int *status) {
-           *status = (ptr)->ESMC_TimeSet(YR, YRl, MM, DD, D, Dl, H, M, S, Sl,
-                                         MS, US, NS, d_, h_, m_, s_,
-                                         ms_, us_, ns_, Sn, Sd, cal, tz);
+                                ESMF_IKIND_I4 *yr, ESMF_IKIND_I8 *yr_i8,
+                                int *mm, int *dd,
+                                ESMF_IKIND_I4 *d,  ESMF_IKIND_I8 *d_i8,
+                                ESMF_IKIND_I4 *h,  ESMF_IKIND_I4 *m,
+                                ESMF_IKIND_I4 *s,  ESMF_IKIND_I8 *s_i8,
+                                ESMF_IKIND_I4 *ms, ESMF_IKIND_I4 *us,
+                                ESMF_IKIND_I4 *ns,
+                                ESMF_IKIND_R8 *d_r8,  ESMF_IKIND_R8 *h_r8,
+                                ESMF_IKIND_R8 *m_r8,  ESMF_IKIND_R8 *s_r8,
+                                ESMF_IKIND_R8 *ms_r8, ESMF_IKIND_R8 *us_r8,
+                                ESMF_IKIND_R8 *ns_r8,
+                                ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                                ESMC_Calendar *calendar, int *timeZone,
+                                int *status) {
+          int rc = (ptr)->ESMC_TimeSet(yr, yr_i8, mm, dd, d, d_i8, h, m,
+                                         s, s_i8, ms, us, ns, d_r8, h_r8, m_r8,
+                                         s_r8, ms_r8, us_r8, ns_r8,
+                                         sN, sD, calendar, timeZone);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timegetcalendarcopy)(ESMC_Time *ptr,
-                                        ESMC_Calendar *calendar, int *status) {
-           *status = (ptr)->ESMC_TimeGetCalendar(calendar);
+       void FTN(c_esmc_timeget)(ESMC_Time *ptr,
+                                ESMF_IKIND_I4 *yr, ESMF_IKIND_I8 *yr_i8,
+                                int *mm, int *dd,
+                                ESMF_IKIND_I4 *d,  ESMF_IKIND_I8 *d_i8,
+                                ESMF_IKIND_I4 *h,  ESMF_IKIND_I4 *m,
+                                ESMF_IKIND_I4 *s,  ESMF_IKIND_I8 *s_i8,
+                                ESMF_IKIND_I4 *ms, ESMF_IKIND_I4 *us,
+                                ESMF_IKIND_I4 *ns,
+                                ESMF_IKIND_R8 *d_r8,  ESMF_IKIND_R8 *h_r8,
+                                ESMF_IKIND_R8 *m_r8,  ESMF_IKIND_R8 *s_r8,
+                                ESMF_IKIND_R8 *ms_r8, ESMF_IKIND_R8 *us_r8,
+                                ESMF_IKIND_R8 *ns_r8,
+                                ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                                ESMC_Calendar *calendar, int *timeZone,
+                                char *timeString, int *dayOfWeek,
+                                int *dayOfMonth, ESMC_Time *midMonth,
+                                ESMF_IKIND_I4 *dayOfYear,
+                                ESMF_IKIND_R8 *dayOfYear_r8,
+                                ESMC_TimeInterval *dayOfYear_intvl,
+                                int *status) {
+          int rc = (ptr)->ESMC_TimeGet(yr, yr_i8, mm, dd, d, d_i8, h, m,
+                                         s, s_i8, ms, us, ns, d_r8, h_r8, m_r8,
+                                         s_r8, ms_r8, us_r8, ns_r8,
+                                         sN, sD, calendar, timeZone,
+                                         timeString, dayOfWeek, dayOfMonth,
+                                         midMonth, dayOfYear, dayOfYear_r8,
+                                         dayOfYear_intvl);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timegetcalendarptr)(ESMC_Time *ptr,
-                                        ESMC_Calendar **calendar, int *status) {
-           *status = (ptr)->ESMC_TimeGetCalendar(calendar);
+       void FTN(c_esmc_timeissamecalendar)(ESMC_Time *ptr, ESMC_Time *time,
+                                           int *esmf_timeIsSameCalendar,
+                                           int *status) {
+           *esmf_timeIsSameCalendar =
+                                   (ptr)->ESMC_TimeIsSameCalendar(time, status);
        }
 
-       void FTN(c_esmc_timesetcalendarptr)(ESMC_Time *ptr,
-                                        ESMC_Calendar *calendar, int *status) {
-           *status = (ptr)->ESMC_TimeSetCalendar(calendar);
+       void FTN(c_esmc_timesynctorealtime)(ESMC_Time *ptr,
+                                           int *status) {                 
+          int rc = (ptr)->ESMC_TimeSyncToRealTime();      
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timesetcalendarptrptr)(ESMC_Time *ptr,
-                                        ESMC_Calendar **calendar, int *status) {
-           *status = (ptr)->ESMC_TimeSetCalendar(*calendar);
+       void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, ESMF_IKIND_I8 *s,
+                                        ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                                        ESMC_Calendar *calendar, int *timeZone,
+                                        int *status) {
+          int rc = (ptr)->ESMC_TimeReadRestart(*s, *sN, *sD, calendar,
+                                               *timeZone);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timeissamecal)(ESMC_Time *ptr, ESMC_Time *time,
-                                      int *esmf_timeIsSameCal, int *status) {
-           *esmf_timeIsSameCal = (ptr)->ESMC_TimeIsSameCal(time, status);
+       void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, ESMF_IKIND_I8 *s,
+                                         ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                                         ESMC_Calendar *calendar, int *timeZone,
+                                         int *status) {
+          int rc = (ptr)->ESMC_TimeWriteRestart(s, sN, sD, calendar, timeZone);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timegettimezone)(ESMC_Time *ptr,
-                                        int *timezone, int *status) {  
-           *status = (ptr)->ESMC_TimeGetTimeZone(timezone);
-       }
-
-       void FTN(c_esmc_timesettimezone)(ESMC_Time *ptr,
-                                        int *timezone, int *status) {  
-           *status = (ptr)->ESMC_TimeSetTimeZone(*timezone);
-       }
-
-       void FTN(c_esmc_timegetstring)(ESMC_Time *ptr,
-                                      char *timestring, int *status) { 
-           *status = (ptr)->ESMC_TimeGetString(timestring);
-       }
-
-       void FTN(c_esmc_timegetdayofyeardouble)(ESMC_Time *ptr,
-                                               double *dayofyear, int *status) {
-           *status = (ptr)->ESMC_TimeGetDayOfYear(dayofyear);
-       }
-
-       void FTN(c_esmc_timegetdayofyearinteger)(ESMC_Time *ptr,
-                                                int *dayofyear, int *status) {
-           *status = (ptr)->ESMC_TimeGetDayOfYear(dayofyear);
-       }
-
-       void FTN(c_esmc_timegetdayofyeartimeint)(ESMC_Time *ptr,
-                                                ESMC_TimeInterval *dayofyear,
-                                                int *status) {
-           *status = (ptr)->ESMC_TimeGetDayOfYear(dayofyear);
-       }
-
-       void FTN(c_esmc_timegetdayofweek)(ESMC_Time *ptr,
-                                         int *dayofweek, int *status) {   
-           *status = (ptr)->ESMC_TimeGetDayOfWeek(dayofweek);
-       }
-
-       void FTN(c_esmc_timegetdayofmonth)(ESMC_Time *ptr,
-                                          int *dayofmonth, int *status) {
-           *status = (ptr)->ESMC_TimeGetDayOfMonth(dayofmonth);
-       }
-
-       void FTN(c_esmc_timegetmidmonth)(ESMC_Time *ptr,
-                                        ESMC_Time *midmonth, int *status) {  
-           *status = (ptr)->ESMC_TimeGetMidMonth(midmonth);
-       }
-
-       void FTN(c_esmc_timegetrealtime)(ESMC_Time *ptr,
-                                        int *status) {                 
-           *status = (ptr)->ESMC_TimeGetRealTime();      
-       }
-
-       void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, ESMF_IKIND_I8 *S,
-                                        int *Sn, int *Sd, ESMC_Calendar *cal,
-                                        int *timeZone, int *status) {
-           *status = (ptr)->ESMC_TimeReadRestart(*S, *Sn, *Sd, cal, *timeZone);
-       }
-
-       void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, ESMF_IKIND_I8 *S,
-                                         int *Sn, int *Sd, ESMC_Calendar *cal,
-                                         int *timeZone, int *status) {
-           *status = (ptr)->ESMC_TimeWriteRestart(S, Sn, Sd, cal, timeZone);
-       }
-
-       void FTN(c_esmc_timevalidate)(ESMC_Time *ptr, const char *opts,
+       void FTN(c_esmc_timevalidate)(ESMC_Time *ptr, const char *options,
                                      int *status) {
-           *status = (ptr)->ESMC_TimeValidate(opts);
+          int rc = (ptr)->ESMC_TimeValidate(options);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timeprint)(ESMC_Time *ptr, const char *opts,
+       void FTN(c_esmc_timeprint)(ESMC_Time *ptr, const char *options,
                                   int *status) {
-           *status = (ptr)->ESMC_TimePrint(opts);
+          int rc = (ptr)->ESMC_TimePrint(options);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 };

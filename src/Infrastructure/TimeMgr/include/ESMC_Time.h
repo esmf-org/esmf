@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.24 2003/07/25 19:58:26 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.25 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,8 +75,8 @@
                                           // TODO: (& ESMC_Base class when
                                           // fully aligned with F90 equiv)
   private:   // corresponds to F90 module 'type ESMF_Time' members 
-    class ESMC_Calendar *Calendar;    // associated calendar
-    int Timezone;                     // Offset from GMT
+    class ESMC_Calendar *calendar;    // associated calendar
+    int timeZone;                     // Offset from UTC
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -87,6 +87,40 @@
     // accessor methods
     // all get/set routines perform signed conversions, where applicable
 
+    // Get/Set methods to support the F90 optional arguments interface
+    int ESMC_TimeSet(ESMF_IKIND_I4 *yr=0, ESMF_IKIND_I8 *yr_i8=0,
+                     int *mm=0, int *dd=0,
+                     ESMF_IKIND_I4 *d=0,  ESMF_IKIND_I8 *d_i8=0,
+                     ESMF_IKIND_I4 *h=0,  ESMF_IKIND_I4 *m=0,
+                     ESMF_IKIND_I4 *s=0,  ESMF_IKIND_I8 *s_i8=0,
+                     ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
+                     ESMF_IKIND_I4 *ns=0,
+                     ESMF_IKIND_R8 *d_r8=0,  ESMF_IKIND_R8 *h_r8=0,
+                     ESMF_IKIND_R8 *m_r8=0,  ESMF_IKIND_R8 *s_r8=0,
+                     ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
+                     ESMF_IKIND_R8 *ns_r8=0,
+                     ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0,
+                     ESMC_Calendar *calendar=0, int *timeZone=0);
+
+    int ESMC_TimeGet(ESMF_IKIND_I4 *yr=0, ESMF_IKIND_I8 *yr_i8=0,
+                     int *mm=0, int *dd=0,
+                     ESMF_IKIND_I4 *d=0,  ESMF_IKIND_I8 *d_i8=0,
+                     ESMF_IKIND_I4 *h=0,  ESMF_IKIND_I4 *m=0,
+                     ESMF_IKIND_I4 *s=0,  ESMF_IKIND_I8 *s_i8=0,
+                     ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
+                     ESMF_IKIND_I4 *ns=0,
+                     ESMF_IKIND_R8 *d_r8=0,  ESMF_IKIND_R8 *h_r8=0,
+                     ESMF_IKIND_R8 *m_r8=0,  ESMF_IKIND_R8 *s_r8=0,
+                     ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
+                     ESMF_IKIND_R8 *ns_r8=0,
+                     ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0,
+                     ESMC_Calendar *calendar=0, int *timeZone=0,
+                     char *timeString=0, int *dayOfWeek=0,
+                     int *dayOfMonth=0, ESMC_Time *midMonth=0,
+                     ESMF_IKIND_I4 *dayOfYear=0,
+                     ESMF_IKIND_R8 *dayOfYear_r8=0,
+                     ESMC_TimeInterval *dayOfYear_intvl=0) const;
+
     // native C++ interface -- via variable argument lists
     //   corresponds to F90 named-optional-arguments interface
 
@@ -94,53 +128,15 @@
     int ESMC_TimeGet(const char *timeList, ...) const;
     // e.g. ESMC_TimeGet("YR:MM:DD", (int *)YR,(int *)MM, (int *)DD);
 
-    int ESMC_TimeSet(ESMC_Calendar *cal, int tz, const char *timeList, ...);
+    int ESMC_TimeSet(ESMC_Calendar *calendar, int timeZone,
+                     const char *timeList, ...);
     int ESMC_TimeSet(const char *timeList, ...);
     // e.g. ESMC_TimeSet("s" , (double) s);
 
-    // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeGet(int *YR=0, ESMF_IKIND_I8 *YRl=0,
-                     int *MM=0, int *DD=0,
-                     int *D=0, ESMF_IKIND_I8 *Dl=0,
-                     int *H=0, int *M=0, 
-                     int *S=0, ESMF_IKIND_I8 *Sl=0,
-                     int *MS=0, int *US=0, int *NS=0,
-                     double *d_=0, double *h_=0, double *m_=0, double *s_=0,
-                     double *ms_=0, double *us_=0, double *ns_=0,
-                     int *Sn=0, int *Sd=0) const;
+    bool ESMC_TimeIsSameCalendar(ESMC_Time *time, int *rc) const;
 
-    int ESMC_TimeSet(int *YR=0, ESMF_IKIND_I8 *YRl=0,
-                     int *MM=0, int *DD=0,
-                     int *D=0, ESMF_IKIND_I8 *Dl=0,
-                     int *H=0, int *M=0,
-                     int *S=0, ESMF_IKIND_I8 *Sl=0,
-                     int *MS=0, int *US=0, int *NS=0,
-                     double *d_=0, double *h_=0, double *m_=0, double *s_=0,
-                     double *ms_=0, double *us_=0, double *ns_=0,
-                     int *Sn=0, int *Sd=0, ESMC_Calendar *cal=0, int *tz=0);
-
-    int ESMC_TimeGetCalendar(ESMC_Calendar **calendar) const;  // pointer
-    int ESMC_TimeGetCalendar(ESMC_Calendar  *calendar) const;  // copy
-    int ESMC_TimeSetCalendar(ESMC_Calendar  *calendar);
-
-    bool ESMC_TimeIsSameCal(ESMC_Time *time, int *rc) const;
-
-    int ESMC_TimeGetTimeZone(int *timezone) const;  // (TMG 2.5.1)
-    int ESMC_TimeSetTimeZone(int  timezone);
-
-    // return in string format (TMG 2.4.7)
-    int ESMC_TimeGetString(char *timeString) const;
-
-    int ESMC_TimeGetDayOfYear(double *dayOfYear) const; // (TMG 2.5.2)
-    int ESMC_TimeGetDayOfYear(int *dayOfYear) const;
-    int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
-
-    int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
-    int ESMC_TimeGetDayOfMonth(int *dayOfMonth) const;  // (TMG 2.5.4)
-    int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
-                                                        // (TMG 2.5.5)
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
-    int ESMC_TimeGetRealTime(void);
+    int ESMC_TimeSyncToRealTime(void);
 
     // copy or assign from ESMC_BaseTime expressions
     // TODO:  should be implicit ?
@@ -149,10 +145,12 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_TimeReadRestart(ESMF_IKIND_I8 S, int Sn, int Sd,
-                             ESMC_Calendar *cal, int timeZone);
-    int ESMC_TimeWriteRestart(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                              ESMC_Calendar *cal, int *timeZone) const;
+    int ESMC_TimeReadRestart(ESMF_IKIND_I8 s,
+                             ESMF_IKIND_I4 sN, ESMF_IKIND_I4 sD,
+                             ESMC_Calendar *calendar, int timeZone);
+    int ESMC_TimeWriteRestart(ESMF_IKIND_I8 *s,
+                              ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                              ESMC_Calendar *calendar, int *timeZone) const;
 
     // internal validation
     int ESMC_TimeValidate(const char *options=0) const;  // (TMG 7.1.1)
@@ -162,8 +160,8 @@
 
     // native C++ constructors/destructors
     ESMC_Time(void);
-    ESMC_Time(ESMF_IKIND_I8 S, int Sn, int Sd, ESMC_Calendar *cal,
-              int timezone=0);
+    ESMC_Time(ESMF_IKIND_I8 s, int sN, int sD, ESMC_Calendar *calendar,
+              int timeZone=0);
     ~ESMC_Time(void);
 
  // < declare the rest of the public interface methods here >
@@ -173,6 +171,18 @@
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
+    // return in string format (TMG 2.4.7)
+    int ESMC_TimeGetString(char *timeString) const;
+
+    int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
+    int ESMC_TimeGetDayOfMonth(int *dayOfMonth) const;  // (TMG 2.5.4)
+    int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
+
+    int ESMC_TimeGetDayOfYear(ESMF_IKIND_I4 *dayOfYear) const;
+    int ESMC_TimeGetDayOfYear(ESMF_IKIND_R8 *dayOfYear) const; // (TMG 2.5.2)
+    int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
+
+                                                        // (TMG 2.5.5)
 //
  // < declare private interface methods here >
 //

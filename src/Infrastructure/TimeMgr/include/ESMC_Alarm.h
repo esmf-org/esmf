@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.16 2003/08/18 16:08:02 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.17 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -90,24 +90,31 @@ class ESMC_Alarm {
                                         // when fully aligned with F90 equiv
 
   private:   // corresponds to F90 module 'type ESMF_Alarm' members
-    ESMC_TimeInterval RingInterval; // (TMG 4.5.2) for periodic alarming
+    ESMC_TimeInterval ringInterval; // (TMG 4.5.2) for periodic alarming
     ESMC_TimeInterval ringDuration; // how long alarm stays on
-    ESMC_Time         RingTime;     // (TMG 4.5.1) next time to ring
-    ESMC_Time         PrevRingTime; // previous alarm time 
-    ESMC_Time         StopTime;     // when alarm intervals end.
+    ESMC_Time         ringTime;     // (TMG 4.5.1) next time to ring
+    ESMC_Time         prevRingTime; // previous alarm time 
+    ESMC_Time         stopTime;     // when alarm intervals end.
     ESMC_Time         ringBegin;    // note time when alarm turns on.
-    ESMC_Time         refTime;      // reference time.
+    ESMC_Time         refTime;    // reference time.
+    int               nRingDurationTimeSteps; // how long alarm rings;
+                                              //  mutually exclusive with
+                                              //  ringDuration
+    int               nTimeStepsRinging;      // how long alarm has been
+                                              //   ringing in terms of a 
+                                              //   number of time steps.
 
-    int               ID;         // used to distinguish among
+    int               id;         // used to distinguish among
                                   //   multiple clock alarms
-//    pthread_mutex_t   AlarmMutex; // TODO: (TMG 7.5)
 
-    bool              Ringing;    // (TMG 4.4) currently ringing
-    bool              Enabled;    // able to ring (TMG 4.5.3)
+    bool              ringing;    // (TMG 4.4) currently ringing
+    bool              enabled;    // able to ring (TMG 4.5.3)
     bool              sticky;     // must be turned off via ESMC_AlarmTurnOff(),
                                   //  otherwise will turn self off after
                                   //  ringDuration.
-    bool              pad1;       //  align on byte boundary
+//    bool              pad1;       //  TODO:  align on byte boundary
+
+//    pthread_mutex_t   alarmMutex; // TODO: (TMG 7.5)
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -118,53 +125,60 @@ class ESMC_Alarm {
 
     // accessor methods
 
+    int ESMC_AlarmSetup(ESMC_Time         *ringTime=0,
+                        ESMC_TimeInterval *ringInterval=0,
+                        ESMC_Time         *stopTime=0,
+                        ESMC_TimeInterval *ringDuration=0,
+                        int               *nRingDurationTimeSteps=0,
+                        ESMC_Time         *refTime=0,
+                        int               *id=0,
+                        bool              *enabled=0,  // (TMG 4.1, 4.7)
+                        bool              *sticky=0);
+
     int ESMC_AlarmSet(ESMC_Time         *ringTime=0,
                       ESMC_TimeInterval *ringInterval=0,
                       ESMC_Time         *stopTime=0,
-                      bool               enabled=true);  // (TMG 4.1, 4.7)
+                      ESMC_TimeInterval *ringDuration=0,
+                      int               *nRingDurationTimeSteps=0,
+                      ESMC_Time         *refTime=0,
+                      int               *id=0,
+                      bool              *ringing=0,
+                      bool              *enabled=0,  // (TMG 4.1, 4.7)
+                      bool              *sticky=0);
 
-    int ESMC_AlarmGetRingInterval(ESMC_TimeInterval *ringInterval) const;
-                                                           // TMG4.7
-    int ESMC_AlarmSetRingInterval(ESMC_TimeInterval *ringInterval);
-                                                           // TMG4.5.2, 4.7
+    int ESMC_AlarmGet(ESMC_Time         *ringTime=0,
+                      ESMC_Time         *prevRingTime=0,
+                      ESMC_TimeInterval *ringInterval=0,
+                      ESMC_Time         *stopTime=0,
+                      ESMC_TimeInterval *ringDuration=0,
+                      int               *nRingDurationTimeSteps=0,
+                      int               *nTimeStepsRinging=0,
+                      ESMC_Time         *ringBegin=0,
+                      ESMC_Time         *refTime=0,
+                      int               *id=0,
+                      bool              *ringing=0,
+                      bool              *enabled=0,  // (TMG 4.1, 4.7)
+                      bool              *sticky=0);
 
-    int ESMC_AlarmGetRingDuration(ESMC_TimeInterval *ringduration) const;
-    int ESMC_AlarmSetRingDuration(ESMC_TimeInterval *ringduration,
-                                  int numTimeSteps, 
-                                  ESMC_TimeInterval *timestep);
+    int  ESMC_AlarmEnable(void);    // TMG4.5.3
+    int  ESMC_AlarmDisable(void);
+    bool ESMC_AlarmIsEnabled(int *rc) const;
 
-    int ESMC_AlarmGetRingTime(ESMC_Time *ringTime) const;
-                                                           // TMG4.7, 4.8
-    int ESMC_AlarmSetRingTime(ESMC_Time *ringTime); 
-                                                           // TMG4.5.1, 4.7, 4.8
-
-    int ESMC_AlarmGetPrevRingTime(ESMC_Time *prevRingTime) const;
-                                                           // TMG 4.7, 4.8
-    int ESMC_AlarmSetPrevRingTime(ESMC_Time *prevRingTime);
-                                                           // TMG 4.7, 4.8
-
-    int ESMC_AlarmGetStopTime(ESMC_Time *stopTime) const;  // TMG 4.5.2, 4.7
-    int ESMC_AlarmSetStopTime(ESMC_Time *stopTime);        // TMG 4.5.2, 4.7
-
-    int ESMC_AlarmGetRefTime(ESMC_Time *reftime) const;
-    int ESMC_AlarmSetRefTime(ESMC_Time *reftime);
-
-    int ESMC_AlarmEnable(void);    // TMG4.5.3
-    int ESMC_AlarmDisable(void);
-
-    int ESMC_AlarmTurnOn(void);    // TMG4.6: manually turn on/off
-    int ESMC_AlarmTurnOff(void);
-
-    int ESMC_AlarmSticky(void);
-    int ESMC_AlarmNotSticky(void);
-
+    int  ESMC_AlarmRingerOn(void);    // TMG4.6: manually turn on/off
+    int  ESMC_AlarmRingerOff(void);
     bool ESMC_AlarmIsRinging(int *rc) const;
                                          // TMG 4.4: synchronous query for apps
+
+    int  ESMC_AlarmSticky(void);
+    int  ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration=0,
+                             int *nRingDurationTimeSteps=0);
+    bool ESMC_AlarmIsSticky(int *rc) const;
+
     bool ESMC_AlarmCheckRingTime(ESMC_Time *clockCurrTime, bool positive,
                                  int *rc);
                          // associated clock should invoke after advance:
                          // TMG4.4, 4.6
-                         // Check for crossing RingTime in either positive or
+                         // Check for crossing ringTime in either positive or
                          //   negative direction
                          // Can be basis for asynchronous alarm reporting
 
@@ -176,29 +190,33 @@ class ESMC_Alarm {
 
     // restore state
     int ESMC_AlarmReadRestart(ESMC_TimeInterval *ringInterval,
-                              ESMC_TimeInterval *ringduration,
+                              ESMC_TimeInterval *ringDuration,
                               ESMC_Time         *ringTime,
                               ESMC_Time         *prevRingTime,
                               ESMC_Time         *stopTime,
-                              ESMC_Time         *ringbegin,
-                              ESMC_Time         *reftime,
+                              ESMC_Time         *ringBegin,
+                              ESMC_Time         *refTime,
+                              int               nRingDurationTimeSteps,
+                              int               nTimeStepsRinging,
+                              int               id,
                               bool              ringing,
                               bool              enabled,
-                              bool              Sticky,
-                              int               id);
+                              bool              sticky);
 
     // save state
     int ESMC_AlarmWriteRestart(ESMC_TimeInterval *ringInterval,
-                               ESMC_TimeInterval *ringduration,
+                               ESMC_TimeInterval *ringDuration,
                                ESMC_Time         *ringTime,
                                ESMC_Time         *prevRingTime,
                                ESMC_Time         *stopTime,
-                               ESMC_Time         *ringbegin,
-                               ESMC_Time         *reftime,
+                               ESMC_Time         *ringBegin,
+                               ESMC_Time         *refTime,
+                               int               *nRingDurationTimeSteps,
+                               int               *nTimeStepsRinging,
+                               int               *id,
                                bool              *ringing,
                                bool              *enabled,
-                               bool              *Sticky,
-                               int               *id) const;
+                               bool              *sticky) const;
 
     // internal validation
     int ESMC_AlarmValidate(const char *options=0) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.16 2003/07/25 19:58:26 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.17 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,9 +120,10 @@ class ESMC_BaseTime {
 
   protected:
 
-    ESMF_IKIND_I8 S;    // Integer seconds (signed)
-    int Sn;     // Integer fractional seconds (exact) n/d; numerator (signed)
-    int Sd;     // Integer fractional seconds (exact) n/d; denominator
+    ESMF_IKIND_I8 s;   // Integer seconds (signed)
+    ESMF_IKIND_I4 sN;  // Integer fractional seconds (exact) n/d; numerator
+                       //                                         (signed)
+    ESMF_IKIND_I4 sD;  // Integer fractional seconds (exact) n/d; denominator
 
     // TODO:  move ESMC_Calendar* here to define seconds per day ? then could
     //        add D (Julian Days) to Get()/Set() below, and remove secondsPerDay
@@ -135,20 +136,28 @@ class ESMC_BaseTime {
   public:
 
     // Get/Set methods (primarily to support F90 interface)
-    int ESMC_BaseTimeGet(int secondsPerDay,
-                         int *H=0, int *M=0, int *S=0, ESMF_IKIND_I8 *Sl=0,
-                         int *MS=0, int *US=0, int *NS=0,
-                         double *h_=0, double *m_=0, double *s_=0,
-                         double *ms_=0, double *us_=0, double *ns_=0,
-                         int *Sn=0, int *Sd=0) const;
+    int ESMC_BaseTimeSet(ESMF_IKIND_I4 *h=0, ESMF_IKIND_I4 *m=0,
+                         ESMF_IKIND_I4 *s=0, ESMF_IKIND_I8 *s_i8=0,
+                         ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
+                         ESMF_IKIND_I4 *ns=0,
+                         ESMF_IKIND_R8 *h_r8=0, ESMF_IKIND_R8 *m_r8=0,
+                         ESMF_IKIND_R8 *s_r8=0,
+                         ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
+                         ESMF_IKIND_R8 *ns_r8=0,
+                         ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0);
 
-    int ESMC_BaseTimeSet(int *H=0, int *M=0, int *S=0, ESMF_IKIND_I8 *Sl=0,
-                         int *MS=0, int *US=0, int *NS=0,
-                         double *h_=0, double *m_=0, double *s_=0,
-                         double *ms_=0, double *us_=0, double *ns_=0,
-                         int *Sn=0, int *Sd=0);
+    int ESMC_BaseTimeSet(ESMF_IKIND_I8 S, int sN, int sD);
 
-    int ESMC_BaseTimeSet(ESMF_IKIND_I8 S, int Sn, int Sd);
+    int ESMC_BaseTimeGet(ESMF_IKIND_I4 secondsPerDay,
+                         ESMF_IKIND_I4 *h=0, ESMF_IKIND_I4 *m=0,
+                         ESMF_IKIND_I4 *s=0, ESMF_IKIND_I8 *s_i8=0,
+                         ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
+                         ESMF_IKIND_I4 *ns=0,
+                         ESMF_IKIND_R8 *h_r8=0, ESMF_IKIND_R8 *m_r8=0,
+                         ESMF_IKIND_R8 *s_r8=0,
+                         ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
+                         ESMF_IKIND_R8 *ns_r8=0,
+                         ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0) const;
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -175,8 +184,10 @@ class ESMC_BaseTime {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_BaseTimeReadRestart(ESMF_IKIND_I8 S, int Sn, int Sd);
-    int ESMC_BaseTimeWriteRestart(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
+    int ESMC_BaseTimeReadRestart(ESMF_IKIND_I8 s, ESMF_IKIND_I4 sN,
+                                 ESMF_IKIND_I4 sD);
+    int ESMC_BaseTimeWriteRestart(ESMF_IKIND_I8 *s, ESMF_IKIND_I4 *sN,
+                                  ESMF_IKIND_I4 *sD) const;
 
     // internal validation
     int ESMC_BaseTimeValidate(const char *options=0) const;
@@ -186,7 +197,7 @@ class ESMC_BaseTime {
 
     // native C++ constructors/destructors
     ESMC_BaseTime(void);
-    ESMC_BaseTime(ESMF_IKIND_I8 S, int Sn, int Sd);
+    ESMC_BaseTime(ESMF_IKIND_I8 S, ESMF_IKIND_I4 sN, ESMF_IKIND_I4 sD);
     ~ESMC_BaseTime(void);
 
  // < declare the rest of the public interface methods here >

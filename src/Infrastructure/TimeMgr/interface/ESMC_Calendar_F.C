@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.12 2003/07/25 19:58:26 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.13 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,69 +35,87 @@ extern "C" {
        void FTN(c_esmc_calendarset)(ESMC_Calendar *ptr,
                                     ESMC_CalendarType *type, 
                                     int *status) {
-           *status = (ptr)->ESMC_CalendarSet(*type);
-       }
-
-       void FTN(c_esmc_calendarget)(ESMC_Calendar *ptr,
-                                    ESMC_CalendarType *type, 
-                                    int *status) {
-           // TODO *status = (ptr)->ESMC_CalendarGet(type);
+           int rc = (ptr)->ESMC_CalendarSet(*type);
+           if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_calendarsetgeneric)(ESMC_Calendar *ptr,
-                                    int *daysPerMonth, int *secondsPerDay,
-                                    int *daysPerYear,  int *daysPerYearDn,
-                                    int *daysPerYearDd, int *status) {
-           *status = (ptr)->ESMC_CalendarSetGeneric(daysPerMonth,
+                                    int           *daysPerMonth,
+                                    ESMF_IKIND_I4 *secondsPerDay,
+                                    ESMF_IKIND_I4 *daysPerYear,
+                                    ESMF_IKIND_I4 *daysPerYearDn,
+                                    ESMF_IKIND_I4 *daysPerYearDd, int *status) {
+           int rc = (ptr)->ESMC_CalendarSetGeneric(daysPerMonth,
+                                                   *secondsPerDay,
+                                                   *daysPerYear,
+                                                   *daysPerYearDn,
+                                                   *daysPerYearDd);
+           if (status != ESMC_NULL_POINTER) *status = rc;
+       }
+
+       void FTN(c_esmc_calendarget)(ESMC_Calendar *ptr,
+                                    ESMC_CalendarType *type,
+                                    int           *daysPerMonth,
+                                    ESMF_IKIND_I4 *secondsPerDay,
+                                    ESMF_IKIND_I4 *secondsPerYear,
+                                    ESMF_IKIND_I4 *daysPerYear,
+                                    ESMF_IKIND_I4 *daysPerYearDn,
+                                    ESMF_IKIND_I4 *daysPerYearDd, int *status) {
+           int rc = (ptr)->ESMC_CalendarGet(type,
+                                            daysPerMonth,
+                                            secondsPerDay,
+                                            secondsPerYear,
+                                            daysPerYear,
+                                            daysPerYearDn,
+                                            daysPerYearDd);
+           if (status != ESMC_NULL_POINTER) *status = rc;
+       }
+       void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar *ptr,
+                                            ESMC_CalendarType *type,
+                                            int           *daysPerMonth,
+                                            ESMF_IKIND_I4 *secondsPerDay,
+                                            ESMF_IKIND_I4 *secondsPerYear,
+                                            ESMF_IKIND_I4 *daysPerYear,
+                                            ESMF_IKIND_I4 *daysPerYearDn,
+                                            ESMF_IKIND_I4 *daysPerYearDd,
+                                            int *status) {
+           int rc = (ptr)->ESMC_CalendarReadRestart(*type, daysPerMonth,
                                                     *secondsPerDay,
+                                                    *secondsPerYear,
                                                     *daysPerYear,
                                                     *daysPerYearDn,
                                                     *daysPerYearDd);
-       }
-
-       void FTN(c_esmc_calendargetgeneric)(ESMC_Calendar *ptr,
-                                    int *daysPerMonth, int *secondsPerDay,
-                                    int *daysPerYear,  int *daysPerYearDn,
-                                    int *daysPerYearDd, int *status) {
-           // TODO *status = (ptr)->ESMC_CalendarGetGeneric(daysPerMonth,
-           //                                         secondsPerDay,
-           //                                         daysPerYear,
-           //                                         daysPerYearDn,
-           //                                         daysPerYearDd);
-       }
-
-       void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar *ptr,
-                                          ESMC_CalendarType *type,
-                                          int *daysPerMonth, int *secondsPerDay,
-                                          int *daysPerYear,  int *daysPerYearDn,
-                                          int *daysPerYearDd, int *status) {
-           *status = (ptr)->ESMC_CalendarReadRestart(*type, daysPerMonth,
-                                                     *secondsPerDay,
-                                                     *daysPerYear,
-                                                     *daysPerYearDn,
-                                                     *daysPerYearDd);
+           if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_calendarwriterestart)(ESMC_Calendar *ptr,
-                                          ESMC_CalendarType *type,
-                                          int *daysPerMonth, int *secondsPerDay,
-                                          int *daysPerYear,  int *daysPerYearDn,
-                                          int *daysPerYearDd, int *status) {
-           *status = (ptr)->ESMC_CalendarWriteRestart(type, daysPerMonth,
-                                                      secondsPerDay,
-                                                      daysPerYear,
-                                                      daysPerYearDn,
-                                                      daysPerYearDd);
+                                             ESMC_CalendarType *type,
+                                             int           *daysPerMonth,
+                                             ESMF_IKIND_I4 *secondsPerDay,
+                                             ESMF_IKIND_I4 *secondsPerYear,
+                                             ESMF_IKIND_I4 *daysPerYear,
+                                             ESMF_IKIND_I4 *daysPerYearDn, 
+                                             ESMF_IKIND_I4 *daysPerYearDd,
+                                             int *status) {
+           int rc = (ptr)->ESMC_CalendarWriteRestart(type, daysPerMonth,
+                                                     secondsPerDay,
+                                                     secondsPerYear,
+                                                     daysPerYear,
+                                                     daysPerYearDn,
+                                                     daysPerYearDd);
+           if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_calendarvalidate)(ESMC_Calendar *ptr, const char *opts,
+       void FTN(c_esmc_calendarvalidate)(ESMC_Calendar *ptr,
+                                         const char *options,
                                          int *status) {
-           *status = (ptr)->ESMC_CalendarValidate(opts);
+           int rc = (ptr)->ESMC_CalendarValidate(options);
+           if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_calendarprint)(ESMC_Calendar *ptr, const char *opts,
+       void FTN(c_esmc_calendarprint)(ESMC_Calendar *ptr, const char *options,
                                       int *status) {
-           *status = (ptr)->ESMC_CalendarPrint(opts);
+           int rc = (ptr)->ESMC_CalendarPrint(options);
+           if (status != ESMC_NULL_POINTER) *status = rc;
        }
-
 };

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.16 2003/08/18 16:08:02 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.17 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.16 2003/08/18 16:08:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.17 2003/08/29 05:31:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -41,7 +41,80 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmSet - initializes a Alarm object
+// !IROUTINE:  ESMC_AlarmSetup - initializes a Alarm object
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_AlarmSetup(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time         *ringTime,      // in
+      ESMC_TimeInterval *ringInterval,  // in
+      ESMC_Time         *stopTime,      // in
+      ESMC_TimeInterval *ringDuration,  // in
+      int               *nRingDurationTimeSteps, // in
+      ESMC_Time         *refTime,       // in
+      int               *id,            // in
+      bool              *enabled,       // in
+      bool              *sticky) {      // in
+//
+// !DESCRIPTION:
+//      ESMF routine which only initializes {\tt ESMC\_Alarm} values;
+//      it does not allocate any resources.  
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
+    this->ringing = false;
+    this->enabled = true;
+    this->sticky  = true;
+    
+    if (ringTime != ESMC_NULL_POINTER) {
+      this->ringTime = *ringTime;
+    }
+    if (ringInterval != ESMC_NULL_POINTER) {
+      this->ringInterval = *ringInterval;
+      // if ringTime not specified, calculate it from the current time
+      if (ringTime == ESMC_NULL_POINTER) {
+        ESMC_Time currTime;
+        currTime.ESMC_TimeSyncToRealTime();
+        this->ringTime = currTime + this->ringInterval;
+      }
+    }
+    if (stopTime != ESMC_NULL_POINTER) {
+      this->stopTime = *stopTime;
+    }
+    if (ringDuration != ESMC_NULL_POINTER) {
+      this->ringDuration = *ringDuration;
+    }
+    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
+      this->nRingDurationTimeSteps = *nRingDurationTimeSteps;
+    }
+    if (refTime != ESMC_NULL_POINTER) {
+      this->refTime = *refTime;
+    }
+    if (id != ESMC_NULL_POINTER) {
+      this->id = *id;
+    }
+    if (enabled != ESMC_NULL_POINTER) {
+      this->enabled = *enabled;
+    }
+    if (sticky != ESMC_NULL_POINTER) {
+      this->sticky = *sticky;
+    }
+     
+    return(ESMC_AlarmValidate());
+
+ } // end ESMC_AlarmSetup
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmSet - Sets an Alarm's properties
 //
 // !INTERFACE:
       int ESMC_Alarm::ESMC_AlarmSet(
@@ -53,359 +126,121 @@
       ESMC_Time         *ringTime,      // in
       ESMC_TimeInterval *ringInterval,  // in
       ESMC_Time         *stopTime,      // in
-      bool               enabled) {     // in
+      ESMC_TimeInterval *ringDuration,  // in
+      int               *nRingDurationTimeSteps, // in
+      ESMC_Time         *refTime,       // in
+      int               *id,            // in
+      bool              *ringing,       // in
+      bool              *enabled,       // in
+      bool              *sticky) {      // in
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes {\tt ESMC\_Alarm} values; it does not
-//      allocate any resources.  
+//      ESMF routine which only initializes {\tt ESMC\_Alarm} values;
+//      it does not allocate any resources.  
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    // TODO: ensure initialization if called via F90 interface;
-    //       cannot call constructor, because destructor is subsequently
-    //       called automatically, returning initialized values to garbage.
-    Ringing = false;
-    Enabled = true;
-    
-    if (ringTime     != ESMC_NULL_POINTER) RingTime     = *ringTime;
-    if (ringInterval != ESMC_NULL_POINTER) RingInterval = *ringInterval;
-    if (stopTime     != ESMC_NULL_POINTER) StopTime     = *stopTime;
-    Enabled = enabled;
-
+    if (ringTime != ESMC_NULL_POINTER) {
+      this->ringTime = *ringTime;
+    }
+    if (ringInterval != ESMC_NULL_POINTER) {
+      this->ringInterval = *ringInterval;
+    }
+    if (stopTime != ESMC_NULL_POINTER) {
+      this->stopTime = *stopTime;
+    }
+    if (ringDuration != ESMC_NULL_POINTER) {
+      this->ringDuration = *ringDuration;
+    }
+    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
+      this->nRingDurationTimeSteps = *nRingDurationTimeSteps;
+    }
+    if (refTime != ESMC_NULL_POINTER) {
+      this->refTime = *refTime;
+    }
+    if (id != ESMC_NULL_POINTER) {
+      this->id = *id;
+    }
+    if (ringing != ESMC_NULL_POINTER) {
+      this->ringing = *ringing;
+    }
+    if (enabled != ESMC_NULL_POINTER) {
+      this->enabled = *enabled;
+    }
+    if (sticky != ESMC_NULL_POINTER) {
+      this->sticky = *sticky;
+    }
+     
     return(ESMC_AlarmValidate());
 
  } // end ESMC_AlarmSet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmGetRingInterval - gets an Alarm's ring interval
+// !IROUTINE:  ESMC_AlarmGet - initializes a Alarm object
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGetRingInterval(
+      int ESMC_Alarm::ESMC_AlarmGet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *ringInterval) const {    // out - ring interval
+      ESMC_Time         *ringTime,          // in
+      ESMC_Time         *prevRingTime,      // in
+      ESMC_TimeInterval *ringInterval,      // in
+      ESMC_Time         *stopTime,          // in
+      ESMC_TimeInterval *ringDuration,      // in
+      int               *nRingDurationTimeSteps, // in
+      int               *nTimeStepsRinging, // in
+      ESMC_Time         *ringBegin,         // in
+      ESMC_Time         *refTime,           // in
+      int               *id,                // in
+      bool              *ringing,           // in
+      bool              *enabled,           // in
+      bool              *sticky) {          // in
 //
 // !DESCRIPTION:
-//      Gets an {\tt ESMC\_Alarm}'s ring interval
+//      Gets {\tt ESMC\_Alarm} property values;
 //
 //EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
+// !REQUIREMENTS:  developer's guide for classes
 
-    if (ringInterval == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+    if (ringTime != ESMC_NULL_POINTER) {
+      *ringTime = this->ringTime;
+    }
+    if (ringInterval != ESMC_NULL_POINTER) {
+      *ringInterval = this->ringInterval;
+    }
+    if (stopTime != ESMC_NULL_POINTER) {
+      *stopTime = this->stopTime;
+    }
+    if (ringDuration != ESMC_NULL_POINTER) {
+      *ringDuration = this->ringDuration;
+    }
+    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
+      *nRingDurationTimeSteps = this->nRingDurationTimeSteps;
+    }
+    if (refTime != ESMC_NULL_POINTER) {
+      *refTime = this->refTime;
+    }
+    if (id != ESMC_NULL_POINTER) {
+      *id = this->id;
+    }
+    if (ringing != ESMC_NULL_POINTER) {
+      *ringing = this->ringing;
+    }
+    if (enabled != ESMC_NULL_POINTER) {
+      *enabled = this->enabled;
+    }
+    if (sticky != ESMC_NULL_POINTER) {
+      *sticky = this->sticky;
+    }
+     
+    return(ESMC_AlarmValidate());
 
-    *ringInterval = RingInterval;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmGetRingInterval
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmSetRingInterval - sets an Alarm's ring interval
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSetRingInterval(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_TimeInterval *ringInterval) {    // in - ring interval
-//
-// !DESCRIPTION:
-//      Sets an {\tt ESMC\_Alarm}'s ring interval
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (ringInterval == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    RingInterval = *ringInterval;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmSetRingInterval
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmGetRingDuration - gets an Alarm's ring duration
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGetRingDuration(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_TimeInterval *ringduration) const {    // out - ring duration
-//
-// !DESCRIPTION:
-//      Gets an {\tt ESMC\_Alarm}'s ring duration
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (ringduration == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    *ringduration = ringDuration;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmGetRingDuration
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmSetRingDuration - sets an Alarm's ring duration
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSetRingDuration(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_TimeInterval *ringduration,  // in - ring duration
-      int numTimeSteps,                 // in - number of timesteps
-      ESMC_TimeInterval *timestep) {    // in - timestep
-//
-// !DESCRIPTION:
-//      Sets an {\tt ESMC\_Alarm}'s ring duration
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    // must have either a ringDuration or a timeStep
-    if (ringduration == ESMC_NULL_POINTER &&
-        timestep == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    // if ringDuration is present, use it; otherwise use numTimeSteps * timeStep
-    ringDuration = (ringduration != ESMC_NULL_POINTER) ?
-                    *ringduration : ((*timestep) * numTimeSteps);
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmSetRingDuration
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmGetRingTime - gets an Alarm's ring time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGetRingTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *ringTime) const {    // out - ring time
-//
-// !DESCRIPTION:
-//      Gets an {\tt ESMC\_Alarm}'s ring time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (ringTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    *ringTime = RingTime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmGetRingTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmSetRingTime - sets an Alarm's ring time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSetRingTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *ringTime) {    // in - ring time
-//
-// !DESCRIPTION:
-//      Sets an {\tt ESMC\_Alarm}'s ring time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (ringTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    RingTime = *ringTime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmSetRingTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmGetPrevRingTime - gets an Alarm's previous ring time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGetPrevRingTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *prevRingTime) const {    // out - previous ring time
-//
-// !DESCRIPTION:
-//      Gets an {\tt ESMC\_Alarm}'s previous ring time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (prevRingTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    *prevRingTime = PrevRingTime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmGetPrevRingTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmSetPrevRingTime - sets an Alarm's previous ring time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSetPrevRingTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *prevRingTime) {    // in - previous ring time
-//
-// !DESCRIPTION:
-//      Sets an {\tt ESMC\_Alarm}'s previous ring time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (prevRingTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    PrevRingTime = *prevRingTime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmSetPrevRingTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmGetStopTime - gets an Alarm's stop time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGetStopTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *stopTime) const {    // out - stop time
-//
-// !DESCRIPTION:
-//      Gets an {\tt ESMC\_Alarm}'s stop time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (stopTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    *stopTime = StopTime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmGetStopTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmSetStopTime - sets an Alarm's stop time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSetStopTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *stopTime) {    // in - stop time
-//
-// !DESCRIPTION:
-//      Sets an {\tt ESMC\_Alarm}'s stop time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (stopTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    StopTime = *stopTime; 
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmSetStopTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmGetRefTime - gets an Alarm's reference time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmGetRefTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *reftime) const {    // out - reference time
-//
-// !DESCRIPTION:
-//      Gets an {\tt ESMC\_Alarm}'s reference time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (reftime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    *reftime = refTime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmGetRefTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmSetRefTime - sets an Alarm's reference time
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmSetRefTime(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Time *reftime) {    // in - reference time
-//
-// !DESCRIPTION:
-//      Sets an {\tt ESMC\_Alarm}'s reference time
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    if (reftime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-
-    refTime = *reftime;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmSetRefTime
+ } // end ESMC_AlarmSet
 
 //-------------------------------------------------------------------------
 //BOP
@@ -426,7 +261,7 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    Enabled = true;
+    enabled = true;
 
     return(ESMF_SUCCESS);
 
@@ -451,8 +286,8 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    Ringing = false;
-    Enabled = false;
+    ringing = false;
+    enabled = false;
 
     return(ESMF_SUCCESS);
 
@@ -460,37 +295,35 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmTurnOn - sets an Alarm to the ringing state
+// !IROUTINE:  ESMC_AlarmIsEnabled - check if Alarm is enabled
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmTurnOn(void) {
+      bool ESMC_Alarm::ESMC_AlarmIsEnabled(
 //
 // !RETURN VALUE:
-//    int error return code
+//    bool is enabled or not
 //
 // !ARGUMENTS:
-//    none
+      int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//      ESMF routine which sets an {\tt ESMC\_Alarm} object to the ringing state
+//    checks if {\tt ESMC\_Alarm}'s enabled state is set.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:
 
-    if(!Enabled) return(ESMF_FAILURE);
+    *rc = ESMF_SUCCESS;
 
-    Ringing = true;
+    return(enabled);
 
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmTurnOn
+ } // end ESMC_AlarmIsEnabled
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmTurnOff - turns off an Alarm's ringing state
+// !IROUTINE:  ESMC_AlarmRingerOn - sets an Alarm to the ringing state
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmTurnOff(void) {
+      int ESMC_Alarm::ESMC_AlarmRingerOn(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -499,16 +332,69 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which turns off an {\tt ESMC\_Alarm}'s ringing state
+//      ESMF routine which sets an {\tt ESMC\_Alarm} object to the
+//      ringing state.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    Ringing = false;
+    if(!enabled) return(ESMF_FAILURE);
+
+    ringing = true;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_AlarmTurnOn
+ } // end ESMC_AlarmRingerOn
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmRingerOff - turns off an Alarm's ringing state
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_AlarmRingerOff(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which turns off an {\tt ESMC\_Alarm}'s ringing state.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    ringing = false;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_AlarmRingerOff
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmIsRinging - check if Alarm is ringing
+//
+// !INTERFACE:
+      bool ESMC_Alarm::ESMC_AlarmIsRinging(
+//
+// !RETURN VALUE:
+//    bool is ringing or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    checks if {\tt ESMC\_Alarm}'s ringing state is set.
+//
+//EOP
+// !REQUIREMENTS:
+
+    *rc = ESMF_SUCCESS;
+
+    return(enabled && ringing);
+
+ } // end ESMC_AlarmIsRinging
 
 //-------------------------------------------------------------------------
 //BOP
@@ -540,7 +426,8 @@
 // !IROUTINE:  ESMC_AlarmNotSticky - unsets an Alarm's sticky state 
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmNotSticky(void) {
+      int ESMC_Alarm::ESMC_AlarmNotSticky(ESMC_TimeInterval *ringDuration,
+                                          int *nRingDurationTimeSteps) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -549,12 +436,29 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which unsets an {\tt ESMC\_Alarm}'s sticky flag.
+//      ESMF routine which unsets an {\tt ESMC\_Alarm}'s sticky flag,
+//      and optionally sets a ring duration either in terms of an
+//      {\tt ESMC\_TimeInterval} or a integer number of clock timesteps.
 //
 //EOP
 // !REQUIREMENTS:
 
     sticky = false;
+
+    // mutually exclusive: can only specify one ring duration type
+    if (ringDuration == ESMC_NULL_POINTER &&
+        nRingDurationTimeSteps == ESMC_NULL_POINTER) {
+      cout << "ESMC_Alarm::ESMC_AlarmNotSticky(): can only specify " <<
+              "one type of ring duration, not both." << endl;
+      return(ESMF_FAILURE);
+    }
+
+    if (ringDuration != ESMC_NULL_POINTER) {
+      this->ringDuration = *ringDuration;
+    }
+    if (nRingDurationTimeSteps != ESMC_NULL_POINTER) {
+      this->nRingDurationTimeSteps = *nRingDurationTimeSteps;
+    }
 
     return(ESMF_SUCCESS);
 
@@ -562,28 +466,28 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmIsRinging - check if Alarm is ringing
+// !IROUTINE:  ESMC_AlarmIsSticky - check if Alarm is sticky
 //
 // !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmIsRinging(
+      bool ESMC_Alarm::ESMC_AlarmIsSticky(
 //
 // !RETURN VALUE:
-//    bool is ringing or not
+//    bool is sticky or not
 //
 // !ARGUMENTS:
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//    checks if {\tt ESMC\_Alarm}'s ringing state is set.
+//    checks if {\tt ESMC\_Alarm}'s sticky state is set.
 //
 //EOP
 // !REQUIREMENTS:
 
     *rc = ESMF_SUCCESS;
 
-    return(Enabled && Ringing);
+    return(sticky);
 
- } // end ESMC_AlarmIsRinging
+ } // end ESMC_AlarmIsSticky
 
 //-------------------------------------------------------------------------
 //BOP
@@ -611,24 +515,24 @@
     *rc = ESMF_SUCCESS;
 
     // check if time to turn on alarm
-    if (!Ringing && Enabled) {
+    if (!ringing && enabled) {
       if (positive) {
-        Ringing = *ClockCurrTime >= RingTime;
+        ringing = *ClockCurrTime >= ringTime;
       } else {
-        Ringing = *ClockCurrTime <= RingTime;
+        ringing = *ClockCurrTime <= ringTime;
       }
     // else check if time to turn off alarm
-    } else if (!sticky && Enabled) {
+    } else if (!sticky && enabled) {
       ESMC_TimeInterval cumulativeRinging;
       cumulativeRinging = *ClockCurrTime - ringBegin;
       if (cumulativeRinging.ESMC_TimeIntervalAbsValue() >=
             ringDuration)
       {
-        Ringing = false;
+        ringing = false;
       }
     }
 
-    return(Ringing && Enabled);
+    return(ringing && enabled);
 
  } // end ESMC_AlarmCheckRingTime
 
@@ -652,7 +556,7 @@
 //EOP
 // !REQUIREMENTS:
 
-    return(ID == alarm.ID);
+    return(id == alarm.id);
 
 }  // end ESMC_Alarm::operator==
 
@@ -668,45 +572,50 @@
 //
 // !ARGUMENTS:
       ESMC_TimeInterval *ringInterval,
-      ESMC_TimeInterval *ringduration,
+      ESMC_TimeInterval *ringDuration,
       ESMC_Time         *ringTime,
       ESMC_Time         *prevRingTime,
       ESMC_Time         *stopTime,
-      ESMC_Time         *ringbegin,
-      ESMC_Time         *reftime,
+      ESMC_Time         *ringBegin,
+      ESMC_Time         *refTime,
+      int               nRingDurationTimeSteps,
+      int               nTimeStepsRinging,
+      int               id,
       bool              ringing,
       bool              enabled,
-      bool              Sticky,
-      int               id) {
+      bool              sticky) {
 
 //
 // !DESCRIPTION:
-//      Restore information about an {\tt ESMC\_Alarm}. For persistence/checkpointing
+//      Restore information about an {\tt ESMC\_Alarm}.
+//      For persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (ringInterval == ESMC_NULL_POINTER || ringduration == ESMC_NULL_POINTER
+    if (ringInterval == ESMC_NULL_POINTER || ringDuration == ESMC_NULL_POINTER
         || ringTime == ESMC_NULL_POINTER  || prevRingTime == ESMC_NULL_POINTER
-        || stopTime == ESMC_NULL_POINTER  || ringbegin == ESMC_NULL_POINTER
-        || reftime  == ESMC_NULL_POINTER) {
+        || stopTime == ESMC_NULL_POINTER  || ringBegin == ESMC_NULL_POINTER
+        || refTime  == ESMC_NULL_POINTER) {
       // TODO: log error
       cout << "ESMC_Alarm::ESMC_AlarmReadRestart(): null pointer(s) passed in"
            << endl;
       return(ESMF_FAILURE);
     }
 
-    RingInterval = *ringInterval;
-    ringDuration = *ringduration;
-    RingTime     = *ringTime;
-    PrevRingTime = *prevRingTime;
-    StopTime     = *stopTime;
-    ringBegin    = *ringbegin;
-    refTime      = *reftime;
-    Ringing      = ringing;
-    Enabled      = enabled;
-    sticky       = Sticky;
-    ID           = id;
+    this->ringInterval = *ringInterval;
+    this->ringDuration = *ringDuration;
+    this->ringTime     = *ringTime;
+    this->prevRingTime = *prevRingTime;
+    this->stopTime     = *stopTime;
+    this->ringBegin    = *ringBegin;
+    this->refTime      = *refTime;
+    this->nRingDurationTimeSteps = nRingDurationTimeSteps;
+    this->nTimeStepsRinging      = nTimeStepsRinging;
+    this->id           = id;
+    this->ringing      = ringing;
+    this->enabled      = enabled;
+    this->sticky       = sticky;
 
     return(ESMF_SUCCESS);
 
@@ -724,47 +633,54 @@
 //
 // !ARGUMENTS:
       ESMC_TimeInterval *ringInterval,
-      ESMC_TimeInterval *ringduration,
+      ESMC_TimeInterval *ringDuration,
       ESMC_Time         *ringTime,
       ESMC_Time         *prevRingTime,
       ESMC_Time         *stopTime,
-      ESMC_Time         *ringbegin,
-      ESMC_Time         *reftime,
+      ESMC_Time         *ringBegin,
+      ESMC_Time         *refTime,
+      int               *nRingDurationTimeSteps,
+      int               *nTimeStepsRinging,
+      int               *id,
       bool              *ringing,
       bool              *enabled,
-      bool              *Sticky,
-      int               *id) const {
+      bool              *sticky) const {
 
 //
 // !DESCRIPTION:
-//      Save information about an {\tt ESMC\_Alarm}. For persistence/checkpointing
+//      Save information about an {\tt ESMC\_Alarm}.
+//      For persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    if (ringInterval == ESMC_NULL_POINTER || ringduration == ESMC_NULL_POINTER
+    if (ringInterval == ESMC_NULL_POINTER || ringDuration == ESMC_NULL_POINTER
         || ringTime == ESMC_NULL_POINTER  || prevRingTime == ESMC_NULL_POINTER
-        || stopTime == ESMC_NULL_POINTER  || ringbegin == ESMC_NULL_POINTER
-        || reftime  == ESMC_NULL_POINTER  || ringing == ESMC_NULL_POINTER
-        || enabled == ESMC_NULL_POINTER || Sticky == ESMC_NULL_POINTER
-        || id == ESMC_NULL_POINTER) {
+        || stopTime == ESMC_NULL_POINTER  || ringBegin == ESMC_NULL_POINTER
+        || refTime  == ESMC_NULL_POINTER
+        || nRingDurationTimeSteps == ESMC_NULL_POINTER
+        || nTimeStepsRinging == ESMC_NULL_POINTER
+        || id == ESMC_NULL_POINTER || ringing == ESMC_NULL_POINTER
+        || enabled == ESMC_NULL_POINTER || sticky == ESMC_NULL_POINTER) {
       // TODO: log error
       cout << "ESMC_Alarm::ESMC_AlarmWriteRestart(): null pointer(s) passed in"
            << endl;
       return(ESMF_FAILURE);
     }
 
-    *ringInterval = RingInterval;
-    *ringduration = ringDuration;
-    *ringTime     = RingTime;
-    *prevRingTime = PrevRingTime;
-    *stopTime     = StopTime;
-    *ringbegin    = ringBegin;
-    *reftime      = refTime;
-    *ringing      = Ringing;
-    *enabled      = Enabled;
-    *Sticky       = sticky;
-    *id           = ID;
+    *ringInterval = this->ringInterval;
+    *ringDuration = this->ringDuration;
+    *ringTime     = this->ringTime;
+    *prevRingTime = this->prevRingTime;
+    *stopTime     = this->stopTime;
+    *ringBegin    = this->ringBegin;
+    *refTime      = this->refTime;
+    *nRingDurationTimeSteps = this->nRingDurationTimeSteps;
+    *nTimeStepsRinging      = this->nTimeStepsRinging;
+    *id           = this->id;
+    *ringing      = this->ringing;
+    *enabled      = this->enabled;
+    *sticky       = this->sticky;
 
     return(ESMF_SUCCESS);
 
@@ -791,13 +707,13 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    // must have a ring time; RingDuration, StopTime, PrevRingTime optional
-    if (RingTime.ESMC_TimeValidate() != ESMF_SUCCESS) return(ESMF_FAILURE);
+    // must have a ring time; ringDuration, stopTime, prevRingTime optional
+    if (ringTime.ESMC_TimeValidate() != ESMF_SUCCESS) return(ESMF_FAILURE);
 
     // invalid state
-    if (!Enabled && Ringing) return(ESMF_FAILURE);
+    if (!enabled && ringing) return(ESMF_FAILURE);
 
-    // TODO: validate ID ?
+    // TODO: validate id ?
 
     return(ESMF_SUCCESS);
 
@@ -817,20 +733,27 @@
       const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
-//      Print information about an {\tt ESMC\_Alarm}.  For testing/debugging
+//      Print information about an {\tt ESMC\_Alarm}.  For testing/debugging.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     cout << "Alarm ----------------------------------" << endl;
-    cout << "RingDuration = " << endl;
-                                 RingInterval.ESMC_TimeIntervalPrint(options);
-    cout << "RingTime = "     << endl; RingTime.ESMC_TimePrint(options);
-    cout << "PrevRingTime = " << endl; PrevRingTime.ESMC_TimePrint(options);
-    cout << "StopTime = "     << endl; StopTime.ESMC_TimePrint(options);
-    cout << "Ringing = "      << Ringing << endl;
-    cout << "Enabled = "      << Enabled << endl;
-    cout << "ID = "           << ID << endl;
+    cout << "ringInterval = " << endl;
+                                 ringInterval.ESMC_TimeIntervalPrint(options);
+    cout << "ringDuration = " << endl;
+                                 ringDuration.ESMC_TimeIntervalPrint(options);
+    cout << "ringTime = "     << endl; ringTime.ESMC_TimePrint(options);
+    cout << "prevRingTime = " << endl; prevRingTime.ESMC_TimePrint(options);
+    cout << "stopTime = "     << endl; stopTime.ESMC_TimePrint(options);
+    cout << "ringBegin = "    << endl; ringBegin.ESMC_TimePrint(options);
+    cout << "refTime = "      << endl; refTime.ESMC_TimePrint(options);
+    cout << "nRingDurationTimeSteps = " << nRingDurationTimeSteps << endl;
+    cout << "nTimeStepsRinging = " << nTimeStepsRinging << endl;
+    cout << "id = "           << id << endl;
+    cout << "ringing = "      << ringing << endl;
+    cout << "enabled = "      << enabled << endl;
+    cout << "sticky = "       << sticky << endl;
     cout << "end Alarm ------------------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
@@ -852,13 +775,13 @@
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
+//      with default or passed-in values.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-   Ringing = false;
-   Enabled = true;
+   ringing = false;
+   enabled = true;
    sticky  = true;
 
  } // end ESMC_Alarm
@@ -877,7 +800,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
+//      Calls standard ESMF deep or shallow methods for destruction.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n

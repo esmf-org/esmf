@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.38 2003/08/08 00:25:49 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.39 2003/08/29 05:31:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,12 +59,12 @@
 !     ! Equivalent sequence and kind to C++:
 
      type ESMF_Time
-     sequence                           ! match C++ storage order
-     private                            !   (members opaque on F90 side)
-       type(ESMF_BaseTime) :: baseTime           ! inherit base class
+     sequence                                    ! match C++ storage order
+     private                                     !  (members opaque on F90 side)
+       type(ESMF_BaseTime)          :: baseTime  ! inherit base class
        type(ESMF_Calendar), pointer :: calendar  ! associated calendar
-       integer :: timeZone                       ! local timezone
-       integer :: pad                            ! to satisfy halem compiler
+       integer                      :: timeZone  ! local timezone
+       integer                      :: pad       ! to satisfy halem compiler
      end type
 
 !------------------------------------------------------------------------------
@@ -73,19 +73,12 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_TimeGet
       public ESMF_TimeSet
-      public ESMF_TimeGetCalendar
-      public ESMF_TimeSetCalendar
-      public ESMF_TimeIsSameCal
-      public ESMF_TimeGetTimezone
-      public ESMF_TimeSetTimezone
-      public ESMF_TimeGetString
-      public ESMF_TimeGetDayOfYear
-      public ESMF_TimeGetDayOfWeek
-      public ESMF_TimeGetDayOfMonth
-      public ESMF_TimeGetMidMonth
-      public ESMF_TimeGetRealTime
+      public ESMF_TimeGet
+
+      public ESMF_TimeIsSameCalendar
+
+      public ESMF_TimeSyncToRealTime
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -95,14 +88,6 @@
       public ESMF_TimePrint
 
 ! !PRIVATE MEMBER FUNCTIONS:
-
-      private ESMF_TimeGetCalendarCopy
-      private ESMF_TimeGetCalendarPtr
-      private ESMF_TimeSetCalendarPtr
-      private ESMF_TimeSetCalendarPtrPtr
-      private ESMF_TimeGetDayOfYearR
-      private ESMF_TimeGetDayOfYearI
-      private ESMF_TimeGetDayOfYearTimeIntvl
 
 ! Inherited and overloaded from ESMF_BaseTime
 
@@ -135,62 +120,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.38 2003/08/08 00:25:49 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.39 2003/08/29 05:31:58 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
-! !INTERFACE:
-      interface ESMF_TimeGetCalendar
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGetCalendarCopy
-      module procedure ESMF_TimeGetCalendarPtr
-
-! !DESCRIPTION:
-!     This interface overloads the {\tt ESMF\_GetCalendar} method
-!     for the {\tt ESMF\_Time} class.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_TimeSetCalendar
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeSetCalendarPtr
-      module procedure ESMF_TimeSetCalendarPtrPtr
-
-! !DESCRIPTION:
-!     This interface overloads the {\tt ESMF\_SetCalendar} method
-!     for the {\tt ESMF\_Time} class.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_TimeGetDayOfYear
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeGetDayOfYearR
-      module procedure ESMF_TimeGetDayOfYearI
-      module procedure ESMF_TimeGetDayOfYearTimeIntvl
-
-! !DESCRIPTION:
-!     This interface overloads the {\tt ESMF\_GetDayOfYear} method
-!     for the {\tt ESMF\_Time} class.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       interface operator(+)
@@ -324,188 +260,47 @@
 
 !==============================================================================
 !
-! Generic Get/Set routines which use F90 optional arguments
+! Generic Set/Get routines which use F90 optional arguments
 !
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGet - Get value in user-specified units
-
-! !INTERFACE:
-      subroutine ESMF_TimeGet(time, yr_i4, yr_i8, &
-                                    mm_i4, &
-                                    dd_i4, &
-                                    d_i4, d_i8, &
-                                    h_i4, &
-                                    m_i4, &
-                                    s_i4, s_i8, &
-                                    ms_i4, &
-                                    us_i4, &
-                                    ns_i4, &
-                                    d_r8, &
-                                    h_r8, &
-                                    m_r8, &
-                                    s_r8, &
-                                    ms_r8, &
-                                    us_r8, &
-                                    ns_r8, &
-                                    sN, sD, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      integer(ESMF_IKIND_I4), intent(out), optional :: yr_i4
-      integer(ESMF_IKIND_I8), intent(out), optional :: yr_i8
-      integer(ESMF_IKIND_I4), intent(out), optional :: mm_i4
-      integer(ESMF_IKIND_I4), intent(out), optional :: dd_i4
-      integer(ESMF_IKIND_I4), intent(out), optional :: d_i4
-      integer(ESMF_IKIND_I8), intent(out), optional :: d_i8
-      integer(ESMF_IKIND_I4), intent(out), optional :: h_i4
-      integer(ESMF_IKIND_I4), intent(out), optional :: m_i4
-      integer(ESMF_IKIND_I4), intent(out), optional :: s_i4
-      integer(ESMF_IKIND_I8), intent(out), optional :: s_i8
-      integer(ESMF_IKIND_I4), intent(out), optional :: ms_i4
-      integer(ESMF_IKIND_I4), intent(out), optional :: us_i4
-      integer(ESMF_IKIND_I4), intent(out), optional :: ns_i4
-      real(ESMF_IKIND_R8),    intent(out), optional :: d_r8
-      real(ESMF_IKIND_R8),    intent(out), optional :: h_r8
-      real(ESMF_IKIND_R8),    intent(out), optional :: m_r8
-      real(ESMF_IKIND_R8),    intent(out), optional :: s_r8
-      real(ESMF_IKIND_R8),    intent(out), optional :: ms_r8
-      real(ESMF_IKIND_R8),    intent(out), optional :: us_r8
-      real(ESMF_IKIND_R8),    intent(out), optional :: ns_r8
-      integer,                intent(out), optional :: sN
-      integer,                intent(out), optional :: sD
-      integer,                intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get the value of the {\tt ESMF\_Time} in units specified by the user
-!     via F90 optional arguments.
-!
-!     Time manager represents and manipulates time internally with integers
-!     to maintain precision. Hence, user-specified floating point values are
-!     converted internally from integers.
-!
-!     Units are bound (normalized) to the next larger unit specified.  For
-!     example, if a time is defined to be 2:00 am on a particular date, then
-!     {\tt ESMF\_TimeGet(h\_i4 = hours, s\_i4 = seconds)} would return
-!       {\tt hours = 2}, {\tt seconds = 0},
-!     whereas {\tt ESMF\_TimeGet(s\_i4=seconds)} would return
-!       {\tt seconds = 7200}.
-!
-!     See {\tt ../include/ESMC\_BaseTime.h} and {\tt ../include/ESMC\_Time.h} 
-!     for complete description.
-!     
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[{[yr\_i4]}]
-!          Integer year CCYR (>= 32-bit).
-!     \item[{[yr\_i8]}]
-!          Integer year CCYR (large, >= 64-bit).
-!     \item[{[mm\_i4]}]
-!          Integer month 1-12.
-!     \item[{[dd\_i4]}]
-!          Integer day of the month 1-31.
-!     \item[{[d\_i4]}]
-!          Integer Julian days (>= 32-bit).
-!     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).
-!     \item[{[h\_i4]}]
-!          Integer hours.
-!     \item[{[m\_i4]}]
-!          Integer minutes.
-!     \item[{[s\_i4]}]
-!          Integer seconds (>= 32-bit).
-!     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).
-!     \item[{[ms\_i4]}]
-!          Integer milliseconds.
-!     \item[{[us\_i4]}]
-!          Integer microseconds.
-!     \item[{[ns\_i4]}]
-!          Integer nanoseconds.
-!     \item[{[d\_r8]}]
-!          Double precision days.
-!     \item[{[h\_r8]}]
-!          Double precision hours.
-!     \item[{[m\_r8]}]
-!          Double precision minutes.
-!     \item[{[s\_r8]}]
-!          Double precision seconds.
-!     \item[{[ms\_r8]}]
-!          Double precision milliseconds.
-!     \item[{[us\_r8]}]
-!          Double precision microseconds.
-!     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.
-!     \item[{[sN]}]
-!          Integer fractional seconds - numerator.
-!     \item[{[sD]}]
-!          Integer fractional seconds - denominator.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.1, TMG2.5.1, TMG2.5.6
-
-      ! use optional args for any subset
-      call c_ESMC_TimeGet(time, yr_i4, yr_i8, mm_i4, dd_i4, d_i4, d_i8, &
-                          h_i4, m_i4, s_i4, s_i8, ms_i4, us_i4, ns_i4, &
-                          d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, rc)
-    
-      end subroutine ESMF_TimeGet
-
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_TimeSet - Initialize via user-specified unit set
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSet(time, yr_i4, yr_i8, &
-                                    mm_i4, &
-                                    dd_i4, &
-                                    d_i4, d_i8, &
-                                    h_i4, &
-                                    m_i4, &
-                                    s_i4, s_i8, &
-                                    ms_i4, &
-                                    us_i4, &
-                                    ns_i4, &
-                                    d_r8, &
-                                    h_r8, &
-                                    m_r8, &
-                                    s_r8, &
-                                    ms_r8, &
-                                    us_r8, &
-                                    ns_r8, &
+      subroutine ESMF_TimeSet(time, yr, yr_i8, &
+                                    mm, dd, &
+                                    d, d_i8, &
+                                    h, m, &
+                                    s, s_i8, &
+                                    ms, us, ns, &
+                                    d_r8, h_r8, m_r8, s_r8, &
+                                    ms_r8, us_r8, ns_r8, &
                                     sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
-      integer(ESMF_IKIND_I4), intent(in), optional :: yr_i4
-      integer(ESMF_IKIND_I8), intent(in), optional :: yr_i8
-      integer(ESMF_IKIND_I4), intent(in), optional :: mm_i4
-      integer(ESMF_IKIND_I4), intent(in), optional :: dd_i4
-      integer(ESMF_IKIND_I4), intent(in), optional :: d_i4
-      integer(ESMF_IKIND_I8), intent(in), optional :: d_i8
-      integer(ESMF_IKIND_I4), intent(in), optional :: h_i4
-      integer(ESMF_IKIND_I4), intent(in), optional :: m_i4
-      integer(ESMF_IKIND_I4), intent(in), optional :: s_i4
-      integer(ESMF_IKIND_I8), intent(in), optional :: s_i8
-      integer(ESMF_IKIND_I4), intent(in), optional :: ms_i4
-      integer(ESMF_IKIND_I4), intent(in), optional :: us_i4
-      integer(ESMF_IKIND_I4), intent(in), optional :: ns_i4
-      real(ESMF_IKIND_R8),    intent(in), optional :: d_r8
-      real(ESMF_IKIND_R8),    intent(in), optional :: h_r8
-      real(ESMF_IKIND_R8),    intent(in), optional :: m_r8
-      real(ESMF_IKIND_R8),    intent(in), optional :: s_r8
-      real(ESMF_IKIND_R8),    intent(in), optional :: ms_r8
-      real(ESMF_IKIND_R8),    intent(in), optional :: us_r8
-      real(ESMF_IKIND_R8),    intent(in), optional :: ns_r8
-      integer,                intent(in), optional :: sN
-      integer,                intent(in), optional :: sD
+      type(ESMF_Time),        intent(inout)         :: time
+      integer(ESMF_IKIND_I4), intent(in),  optional :: yr
+      integer(ESMF_IKIND_I8), intent(in),  optional :: yr_i8
+      integer,                intent(in),  optional :: mm
+      integer,                intent(in),  optional :: dd
+      integer(ESMF_IKIND_I4), intent(in),  optional :: d
+      integer(ESMF_IKIND_I8), intent(in),  optional :: d_i8
+      integer(ESMF_IKIND_I4), intent(in),  optional :: h
+      integer(ESMF_IKIND_I4), intent(in),  optional :: m
+      integer(ESMF_IKIND_I4), intent(in),  optional :: s
+      integer(ESMF_IKIND_I8), intent(in),  optional :: s_i8
+      integer(ESMF_IKIND_I4), intent(in),  optional :: ms
+      integer(ESMF_IKIND_I4), intent(in),  optional :: us
+      integer(ESMF_IKIND_I4), intent(in),  optional :: ns
+      real(ESMF_IKIND_R8),    intent(in),  optional :: d_r8
+      real(ESMF_IKIND_R8),    intent(in),  optional :: h_r8
+      real(ESMF_IKIND_R8),    intent(in),  optional :: m_r8
+      real(ESMF_IKIND_R8),    intent(in),  optional :: s_r8
+      real(ESMF_IKIND_R8),    intent(in),  optional :: ms_r8
+      real(ESMF_IKIND_R8),    intent(in),  optional :: us_r8
+      real(ESMF_IKIND_R8),    intent(in),  optional :: ns_r8
+      integer(ESMF_IKIND_I4), intent(in),  optional :: sN
+      integer(ESMF_IKIND_I4), intent(in),  optional :: sD
       type(ESMF_Calendar),    intent(in),  optional :: calendar
       integer,                intent(in),  optional :: timeZone
       integer,                intent(out), optional :: rc
@@ -525,31 +320,31 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to initialize.
-!     \item[{[yr\_i4]}]
+!     \item[{[yr]}]
 !          Integer year CCYR (>= 32-bit).
 !     \item[{[yr\_i8]}]
 !          Integer year CCYR (large, >= 64-bit).
-!     \item[{[mm\_i4]}]
+!     \item[{[mm]}]
 !          Integer month 1-12.
-!     \item[{[dd\_i4]}]
+!     \item[{[dd]}]
 !          Integer day of the month 1-31.
-!     \item[{[d\_i4]}]
+!     \item[{[d]}]
 !          Integer Julian days (>= 32-bit).
 !     \item[{[d\_i8]}]
 !          Integer Julian days (large, >= 64-bit).
-!     \item[{[h\_i4]}]
+!     \item[{[h]}]
 !          Integer hours.
-!     \item[{[m\_i4]}]
+!     \item[{[m]}]
 !          Integer minutes.
-!     \item[{[s\_i4]}]
+!     \item[{[s]}]
 !          Integer seconds (>= 32-bit).
 !     \item[{[s\_i8]}]
 !          Integer seconds (large, >= 64-bit).
-!     \item[{[ms\_i4]}]
+!     \item[{[ms]}]
 !          Integer milliseconds.
-!     \item[{[us\_i4]}]
+!     \item[{[us]}]
 !          Integer microseconds.
-!     \item[{[ns\_i4]}]
+!     \item[{[ns]}]
 !          Integer nanoseconds.
 !     \item[{[d\_r8]}]
 !          Double precision days.
@@ -582,8 +377,8 @@
 !     TMGn.n.n
 
       ! use optional args for any subset
-      call c_ESMC_TimeSet(time, yr_i4, yr_i8, mm_i4, dd_i4, d_i4, d_i8, &
-                          h_i4, m_i4, s_i4, s_i8, ms_i4, us_i4, ns_i4, &
+      call c_ESMC_TimeSet(time, yr, yr_i8, mm, dd, d, d_i8, &
+                          h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sD, calendar, timeZone, rc)
 
@@ -591,151 +386,198 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGetCalendarCopy - Get copy of associated calendar
+! !IROUTINE: ESMF_TimeGet - Get value in user-specified units
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGetCalendarCopy(time, calendar, rc)
+      subroutine ESMF_TimeGet(time, yr, yr_i8, &
+                                    mm, dd, &
+                                    d, d_i8, &
+                                    h, m, &
+                                    s, s_i8, &
+                                    ms, us, ns, &
+                                    d_r8, h_r8, m_r8, s_r8, &
+                                    ms_r8, us_r8, ns_r8, &
+                                    sN, sD, &
+                                    calendar,   timeZone, &
+                                    timeString, dayOfWeek, dayOfMonth, &
+                                    midMonth,   dayOfYear, dayOfYear_r8, &
+                                    dayOfYear_intvl, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      type(ESMF_Calendar), intent(out) :: calendar
-      integer, intent(out), optional :: rc
+      type(ESMF_Time),         intent(in)            :: time
+      integer(ESMF_IKIND_I4),  intent(out), optional :: yr
+      integer(ESMF_IKIND_I8),  intent(out), optional :: yr_i8
+      integer,                 intent(out), optional :: mm
+      integer,                 intent(out), optional :: dd
+      integer(ESMF_IKIND_I4),  intent(out), optional :: d
+      integer(ESMF_IKIND_I8),  intent(out), optional :: d_i8
+      integer(ESMF_IKIND_I4),  intent(out), optional :: h
+      integer(ESMF_IKIND_I4),  intent(out), optional :: m
+      integer(ESMF_IKIND_I4),  intent(out), optional :: s
+      integer(ESMF_IKIND_I8),  intent(out), optional :: s_i8
+      integer(ESMF_IKIND_I4),  intent(out), optional :: ms
+      integer(ESMF_IKIND_I4),  intent(out), optional :: us
+      integer(ESMF_IKIND_I4),  intent(out), optional :: ns
+      real(ESMF_IKIND_R8),     intent(out), optional :: d_r8
+      real(ESMF_IKIND_R8),     intent(out), optional :: h_r8
+      real(ESMF_IKIND_R8),     intent(out), optional :: m_r8
+      real(ESMF_IKIND_R8),     intent(out), optional :: s_r8
+      real(ESMF_IKIND_R8),     intent(out), optional :: ms_r8
+      real(ESMF_IKIND_R8),     intent(out), optional :: us_r8
+      real(ESMF_IKIND_R8),     intent(out), optional :: ns_r8
+      integer(ESMF_IKIND_I4),  intent(out), optional :: sN
+      integer(ESMF_IKIND_I4),  intent(out), optional :: sD
+      type(ESMF_Calendar),     intent(out), optional :: calendar
+      integer,                 intent(out), optional :: timeZone
+      character (len=*),       intent(out), optional :: timeString
+      integer,                 intent(out), optional :: dayOfWeek
+      integer,                 intent(out), optional :: dayOfMonth
+      type(ESMF_Time),         intent(out), optional :: midMonth
+      integer(ESMF_IKIND_I4),  intent(out), optional :: dayOfYear
+      real(ESMF_IKIND_R8),     intent(out), optional :: dayOfYear_r8
+      type(ESMF_TimeInterval), intent(out), optional :: dayOfYear_intvl
+      integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get copy of the associated {\tt ESMF\_Calendar}.
+!     Get the value of the {\tt ESMF\_Time} in units specified by the user
+!     via F90 optional arguments.
+!
+!     Time manager represents and manipulates time internally with integers
+!     to maintain precision. Hence, user-specified floating point values are
+!     converted internally from integers.
+!
+!     Units are bound (normalized) to the next larger unit specified.  For
+!     example, if a time is defined to be 2:00 am on a particular date, then
+!     {\tt ESMF\_TimeGet(h = hours, s = seconds)} would return
+!       {\tt hours = 2}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeGet(s=seconds)} would return
+!       {\tt seconds = 7200}.
+!
+!     See {\tt ../include/ESMC\_BaseTime.h} and {\tt ../include/ESMC\_Time.h} 
+!     for complete description.
+!
+!     For timeString, convert {\tt ESMF\_Time}'s value into ISO 8601
+!     format YYYY-MM-DDThh:mm:ss.
+!     
+!     For dayOfWeek, get the day of the week the given {\tt ESMF\_Time}
+!     instant falls on.  ISO 8601 standard:  Monday = 1 through Sunday = 7.
+!
+!     For dayOfMonth, get the day of the month the {\tt ESMF\_Time} instant
+!     falls on (1-31).
+!
+!     For midMonth, get the middle time instant of the month the given
+!     {\tt ESMF\_Time} instant falls on.
+!
+!     For dayOfYear, get the day of the year the given {\tt ESMF\_Time}
+!     instant falls on (1-365).  Returned as an integer value.
+!
+!     For dayOfYear\_r8, get the day of the year the given {\tt ESMF\_Time}
+!     instant falls on (1.x-365.x).  Returned as floating point value;
+!     fractional part represents the time of day. 
+!
+!     For dayOfYear\_intvl, get the day of the year the given {\tt ESMF\_Time}
+!     instant falls on (1-365).  Returned as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          The object instance to query.
-!     \item[{calendar}]
-!          Associated {\tt ESMF\_Calendar}.
+!     \item[{[yr]}]
+!          Integer year CCYR (>= 32-bit).
+!     \item[{[yr\_i8]}]
+!          Integer year CCYR (large, >= 64-bit).
+!     \item[{[mm]}]
+!          Integer month 1-12.
+!     \item[{[dd]}]
+!          Integer day of the month 1-31.
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).
+!     \item[{[h]}]
+!          Integer hours.
+!     \item[{[m]}]
+!          Integer minutes.
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).
+!     \item[{[ms]}]
+!          Integer milliseconds.
+!     \item[{[us]}]
+!          Integer microseconds.
+!     \item[{[ns]}]
+!          Integer nanoseconds.
+!     \item[{[d\_r8]}]
+!          Double precision days.
+!     \item[{[h\_r8]}]
+!          Double precision hours.
+!     \item[{[m\_r8]}]
+!          Double precision minutes.
+!     \item[{[s\_r8]}]
+!          Double precision seconds.
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.
+!     \item[{[sN]}]
+!          Integer fractional seconds - numerator.
+!     \item[{[sD]}]
+!          Integer fractional seconds - denominator.
+!     \item[{[calendar]}]
+!          Associated {\tt Calendar}.
+!     \item[{[timeZone]}]
+!          Associated timezone (hours offset from GMT, e.g. EST = -5).
+!     \item[{[timeString]}]
+!          Convert time value to ISO 8601 format string YYYY-MM-DDThh:mm:ss.
+!     \item[{[dayOfWeek]}]
+!          Get the time instant's day of the week (1-7).
+!     \item[{[dayOfMonth]}]
+!          The time instant's day of the month (1-31).
+!     \item[{[MidMonth]}]
+!          The given time instant's middle-of-the-month time instant.
+!     \item[{[dayOfYear]}]
+!          The {\tt ESMF\_Time} instant's integer day of the year (1-365).
+!     \item[{[dayOfYear\_r8]}]
+!          The {\tt ESMF\_Time} instant's floating point day of the year
+!          (1.x-365.x).
+!     \item[{[dayOfYear\_intvl]}]
+!          The {\tt ESMF\_Time} instant's day of the year (1-365) as an
+!          {\tt ESMF\_TimeInterval}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
-!     TMGn.n.n
+!     TMG2.1, TMG2.5.1, TMG2.5.6
 
-      call c_ESMC_TimeGetCalendarCopy(time, calendar, rc)
+      ! use optional args for any subset
+      call c_ESMC_TimeGet(time, yr, yr_i8, mm, dd, d, d_i8, &
+                          h, m, s, s_i8, ms, us, ns, &
+                          d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
+                          sN, sD, calendar, timeZone, timeString, dayOfWeek, &
+                          dayOfMonth, MidMonth, dayOfYear, dayOfYear_r8, &
+                          dayOfYear_intvl, rc)
     
-      end subroutine ESMF_TimeGetCalendarCopy
+      end subroutine ESMF_TimeGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGetCalendarPtr - Get pointer to associated calendar
+! !IROUTINE: ESMF_TimeIsSameCalendar - Compare calendars of two time instants
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGetCalendarPtr(time, calendar, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      type(ESMF_Pointer), intent(out) :: calendar
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get pointer to the associated {\tt ESMF\_Calendar}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[{calendar}]
-!          Pointer to associated {\tt ESMF\_Calendar}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-      call c_ESMC_TimeGetCalendarPtr(time, calendar, rc)
-    
-      end subroutine ESMF_TimeGetCalendarPtr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeSetCalendarPtr - Set associated calendar
-
-! !INTERFACE:
-      subroutine ESMF_TimeSetCalendarPtr(time, calendar, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
-      type(ESMF_Calendar), intent(in) :: calendar
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Set the associated {\tt ESMF\_Calendar} by passing its pointer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to set.
-!     \item[{calendar}]
-!          Associated {\tt ESMF\_Calendar}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-      call c_ESMC_TimeSetCalendarPtr(time, calendar, rc)
-    
-      end subroutine ESMF_TimeSetCalendarPtr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeSetCalendarPtrPtr - Set associated calendar
-
-! !INTERFACE:
-      subroutine ESMF_TimeSetCalendarPtrPtr(time, calendar, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
-      type(ESMF_Pointer), intent(in) :: calendar
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Set the associated {\tt ESMF\_Calendar} by passing the address of
-!     its pointer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to set.
-!     \item[{calendar}]
-!          Associated {\tt ESMF\_Calendar} pointer.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-      call c_ESMC_TimeSetCalendarPtrPtr(time, calendar, rc)
-    
-      end subroutine ESMF_TimeSetCalendarPtrPtr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeIsSameCal - Compare calendars of two time instants
-
-! !INTERFACE:
-      function ESMF_TimeIsSameCal(time1, time2, rc)
+      function ESMF_TimeIsSameCalendar(time1, time2, rc)
 
 ! !RETURN VALUE:
-      logical :: ESMF_TimeIsSameCal
+      logical :: ESMF_TimeIsSameCalendar
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-      integer, intent(out), optional :: rc
+      type(ESMF_Time), intent(in)            :: time1
+      type(ESMF_Time), intent(in)            :: time2
+      integer,         intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Returns true if both {\tt ESMF\_Time}'s {\tt ESMF\_Calendar}s are
@@ -755,319 +597,16 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
-      call c_ESMC_TimeIsSameCal(time1, time2, ESMF_TimeIsSameCal, rc)
+      call c_ESMC_TimeIsSameCalendar(time1, time2, ESMF_TimeIsSameCalendar, rc)
     
-      end function ESMF_TimeIsSameCal
+      end function ESMF_TimeIsSameCalendar
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGetTimezone - Get time instant's time zone
+! !IROUTINE: ESMF_TimeSyncToRealTime - Get system real time (wall clock time)
 !
 ! !INTERFACE:
-      subroutine ESMF_TimeGetTimezone(time, timeZone, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      integer, intent(out) :: timeZone
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the time zone of the given {\tt ESMF\_Time} instant.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[{timeZone}]
-!          {\tt ESMF\_Time} instant's time zone.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.5.1
-
-      call c_ESMC_TimeGetTimezone(time, timeZone, rc)
-
-      end subroutine ESMF_TimeGetTimezone
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeSetTimezone - Set time instant's time zone
-!
-! !INTERFACE:
-      subroutine ESMF_TimeSetTimezone(time, timeZone, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
-      integer, intent(in) :: timeZone
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Set the time zone of the given {\tt ESMF\_Time} instant.
-!     Default is 0 for UTC time zone (Greenwich Mean Time).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to set.
-!     \item[{timeZone}]
-!          {\tt ESMF\_Time} instant's time zone.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.5.1
-
-      call c_ESMC_TimeSetTimezone(time, timeZone, rc)
-
-      end subroutine ESMF_TimeSetTimezone
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeGetString - Get time instant value in string format
-
-! !INTERFACE:
-      subroutine ESMF_TimeGetString(time, timeString, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      character, intent(out) :: timeString(:)
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Convert {\tt ESMF\_Time}'s value into ISO 8601 format YYYY-MM-DDThh:mm:ss.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to convert.
-!     \item[timeString]
-!          The string to return.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.4.7
-
-      call c_ESMC_TimeGetString(time, timeString, rc)
-
-      end subroutine ESMF_TimeGetString
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetDayOfYearR - Get time instant's day of the year as a floating point value
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetDayOfYearR(time, dayOfYear, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      real(ESMF_IKIND_R8), intent(out) :: dayOfYear
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the day of the year the given {\tt ESMF\_Time} instant falls on
-!     (1.x-365.x).  Returned as floating point value; fractional part
-!     represents the time of day. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[dayOfYear]
-!          The {\tt ESMF\_Time} instant's day of the year (1-365).
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.5.2
-
-      call c_ESMC_TimeGetDayOfYearDouble(time, dayOfYear, rc)
-
-      end subroutine ESMF_TimeGetDayOfYearR
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetDayOfYearI - Get time instant's day of the year as an integer value
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetDayOfYearI(time, dayOfYear, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      integer(ESMF_IKIND_I4), intent(out) :: dayOfYear
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the day of the year the given {\tt ESMF\_Time} instant falls on
-!     (1-365).  Returned as an integer value.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[dayOfYear]
-!          The {\tt ESMF\_Time} instant's day of the year (1-365).
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      call c_ESMC_TimeGetDayOfYearInteger(time, dayOfYear, rc)
-
-      end subroutine ESMF_TimeGetDayOfYearI
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetDayOfYearTimeIntvl - Get time instant's day of the year as a Time Interval
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetDayOfYearTimeIntvl(time, dayOfYear, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      type(ESMF_TimeInterval), intent(out) :: dayOfYear
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the day of the year the given {\tt ESMF\_Time} instant falls on
-!     (1-365).  Returned as an {\tt ESMF\_TimeInterval}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[dayOfYear]
-!          The {\tt Time} instant's day of the year as a
-!            {\tt ESMC\_TimeInterval}.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      call c_ESMC_TimeGetDayOfYearTimeInt(time, dayOfYear, rc)
-
-      end subroutine ESMF_TimeGetDayOfYearTimeIntvl
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetDayOfWeek - Get time instant's day of the week
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetDayOfWeek(time, dayOfWeek, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      integer, intent(out) :: dayOfWeek
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the day of the week the given {\tt ESMF\_Time} instant falls on.
-!     ISO 8601 standard:  Monday = 1 through Sunday = 7.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[dayOfWeek]
-!          The time instant's day of the week (1-7).
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.5.3
-    
-      call c_ESMC_TimeGetDayOfWeek(time, dayOfWeek, rc)
-
-      end subroutine ESMF_TimeGetDayOfWeek
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetDayOfMonth - Get time instant's day of the month
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetDayOfMonth(time, dayOfMonth, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      integer, intent(out) :: dayOfMonth
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the day of the month the {\tt ESMF\_Time} instant falls on (1-31).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[dayOfMonth]
-!          The time instant's day of the month (1-31).
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.5.4
-
-      call c_ESMC_TimeGetDayOfMonth(time, dayOfMonth, rc)
-
-      end subroutine ESMF_TimeGetDayOfMonth
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetMidMonth - Get time instant's middle of the month
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetMidMonth(time, midMonth, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      type(ESMF_Time), intent(out) :: midMonth
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Get the middle time instant of the month the given {\tt ESMF\_Time}
-!     instant falls on.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to query.
-!     \item[MidMonth]
-!          The given time instant's middle-of-the-month time instant.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG2.5.5
-
-      call c_ESMC_TimeGetMidMonth(time, midMonth, rc)
-
-      end subroutine ESMF_TimeGetMidMonth
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeGetRealTime - Get system real time (wall clock time)
-!
-! !INTERFACE:
-      subroutine ESMF_TimeGetRealTime(time, rc)
+      subroutine ESMF_TimeSyncToRealTime(time, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
@@ -1089,9 +628,9 @@
 ! !REQUIREMENTS:
 !     TMG2.5.7
 
-      call c_ESMC_TimeGetRealTime(time, rc)
+      call c_ESMC_TimeSyncToRealTime(time, rc)
 
-      end subroutine ESMF_TimeGetRealTime
+      end subroutine ESMF_TimeSyncToRealTime
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1104,7 +643,7 @@
       type(ESMF_Time) :: ESMF_TimeInc
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
+      type(ESMF_Time),         intent(in) :: time
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
@@ -1144,7 +683,7 @@
       type(ESMF_Time) :: ESMF_TimeDec
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
+      type(ESMF_Time),         intent(in) :: time
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
@@ -1442,13 +981,13 @@
       subroutine ESMF_TimeReadRestart(time, s, sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(out) :: time
-      integer(ESMF_IKIND_I8), intent(in) :: s
-      integer, intent(in) :: sN
-      integer, intent(in) :: sD
-      type(ESMF_Calendar), intent(in) :: calendar
-      integer, intent(in) :: timeZone
-      integer, intent(out), optional :: rc
+      type(ESMF_Time),        intent(out) :: time
+      integer(ESMF_IKIND_I8), intent(in)  :: s
+      integer(ESMF_IKIND_I4), intent(in)  :: sN
+      integer(ESMF_IKIND_I4), intent(in)  :: sD
+      type(ESMF_Calendar),    intent(in)  :: calendar
+      integer,                intent(in)  :: timeZone
+      integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Perform a restore on a {\tt ESMF\_Time}'s properties.
@@ -1487,13 +1026,13 @@
       subroutine ESMF_TimeWriteRestart(time, s, sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
+      type(ESMF_Time),        intent(in)  :: time
       integer(ESMF_IKIND_I8), intent(out) :: s
-      integer, intent(out) :: sN
-      integer, intent(out) :: sD
-      type(ESMF_Calendar), intent(out) :: calendar
-      integer, intent(out) :: timeZone
-      integer, intent(out), optional :: rc
+      integer(ESMF_IKIND_I4), intent(out) :: sN
+      integer(ESMF_IKIND_I4), intent(out) :: sD
+      type(ESMF_Calendar),    intent(out) :: calendar
+      integer,                intent(out) :: timeZone
+      integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Perform a save on a {\tt ESMF\_Time}'s properties.
@@ -1529,12 +1068,12 @@
 ! !IROUTINE:  ESMF_TimeValidate - Validate a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_TimeValidate(time, opts, rc)
+      subroutine ESMF_TimeValidate(time, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      character (len=*), intent(in), optional :: opts
-      integer, intent(out), optional :: rc
+      type(ESMF_Time),   intent(in)            :: time
+      character (len=*), intent(in),  optional :: options
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Perform a validation check on a {\tt ESMF\_Time}'s properties.
@@ -1543,7 +1082,7 @@
 !     \begin{description}
 !     \item[time]
 !          {\tt ESMF\_Time} instant to validate.
-!     \item[{[opts]}]
+!     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1553,7 +1092,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
    
-      call c_ESMC_TimeValidate(time, opts, rc)
+      call c_ESMC_TimeValidate(time, options, rc)
 
       end subroutine ESMF_TimeValidate
 
@@ -1562,12 +1101,12 @@
 ! !IROUTINE:  ESMF_TimePrint - Print out a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_TimePrint(time, opts, rc)
+      subroutine ESMF_TimePrint(time, options, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      character (len=*), intent(in), optional :: opts
-      integer, intent(out), optional :: rc
+      type(ESMF_Time),   intent(in)            :: time
+      character (len=*), intent(in),  optional :: options
+      integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     To support testing/debugging, print out a {\tt ESMF\_Time}'s
@@ -1577,7 +1116,7 @@
 !     \begin{description}
 !     \item[time]
 !          {\tt ESMF\_Time} instant to print out.
-!     \item[{[opts]}]
+!     \item[{[options]}]
 !          Print options.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1587,7 +1126,7 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
    
-      call c_ESMC_TimePrint(time, opts, rc)
+      call c_ESMC_TimePrint(time, options, rc)
 
       end subroutine ESMF_TimePrint
 

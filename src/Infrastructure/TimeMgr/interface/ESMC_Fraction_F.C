@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.8 2003/07/25 19:36:08 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.9 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,37 +36,45 @@ extern "C" {
        // keep this for shallow classes, get rid of create/destroy above
        void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, int *arg1, int *arg2,
                                                   int *arg3, int *status) {
-           *status = (ptr)->ESMC_FractionSet(*arg1, *arg2, *arg3);
+          int rc = (ptr)->ESMC_FractionSet(*arg1, *arg2, *arg3);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionget)(ESMC_Fraction *ptr, 
                                          <value> *value, int *status} {
-           *status = (ptr)->ESMC_FractionGet(&value);
+          int rc = (ptr)->ESMC_FractionGet(&value);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, 
                                          <value> *value, int *status} {
-           *status = (ptr)->ESMC_FractionSet(value);
+          int rc = (ptr)->ESMC_FractionSet(value);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionreadrestart)(ESMC_Fraction *ptr, int *arg1,
                                             int *arg2, int *arg3, int *status) {
-           *status = (ptr)->ESMC_Fraction::ESMC_ReadRestart(*arg1, *arg2, *arg3);
+          int rc = (ptr)->ESMC_Fraction::ESMC_ReadRestart(*arg1, *arg2, *arg3);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionwriterestart)(ESMC_Fraction *ptr, int *arg1,
                                             int *arg2, int *arg3, int *status) {
-           *status = (ptr)->ESMC_Fraction::ESMC_WriteRestart(arg1, arg2, arg3);
+          int rc = (ptr)->ESMC_Fraction::ESMC_WriteRestart(arg1, arg2, arg3);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr, const char *opts,
+       void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr,
+                                         const char *options,
                                          int *status) {
-           *status = (ptr)->ESMC_Fraction::ESMC_Validate(opts);
+          int rc = (ptr)->ESMC_Fraction::ESMC_Validate(options);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, const char *opts,
+       void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, const char *options,
                                       int *status) {
-           *status = (ptr)->ESMC_Fraction::ESMC_Print(opts);
+          int rc = (ptr)->ESMC_Fraction::ESMC_Print(options);
+          if (status != ESMC_NULL_POINTER) *status = rc;
        }
 #endif
 };

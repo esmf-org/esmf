@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.16 2003/07/25 19:58:26 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.17 2003/08/29 05:31:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 //      type per application (for reference only, like a wall calendar)
 //      But may have multiples for convienience such as one per component.
 //    - Generic enough to define for any planetary body
-//    - if SecondsPerDay != 86400, then how are minutes and hours defined ?
+//    - if secondsPerDay != 86400, then how are minutes and hours defined ?
 //      Assume always minute=60 seconds; hour=3600 seconds
 //
 //-------------------------------------------------------------------------
@@ -78,7 +78,7 @@
 
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
-                        ESMC_CAL_JULIAN,
+                        ESMC_CAL_JULIANDAY,
                         ESMC_CAL_NOLEAP,      // like Gregorian, except
                                               //   Feb always has 28 days
                         ESMC_CAL_360DAY,      // 12 months, 30 days each
@@ -103,39 +103,48 @@ class ESMC_Calendar {
 
   private:   // corresponds to F90 module 'type ESMF_Calendar' members
 
-    ESMC_CalendarType Type;    // Calendar type
+    ESMC_CalendarType type;    // Calendar type
 
-    int DaysPerMonth[MONTHS_PER_YEAR];
-    int SecondsPerDay;
-    int SecondsPerYear;
-    struct DaysPerYear_s
+    int daysPerMonth[MONTHS_PER_YEAR];
+    ESMF_IKIND_I4 secondsPerDay;
+    ESMF_IKIND_I4 secondsPerYear;
+    struct daysPerYear_s
     {
-        int D;        // integer number of days per year
-        int Dn;       // fractional number of days per year (numerator)
-        int Dd;       //                                    (denominator)
-    } DaysPerYear;    // e.g. for Venus, D=0, Dn=926, Dd=1000
+        ESMF_IKIND_I4 d;    // integer number of days per year
+        ESMF_IKIND_I4 dN;   // fractional number of days per year (numerator)
+        ESMF_IKIND_I4 dD;   //                                    (denominator)
+    } daysPerYear;    // e.g. for Venus, d=0, dN=926, dD=1000
 
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
 
     int ESMC_CalendarSet(ESMC_CalendarType type);
-    int ESMC_CalendarSetGeneric(int *daysPerMonth, int secondsPerDay,
-                                int daysPerYear,   int daysPerYearDn,
-                                int daysPerYearDd);
+    int ESMC_CalendarSetGeneric(int          *daysPerMonth,
+                                ESMF_IKIND_I4 secondsPerDay,
+                                ESMF_IKIND_I4 daysPerYear,
+                                ESMF_IKIND_I4 daysPerYearDn,
+                                ESMF_IKIND_I4 daysPerYearDd);
+    int ESMC_CalendarGet(ESMC_CalendarType *type,
+                         int               *daysPerMonth,
+                         ESMF_IKIND_I4     *secondsPerDay,
+                         ESMF_IKIND_I4     *secondsPerYear,
+                         ESMF_IKIND_I4     *daysPerYear,
+                         ESMF_IKIND_I4     *daysPerYeardN,
+                         ESMF_IKIND_I4     *daysPerYeardD);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
-    int ESMC_CalendarConvertToTime(ESMF_IKIND_I8 YR, int MM, int DD,
-                                   ESMF_IKIND_I8 D, ESMC_BaseTime *T) const;
-    int ESMC_CalendarConvertToDate(const ESMC_BaseTime *T,
-                             int *YR=0, ESMF_IKIND_I8 *YRl=0,
-                             int *MM=0, int *DD=0,
-                             int *D=0, ESMF_IKIND_I8 *Dl=0,
-                             double *d_=0) const;
+    int ESMC_CalendarConvertToTime(ESMF_IKIND_I8 yr, int mm, int dd,
+                                   ESMF_IKIND_I8 d, ESMC_BaseTime *t) const;
+    int ESMC_CalendarConvertToDate(const ESMC_BaseTime *t,
+                             ESMF_IKIND_I4 *yr=0, ESMF_IKIND_I8 *yr_i8=0,
+                             int *mm=0, int *dd=0,
+                             ESMF_IKIND_I4 *d=0, ESMF_IKIND_I8 *d_i8=0,
+                             ESMF_IKIND_R8 *d_r8=0) const;
 
     // TODO:  add method to convert calendar interval to core time ?
 
@@ -143,13 +152,19 @@ class ESMC_Calendar {
 
     // for persistence/checkpointing
     int ESMC_CalendarReadRestart(ESMC_CalendarType type,
-                                 int *daysPerMonth, int secondsPerDay,
-                                 int daysPerYear,   int daysPerYearDn,
-                                 int daysPerYearDd);
+                                 int          *daysPerMonth,
+                                 ESMF_IKIND_I4 secondsPerDay,
+                                 ESMF_IKIND_I4 secondsPerYear,
+                                 ESMF_IKIND_I4 daysPerYear,
+                                 ESMF_IKIND_I4 daysPerYeardN,
+                                 ESMF_IKIND_I4 daysPerYeardD);
     int ESMC_CalendarWriteRestart(ESMC_CalendarType *type,
-                                  int *daysPerMonth,  int *secondsPerDay,
-                                  int *daysPerYear,   int *daysPerYearDn,
-                                  int *daysPerYearDd) const;
+                                  int           *daysPerMonth,
+                                  ESMF_IKIND_I4 *secondsPerDay,
+                                  ESMF_IKIND_I4 *secondsPerYear,
+                                  ESMF_IKIND_I4 *daysPerYear,
+                                  ESMF_IKIND_I4 *daysPerYeardN,
+                                  ESMF_IKIND_I4 *daysPerYeardD) const;
 
     // internal validation
     int ESMC_CalendarValidate(const char *options=0) const;
@@ -159,9 +174,10 @@ class ESMC_Calendar {
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
-    ESMC_Calendar(ESMC_CalendarType Type);
-    ESMC_Calendar(int *daysPerMonth, int secondsPerDay,
-                  int daysPerYear,   int daysPerYearDn, int daysPerYearDd);
+    ESMC_Calendar(ESMC_CalendarType type);
+    ESMC_Calendar(int *daysPerMonth, ESMF_IKIND_I4 secondsPerDay,
+                  ESMF_IKIND_I4 daysPerYear, ESMF_IKIND_I4 daysPerYeardN,
+                  ESMF_IKIND_I4 daysPerYearDd);
     ~ESMC_Calendar(void);
 
  // < declare the rest of the public interface methods here >
