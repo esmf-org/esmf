@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.20 2003/04/02 19:51:52 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.21 2003/04/03 17:41:06 flanigan Exp $ 
+ALL: alldoc 
 
 
 
