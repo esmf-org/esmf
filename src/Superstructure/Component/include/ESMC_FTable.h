@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.4 2003/02/27 21:28:25 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.5 2003/04/01 23:47:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,31 +47,33 @@
 
 // !PRIVATE TYPES:
 
- enum ftype { FT_VOID=1, FT_INT, FT_2INT, FT_INTP, FT_VOIDP, FT_VOIDPINTP };
- typedef int (*VoidFunc)(void);
- typedef int (*IntFunc)(int);
- typedef int (*Int2Func)(int, int);
- typedef int (*IntPtrFunc)(int *);
- typedef int (*VoidPtrFunc)(void *);
- typedef int (*VoidPtrIntPtrFunc)(void *, int *);
- struct funcinfo {
-    char *funcname;
-    void *funcptr;
-    void *funcarg1;
-    void *funcarg2;
-    char funcblock[16];    // TODO: make this extensible
-    enum ftype ftype;
- };
+enum ftype { FT_VOID=1, FT_INT, FT_2INT, FT_INTP, FT_VOIDP, FT_VOIDPINTP,
+              FT_INITFINAL, FT_RUN, FT_GRID, FT_CPL };
+typedef void (*VoidFunc)(void);
+typedef void (*IntFunc)(int);
+typedef void (*Int2Func)(int, int);
+typedef void (*IntPtrFunc)(int *);
+typedef void (*VoidPtrFunc)(void *);
+typedef void (*VoidPtrIntPtrFunc)(void *, int *);
+typedef void (*GridCall)(void *, void *, void *, void *, int *);
+typedef void (*CplCall)(void *, void *, void *, int *);
 
- enum dtype { DT_VOIDP=1 };
- struct datainfo {
-    char *dataname;
-    void *dataptr;
-    enum dtype dtype;
- };
+struct funcinfo {
+   char *funcname;
+   void *funcptr;
+   void *funcarg[16];
+   enum ftype ftype;
+};
+
+enum dtype { DT_VOIDP=1 };
+struct datainfo {
+   char *dataname;
+   void *dataptr;
+   enum dtype dtype;
+};
 
  // class declaration type
- class ESMC_FTable {
+class ESMC_FTable {
 
    private:
     int funccount;
@@ -81,11 +83,14 @@
     int dataalloc;
     struct datainfo *data;
 
-  public:
+   public:
 
     int ESMC_FTableSetFuncPtr(char *name, void *func, enum ftype ftype);
+    int ESMC_FTableSetFuncPtr(char *name, void *func);
+    int ESMC_FTableSetFuncPtr(char *name, void *func, void *arg1, int *arg2);
     int ESMC_FTableSetFuncPtr(char *name, void *func, enum ftype ftype, 
-                                                      void *arg1, void *arg2);
+                                                  int acount, void **arglist);
+    int ESMC_FTableSetFuncArgs(char *name, int acount, void **arglist);
     int ESMC_FTableSetDataPtr(char *name, void *data, enum dtype dtype);
 
     int ESMC_FTableGetFuncPtr(char *name, void **func, enum ftype *ftype);

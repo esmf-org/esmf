@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.8 2003/02/27 21:28:26 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.9 2003/04/01 23:47:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,57 @@
 //
 //EOP
 
+// make a copy of a string, trim off trailing blanks, and make sure 
+// it's null terminated.  if phase > 0, add it as a 0 filled 3 digit
+// number. this char string must be deleted when finished.
+static void newtrim(char *c, int clen, int *phase, char **newc) {
+     char *cp, *ctmp, *ctmpp;
+     int hasphase = 0;
+     int pad=4;
+
+     //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
+     if ((phase != NULL) && (*phase > 0))  {
+         pad = 8;
+         hasphase++;
+     }
+
+     ctmp = new char[clen+pad];
+     strncpy(ctmp, c, clen);
+     (ctmp)[clen] = '\0';
+     for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
+         *cp = '\0';
+  
+     if (hasphase) {
+         ctmpp = new char[strlen(ctmp) + pad];
+         sprintf(ctmpp, "%s%03d", ctmp, *phase);
+         delete[] ctmp;
+         *newc = ctmpp;
+     } else
+         *newc = ctmp;
+
+     //printf("out newtrim, newc = '%s'\n", *newc);
+     return;
+
+}
+
+static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase, 
+                                  enum ftype ftype, void *func, int *status) {
+     char *name;
+     int *tablerc = new int;
+     void *f90comp = ptr;
+     ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+
+     newtrim(tname, slen, phase, &name);
+         
+     //printf("SetTypedEP: setting function name = '%s'\n", name);
+     if (ftype == FT_VOIDPINTP)
+         *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, f90comp, tablerc);
+     else
+         *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
+
+     //delete[] name;
+}
+
 
 // these interface subroutine names MUST be in lower case
 extern "C" {
@@ -59,20 +110,21 @@ extern "C" {
      // type.  the second dereference finds the ftable pointer which must
      // be the first entry in the comp derived type.
 
-     void FTN(esmf_compregister)(void *ptr, int (*func)(), int *status) {
+     // ---------- Set Services ---------------
+     void FTN(esmf_compsetservices)(void *ptr, int (*func)(), int *status) {
          int rc, funcrc;
          int *tablerc = new int;
          void *f90comp = ptr;
          ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
          
-         rc = (tabptr)->ESMC_FTableExtend(8, 0); // room for 8 funcs, 0 data
+         rc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
          if (rc != ESMF_SUCCESS) {
              *status = rc;
              return;
          }
 
          rc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
-                              FT_VOIDPINTP, (void *)f90comp, (void *)tablerc);
+                                                        f90comp, tablerc);
          if (rc != ESMF_SUCCESS) {
              *status = rc;
              return;
@@ -97,43 +149,89 @@ extern "C" {
          // return; 
      }
 
-     // TODO: type used to be a string, which is more general, but i'm having
-     // problems passing strings between F90 routines directly to C w/o
-     // prototypes (which is necessary since func can't be a typed variable)
-     void FTN(esmf_compsetroutine)(void *ptr, int *type,
-                                     int *phase, void *func, int *status) {
-         char *name;
-         int *tablerc = new int;
-         void *f90comp = ptr;
-         ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
-
-         switch(*type) {
-           case ESMF_INIT:   name = "init";  break;
-           case ESMF_RUN:    name = "run";   break;
-           case ESMF_FINAL:  name = "final"; break;
-           default:
-             printf("compsetroutine: unrecognized routine type %d\n", *type);
-             *status = ESMF_FAILURE;
-             return;
-         }
-         //printf("SetRoutine: setting function name = '%s'\n", name);
-         if (*phase == 1)
-             *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, 
-                              FT_VOIDPINTP, (void *)f90comp, (void *)tablerc);
-         else {
-             char *tbuf = new char[strlen(name) + 4];
-             sprintf(tbuf, "%s%02d", name, *phase);
-             *status = (tabptr)->ESMC_FTableSetFuncPtr(tbuf, func, 
-                              FT_VOIDPINTP, (void *)f90comp, (void *)tablerc);
-         }
+     void FTN(esmf_gridcompsetservices)(void *ptr, int (*func)(), int *status) {
+         esmf_compsetservices(ptr, func, status);
+     }
+     void FTN(esmf_cplcompsetservices)(void *ptr, int (*func)(), int *status) {
+         esmf_compsetservices(ptr, func, status);
      }
 
-     // TODO: ditto as above
-     void FTN(esmf_compsetdataptr)(ESMC_FTable ***ptr, int *type,
-                                                 void *datap, int *status) {
+     // ---------- Set Entry Point ---------------
+     void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname,
+                               void *func, int *phase, int *status, int slen) {
+         ESMC_SetTypedEP(ptr, tname, slen, phase, FT_GRID, func, status);
+     }
+     void FTN(esmf_cplcompsetentrypoint)(void *ptr, char *tname,
+                               void *func, int *phase, int *status, int slen) {
+         ESMC_SetTypedEP(ptr, tname, slen, phase, FT_CPL, func, status);
+     }
+     void FTN(esmf_compsetentrypoint)(void *ptr, char *tname,
+                             void *func, int *phase, int *status, int slen) {
+         ESMC_SetTypedEP(ptr, tname, slen, phase, FT_VOIDPINTP, func,  status);
+     }
+
+
+     // ---------- Set Internal State ---------------
+     static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
          char *name = "localdata";
-         *status = (**ptr)->ESMC_FTableSetDataPtr(name, datap, DT_VOIDP);
+         enum dtype dtype = DT_VOIDP;
+
+         *status = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
      }
+
+     void FTN(esmf_gridcompsetinternalstate)(ESMC_FTable ***ptr, 
+                                                 void **datap, int *status) {
+         ESMC_SetDP(ptr, datap, status);
+     }
+     void FTN(esmf_cplcompsetinternalstate)(ESMC_FTable ***ptr, 
+                                                 void **datap, int *status) {
+         ESMC_SetDP(ptr, datap, status);
+     }
+
+     void FTN(esmf_compsetinternalstate)(ESMC_FTable ***ptr, char *name, 
+                                         void **datap, int *status, int slen) {
+         char *tbuf; 
+         enum dtype dtype = DT_VOIDP;
+
+         newtrim(name, slen, NULL, &tbuf);
+         //printf("after newtrim, name = '%s'\n", tbuf);
+
+         *status = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
+  
+         delete[] tbuf;
+     }
+
+     // ---------- Get Internal State ---------------
+     static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
+         char *name = "localdata";
+         enum dtype *dtype;
+
+         *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, dtype);
+ 
+     }
+
+     void FTN(esmf_gridcompgetinternalstate)(ESMC_FTable ***ptr, 
+                                                 void **datap, int *status) {
+         ESMC_GetDP(ptr, datap, status);
+     }
+     void FTN(esmf_cplcompgetinternalstate)(ESMC_FTable ***ptr, 
+                                                 void **datap, int *status) {
+         ESMC_GetDP(ptr, datap, status);
+     }
+
+     void FTN(esmf_compgetinternalstate)(ESMC_FTable ***ptr, char *name,
+                                         void **datap, int *status, int slen) {
+         char *tbuf; 
+         enum dtype *dtype;
+
+         newtrim(name, slen, NULL, &tbuf);
+         //printf("after newtrim, name = '%s'\n", tbuf);
+
+         *status = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, dtype);
+  
+         delete[] tbuf;
+     }
+
 
 };
 

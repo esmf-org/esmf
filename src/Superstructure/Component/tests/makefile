@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/28 17:42:31 svasquez Exp $ 
+# $Id: makefile,v 1.8 2003/04/01 23:47:57 nscollins Exp $ 
 
 ALL:  tests
 
@@ -15,18 +15,22 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/Component/tests
 
 TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
+		$(ESMC_TESTDIR)/ESMF_CompRun \
 		$(ESMC_TESTDIR)/ESMF_StateCreate \
 		$(ESMC_TESTDIR)/ESMF_StateUTest
 
-TESTS_RUN     =	RUN_ESMF_ESMF_CompCreate \
+TESTS_RUN     =	RUN_ESMF_CompCreate \
+		RUN_ESMF_CompRun \
 		RUN_ESMF_StateCreate \
 		RUN_ESMF_StateUTest
 
 TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
+		RUN_ESMF_CompRunUNI \
 		RUN_ESMF_StateCreateUNI \
 		RUN_ESMF_StateUTestUNI
 
 TESTS_RM      =	ESMF_CompCreate.rm \
+		ESMF_CompRun.rm \
 		ESMF_StateCreate.rm \
 		ESMF_StateUTest.rm
 
@@ -56,6 +60,26 @@ RUN_ESMF_CompCreateUNI:
 
 ESMF_CompCreate.rm:
 	echo "ESMF_CompCreate.rm target called here."
+
+
+ESMF_UserRun.o: ESMF_UserGComp.o ESMF_UserCComp.o
+
+$(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_UserCComp.o ESMF_CompRun.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
+         ESMF_UserGComp.o ESMF_UserCComp.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
+         ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_CompRun.o ESMF_UserComp.o
+
+RUN_ESMF_CompRun:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CompRun.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
+
+RUN_ESMF_CompRunUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CompRun.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompRun > $(ESMC_TESTDIR)/ESMF_CompRun.stdout
+
+ESMF_CompRun.rm:
+	echo "ESMF_CompRun.rm target called here."
 
 
 #       

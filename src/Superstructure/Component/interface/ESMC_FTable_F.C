@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.1 2003/02/27 21:28:26 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.2 2003/04/01 23:47:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
 #include "ESMC_Base.h"
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
+#include "ESMC_Array.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -34,6 +35,39 @@
 //
 //
 //EOP
+
+// make a copy of a string, trim off trailing blanks, and make sure
+// it's null terminated.  if phase > 0, add it as a 0 filled 3 digit
+// number. this char string must be deleted when finished.
+static void newtrim(char *c, int clen, int *phase, char **newc) {
+     char *cp, *ctmp, *ctmpp;
+     int hasphase = 0;
+     int pad=4;
+
+     //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
+     if ((phase != NULL) && (*phase > 0))  {
+         pad = 8;
+         hasphase++;
+     }
+
+     ctmp = new char[clen+pad];
+     strncpy(ctmp, c, clen);
+     (ctmp)[clen] = '\0';
+     for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
+         *cp = '\0';
+   
+     if (hasphase) {
+         ctmpp = new char[strlen(ctmp) + pad];
+         sprintf(ctmp, "%s%03d", ctmp, *phase);
+         delete[] ctmp;
+         *newc = ctmpp;
+     } else
+ 	 *newc = ctmp;
+
+     //printf("out newtrim, newc = '%s'\n", *newc);
+     return;
+
+}
 
 
 // these interface subroutine names MUST be in lower case
@@ -49,89 +83,140 @@ extern "C" {
      void FTN(c_esmc_ftabledestroy)(ESMC_FTable **ptr, int *status) {
          delete (*ptr);
          *ptr = 0;
-         (*status) = ESMF_SUCCESS;
+         *status = ESMF_SUCCESS;
      }
   
      // call a function 
-     void FTN(c_esmc_ftablecallroutine)(ESMC_FTable **ptr, int *type,
-                                                                 int *status) {
+     void FTN(c_esmc_ftablecallentrypoint)(ESMC_FTable **ptr, char *type, 
+                                         int *phase, int *status, int slen) {
          int funcrc;
          char *name;
+
+         newtrim(type, slen, phase, &name);
+         //printf("after newtrim, name = '%s'\n", name);
 
          // TODO: two return codes here - one is whether we could find
          // the right function to call; the other is the actual return code
          // from the user function itself.
-         switch(*type) {
-           case ESMF_INIT:   name = "init";  break;
-           case ESMF_RUN:    name = "run";   break;
-           case ESMF_FINAL:  name = "final"; break;
-           default:
-             printf("ftablecallroutine, unrecognized routine type %d\n", *type);
-             *status = ESMF_FAILURE;
-             return;
-         }
 
          *status = (*ptr)->ESMC_FTableCallVFuncPtr(name, &funcrc);
+
+         delete[] name;
      }
 
      // get and set routines for both function and data pointers.
      // index them by name.
-     void FTN(c_esmc_ftablegetroutine)(ESMC_FTable **ptr, int *type, 
-                                 void **func, enum ftype *ftype, int *status) {
+     void FTN(c_esmc_ftablegetentrypoint)(ESMC_FTable **ptr, char *type, 
+                       void **func, enum ftype *ftype, int *status, int slen) {
          char *name;
 
-         switch(*type) {
-           case ESMF_INIT:   name = "init";  break;
-           case ESMF_RUN:    name = "run";   break;
-           case ESMF_FINAL:  name = "final"; break;
-           default:
-             printf("ftablegetroutine: unrecognized routine type %d\n", *type);
-             *status = ESMF_FAILURE;
-             return;
-         }
+         newtrim(type, slen, NULL, &name);
+         //printf("after newtrim, name = '%s'\n", name);
 
          *status = (*ptr)->ESMC_FTableGetFuncPtr(name, func, ftype);
+
+         delete[] name;
      }
 
-     void FTN(c_esmc_ftablegetdataptr)(ESMC_FTable **ptr, int *type,
-                                 void **data, enum dtype *dtype, int *status) {
+     void FTN(c_esmc_ftablegetinternalstate)(ESMC_FTable **ptr, char *type,
+                       void **data, enum dtype *dtype, int *status, int slen) {
          char *name;
 
-         switch(*type) {
-           default:
-             name = "localdata";
-         }
+         newtrim(type, slen, NULL, &name);
+         //printf("after newtrim, name = '%s'\n", name);
 
          *status = (*ptr)->ESMC_FTableGetDataPtr(name, data, dtype);
+
+         delete[] name;
      }
 
-     void FTN(c_esmc_ftablesetroutine)(ESMC_FTable **ptr, int *type,
-                                  void *func, enum ftype *ftype, int *status) {
+     void FTN(c_esmc_ftablesetentrypoint)(ESMC_FTable **ptr, char *type,
+                                           void *func, int *status, int slen) {
          char *name;
 
-         switch(*type) {
-           case ESMF_INIT:   name = "init";  break;
-           case ESMF_RUN:    name = "run";   break;
-           case ESMF_FINAL:  name = "final"; break;
-           default:
-             printf("ftablesetroutine: unrecognized routine type %d\n", *type);
-             *status = ESMF_FAILURE;
-             return;
-         }
+         newtrim(type, slen, NULL, &name);
+         //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (*ptr)->ESMC_FTableSetFuncPtr(name, func, *ftype);
+         *status = (*ptr)->ESMC_FTableSetFuncPtr(name, func);
+
+         delete[] name;
      }
 
-     void FTN(c_esmc_ftablesetdataptr)(ESMC_FTable **ptr, int *type,
-                                  void *data, enum dtype *dtype, int *status) {
+     void FTN(c_esmc_ftablesetargs)(ESMC_FTable **ptr, char *type,
+                            int *acount, void **alist, int *status, int slen) {
          char *name;
 
-         switch(*type) {
-           default:
-             name = "localdata";
-         }
+         newtrim(type, slen, NULL, &name);
+         //printf("after newtrim, name = '%s'\n", name);
+
+         *status = (*ptr)->ESMC_FTableSetFuncArgs(name, *acount, alist);
+
+         delete[] name;
+     }
+
+     void FTN(c_esmc_ftablesetgridargs)(ESMC_FTable **ptr, char *type,
+                         int *phase, void *comp, 
+                         void *importstate, void *exportstate,
+	                 void *clock, int *status, int slen) {
+
+         char *fname;
+         int acount = 5;
+         void *alist[5];
+
+         newtrim(type, slen, phase, &fname);
+         //printf("after newtrim, name = '%s'\n", fname);
+
+         alist[0] = (void *)comp;
+         alist[1] = (void *)importstate;
+         alist[2] = (void *)exportstate;
+         alist[3] = (void *)clock;
+         alist[4] = (void *)status;
+
+         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
+
+         delete[] fname;
+     }
+
+     void FTN(c_esmc_ftablesetcplargs)(ESMC_FTable **ptr, char *type,
+                                      int *phase, void *comp, 
+                                      void **statelist, void *clock, 
+                                      int *status, int slen) {
+
+         char *fname;
+         int acount = 4;
+         void *alist[4];
+         void *fred;
+
+         newtrim(type, slen, phase, &fname);
+         //printf("after newtrim, name = '%s'\n", fname);
+
+         // TODO:   hack!!  memory leak!!  just try this code out
+         // to see if it works, then figure out how to fix it.
+         
+         //fred = (void*)(new char[ESMF_F90_PTR_BASE_SIZE]);
+         //memcpy(fred, statelist, ESMF_F90_PTR_BASE_SIZE);
+         alist[0] = (void *)comp;
+         //alist[1] = (void *)fred;
+         alist[1] = (void *)(*statelist);
+         alist[2] = (void *)clock;
+         alist[3] = (void *)status;
+
+         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
+
+         delete[] fname;
+     }
+
+
+     void FTN(c_esmc_ftablesetinternalstate)(ESMC_FTable **ptr, char *type,
+                        void *data, enum dtype *dtype, int *status, int slen) {
+         char *name;
+
+         newtrim(type, slen, NULL, &name);
+         //printf("after newtrim, name = '%s'\n", name);
 
          *status = (*ptr)->ESMC_FTableSetDataPtr(name, data, *dtype);
+
+         delete[] name;
      }
 
 };

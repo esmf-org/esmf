@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.5 2003/03/26 20:44:44 nscollins Exp $
+! $Id: ESMF_CompCreate.F90,v 1.6 2003/04/01 23:47:57 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -19,19 +19,14 @@
 #include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by Comps
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
     use ESMF_CompMod
     
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc
-    integer :: timestep
-    integer, dimension(2) :: pelist
+    integer :: rc
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_DELayout) :: layout
-    type(ESMF_Comp) :: comp1, comp2, comp3, comp4
+    type(ESMF_GridComp) :: comp1
         
 !-------------------------------------------------------------------------
 !   ! Test 1:
@@ -40,34 +35,17 @@
  
     print *, "Component Test 1:"
 
-    pelist = (/ 0, 1 /)
-    layout = ESMF_DELayoutCreate(2, 1, pelist, ESMF_XFAST, rc)
-
     cname = "Atmosphere"
-    comp1 = ESMF_CompCreate(cname, layout=layout, ctype=ESMF_GRIDCOMP, &
-                              mtype=ESMF_ATM, filepath="/usr/local", rc=rc)  
+    comp1 = ESMF_GridCompCreate(name=cname, mtype=ESMF_ATM, &
+                                             configfile="~/grid.rc", rc=rc)  
 
-    print *, "Comp Create returned, name = ", trim(cname)
+    print *, "Grid Comp Create returned, name = ", trim(cname)
 
-    call ESMF_CompInit(comp1, rc)
-    print *, "Comp Init returned"
-
-
-    call ESMF_CompPrint(comp1, rc=rc)
+    call ESMF_GridCompPrint(comp1, rc=rc)
     print *, "Comp Print returned"
 
-    call ESMF_CompRun(comp1, rc=rc)
+    call ESMF_GridCompDestroy(comp1, rc=rc)
     print *, "Comp Run returned"
-
-    call ESMF_CompFinalize(comp1, rc=rc)
-    print *, "Comp Finalize returned"
-
-
-    call ESMF_CompDestroy(comp1, rc)
-    print *, "Comp Destroy returned"
-
-    call ESMF_DELayoutDestroy(layout, rc)
-    print *, "DELayout Destroy returned"
 
     print *, "Component Test 1 finished"
 
