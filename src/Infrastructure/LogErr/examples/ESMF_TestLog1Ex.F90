@@ -6,11 +6,12 @@ program test_log_2
 
     type(ESMF_Log) :: aLog1
     real :: real_num
-    integer :: rc
+    integer :: rc,rc2
     logical :: ret
 
-    call ESMF_LogInitialize("aLog1.txt",rc)
+    call ESMF_Initialize(rc=rc2)
+    !call ESMF_LogInitialize("aLog1.txt",rc)
     call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO,rc=rc)
     ret = ESMF_LogFoundError(ESMF_FAILURE,"Log Found Error 2",ESMF_LOG_INFO)
-
+    call ESMF_Finalize(rc2)
 end program
