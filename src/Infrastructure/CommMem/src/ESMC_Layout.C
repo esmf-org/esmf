@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -49,7 +49,51 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutCreate - Create a new Layout
+// !IROUTINE:  ESMC_LayoutCreate - Create a new 2D Layout from a simple DE list
+//
+// !INTERFACE:
+      ESMC_Layout *ESMC_LayoutCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Layout
+//
+// !ARGUMENTS:
+      int nx,                    // in - number of DE's in the x direction
+      int ny,                    // in - number of DE's in the y direction
+      int *delist,               // in - 1 dimensional list of DE id's
+                                 //      (e.g. mpi ranks)
+      ESMC_CommHint_e commhint,  // in - fastest communication direction hint
+      int *rc) {                 // out - return code
+//
+// !DESCRIPTION:
+//      Allocates memory for a new Layout
+//      object and uses the internal routine ESMC\_LayoutContruct to
+//      initialize it. There can be multiple overloaded methods with the 
+//      same name, but different argument lists.
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+  ESMC_Layout *layout;
+
+  try {
+    layout = new ESMC_Layout;
+//cout << "ESMC_LayoutCreate() succesful\n";
+    *rc = layout->ESMC_LayoutConstruct(nx, ny, delist, commhint);
+    return(layout);
+  }
+  catch (...) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(0);
+  }
+
+ } // end ESMC_LayoutCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutCreate - Create a new 3D Layout from a PE List
 //
 // !INTERFACE:
       ESMC_Layout *ESMC_LayoutCreate(
@@ -76,21 +120,6 @@
 
   ESMC_Layout *layout;
 
-#if 0
-// use this section if exception handling not supported
-// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
-  if ((layout = new (nothrow) ESMC_Layout) == 0) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
-    return(0);
-  }
-
-//cout << "ESMC_LayoutCreate() succesful\n";
-  *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
-  return(layout);
-#endif
-
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
 #if 1
   try {
@@ -106,6 +135,21 @@
     *rc = ESMF_FAILURE;
     return(0);
   }
+#endif
+
+#if 0
+// use this section if exception handling not supported
+// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
+  if ((layout = new (nothrow) ESMC_Layout) == 0) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(0);
+  }
+
+//cout << "ESMC_LayoutCreate() succesful\n";
+  *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
+  return(layout);
 #endif
 
  } // end ESMC_LayoutCreate
@@ -130,10 +174,11 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+cout << "ESMC_LayoutDestroy, layout = " << layout << endl;
   if (layout != 0) {
     layout->ESMC_LayoutDestruct();
     delete layout;
-//cout << "ESMC_LayoutDestroy() successful\n";
+cout << "ESMC_LayoutDestroy() successful\n";
     return(ESMF_SUCCESS);
   } else {
     return(ESMF_FAILURE);
@@ -143,7 +188,127 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LayoutConstruct - fill in an already allocated Layout
+// !IROUTINE:  ESMC_LayoutConstruct - Build a 2D DE topology from a DE list
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutConstruct(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int nx,                     // in - number of DE's in the x direction
+      int ny,                     // in - number of DE's in the y direction
+      int *delist,                // in - DEList
+      ESMC_CommHint_e commhint) { // in - fastest communication direction hint
+//
+// !DESCRIPTION:
+//      ESMF routine which fills in the contents of an already
+//      allocated Layout object.  May need to do additional allocations
+//      as needed.  Must call the corresponding ESMC\_LayoutDestruct
+//      routine to free the additional memory.  Intended for internal
+//      ESMF use only; end-users use ESMC\_LayoutCreate, which calls
+//      ESMC\_LayoutConstruct.  Define for deep classes only.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  //
+  // initialize my DE, PE, Comm, and Machine model
+  //
+  int argc = 0;    // pass into LayoutCreate ?
+  char **argv = 0; // pass into LayoutCreate ?
+  int myDEid=0, mypeid=0, mycpuid=0, mynodeid=0;
+  myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: pass into LayoutCreate ?
+  comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
+  myPE.ESMC_PEInit(&Mach);        // gets cpu, node ids from machine
+  myDE.ESMC_DEGetESMFID(&myDEid);
+  myPE.ESMC_PESetEsmfID(myDEid);  // assume 1-to-1 DE-to-PE for now TODO: ?
+//cout << "myDEid = " << myDEid << "\n";
+
+  myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
+  myPE.ESMC_PEGetCpuID(&mycpuid);
+  myPE.ESMC_PEGetNodeID(&mynodeid);
+//cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
+//       << mynodeid << "\n";
+
+  //
+  // construct 2D array of ESMC_DE's
+  //
+
+  try {
+    // construct 2D array of ESMC_DE's
+
+    // first, create array of (nx) pointers to ESMC_DE pointers
+    layout = new ESMC_DE**[nx];
+
+    // then allocate an array of (ny) ESMC_DE pointers for each x pointer
+    for (int i=0; i<nx; i++) {
+      layout[i] = new ESMC_DE*[ny];
+      // finally allocate a Z array of ESMC_DE's for each y pointer
+      // only 1 long, since this version of Construct is 2D
+      for (int j=0; j<ny; j++) {
+        layout[i][j] = new ESMC_DE[1];
+      }
+    }
+  }
+  catch(...) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+
+  nxLayout = nx;
+  nyLayout = ny;
+  nzLayout = 1;
+  //deList = delist;
+  commHint = commhint;
+
+  // TODO: ?? make commHint lookup table & share with Print()
+
+  //
+  // Assign DElist to DE's in layout according to communication hint.
+  // Assume given DE list consists of unique DE ids that are pre-sorted
+  // by fastest communication affinity (e.g. node, thread, process)
+  //
+  int ni, nj;  // loop limits
+  int i, j;    // i outer loop, j inner loop (fastest)
+  int *x, *y;  // layout coordinates to loop through
+  switch (commHint)
+  {
+    case ESMC_XFAST:
+    case ESMC_NOHINT:
+      ni = nyLayout;  y = &i; // 2nd fastest (outer loop)
+      nj = nxLayout;  x = &j; // fastest (inner loop)
+      break;
+    case ESMC_YFAST:
+      ni = nxLayout; x = &i; // 2nd fastest (outer loop)
+      nj = nyLayout; y = &j; // fastest (inner loop)
+      break;
+    default:
+      break;
+  }
+
+//cout << "ESMC_LayoutConstruct() ni, nj " << ni << ", " << nj << endl;
+
+  int DEix=0;
+  for (i=0; i<ni; i++) {
+    for(j=0; j<nj; j++) {
+        // assign DE in given list to this DE in layout
+//cout << "ESMC_LayoutConstruct(): " << i << ", " << j  << "\n";
+//cout << "ESMC_LayoutConstruct(): " << *x<< ", " << *y << "\n";
+        layout[*x][*y][0].ESMC_DESetESMFID(delist[DEix++]);
+    }
+  }
+
+//cout << "ESMC_LayoutConstruct() successful\n";
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_LayoutConstruct
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutConstruct - Build a 3D DE topology from a PE list
 //
 // !INTERFACE:
       int ESMC_Layout::ESMC_LayoutConstruct(
@@ -170,6 +335,31 @@
 // !REQUIREMENTS:  developer's guide for classes
 
   // construct 3D array of ESMC_DE's
+
+// TODO: ?? use exception handling when universally supported (pgCC doesn't)
+#if 1
+  try {
+    // construct 2D array of ESMC_DE's
+
+    // first, create array of (nx) pointers to ESMC_DE pointers
+    layout = new ESMC_DE**[nx];
+
+    // then allocate an array of (ny) ESMC_DE pointers for each x pointer
+    for (int i=0; i<nx; i++) {
+      layout[i] = new ESMC_DE*[ny];
+      // finally allocate an array of ESMC_DE's for each y pointer
+      for (int j=0; j<ny; j++) {
+        layout[i][j] = new ESMC_DE[nz];
+      }
+    }
+  }
+//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
+  catch(...) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+#endif
 
 #if 0
 // use this section if exception handling not supported
@@ -200,31 +390,6 @@
   }
 #endif
 
-// TODO: ?? use exception handling when universally supported (pgCC doesn't)
-#if 1
-  try {
-    // construct 2D array of ESMC_DE's
-
-    // first, create array of (nx) pointers to ESMC_DE pointers
-    layout = new ESMC_DE**[nx];
-
-    // then allocate an array of (ny) ESMC_DE pointers for each x pointer
-    for (int i=0; i<nx; i++) {
-      layout[i] = new ESMC_DE*[ny];
-      // finally allocate an array of ESMC_DE's for each y pointer
-      for (int j=0; j<ny; j++) {
-        layout[i][j] = new ESMC_DE[nz];
-      }
-    }
-  }
-//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-  catch(...) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
-    return(ESMF_FAILURE);
-  }
-#endif
-
   nxLayout = nx;
   nyLayout = ny;
   nzLayout = nz;
@@ -241,9 +406,9 @@
   {
     case ESMC_XFAST:
     case ESMC_NOHINT:
-      ni = nzLayout;  z = &i; // 3rd fastest
-      nj = nyLayout;  y = &j; // 2nd fastest
-      nk = nxLayout;  x = &k; // fastest
+      ni = nzLayout;  z = &i; // 3rd fastest (for outer loop)
+      nj = nyLayout;  y = &j; // 2nd fastest (for middle loop)
+      nk = nxLayout;  x = &k; // fastest (for inner loop)
       break;
     case ESMC_YFAST:
       ni = nzLayout; z = &i;
@@ -471,6 +636,33 @@
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_LayoutGetSize - get (nx,ny) size of 2D Layout
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutGetSize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *nx,             // out - number of DE's in x direction
+      int *ny) const {     // out - number of DE's in y direction
+//
+// !DESCRIPTION:
+//    returns overall x,y dimensions of 2D Layout
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  *nx = nxLayout;
+  *ny = nyLayout;
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_LayoutGetSize
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_LayoutGetSize - get (nx,ny,nz) size of Layout
 //
 // !INTERFACE:
@@ -497,6 +689,43 @@
   return(ESMF_SUCCESS);
 
  } // end ESMC_LayoutGetSize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutGetDEPosition - get x,y position of my DE in 2D Layout
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutGetDEPosition(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *x,             // out - x position of DE in layout
+      int *y) const {     // out - y position of DE in layout
+//
+// !DESCRIPTION:
+//    returns (x,y) position of my DE in 2D layout
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  // linear search for DE TODO: compute once on initialization ?
+  for (int i=0; i<nxLayout; i++) {
+    for (int j=0; j<nyLayout; j++) {
+      if (myDE.esmfID == layout[i][j][0].esmfID) {
+        // found -- return (x,y) position
+        *x = i;
+        *y = j;
+        return(ESMF_SUCCESS);
+      }
+    }
+  }
+
+  // not found - return error
+  return(ESMF_FAILURE);
+
+ } // end ESMC_LayoutGetDEPosition
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -539,6 +768,30 @@
   return(ESMF_FAILURE);
 
  } // end ESMC_LayoutGetDEPosition
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutGetDEid - get id of our DE
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutGetDEid(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *deid) const {     // out - our DE id
+//
+// !DESCRIPTION:
+//    Returns our DE id
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  myDE.ESMC_DEGetESMFID(deid);
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_LayoutGetDEid
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -598,9 +851,9 @@
   {
     case ESMC_XFAST:
     case (ESMC_NOHINT):
-      ni = nzLayout; z = &i;
-      nj = nyLayout; y = &j;
-      nk = nxLayout; x = &k;
+      ni = nzLayout; z = &i; // outer loop
+      nj = nyLayout; y = &j; // middle loop
+      nk = nxLayout; x = &k; // inner loop
       //cout << "i=z, j=y, k=x \n";
       break;
     case (ESMC_YFAST):
@@ -655,10 +908,10 @@
 
   // initialize to an empty layout
   layout = 0;
-  peList = 0;
   nxLayout = 0;
   nyLayout = 0;
   nzLayout = 0;
+  peList = 0;
   commHint = ESMC_NOHINT;
 
  } // end ESMC_Layout
@@ -686,3 +939,52 @@
   ESMC_LayoutDestruct();
 
  } // end ~ESMC_Layout
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutAllReduce - reduce 1D integer data array across layout
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutAllReduce(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *dataArray,          // in  - 1D integer data array
+      int *result,             // out - single integer value
+      int arrayLen,            // in  - length of dataArray
+      ESMC_Op_e op)  {         // in  - reduction operation (sum, min, max ...)
+//
+// !DESCRIPTION:
+//      performs requested reduction operation on given data array across
+//      all DEs in layout
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+  // perform reduction operation within our DE (given dataArray)
+  int localResult = 0;
+  for(int i=0; i<arrayLen; i++) {
+    switch (op)
+    {
+      case ESMC_SUM:
+        localResult += dataArray[i];
+        break;
+      default:
+        break;
+    }
+  }
+
+  cout << "ESMC_LayoutAllReduce localResult = " << localResult << endl;
+
+  // perform reduction operation across all DEs in the layout
+  int rc;
+  rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMC_INT, op);
+  if (rc != ESMF_SUCCESS) {
+    cout << "ESMC_LayoutAllReduce(1D) error" << endl;
+  }
+
+  return(rc);
+
+ } // end ESMC_LayoutAllReduce

@@ -1,4 +1,4 @@
-// $Id: ESMC_PE.C,v 1.4 2002/12/17 02:23:45 eschwab Exp $
+// $Id: ESMC_PE.C,v 1.5 2003/01/09 02:16:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PE.C,v 1.4 2002/12/17 02:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PE.C,v 1.5 2003/01/09 02:16:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize peCount (class static)
@@ -57,7 +57,7 @@ int ESMC_PE::peCount = 0;
 //    int error return code
 //
 // !ARGUMENTS:
-      void) {         //
+      ESMC_Machine *mach) {         // in - handle to machine model
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes PE values; it does not
@@ -68,9 +68,13 @@ int ESMC_PE::peCount = 0;
 
   int esmfid, cpuid, nodeid;
 
-  // assign ESMF id - number of PE's instantiated
+  // save machine model handle
+  machine = mach;
+
+  // assign unique ESMF id - number of PE's instantiated
   esmfid = ++peCount;
 
+  // get machine-specific IDs
   machine->ESMC_MachineGetCpuID(&cpuid);
   machine->ESMC_MachineGetNodeID(&nodeid);
   

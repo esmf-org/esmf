@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.h,v 1.2 2002/12/10 03:49:15 eschwab Exp $
+// $Id: ESMC_DE.h,v 1.3 2003/01/09 02:15:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,6 +92,7 @@ enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
     int ESMC_DESetESMFID(int esmfid);
     int ESMC_DEGetESMFID(int *esmfid) const;
     int ESMC_DEGetpID(int *pid) const;
+    int ESMC_DESetType(ESMC_DEType_e detype);
     int ESMC_DEGetType(ESMC_DEType_e *detype) const;
     
  // required methods inherited and overridden from the ESMC_Base class

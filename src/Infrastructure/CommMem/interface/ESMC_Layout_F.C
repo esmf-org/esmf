@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout_F.C,v 1.1 2002/12/30 22:02:19 nscollins Exp $
+// $Id: ESMC_Layout_F.C,v 1.2 2003/01/09 02:17:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,19 +35,37 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-//     void FTN(c_esmc_layoutcreate)(ESMC_Layout *ptr, int *status) {
-//         ptr = ESMC_LayoutCreate(status);
-//     }
+       void FTN(c_esmc_layoutcreate)(ESMC_Layout **ptr, int *nx, int *ny,
+                int *delist, int *commhint, int *status) {
+         *ptr = ESMC_LayoutCreate(*nx, *ny, delist, (ESMC_CommHint_e) *commhint,
+                                  status);
+       }
 
-//     void FTN(c_esmc_layoutdestroy)(ESMC_Layout *ptr, int *status) {
-//         *status = ESMC_LayoutDestroy(ptr);
-//     }
+       void FTN(c_esmc_layoutdestroy)(ESMC_Layout **ptr, int *status) {
+           *status = ESMC_LayoutDestroy(*ptr);
+       }
+
+       void FTN(c_esmc_layoutgetsize)(ESMC_Layout **ptr, int *nx, int *ny,
+                int *status) {
+           *status = (*ptr)->ESMC_LayoutGetSize(nx, ny);
+       }
+
+       void FTN(c_esmc_layoutgetdeposition)(ESMC_Layout **ptr, int *x, int *y,
+                int *status) {
+           *status = (*ptr)->ESMC_LayoutGetDEPosition(x, y);
+       }
+
+       void FTN(c_esmc_layoutgetdeid)(ESMC_Layout **ptr, int *id, int *status) {
+           *status = (*ptr)->ESMC_LayoutGetDEid(id);
+       }
 
 //     void FTN(c_esmc_layoutprint)(ESMC_Layout *ptr, char *opts, int *status) {
 //         *status = ptr->ESMC_LayoutPrint(opts);
 //     }
 
+       void FTN(c_esmc_layoutallreduce)(ESMC_Layout **ptr, int *array,
+                int *result, int *len, int *op, int *status) {
+           *status = (*ptr)->ESMC_LayoutAllReduce(array, result, *len,
+                                                  (ESMC_Op_e) *op);
+       }
 };
-
-
-

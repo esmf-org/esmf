@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,15 +34,28 @@
  #include <ESMC_Comm.h>
 
 // shared memory buffers TODO:  bring into class as pointers ??
-extern int *lbuf;
-extern int *gbuf;
-extern int nodeRank;
-extern pthread_t ESMC_Comm_tid[];
+
+// shared memory local buffer for intra-node pthreads communications
+int lbuf[ESMC_COMM_NTHREADS * 3];
+
+// shared memory global receive buffer for inter-node MPI communications
+int gbuf[ESMC_COMM_NPROCS * ESMC_COMM_NTHREADS * 3];
+
+// shared memory MPI rank of this node used by threads to calculate unique DE id
+int nodeRank=-1;
+
+// shared memory thread id array
+pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
+
+//extern int *lbuf;
+//extern int *gbuf;
+//extern int nodeRank;
+//extern pthread_t ESMC_Comm_tid[];
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,6 +65,7 @@ extern pthread_t ESMC_Comm_tid[];
 
 // Initialize class statics
 
+ pthread_mutex_t ESMC_Comm::bufMutex = PTHREAD_MUTEX_INITIALIZER;
  pthread_mutex_t ESMC_Comm::initMutex = PTHREAD_MUTEX_INITIALIZER;
  pthread_cond_t ESMC_Comm::initCV = PTHREAD_COND_INITIALIZER;
  pthread_mutex_t ESMC_Comm::barrierMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -59,6 +73,7 @@ extern pthread_t ESMC_Comm_tid[];
  pthread_cond_t ESMC_Comm::mainProcBarrierCV = PTHREAD_COND_INITIALIZER;
  int ESMC_Comm::threadCountA = 0;
  int ESMC_Comm::threadCountB = 0;
+ bool ESMC_Comm::lbufCleared = false;
 
 // This section includes all the Comm routines
 //
@@ -92,7 +107,8 @@ extern pthread_t ESMC_Comm_tid[];
   // save DE pointer
   DE = de;
 
-  numDEs = ESMC_COMM_NTHREADS * ESMC_COMM_NNODES;
+  // TODO:  coordinate with other DEs to determine group size ??
+  numDEs = ESMC_COMM_NTHREADS * ESMC_COMM_NPROCS;
 
   if (DE->deType == ESMC_PROCESS) {
     int initialized;
@@ -742,10 +758,10 @@ cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << endl;
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CommReduce - Reduce All DEs to a single DE
+// !IROUTINE:  ESMC_CommAllReduce - Data Reduction across All DEs
 //
 // !INTERFACE:
-      int ESMC_Comm::ESMC_CommReduce(
+      int ESMC_Comm::ESMC_CommAllReduce(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -755,8 +771,7 @@ cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << endl;
       void *rbuf,
       int num,
       ESMC_Type_e type,
-      ESMC_Op_e op,
-      ESMC_DE *root) {
+      ESMC_Op_e op) {
 //
 // !DESCRIPTION:
 //      
@@ -764,15 +779,74 @@ cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << endl;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  int rootpID;
+cout << "entered ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
 
-  root->ESMC_DEGetpID(&rootpID);
+  switch (op)
+  {
+    case ESMC_SUM:
+    // add our data into common buffer
+    switch (type)
+    {
+      case ESMC_INT:
+        pthread_mutex_lock(&bufMutex);
+        if(!lbufCleared) {
+          memset(lbuf, 0, num*sizeof(int)); // 1st DE in clears lbuf
+          lbufCleared = true;
+        }
+        // add our sbuf to lbuf slot
+        for (int i=0; i<num; i++) {
+          ((int *)lbuf)[i] += ((int *)sbuf)[i];
+        }
+        pthread_mutex_unlock(&bufMutex);
+        break;
+  
+      default:
+        break;
+    }
+    default:
+      break;
+  }
 
-#ifdef MPI
-  MPI_Reduce(sbuf, rbuf, num, ESMC_TypeToMPI[type], ESMC_OpToMPI[op], rootpID, 
-             MPI_COMM_WORLD);
-#endif
+  if (DE->deType == ESMC_PROCESS) {
+    // gather local node's thread data first by simply waiting
+    //   for them to finish reducing their data to the rbuf
+
+    pthread_mutex_lock(&barrierMutex);
+
+//cout << "entered process barrier, threadCount = " << *threadCount << "\n";
+
+      // if this counter still in use by previous barrier, switch to partner
+      if (*threadCount >= ESMC_COMM_NTHREADS) {
+         threadCount = (threadCount == &threadCountA) ?
+                        &threadCountB : &threadCountA;
+      }
+
+      // use while loop to guard against spurious/erroneous wake-ups
+      while (*threadCount < ESMC_COMM_NTHREADS-1) {
+cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
+        pthread_cond_wait(&mainProcBarrierCV, &barrierMutex);
+cout << "main wokeup with threadCount = " << *threadCount << endl;
+      }
+
+    pthread_mutex_unlock(&barrierMutex);
+
+    // then reduce data with other nodes
+cout << "calling MPI_Allreduce" << endl;
+    memset(rbuf, 0, num*sizeof(int)); // clear gbuf
+    MPI_Allreduce(lbuf, rbuf, num, ESMC_TypeToMPI[type],
+                  ESMC_OpToMPI[op], MPI_COMM_WORLD);
+  }
+
+//cout << "ESMC_CommAllReduce(), final barrier, tidx = " << DE->tID << endl;
+
+  // wait for all threads to finish copying their data
+  ESMC_CommBarrier();
+
+  // reset result buffer cleared flag
+  lbufCleared = false;
+
+//cout << "leaving ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_CommReduce
+ } // end ESMC_CommAllReduce

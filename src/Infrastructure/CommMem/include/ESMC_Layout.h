@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.h,v 1.3 2002/12/10 03:49:15 eschwab Exp $
+// $Id: ESMC_Layout.h,v 1.4 2003/01/09 02:15:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@
  #include <ESMC_PE.h>  
  #include <ESMC_PEList.h>  
  #include <ESMC_DE.h>  
+ #include <ESMC_Comm.h>  
  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 
@@ -72,14 +73,18 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
  //                                 in F90 modules
     ESMC_DE ***layout;     // 3D topology (3D array) of DE's -- aligns
                            //   with (maps to) a Distributed Grid
+    int nxLayout;          // number of DE's laid out in the x-direction
+    int nyLayout;          // number of DE's laid out in the y-direction
+    int nzLayout;          // number of DE's laid out in the z-direction
     ESMC_PEList *peList;   // PE list on which the layout maps. 
-    int nxLayout;           // number of DE's laid out in the x-direction
-    int nyLayout;           // number of DE's laid out in the y-direction
-    int nzLayout;           // number of DE's laid out in the z-direction
     ESMC_CommHint_e commHint;  // hint about direction of the most performance
                                //   critical (frequent and/or voluminous)
                                //   communication direction: x, y or z
-                            
+    ESMC_DE myDE;     // the DE on which this Layout copy (instance) resides
+    ESMC_PE myPE;     // the PE on which this Layout copy (instance) resides
+    ESMC_Comm comm;   // comm object for this DE (TODO: make property of DE ? )
+    ESMC_Machine Mach;// machine model for this layout
+                      //  (TODO: make property of DE or PE ? heterogenous PEs)
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -91,6 +96,8 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
   public:
  // the following methods apply to deep classes only
+    int ESMC_LayoutConstruct(int nx, int ny, int *delist,
+                             ESMC_CommHint_e commhint); 
     int ESMC_LayoutConstruct(int nx, int ny, int nz, ESMC_PEList *pelist,
                              ESMC_CommHint_e commhint); 
                                              // internal only, deep class
@@ -104,8 +111,11 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
  // accessor methods for class members
 //    int ESMC_LayoutGet<Value>(<value type> *value) const;
 //    int ESMC_LayoutSet<Value>(<value type>  value);
+    int ESMC_LayoutGetSize(int *nx, int *ny) const;
     int ESMC_LayoutGetSize(int *nx, int *ny, int *nz) const;
     int ESMC_LayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
+    int ESMC_LayoutGetDEPosition(int *x, int *y) const;
+    int ESMC_LayoutGetDEid(int *deid) const;
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_LayoutValidate(void) const;
@@ -116,6 +126,8 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 	~ESMC_Layout(void);
   
  // < declare the rest of the public interface methods here >
+    int ESMC_LayoutAllReduce(int *dataArray, int *result, int arrayLen,
+                             ESMC_Op_e op);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -128,6 +140,9 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
  };   // end class ESMC_Layout
 
+    ESMC_Layout *ESMC_LayoutCreate(int nx, int ny, int *delist,
+                                   ESMC_CommHint_e commhint, int *rc);
+                                                 // interface only, deep class
     ESMC_Layout *ESMC_LayoutCreate(int nx, int ny, int nz, ESMC_PEList *pelist,
                                    ESMC_CommHint_e commhint, int *rc);
                                                  // interface only, deep class

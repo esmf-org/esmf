@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.2 2002/12/30 22:09:37 nscollins Exp $
+! $Id: ESMF_Layout.F90,v 1.3 2003/01/09 02:17:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include "ESMF.h"
 !------------------------------------------------------------------------------
 !BOP
-! !MODULE: ESMF_LayoutMod - Manage data layouts uniformly between F90 and C++     
+! !MODULE: ESMF_LayoutMod - F90 Interface to C++ ESMC_Layout class
 !
 ! !DESCRIPTION:
 !
@@ -37,6 +37,12 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       implicit none
+
+!  TODO: move to include file ?
+      integer, parameter :: ESMF_NOHINT=0, ESMF_XFAST=1, ESMF_YFAST=2, &
+                            ESMF_ZFAST=3
+
+      integer, parameter :: ESMF_SUM=0, ESMF_MIN=1, ESMF_MAX=2
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -56,6 +62,8 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Layout
+      public ESMF_NOHINT, ESMF_XFAST, ESMF_YFAST, ESMF_ZFAST
+      public ESMF_SUM, ESMF_MIN, ESMF_MAX
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -65,7 +73,9 @@
  
       !public ESMF_LayoutSetData
       !public ESMF_LayoutGetData
-      !public ESMF_LayoutGet
+      public ESMF_LayoutGetSize
+      public ESMF_LayoutGetDEPosition
+      public ESMF_LayoutGetDEid
  
       public ESMF_LayoutCheckpoint
       public ESMF_LayoutRestore
@@ -73,12 +83,14 @@
       public ESMF_LayoutRead
  
       public ESMF_LayoutPrint
+
+      public ESMF_LayoutAllReduce
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.2 2002/12/30 22:09:37 nscollins Exp $'
+      '$Id: ESMF_Layout.F90,v 1.3 2003/01/09 02:17:16 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -94,7 +106,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_LayoutCreateNew
+        module procedure ESMF_LayoutCreateIntDE2D
 !        !module procedure ESMF_LayoutCreateNoData
 
 ! !DESCRIPTION: 
@@ -133,16 +145,16 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LayoutCreateNew -- Create a new Layout specifying all options.
+! !IROUTINE: ESMF_LayoutCreateIntDE2D - Create 2D Layout from a integer DE list
 
 ! !INTERFACE:
-      function ESMF_LayoutCreateNew(nde_i, nde_j, nde_k, rc)
+      function ESMF_LayoutCreateIntDE2D(nx, ny, delist, commhint, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Layout) :: ESMF_LayoutCreateNew
+      type(ESMF_Layout) :: ESMF_LayoutCreateIntDE2D
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: nde_i, nde_j, nde_k
+      integer, intent(in) :: nx, ny, delist(:), commhint
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -153,14 +165,11 @@ end interface
 !  The arguments are:
 !  \begin{description}
 ! 
-!   \item[nde_i]
+!   \item[nx]
 !     Number of {\tt DE}s in the {\tt I} dimension.
 ! 
-!   \item[nde_j]
+!   \item[ny]
 !     Number of {\tt DE}s in the {\tt J} dimension.
-! 
-!   \item[nde_k]
-!     Number of {\tt DE}s in the {\tt K} dimension.
 ! 
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -172,12 +181,13 @@ end interface
 
 
 !       local vars
-        type (ESMF_Layout), pointer :: ptr   ! opaque pointer to new C++ Layout
+        type (ESMF_Layout) :: ptr   ! opaque pointer to new C++ Layout
+!        type (ESMF_Layout), pointer :: ptr   ! opaque pointer to new C++ Layout
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        nullify(ptr)
+!        nullify(ptr)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -186,17 +196,18 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        !call c_ESMC_LayoutCreate(nde_i, nde_j, nde_k, status)
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "Layout construction error"
-        !  return
-        !endif
+        call c_ESMC_LayoutCreate(ptr, nx, ny, delist, commhint, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Layout creation error"
+          return
+        endif
 
 !       set return values
-        ESMF_LayoutCreateNew%this => ptr 
+        ESMF_LayoutCreateIntDE2D = ptr 
+!        ESMF_LayoutCreateIntDE2D%this => ptr 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_LayoutCreateNew
+        end function ESMF_LayoutCreateIntDE2D
 
 
 !------------------------------------------------------------------------------
@@ -292,11 +303,11 @@ end interface
         endif
 
 !       call Destroy to release resources on the C++ side
-        !call c_ESMC_LayoutDestroy(layout%this, status)
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "Layout contents destruction error"
-        !  return
-        !endif
+        call c_ESMC_LayoutDestroy(layout, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Layout destruction error"
+          return
+        endif
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -325,6 +336,19 @@ end interface
 !
 ! TODO: code goes here
 !
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_LayoutSetData
 
 !------------------------------------------------------------------------------
@@ -335,12 +359,12 @@ end interface
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_LayoutGet(layout, rc)
+      subroutine ESMF_LayoutGetSize(layout, nx, ny, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Layout) :: layout
+      integer, intent(out) :: nx, ny             
       integer, intent(out), optional :: rc             
-
 !
 ! !DESCRIPTION:
 !      Returns information about the layout.  For queries where the caller
@@ -350,11 +374,107 @@ end interface
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_LayoutGet
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
 
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        call c_ESMC_LayoutGetSize(layout, nx, ny, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutGetSize error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_LayoutGetSize
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_LayoutGetDEPosition(layout, x, y, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Layout) :: layout
+      integer, intent(out) :: x, y             
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!      Returns information about the layout.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the layout input are optional to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        call c_ESMC_LayoutGetDEPosition(layout, x, y, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutGetDEPosition error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_LayoutGetDEPosition
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_LayoutGetDEid(layout, id, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Layout) :: layout
+      integer, intent(out) :: id
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!      Returns information about the layout.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the layout input are optional to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        call c_ESMC_LayoutGetDEid(layout, id, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutGetDEid error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_LayoutGetDEid
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -382,6 +502,19 @@ end interface
 !
 ! TODO: code goes here
 !
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_LayoutCheckpoint
 
 
@@ -409,19 +542,28 @@ end interface
 !
 ! TODO: code goes here
 !
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
         type (ESMF_Layout) :: a 
 
 !       this is just to shut the compiler up
         type (ESMF_Layout), target :: b 
         a%this => b
         nullify(a%this)
-
 !
-! TODO: add code here
-!
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
 
         ESMF_LayoutRestore = a 
  
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
         end function ESMF_LayoutRestore
 
 
@@ -447,6 +589,19 @@ end interface
 !
 ! TODO: code goes here
 !
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_LayoutWrite
 
 
@@ -473,6 +628,10 @@ end interface
 !
 ! TODO: code goes here
 !
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
         type (ESMF_Layout) :: a
 
 !       this is just to shut the compiler up
@@ -480,12 +639,17 @@ end interface
         a%this => b
         nullify(a%this)
 
-!
-! TODO: add code here
-!
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
 
         ESMF_LayoutRead = a 
  
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
         end function ESMF_LayoutRead
 
 
@@ -538,6 +702,47 @@ end interface
 
        end subroutine ESMF_LayoutPrint
 
+!------------------------------------------------------------------------------
+!BOP
+!
+!
+! !INTERFACE:
+      subroutine ESMF_LayoutAllReduce(layout, dataArray, result, arrayLen, &
+                                      op, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Layout) :: layout
+      integer, intent(in) :: dataArray(:), arrayLen, op
+      integer, intent(out) :: result 
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        call c_ESMC_LayoutAllReduce(layout, dataArray, result, arrayLen, op, &
+                                    status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutAllReduce error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+       end subroutine ESMF_LayoutAllReduce
 
        end module ESMF_LayoutMod
 

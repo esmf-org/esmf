@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.4 2002/12/17 02:23:45 eschwab Exp $
+// $Id: ESMC_DE.C,v 1.5 2003/01/09 02:16:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.4 2002/12/17 02:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.5 2003/01/09 02:16:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -285,6 +285,32 @@
   return(ESMF_SUCCESS);
 
  } // end ESMC_DESetpID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DESetDEType - set DE's type (process or thread)
+
+//
+// !INTERFACE:
+      int ESMC_DE::ESMC_DESetType(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DEType_e detype) {     // in - DE type
+//
+// !DESCRIPTION:
+//     Sets the DE's type: process or thread
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  deType = detype; 
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DESetType
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.3 2002/12/10 03:49:15 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.4 2003/01/09 02:15:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,8 +53,10 @@
  class ESMC_Comm;
 
 // TODO: ?? bring in from outside program (cmd args, cfg file, etc.)
- #define ESMC_COMM_NTHREADS 4
- #define ESMC_COMM_NNODES 2
+// num threads per proc
+ #define ESMC_COMM_NTHREADS 1
+// num procs
+ #define ESMC_COMM_NPROCS 2
 
  enum ESMC_Type_e {ESMC_INT=0, ESMC_LONG, ESMC_FLOAT, ESMC_DOUBLE};
  #define ESMC_COMM_TYPES 4
@@ -90,6 +92,7 @@
      void *ESMC_Request; // linked list of requests
      void *ESMC_Status;  // linked list of statuses
 
+     static pthread_mutex_t bufMutex;
      static pthread_mutex_t initMutex;
      static pthread_cond_t initCV;
      static pthread_mutex_t barrierMutex;
@@ -97,6 +100,7 @@
      static pthread_cond_t mainProcBarrierCV;
      static int threadCountA;
      static int threadCountB;
+     static bool lbufCleared;
 
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -138,8 +142,8 @@
                          ESMC_DE *root);
     int ESMC_CommAllGather(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
     int ESMC_CommAlltoAll(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
-    int ESMC_CommReduce(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
-                        ESMC_Op_e op, ESMC_DE *root);
+    int ESMC_CommAllReduce(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
+                           ESMC_Op_e op);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
