@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.8 2004/04/26 15:58:15 theurich Exp $
+// $Id: ESMC_VM.C,v 1.9 2004/05/19 02:15:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.8 2004/04/26 15:58:15 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.9 2004/05/19 02:15:36 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -165,11 +165,16 @@ int ESMC_VM::ESMC_VMGet(
     for (int i=0; i<npets; i++)
       *npes += this->vmachine_ncpet(i);
   }
-  if (mpic != ESMC_NULL_POINTER)
+  if (mpic != ESMC_NULL_POINTER){
     // TODO:  Note:  on SunOS, MPI_Comm is defined as pointer to a structure,
     //        so mpic should only be used as a reference container not to be
     //        changed by the user.
-    *mpic = (int) this->vmachine_mpi_comm();
+    //*mpic = (int) this->vmachine_mpi_comm();
+    // TODO: Ensure that all of the MPI implementations have this MPI-2
+    // function implemented. If not then deal with those cases by static 
+    // type cast (as above). LAM has it and needs the MPI-2 interlanguage cast.
+    *mpic = (int) MPI_Comm_c2f(this->vmachine_mpi_comm());
+  }
   if (ok_openmp != ESMC_NULL_POINTER)
     *ok_openmp = ESMF_TRUE;   // TODO: Determine this at compile time...
   return ESMF_SUCCESS;
