@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.12 2003/08/27 15:58:50 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.13 2003/08/27 16:43:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.12 2003/08/27 15:58:50 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.13 2003/08/27 16:43:28 jwolfe Exp $'
 
 !==============================================================================
 
@@ -201,8 +201,8 @@
       !call ESMF_LocalArrayCreate(srcCenterX, size.....
       !call ESMF_LocalArrayCreate(srcCenterY, size.....
 
-      call ESMF_RouteRun(route, center_coord(1,1,1), srcCenterX, rc)
-      call ESMF_RouteRun(route, center_coord(2,1,1), srcCenterY, rc)
+      !call ESMF_RouteRun(route, center_coord(1,1,1), srcCenterX, rc)
+      !call ESMF_RouteRun(route, center_coord(2,1,1), srcCenterY, rc)
 
       ! Get pointers to data inside the LocalArrays
       !call ESMF_LocalArrayGetData(srcCenterX, src_center_x...
