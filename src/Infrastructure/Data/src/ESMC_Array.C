@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.49 2003/06/23 17:37:37 rstaufer Exp $";
+            "$Id: ESMC_Array.C,v 1.50 2003/07/09 17:25:50 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -707,11 +707,7 @@
       ESMC_DELayout *layout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
-      int size_decomp,           // in  - size of decomp array
-      ESMC_AxisIndex *AI_exc,    // in  - axis indices for the exclusive domain
-                                 //       of the Array
-      ESMC_AxisIndex *AI_tot) {  // in  - axis indices for the total domain of
-                                 //       the Array
+      int size_decomp {          // in  - size of decomp array
 //
 // !DESCRIPTION:
 //      
@@ -731,8 +727,8 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * AI_exc[i].max;
-      lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
+      gsize = gsize * ai_comp[i].max;
+      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
     }
 
     // switch based on datatype  TODO: this might be a good place to use templates
@@ -744,7 +740,7 @@
         // call layoutgather to fill this array
         fp0 = (float *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                          AI_exc, AI_tot, fp);
+                                          ai_comp, ai_local, fp);
 
         // switch based on array rank
         switch (this->rank) {
@@ -759,19 +755,19 @@
               int lstart[2];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = AI_exc[i-1].max;
+                gmax[i] = ai_comp[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_exc[i].gstart + AI_tot[i].l;
+                lmax[i] = ai_local[i].min - ai_local[i].min + 1;
+                lstart[i] = ai_comp[i].gstart + ai_local[i].min;
               }
               int local, global;
               for (j=0; j<lmax[1]; j++) {
-                j_exc = j + lstart[1] - AI_exc[1].l;
-                if (j_exc>=0 && j_exc<AI_exc[1].max) {
+                j_exc = j + lstart[1] - ai_comp[1].min;
+                if (j_exc>=0 && j_exc<ai_comp[1].max) {
                   for (i=0; i<lmax[0]; i++) {
-                    i_exc = i + lstart[0] - AI_exc[0].l;
-                    if (i_exc>=0 && i_exc<AI_exc[0].max) {
+                    i_exc = i + lstart[0] - ai_comp[0].min;
+                    if (i_exc>=0 && i_exc<ai_comp[0].max) {
                       local  = lmax[0]*j + i;
                       global = gmax[1]*j_exc +
                                gmax[0]*i_exc;
@@ -790,11 +786,11 @@
               int lstart[3];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = AI_exc[i-1].max;
+                gmax[i] = ai_comp[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
+                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
+                lstart[i] = ai_local[i].gstart + ai_local[i].min;
               }
               int local, global;
               for (k=0; k<lmax[2]; k++) {
@@ -819,11 +815,11 @@
               int lstart[4];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = AI_exc[i-1].max;
+                gmax[i] = ai_comp[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
+                lmax[i] = ai_local[i].min - ai_local[i].min + 1;
+                lstart[i] = ai_local[i].gstart + ai_local[i].min;
               }
               int local, global;
               for (l=0; l<lmax[3]; l++) {
@@ -863,7 +859,7 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                          AI_exc, AI_tot, ip);
+                                          ai_comp, ai_local, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -878,19 +874,19 @@
               int lstart[2];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = AI_exc[i-1].max;
+                gmax[i] = ai_comp[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_exc[i].gstart + AI_tot[i].l;
+                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
+                lstart[i] = ai_comp[i].gstart + ai_local[i].min;
               }
               int local, global;
               for (j=0; j<lmax[1]; j++) {
-                j_exc = j + lstart[1] - AI_exc[1].l;
-                if (j_exc>=0 && j_exc<AI_exc[1].max) {
+                j_exc = j + lstart[1] - ai_comp[1].min;
+                if (j_exc>=0 && j_exc<ai_comp[1].max) {
                   for (i=0; i<lmax[0]; i++) {
-                    i_exc = i + lstart[0] - AI_exc[0].l;
-                    if (i_exc>=0 && i_exc<AI_exc[0].max) {
+                    i_exc = i + lstart[0] - ai_comp[0].min;
+                    if (i_exc>=0 && i_exc<ai_comp[0].max) {
                       local  = lmax[0]*j + i;
                       global = gmax[1]*j_exc +
                                gmax[0]*i_exc;
@@ -909,11 +905,11 @@
               int lstart[3];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = AI_exc[i-1].max;
+                gmax[i] = ai_comp[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
+                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
+                lstart[i] = ai_local[i].gstart + ai_local[i].min;
               }
               int local, global;
               for (k=0; k<lmax[2]; k++) {
@@ -938,11 +934,11 @@
               int lstart[4];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = AI_exc[i-1].max;
+                gmax[i] = ai_comp[i-1].max;
               }
               for (i=0; i<this->rank; i++) {
-                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
-                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
+                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
+                lstart[i] = ai_local[i].gstart + ai_local[i].min;
               }
               int local, global;
               for (l=0; l<lmax[3]; l++) {
@@ -1000,10 +996,6 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
-      ESMC_AxisIndex *AI_exc,    // in  - axis indices for the exclusive domain
-                                 //       of the Array
-      ESMC_AxisIndex *AI_tot,    // in  - axis indices for the total domain of
-                                 //       the Array
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
@@ -1026,9 +1018,9 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * AI_exc[i].max;
-      lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
-      counts[i] = AI_exc[i].max;
+      gsize = gsize * ai_comp[i].max;
+      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
+      counts[i] = ai_comp[i].max;
     }
 
     // switch based on datatype  TODO: this might be a good place to use templates
@@ -1042,7 +1034,7 @@
         // call layoutgather to fill this array
         fp0 = (float *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                          AI_exc, AI_tot, fp);
+                                          ai_comp, ai_local, fp);
 
       break;
 
@@ -1055,7 +1047,7 @@
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
         layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                          AI_exc, AI_tot, ip);
+                                          ai_comp, ai_local, ip);
 
       break;
       default:
@@ -1088,10 +1080,6 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
-      ESMC_AxisIndex *AI_exc,    // in  - axis indices for the exclusive domain
-                                 //       of the Array
-      ESMC_AxisIndex *AI_tot,    // in  - axis indices for the total domain of
-                                 //       the Array
       int deid,                  // in  - the DE to collect the data on
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
@@ -1116,9 +1104,9 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * AI_exc[i].max;
-      lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
-      counts[i] = AI_exc[i].max;
+      gsize = gsize * ai_comp[i].max;
+      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
+      counts[i] = ai_comp[i].max;
     }
 
     layout->ESMC_DELayoutGetDEID(&thisde);
@@ -1137,11 +1125,11 @@
 
           // call something which will do a receive
           layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, fp);
+                                            ai_comp, ai_local, fp);
         } else {
           // call something which will do a send
           layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, fp);
+                                            ai_comp, ai_local, fp);
         } 
 
       break;
@@ -1158,11 +1146,11 @@
           // call something which will do a receive
           ip0 = (int *)this->base_addr;
           layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, ip);
+                                            ai_comp, ai_local, ip);
         } else {
           // call something which will do a send
           layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, ip);
+                                            ai_comp, ai_local, ip);
         }
       break;
       default:
@@ -1198,10 +1186,6 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
-      ESMC_AxisIndex *AI_exc,    // in  - axis indices for the exclusive domain
-                                 //       of the Array
-      ESMC_AxisIndex *AI_tot,    // in  - axis indices for the total domain of
-                                 //       the Array
       int deid,                  // in  - the DE the original Array is on
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
@@ -1230,9 +1214,9 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * AI_exc[i].max;
-      lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
-      counts[i] = AI_exc[i].max;
+      gsize = gsize * ai_comp[i].max;
+      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
+      counts[i] = ai_comp[i].max;
     }
 
     layout->ESMC_DELayoutGetDEID(&thisde);
@@ -1251,11 +1235,11 @@
 
           // call something which will do a receive
           layout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, fp);
+                                            ai_comp, ai_local, fp);
         } else {
           // call something which will do a send
           layout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, fp);
+                                            ai_comp, ai_local, fp);
         } 
 
       break;
@@ -1272,11 +1256,11 @@
           // call something which will do a receive
           ip0 = (int *)this->base_addr;
           layout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, ip);
+                                            ai_comp, ai_local, ip);
         } else {
           // call something which will do a send
           layout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
-                                            AI_exc, AI_tot, ip);
+                                            ai_comp, ai_local, ip);
         }
       break;
       default:
