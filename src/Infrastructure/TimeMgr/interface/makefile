@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2003/04/01 23:59:23 nscollins Exp $ 
+# $Id: makefile,v 1.16 2003/09/22 22:32:17 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    = 
@@ -11,6 +11,8 @@ SOURCEF	  = ESMF_Fraction.F90 ESMF_BaseTime.F90 \
             ESMF_Calendar.F90 ESMF_TimeInterval.F90 ESMF_Time.F90 \
             ESMF_Alarm.F90 ESMF_Clock.F90
 SOURCEH	  = 
+STOREH    = ESMF_TimeMgr.inc
+
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Timeobj
