@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/02/27 21:39:45 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/03/03 16:34:16 flanigan Exp $ 
 
 ALL:  test
 
@@ -29,6 +29,7 @@ DIRS =
 
 $(ESMC_TESTDIR)/ESMF_SysTest70385: ESMF_SysTest70385.o  chkopts
 	-${F90CXXLD} -o ESMF_SysTest70385 ESMF_SysTest70385.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	mv -f ESMF_SysTest70385 $(ESMC_TESTDIR)
 	${RM} ESMF_SysTest70385.o
 
 RUN_ESMF_SysTest70385:
