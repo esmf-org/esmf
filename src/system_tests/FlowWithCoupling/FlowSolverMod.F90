@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2003/09/24 22:46:02 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -111,7 +111,7 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real(kind=ESMF_KIND_R4) :: x_min, x_max, y_min, y_max
+      real(kind=ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger

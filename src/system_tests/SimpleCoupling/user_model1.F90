@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: user_model1.F90,v 1.2 2003/09/24 22:48:54 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,7 +98,7 @@
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         integer :: nDE_i, nDE_j
-        real :: x_min, x_max, y_min, y_max
+        real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
         integer :: counts(2)
         integer :: ni, nj, de_id
         integer :: horz_gridtype, horz_stagger, horz_coord_system

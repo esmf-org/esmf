@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/09/19 23:00:30 svasquez Exp $ 
+# $Id: makefile,v 1.4 2003/09/24 22:48:54 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -15,7 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/system_tests/SimpleCoupling
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/SimpleCoupling
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -40,11 +40,11 @@ CLOBBERDIRS =
 
 RUN_SimpleCoupling:
 	-@rm -f testlog stdlog.* logfile.* SimpleCoupling.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/SimpleCoupling >$(ESMC_TESTDIR)/SimpleCouplingSTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest >$(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest.stdout
 
 RUN_SimpleCouplingUNI:
 	-@rm -f testlog stdlog.* logfile.* SimpleCoupling.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/SimpleCoupling >$(ESMC_TESTDIR)/SimpleCouplingSTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest >$(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest.stdout
 
 SimpleCoupling.rm:
 	echo "SimpleCoupling.rm target called here."

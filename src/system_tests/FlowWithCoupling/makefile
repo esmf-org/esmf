@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/09/19 22:47:16 svasquez Exp $ 
+# $Id: makefile,v 1.4 2003/09/24 22:46:02 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -14,7 +14,7 @@ LIBBASE	  =
 LOCDIR	  = src/system_tests/FlowWithCoupling
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/FlowWithCoupling
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -39,11 +39,11 @@ CLOBBERDIRS =
 
 RUN_FlowWithCoupling:
 	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCouplingSTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
 
 RUN_FlowWithCouplingUNI:
 	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCouplingSTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
 
 FlowWithCoupling.rm:
 	echo "FlowWithCoupling.rm target called here."

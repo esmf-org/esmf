@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.2 2003/09/24 22:46:02 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -99,7 +99,7 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real :: x_min, x_max, y_min, y_max
+      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
       real :: in_energy, in_velocity, in_rho
       integer :: printout
