@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.7 2004/04/13 17:30:46 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.8 2004/04/19 19:51:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.7 2004/04/13 17:30:46 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.8 2004/04/19 19:51:23 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -586,42 +586,42 @@
         switch (funcs[i].ftype) {
           case FT_VOID: {
             VoidFuncVM vf;
-//printf("calling out of case FT_VOID VM\n");
+printf("calling out of case FT_VOID VM\n");
             vf = (VoidFuncVM)funcs[i].funcptr;
             (*vf)(vm);
             break;
           }
           case FT_INT: {
             IntFuncVM vf;
-//printf("calling out of case FT_INT VM\n");
+printf("calling out of case FT_INT VM\n");
             vf = (IntFuncVM)funcs[i].funcptr;
             (*vf)(*(int *)funcs[i].funcarg[0], vm);
             break;
           }
           case FT_2INT: {
             Int2FuncVM vf;
-//printf("calling out of case FT_2INT VM\n");
+printf("calling out of case FT_2INT VM\n");
             vf = (Int2FuncVM)funcs[i].funcptr;
             (*vf)(*(int *)funcs[i].funcarg[0], *(int *)funcs[i].funcarg[1], vm);
             break;
           }
           case FT_INTP: {
             IntPtrFuncVM vf;
-//printf("calling out of case FT_INTP VM\n");
+printf("calling out of case FT_INTP VM\n");
             vf = (IntPtrFuncVM)funcs[i].funcptr;
             (*vf)((int *)funcs[i].funcarg[0], vm);
             break;
           }
           case FT_VOIDP: {
             VoidPtrFuncVM vf;
-//printf("calling out of case FT_VOIDP VM\n");
+printf("calling out of case FT_VOIDP VM\n");
             vf = (VoidPtrFuncVM)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0], vm);
             break;
           }
           case FT_VOIDPINTP: {
             VoidPtrIntPtrFuncVM vf;
-//printf("calling out of case FT_VOIDPINTP VM\n");
+printf("calling out of case FT_VOIDPINTP VM\n");
             vf = (VoidPtrIntPtrFuncVM)funcs[i].funcptr;
             (*vf)((void *)funcs[i].funcarg[0], (int *)funcs[i].funcarg[1], vm);
             *rc = *(int *)(funcs[i].funcarg[1]);
@@ -629,7 +629,7 @@
           }
           case FT_COMP1STAT: {
             C1SFuncVM vf;
-//printf("calling out of case FT_COMP1STAT VM\n");
+printf("calling out of case FT_COMP1STAT VM\n");
             vf = (C1SFuncVM)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
@@ -637,18 +637,21 @@
             break;
           }
           case FT_COMP2STAT: {
-            C2SFuncVM vf;
-//printf("calling out of case FT_COMP2STAT VM\n");
-            vf = (C2SFuncVM)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+            C2SFunc vf;
+            int rrc;
+            void *ccompcp=NULL;
+            esmf_compthreadcopy_(&ccompcp, funcs[i].funcarg[0], vm, &rrc);
+            vf = (C2SFunc)funcs[i].funcptr;
+            (*vf)(ccompcp, funcs[i].funcarg[1],
                   funcs[i].funcarg[2], funcs[i].funcarg[3],
-                 (int *)funcs[i].funcarg[4], vm);
+                 (int *)funcs[i].funcarg[4]);
             *rc = *(int *)(funcs[i].funcarg[4]);
+            esmf_compthreadcopyfree_(&ccompcp, &rrc);
             break;
           }
           case FT_COMPSLIST: {
             CSLFuncVM vf;
-//printf("calling out of case FT_COMPSLIST VM\n");
+printf("calling out of case FT_COMPSLIST VM\n");
             vf = (CSLFuncVM)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
@@ -792,3 +795,4 @@
     data = 0;
 
  } // end ~ESMC_FTable
+

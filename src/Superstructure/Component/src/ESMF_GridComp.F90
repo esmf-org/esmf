@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.33 2004/04/14 21:31:54 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.34 2004/04/19 19:52:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,6 +64,7 @@
 #else
          type(ESMF_CompClass), pointer :: compp 
 #endif
+         type(ESMF_VM) :: vm
       end type
 
 
@@ -110,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.33 2004/04/14 21:31:54 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.34 2004/04/19 19:52:03 theurich Exp $'
 
 !==============================================================================
 !
@@ -549,8 +550,8 @@
 ! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompGet(gridcomp, name, delayout, gridcomptype, grid, clock, &
-                                                       configFile, config, rc)
+      subroutine ESMF_GridCompGet(gridcomp, name, delayout, gridcomptype, &
+        grid, clock, configFile, config, vm, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(in) :: gridcomp
@@ -560,6 +561,7 @@
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configFile
+      type(ESMF_VM), intent(out), optional :: vm
       type(ESMF_Config), intent(out), optional :: config
       integer, intent(out), optional :: rc             
 
@@ -602,6 +604,9 @@
         call ESMF_CompGet(gridcomp%compp, name, delayout, &
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
+        if (present(vm)) then
+          vm = gridcomp%vm
+        endif
 
         end subroutine ESMF_GridCompGet
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.10 2004/04/14 21:09:53 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.11 2004/04/19 19:50:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -147,5 +147,10 @@ typedef struct{
   char name[160];         // trimmed type string
   ESMC_FTable *ftable;    // pointer to function table
 } cargotype;
+
+extern "C"{
+void esmf_compthreadcopy_(void *, void *, void *, int *);
+void esmf_compthreadcopyfree_(void *, int *);
+}
 
  #endif  // ESMC_FTable_H

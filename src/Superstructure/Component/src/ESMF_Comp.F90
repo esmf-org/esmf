@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.84 2004/04/16 23:42:49 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.85 2004/04/19 19:52:03 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -133,12 +133,14 @@
 !     ! wrapper for Component objects going across F90/C++ boundary
       type ESMF_CWrap
       sequence
-      private
+!      private
 #ifndef ESMF_NO_INITIALIZERS
           type(ESMF_CompClass), pointer :: compp => NULL()
 #else
           type(ESMF_CompClass), pointer :: compp
 #endif
+      
+          type(ESMF_VM) :: vm
       end type
 
 !------------------------------------------------------------------------------
@@ -162,7 +164,7 @@
       ! These have to be public so other component types can use them, but 
       !  are not intended to be used outside the Framework code.
 
-      public ESMF_CompClass
+      public ESMF_CompClass, ESMF_CWrap
       public ESMF_CompType
       public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
 
@@ -195,7 +197,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.84 2004/04/16 23:42:49 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.85 2004/04/19 19:52:03 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1940,3 +1942,106 @@ end function
 
 end module ESMF_CompMod
 
+
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CompThreadCopy - Create a thread private copy 
+
+! !INTERFACE:
+  subroutine ESMF_CompThreadCopy(ccompcp, ccomp, vm, rc)
+    use ESMF_CompMod
+    use ESMF_VMMod
+!
+! !ARGUMENTS:
+    type(ESMF_CWrap), pointer       :: ccompcp
+    type(ESMF_CWrap)                :: ccomp
+    type(ESMF_VM)                   :: vm
+    integer, intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!     Create a thread private copy of component objects
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[ccomp] 
+!          component object
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! make copy
+    print *, 'Hello out of ESMF_CompThreadCopy'
+    allocate(ccompcp)
+    ccompcp = ccomp
+    ccompcp%vm = vm
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CompThreadCopy
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CompThreadCopyFree - Free a thread private copy 
+
+! !INTERFACE:
+  subroutine ESMF_CompThreadCopyFree(ccompcp, rc)
+    use ESMF_CompMod
+!
+! !ARGUMENTS:
+    type(ESMF_CWrap), pointer       :: ccompcp
+    integer, intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!    Free a thread private copy 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[ccomp] 
+!          component object
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! make copy
+    deallocate(ccompcp)
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CompThreadCopyFree
+!------------------------------------------------------------------------------
