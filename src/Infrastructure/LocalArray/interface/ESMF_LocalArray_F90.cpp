@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.12 2004/03/04 16:30:30 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.13 2004/03/04 22:30:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.12 2004/03/04 16:30:30 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.13 2004/03/04 22:30:01 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -516,13 +516,13 @@ end function
 ! !IROUTINE: ESMF_LocalArrayCreateBySpec -- Create a new LocalArray from an ArraySpec
 
 ! !INTERFACE:
-      function ESMF_LocalArrayCreateBySpec(spec, counts, lbounds, ubounds, rc)
+      function ESMF_LocalArrayCreateBySpec(arrayspec, counts, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_LocalArray) :: ESMF_LocalArrayCreateBySpec
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: spec
+      type(ESMF_ArraySpec), intent(in) :: arrayspec
       integer, intent(in), dimension(:) :: counts
       integer, dimension(:), intent(in), optional :: lbounds
       integer, dimension(:), intent(in), optional :: ubounds 
@@ -535,7 +535,7 @@ end function
 !  The arguments are:
 !  \begin{description}
 !
-!  \item[spec]
+!  \item[arrayspec]
 !    ArraySpec object.
 !
 !  \item[counts]
@@ -574,7 +574,7 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        call ESMF_ArraySpecGet(spec, rank, type, kind, status)
+        call ESMF_ArraySpecGet(arrayspec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
         
         ! Call the list function to make the array
@@ -1376,11 +1376,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 ! !IROUTINE: ESMF_LocalArraySetData
 !
 ! !INTERFACE:
-      subroutine ESMF_LocalArraySetData(array, dataspec, databuf, docopy, rc)
+      subroutine ESMF_LocalArraySetData(array, databuf, docopy, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(inout) :: array 
-      type(ESMF_ArraySpec), intent(in) :: dataspec
       real, dimension (:), pointer :: databuf    
       type(ESMF_CopyFlag), intent(in) :: docopy 
       integer, intent(out), optional :: rc     
@@ -1404,11 +1403,11 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-     subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
+     subroutine ESMF_ArraySpecInit(arrayspec, rank, type, kind, rc)
 !
 !
 ! !ARGUMENTS:
-     type(ESMF_ArraySpec), intent(inout) :: as
+     type(ESMF_ArraySpec), intent(inout) :: arrayspec
      integer, intent(in) :: rank
      type(ESMF_DataType), intent(in) :: type
      type(ESMF_DataKind), intent(in) :: kind
@@ -1463,17 +1462,18 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
         ! Set arrayspec contents with some checking to keep Silverio at bay
         if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
-          as%rank = rank
+          arrayspec%rank = rank
         else
           print *, "ERROR in ESMF_ArraySpecInit: bad rank"
-          as%rank = 0   ! something to trigger on next time that this is bad
+          ! something to trigger on next time that this is bad
+          arrayspec%rank = 0   
           return
         endif
 
         ! Since type and kind are derived types, you cannot set them to
         !  illegal values, so no additional tests are needed.
-        as%type = type
-        as%kind = kind
+        arrayspec%type = type
+        arrayspec%kind = kind
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1624,10 +1624,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
+      subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: as
+      type(ESMF_ArraySpec), intent(in) :: arrayspec
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
@@ -1639,7 +1639,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 !  The arguments are:
 !  \begin{description}
 !
-!  \item[as]
+!  \item[arrayspec]
 !    An {\tt ESMF\_ArraySpec} object.
 !
 !  \item[rank]
@@ -1678,9 +1678,9 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
         ! Get arrayspec contents
       
-        if(present(rank)) rank = as%rank
-        if(present(type)) type = as%type
-        if(present(kind)) kind = as%kind
+        if(present(rank)) rank = arrayspec%rank
+        if(present(type)) type = arrayspec%type
+        if(present(kind)) kind = arrayspec%kind
 
         if (rcpresent) rc = ESMF_SUCCESS
 
