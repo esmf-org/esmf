@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.72 2004/03/09 13:05:22 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.73 2004/03/09 15:04:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.72 2004/03/09 13:05:22 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.73 2004/03/09 15:04:55 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1592,7 +1592,7 @@ end function
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass), pointer, intent(in)            :: compp
+    type(ESMF_CompClass), pointer                        :: compp
     integer,                       intent(in),  optional :: max
     integer,                       intent(in),  optional :: pref_intra_process
     integer,                       intent(in),  optional :: pref_intra_ssi
@@ -1656,7 +1656,7 @@ end function
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass), pointer, intent(in)            :: compp
+    type(ESMF_CompClass), pointer                        :: compp
     integer,                       intent(in),  optional :: max
     integer,                       intent(in),  optional :: pref_intra_process
     integer,                       intent(in),  optional :: pref_intra_ssi
@@ -1720,7 +1720,7 @@ end function
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass), pointer, intent(in)            :: compp
+    type(ESMF_CompClass), pointer                        :: compp
     integer,                       intent(in),  optional :: max
     integer,                       intent(in),  optional :: pref_intra_process
     integer,                       intent(in),  optional :: pref_intra_ssi
