@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.5 2004/05/26 18:39:00 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.6 2004/06/01 20:41:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.5 2004/05/26 18:39:00 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.6 2004/06/01 20:41:04 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -316,17 +316,241 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayDataMapGet - Get object from a ArrayDataMap type.
 !
-! This section includes the ArrayDataMap Init and Invalidate routines
+! !INTERFACE:
+      subroutine ESMF_ArrayDataMapGet(datamap, dataRank, dataIndices, counts, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayDataMap), intent(in) :: datamap  
+      integer, intent(out), optional :: dataRank    
+      integer, dimension(:), intent(out), optional :: dataIndices
+      integer, dimension(:), intent(out), optional :: counts 
+      integer, intent(out), optional :: rc       
+!
+! !DESCRIPTION:
+!   Return info about the current {\tt ESMF\_ArrayDataMap} described by this object.
+!
+!   The arguments are:
+!     \begin{description}
+!     \item [datamap]
+!           An {\tt ESMF\_ArrayDataMap} object.
+!     \item [{[datarank]}]
+!	    The number of array dimensions.
+!     \item [{[dataIndices]}] 
+!           The Grid rank which corresponds to this Array rank.  If
+!           there is no correspondance (because the Array has a higher rank
+!           than the Grid), the value must be 0.  The default is a 1-to-1
+!           mapping of Grid to Array ranks.
+!     \item [{[counts]}]
+!           If the {\tt ESMF\_Array} object is a higher rank than the
+!           {\tt ESMF\_Grid}, the additional dimensions may each have an
+!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
+!           and create the appropriately sized {\tt ESMF\_Array} for each
+!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!           can be obtained from the {\tt ESMF\_Array} and this argument
+!           is unneeded.  If the ranks of the grid and array are the same,
+!           this is also unneeded.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
 !
 !
+!EOP
+! !REQUIREMENTS: 
+ 
+        ! local vars
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+        integer :: i, dimlength
+
+        ! initialize return code
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+
+        if (present(dataRank)) dataRank = datamap%dataRank
+
+        if (present(dataIndices)) then
+           dimlength = size(dataIndices,1)
+           if (dimlength .lt. datamap%dataRank) then
+             print *, "ESMF_ArrayDataMapGet: dataIndices array too short for dataRank"
+             return
+           endif
+
+           do i=1, dimlength
+             dataIndices(i) = datamap%dataDimOrder(i)
+           enddo
+        endif
+
+        if (present(counts)) then
+           dimlength = size(counts)
+           do i=1, dimlength
+             counts(i) = datamap%dataNonGridCounts(i)
+           enddo
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayDataMapGet
+
+
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_ArrayDataMapSetDefault - initialize the contents of a ArrayDataMap
+! !IROUTINE: ESMF_ArrayDataMapPrint - Print a ArrayDataMap type
+!
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayDataMapPrint(datamap, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayDataMap), intent(in) :: datamap
+      character (len = *), intent(in) :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a {\tt ESMF\_ArrayDataMap}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [datamap]
+!           {\tt ESMF\_ArrayDataMap} object to print.
+!     \item [{[options]}]
+!           Print options.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        integer :: i, j
+        character (len = ESMF_MAXSTR) :: str
+
+        print *, "ArrayDataMap print:"
+        if (datamap%status .ne. ESMF_STATE_READY) then
+          print *, "Uninitialized or Invalid object"
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
+        ! individual data item information
+        print *, " Data rank = ", datamap%dataRank
+        print *, " Data Index Order and Lengths for non-Grid Indices:"
+        j = 1
+        do i=1, ESMF_MAXDIM
+            if (datamap%dataDimOrder(i) .eq. 0) then
+               print *, i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
+               j = j + 1
+            else
+               print *, i, "Grid index ", datamap%dataDimOrder(i)
+            endif
+        enddo
+
+        end subroutine ESMF_ArrayDataMapPrint
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayDataMapSet - Set a ArrayDataMap type object.
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayDataMapSet(datamap, dataRank, dataIndices, counts, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayDataMap), intent(inout) :: datamap  
+      integer, intent(in), optional :: dataRank    
+      integer, dimension(:), intent(in), optional :: dataIndices
+      integer, dimension(:), intent(in), optional :: counts 
+      integer, intent(out), optional :: rc       
+!
+! !DESCRIPTION:
+! Set info about the given {\tt ESMF\_ArrayDataMap}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item [datamap]
+!         An {\tt ESMF\_ArrayDataMap} object.
+!   \item [{[datarank]}]
+!         The number of array dimensions.
+!   \item [{[dataIndices]}]
+!         The Grid rank which corresponds to this Array rank.  If
+!         there is no correspondance (because the Array has a higher rank
+!         than the Grid), the value must be 0.  The default is a 1-to-1
+!         mapping of Grid to Array ranks.
+!   \item [{[counts]}]
+!         If the {\tt ESMF\_Array} object is a higher rank than the
+!         {\tt ESMF\_Grid}, the additional dimensions may each have an
+!         item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!         call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
+!         and create the appropriately sized {\tt ESMF\_Array} for each
+!         {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!         can be obtained from the {\tt ESMF\_Array} and this argument
+!         is unneeded.  If the ranks of the grid and array are the same,
+!         this is also unneeded.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: 
+ 
+        ! local vars
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+        integer :: i, dimlength
+
+        ! initialize return code
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+
+        if (present(dataRank)) datamap%dataRank = dataRank
+
+        if (present(dataIndices)) then
+           dimlength = size(dataIndices,1)
+           if (dimlength .lt. datamap%dataRank) then
+             print *, "ESMF_ArrayDataMapSet: dataIndices array too short for dataRank"
+             return
+           endif
+
+           do i=1, dimlength
+             datamap%dataDimOrder(i) = dataIndices(i)
+           enddo
+        endif
+
+        if (present(counts)) then
+           datamap%dataNonGridCounts(:) = 1
+           dimlength = size(counts)
+           do i=1, dimlength
+             datamap%dataNonGridCounts(i) = counts(i)
+           enddo
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayDataMapSet
+
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_ArrayDataMapSetDefault - Set ArrayDataMap default values
 
 ! !INTERFACE:
-      ! Private name: scCall using ESMF_ArrayDataMapSetDefault()
+      ! Private name; call using ESMF_ArrayDataMapSetDefault()
       subroutine ESMF_ArrayDataMapSetDefIndex(datamap, dataIorder, counts, rc)
 !
 ! !ARGUMENTS:
@@ -336,7 +560,7 @@ end function
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!     Initialize the contents of a {\tt ESMF\_ArrayDataMap} type.
+!     Set default values of an {\tt ESMF\_ArrayDataMap}.
 !
 !     The arguments are:
 !     \begin{description} 
@@ -451,87 +675,6 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      subroutine ESMF_ArrayDataMapSetDefExplicit(datamap, dataRank, dataIndices, &
-                                                                   counts, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayDataMap) :: datamap
-      integer, intent(in) :: dataRank
-      integer, dimension(:), intent(in) :: dataIndices
-      integer, dimension(:), intent(in), optional :: counts
-      integer, intent(out), optional :: rc  
-!
-! !DESCRIPTION:
-!      ESMF routine to initialize the contents of a {\tt ESMF\_ArrayDataMap} type.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           An {\tt ESMF\_ArrayDataMap} object.
-!     \item [dataRank] 
-!	    The number of the array dimensions.
-!     \item [dataIndices] 
-!           The Grid rank which corresponds to this Array rank.  If
-!           there is no correspondance (because the Array has a higher rank
-!           than the Grid), the value must be 0.  The default is a 1-to-1
-!           mapping of Grid to Array ranks.
-!     \item [{[counts]}]
-!           If the {\tt ESMF\_Array} object is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may each have an
-!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
-!           and create the appropriately sized {\tt ESMF\_Array} for each
-!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!           can be obtained from the {\tt ESMF\_Array} and this argument
-!           is unneeded.  If the ranks of the grid and array are the same,
-!           this is also unneeded.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOPI
-! !REQUIREMENTS: internal
-
-        ! local vars
-        integer :: status                     ! local error status
-        logical :: rcpresent                  ! did user specify rc?
-
-        ! init return code
-        status = ESMF_FAILURE
-        if (present(rc)) then
-            rcpresent=.TRUE.
-            rc = ESMF_FAILURE    
-        else
-          rcpresent = .FALSE.
-        endif
-
-        ! initialize the contents of the datamap
-
-        ! set the defaults
-        datamap%dataDimOrder(:) = 0
-
-        ! now overwrite with what the user passed in
-        datamap%dataRank = dataRank
-        datamap%dataDimOrder(1:size(dataIndices)) = dataIndices
-
-        ! counts for dimensions not aligned with the grid
-        datamap%dataNonGridCounts(:) = 1
-        if (present(counts)) then
-          datamap%dataNonGridCounts(1:size(counts)) = counts(:)
-        endif
-
-        ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATE_READY
-
-        ! if user asked for it, return error code
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayDataMapSetDefExplicit
-
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_ArrayDataMapSetInvalid - set contents of a ArrayDataMap to uninitialized value.
 
@@ -567,60 +710,36 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section contains the Get and Set routines
-!
-!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayDataMapGet - Get object from a ArrayDataMap type.
+! !IROUTINE: ESMF_ArrayDataMapValidate - Validate internal state of an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapGet(datamap, dataRank, dataIndices, counts, rc)
+      subroutine ESMF_ArrayDataMapValidate(datamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap  
-      integer, intent(out), optional :: dataRank    
-      integer, dimension(:), intent(out), optional :: dataIndices
-      integer, dimension(:), intent(out), optional :: counts 
-      integer, intent(out), optional :: rc       
+      type(ESMF_ArrayDataMap), intent(in) :: datamap
+      character (len = *), intent(in) :: options
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Return info about the current {\tt ESMF\_ArrayDataMap} described by this object.
+!      Routine to validate the internal state of a {\tt ESMF\_ArrayDataMap}.
 !
-!   The arguments are:
+!      The arguments are:
 !     \begin{description}
 !     \item [datamap]
-!           An {\tt ESMF\_ArrayDataMap} object.
-!     \item [{[datarank]}]
-!	    The number of array dimensions.
-!     \item [{[dataIndices]}] 
-!           The Grid rank which corresponds to this Array rank.  If
-!           there is no correspondance (because the Array has a higher rank
-!           than the Grid), the value must be 0.  The default is a 1-to-1
-!           mapping of Grid to Array ranks.
-!     \item [{[counts]}]
-!           If the {\tt ESMF\_Array} object is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may each have an
-!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
-!           and create the appropriately sized {\tt ESMF\_Array} for each
-!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!           can be obtained from the {\tt ESMF\_Array} and this argument
-!           is unneeded.  If the ranks of the grid and array are the same,
-!           this is also unneeded.
+!           {\tt ESMF\_ArrayDataMap} object to validate.
+!     \item [{[options]}]
+!           Validation options.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
 !
-!
 !EOP
-! !REQUIREMENTS: 
- 
+! !REQUIREMENTS:  FLD4.1
+        
         ! local vars
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
-        integer :: i, dimlength
 
         ! initialize return code
         status = ESMF_FAILURE
@@ -631,126 +750,13 @@ end function
         endif
 
 
-        if (present(dataRank)) dataRank = datamap%dataRank
-
-        if (present(dataIndices)) then
-           dimlength = size(dataIndices,1)
-           if (dimlength .lt. datamap%dataRank) then
-             print *, "ESMF_ArrayDataMapGet: dataIndices array too short for dataRank"
-             return
-           endif
-
-           do i=1, dimlength
-             dataIndices(i) = datamap%dataDimOrder(i)
-           enddo
-        endif
-
-        if (present(counts)) then
-           dimlength = size(counts)
-           do i=1, dimlength
-             counts(i) = datamap%dataNonGridCounts(i)
-           enddo
-        endif
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayDataMapGet
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayDataMapSet - Set a ArrayDataMap type object.
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayDataMapSet(datamap, dataRank, dataIndices, counts, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(inout) :: datamap  
-      integer, intent(in), optional :: dataRank    
-      integer, dimension(:), intent(in), optional :: dataIndices
-      integer, dimension(:), intent(in), optional :: counts 
-      integer, intent(out), optional :: rc       
-!
-! !DESCRIPTION:
-! Set info about the given {\tt ESMF\_ArrayDataMap}.
-!
-! The arguments are:
-!   \begin{description}
-!   \item [datamap]
-!         An {\tt ESMF\_ArrayDataMap} object.
-!   \item [{[datarank]}]
-!         The number of array dimensions.
-!   \item [{[dataIndices]}]
-!         The Grid rank which corresponds to this Array rank.  If
-!         there is no correspondance (because the Array has a higher rank
-!         than the Grid), the value must be 0.  The default is a 1-to-1
-!         mapping of Grid to Array ranks.
-!   \item [{[counts]}]
-!         If the {\tt ESMF\_Array} object is a higher rank than the
-!         {\tt ESMF\_Grid}, the additional dimensions may each have an
-!         item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!         call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
-!         and create the appropriately sized {\tt ESMF\_Array} for each
-!         {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!         can be obtained from the {\tt ESMF\_Array} and this argument
-!         is unneeded.  If the ranks of the grid and array are the same,
-!         this is also unneeded.
-!   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: 
+        if (datamap%status .ne. ESMF_STATE_READY) return
+            
+        ! TODO: add more validation here - for index numbers, etc
  
-        ! local vars
-        integer :: status                     ! local error status
-        logical :: rcpresent                  ! did user specify rc?
-        integer :: i, dimlength
-
-        ! initialize return code
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-
-        if (present(dataRank)) datamap%dataRank = dataRank
-
-        if (present(dataIndices)) then
-           dimlength = size(dataIndices,1)
-           if (dimlength .lt. datamap%dataRank) then
-             print *, "ESMF_ArrayDataMapSet: dataIndices array too short for dataRank"
-             return
-           endif
-
-           do i=1, dimlength
-             datamap%dataDimOrder(i) = dataIndices(i)
-           enddo
-        endif
-
-        if (present(counts)) then
-           datamap%dataNonGridCounts(:) = 1
-           dimlength = size(counts)
-           do i=1, dimlength
-             datamap%dataNonGridCounts(i) = counts(i)
-           enddo
-        endif
-
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayDataMapSet
-
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section is I/O for ArrayDataMaps
-!
-!
+        end subroutine ESMF_ArrayDataMapValidate
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -920,111 +926,6 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayDataMapValidate - Validate internal state of a ArrayDataMap type
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayDataMapValidate(datamap, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap
-      character (len = *), intent(in) :: options
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Routine to validate the internal state of a {\tt ESMF\_ArrayDataMap}.
-!
-!      The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           {\tt ESMF\_ArrayDataMap} object to validate.
-!     \item [{[options]}]
-!           Validation options.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOP
-! !REQUIREMENTS:  FLD4.1
-        
-        ! local vars
-        integer :: status                     ! local error status
-        logical :: rcpresent                  ! did user specify rc?
-
-        ! initialize return code
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-
-        if (datamap%status .ne. ESMF_STATE_READY) return
-            
-        ! TODO: add more validation here - for index numbers, etc
- 
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayDataMapValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayDataMapPrint - Print a ArrayDataMap type
-!
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayDataMapPrint(datamap, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap
-      character (len = *), intent(in) :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about a {\tt ESMF\_ArrayDataMap}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           {\tt ESMF\_ArrayDataMap} object to print.
-!     \item [{[options]}]
-!           Print options.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        integer :: i, j
-        character (len = ESMF_MAXSTR) :: str
-
-        print *, "ArrayDataMap print:"
-        if (datamap%status .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Invalid object"
-          if (present(rc)) rc = ESMF_FAILURE
-          return
-        endif
-
-        ! individual data item information
-        print *, " Data rank = ", datamap%dataRank
-        print *, " Data Index Order and Lengths for non-Grid Indices:"
-        j = 1
-        do i=1, ESMF_MAXDIM
-            if (datamap%dataDimOrder(i) .eq. 0) then
-               print *, i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
-               j = j + 1
-            else
-               print *, i, "Grid index ", datamap%dataDimOrder(i)
-            endif
-        enddo
-
-        end subroutine ESMF_ArrayDataMapPrint
-
-
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE:  ESMF_RelLocString - Return a relloc as a string
@@ -1151,6 +1052,89 @@ end function
         if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_IndexOrderString
+
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      subroutine ESMF_ArrayDataMapSetDefExplicit(datamap, dataRank, dataIndices, &
+                                                                   counts, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArrayDataMap) :: datamap
+      integer, intent(in) :: dataRank
+      integer, dimension(:), intent(in) :: dataIndices
+      integer, dimension(:), intent(in), optional :: counts
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      ESMF routine to initialize the contents of a {\tt ESMF\_ArrayDataMap} type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [datamap]
+!           An {\tt ESMF\_ArrayDataMap} object.
+!     \item [dataRank] 
+!	    The number of the array dimensions.
+!     \item [dataIndices] 
+!           The Grid rank which corresponds to this Array rank.  If
+!           there is no correspondance (because the Array has a higher rank
+!           than the Grid), the value must be 0.  The default is a 1-to-1
+!           mapping of Grid to Array ranks.
+!     \item [{[counts]}]
+!           If the {\tt ESMF\_Array} object is a higher rank than the
+!           {\tt ESMF\_Grid}, the additional dimensions may each have an
+!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_ArrayDataMap}
+!           and create the appropriately sized {\tt ESMF\_Array} for each
+!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!           can be obtained from the {\tt ESMF\_Array} and this argument
+!           is unneeded.  If the ranks of the grid and array are the same,
+!           this is also unneeded.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!EOPI
+! !REQUIREMENTS: internal
+
+        ! local vars
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+
+        ! init return code
+        status = ESMF_FAILURE
+        if (present(rc)) then
+            rcpresent=.TRUE.
+            rc = ESMF_FAILURE    
+        else
+          rcpresent = .FALSE.
+        endif
+
+        ! initialize the contents of the datamap
+
+        ! set the defaults
+        datamap%dataDimOrder(:) = 0
+
+        ! now overwrite with what the user passed in
+        datamap%dataRank = dataRank
+        datamap%dataDimOrder(1:size(dataIndices)) = dataIndices
+
+        ! counts for dimensions not aligned with the grid
+        datamap%dataNonGridCounts(:) = 1
+        if (present(counts)) then
+          datamap%dataNonGridCounts(1:size(counts)) = counts(:)
+        endif
+
+        ! mark object as initialized and ready to be used
+        datamap%status = ESMF_STATE_READY
+
+        ! if user asked for it, return error code
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayDataMapSetDefExplicit
+
+
+
 
 !------------------------------------------------------------------------------
 
