@@ -1,4 +1,4 @@
- $Id: README,v 1.12 2003/05/28 20:27:58 flanigan Exp $
+ $Id: README,v 1.13 2003/05/28 21:23:05 flanigan Exp $
 ================================================================================
                                    README
 
@@ -25,7 +25,7 @@ to be set:
 
 ESMF_PROJECT  Load Sharing Facility (LSF) project name 
 
-On a Alpha machine, test and demo applications are run using 
+On an Alpha machine, test and demo applications are run using 
 the bsub command.  The value of ESMF_PROJECT is used as the 
 argument for bsub's -P option. The -P option assigns a job to 
 a specific project.  
