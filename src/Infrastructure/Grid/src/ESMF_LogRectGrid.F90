@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.60 2004/04/19 21:51:56 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.61 2004/04/21 17:23:28 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1591,11 +1591,11 @@
       endif
 
       ! validate the layout before going any furthe
-  !jw    call ESMF_newDELayoutValidate(delayout, rc=status)
-  !jw    if (status .ne. ESMF_SUCCESS) then
-  !jw        print *, "ESMF_LogRectGridDistribute: bad delayout, cannot distribute grid"
-  !jw        return
-  !jw    endif
+ !jw     call ESMF_newDELayoutValidate(delayout, rc=status)
+ !jw     if (status .ne. ESMF_SUCCESS) then
+ !jw       print *, "ESMF_LogRectGridDistribute: bad delayout, cannot distribute grid"
+ !jw       return
+ !jw     endif
       
       ! Extract some information from the Grid
       dimCount = grid%dimCount
@@ -4282,10 +4282,13 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       integer :: i, j
-      real(ESMF_KIND_R8) :: coordUse1, coordUse2
-      real(ESMF_KIND_R8), dimension(:), pointer :: temp
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
-      type(ESMF_Array), dimension(:), pointer :: arrayTemp
+      integer, dimension(:), allocatable :: cornerCounts
+      real(ESMF_KIND_R8) :: centerUse1, centerUse2
+      real(ESMF_KIND_R8) :: cornerUse11, cornerUse12, cornerUse21, cornerUse22
+      real(ESMF_KIND_R8), dimension(:), pointer :: center
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: center1, center2, corner
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: corner1, corner2
+      type(ESMF_Array), dimension(:), pointer :: centerArray, cornerArray
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
@@ -4301,21 +4304,32 @@
       !       would have to be supported by Regrid first
 
       ! allocate arrays
-      allocate(arrayTemp(dimCount))
+      allocate(cornerCounts(size(counts)+1))
+      allocate(centerArray(dimCount))
+      allocate(cornerArray(dimCount))
+
+      ! set up cornerCounts arrays
+      cornerCounts(1) = dimCount*2
+      do i = 1,size(counts)
+        cornerCounts(i+1) = counts(i)
+      enddo
 
       ! create ESMF_Arrays
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
-        arrayTemp(i) = ESMF_ArrayCreate(dimCount, type, kind, counts, &
-                                        haloWidth=gridBoundWidth, rc=status)
+        centerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, counts, &
+                                          haloWidth=gridBoundWidth, rc=status)
+        cornerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, cornerCounts, &
+                                          haloWidth=gridBoundWidth, rc=status)
       enddo
 
       select case (dimCount)
       case(1)   ! 1D coordinates, assumed mostly for vertical grids
 
         ! get data
-        call ESMF_ArrayGetData(arrayTemp(1), temp, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(centerArray(1), center, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, status)
 
         ! For now, an if construct for the different relative locations
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
@@ -4323,12 +4337,16 @@
 
         elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
           do i = 1,counts(1)
-            temp(i) = 0.5d0*(coord1(i)+coord1(i+1))
+            center(  i) = 0.5d0*(coord1(i)+coord1(i+1))
+            corner(1,i) = coord1(i  )
+            corner(2,i) = coord1(i+1)
           enddo
 
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,counts(1)
-            temp(i) = coord1(i+1)
+            center(  i) = coord1(i+1)
+            corner(1,i) = 0.5d0*(coord1(i  )+coord1(i+1))
+            corner(2,i) = 0.5d0*(coord1(i+1)+coord1(i+2))
           enddo
 
         else
@@ -4341,8 +4359,10 @@
       case(2)   ! 2D coordinates
 
         ! get data
-        call ESMF_ArrayGetData(arrayTemp(1), temp1, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(arrayTemp(2), temp2, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(centerArray(1), center1, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(centerArray(2), center2, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, status)
 
         ! For now, an if construct for the different relative locations
         ! TODO: also set corners and faces
@@ -4351,91 +4371,199 @@
 
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,counts(1)
-            coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
+            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
+            cornerUse11 = coord1(i  )
+            cornerUse12 = coord1(i+1)
             do j = 1,counts(2)
-              coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
+              cornerUse21 = coord2(j  )
+              cornerUse22 = coord2(j+1)
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_NFACE) then
           do i = 1,counts(1)
-            coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
+            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
+            cornerUse11 = coord1(i  )
+            cornerUse12 = coord1(i+1)
             do j = 1,counts(2)
-              coordUse2 = coord2(j+1)
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = coord2(j+1)
+              cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
+              cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_SFACE) then
           do i = 1,counts(1)
-            coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
+            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
+            cornerUse11 = coord1(i  )
+            cornerUse12 = coord1(i+1)
             do j = 1,counts(2)
-              coordUse2 = coord2(j)
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = coord2(j)
+              cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
+              cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_EFACE) then
           do i = 1,counts(1)
-            coordUse1 = coord1(i+1)
+            centerUse1  = coord1(i+1)
+            cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
+            cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
             do j = 1,counts(2)
-              coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
+              cornerUse21 = coord2(j  )
+              cornerUse22 = coord2(j+1)
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_WFACE) then
           do i = 1,counts(1)
-            coordUse1 = coord1(i)
+            centerUse1  = coord1(i)
+            cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
+            cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
             do j = 1,counts(2)
-              coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
+              cornerUse21 = coord2(j  )
+              cornerUse22 = coord2(j+1)
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_NECORNER) then
           do i = 1,counts(1)
-            coordUse1 = coord1(i+1)
+            centerUse1  = coord1(i+1)
+            cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
+            cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
             do j = 1,counts(2)
-              coordUse2 = coord2(j+1)
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = coord2(j+1)
+              cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
+              cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_SWCORNER) then
           do i = 1,counts(1)
-            coordUse1 = coord1(i)
+            centerUse1  = coord1(i)
+            cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
+            cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
             do j = 1,counts(2)
-              coordUse2 = coord2(j)
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = coord2(j)
+              cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
+              cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_SECORNER) then
           do i = 1,counts(1)
-            coordUse1 = coord1(i+1)
+            centerUse1  = coord1(i+1)
+            cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
+            cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
             do j = 1,counts(2)
-              coordUse2 = coord2(j)
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = coord2(j)
+              cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
+              cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
         elseif (relloc .eq. ESMF_CELL_NWCORNER) then
           do i = 1,counts(1)
-            coordUse1 = coord1(i)
+            centerUse1  = coord1(i)
+            cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
+            cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
             do j = 1,counts(2)
-              coordUse2 = coord2(j+1)
-              temp1(i,j) = coordUse1 
-              temp2(i,j) = coordUse2
+              centerUse2  = coord2(j+1)
+              cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
+              cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
+              center1(  i,j) = centerUse1 
+              center2(  i,j) = centerUse2
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse11
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse12
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse22
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse21
             enddo
           enddo
 
@@ -4453,13 +4581,15 @@
 
       ! now set the location array in PhysGrid
       call ESMF_PhysGridSetLocations(grid%physGrids(physGridId), &
-                                     locationArray=arrayTemp, total=total, &
+                                     locationArray=centerArray, total=total, &
                                      rc=status)
             ! TODO: add name to set call
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridSetCoordCompute: PhysGrid set locations"
         return
       endif
+
+      deallocate(cornerCounts)
 
       if (rcpresent) rc = ESMF_SUCCESS
 
