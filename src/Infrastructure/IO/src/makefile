@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/06/07 22:00:56 slswift Exp $
+# $Id: makefile,v 1.10 2004/06/07 23:25:43 slswift Exp $
 
 ALL: build_here
 
@@ -7,7 +7,7 @@ FFLAGS    =
 SOURCEC   = 
 SOURCEF   = wrf_io.F90 field_routines.F90 module_wrf_error.F wrf_abort.F
 CODE      = ext_ncd_get_dom_ti.code ext_ncd_get_var_td.code ext_ncd_get_var_ti.code ext_ncd_put_dom_ti.code ext_ncd_put_var_td.code ext_ncd_put_var_ti.code transpose.code
-#STOREH    = ESMC_IO.h
+STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
