@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.5 2002/10/24 17:06:20 eschwab Exp $
+# $Id: do_newcomp,v 1.6 2002/10/25 17:19:32 eschwab Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -105,7 +105,7 @@ endif
           sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90
       endif
 
-      if(!(-r $intfdir/ESMC_class.C)) 
+      if(!(-r $intfdir/ESMC_class.C)) then
           cp $DOCT_DIR/ESMC_class.C $intfdir
           chmod 644 $intfdir/ESMC_class.C
       endif
