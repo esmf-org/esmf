@@ -129,7 +129,7 @@ class vmachine{
     void vmachine_destruct(void);
       // free allocations within an existing vmachine object
 
-    void *vmachine_enter(class vmplan &vmp, void *(fctp)(vmachine &, void *),
+    void *vmachine_enter(class vmplan &vmp, void *(fctp)(void *, void *),
       void *cargo);
       // enter a vm derived from current vm according to the vmplan
     void vmachine_exit(class vmplan &vmp, void *arg);
@@ -173,7 +173,7 @@ class vmplan{
     int *cspawnid;    // idication to which one of spawned pets to contribute to
     // vmachine references for this PET (as many entries as this PET spawns)
     int nspawn;       // number of PETs this PET will spwan
-    vmachine **myvms; // this array holds pointers to heap vmachine instances
+    void **myvms;     // this array holds pointers to heap vmachine instances
     // Communication preferences
     // These preferences will be satisfied if the architecture supports it, 
     // otherwise the default communication setting is chosen instead.
@@ -188,6 +188,10 @@ class vmplan{
       // native destructor
     void vmplan_garbage(void);
       // perform garbage collection within a vmplan object
+    int vmplan_nspawn(void);
+      // return number of PETs that are being spawned out of current PET
+    void vmplan_myvms(void **myvms);
+      // set the internal myvms pointer array
     void vmplan_maxthreads(vmachine &vm);  
       // set up a vmplan that will maximize the number of thread-pets
     void vmplan_maxthreads(vmachine &vm, int max);  
