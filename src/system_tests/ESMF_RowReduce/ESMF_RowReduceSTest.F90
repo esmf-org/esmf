@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.29 2004/06/14 22:28:57 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.30 2004/06/15 22:50:28 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -29,11 +29,10 @@
     integer :: row_to_reduce
     integer :: rowlen, rstart, rend
     integer :: result, pet_id, npets, rightvalue 
-    integer :: counts(2)
+    integer :: counts(2), localCount(2)
     type(ESMF_GridHorzStagger) :: horz_stagger
     real(ESMF_KIND_R8) :: min(2), max(2)
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
-    type(ESMF_AxisIndex), dimension(2) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: delayout1 
     type(ESMF_Grid) :: grid1
@@ -133,8 +132,8 @@
     enddo
     print *, "size local1D", size(ldata)
     print *, "size global1D", size(idata)
-    call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, &
-                                     horzRelloc=ESMF_CELL_CENTER, rc=rc) 
+    call ESMF_GridDELocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, &
+                                       horzRelloc=ESMF_CELL_CENTER, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "after local to global"
@@ -191,12 +190,12 @@
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDELocalInfo(grid1, globalAIPerDim=index, &
+    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=localCount, &
                                  horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE
-    rowlen = index(1)%max - index(1)%min + 1
+    rowlen = localCount(1)
     rstart = ((row_to_reduce-1) * rowlen) + 1
     rend = (row_to_reduce) * rowlen
     
