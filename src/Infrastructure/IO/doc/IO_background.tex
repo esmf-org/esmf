@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.15 2002/05/23 20:07:18 jwolfe Exp $
+% $Id: IO_background.tex,v 1.16 2002/09/20 22:03:22 cdeluca Exp $
 
 
 Earth system modeling applications require efficient and robust tools
@@ -7,20 +7,13 @@ well as observational data streams.  Interfaces and methods provided
 by ESMF should allow reading and writing of data in several standard
 formats as well as support efficient internal data representations
 (see ESMF General Requirements \cite{ESMFGenReq}, Section 8.1.3). 
-The ESMF IO is supposed to provide a unified interface for input and output 
+The ESMF IO will provide a unified interface for input and output 
 of high level ESMF objects such as Fields.  The system is expected to 
 automatically detect file formats at runtime, and to output data in a variety 
 of formats, with the posibility of creating companion metadata files. Other 
 file IO functionalities, such as writing of error and log messages and input 
 of configuration parameters from an ASCII file, are not covered in this
 document. 
-%%Arlindo%%%%
-%%These will be the subject of the Log Utility and Configuration Parameter 
-%%requirement documents.
-%%Arlindo%%%%
-These will be the subject of the ESMF Log Requirement Document and the ESMF 
-Control Requirement Document \cite{ESMF-Log-Req, ESMF-Control-Req}.
-
 
 \subsection{I/O architecture}
 
