@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.28 2004/02/11 16:31:24 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.29 2004/02/11 17:13:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,7 +105,7 @@
       public ESMF_ArraySpecInit
       public ESMF_ArraySpecGet
 
-      public ESMF_ArrayGet, ESMF_ArrayGetName
+      public ESMF_ArrayGet, ESMF_ArrayGetName, ESMF_ArraySetName
 
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
 
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.28 2004/02/11 16:31:24 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.29 2004/02/11 17:13:16 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -513,6 +513,48 @@ end subroutine
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayGetName
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArraySetName - Set the name of a Array
+!
+! !INTERFACE:
+      subroutine ESMF_ArraySetName(array, name, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      character (len = *), intent(in) :: name
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Sets the name of the array.  
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_BaseSetName(array, name, status)
+      if(status .eq. ESMF_FAILURE) then
+        print *, "ERROR in ESMF_ArraySetName"
+        return
+      endif
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_ArraySetName
 
 
 !------------------------------------------------------------------------------
