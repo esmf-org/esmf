@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/10/17 19:34:56 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.2 2004/03/16 18:33:29 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,3 +15,4 @@ currently an empty file.  available if #defines needed
 on a per-system basis for F90 code
 #endif
 
+#define ESMF_NO_INITIALIZERS 1
