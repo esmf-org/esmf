@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.3 2004/08/27 20:08:18 svasquez Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.4 2004/08/30 20:34:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.3 2004/08/27 20:08:18 svasquez Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.4 2004/08/30 20:34:52 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -230,11 +230,9 @@
 
       !EX_UTest_Multi_Proc_Only
       ! route test
-      rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(f1, f2, layout1, rh, rc=rc)
       call ESMF_FieldRedist(f1, f2, rh, rc=rc)
       call ESMF_FieldRedistRelease(rh, rc)
-      call ESMF_RouteHandleDestroy(rh, rc)
       write(failMsg, *) ""
       write(name, *) "Calling Field Redist"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
