@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.30 2004/12/02 23:25:01 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.31 2004/12/23 04:41:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,9 +200,11 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      ESMC_VMPlan *vmplan_p;
      FTN(f_esmf_compgetvmplan)(f90comp, &vmplan_p, &rcc);   // obtain vmplan_p
 //fprintf(stderr, "gjt debug: ESMC_SetServ, vm_plan=%p\n", vmplan_p);
-     void *vm_info = vm_parent->vmk_startup(
-      static_cast<ESMC_VMKPlan *>(vmplan_p), ESMC_FTableCallEntryPointVMHop,
-      NULL);
+     void *vm_info = vm_parent->ESMC_VMStartup(vmplan_p,
+       ESMC_FTableCallEntryPointVMHop, NULL);
+//gjt     void *vm_info = vm_parent->vmk_startup(
+//gjt     static_cast<ESMC_VMKPlan *>(vmplan_p), ESMC_FTableCallEntryPointVMHop,
+//gjt      NULL);
 //fprintf(stderr, "gjt debug: ESMC_SetServ, vm_info=%p\n", vm_info);
      FTN(f_esmf_compsetvminfo)(f90comp, &vm_info, &rcc);
      
