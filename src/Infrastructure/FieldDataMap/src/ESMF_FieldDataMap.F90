@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.26.2.1 2005/02/09 16:19:09 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.26.2.2 2005/02/10 20:05:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.26.2.1 2005/02/09 16:19:09 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.26.2.2 2005/02/10 20:05:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -322,7 +322,7 @@
 ! Set values in an {\tt ESMF\_FieldDataMap}.   Any of the arguments which
 !  are not specified will retain their original values; only those given
 !  to this call will have their values changed.  If you want to initialize
-!  a new {\tt ESMF_FieldDataMap} variable, setting reasonable defaults to
+!  a new {\tt ESMF\_FieldDataMap} variable, setting reasonable defaults to
 !  all non-specified arguments, call {\tt ESMF\_FieldDataMapSetDefault()}
 !  instead.
 !
