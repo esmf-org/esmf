@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.4 2004/06/12 22:02:32 cdeluca Exp $
+% $Id: State_usage.tex,v 1.5 2004/12/28 22:17:51 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,14 +10,13 @@
 
 %\subsection{Use and Examples}
 
-In ESMF applications States are created at the same 
-time as the components that they will be associated with.  
 A Gridded Component generally has one associated import 
-State and one export State.  In most cases the States 
+State and one export State.  Generally the States 
 associated with a Gridded Component will be created by 
-the Gridded Component's parent component with no data 
-buffers yet attached.  Both the incomplete States and the 
-pointer to the newly created Gridded Component are passed
+the Gridded Component's parent component.
+In many cases, the States will be created containing 
+no data.  Both the empty States and the
+newly created Gridded Component are passed
 by the parent component into the Gridded Component's initialize 
 method.  This is where the States get prepared for use 
 and the import State is first filled with data.
@@ -35,7 +34,7 @@ have data allocated.  Fields, Bundles, and Arrays each have
 methods that support their creation without actual data 
 allocation - the grid and metadata are set up but no
 Fortran array of data values is allocated.  In this approach, 
-when a State is passed into its associated Gridded component's 
+when a State is passed into its associated Gridded Component's 
 initialize method, the incomplete Arrays, Fields, and 
 Bundles within the State can allocate or reference data 
 inside the initialize method.
@@ -75,7 +74,32 @@ invalid, and data required for restart or not.  These are not
 yet fully implemented, so only the default value for each value 
 can be set at this time.
 
+Objects inside States are normally created in {\tt unison} where
+each PET executing a component makes the same object create call.
+If the object contains data, like a Field, each PET may have a
+different local chunk of the entire dataset but each Field has
+the same name and is logically one part of a single distributed 
+object.   As States are passed between components if any object
+in a State was not created in unison on all the current PETs 
+then some PETs have no object to pass into a
+communication method (e.g. regrid or data redistribution).
+A State method called reconcile must be called to broadcast 
+information about these objects to all PETs in a component;
+after which all PETs have a single uniform view of all objects.  
 
-
+If components are running in sequential mode on all available PETs
+and States are being passed between them there is no need to make
+the reconcile call since all PETs have a uniform view of the objects.
+However, if components are running on a subset of the PETs, as is
+usually the case when running in concurrent mode, then when States
+are passed into components which contain a superset of those PETs,
+for example, a Coupler Component, all PETs must call reconcile
+on the States before using them in any ESMF communication methods.
+The reconcile process broadcasts metadata information about objects
+which exist only on a subset of the PETs.  On PETs missing those
+objects it creates a {\it proxy} object which contains any
+attributes of the original object plus enough information for it
+to be a data source or destination for a regrid or data redistribution
+operation. 
 
 
