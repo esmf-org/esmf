@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTableUTest.C,v 1.2 2004/04/23 22:00:05 nscollins Exp $
+// $Id: ESMC_CommTableUTest.C,v 1.3 2005/02/28 16:28:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CommTableUTest.C,v 1.2 2004/04/23 22:00:05 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_CommTableUTest.C,v 1.3 2005/02/28 16:28:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -66,14 +66,6 @@
    ESMC_Test((commtable_ptr!=0 && rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
     
-   // test internal dynamic allocation within statically allocated
-   //   ESMC_CommTable
-   rc = commtable_ptr->ESMC_CommTableConstruct(args);
-   sprintf(name, "ESMC_CommTableConstruct"); 
-   sprintf(failMsg, "rc = %d, args = %f", rc, args);
-   ESMC_Test((rc==ESMF_SUCCESS),
-              name, failMsg, &result, ESMF_SRCLINE);
-
    // test initialization of members of statically allocated ESMC_CommTable
    //   may want to read back values via Get methods for comparison
    rc = commtable_ptr->ESMC_CommTableInit(args);
@@ -129,14 +121,6 @@
    rc = commtable_ptr->ESMC_CommTablePrint(print_options);
    sprintf(name, "ESMC_CommTablePrint"); 
    sprintf(failMsg, "rc = %d, print_options = %s", rc, print_options);
-   ESMC_Test((rc==ESMF_SUCCESS),
-              name, failMsg, &result, ESMF_SRCLINE);
-
-   // test internal dynamic deallocation within statically allocated 
-   //   ESMC_CommTable
-   rc = commtable_ptr->ESMC_CommTableDestruct();
-   sprintf(name, "ESMC_CommTableDestruct"); 
-   sprintf(failMsg, "rc = %d", rc);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 

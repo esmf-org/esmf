@@ -1,4 +1,4 @@
-! $Id: ESMF_RTableUTest.F90,v 1.2 2003/04/25 20:49:42 nscollins Exp $
+! $Id: ESMF_RTableUTest.F90,v 1.3 2005/02/28 16:28:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RTableUTest.F90,v 1.2 2003/04/25 20:49:42 nscollins Exp $'
+      '$Id: ESMF_RTableUTest.F90,v 1.3 2005/02/28 16:28:00 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -53,51 +53,51 @@
       type(ESMF_RTable) :: rtable
  
       ! local args needed to create/construct objects
-      integer :: mydeid
-      integer :: decount
+      character(ESMF_MAXSTR) :: print_options
+      character(ESMF_MAXSTR) :: validate_options
+      type(ESMF_VM) :: vm
+      integer :: myvmid
+      integer :: vmcount
 
-      mydeid = 1
-      decount = 4
+      !------------------------------------------------------------------------
 
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+      if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
+
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localpet=myvmid, petcount=vmcount, rc=rc)
+
+
+      !------------------------------------------------------------------------
+      !
       ! test dynamic allocation of ESMF_RTable
-      rtable = ESMF_RTableCreate(mydeid, decount, rc)
+      rtable = ESMF_RTableCreate(myvmid, vmcount, rc)
       write(name, *) "ESMF_RTableCreate"
-      write(failMsg, *) "rc =", rc, ", args =", mydeid, decount
+      write(failMsg, *) "rc =", rc, ", args =", myvmid, vmcount
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
     
-      ! test internal dynamic allocation within statically allocated
-      !   ESMF_RTable
-      call ESMF_RTableConstruct(rtable, mydeid, decount, rc)
-      write(name, *) "ESMF_RTableConstruct"
-      write(failMsg, *) "rc =", rc, ", args =", mydeid, decount
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !
       ! test validate method via option string
-      character(ESMF_MAXSTR) :: validate_options
       call ESMF_RTableValidate(rtable, validate_options, rc)
       write(name, *) "ESMF_RTableValidate"
       write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !
       ! test print method via option string
-      character(ESMF_MAXSTR) :: print_options
       call ESMF_RTablePrint(rtable, print_options, rc)
       write(name, *) "ESMF_RTablePrint"
       write(failMsg, *) "rc =", rc, ", print_options =", print_options
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! test internal dynamic deallocation within statically allocated 
-      !   ESMF_RTable
-      call ESMF_RTableDestruct(rtable, rc)
-      write(name, *) "ESMF_RTableDestruct"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      failMsg, result, ESMF_SRCLINE)
-
+      !------------------------------------------------------------------------
+      !
       ! test dynamic deallocation of ESMF_RTable
       !   also tests destructor
       call ESMF_RTableDestroy(rtable, rc)
@@ -106,7 +106,10 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
+      !------------------------------------------------------------------------
+      
+10    continue
+
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
   
       end program ESMF_RTableTest
