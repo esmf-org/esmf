@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.13 2004/01/14 17:10:24 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.14 2004/01/26 17:44:42 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
@@ -160,9 +160,10 @@
     end subroutine CPLR_SetServices
       
       
-    subroutine my_init(cpl, statelist, externalclock, rc)
+    subroutine my_init(cpl, importstatelist, exportstatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
-      type(ESMF_State), dimension(:) :: statelist
+      type(ESMF_State) :: importstatelist
+      type(ESMF_State) :: exportstatelist
       type(ESMF_Clock) :: externalclock
       integer :: rc
 
@@ -171,9 +172,10 @@
 
     end subroutine my_init
 
-    subroutine my_run(cpl, statelist, externalclock, rc)
+    subroutine my_run(cpl, importstatelist, exportstatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
-      type(ESMF_State), dimension(:) :: statelist
+      type(ESMF_State) :: importstatelist
+      type(ESMF_State) :: exportstatelist
       type(ESMF_Clock) :: externalclock
       integer :: rc
 
@@ -182,9 +184,10 @@
 
     end subroutine my_run
 
-    subroutine my_final(cpl, statelist, externalclock, rc)
+    subroutine my_final(cpl, importstatelist, exportstatelist, externalclock, rc)
       type(ESMF_CplComp) :: cpl
-      type(ESMF_State), dimension(:) :: statelist
+      type(ESMF_State) :: importstatelist
+      type(ESMF_State) :: exportstatelist
       type(ESMF_Clock) :: externalclock
       integer :: rc
 
@@ -217,7 +220,7 @@
     integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname, cname1, cname2
     type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
-    type(ESMF_State) :: states(2), bothstates
+    type(ESMF_State) :: states(2)
     type(ESMF_GridComp) :: top
     type(ESMF_GridComp) :: gcomp1, gcomp2
     type(ESMF_CplComp) :: cpl
@@ -280,8 +283,6 @@
 
     states(1) = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, rc=rc)
     states(2) = ESMF_StateCreate(cname2, ESMF_STATEIMPORT, rc=rc)
-    bothstates = ESMF_StateCreate(cname, rc=rc)
-    call ESMF_StateAddData(bothstates, 2, states, rc)
 
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
@@ -308,7 +309,7 @@
                                  rc=rc)
     call ESMF_GridCompInitialize(gcomp2, importstate=states(2), clock=tclock, &
                                  rc=rc)
-    call ESMF_CplCompInitialize(cpl, statelist=states, clock=tclock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, states(1), states(2), clock=tclock, rc=rc)
     print *, "Comp Initialize complete"
 
 
@@ -317,7 +318,8 @@
     do while (.not. finished)
 
         call ESMF_GridCompRun(gcomp1, exportstate=states(1), clock=tclock, rc=rc)
-        call ESMF_CplCompRun(cpl, statelist=states, clock=tclock, rc=rc)
+        call ESMF_CplCompRun(cpl, importstate=states(1), &
+                                  exportstate=states(2), clock=tclock, rc=rc)
         call ESMF_GridCompRun(gcomp2, importstate=states(2), clock=tclock, rc=rc)
    
         call ESMF_ClockAdvance(tclock, timestep)
@@ -334,7 +336,7 @@
     !  for those components which have multiple entry points.
     call ESMF_GridCompFinalize(gcomp1, exportstate=states(1), clock=tclock, rc=rc)
     call ESMF_GridCompFinalize(gcomp2, importstate=states(2), clock=tclock, rc=rc)
-    call ESMF_CplCompFinalize(cpl, statelist=states, clock=tclock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, states(1), states(2), clock=tclock, rc=rc)
     print *, "Comp Finalize complete"
 
 

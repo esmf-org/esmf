@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.58 2004/01/20 23:17:39 jwolfe Exp $
+! $Id: ESMF_Comp.F90,v 1.59 2004/01/26 17:44:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,15 +92,6 @@
       integer, parameter :: ESMF_SINGLEPHASE = 0
 
 !------------------------------------------------------------------------------
-!     ! Configuration placeholder - TODO: replace with real config object
-!
-      !type ESMF_Config
-      !sequence
-      !private
-      !    integer :: dummy
-      !end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_CompClass
 !
 !     ! Component internal class data.
@@ -134,18 +125,6 @@
           type(ESMF_CompClass), pointer :: compp => NULL()
 #else
           type(ESMF_CompClass), pointer :: compp
-#endif
-      end type
-
-!------------------------------------------------------------------------------
-!     ! wrapper for State array objects going across F90/C++ boundary
-      type ESMF_SWrap
-      sequence
-      private
-#ifndef ESMF_NO_INITIALIZERS
-          type(ESMF_State), dimension(:), pointer :: statep => NULL()
-#else
-          type(ESMF_State), dimension(:), pointer :: statep
 #endif
       end type
 
@@ -197,7 +176,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.58 2004/01/20 23:17:39 jwolfe Exp $'
+      '$Id: ESMF_Comp.F90,v 1.59 2004/01/26 17:44:42 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -497,16 +476,14 @@ end function
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompInitialize(compp, statecount, importstate, exportstate, &
-                                       statelist, clock, phase, rc)
+      subroutine ESMF_CompInitialize(compp, importstate, exportstate, &
+                                       clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      integer, intent(in) :: statecount
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), dimension(:), target, optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -521,14 +498,9 @@ end function
 !   \item[compp]
 !    Component to call Initialization routine for.
 !
-!   \item[statecount] 1 or 2 States being passed through interface.
-!       
 !   \item[{[importstate]}]  Import data for initialization.
 !
 !   \item[{[exportstate]}]  Export data for initialization.
-!
-!   \item[{[statelist]}]  
-!       Array containing States for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -551,7 +523,6 @@ end function
         integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_SWrap) :: statew
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -577,24 +548,14 @@ end function
 
         call ESMF_GetName(compp%base, cname, status)
 
-        ! Wrap comp and statelist so they're passed to C++ correctly.
+        ! Wrap comp so it's passed to C++ correctly.
         compw%compp => compp
-        if (present(statelist)) statew%statep => statelist
 
         ! Set up the arguments, then make the call
-        if (statecount .eq. 2) then
-          call c_ESMC_FTableSet2StateArgs(compp%this, ESMF_SETINIT, phase, &
+        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
                                compw, importstate, exportstate, clock, status)
           
-          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, &
-                                                             phase, 2, status)
-        else
-          call c_ESMC_FTableSet1StateArgs(compp%this, ESMF_SETINIT, phase, &
-                                              compw, statew, clock, status)
-         
-          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, &
-                                                            phase, 1, status)
-        endif
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, phase, status)
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
@@ -655,7 +616,6 @@ end function
         integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_SWrap) :: statew
 
         ! WriteRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -690,7 +650,7 @@ end function
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
-                                                            phase, 2, status)
+                                                            phase, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component WriteRestart error"
           return
@@ -750,7 +710,6 @@ end function
         integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_SWrap) :: statew
 
         ! ReadRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -785,7 +744,7 @@ end function
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
-                                                           phase, 2, status)
+                                                           phase, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component ReadRestart error"
           return
@@ -803,16 +762,14 @@ end function
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompFinalize(compp, statecount, importstate, exportstate, &
-                                      statelist, clock, phase, rc)
+      subroutine ESMF_CompFinalize(compp, importstate, exportstate, &
+                                      clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      integer, intent(in) :: statecount
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), dimension(:), target, optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -827,14 +784,9 @@ end function
 !   \item[compp]
 !    Component to call Finalize routine for.
 !
-!   \item[statecount] 1 or 2 States being passed through interface.
-!       
 !   \item[{[importstate]}]  Import data for finalize.
 !
 !   \item[{[exportstate]}]  Export data for finalize.
-!
-!   \item[{[statelist]}]  
-!       Array containing States for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -857,7 +809,6 @@ end function
         integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_SWrap) :: statew
 
         ! Finalize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -883,24 +834,14 @@ end function
 
         call ESMF_GetName(compp%base, cname, status)
 
-        ! Wrap comp and statelist so they're passed to C++ correctly.
+        ! Wrap comp so it's passed to C++ correctly.
         compw%compp => compp
-        if (present(statelist)) statew%statep => statelist
 
         ! Set up the arguments before the call     
-        if (statecount .eq. 2) then
-          call c_ESMC_FTableSet2StateArgs(compp%this, ESMF_SETFINAL, phase, &
+        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETFINAL, phase, &
                                 compw, importstate, exportstate, clock, status)
         
-          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, &
-                                                              phase, 2, status)
-        else
-          call c_ESMC_FTableSet1StateArgs(compp%this, ESMF_SETFINAL, phase, &
-                                               compw, statew, clock, status)
-        
-          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, &
-                                                              phase, 1, status)
-        endif
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, phase, status)
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component finalize error"
@@ -918,16 +859,14 @@ end function
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRun(compp, statecount, importstate, exportstate, &
-                                                  statelist, clock, phase, rc)
+      subroutine ESMF_CompRun(compp, importstate, exportstate, &
+                                clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      integer, intent(in) :: statecount
       type (ESMF_State), intent(inout), optional :: importstate
       type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_State), intent(inout), dimension(:), target, optional :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -942,14 +881,9 @@ end function
 !   \item[compp]
 !    Component to call Run routine for.
 !
-!   \item[statecount] 1 or 2 States being passed through interface.
-!       
 !   \item[{[importstate]}]  Import data for run.
 !
 !   \item[{[exportstate]}]  Export data for run.
-!
-!   \item[{[statelist]}]  
-!       Array containing States for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
 !
@@ -972,7 +906,6 @@ end function
         integer :: lde_id                       ! the DE in the subcomp layout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_SWrap) :: statew
 
         ! Run return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -998,24 +931,14 @@ end function
 
         call ESMF_GetName(compp%base, cname, status)
 
-        ! Wrap comp and statelist so they're passed to C++ correctly.
+        ! Wrap comp so it's passed to C++ correctly.
         compw%compp => compp
-        if (present(statelist)) statew%statep => statelist
 
         ! Set up the arguments before the call     
-        if (statecount .eq. 2) then
-          call c_ESMC_FTableSet2StateArgs(compp%this, ESMF_SETRUN, phase, compw, &
+        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, compw, &
                                        importstate, exportstate, clock, status)
         
-          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
-                                                              phase, 2, status)
-        else
-          call c_ESMC_FTableSet1StateArgs(compp%this, ESMF_SETRUN, phase, &
-                                               compw, statew, clock, status)
-        
-          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
-                                                              phase, 1, status)
-        endif
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, phase, status)
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"

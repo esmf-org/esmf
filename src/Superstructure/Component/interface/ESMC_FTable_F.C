@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.9 2003/09/23 15:18:31 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.10 2004/01/26 17:44:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,12 +56,12 @@ extern "C" {
   
      // call a function 
      void FTN(c_esmc_ftablecallentrypoint)(ESMC_FTable **ptr, char *type, 
-                              int *phase, int *nstate, int *status, int slen) {
+                                        int *phase, int *status, int slen) {
          int funcrc;
          int localrc;
          char *name;
 
-         newtrim(type, slen, phase, nstate, &name);
+         newtrim(type, slen, phase, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          // TODO: two return codes here - one is whether we could find
@@ -113,40 +113,16 @@ extern "C" {
          delete[] name;
      }
 
-     void FTN(c_esmc_ftableset1stateargs)(ESMC_FTable **ptr, char *type,
-                                      int *phase, void *comp, 
-                                      void **statelist, void *clock, 
-                                      int *status, int slen) {
-
-         char *fname;
-         int acount = 4;
-         int scount = 1;
-         void *alist[4];
-
-         newtrim(type, slen, phase, &scount, &fname);
-         //printf("after newtrim, name = '%s'\n", fname);
-
-         alist[0] = (void *)comp;
-         alist[1] = (void *)statelist;
-         alist[2] = (void *)clock;
-         alist[3] = (void *)status;
-
-         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
-
-         delete[] fname;
-     }
-
-     void FTN(c_esmc_ftableset2stateargs)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftablesetstateargs)(ESMC_FTable **ptr, char *type,
                          int *phase, void *comp, 
                          void *importstate, void *exportstate,
 	                 void *clock, int *status, int slen) {
 
          char *fname;
          int acount = 5;
-         int scount = 2;
          void *alist[5];
 
-         newtrim(type, slen, phase, &scount, &fname);
+         newtrim(type, slen, phase, NULL, &fname);
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;
@@ -168,10 +144,9 @@ extern "C" {
 
          char *fname;
          int acount = 4;
-         int scount = 1;
          void *alist[4];
 
-         newtrim(type, slen, phase, &scount, &fname);
+         newtrim(type, slen, phase, NULL, &fname);
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;

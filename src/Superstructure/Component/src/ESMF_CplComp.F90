@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.9 2004/01/08 22:26:42 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.10 2004/01/26 17:44:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.9 2004/01/08 22:26:42 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.10 2004/01/26 17:44:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -125,75 +125,7 @@
 !EOP
       end interface
 
-!==============================================================================
-!BOP
-! !IROUTINE: ESMF_CplCompInitialize
-!
-! !INTERFACE:
-      interface ESMF_CplCompInitialize
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_CplCompInitStateList
-        module procedure ESMF_CplCompInitTwoStates
-
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that want to
-!     call a Coupler's {\tt Initialization} routine.  Simple couplers
-!     can be called with separate import and export state as arguments
-!     and the caller does not have to create a combined statelist object.  
-!     Couplers with more complex combinations of states should be called with
-!     a single combined state object containing all needed states.
-!
-
-!EOP
-      end interface
-
-!==============================================================================
-!BOP
-! !IROUTINE: ESMF_CplCompRun
-!
-! !INTERFACE:
-      interface ESMF_CplCompRun
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_CplCompRunStateList
-        module procedure ESMF_CplCompRunTwoStates
-
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that want to
-!     call a Coupler's {\tt Run} routine.  Simple couplers
-!     can be called with separate import and export state as arguments
-!     and the caller does not have to create a combined statelist object.  
-!     Couplers with more complex combinations of states should be called with
-!     a single combined state object containing all needed states.
-!
-
-!EOP
-      end interface
-
-!==============================================================================
-!BOP
-! !IROUTINE: ESMF_CplCompFinalize
-!
-! !INTERFACE:
-      interface ESMF_CplCompFinalize
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_CplCompFinalStateList
-        module procedure ESMF_CplCompFinalTwoStates
-
-! !DESCRIPTION:
-!     This interface provides an entry point for methods that want to
-!     call a Coupler's {\tt Finalize} routine.  Simple couplers
-!     can be called with separate import and export state as arguments
-!     and the caller does not have to create a combined statelist object.  
-!     Couplers with more complex combinations of states should be called with
-!     a single combined state object containing all needed states.
-!
-
-!EOP
-      end interface
-
+!------------------------------------------------------------------------------
 ! out for now.
 !      interface assignment(=)
 !        module procedure ESMF_cpas
@@ -385,65 +317,17 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompInitStateList -- Call the Component's init routine
+! !IROUTINE: ESMF_CplCompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompInitStateList(component, statelist, &
-                                                        clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), dimension(:), intent(inout) :: statelist
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Initialization routine for.
-!
-!   \item[statelist]  
-!       State containing list of nested import and export states for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompInitialize(component%compp, 1, statelist=statelist, &
-                                              clock=clock, phase=phase, rc=rc)
-
-        end subroutine ESMF_CplCompInitStateList
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompInitTwoStates -- Call the Component's init routine
-
-! !INTERFACE:
-      subroutine ESMF_CplCompInitTwoStates(component, importstate, &
+      subroutine ESMF_CplCompInitialize(component, importstate, &
                                              exportstate, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout) :: importstate
-      type (ESMF_State), intent(inout) :: exportstate
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -477,73 +361,26 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompInitialize(component%compp, 2, importstate=importstate, &
+        call ESMF_CompInitialize(component%compp, importstate=importstate, &
                                  exportstate=exportstate, clock=clock,     &
                                  phase=phase, rc=rc)
 
-        end subroutine ESMF_CplCompInitTwoStates
+        end subroutine ESMF_CplCompInitialize
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompRunStateList -- Call the Component's run routine
+! !IROUTINE: ESMF_CplCompRun -- Call Component Run routine with 2 States
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompRunStateList(component, statelist, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), dimension(:), intent(inout) :: statelist
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user run code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Run routine for.
-!
-!   \item[statelist]  
-!       State containing list of nested import and export states for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompRun(component%compp, 1, statelist=statelist, &
-                                            clock=clock, phase=phase, rc=rc)
-
-        end subroutine ESMF_CplCompRunStateList
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompRunTwoStates -- Call Component Run routine with 2 States
-
-! !INTERFACE:
-      subroutine ESMF_CplCompRunTwoStates(component, importstate, exportstate, &
+      subroutine ESMF_CplCompRun(component, importstate, exportstate, &
                                                                   clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout) :: importstate
-      type (ESMF_State), intent(inout) :: exportstate
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -558,10 +395,10 @@
 !   \item[component]
 !    Component to call Run routine for.
 !
-!   \item[importstate]  
+!   \item[{[importstate]}]
 !       State containing import data for coupling.
 !
-!   \item[importstate]  
+!   \item[{[exportstate]}]
 !       State containing export data for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
@@ -577,10 +414,10 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRun(component%compp, 2, importstate=importstate,  &
-                          exportstate=exportstate, clock=clock, phase=phase, rc=rc)
+        call ESMF_CompRun(component%compp, importstate=importstate,  &
+                      exportstate=exportstate, clock=clock, phase=phase, rc=rc)
 
-        end subroutine ESMF_CplCompRunTwoStates
+        end subroutine ESMF_CplCompRun
 
 
 !------------------------------------------------------------------------------
@@ -693,15 +530,17 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompFinalStatelist -- Call the Component's finalize routine
+! !IROUTINE: ESMF_CplCompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompFinalStatelist(component, statelist, clock, phase, rc)
+      subroutine ESMF_CplCompFinalize(component, importstate, exportstate, &
+                                                            clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), dimension(:), intent(inout) :: statelist
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -716,59 +555,10 @@
 !   \item[component]
 !    Component to call Finalize routine for.
 !
-!   \item[statelist]  
-!       State containing list of nested import and export states for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompFinalize(component%compp, 1, statelist=statelist, &
-                                          clock=clock, phase=phase, rc=rc)
-
-        end subroutine ESMF_CplCompFinalStatelist
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompFinalTwoStates -- Call the Component's finalize routine
-
-! !INTERFACE:
-      subroutine ESMF_CplCompFinalTwoStates(component, importstate, &
-                                                   exportstate, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout) :: importstate
-      type (ESMF_State), intent(inout) :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Finalize routine for.
-!
-!   \item[importstate]  
+!   \item[{[importstate]}]
 !       State containing import data for coupling.
 !
-!   \item[exportstate]  
+!   \item[{[exportstate]}]
 !       State containing export data for coupling.
 !
 !   \item[{[clock]}]  External clock for passing in time information.
@@ -784,10 +574,10 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompFinalize(component%compp, 2, importstate=importstate, &
-                          exportstate=exportstate, clock=clock, phase=phase, rc=rc)
+        call ESMF_CompFinalize(component%compp, importstate=importstate, &
+                      exportstate=exportstate, clock=clock, phase=phase, rc=rc)
 
-        end subroutine ESMF_CplCompFinalTwoStates
+        end subroutine ESMF_CplCompFinalize
 
 
 !------------------------------------------------------------------------------

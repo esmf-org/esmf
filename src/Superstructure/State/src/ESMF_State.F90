@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.6 2004/01/15 16:22:23 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.7 2004/01/26 17:44:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,9 +243,13 @@
 
       public ESMF_StateCreate, ESMF_StateDestroy
 
-      public ESMF_StateGetFromList
       public ESMF_StateAddData, ESMF_StateGetData
+      public ESMF_StateAddBundle, ESMF_StateAddField, ESMF_StateAddArray
+      public ESMF_StateAddState, ESMF_StateAddDataName
+      public ESMF_StateGetBundle, ESMF_StateGetField, ESMF_StateGetArray
+      public ESMF_StateGetState
       !public ESMF_StateQueryData       ! returns ESMF type for this entry
+      !public ESMF_StateGetFromList
 
       public ESMF_StateGetInfo, ESMF_StateGetName
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
@@ -273,7 +277,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.6 2004/01/15 16:22:23 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.7 2004/01/26 17:44:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -290,6 +294,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+! FIXME: add bundle overload, field overload, etc
         module procedure ESMF_StateAddBundle
         module procedure ESMF_StateAddBundleList
         module procedure ESMF_StateAddField
@@ -2591,6 +2596,10 @@ end function
       end subroutine ESMF_StateGetName
 
 
+#if 0
+!! FIXME - remove this code when we finalize on nested State objects.
+!!  but this has shifted around so many times, i'm not removing this code
+!!  until we're sure...
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_StateGetFromList -- Get a State by name from an array of States
@@ -2667,7 +2676,7 @@ end function
       print *, "State with name", statename, "not found in list of States"
 
       end function ESMF_StateGetFromList
-
+#endif
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2960,25 +2969,39 @@ end function
 ! !IROUTINE: ESMF_StateGetBundle -- Retrieve a data Bundle from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetBundle(state, name, bundle, rc)
+      subroutine ESMF_StateGetBundle(state, bundlename, bundle, statename, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: name
+      character (len=*), intent(in) :: bundlename
       type(ESMF_Bundle), intent(out) :: bundle
+      character (len=*), intent(in), optional :: statename
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns a {\tt Bundle} from a {\tt State} by name.
+!      Returns an {\tt ESMF\_Bundle} from an {\tt ESMF\_State} by name.  
+!      If the {\tt State} is a simple {\tt ESMF\_State} only the
+!      {\tt bundlename} is required.
+!      If the {\tt state} contains multiple {\tt ESMF\_States} 
+!      an additional argument, the {\tt statename}, is required to 
+!      specify which nested State to select.  {\tt ESMF\_State}s can
+!      be nested to any depth, but this routine only searches immediate
+!      descendents.  It is an error to specify a {\tt statename} if the
+!      {\tt state} contains no nested {\tt ESMF\_States}.
 !
 !  \begin{description}     
 !  \item[state]
-!    State to query for a {\tt Bundle} named {\tt name}.
-!  \item[name]
-!    {\tt Bundle} name to be returned.
+!    State to query for an {\tt ESMF\_Bundle} named {\tt bundlename}.
+!  \item[bundlename]
+!    Name of {\tt ESMF\_Bundle} to return.
 !  \item[bundle]
-!    Where the {\tt bundle} is returned.
+!    Returned {\tt ESMF\_Bundle}.
+!  \item[{[statename]}]
+!    Optional.  An error if specified when the {\tt state} argument is a
+!    a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s, and therefore the exact 
+!    {\tt ESMF\_State} must be selected by this {\tt statename}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -2988,6 +3011,8 @@ end function
 ! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
+      type(ESMF_State), pointer :: top
+      type(ESMF_State), pointer :: nested
       logical :: exists
       integer :: status
 
@@ -2997,13 +3022,39 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
+      if (present(statename)) then
+          exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+                                                          dataitem, rc=status)
+          if (.not. exists) then
+              print *, "ESMF_StateGetBundle: no nested state named ", &
+                         statename, "found.  Omit the 'statename' argument to find the bundlename directly from the state"
+              if (present(rc)) rc = status
+              return
+          endif
+    
+          if (dataitem%otype .ne. ESMF_STATESTATE) then
+              print *, "ESMF_StateGetBundle: ", statename, "found, but not type State"
+              if (present(rc)) rc = status
+              return
+          endif
+          
+          top%statep = dataitem%datap%spp
+      else
+          top%statep = state%statep
+      endif
+
+
+      exists = ESMF_StateTypeFindData(top%statep, bundlename, .true., &
+                                                          dataitem, rc=status)
       if (.not. exists) then
+          print *, "ESMF_StateGetBundle: no bundle named ", bundlename
           if (present(rc)) rc = status
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEBUNDLE) then
+          print *, "ESMF_StateGetBundle: ", bundlename, "found, but not type Bundle"
+          if (present(rc)) rc = status
           return
       endif
 
@@ -3018,25 +3069,39 @@ end function
 ! !IROUTINE: ESMF_StateGetField -- Retrieve a data Field from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetField(state, name, field, rc)
+      subroutine ESMF_StateGetField(state, fieldname, field, statename, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: name
+      character (len=*), intent(in) :: fieldname
       type(ESMF_Field), intent(out) :: field
+      character (len=*), intent(in), optional :: statename
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns a {\tt Field} from a {\tt State} by name.
+!      Returns an {\tt ESMF\_Field} from an {\tt ESMF\_State} by name.  
+!      If the {\tt State} is a simple {\tt ESMF\_State}, only the
+!      {\tt fieldname} is required.
+!      If the {\tt ESMF\_State} contains multiple {\tt States}, 
+!      an additional argument, the {\tt statename}, is required to 
+!      specify which nested State to select.  {\tt ESMF\_State}s can
+!      be nested to any depth, but this routine only searches for immediate
+!      descendents.  It is an error to specify a {\tt statename} if the
+!      {\tt state} contains no nested {\tt ESMF\_States}.
 !
 !  \begin{description}     
 !  \item[state]
-!    State to query for a {\tt Field} named {\tt name}.
-!  \item[name]
-!    {\tt Field} name to be returned.
+!    {\tt ESMF\_State} to query for an {\tt ESMF\_Field} named {\tt name}.
+!  \item[fieldname]
+!    Name of {\tt ESMF\_Field} to return.
 !  \item[field]
-!    Where the {\tt field} is returned.
+!    Returned {\tt ESMF\_Field}.
+!  \item[{[statename]}]
+!    Optional.  An error if specified when the {\tt state} argument is a
+!    a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s, and therefore the exact 
+!    {\tt ESMF\_State} must be selected by this {\tt statename}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -3046,6 +3111,8 @@ end function
 ! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
+      type(ESMF_State), pointer :: top
+      type(ESMF_State), pointer :: nested
       logical :: exists
       integer :: status
 
@@ -3055,8 +3122,32 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
+      if (present(statename)) then
+          exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+                                                          dataitem, rc=status)
+          if (.not. exists) then
+              print *, "ESMF_StateGetField: no nested state named ", &
+                         statename, "found.  Omit the 'statename' argument to find the bundlename directly from the state"
+              if (present(rc)) rc = status
+              return
+          endif
+    
+          if (dataitem%otype .ne. ESMF_STATESTATE) then
+              print *, "ESMF_StateGetField: ", statename, "found, but not type State"
+              if (present(rc)) rc = status
+              return
+          endif
+          
+          top%statep = dataitem%datap%spp
+      else
+          top%statep = state%statep
+      endif
+
+
+      exists = ESMF_StateTypeFindData(top%statep, fieldname, .true., &
+                                                          dataitem, rc=status)
       if (.not. exists) then
+          print *, "ESMF_StateGetfield: no field named ", fieldname
           if (present(rc)) rc = status
           return
       endif
@@ -3066,6 +3157,8 @@ end function
               ! TODO: how do we return the info that this is inside a bundle?
               print *, "found indirect pointer to bundle, need to do what?"
           endif
+          if (present(rc)) rc = status
+          print *, "ESMF_StateGetField: ", fieldname, "found, but not type Field"
           return
       endif
 
@@ -3080,34 +3173,51 @@ end function
 ! !IROUTINE: ESMF_StateGetArray -- Retrieve a data Array from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetArray(state, name, array, rc)
+      subroutine ESMF_StateGetArray(state, arrayname, array, statename, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: name
+      character (len=*), intent(in) :: arrayname
       type(ESMF_Array), intent(out) :: array
+      character (len=*), intent(in), optional :: statename
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
+!      Returns an {\tt ESMF\_Array} from an {\tt ESMF\_State} by name.  
+!      If the {\tt State} is a simple {\tt ESMF\_State}, only the
+!      {\tt arrayname} is required.
+!      If the {\tt ESMF\_State} contains multiple {\tt States}, 
+!      an additional argument, the {\tt statename}, is required to 
+!      specify which nested State to select.  {\tt ESMF\_State}s can
+!      be nested to any depth, but this routine only searches for immediate
+!      descendents.  It is an error to specify a {\tt statename} if the
+!      {\tt state} contains no nested {\tt ESMF\_States}.
+!
 !      Returns a {\tt Array} from a {\tt State} by name.
 !
 !  \begin{description}     
 !  \item[state]
 !    State to query for a {\tt Array} named {\tt name}.
-!  \item[name]
-!    {\tt Array} name to be returned.
+!  \item[arrayname]
+!    Name of {\tt ESMF\_Array} to return.
 !  \item[array]
-!    Where the {\tt array} is returned.
+!    Returned {\tt ESMF\_Array}.
+!  \item[{[statename]}]
+!    Optional.  An error if specified when the {\tt state} argument is a
+!    a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s, and therefore the exact 
+!    {\tt ESMF\_State} must be selected by this {\tt statename}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
-!
-!EOP
+!  !EOP
 ! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
+      type(ESMF_State), pointer :: top
+      type(ESMF_State), pointer :: nested
       logical :: exists
       integer :: status
 
@@ -3117,13 +3227,39 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty array to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
+      if (present(statename)) then
+          exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+                                                          dataitem, rc=status)
+          if (.not. exists) then
+              print *, "ESMF_StateGetArray: no nested state named ", &
+                         statename, "found.  Omit the 'statename' argument to find the arrayname directly from the state"
+              if (present(rc)) rc = status
+              return
+          endif
+    
+          if (dataitem%otype .ne. ESMF_STATESTATE) then
+              print *, "ESMF_StateGetArray: ", statename, "found, but not type State"
+              if (present(rc)) rc = status
+              return
+          endif
+          
+          top%statep = dataitem%datap%spp
+      else
+          top%statep = state%statep
+      endif
+
+
+      exists = ESMF_StateTypeFindData(top%statep, arrayname, .true., &
+                                                          dataitem, rc=status)
       if (.not. exists) then
+          print *, "ESMF_StateGetArray: no array named ", arrayname
           if (present(rc)) rc = status
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEARRAY) then
+          print *, "ESMF_StateGetArray: ", arrayname, "found, but not type Array"
+          if (present(rc)) rc = status
           return
       endif
 
@@ -3138,25 +3274,30 @@ end function
 ! !IROUTINE: ESMF_StateGetState -- Retrieve a data State from a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGetState(state, name, nestedstate, rc)
+      subroutine ESMF_StateGetState(state, statename, nestedstate, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
-      character (len=*), intent(in) :: name
+      character (len=*), intent(in) :: statename
       type(ESMF_State), intent(out) :: nestedstate
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns a nested {\tt State} from a {\tt State} by name.
+!      Returns a nested {\tt ESMF\_State} from another {\tt ESMF\_State} 
+!      by name.
+!      Unlike the other routines, this does not allow the caller to
+!      retrieve an {\tt ESMF\_State} from two levels down.  It returns
+!      immediate child objects only.
 !
 !  \begin{description}     
 !  \item[state]
-!    State to query for a nested {\tt State} named {\tt name}.
-!  \item[name]
-!    {\tt State} name to be returned.
+!    {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
+!       named {\tt statename}.
+!  \item[statename]
+!    Name of {\tt ESMF\_State} to return.
 !  \item[nestedstate]
-!    Where the nested {\tt state} is returned.
+!    Returned {\tt ESMF\_State}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -3175,8 +3316,10 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, .true., dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+                                                         dataitem, rc=status)
       if (.not. exists) then
+          print *, "ESMF_StateGetState: no state named", statename
           if (present(rc)) rc = status
           return
       endif
@@ -3338,7 +3481,7 @@ end function
         integer :: status
 
         if (present(itemname)) then
-            call ESMF_StateGetField(state, name=itemname, field=fred, rc=status)
+            call ESMF_StateGetField(state, fieldname=itemname, field=fred, rc=status)
             call ESMF_FieldWrite(fred, iospec=iospec, rc=status) 
         endif
   

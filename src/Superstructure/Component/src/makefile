@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2003/11/07 21:55:34 nscollins Exp $
+# $Id: makefile,v 1.22 2004/01/26 17:44:42 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -13,7 +13,7 @@ FFLAGS    =
 SOURCEC	  = ESMC_FTable.C
 
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 ESMF.F90
+SOURCEF	  = ESMF_Comp.F90 ESMF_GridComp.F90 ESMF_CplComp.F90 
 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
