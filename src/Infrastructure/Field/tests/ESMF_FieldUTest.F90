@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.61 2004/06/20 05:57:53 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.62 2004/06/21 07:41:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.61 2004/06/20 05:57:53 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.62 2004/06/21 07:41:46 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -394,13 +394,14 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
-      !EX_UTest
+      !-X_UTest
       ! Verifing the ESMF_FieldSetDataMap
-       call ESMF_FieldDataMapSetDefault(dm1, ESMF_INDEX_JI, rc=rc)
-       call ESMF_FieldSetDataMap(f3, datamap=dm1, rc=rc)
-       write(failMsg, *) "Did return ESMF_SUCCESS"
-       write(name, *) "Setting a Field Data Map Test"
-       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      ! commenting out - not implemented yet.  nsc 21jun04
+      !call ESMF_FieldDataMapSetDefault(dm1, ESMF_INDEX_JI, rc=rc)
+      !call ESMF_FieldSetDataMap(f3, datamap=dm1, rc=rc)
+      !write(failMsg, *) "Did return ESMF_SUCCESS"
+      !write(name, *) "Setting a Field Data Map Test"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest
       ! Verifing that destroying a Grid in a Field is not allowed
