@@ -1,4 +1,4 @@
- $Id: README,v 1.23 2003/08/20 17:49:02 flanigan Exp $
+ $Id: README,v 1.24 2003/08/20 18:40:11 flanigan Exp $
 ================================================================================
                                    README
 
@@ -83,7 +83,7 @@ level ESMF directory.
 The following environment variables need to be set only if the
 default values are not acceptable.
 
-ESMF_ARCH      Value of uname -s.  This will by AIX for IBM RS6000's.
+ESMF_ARCH      Value of uname -s.  This will be AIX for IBM RS6000's.
 
 ESMF_SITE      Build configure site name or the value default.
                If not set, then the value of default is assumed.
@@ -118,7 +118,7 @@ valid values for your userid.
 
 IBM rs6000 - Before running on rs6000 machines, you will need to set
 an additional environment variable MP_RMPOOL to a valid node
-allocation pool.
+allocation pool.  Usually this can be a value of 1.
 
 
 Build Information
