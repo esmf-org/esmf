@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.116 2004/08/19 16:52:17 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.117 2004/08/28 00:08:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.116 2004/08/19 16:52:17 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.117 2004/08/28 00:08:00 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -207,15 +207,10 @@
 !
 !EOPI
 
-      logical :: rcpresent                          ! Return code present   
       integer :: status, allocNAttrs
 
-!     ! Initialize return code
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code
+      if (present(rc)) rc = ESMF_FAILURE
 
       allocNAttrs = 0   ! default value, overwrite if argument specified
       if (present(nattr)) allocNAttrs = nattr
@@ -227,7 +222,7 @@
           call c_ESMC_BaseCreate(base, superclass, "", allocNattrs, status)
       endif
 
-      if (rcpresent) rc = status
+      if (present(rc)) rc = status
 
       end subroutine ESMF_BaseCreate
 
