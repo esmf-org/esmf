@@ -1,4 +1,4 @@
-// $Id: ESMC_Field_F.C,v 1.1 2004/11/30 20:56:56 nscollins Exp $
+// $Id: ESMC_Field_F.C,v 1.2 2004/12/01 18:33:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Field_F.C,v 1.1 2004/11/30 20:56:56 nscollins Exp $";
+             "$Id: ESMC_Field_F.C,v 1.2 2004/12/01 18:33:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -58,7 +58,7 @@ extern "C" {
 #endif
 
 // non-method functions
-void c_esmc_fieldserialize(ESMC_Status *fieldstatus, 
+void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
                            ESMC_Status *gridstatus, 
                            ESMC_Status *datastatus, 
                            ESMC_Status *datamapstatus, 
@@ -85,8 +85,7 @@ void c_esmc_fieldserialize(ESMC_Status *fieldstatus,
 } 
 
 
-// non-method functions
-void c_esmc_fielddeserialize(ESMC_Status *fieldstatus, 
+void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus, 
                              ESMC_Status *gridstatus, 
                              ESMC_Status *datastatus, 
                              ESMC_Status *datamapstatus, 

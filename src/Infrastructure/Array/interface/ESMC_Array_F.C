@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.30 2004/11/30 20:59:01 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.31 2004/12/01 18:33:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -405,6 +405,7 @@ extern "C" {
 // 
 // !DESCRIPTION:
 //     Serialize the contents of a array object.
+//     Warning!!  Not completely implemented yet.
 //
 //EOP
 
@@ -442,6 +443,7 @@ extern "C" {
 // 
 // !DESCRIPTION:
 //     Deserialize the contents of a array object.
+//     Warning!!  Not completely implemented yet.
 //
 //EOP
 
@@ -454,6 +456,78 @@ extern "C" {
   return;
 
 }  // end c_ESMC_ArrayDeserialize
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_ArraySerializeNoData - Serialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arrayserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in/out - array object
+      char *buf,                // in/out - really a byte stream
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a array object, without preserving
+//     the data values.
+//
+//EOP
+
+  int i, status;
+
+  if (!array) {
+    //printf("uninitialized Array object\n");
+    ESMC_LogDefault.ESMC_LogWrite("Array object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*array)->ESMC_ArraySerializeNoData(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_ArraySerializeNoData
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_ArrayDeserializeNoData - Deserialize Array object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_arraydeserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list.
+// 
+// !ARGUMENTS:
+      ESMC_Array **array,       // in/out - array object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a array object, without preserving
+//     any of the data (counts explicitly set to 0).
+//
+//EOP
+
+  int i, status;
+
+  (*array) = ESMC_ArrayDeserializeNoData(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_ArrayDeserializeNoData
 
 
 }

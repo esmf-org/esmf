@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle.h,v 1.3 2004/04/23 21:49:18 nscollins Exp $
+// $Id: ESMC_Bundle.h,v 1.4 2004/12/01 18:33:04 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,6 +43,16 @@
 extern "C" {
    void FTN(f_esmf_bundlecreate)(ESMC_Bundle *, int *rc);
    void FTN(f_esmf_bundledestroy)(ESMC_Bundle *, int *rc);
+
+   void FTN(c_esmc_bundleserialize)(ESMC_Status *bundlestatus,
+              ESMC_Status *gridstatus, int *field_count, int *pack_flag,
+              void *mapping, ESMC_Status *iostatus,
+              void *buffer, int *length, int *offset, int *localrc);
+   void FTN(c_esmc_bundledeserialize)(ESMC_Status *bundlestatus,
+              ESMC_Status *gridstatus, int *field_count, int *pack_flag,
+              void *mapping, ESMC_Status *iostatus,
+              void *buffer, int *offset, int *localrc);
+
 };
 
  // class declaration type

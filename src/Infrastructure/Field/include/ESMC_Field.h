@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.3 2004/04/23 21:49:29 nscollins Exp $
+// $Id: ESMC_Field.h,v 1.4 2004/12/01 18:33:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,19 @@
 extern "C" {
    void FTN(f_esmf_fieldcreate)(ESMC_Field *, int *rc);
    void FTN(f_esmf_fielddestroy)(ESMC_Field *, int *rc);
+  
+   void FTN(c_esmc_fieldserialize)(ESMC_Status *fieldstatus, 
+              ESMC_Status *gridstatus, ESMC_Status *datastatus, 
+              ESMC_Status *datamapstatus, ESMC_Status *iostatus,
+              void *buffer, int *length, int *offset, int *localrc);
+   
+   void FTN(c_esmc_fielddeserialize)(ESMC_Status *fieldstatus,
+              ESMC_Status *gridstatus, ESMC_Status *datastatus,
+              ESMC_Status *datamapstatus, ESMC_Status *iostatus,
+              void *buffer, int *offset, int *localrc);
+
 };
+
 
  // class declaration type
  // TODO: decide if this does or does not inherit from the ESMC_Base class.

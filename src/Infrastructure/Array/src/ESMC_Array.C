@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.37 2004/11/30 20:59:02 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.38 2004/12/01 18:33:16 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.37 2004/11/30 20:59:02 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.38 2004/12/01 18:33:16 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1926,6 +1926,8 @@
 //
 // !DESCRIPTION:
 //    Turn info in array class into a stream of bytes.
+//    Warning!  This version does not yet preserve the data.  That
+//    part of the code is not implemented yet.
 //
 //EOPI
     int fixedpart, nbytes;
@@ -1937,11 +1939,13 @@
         *length += 2 * fixedpart;
     }
 
-    // what about base object and attributes?  
+    // TODO: what about base object and attributes?  
 
     cp = (char *)(buffer + *offset);
     memcpy(cp, (void *)this, sizeof(ESMC_Array));
     cp += sizeof(ESMC_Array);
+
+    // TODO:  now this needs to copy the actual data into the buffer.
 
     *offset = (cp - buffer);
    
@@ -1969,22 +1973,127 @@
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
+//    Warning!  This version does not yet restore the data.  That
+//    part of the code is not implemented yet.
 //
 //EOPI
     ESMC_Array *a = new ESMC_Array;
     char *cp;
 
-    // what about base object and attributes?  
+    // TODO: what about base object and attributes?  
 
     cp = (char *)(buffer + *offset);
     memcpy((void *)a, cp, sizeof(ESMC_Array));
     cp += sizeof(ESMC_Array);
+
+    // TODO:  now this needs to copy over the actual data from the buffer.
 
     *offset = (cp - buffer);
    
     return a;
 
  } // end ESMC_ArrayDeserialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArraySerializeNoData"
+//BOPI
+// !IROUTINE:  ESMC_ArraySerializeNoData - Turn array information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArraySerializeNoData(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in array class into a stream of bytes.   This version
+//    does not preserve any data associated with the array, just the
+//    type/rank/shape information.
+//
+//EOPI
+    int fixedpart, nbytes;
+    char *cp;
+
+    fixedpart = sizeof(ESMC_Array);
+    if ((*length - *offset) < fixedpart) {
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        *length += 2 * fixedpart;
+    }
+
+    // TODO: what about base object and attributes?  
+
+    cp = (char *)(buffer + *offset);
+    memcpy(cp, (void *)this, sizeof(ESMC_Array));
+    cp += sizeof(ESMC_Array);
+
+    *offset = (cp - buffer);
+   
+    return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_DeserializeNoData"
+//BOPI
+// !IROUTINE:  ESMC_ArrayDeserializeNoData - Turn a byte stream into an object
+//
+// !INTERFACE:
+      ESMC_Array *ESMC_ArrayDeserializeNoData(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.  This version does not
+//    preserve any data, only the type/rank/shape of the array.
+//
+//EOPI
+    ESMC_Array *a = new ESMC_Array;
+    char *cp;
+    int i, bytes;
+
+    // TODO: what about base object and attributes?  
+
+    cp = (char *)(buffer + *offset);
+    memcpy((void *)a, cp, sizeof(ESMC_Array));
+    cp += sizeof(ESMC_Array);
+
+    // overwrite data-related fields
+    a->base_addr = NULL;
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        a->counts[i] = 0;
+        a->lbound[i] = 0;
+        a->ubound[i] = 0;
+        a->offset[i] = 0;
+    }
+
+    // note - starts at 1; base includes rank 1 size
+    bytes = ESMF_F90_PTR_BASE_SIZE;
+    for (i=1; i<a->rank; i++)
+        bytes += ESMF_F90_PTR_PLUS_RANK;
+
+    memset((void *)(&a->f90dopev), 0, bytes);
+    
+
+    *offset = (cp - buffer);
+   
+    return a;
+
+ } // end ESMC_ArrayDeserializeNoData
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

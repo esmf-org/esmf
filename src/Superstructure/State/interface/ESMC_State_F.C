@@ -1,4 +1,4 @@
-// $Id: ESMC_State_F.C,v 1.1 2004/11/30 20:58:22 nscollins Exp $
+// $Id: ESMC_State_F.C,v 1.2 2004/12/01 18:32:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_State_F.C,v 1.1 2004/11/30 20:58:22 nscollins Exp $";
+             "$Id: ESMC_State_F.C,v 1.2 2004/12/01 18:32:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -59,7 +59,7 @@ extern "C" {
 #endif
 
 // non-method functions
-void c_esmc_stateserialize(int *statestatus, 
+void FTN(c_esmc_stateserialize)(int *statestatus, 
                            int *st, 
                            int *needed_default, 
                            int *ready_default,
@@ -91,7 +91,7 @@ void c_esmc_stateserialize(int *statestatus,
 } 
 
 
-void c_esmc_statedeserialize(int *statestatus, 
+void FTN(c_esmc_statedeserialize)(int *statestatus, 
                              int *st, 
                              int *needed_default, 
                              int *ready_default,
@@ -139,7 +139,7 @@ void c_esmc_statedeserialize(int *statestatus,
 
 #endif
 
-void c_esmc_stateitemserialize(int *otype, 
+void FTN(c_esmc_stateitemserialize)(int *otype, 
                                char *namep, 
                                int *indirect_index, 
                                int *needed,
@@ -174,7 +174,7 @@ void c_esmc_stateitemserialize(int *otype,
 } 
 
 
-void c_esmc_stateitemdeserialize(int *otype, 
+void FTN(c_esmc_stateitemdeserialize)(int *otype, 
                                char *namep, 
                                int *indirect_index, 
                                int *needed,
