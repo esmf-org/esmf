@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.10 2003/11/17 21:59:35 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.11 2003/11/18 08:05:26 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -13,6 +13,8 @@ The elements of the {\bf Infrastructure} layer include constructs to support par
 to Earth science applications, specialized libraries to support consistent time and calendar management and
 performance, error handling and scalable I/O tools. The {\bf Infrastructure} layer is described in section \ref{sec:infrastructure}.
 A hierarchical combination of {\bf Superstructure}, user code components and Infrastructure are joined together to form an ESMF application.
+
+
 
 \subsection{Key Concepts}
 
@@ -65,21 +67,42 @@ For example, physics and dynamics modules can be defined as
 separate GridComps, coupled together with a CplComp, and this 
 whole system can be nested within a single atmospheric GridComp.
 The atmospheric GridComp can be run standalone, or included
-in a larger climate or data assimilation application.  The
-data structure that enables you to do this in ESMF is the
-derived type GridComp.  F90 alone doesn't allow you to create
+in a larger climate or data assimilation application.  See Figure
+\ref{fig:appunit} for an illustrative example.
+
+The data structure that enables scalability in ESMF is the
+derived type GridComp.  Fortran alone doesn't allow you to create
 generic components - you'd have to create derived types for
 PhysComp, and DynComp, and PhysDynCouplerComp, and AtmComp.  In 
-ESMF, they are always of type GridComp or CplComp, so they 
+ESMF, these are always of type GridComp or CplComp, so they 
 can be called by the same drivers (whether that driver is a 
 standard ESMF driver or another model), and use the same methods
-without having to overload them with a lot of specific derived 
-types.  Same idea when you want to support different 
+without having to overload them with many specific derived 
+types.  It's the same idea when you want to support different 
 implementations of the same component, like multiple dynamics.
 
 {\bf In short, the ESMF defines a sensible scalable 
 architecture for organizing very complex applications, and
 for allowing exchangeable components.}
+
+\begin{figure}
+\caption{A typical building block for an ESMF application consists of a 
+parent GridComp, two or more child GridComps, and 
+a CplComp.  The parent GridComp is called by an 
+AppDriver.  All ESMF components have Initialize, Run, and 
+Finalize methods.  The diagram shows that when the AppDriver calls 
+Initialize on a parent GridComp, the call cascades down to
+all of its children, so that the result is that the entire ``tree''
+of components is initialized.  The Run and Finalize methods work the
+same way.  In this example a hurricane simulation is built 
+from ocean and atmosphere GridComps.  The data exchange between 
+the ocean and atmosphere is handled by an ocean-atmosphere CplComp.  
+Since the whole hurricane simulation is a GridComp,
+it could be easily be treated as a child and coupled to another
+GridComp, rather than being driven directly by the AppDriver.}
+\label{fig:appunit}
+\scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
+\end{figure}
 
 \subsubsection{Local Communication}
 Communication in ESMF always occurs within a component.  It
