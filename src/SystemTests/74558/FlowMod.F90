@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.4 2003/04/05 00:05:21 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.5 2003/04/09 21:27:28 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -162,9 +162,10 @@
 ! Local variables
 !
       integer :: status
-      integer :: i, j
+      integer :: i, j, x, y, nx, ny
       logical :: rcpresent
       type(ESMF_Grid) :: grid
+      type(ESMF_DElayout) :: layout
 !
 ! Set initial values
 !
@@ -196,7 +197,7 @@
 !
 ! read in parameters   ! TODO: just set here for now
 !
-      uin = 1.4
+      uin = 1.5
       rhoin = 6.0
       siein= 0.50
       gamma = 1.40
@@ -206,6 +207,73 @@
       v0 = 0.0
       sie0 = 0.50
       rho0 = 6.0
+!
+! flags for boundary conditions (ordered left, right, bottom, top):
+!     nbc(i) = 1       inflow
+!     nbc(i) = 2       outflow
+!     nbc(i) = 3       insulated, free-slip
+!     nbc(i) = 4       insulated, no-slip
+!     nbc(i) = 5       specified temperature, free-slip
+!     nbc(i) = 6       specified temperature, no-slip
+! TODO:  could be read in, but for now set here
+!
+      nbc(1) = 1
+      nbc(2) = 2
+      nbc(3) = 3
+      nbc(4) = 3
+!
+! set flags, based on NBC's and position in layout
+! note: since we're operating on a five-point stencil, we don't
+!       really care out how the corners get set
+!
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Flowinit:  grid comp get"
+        return
+      endif
+      call ESMF_DELayoutGetSize(layout, nx, ny, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Flowinit:  layout get size"
+        return
+      endif
+      call ESMF_DELayoutGetDEPosition(layout, x, y, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Flowinit:  layout get position"
+        return
+      endif
+      do j = jmin_t, jmax_t
+        do i = imin_t, imax_t
+          flag(i,j) = 0.0
+        enddo
+      enddo
+      if (x.eq.1) then  ! left boundary
+        do j = jmin_t, jmax_t
+          do i = imin_t, imin
+            flag(i,j) = 1.0
+          enddo
+        enddo
+      endif
+      if (x.eq.nx) then  ! right boundary
+        do j = jmin_t, jmax_t
+          do i = imax, imax_t
+            flag(i,j) = 2.0
+          enddo
+        enddo
+      endif
+      if (y.eq.1) then  ! bottom boundary
+        do j = jmin_t, jmin
+          do i = imin_t, imax_t
+            flag(i,j) = 3.0
+          enddo
+        enddo
+      endif
+      if (y.eq.ny) then  ! top boundary
+        do j = jmax, jmax_t
+          do i = imin_t, imax_t
+            flag(i,j) = 4.0
+          enddo
+        enddo
+      endif
 !
 ! set up initial velocities 
 !
@@ -230,42 +298,20 @@
         enddo
       enddo
 !
-! initialize inlet parameters  TODO: identify de's with inflow regions
+! initialize inlet parameters TODO:  assume for now only left boundary
+!                                    can be inflow
 !
       do j = jmin_t, jmax_t
-        rho(1,j) = rhoin
-        sie(1,j) = siein
-        u(1,j) = uin
-        rhoi(1,j) = rhoin*siein
-        rhou(1,j) = rhoin*uin
+        do i = imin_t, imax_t
+          if (flag(i,j).eq.1.0) then
+            rho(i,j) = rhoin
+            sie(i,j) = siein
+            u(i,j) = uin
+            rhoi(i,j) = rhoin*siein
+            rhou(i,j) = rhoin*uin
+          endif
+        enddo
       enddo
-      call ESMF_FieldHalo(field_rho, status)   ! TODO:  shouldn't have to halo
-                                               ! here, but every left column on
-                                               ! each DE is getting inlet values
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FlowInit:  rho halo"
-        return
-      endif
-      call ESMF_FieldHalo(field_sie, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FlowInit:  sie halo"
-        return
-      endif
-      call ESMF_FieldHalo(field_u, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FlowInit:  u halo"
-        return
-      endif
-      call ESMF_FieldHalo(field_rhoi, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FlowInit:  rhoi halo"
-        return
-      endif
-      call ESMF_FieldHalo(field_rhou, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FlowInit:  rhou halo"
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -493,11 +539,30 @@
           endif
           dsiedx2 = (sie(i+1,j)+sie(i-1,j)-2.*sie(i,j))/dx**2
           dsiedy2 = (sie(i,j+1)+sie(i,j-1)-2.*sie(i,j))/dy**2
-!  TODO  add BC's to modify dsiedx2 and dsiedy2
           rhoi(i,j) = rhoi(i,j) + (dt/dx)*(rhoiu_m-rhoiu_p) &
                     + (dt/dy)*(rhoiv_m-rhoiv_p) &
-                    - dt*(p(i,j)+q(i,j))*((u(i,j)-u(i-1,j))/dx + (v(i,j)-v(i,j-1))/dy) &
+                    - dt*(p(i,j)+q(i,j))*((u(i,j)-u(i-1,j))/dx &
+                                        + (v(i,j)-v(i,j-1))/dy) &
                     + dt*akb*(dsiedx2+dsiedy2)
+        enddo
+      enddo
+!
+!  add boundary conditions  WARNING: these are not general
+!
+      do j = jmin_t, jmax_t
+        do i = imin_t, imax_t
+          if (flag(i,j).eq.1.0) then
+            rhoi(i,j) = rhoin*siein 
+          endif
+          if (flag(i,j).eq.2.0) then
+            rhoi(i,j) = rhoi(imax,j)
+          endif
+          if (flag(i,j).eq.3.0) then
+            rhoi(i,j) = rhoi(i,jmin)
+          endif
+          if (flag(i,j).eq.4.0) then
+            rhoi(i,j) = rhoi(i,jmax)
+          endif
         enddo
       enddo
       call ESMF_FieldHalo(field_rhoi, status)
@@ -573,7 +638,27 @@
           if (rho_new(i,j).gt.0.0) sie(i,j) = rhoi(i,j)/rho_new(i,j)
         enddo
       enddo
-!  TODO:  add BC's to sie array
+!
+!  add boundary conditions  WARNING: these are not general
+!
+      do j = jmin_t, jmax_t
+        do i = imin_t, imax_t
+          if (flag(i,j).eq.1.0) then
+            sie(i,j) = 2.*siein - sie(imin,j)
+            rho(i,j) = 2.*rhoin - rho(imin,j)
+          endif
+          if (flag(i,j).eq.2.0) then
+            sie(i,j) = sie(imax,j)
+            rho(i,j) = rho(imax,j)
+          endif
+          if (flag(i,j).eq.3.0) then
+            sie(i,j) = sie(i,jmin)
+          endif
+          if (flag(i,j).eq.4.0) then
+            sie(i,j) = sie(i,jmax)
+          endif
+        enddo
+      enddo
       call ESMF_FieldHalo(field_rho, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  rho halo"
@@ -631,7 +716,40 @@
           if (rhoav.gt.0.0) v(i,j) = rhov(i,j)/rhoav
         enddo
       enddo
+      do i = imin, imax
+        v(i,jmax) = 0.0
+      enddo
+        
 !  TODO:  if there are obstacles, set their normal velocities to zero
+!
+!  add boundary conditions  WARNING: these are not general
+!
+      do j = jmin_t, jmax_t
+        do i = imin_t, imax_t
+          if (flag(i,j).eq.1.0) then
+            u(i,j) = uin
+            rhou(i,j) = uin*rho(i,j)
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+          if (flag(i,j).eq.2.0) then
+            u(i,j) = u(imax,j)
+            v(i,j) = v(imax,j)
+          endif
+          if (flag(i,j).eq.3.0) then
+            u(i,j) = u(i,jmin)
+            rhou(i,j) = u(i,j)*rho(i,j)
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+          if (flag(i,j).eq.4.0) then
+            u(i,j) = u(i,jmax)
+            rhou(i,j) = u(i,j)*rho(i,j)
+            v(i,j) = 0.0
+            rhov(i,j) = 0.0
+          endif
+        enddo
+      enddo
       call ESMF_FieldHalo(field_u, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  u halo"

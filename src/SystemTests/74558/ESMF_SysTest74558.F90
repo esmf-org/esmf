@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.3 2003/04/04 23:24:22 jwolfe Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.4 2003/04/09 21:27:14 jwolfe Exp $
 !
 ! System test code #74558
 
@@ -107,6 +107,7 @@
 !-------------------------------------------------------------------------
  
       c1exp = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, "comp1 export")
+      write(*,*) 'got here'
       call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
       print *, "Comp 1 Initialize finished, rc =", rc
  

@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.1 2003/04/04 18:27:30 jwolfe Exp $
+! $Id: ArraysGlobalMod.F90,v 1.2 2003/04/09 21:26:55 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -16,28 +16,26 @@
 #include "ESMF.h"
 
 ! ESMF modules
-    use ESMF_BaseMod
-    use ESMF_DataMapMod
-    use ESMF_ArrayMod
-    use ESMF_FieldMod
-    use ESMF_GridMod
+    use ESMF_Mod
     
     implicit none
     save
 !
 ! arrays
 !
-    public :: sie, u, v, rho, rhoi, rhou, rhov, p, q
+    public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+    public :: nbc
 
-    real, dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q
+    real, dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+    integer, dimension(4) :: nbc
 !
 ! Fields
 !
     public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-              field_rhov, field_p, field_q
+              field_rhov, field_p, field_q, field_flag
 
     type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                        field_rhou, field_rhov, field_p, field_q
+                        field_rhou, field_rhov, field_p, field_q, field_flag
 !
 ! scalars here
 !
@@ -88,6 +86,7 @@
 !
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                               kind=ESMF_KIND_R4)
+
       field_sie  = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="SIE", rc=status)
       call ESMF_FieldGetData(field_sie, array_temp, rc=status)
@@ -132,6 +131,11 @@
                    name="Q", rc=status)
       call ESMF_FieldGetData(field_q, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, q, ESMF_NO_COPY, status)
+
+      field_flag = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                   name="FLAG", rc=status)
+      call ESMF_FieldGetData(field_flag, array_temp, rc=status)
+      call ESMF_ArrayGetData(array_temp, flag, ESMF_NO_COPY, status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArraysGlobalAlloc"
@@ -192,6 +196,7 @@
       call ESMF_FieldDestroy(field_rhov, rc=status)
       call ESMF_FieldDestroy(field_p   , rc=status)
       call ESMF_FieldDestroy(field_q   , rc=status)
+      call ESMF_FieldDestroy(field_flag, rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArraysGlobalDealloc"
