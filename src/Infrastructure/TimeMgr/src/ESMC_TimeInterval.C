@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.4 2003/03/14 05:17:39 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.5 2003/03/27 01:58:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,6 +20,7 @@
 //-------------------------------------------------------------------------
 
  // higher level, 3rd party or system includes
+ #include <iostream.h>
 
  // associated class definition file
  #include <ESMC_TimeInterval.h>
@@ -27,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.4 2003/03/14 05:17:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.5 2003/03/27 01:58:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -75,6 +76,72 @@
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_TimeIntervalInit - initializer to support F90 interface
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalInit(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *YY,                  // in - integer number of interval years
+      int *MO,                  // in - integer number of interval months
+      int *D,                   // in - integer number of interval days
+      int *H,                   // in - integer hours
+      int *M,                   // in - integer minutes
+      ESMF_IKIND_I8 *S,         // in - long integer seconds 
+      int *MS,                  // in - integer milliseconds
+      int *US,                  // in - integer microseconds
+      int *NS,                  // in - integer nanoseconds
+      double *d_,               // in - floating point days
+      double *h_,               // in - floating point hours
+      double *m_,               // in - floating point minutes
+      double *s_,               // in - floating point seconds
+      double *ms_,              // in - floating point milliseconds
+      double *us_,              // in - floating point microseconds
+      double *ns_,              // in - floating point nanoseconds
+      int *Sn,                  // in - fractional seconds numerator
+      int *Sd,                  // in - fractional seconds denominator
+      ESMC_Calendar *cal) {     // in - associated calendar
+//
+// !DESCRIPTION:
+//      Initialzes a {\tt TimeInterval} with values given in variable arg list
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: validate inputs (individual and combos), set basetime values
+
+    // initialize time interval basetime values
+    this->S  = 0;
+    this->Sn = 0;
+    this->Sd = 1;
+
+    if (cal != 0) {
+      Calendar = cal;
+    }
+    if (D != 0) {
+      this->S += *D * 86400;
+    }
+    if (H != 0) {
+      this->S += *H * 3600;
+    }
+    if (M != 0) {
+      this->S += *M * 60;
+    }
+    if (S != 0) {
+      this->S += *S;
+    }
+
+//cout << "ESMC_TimeIntervalInit():  S = " << this->S << endl;
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalInit
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_TimeInterval - native default C++ constructor
 //
 // !INTERFACE:
@@ -108,7 +175,7 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,              // in - integer seconds
+      ESMF_IKIND_I8 S,    // in - integer seconds
       int Sn,             // in - fractional seconds, numerator
       int Sd) :           // in - fractional seconds, denominator
     ESMC_BaseTime(S, Sn, Sd) {  // invoke ESMC_BaseTime base class constructor
