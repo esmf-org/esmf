@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.4 2003/11/07 22:07:26 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.5 2004/01/26 21:33:52 eschwab Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -163,13 +163,13 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 12May2003, 9:00 am
-      call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=12, h=9, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=12, h=9, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize stop time to 12May2003, 3:00 pm
       ! to keep runtime down
-      call ESMF_TimeSet(stopTime, yr=2003, mm=5, dd=12, h=15, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=12, h=15, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 

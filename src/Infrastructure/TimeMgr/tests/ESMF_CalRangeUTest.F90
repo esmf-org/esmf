@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.14 2003/10/20 20:13:57 cdeluca Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.15 2004/01/26 21:29:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.14 2003/10/20 20:13:57 cdeluca Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.15 2004/01/26 21:29:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -47,7 +47,7 @@
       integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
 
       ! temp variables
-      integer(ESMF_KIND_I8) :: YRl, rYRl, Dl, rDl, endYRl, endDl
+      integer(ESMF_KIND_I8) :: YYl, rYYl, Dl, rDl, endYYl, endDl
       integer :: MM, rMM, DD, rDD
       integer(ESMF_KIND_I8), parameter :: ly1 = 400, ly2 = 4, ly3 = 100
       integer(ESMF_KIND_I8), parameter :: tenthousand = 10000
@@ -111,15 +111,15 @@
       ! day at a time until it breaks                                  !
       !----------------------------------------------------------------!
 
-      YRl = -4713
+      YYl = -4713
       MM = 11
       DD = 24
       Dl = 0 
-      call ESMF_TimeSet(Time, yr_i8=YRl, mm=MM, dd=DD, &
+      call ESMF_TimeSet(Time, yy_i8=YYl, mm=MM, dd=DD, &
                         calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeGet(Time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
+      call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
       print *, "Low range test"
-      print *, "  Start Time Gregorian = ", rYRl, "/", rMM, "/", rDD
+      print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
       print *, "  Start Julian Days = ", rDl
       print *
 
@@ -135,27 +135,27 @@
           MM = MM - 1
           if (MM.eq.0) then
             MM = 12
-            YRl = YRl - 1
+            YYl = YYl - 1
           end if
           DD = DaysPerMonth(MM)
           ! check if leap year
           if (MM.eq.2) then
-            if ((mod(YRl,ly1).eq.0).or. &
-                            (mod(YRl,ly2).eq.0 .and. mod(YRl,ly3).ne.0)) then
+            if ((mod(YYl,ly1).eq.0).or. &
+                            (mod(YYl,ly2).eq.0 .and. mod(YYl,ly3).ne.0)) then
               DD = 29
             end if
           end if
         end if
 
         ! check calculated dates against ESMF dates
-        broken = ESMF_CheckTime(Time, YRl=YRl, MM=MM, DD=DD, Dl=Dl, &
+        broken = ESMF_CheckTime(Time, YYl=YYl, MM=MM, DD=DD, Dl=Dl, &
                                 gregCal=gregorianCalendar, &
                                 julCal=julianCalendar, rc=rc)
       end do
       !EX_UTest
       write(failMsg, *) "Low range endpoint not -4800/2/29 or rc=ESMF_FAILURE"
       write(name, *) "Gregorian/Fliegel Low Range Test"
-      call ESMF_Test((YRl.eq.-4800 .and. MM.eq.2 .and. DD.eq.29 &
+      call ESMF_Test((YYl.eq.-4800 .and. MM.eq.2 .and. DD.eq.29 &
                       .and. Dl.eq.-32045 .and. rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *
@@ -191,7 +191,7 @@
           ! 278(74769560)                                                 !
           !----------------------------------------------------------------!
 
-          YRl = -4713
+          YYl = -4713
           MM  = 11
           DD  = 24
           Dl  = 0 
@@ -215,9 +215,9 @@
           Dl = Dl - 10000000
 
           ! matching start date is October 3, 292,276,992,535
-          YRl = 292276992  ! break up initialization,
-          YRl = YRl * 1000  !   since F90 constants
-          YRl = YRl + 535   !     are 32-bit
+          YYl = 292276992  ! break up initialization,
+          YYl = YYl * 1000  !   since F90 constants
+          YYl = YYl + 535   !     are 32-bit
           MM = 10
           DD = 3
 #else
@@ -226,20 +226,20 @@
           Dl = Dl - 1000
 
           ! matching start date is February 2, 292,277,019,912
-          YRl = 292277019  ! break up initialization,
-          YRl = YRl * 1000  !   since F90 constants
-          YRl = YRl + 912   !     are 32-bit
+          YYl = 292277019  ! break up initialization,
+          YYl = YYl * 1000  !   since F90 constants
+          YYl = YYl + 912   !     are 32-bit
           MM = 2
           DD = 2
 #endif
 
         endif
 
-        call ESMF_TimeSet(Time, yr_i8=YRl, mm=MM, dd=DD, &
+        call ESMF_TimeSet(Time, yy_i8=YYl, mm=MM, dd=DD, &
                           calendar=gregorianCalendar, rc=rc)
-        call ESMF_TimeGet(Time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
+        call ESMF_TimeGet(Time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
         print *, "High range test #", test
-        print *, "  Start Time Gregorian = ", rYRl, "/", rMM, "/", rDD
+        print *, "  Start Time Gregorian = ", rYYl, "/", rMM, "/", rDD
         print *, "  Start Julian Days = ", rDl
         print *
 
@@ -254,8 +254,8 @@
           DD = DD + 1
           ! check if leap year
           if (MM.eq.2 .and. DD.eq.29) then
-            if ((mod(YRl,ly1).eq.0).or. &
-                             (mod(YRl,ly2).eq.0 .and. mod(YRl,ly3).ne.0)) then
+            if ((mod(YYl,ly1).eq.0).or. &
+                             (mod(YYl,ly2).eq.0 .and. mod(YYl,ly3).ne.0)) then
               DaysPerMonth(2) = 29
             else
               DaysPerMonth(2) = 28
@@ -266,18 +266,18 @@
             MM = MM + 1
             if (MM.eq.13) then
               MM = 1
-              YRl = YRl + 1
-              if (mod(YRl,tenthousand).eq.0) then
-                print *, "YRl = ", YRl, ", Dl = ", Dl
+              YYl = YYl + 1
+              if (mod(YYl,tenthousand).eq.0) then
+                print *, "YYl = ", YYl, ", Dl = ", Dl
               end if
-              if (YRl.eq.20000) then
+              if (YYl.eq.20000) then
                 done = .true.
               end if
             end if
           end if
 
           ! check calculated dates against ESMF dates
-          broken = ESMF_CheckTime(Time, YRl=YRl, MM=MM, DD=DD, Dl=Dl, &
+          broken = ESMF_CheckTime(Time, YYl=YYl, MM=MM, DD=DD, Dl=Dl, &
                                   gregCal=gregorianCalendar, &
                                   julCal=julianCalendar, rc=rc)
         end do
@@ -289,7 +289,7 @@
           write(failMsg, *) &
                 "High range (low end) not 1/1/20,000 or rc=ESMF_FAILURE"
           write(name, *) "Gregorian/Fliegel High Range (low end) Test"
-          call ESMF_Test((YRl.eq.20000 .and. MM.eq.1 .and. DD.eq.1 &
+          call ESMF_Test((YYl.eq.20000 .and. MM.eq.1 .and. DD.eq.1 &
                           .and. Dl.eq.9025910 .and. rc.eq.ESMF_SUCCESS), &
                           name, failMsg, result, ESMF_SRCLINE)
           print *
@@ -297,9 +297,9 @@
         else ! HIGH_HI
           
           ! expected endpoint year and julian day
-          endYRl = 292277019
-          endYRl = endYRl * 1000
-          endYRl = endYRl + 914
+          endYYl = 292277019
+          endYYl = endYYl * 1000
+          endYYl = endYYl + 914
           endDl  = 1067519911
           endDl  = endDl * 100000
           endDl  = endDl + 67301
@@ -307,7 +307,7 @@
           write(failMsg, *) &
             "High range (high end) not 10/30/292,277,019,914 or rc=ESMF_FAILURE"
           write(name, *) "Gregorian/Fliegel High Range (high end) Test"
-          call ESMF_Test((YRl.eq.endYRl .and. MM.eq.10 .and. DD.eq.30 &
+          call ESMF_Test((YYl.eq.endYYl .and. MM.eq.10 .and. DD.eq.30 &
                           .and. Dl.eq.endDl .and. rc.eq.ESMF_SUCCESS), &
                           name, failMsg, result, ESMF_SRCLINE)
           print *
@@ -330,14 +330,14 @@
 ! !IROUTINE: ESMF_CheckTime - Check ESMF Time values against given values
 
 ! !INTERFACE:
-      function ESMF_CheckTime(time, YRl, MM, DD, Dl, gregCal, julCal, rc)
+      function ESMF_CheckTime(time, YYl, MM, DD, Dl, gregCal, julCal, rc)
 
 ! !RETURN VALUE:      
       logical :: ESMF_CheckTime
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      integer(ESMF_KIND_I8), intent(in) :: YRl
+      integer(ESMF_KIND_I8), intent(in) :: YYl
       integer, intent(in) :: MM
       integer, intent(in) :: DD
       integer(ESMF_KIND_I8), intent(in) :: Dl
@@ -351,7 +351,7 @@
 !EOP
 
       ! ESMF returned variables
-      integer(ESMF_KIND_I8) :: rYRl, rDl
+      integer(ESMF_KIND_I8) :: rYYl, rDl
       integer :: rMM, rDD
 
       !
@@ -359,17 +359,17 @@
       !
 
       ! set date via ESMF Gregorian calendar
-      call ESMF_TimeSet(time, yr_i8=YRl, mm=MM, dd=DD, calendar=gregCal, rc=rc)
+      call ESMF_TimeSet(time, yy_i8=YYl, mm=MM, dd=DD, calendar=gregCal, rc=rc)
 
       ! see what we get back
-      call ESMF_TimeGet(time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
+      call ESMF_TimeGet(time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
 
-      if (.not.(rYRl.eq.YRl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
+      if (.not.(rYYl.eq.YYl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
                 rDl.eq.Dl)) then
         broken = .true.
         print *, "Gregorian Set/Get"
-        print *, " Fliegel breaks, should be = ", YRl, "/", MM, "/", DD, " ", Dl
-        print *, "                 returned  = ", rYRl, "/", rMM, "/", rDD, &
+        print *, " Fliegel breaks, should be = ", YYl, "/", MM, "/", DD, " ", Dl
+        print *, "                 returned  = ", rYYl, "/", rMM, "/", rDD, &
                                                  " ", rDl
         print *
       end if
@@ -414,14 +414,14 @@
 
       ! see what we get back via Gregorian calendar
       call ESMF_TimeSet(time, calendar=gregCal, rc=rc)
-      call ESMF_TimeGet(time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
+      call ESMF_TimeGet(time, yy_i8=rYYl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
 
-      if (.not.(rYRl.eq.YRl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
+      if (.not.(rYYl.eq.YYl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
                 rDl.eq.Dl)) then
         broken = .true.
         print *, "Julian Set/Gregorian Get"
-        print *, " breaks, should be = ", YRl, "/", MM, "/", DD, " ", Dl
-        print *, "         returned  = ", rYRl, "/", rMM, "/", rDD, " ", rDl
+        print *, " breaks, should be = ", YYl, "/", MM, "/", DD, " ", Dl
+        print *, "         returned  = ", rYYl, "/", rMM, "/", rDD, " ", rDl
         print *
       end if
 

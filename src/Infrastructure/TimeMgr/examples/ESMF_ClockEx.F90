@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.30 2004/01/07 18:59:34 svasquez Exp $
+! $Id: ESMF_ClockEx.F90,v 1.31 2004/01/26 21:29:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
-      call ESMF_TimeSet(startTime, yr=2003, mm=4, dd=1, h=2, m=24, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=4, dd=1, h=2, m=24, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -93,7 +93,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
-      call ESMF_TimeSet(stopTime, yr=2003, mm=4, dd=14, h=2, m=24, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=4, dd=14, h=2, m=24, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.4 2003/11/07 22:07:25 nscollins Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.5 2004/01/26 21:33:25 eschwab Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -140,11 +140,11 @@
       call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
 
       ! initialize start time to 3/28/2003
-      call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=1, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 3/29/2003
-      call ESMF_TimeSet(stopTime, yr=2003, mm=5, dd=2, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.17 2004/01/07 18:56:15 svasquez Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.18 2004/01/26 21:29:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,8 +28,8 @@
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3
 
       ! temp variables
-      integer :: D, H, M, S, rc
-      integer(ESMF_KIND_I8) :: Dl, Sl
+      integer :: d, h, m, s, rc
+      integer(ESMF_KIND_I8) :: dl, sl
       double precision :: quotient, divisor, multiplier 
       type(ESMF_TimeInterval) :: remainder
 !\end{verbatim}
@@ -42,7 +42,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalSet(timeInterval1, d=1, s=1800, rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval1, d=1, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -63,7 +63,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeIntervalGet(timeInterval1, d=D, h=H, m=M, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -73,7 +73,7 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Time Interval1 = ", D, " days, ", H, " hours, ", M, " minutes."
+      print *, "Time Interval1 = ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval1, "string", rc)
 !\end{verbatim}
 !EOP
@@ -84,7 +84,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeIntervalGet(timeInterval2, d=D, h=H, m=M, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval2, d=d, h=h, m=m, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -94,7 +94,7 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Time Interval2 = ", D, " days, ", H, " hours, ", M, " minutes."
+      print *, "Time Interval2 = ", d, " days, ", h, " hours, ", m, " minutes."
       call ESMF_TimeIntervalPrint(timeInterval2, "string", rc)
 !\end{verbatim}
 !EOP
@@ -107,7 +107,7 @@
 !\begin{verbatim}
       ! difference
       timeInterval3 = timeInterval2 - timeInterval1
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -118,7 +118,7 @@
 !BOP
 !\begin{verbatim}
       print *, "Difference between TimeInterval2 and TimeInterval1 = ", &
-               D, " days, ", S, " seconds."
+               d, " days, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -131,7 +131,7 @@
 !\begin{verbatim}
       ! sum
       timeInterval3 = timeInterval2 + timeInterval1
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -141,8 +141,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Sum of TimeInterval1 and TimeInterval2 = ", D, " days, ", &
-               S, " seconds."
+      print *, "Sum of TimeInterval1 and TimeInterval2 = ", d, " days, ", &
+               s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -172,7 +172,7 @@
 !\begin{verbatim}
       ! divide by integer
       timeInterval3 = timeInterval2 / 2
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -182,8 +182,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "TimeInterval2 divided by 2 = ", D, " days, ", H, " hours, ", &
-               M, " minutes, ", S, " seconds."
+      print *, "TimeInterval2 divided by 2 = ", d, " days, ", h, " hours, ", &
+               m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -197,7 +197,7 @@
       ! divide by double precision real
       divisor = 1.5
       timeInterval3 = timeInterval2 / divisor
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -207,8 +207,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "TimeInterval2 divided by 1.5 = ", D, " days, ", H, " hours, ", &
-               M, " minutes, ", S, " seconds."
+      print *, "TimeInterval2 divided by 1.5 = ", d, " days, ", h, " hours, ", &
+               m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -221,7 +221,7 @@
 !\begin{verbatim}
       ! multiply by integer
       timeInterval3 = timeInterval1 * 3
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -231,8 +231,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "TimeInterval1 multiplied by 3 = ", D, " days, ", H, &
-               " hours, ", M, " minutes, ", S, " seconds."
+      print *, "TimeInterval1 multiplied by 3 = ", d, " days, ", h, &
+               " hours, ", m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -246,7 +246,7 @@
       ! multiply by double precision real
       multiplier = 2.25
       timeInterval3 = timeInterval1 * multiplier
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -256,8 +256,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "TimeInterval1 multiplied by 2.25 = ", D, " days, ", H, &
-               " hours, ", M, " minutes, ", S, " seconds."
+      print *, "TimeInterval1 multiplied by 2.25 = ", d, " days, ", h, &
+               " hours, ", m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -270,7 +270,7 @@
 !\begin{verbatim}
       ! change time interval 1 to negative value
       timeInterval1 = timeInterval1 * (-1)
-      call ESMF_TimeIntervalGet(timeInterval1, d=D, h=H, m=M, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval1, d=d, h=h, m=m, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -280,8 +280,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Time Interval1 changed to ", D, " days, ", H, " hours, ", &
-               M, " minutes."
+      print *, "Time Interval1 changed to ", d, " days, ", h, " hours, ", &
+               m, " minutes."
       call ESMF_TimeIntervalPrint(timeInterval1, "string", rc)
 !\end{verbatim}
 !EOP
@@ -294,7 +294,7 @@
 !\begin{verbatim}
       ! absolute value
       timeInterval3 = ESMF_TimeIntervalAbsValue(timeInterval1)
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -304,8 +304,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Absolute value of TimeInterval1 = ", D, " days, ", H, &
-               " hours, ", M, " minutes, ", S, " seconds."
+      print *, "Absolute value of TimeInterval1 = ", d, " days, ", h, &
+               " hours, ", m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP
@@ -318,7 +318,7 @@
 !\begin{verbatim}
       ! negative absolute value of time interval 1
       timeInterval3 = ESMF_TimeIntervalNegAbsValue(timeInterval1)
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -328,8 +328,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Negative absolute value of TimeInterval1 = ", D, " days, ", H, &
-               " hours, ", M, " minutes, ", S, " seconds."
+      print *, "Negative absolute value of TimeInterval1 = ", d, " days, ", h, &
+               " hours, ", m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
 !\end{verbatim}
@@ -342,7 +342,7 @@
 !\begin{verbatim}
       ! negative absolute value of time interval 2
       timeInterval3 = ESMF_TimeIntervalNegAbsValue(timeInterval2)
-      call ESMF_TimeIntervalGet(timeInterval3, d=D, h=H, m=M, s=S, rc=rc)
+      call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -352,8 +352,8 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Negative absolute value of TimeInterval2 = ", D, " days, ", H, &
-               " hours, ", M, " minutes, ", S, " seconds."
+      print *, "Negative absolute value of TimeInterval2 = ", d, " days, ", h, &
+               " hours, ", m, " minutes, ", s, " seconds."
       call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 !\end{verbatim}
 !EOP

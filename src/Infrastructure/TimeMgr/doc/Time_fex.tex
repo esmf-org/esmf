@@ -1,4 +1,4 @@
-% $Id: Time_fex.tex,v 1.9 2003/09/10 23:57:43 eschwab Exp $
+% $Id: Time_fex.tex,v 1.10 2004/01/26 21:28:16 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -7,7 +7,7 @@ use ESMF_Mod
 type(ESMF_Time) :: startTime1, startTime2, startTime3
 
 ! Initialize first to 8/1/2002, 14:25:45.250, Gregorian calendar
-call ESMF_TimeSet(startTime1, yr=2002, mm=8, dd=1, &
+call ESMF_TimeSet(startTime1, yy=2002, mm=8, dd=1, &
                   h=14, m=25, s=45, ms=250, calendar=gregorian)
 
 ! Initialize second to real time (wall clock time)

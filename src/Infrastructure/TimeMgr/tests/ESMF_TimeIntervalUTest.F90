@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.3 2003/10/20 20:13:57 cdeluca Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.4 2004/01/26 21:29:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.3 2003/10/20 20:13:57 cdeluca Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.4 2004/01/26 21:29:38 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, MM, DD, YR, days, totalDays, secs, testResults, ans
+      integer :: rc, H, MM, DD, YY, days, totalDays, secs, testResults, ans
 
       ! individual test name
       character(ESMF_MAXSTR) :: name

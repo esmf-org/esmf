@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.27 2004/01/07 18:00:02 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.28 2004/01/26 21:28:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,7 +80,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                              // fully aligned with F90 equiv)
   private:
     ESMF_KIND_I8 yy;      // for Calendar intervals:  number of years
-    ESMF_KIND_I8 mo;      // for Calendar intervals:  number of months
+    ESMF_KIND_I8 mm;      // for Calendar intervals:  number of months
     ESMF_KIND_I8 d;       // for Calendar intervals:  number of days
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -95,7 +95,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // Get/Set methods to support the F90 optional arguments interface
     int ESMC_TimeIntervalSet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
-                             ESMF_KIND_I4 *mo=0, ESMF_KIND_I8 *mo_i8=0,
+                             ESMF_KIND_I4 *mm=0, ESMF_KIND_I8 *mm_i8=0,
                              ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
                              ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
                              ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
@@ -108,7 +108,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0);
 
     int ESMC_TimeIntervalGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
-                             ESMF_KIND_I4 *mo=0, ESMF_KIND_I8 *mo_i8=0,
+                             ESMF_KIND_I4 *mm=0, ESMF_KIND_I8 *mm_i8=0,
                              ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
                              ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
                              ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
@@ -179,7 +179,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
     ESMC_TimeInterval(ESMF_KIND_I8 s, int sN, int sD,
-                      ESMF_KIND_I8 yy, ESMF_KIND_I8 mo, ESMF_KIND_I8 d);
+                      ESMF_KIND_I8 yy, ESMF_KIND_I8 mm, ESMF_KIND_I8 d);
 
     ~ESMC_TimeInterval(void);
 

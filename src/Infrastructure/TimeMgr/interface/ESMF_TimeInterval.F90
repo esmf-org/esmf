@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.44 2004/01/07 17:59:53 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.45 2004/01/26 21:28:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -67,7 +67,7 @@
       private                              !   (members opaque on F90 side)
         type(ESMF_BaseTime)   :: baseTime  ! inherit base class
         integer(ESMF_KIND_I8) :: yy        ! calendar interval number of years
-        integer(ESMF_KIND_I8) :: mo        ! calendar interval number of months
+        integer(ESMF_KIND_I8) :: mm        ! calendar interval number of months
         integer(ESMF_KIND_I8) :: d         ! calendar interval number of days
       end type
 
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.44 2004/01/07 17:59:53 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.45 2004/01/26 21:28:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -889,7 +889,7 @@
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalSet(timeInterval, &
                                       yy, yy_i8, &
-                                      mo, mo_i8, &
+                                      mm, mm_i8, &
                                       d, d_i8, &
                                       h, m, &
                                       s, s_i8, &
@@ -902,8 +902,8 @@
       type(ESMF_TimeInterval), intent(inout)         :: timeInterval
       integer(ESMF_KIND_I4),   intent(in),  optional :: yy
       integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: mo
-      integer(ESMF_KIND_I8),   intent(in),  optional :: mo_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: mm
+      integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: d
       integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
       integer(ESMF_KIND_I4),   intent(in),  optional :: h
@@ -943,9 +943,9 @@
 !          Integer years (>= 32-bit).  Default = 0
 !     \item[{[yy\_i8]}]
 !          Integer years (large, >= 64-bit).  Default = 0
-!     \item[{[mo]}]
+!     \item[{[mm]}]
 !          Integer months (>= 32-bit).  Default = 0
-!     \item[{[mo\_i8]}]
+!     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).  Default = 0
 !     \item[{[d]}]
 !          Integer Julian days (>= 32-bit).  Default = 0
@@ -994,7 +994,7 @@
 !     TMGn.n.n
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalSet(timeInterval, yy, yy_i8, mo, mo_i8, &
+      call c_ESMC_TimeIntervalSet(timeInterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, rc)
@@ -1008,7 +1008,7 @@
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalGet(timeInterval, &
                                       yy, yy_i8, &
-                                      mo, mo_i8, &
+                                      mm, mm_i8, &
                                       d, d_i8, &
                                       h, m, &
                                       s, s_i8, &
@@ -1022,8 +1022,8 @@
       type(ESMF_TimeInterval), intent(in)            :: timeInterval
       integer(ESMF_KIND_I4),   intent(out), optional :: yy
       integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
-      integer(ESMF_KIND_I4),   intent(out), optional :: mo
-      integer(ESMF_KIND_I8),   intent(out), optional :: mo_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: mm
+      integer(ESMF_KIND_I8),   intent(out), optional :: mm_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: d
       integer(ESMF_KIND_I8),   intent(out), optional :: d_i8
       integer(ESMF_KIND_I4),   intent(out), optional :: h
@@ -1074,9 +1074,9 @@
 !          Integer years (>= 32-bit).
 !     \item[{[yy\_i8]}]
 !          Integer years (large, >= 64-bit).
-!     \item[{[mo]}]
+!     \item[{[mm]}]
 !          Integer months (>= 32-bit).
-!     \item[{[mo\_i8]}]
+!     \item[{[mm\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d]}]
 !          Integer Julian days (>= 32-bit).
@@ -1125,7 +1125,7 @@
 !     TMG1.1
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalGet(timeInterval, yy, yy_i8, mo, mo_i8, &
+      call c_ESMC_TimeIntervalGet(timeInterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, timeString, rc)

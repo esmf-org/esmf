@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.2 2003/10/10 17:16:41 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.3 2004/01/26 21:33:54 eschwab Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -143,12 +143,12 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       ! initialize start time to 12May2003, 2:00 pm
       ! for testing, initialize start time to 12May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_start_time, &
-                                 yr=2003, mm=5, dd=12, h=14, &
+                                 yy=2003, mm=5, dd=12, h=14, &
                                  calendar=datablock%gregorianCalendar, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_stop_time, &
-                                 yr=2003, mm=5, dd=13, h=14, &
+                                 yy=2003, mm=5, dd=13, h=14, &
                                  calendar=datablock%gregorianCalendar, rc=rc)
 
 

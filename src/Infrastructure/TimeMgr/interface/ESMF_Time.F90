@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.58 2004/01/21 00:51:09 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.59 2004/01/26 21:28:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.58 2004/01/21 00:51:09 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.59 2004/01/26 21:28:35 eschwab Exp $'
 
 !==============================================================================
 !
@@ -485,7 +485,7 @@
 ! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSet(time, yr, yr_i8, &
+      subroutine ESMF_TimeSet(time, yy, yy_i8, &
                                     mm, dd, &
                                     d, d_i8, &
                                     h, m, &
@@ -497,8 +497,8 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time),       intent(inout)         :: time
-      integer(ESMF_KIND_I4), intent(in),  optional :: yr
-      integer(ESMF_KIND_I8), intent(in),  optional :: yr_i8
+      integer(ESMF_KIND_I4), intent(in),  optional :: yy
+      integer(ESMF_KIND_I8), intent(in),  optional :: yy_i8
       integer,               intent(in),  optional :: mm
       integer,               intent(in),  optional :: dd
       integer(ESMF_KIND_I4), intent(in),  optional :: d
@@ -529,19 +529,19 @@
 !
 !     The range of valid values for mm and dd depend on the calendar used.
 !     For Gregorian, Julian, and No-Leap calendars, mm is [1-12] and dd is
-!     [1-28,29,30, or 31], depending on the value of mm and whether yr or
-!     yr\_i8 is a leap year.  For the 360-day calendar, mm is [1-12] and dd is
-!     [1-30].  For the Julian-day and No-calendar, yr, yr\_i8, mm, and dd are
+!     [1-28,29,30, or 31], depending on the value of mm and whether yy or
+!     yy\_i8 is a leap year.  For the 360-day calendar, mm is [1-12] and dd is
+!     [1-30].  For the Julian-day and No-calendar, yy, yy\_i8, mm, and dd are
 !     invalid inputs, since these calendars do not define them.  When valid,
-!     the yr and yr\_i8 arguments should be fully specified, e.g. 2003 instead
-!     of 03.  yr and yr\_i8 ranges are only limited by machine word size, 
+!     the yy and yy\_i8 arguments should be fully specified, e.g. 2003 instead
+!     of 03.  yy and yy\_i8 ranges are only limited by machine word size, 
 !     except for the Gregorian calendar, where the lower year limit is -4800.
 !     This is a limitation of the Gregorian date-to-Julian day conversion
 !     algorithm used to convert a Gregorian date to the internal representation
 !     of seconds.  The algorithm is from Henry F. Fliegel and Thomas C. Van
 !     Flandern, in Communications of the ACM, CACM, volume 11, number 10,
 !     October 1968, p. 657.  The Custom calendar will have a user-defined
-!     definition of yr, yr\_i8, mm, and dd.
+!     definition of yy, yy\_i8, mm, and dd.
 !
 !     The Julian day specifier, d or d\_i8, can be used with either the
 !     Julian-day or No-calendar, and has a valid range depending on the
@@ -568,9 +568,9 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to initialize.
-!     \item[{[yr]}]
+!     \item[{[yy]}]
 !          Integer year (>= 32-bit).  Default = 0
-!     \item[{[yr\_i8]}]
+!     \item[{[yy\_i8]}]
 !          Integer year (large, >= 64-bit).  Default = 0
 !     \item[{[mm]}]
 !          Integer month.  Default = 1
@@ -628,7 +628,7 @@
 !     TMGn.n.n
 
       ! use optional args for any subset
-      call c_ESMC_TimeSet(time, yr, yr_i8, mm, dd, d, d_i8, &
+      call c_ESMC_TimeSet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sD, calendar, timeZone, rc)
@@ -640,7 +640,7 @@
 ! !IROUTINE: ESMF_TimeGet - Get a Time value 
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGet(time, yr, yr_i8, &
+      subroutine ESMF_TimeGet(time, yy, yy_i8, &
                                     mm, dd, &
                                     d, d_i8, &
                                     h, m, &
@@ -656,8 +656,8 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(in)            :: time
-      integer(ESMF_KIND_I4),   intent(out), optional :: yr
-      integer(ESMF_KIND_I8),   intent(out), optional :: yr_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: yy
+      integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
       integer,                 intent(out), optional :: mm
       integer,                 intent(out), optional :: dd
       integer(ESMF_KIND_I4),   intent(out), optional :: d
@@ -737,9 +737,9 @@
 !     \begin{description}
 !     \item[time]
 !          The object instance to query.
-!     \item[{[yr]}]
+!     \item[{[yy]}]
 !          Integer year (>= 32-bit).
-!     \item[{[yr\_i8]}]
+!     \item[{[yy\_i8]}]
 !          Integer year (large, >= 64-bit).
 !     \item[{[mm]}]
 !          Integer month.
@@ -814,7 +814,7 @@
 !     TMG2.1, TMG2.5.1, TMG2.5.6
 
       ! use optional args for any subset
-      call c_ESMC_TimeGet(time, yr, yr_i8, mm, dd, d, d_i8, &
+      call c_ESMC_TimeGet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sD, calendar, timeZone, timeString, dayOfWeek, &

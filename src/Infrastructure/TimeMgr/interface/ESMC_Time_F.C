@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.23 2004/01/21 00:51:08 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.24 2004/01/26 21:28:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 extern "C" {
 
        void FTN(c_esmc_timeset)(ESMC_Time *ptr,
-                                ESMF_KIND_I4 *yr, ESMF_KIND_I8 *yr_i8,
+                                ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
                                 int *mm, int *dd,
                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
@@ -52,10 +52,10 @@ extern "C" {
                                 ESMC_Calendar *calendar, int *timeZone,
                                 int *status) {
           int rc = (ptr)->ESMC_TimeSet(
-                    ((void*)yr       == (void*)ESMC_BAD_POINTER ?
-                                               ESMC_NULL_POINTER : yr),
-                    ((void*)yr_i8    == (void*)ESMC_BAD_POINTER ? 
-                                               ESMC_NULL_POINTER : yr_i8),
+                    ((void*)yy       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : yy),
+                    ((void*)yy_i8    == (void*)ESMC_BAD_POINTER ? 
+                                               ESMC_NULL_POINTER : yy_i8),
                     ((void*)mm       == (void*)ESMC_BAD_POINTER ?
                                                ESMC_NULL_POINTER : mm),
                     ((void*)dd       == (void*)ESMC_BAD_POINTER ?
@@ -106,7 +106,7 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeget)(ESMC_Time *ptr,
-                                ESMF_KIND_I4 *yr, ESMF_KIND_I8 *yr_i8,
+                                ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
                                 int *mm, int *dd,
                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
@@ -127,10 +127,10 @@ extern "C" {
                                 int *status) {
 
           int rc = (ptr)->ESMC_TimeGet(
-                 ((void*)yr    == (void*)ESMC_BAD_POINTER ?
-                                         ESMC_NULL_POINTER : yr),
-                 ((void*)yr_i8 == (void*)ESMC_BAD_POINTER ?
-                                         ESMC_NULL_POINTER : yr_i8),
+                 ((void*)yy    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : yy),
+                 ((void*)yy_i8 == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : yy_i8),
                  ((void*)mm    == (void*)ESMC_BAD_POINTER ?
                                          ESMC_NULL_POINTER : mm),
                  ((void*)dd    == (void*)ESMC_BAD_POINTER ?

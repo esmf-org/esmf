@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.8 2003/11/07 22:07:25 nscollins Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.9 2004/01/26 21:33:27 eschwab Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -143,11 +143,11 @@
       call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
 
       ! initialize start time to 5/01/2003
-      call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=1, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 5/02/2003
-      call ESMF_TimeSet(stopTime, yr=2003, mm=5, dd=1, h=6, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=1, h=6, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values

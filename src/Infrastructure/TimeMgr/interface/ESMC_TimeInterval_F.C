@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.24 2004/01/07 18:00:02 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.25 2004/01/26 21:28:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalset)(ESMC_TimeInterval *ptr,
                                  ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
-                                 ESMF_KIND_I4 *mo, ESMF_KIND_I8 *mo_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
                                  ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
                                  ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
                                  ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
@@ -55,10 +55,10 @@ extern "C" {
                                              ESMC_NULL_POINTER : yy),
                     ((void*) yy_i8 == (void*)ESMC_BAD_POINTER ?
                                              ESMC_NULL_POINTER : yy_i8),
-                    ((void*) mo    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mo),
-                    ((void*) mo_i8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mo_i8),
+                    ((void*) mm    == (void*)ESMC_BAD_POINTER ?
+                                             ESMC_NULL_POINTER : mm),
+                    ((void*) mm_i8 == (void*)ESMC_BAD_POINTER ?
+                                             ESMC_NULL_POINTER : mm_i8),
                     ((void*) d     == (void*)ESMC_BAD_POINTER ?
                                              ESMC_NULL_POINTER : d),
                     ((void*) d_i8  == (void*)ESMC_BAD_POINTER ?
@@ -102,7 +102,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
                                  ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
-                                 ESMF_KIND_I4 *mo, ESMF_KIND_I8 *mo_i8,
+                                 ESMF_KIND_I4 *mm, ESMF_KIND_I8 *mm_i8,
                                  ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
                                  ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
                                  ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
@@ -120,10 +120,10 @@ extern "C" {
                                              ESMC_NULL_POINTER : yy),
                     ((void*) yy_i8 == (void*)ESMC_BAD_POINTER ?
                                              ESMC_NULL_POINTER : yy_i8),
-                    ((void*) mo    == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mo),
-                    ((void*) mo_i8 == (void*)ESMC_BAD_POINTER ?
-                                             ESMC_NULL_POINTER : mo_i8),
+                    ((void*) mm    == (void*)ESMC_BAD_POINTER ?
+                                             ESMC_NULL_POINTER : mm),
+                    ((void*) mm_i8 == (void*)ESMC_BAD_POINTER ?
+                                             ESMC_NULL_POINTER : mm_i8),
                     ((void*) d     == (void*)ESMC_BAD_POINTER ?
                                              ESMC_NULL_POINTER : d),
                     ((void*) d_i8  == (void*)ESMC_BAD_POINTER ?

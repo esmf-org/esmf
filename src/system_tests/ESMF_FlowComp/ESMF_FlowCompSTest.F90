@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.4 2003/11/07 22:07:26 nscollins Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.5 2004/01/26 21:33:44 eschwab Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -115,12 +115,12 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 3/28/2003 10:00
-      call ESMF_TimeSet(startTime, yr=2003, mm=3, dd=28, h=10, m=0, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=3, dd=28, h=10, m=0, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize stop time to 3/28/2003 10:01
-      call ESMF_TimeSet(stopTime, yr=2003, mm=3, dd=28, h=10, m=1, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=3, dd=28, h=10, m=1, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 

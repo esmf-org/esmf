@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.20 2004/01/07 19:04:10 svasquez Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.21 2004/01/26 21:29:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,11 +42,11 @@
       type(ESMF_TimeInterval) :: currSimTime, prevSimTime
 
       ! temp variables for Get functions
-      integer :: yr, mm, dd, d, h, m, s, yD, rc
+      integer :: yy, mm, dd, d, h, m, s, yD, rc
       type(ESMF_TimeInterval) :: time_step, time_step_copy
       type(ESMF_TimeInterval) :: time_diff
       type(ESMF_Time) :: curr_time, curr_time_copy, prev_time
-      integer(ESMF_KIND_I8) :: advanceCount, yr_i8, d_i8, s_i8
+      integer(ESMF_KIND_I8) :: advanceCount, yy_i8, d_i8, s_i8
       double precision :: d_r8
       logical alarmRinging
 !\end{verbatim}
@@ -85,7 +85,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize start time to 5/15/2003 12:00:00 noon
-      call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=15, h=12, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=15, h=12, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -97,7 +97,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize stop time to 5/15/2002 12:00:00 noon
-      call ESMF_TimeSet(stopTime, yr=2002, mm=5, dd=15, h=12, &
+      call ESMF_TimeSet(stopTime, yy=2002, mm=5, dd=15, h=12, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -109,7 +109,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize reference time to 1/1/2000 00:00:00 midnight
-      call ESMF_TimeSet(refTime, yr=2000, mm=1, dd=1, &
+      call ESMF_TimeSet(refTime, yy=2000, mm=1, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -154,7 +154,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize alarm time to July 4, 2002, noon
-      call ESMF_TimeSet(alarmTime, yr=2002, mm=7, dd=4, h=12, &
+      call ESMF_TimeSet(alarmTime, yy=2002, mm=7, dd=4, h=12, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -348,7 +348,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeGet(startTime, yr=yr, mm=mm, dd=dd, h=h, rc=rc)
+      call ESMF_TimeGet(startTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -358,7 +358,7 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Clock's start time = ", yr, "/", mm, "/", dd, " ", h, " hours."
+      print *, "Clock's start time = ", yy, "/", mm, "/", dd, " ", h, " hours."
 
       ! get clock's stop time
       call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
@@ -371,7 +371,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeGet(stopTime, yr=yr, mm=mm, dd=dd, h=h, rc=rc)
+      call ESMF_TimeGet(stopTime, yy=yy, mm=mm, dd=dd, h=h, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -381,7 +381,7 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Clock's stop time = ", yr, "/", mm, "/", dd, " ", h, " hours."
+      print *, "Clock's stop time = ", yy, "/", mm, "/", dd, " ", h, " hours."
 
       ! get clock's reference time
       call ESMF_ClockGet(clock, refTime=refTime, rc=rc)
@@ -394,7 +394,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeGet(refTime, yr=yr, mm=mm, dd=dd, rc=rc)
+      call ESMF_TimeGet(refTime, yy=yy, mm=mm, dd=dd, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -404,7 +404,7 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "Clock's reference time = ", yr, "/", mm, "/", dd, " midnight."
+      print *, "Clock's reference time = ", yy, "/", mm, "/", dd, " midnight."
 
       ! get clock's current time
       call ESMF_ClockGet(clock, currTime=curr_time, rc=rc)
@@ -595,7 +595,7 @@
 
 !BOP
 !\begin{verbatim}
-      call ESMF_TimeSet(curr_time, yr=1776, &
+      call ESMF_TimeSet(curr_time, yy=1776, &
                         mm=7, dd=4, calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP

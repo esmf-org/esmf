@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.9 2003/11/13 16:46:50 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.10 2004/01/26 21:29:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.9 2003/11/13 16:46:50 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.10 2004/01/26 21:29:37 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, MM, DD, YR, days, totalDays, secs, testResults
+      integer :: rc, H, MM, DD, YY, days, totalDays, secs, testResults
       integer(ESMF_KIND_I8) :: year
       integer(ESMF_KIND_I8) :: julianDay, advanceCounts
 
@@ -390,7 +390,7 @@
       ! Test Setting the Start Time for the Gregorian Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit of Gregorian Calendar Test"
-      call ESMF_TimeSet(startTime, yr=-4800, mm=3, dd=1, &
+      call ESMF_TimeSet(startTime, yy=-4800, mm=3, dd=1, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -411,7 +411,7 @@
       ! Test Setting the Start Time for the Gregorian Calencar
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit minus 1 second of Gregorian Calendar Test"
-      call ESMF_TimeSet(startTime, yr=-4800, mm=3, dd=1, s=-1, &
+      call ESMF_TimeSet(startTime, yy=-4800, mm=3, dd=1, s=-1, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -433,7 +433,7 @@
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit of Gregorian Calendar Test"
       year=292277019914_ESMF_KIND_I8
-      call ESMF_TimeSet(stopTime, yr_i8=year, mm=10, dd=29, &
+      call ESMF_TimeSet(stopTime, yy_i8=year, mm=10, dd=29, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -456,7 +456,7 @@
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit plus 86400 second of Gregorian Calendar Test"
       year=292277019914_ESMF_KIND_I8
-      call ESMF_TimeSet(stopTime, yr_i8=year, mm=10, dd=29, s=86400, &
+      call ESMF_TimeSet(stopTime, yy_i8=year, mm=10, dd=29, s=86400, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -564,7 +564,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+      call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=1, &
                                         calendar=gregorianCalendar, rc=rc)
       write(name, *) "Gregorian Cal. Start Time init with year = -100 Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -574,7 +574,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+      call ESMF_TimeSet(stopTime, yy=100, mm=1, dd=1, &
                                 calendar=gregorianCalendar, rc=rc)
       write(name, *) "Gregorian Cal. Stop Time init with year = 100 Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -627,7 +627,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+      call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=1, &
                                         calendar=no_leapCalendar, rc=rc)
       write(name, *) "No Leap Cal. Start Time init with year = -100 Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -636,7 +636,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+      call ESMF_TimeSet(stopTime, yy=100, mm=1, dd=1, &
                                 calendar=no_leapCalendar, rc=rc)
       write(name, *) "No Leap Cal. Stop Time init with year = 100 Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -679,7 +679,7 @@
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+      call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=1, &
                                         calendar=esmf_360dayCalendar, rc=rc)
       write(name, *) "360 Day Cal. Start Time init with year = -100 Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -688,7 +688,7 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+      call ESMF_TimeSet(stopTime, yy=100, mm=1, dd=1, &
                                 calendar=esmf_360dayCalendar, rc=rc)
       write(name, *) "360 Day Cal. Stop Time init with year = 100 Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &

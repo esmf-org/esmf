@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.6 2004/01/07 21:02:31 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.7 2004/01/26 21:29:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -84,7 +84,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize start time to 9/1/2003
-      call ESMF_TimeSet(startTime, yr=2003, mm=9, dd=1, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=9, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -96,7 +96,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize stop time to 9/30/2003
-      call ESMF_TimeSet(stopTime, yr=2003, mm=9, dd=30, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=9, dd=30, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -138,7 +138,7 @@
       ! Initialize first alarm to be a one-shot on 9/15/2003 and associate
       ! it with the clock
       !
-      call ESMF_TimeSet(alarmTime, yr=2003, mm=9, dd=15, &
+      call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=15, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -175,7 +175,7 @@
       ! Initialize second alarm to ring on a 1 week interval from 9/1/2003 and
       ! associate it with the clock
       !
-      call ESMF_TimeSet(alarmTime, yr=2003, mm=9, dd=1, &
+      call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !EOP
@@ -198,6 +198,8 @@
 !\begin{verbatim}
       alarm(2) = ESMF_AlarmCreate(clock=clock, ringTime=alarmTime, &
                                   ringInterval=alarmInterval, rc=rc)
+print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
+
 !\end{verbatim}
 !EOP
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.30 2004/01/16 00:30:25 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.31 2004/01/26 21:28:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
     // all get/set routines perform signed conversions, where applicable
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeSet(ESMF_KIND_I4 *yr=0, ESMF_KIND_I8 *yr_i8=0,
+    int ESMC_TimeSet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                      int *mm=0, int *dd=0,
                      ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
                      ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
@@ -102,7 +102,7 @@
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                      ESMC_Calendar *calendar=0, int *timeZone=0);
 
-    int ESMC_TimeGet(ESMF_KIND_I4 *yr=0, ESMF_KIND_I8 *yr_i8=0,
+    int ESMC_TimeGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                      int *mm=0, int *dd=0,
                      ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
                      ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
@@ -126,7 +126,7 @@
 
     // (TMG 2.1, 2.5.1, 2.5.6)
     int ESMC_TimeGet(const char *timeList, ...) const;
-    // e.g. ESMC_TimeGet("YR:MM:DD", (int *)YR,(int *)MM, (int *)DD);
+    // e.g. ESMC_TimeGet("YY:MM:DD", (int *)YY,(int *)MM, (int *)DD);
 
     int ESMC_TimeSet(ESMC_Calendar *calendar, int timeZone,
                      const char *timeList, ...);

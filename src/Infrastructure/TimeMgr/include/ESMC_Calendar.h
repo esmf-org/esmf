@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.24 2003/12/19 19:19:08 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.25 2004/01/26 21:28:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -146,10 +146,10 @@ class ESMC_Calendar {
 
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
-    int ESMC_CalendarConvertToTime(ESMF_KIND_I8 yr, int mm, int dd,
+    int ESMC_CalendarConvertToTime(ESMF_KIND_I8 yy, int mm, int dd,
                                    ESMF_KIND_I8 d, ESMC_BaseTime *t) const;
     int ESMC_CalendarConvertToDate(const ESMC_BaseTime *t,
-                             ESMF_KIND_I4 *yr=0, ESMF_KIND_I8 *yr_i8=0,
+                             ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                              int *mm=0, int *dd=0,
                              ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
                              ESMF_KIND_R8 *d_r8=0) const;

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.20 2004/01/21 00:47:37 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.21 2004/01/26 21:29:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,8 +40,8 @@
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2
 
       ! temp variables for Get functions
-      integer :: YR, MM, DD, D, H, M, S, rc
-      integer(ESMF_KIND_I8) :: YRl, Dl, Sl
+      integer :: YY, MM, DD, D, H, M, S, rc
+      integer(ESMF_KIND_I8) :: YYl, Dl, Sl
       type(ESMF_Calendar) :: cal
       integer :: dayOfYear, dayOfWeek, dayOfMonth
       real(ESMF_KIND_R8) :: dayOfYear_real
@@ -66,7 +66,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize time1 to 2/28/2000 2:24:45
-      call ESMF_TimeSet(time1, yr=2000, &
+      call ESMF_TimeSet(time1, yy=2000, &
                         mm=2, dd=28, h=2, m=24, s=45, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
@@ -79,7 +79,7 @@
 !BOP
 !\begin{verbatim}
       ! initialize time2 to 3/1/2000 3:26:01
-      call ESMF_TimeSet(time2, yr=2000, &
+      call ESMF_TimeSet(time2, yy=2000, &
                         mm=3, dd=1, h=3, m=26, s=1, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}

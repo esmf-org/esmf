@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.37 2004/01/12 21:30:27 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.38 2004/01/26 21:29:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.37 2004/01/12 21:30:27 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.38 2004/01/26 21:29:01 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -303,7 +303,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 yr, int mm, int dd, ESMF_KIND_I8 d,    // in
+      ESMF_KIND_I8 yy, int mm, int dd, ESMF_KIND_I8 d,    // in
       ESMC_BaseTime *t) const {                           // out
 //
 // !DESCRIPTION:
@@ -332,11 +332,11 @@
             //
             // Validate inputs 
             //
-            if (yr < -4800 || mm < 1 || mm > 12 || dd < 1) {
+            if (yy < -4800 || mm < 1 || mm > 12 || dd < 1) {
               return (ESMF_FAILURE);
             }
             // invalid before 3/1/-4800
-            if (yr == -4800 && mm < 3) {
+            if (yy == -4800 && mm < 3) {
               return (ESMF_FAILURE);
             }
 
@@ -351,18 +351,18 @@
             // if February, take leap year into account before checking
             //   day of the month
             if (mm == 2) {
-              int leapDay = ESMC_IS_LEAP_YEAR(yr) ? 1 : 0;
+              int leapDay = ESMC_IS_LEAP_YEAR(yy) ? 1 : 0;
               if (dd > (daysPerMonth[1] + leapDay)) {
                 return (ESMF_FAILURE);
               }
             }
 
             // convert Gregorian date to Julian days
-            // Gregorian date (yr, mm, dd) => Julian days (jdays)
+            // Gregorian date (yy, mm, dd) => Julian days (jdays)
             int temp            = (mm - 14) / 12;
-            ESMF_KIND_I8 jdays = (1461 * (yr + 4800 + temp)) / 4 +
+            ESMF_KIND_I8 jdays = (1461 * (yy + 4800 + temp)) / 4 +
                              (367 * (mm - 2 - 12 * temp )) / 12 -
-                             (3 * ((yr + 4900 + temp) / 100)) / 4 + dd - 32075;
+                             (3 * ((yy + 4900 + temp) / 100)) / 4 + dd - 32075;
 
             // convert Julian days to basetime seconds (>= 64 bit)
             t->s = jdays * secondsPerDay;
@@ -372,7 +372,7 @@
         // convert No Leap Date => Time
         case ESMC_CAL_NOLEAP:
         {
-            t->s = yr * secondsPerYear;
+            t->s = yy * secondsPerYear;
             for(int month=0; month < mm-1; month++) {
               t->s += daysPerMonth[month] * secondsPerDay;
             }
@@ -384,7 +384,7 @@
         // convert 360 Day Date => Time
         case ESMC_CAL_360DAY:
         {
-            t->s  = yr * secondsPerYear
+            t->s  = yy * secondsPerYear
                   + (mm-1) * 30 * secondsPerDay   // each month has 30 days
                   + (dd-1) * secondsPerDay + 146565244800LL;
                                           // ^ adjust to match Julian time zero
@@ -419,7 +419,7 @@
 //
 // !ARGUMENTS:
       const ESMC_BaseTime *t,                                          // in
-      ESMF_KIND_I4 *yr, ESMF_KIND_I8 *yr_i8, int *mm, int *dd,         // out
+      ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8, int *mm, int *dd,         // out
       ESMF_KIND_I4 *d, ESMF_KIND_I8 *d_i8, ESMF_KIND_R8 *d_r8) const { // out
 //
 // !DESCRIPTION:
@@ -451,7 +451,7 @@
         case ESMC_CAL_GREGORIAN:
         {
             // Convert basetime portion of Time into date
-            // Julian day (D) => Gregorian date (yr, mm, dd)
+            // Julian day (D) => Gregorian date (yy, mm, dd)
             // The calculation below fails for jday > 106,751,991,167,300
             //    (4*templ = 2^63)
 
@@ -478,9 +478,9 @@
             }
 
             // convert Julian days to Gregorian date
-            // Julian days (jdays) => Gregorian date (yr, mm, dd)
+            // Julian days (jdays) => Gregorian date (yy, mm, dd)
             if (dd != ESMC_NULL_POINTER || mm != ESMC_NULL_POINTER ||
-                yr != ESMC_NULL_POINTER || yr_i8 != ESMC_NULL_POINTER) {
+                yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
               ESMF_KIND_I8 templ = jdays + 68569;
               ESMF_KIND_I8 tempn = (4 * templ) / 146097;
                             templ = templ - (146097 * tempn + 3) / 4;
@@ -496,16 +496,16 @@
               }
 
               ESMF_KIND_I8 year = 100 * (tempn - 49) + tempi + templ;
-              if (yr != ESMC_NULL_POINTER) {
+              if (yy != ESMC_NULL_POINTER) {
                 if (year >= INT_MIN && year <= INT_MAX) {
-                  *yr = (ESMF_KIND_I4) year;  // >= 32-bit
+                  *yy = (ESMF_KIND_I4) year;  // >= 32-bit
                 } else {
                   // too large to fit in given int
                   rc = ESMF_FAILURE;
                 }
               }
-              if (yr_i8 != ESMC_NULL_POINTER) {
-                *yr_i8 = year;    // >= 64-bit
+              if (yy_i8 != ESMC_NULL_POINTER) {
+                *yy_i8 = year;    // >= 64-bit
               }
             }
 
@@ -518,21 +518,21 @@
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
-            if (yr != ESMC_NULL_POINTER) {
+            if (yy != ESMC_NULL_POINTER) {
               ESMF_KIND_I8 year = tmpS / secondsPerYear;
               if (year > INT_MIN && year <= INT_MAX) {
-                  *yr = (ESMF_KIND_I4) year;  // >= 32-bit
+                  *yy = (ESMF_KIND_I4) year;  // >= 32-bit
                   // adjust for negative time (reverse integer division)
-                  if (tmpS % secondsPerYear < 0) (*yr)--;
+                  if (tmpS % secondsPerYear < 0) (*yy)--;
               } else {
                   // too large to fit in given int
                   rc = ESMF_FAILURE;
               }
             }
-            if (yr_i8 != ESMC_NULL_POINTER) {
-              *yr_i8 = tmpS / secondsPerYear;  // >= 64-bit
+            if (yy_i8 != ESMC_NULL_POINTER) {
+              *yy_i8 = tmpS / secondsPerYear;  // >= 64-bit
               // adjust for negative time (reverse integer division)
-              if (tmpS % secondsPerYear < 0) (*yr_i8)--;
+              if (tmpS % secondsPerYear < 0) (*yy_i8)--;
             }
 
             int day = (tmpS % secondsPerYear) / secondsPerDay + 1;
@@ -580,21 +580,21 @@
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
-            if (yr != ESMC_NULL_POINTER) {
+            if (yy != ESMC_NULL_POINTER) {
               ESMF_KIND_I8 year = tmpS / secondsPerYear;
               if (year > INT_MIN && year <= INT_MAX) {
-                *yr = (ESMF_KIND_I4) year;
+                *yy = (ESMF_KIND_I4) year;
                 // adjust for negative time (reverse integer division)
-                if (tmpS % secondsPerYear < 0) (*yr)--;
+                if (tmpS % secondsPerYear < 0) (*yy)--;
               } else {
                 // too large to fit in given int
                 rc = ESMF_FAILURE;
               }
             }
-            if (yr_i8 != ESMC_NULL_POINTER) {
-              *yr_i8 = tmpS / secondsPerYear;
+            if (yy_i8 != ESMC_NULL_POINTER) {
+              *yy_i8 = tmpS / secondsPerYear;
               // adjust for negative time (reverse integer division)
-              if (tmpS % secondsPerYear < 0) (*yr_i8)--;
+              if (tmpS % secondsPerYear < 0) (*yy_i8)--;
             }
 
             int dayOfYear = (tmpS % secondsPerYear) / secondsPerDay + 1;

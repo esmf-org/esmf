@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.4 2003/11/07 22:07:26 nscollins Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.5 2004/01/26 21:33:56 eschwab Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -146,12 +146,12 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 3/28/2003
-      call ESMF_TimeSet(startTime, yr=2003, mm=3, dd=28, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=3, dd=28, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize stop time to 3/29/2003
-      call ESMF_TimeSet(stopTime, yr=2003, mm=3, dd=29, &
+      call ESMF_TimeSet(stopTime, yy=2003, mm=3, dd=29, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 

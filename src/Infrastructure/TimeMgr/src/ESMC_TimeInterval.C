@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.40 2004/01/07 18:00:02 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.41 2004/01/26 21:29:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.40 2004/01/07 18:00:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.41 2004/01/26 21:29:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -62,9 +62,9 @@
                                //                           (>= 32-bit)
       ESMF_KIND_I8 *yy_i8,     // in - integer number of interval years
                                //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *mo,        // in - integer number of interval months
+      ESMF_KIND_I4 *mm,        // in - integer number of interval months
                                //                           (>= 32-bit)
-      ESMF_KIND_I8 *mo_i8,     // in - integer number of interval months
+      ESMF_KIND_I8 *mm_i8,     // in - integer number of interval months
                                //                           (large, >= 64-bit)
       ESMF_KIND_I4 *d,         // in - integer number of interval days
                                //                           (>= 32-bit)
@@ -105,7 +105,7 @@
     this->sN = 0;
     this->sD = 1;
     this->yy = 0;
-    this->mo = 0;
+    this->mm = 0;
     this->d  = 0;
     
     // TODO: validate inputs (individual and combos), set basetime values
@@ -117,10 +117,10 @@
     } else if (yy_i8 != ESMC_NULL_POINTER) {
       this->yy = *yy_i8; // >= 64-bit
     }
-    if (mo != ESMC_NULL_POINTER) {
-      this->mo = *mo;  // >= 32-bit
-    } else if (mo_i8 != ESMC_NULL_POINTER) {
-      this->mo = *mo_i8; // >= 64-bit
+    if (mm != ESMC_NULL_POINTER) {
+      this->mm = *mm;  // >= 32-bit
+    } else if (mm_i8 != ESMC_NULL_POINTER) {
+      this->mm = *mm_i8; // >= 64-bit
     }
     if (d != ESMC_NULL_POINTER) {
       this->d = *d;  // >= 32-bit
@@ -172,9 +172,9 @@
                                 //                           (>= 32-bit)
       ESMF_KIND_I8 *yy_i8,      // out - integer number of interval years
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *mo,         // out - integer number of interval months
+      ESMF_KIND_I4 *mm,         // out - integer number of interval months
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *mo_i8,      // out - integer number of interval months
+      ESMF_KIND_I8 *mm_i8,      // out - integer number of interval months
                                 //                           (large, >= 64-bit)
       ESMF_KIND_I4 *d,          // out - integer number of interval days
                                 //                           (>= 32-bit)
@@ -221,16 +221,16 @@
       *yy_i8 = this->yy;  // >= 64-bit
     }
 
-    if (mo != ESMC_NULL_POINTER) {
-      if (this->mo >= INT_MIN && this->mo <= INT_MAX) {
-        *mo = (ESMF_KIND_I4) this->mo;  // >= 32-bit
+    if (mm != ESMC_NULL_POINTER) {
+      if (this->mm >= INT_MIN && this->mm <= INT_MAX) {
+        *mm = (ESMF_KIND_I4) this->mm;  // >= 32-bit
       } else {
         // too large to fit in given int
         return(ESMF_FAILURE);
       }
     }
-    if (mo_i8 != ESMC_NULL_POINTER) {
-      *mo_i8 = this->mo;   // >= 64-bit
+    if (mm_i8 != ESMC_NULL_POINTER) {
+      *mm_i8 = this->mm;   // >= 64-bit
     }
 
       // TODO: use when Calendar Intervals implemented
@@ -351,7 +351,7 @@
       ESMF_KIND_I4 sN,    // in - fractional seconds, numerator
       ESMF_KIND_I4 sD,    // in - fractional seconds, denominator
       ESMF_KIND_I8 yy,    // in - calendar interval number of years
-      ESMF_KIND_I8 mo)    // in - calendar interval number of months
+      ESMF_KIND_I8 mm)    // in - calendar interval number of months
       ESMF_KIND_I8 d)  {  // in - calendar interval number of days
 //
 // !DESCRIPTION:
@@ -364,7 +364,7 @@
     if (ESMC_BaseTime::ESMC_BaseTimeSet(s, sN, sD) == ESMF_SUCCESS)
     {
       this->yy = yy;
-      this->mo = mo;
+      this->mm = mm;
       this->d  = d;
 
       return(ESMF_SUCCESS);
@@ -403,7 +403,7 @@
     if (s  < 0) absValue.s  *= -1;
     if (sN < 0) absValue.sN *= -1;
     if (yy < 0) absValue.yy *= -1;
-    if (mo < 0) absValue.mo *= -1;
+    if (mm < 0) absValue.mm *= -1;
 //   TODO: use when Calendar Intervals implemented
 //    if (d  < 0) absValue.d  *= -1;
 
@@ -440,7 +440,7 @@
     if (s  > 0) negAbsValue.s  *= -1;
     if (sN > 0) negAbsValue.sN *= -1;
     if (yy > 0) negAbsValue.yy *= -1;
-    if (mo > 0) negAbsValue.mo *= -1;
+    if (mm > 0) negAbsValue.mm *= -1;
 //   TODO: use when Calendar Intervals implemented
 //    if (d  > 0) negAbsValue.d  *= -1;
 
@@ -1109,7 +1109,7 @@
       // default
       ESMC_BaseTime::ESMC_BaseTimePrint(options);
       cout << "yy = " << yy << endl;
-      cout << "mo = " << mo << endl;
+      cout << "mm = " << mm << endl;
       cout << "d  = " << d << endl;
     }
 
@@ -1143,7 +1143,7 @@
    sN = 0;
    sD = 0;
    yy = 0;
-   mo = 0;
+   mm = 0;
    d  = 0;
 
 } // end ESMC_TimeInterval
@@ -1163,7 +1163,7 @@
       ESMF_KIND_I4 sN,    // in - fractional seconds, numerator
       ESMF_KIND_I4 sD,    // in - fractional seconds, denominator
       ESMF_KIND_I8 yy,    // in - calendar interval number of years
-      ESMF_KIND_I8 mo,    // in - calendar interval number of months
+      ESMF_KIND_I8 mm,    // in - calendar interval number of months
       ESMF_KIND_I8 d) :   // in - calendar interval number of days
 //
 // !DESCRIPTION:
@@ -1176,7 +1176,7 @@
     ESMC_BaseTime(s, sN, sD) {  // pass to base class constructor
 
     this->yy = yy;
-    this->mo = mo;
+    this->mm = mm;
     this->d  = d;
 
 } // end ESMC_TimeInterval
@@ -1243,7 +1243,7 @@
     // ISO 8601 format PyYmMdDThHmMsS
     sprintf(timeString, "P%lldDT%dH%dM%lldS\0", d_i8, h, m, s_i8);
     //sprintf(timeString, "P%lldY%dM%lldDT%dH%dM%lldS\0", // TODO: when calendar
-    //        yy_i8, mo_i8, d_i8, h, m, s_i8);         //  intervals implemented
+    //        yy_i8, mm_i8, d_i8, h, m, s_i8);         //  intervals implemented
 
     return(ESMF_SUCCESS);
 
