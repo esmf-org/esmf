@@ -1,28 +1,36 @@
-% $Id: ESMF_infradataoverview.tex,v 1.12 2004/04/15 20:19:18 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.13 2004/04/20 05:49:48 cdeluca Exp $
 
-\section{Overview of Infrastructure Data Structures}
+\section{Overview of Infrastructure Data Handling}
 
 The ESMF infrastructure data classes are part of the framework's 
 hierarchy of structures for handling Earth system model data and 
-metadata on parallel platforms.  The hierarchy is in complexity; the simplest 
-data class in the infrastructure represents a distributed array and the most
-complex data class represents a set of physical fields that are discretized 
-on the same grid.  Data class methods are called both from user 
-written code and from other classes internal to the framework.  
+metadata on parallel platforms.  The hierarchy is in complexity; the 
+simplest data class in the infrastructure represents a distributed 
+array and the most complex data class represents a bundle of physical 
+fields that are discretized on the same grid.  Data class methods 
+are called both from user-written code and from other classes 
+internal to the framework. 
 
-ESMF data classes are useful because they provide a 
-standard, convenient way for developers to collect information 
+Data classes are distributed over DEs, or Decomposition Elements.  
+This abstract concept enables a data decomposition to be defined in 
+terms of threads, MPI processes, virtual decomposition elements, or
+combinations of these without changes to user code.  This is a
+primary strategy for ensuring optimal performance and portability
+for codes using the ESMF for communications.
+
+ESMF data classes are useful because they provide a standard, 
+convenient way for developers to collect together information 
 related to model or observational data.  The information assembled 
-includes a data pointer, a set of associated attributes (e.g. units, 
-although attributes can also be user-defined), and a 
+in a data class includes a data pointer, a set of attributes 
+(e.g. units, although attributes can also be user-defined), and a 
 description of an associated grid.  The same set of information within 
 an ESMF data object can be used by the framework to arrange 
 intercomponent data transfers, to perform I/O, for communications
 such as gathers and scatters, for simplification of interfaces 
 within user code, for debugging, and for other functions.  
-This unifies and organizes codes overall so that the user need not,
-for example, define different representations of metadata for the
-same field for I/O and for component coupling.  
+This unifies and organizes codes overall so that the user need not
+define different representations of metadata for the same field 
+for I/O and for component coupling.  
 
 Since it is critical that users be able to introduce ESMF into their
 codes easily and incrementally, ESMF data classes can be created based 
@@ -33,10 +41,11 @@ arrays later for optimized model calculations.  The ESMF data classes
 do not have associated differential operators or other mathematical 
 methods.
 
-It is not necessary to build an ESMF data object all at once, 
-during object creation.  For example, it's possible to create a 
+For flexibility, it is not necessary to build an ESMF data object 
+all at once.  For example, it's possible to create a 
 field but to defer allocation of the associated field data until 
 a later time.
+
 
 \begin{center}  
 \begin{tabular}{|p{6in}|}
@@ -61,26 +70,27 @@ are as follows:
 
 \item {\bf Array}  An ESMF Array contains a data pointer, 
 information about its associated datatype, precision, and 
-dimension, and user-defined attributes.  
+dimension.  
 
-Data regions in Arrays are partitioned into categories defined 
-by the role the data element plays in distributed halo operations.  
-Haloing - sometimes called ghosting - is the practice of 
-copying portions of Array data to multiple memory locations 
-to ensure that data dependencies can be satisfied quickly 
-when performing a calculation.  ESMF Arrays contain 
+Data elements in Arrays are partitioned into categories 
+defined by the role the data element plays in distributed halo 
+operations.  Haloing - sometimes called ghosting - is the 
+practice of copying portions of array data to multiple memory 
+locations to ensure that data dependencies can be satisfied 
+quickly when performing a calculation.  ESMF Arrays contain 
 an {\bf exclusive} domain, which contains data elements
-updated exclusively and definitively by one DE; a
-{\bf computational} domain, which contains the exclusive domain
-as well as data elements with whom the exclusive points have
-data dependencies; and {\bf total} domain - which you don't 
-compute but you get from your neighbors.
+updated exclusively and definitively by a given DE; a 
+{\bf computational} domain, which contains all data elements
+with values that are updated by the DE in computations; and 
+a {\bf total} domain, which includes both the computational 
+domain and data elements from other DEs which may be read 
+but are not updated in computations.
 
 \item {\bf Field}  A Field holds model and/or observational 
-data together with its underlying grid or set of spatial locations.  
-It provides methods for configuration, initialization, setting and
-retrieving data values, data I/O, data regridding, and 
-manipulation of attributes.
+data together with its underlying grid or set of spatial 
+locations.  It provides methods for configuration, 
+initialization, setting and retrieving data values, 
+data I/O, data regridding, and manipulation of attributes.
 
 \item {\bf Bundle} Groups of Fields on the same underlying 
 physical grid can be collected into a single object called a Bundle.  
@@ -103,18 +113,19 @@ fields, regridding, data I/O, and reordering of data in memory.
 
 Bundles, Fields, and Arrays all have versions of the following
 data communication methods.  In ESMF, data is communicated 
-between DEs.  The DE abstraction
+between DEs.  Depending on the underlying communication 
+mechanism, this may translate within the framework to a data 
+copy, an MPI call, or something else.
 
 There is a common object handle, an {\tt ESMF\_RouteHandle}, which
-allows the communication patterns to be precomputed during 
+allows communication patterns to be precomputed during 
 initialization and the information stored in that RouteHandle.
-By specifying the correct RouteHandle at execution time, only
+By specifying a RouteHandle at execution time, only
 the source and destination data pointers must be supplied and the
 runtime overhead is minimized.
 
-The first three are higher level functions which are intended to
-map closely to needs of applications programs.
-
+The following three methods are intended to map closely to 
+needs of applications programs.
 
 \subsubsection{Halo}
 \input{../Infrastructure/ArrayComm/doc/ArrayHalo_desc}
@@ -127,7 +138,7 @@ map closely to needs of applications programs.
 \input{../Infrastructure/ArrayComm/doc/ArrayRedist_desc}
 
 \subsubsection{Lower Level Functions}
-The last seven correspond closely to the lower level
+The following methods correspond closely to the lower level
 MPI communications primitives.  They are:
 \begin{description}
 \item[Gather]
@@ -161,19 +172,19 @@ result is delivered to all DEs in the set.
 \subsection{Field and Bundle Attributes}
 
 There are routines for setting and getting single values and lists of
-int/I4, double/R8, and logical (ESMF\_Logical) types, and char */character
-strings.  (Arrays of character strings are not supported.)
+int/I4, double/R8, and logical ({\tt ESMF\_Logical}) types, and 
+char */character strings.  (Arrays of character strings are not 
+supported.)
 
-Attributes can be gotten by name.  The type and count can also be queried
-by name and then a specific Get call can be made.  (The arguments to the
-Get routines are typed and overloaded, so the type of the Attribute must
-match the type of the argument receiving it.)
+Attributes can be retrieved by name.  A count of all Attributes 
+associated with a data object can also be returned, and
+then Attributes can also be queried and retrieved by number, 
+for iterating over an unknown Attribute list.  The arguments to 
+the {\tt <Class>_GetAttribute} routines are typed and overloaded, 
+so the type of the Attribute must match the type of the argument 
+receiving it.
 
-A count of all Attributes associated with an object can be returned, and
-then Attributes can also be queried and retrieved by number, for iterating
-an unknown Attribute list.
-
-Currently Fields, Bundles, and States have Attribute support enabled.
+Currently Attributes can be added to Fields and Bundles.
 
 \newpage
 \subsection{Object Model}
@@ -187,6 +198,7 @@ meaning.
 \begin{center}
 \includegraphics{Bundle_obj.eps}   
 \end{center}
+
 
 
 
