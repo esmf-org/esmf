@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.14 2004/03/16 18:38:29 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.15 2004/03/16 19:48:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.14 2004/03/16 18:38:29 svasquez Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.15 2004/03/16 19:48:12 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -2307,7 +2307,7 @@
 !       The buffer array.
 !     \item[num]
 !       The length of the buffer array.
-!     \item[rootde_index]
+!     \item[rootde\_index]
 !       The index of the source DE.
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
