@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.25 2003/02/15 00:06:28 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.26 2003/02/17 22:27:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.25 2003/02/15 00:06:28 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.26 2003/02/17 22:27:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -612,7 +612,7 @@
               int rsize[3];
               int rbreak[2];
               int rbcount = 0;
-              for (int i=0; i<size_decomp; i++) {
+              for (i=0; i<size_decomp; i++) {
                 rmax[i] = ai[i].max;
                 rsize[i] = ai[i].r - ai[i].l + 1;
                 if (olddecompids[i] == 0) {
@@ -862,11 +862,12 @@
                      *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     rcount++;
                     if ((tcount > 22) && (rcount==10)) {
+                       int krem;
                        printf(" skipping to end ...\n");
                        k = (tcount-11) / (imax*jmax);
-                       //j = ((tcount-11) % (imax*jmax)) / imax;
-                       j = ((tcount-11) - (k*imax)) % jmax;
-                       i = (tcount-11) % imax;
+                       krem = (tcount-11) % (imax*jmax);
+                       j = krem / imax;
+                       i = krem % imax;
                     }
                 }
               }
@@ -911,7 +912,7 @@
             }
             break;
           case 3:
-            printf("  Real, Dim 3, Data values:\n");
+            printf("  Integer, Dim 3, Data values:\n");
             imax = this->length[0];
             jmax = this->length[1];
             kmax = this->length[2];
@@ -924,11 +925,12 @@
                      *((int *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     rcount++;
                     if ((tcount > 22) && (rcount==10)) {
+                       int krem;
                        printf(" skipping to end ...\n");
                        k = (tcount-11) / (imax*jmax);
-                       //j = ((tcount-11) % (imax*jmax)) / imax;
-                       j = ((tcount-11) - (k*imax)) % jmax;
-                       i = (tcount-11) % imax;
+                       krem = (tcount-11) % (imax*jmax);
+                       j = krem / imax;
+                       i = krem % imax;
                     }
                 }
               }
