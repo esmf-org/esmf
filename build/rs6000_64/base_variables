@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.14 2003/05/27 22:52:20 flanigan Exp $ 
+# $Id: base_variables,v 1.15 2003/06/06 21:05:59 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -30,19 +30,16 @@ C_FC			= mpxlf90_r -qsmp=omp -q64
 C_FC_MOD		= -I
 C_CLINKER_SLFLAG	= -L
 C_FLINKER_SLFLAG	= -L
-C_CLINKER		= mpcc_r -qsmp=omp -q64 -bmaxdata:0x70000000 
+C_CLINKER		= mpcc_r -qsmp=omp -q64
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
-C_FLINKER		= mpxlf90_r -q64 -bmaxdata:0x70000000 -lC
+C_FLINKER		= mpxlf90_r -q64 -lC_r
 C_CCV			= unknown
 C_FCV			= unknown
-C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
+C_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= -g  -qfullpath 
 G_FOPTFLAGS		= -g  -qfullpath
 # ----------------------------- BOPT - O options -----------------------------
-#O_COPTFLAGS	   = -O3 -qarch=pwr2  -qmaxmem=4000 -w -qspill=3000
-#O_FOPTFLAGS	   = -O3  -qarch=pwr2 -w
-
 O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000
 O_FOPTFLAGS		= -O3 -w
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
@@ -54,38 +51,28 @@ FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 ###  doesn't work, try setting the mpcc_r lines in this section back to
 ###  mpCC_r, and add /usr/vacpp/bin to your search path if you get errors
 ###  about xlC_r not being found.   nsc  1/29/2003
-CXX_CC			= mpcc_r -q64
-CXX_FC			= mpxlf_r -q64
+CXX_CC			= mpCC_r -q64
+CXX_FC			= mpxlf90_r -q64
 CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
-CXX_CLINKER		= mpcc_r -q64
-CXX_FLINKER		= mpcc_r -brtl -q64
+CXX_CLINKER		= mpCC_r -q64
+CXX_FLINKER		= mpCC_r -q64
 CXX_CCV			= unknown
-CXX_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
-CXX_SYS_LIBS            = -lC
+CXX_SYS_LIB		= /usr/lib/libxlf_r.a /usr/lib/libxlf90_r.a  -lcomplex -lisode
+CXX_SYS_LIBS            = -lC_r
 C_CXXF90LD		= ${CXX_CC}
-C_F90CXXLD		= ${CXX_CC}
-C_CXXF90LIBS		= -L.  \
-			   -L/usr/lpp/ppe.poe/lib/threads \
-			  -L/usr/lpp/ppe.poe/lib \
-			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
-			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC 
+C_F90CXXLD		= ${CXX_FC}
 
-C_F90CXXLIBS		= -L. \
-			  -L/usr/lpp/ppe.poe/lib/threads \
-			  -L/usr/lpp/ppe.poe/lib \
-			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
-			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC 
+C_CXXF90LIBS            = -L. \
+                          -lm_r -lxlf90_r -lC_r
 
-C_CXXSO			= cc_r -G
-C_CXXSOLIBS		= -L. \
-                          -L/usr/lpp/ppe.poe/lib/threads \
-			  -L/usr/lpp/ppe.poe/lib \
-			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
-			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC
+C_F90CXXLIBS            = -L. \
+                          -lmpi_r -lxlf90_r -lC_r
+
+C_CXXSO                 = mpCC_r -G
+
+C_CXXSOLIBS             = -L. \
+                          -lm_r -lxlf90_r -lC_r
 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
@@ -109,10 +96,11 @@ PARCH			= rs6000_64
 # SL_C_LINKER = $(CXXF90LD) 
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = -G $(C_F90CXXLIBS)
-SL_LINKOPTS = -lC -brtl
-SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
-SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS)
+SL_LINKOPTS = -brtl
+SL_LIB_LINKER = xlC -bloadmap:loadmap.txt -L$(ESMF_LIBDIR)
+SL_F_LINKER = $(F90CXXLD) -bloadmap:loadmap.txt
+SL_C_LINKER = $(CXXF90LD) -bloadmap:loadmap.txt
 SL_LIBS_TO_MAKE = libesmf liboldworld
 
 
