@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.20 2003/04/28 17:45:34 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.21 2003/04/28 19:00:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.20 2003/04/28 17:45:34 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.21 2003/04/28 19:00:40 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2104,7 +2104,7 @@
 !     \begin{description}
 !     \item [field] 
 !           Field containing data to be gathered.
-!     \item [destination_de] 
+!     \item [destination\_de] 
 !           Destination DE number where the Gathered Array is to be returned.
 !     \item [array] 
 !           Newly created array containing the collected data on the
@@ -2212,7 +2212,7 @@
 !     \item [array] 
 !           Input Array containing the collected data.
 !           It must be the size of the entire undecomposed grid.
-!     \item [source_de]
+!     \item [source\_de]
 !           Integer DE number where the data to be Scattered is located.  The
 !           {\tt Array} input is ignored on all other DEs.
 !     \item [field] 

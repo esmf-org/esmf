@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.45 2003/04/28 17:45:53 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.46 2003/04/28 19:00:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.45 2003/04/28 17:45:53 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.46 2003/04/28 19:00:37 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1961,7 +1961,7 @@
 !          Class to be used.
 !     \item[srcarray]
 !          N-way decomposed {\tt Array} to be gathered into a single 
-!          full {\tt Array) on one DE.
+!          full {\tt Array} on one DE.
 !     \item[deid] 
 !          DE number in this layout to gather Array onto.
 !     \item[dstarray]
