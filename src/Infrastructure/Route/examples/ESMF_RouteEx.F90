@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.9 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.10 2004/03/11 17:40:25 jwolfe Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -38,7 +38,7 @@
     type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field1, field2, field3, field4
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    real (ESMF_KIND_R8), dimension(2) :: mincoords
+    real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
     finalrc = ESMF_SUCCESS
         
@@ -58,13 +58,22 @@
                                   (/ ESMF_COMMTYPE_MP, ESMF_COMMTYPE_MP /), rc)
 
 
-    mincoords = (/ 0.0, 0.0 /)
-    srcgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), mincoords, &
-                                         layout=layout1, name="srcgrid", rc=rc)
+    mincoords = (/  0.0,  0.0 /)
+    mincoords = (/ 20.0, 30.0 /)
+    srcgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
+                   mincoords, maxcoords, &
+                   horzGridKind=ESMF_GridKind_XY, &
+                   horzStagger=ESMF_GridStagger_A, &
+                   horzCoordSystem=ESMF_CoordSystem_Cartesian, &
+                   layout=layout1, name="srcgrid", rc=rc)
 
     ! same grid coordinates, but different layout
-    dstgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), mincoords, &
-                                         layout=layout2, name="dstgrid", rc=rc)
+    dstgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
+                   mincoords, maxcoords, &
+                   horzGridKind=ESMF_GridKind_XY, &
+                   horzStagger=ESMF_GridStagger_A, &
+                   horzCoordSystem=ESMF_CoordSystem_Cartesian, &
+                   layout=layout2, name="srcgrid", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -150,7 +159,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRegridStore(field1, field2, layout1, &
-                                                routehandle=regrid_rh, rc=rc)
+                               routehandle=regrid_rh, &
+                               regridtype=ESMF_RegridMethod_Bilinear, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
