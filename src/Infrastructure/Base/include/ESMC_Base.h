@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.9 2003/03/25 20:08:04 eschwab Exp $
+// $Id: ESMC_Base.h,v 1.10 2003/03/29 01:44:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -188,8 +188,8 @@ class ESMC_Base
 
     // required Validate and Print methods
     //  (would be pure virtual =0; but some will be implemented in F90)
-    virtual int ESMC_Validate(const char *options) const;
-    virtual int ESMC_Print(const char *options) const;
+    virtual int ESMC_Validate(const char *options=0) const;
+    virtual int ESMC_Print(const char *options=0) const;
 
     // attribute methods
     int ESMC_AttributeSet(char *name, ESMC_DataValue value);
