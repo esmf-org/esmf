@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.135 2004/01/31 00:05:20 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.136 2004/02/05 00:07:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.135 2004/01/31 00:05:20 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.136 2004/02/05 00:07:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1919,6 +1919,7 @@
 
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
+        distGridIdUse = 1            ! default
         if (present(distGridId)) distGridIdUse = distGridId
       endif
 
