@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.18 2004/03/16 18:02:19 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.19 2004/03/16 22:01:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@
 
 #if 0
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! Create a new array from an unallocated Fortran array ptr and a list of counts.
 ! Documentation for this class of creates, then the actual macro.
 !------------------------------------------------------------------------------
@@ -44,7 +45,7 @@
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_ArrayCreate - make an ESMF array from an unallocated Fortran array pointer @\
- @\
+! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_ArrayCreate()
 !      function ESMF_ArrayCreateByMTPtr<rank><type><kind>(farr, counts, haloWidth, lbounds, ubounds, rc) @\
@@ -156,6 +157,7 @@
 
 
 #if 0
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! Create a new array based on an allocated Fortran array and a copy flag.
 ! Documentation for this class of creates, then the actual macro.
@@ -288,12 +290,13 @@
 
 #if 0
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! Create a Fortran pointer of the proper type and set the corresponding values
 !  in the array object.  The doc and then actual macro.
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayConstructF90PtrDoc(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define ArrayConstructF90PtrDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOPI @\
@@ -301,7 +304,7 @@
 ! @\
 ! !INTERFACE: @\
 !      subroutine ESMF_ArrayConstructF90Ptr<rank><type><kind>(array, counts, hwidth, fptr, & @\
-                                                   docopy, lbounds, ubounds, rc) @\
+!                                                   docopy, lbounds, ubounds, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Array), intent(inout) :: array @\
@@ -457,11 +460,12 @@
 
 #if 0
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! Get a Fortran pointer to the data contained in this array
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayGetDataDoc(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+#define ArrayGetDataDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 !BOPI @\
@@ -568,11 +572,12 @@
 
 #if 0
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! Deallocate the contents of the array.
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayDeallocateDoc(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define ArrayDeallocateDoc() \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 !BOPI @\
