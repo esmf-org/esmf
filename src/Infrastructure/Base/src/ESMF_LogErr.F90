@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.41 2004/11/15 16:56:55 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.42 2004/12/02 23:02:51 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,14 +105,14 @@ end type ESMF_LOGENTRY
 type ESMF_Log
     private
     sequence       
-    character(len=64)                           nameLogErrFile   
+    character(len=64)                                   nameLogErrFile   
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
 #else
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
 #endif                                         
     type(ESMF_HaltType)                             ::  halt
-    type(ESMF_LogType)			                    ::  logtype
+    type(ESMF_LogType)			            ::  logtype
     type(ESMF_Logical)                              ::  FileIsOpen
     type(ESMF_Logical)                              ::  flushImmediately
     type(ESMF_Logical)			                    ::  flushed     
@@ -559,11 +559,12 @@ end subroutine ESMF_LogGet
 ! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
-      subroutine ESMF_LogInitialize(filename, lognone, rc)
+      subroutine ESMF_LogInitialize(filename, lognone, logtype, rc)
 !
 ! !ARGUMENTS:
       character(len=*)                          :: filename
       integer, intent(in),optional		:: lognone  
+      type(ESMF_LogType),, intent(in),optional  :: logtype  
       integer, intent(out),optional	        :: rc
 
 ! !DESCRIPTION:
@@ -576,8 +577,10 @@ end subroutine ESMF_LogGet
 ! 
 !      \item [{[filename]}]
 !            Name of file.
-!      \item [{[flognone]}]
+!      \item [{[lognone]}]
 !            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}
+!      \item [{[logtype]}]
+!            Specifies ESMF\_LOG\_SINGLE or ESMF\_LOG\_MULTI
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
