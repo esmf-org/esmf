@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.25 2004/07/22 17:48:06 jwolfe Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.26 2004/07/27 16:21:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.25 2004/07/22 17:48:06 jwolfe Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.26 2004/07/27 16:21:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,30 +54,21 @@
       character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      !character(ESMF_MAXSTR) :: validate_options
+      !character(ESMF_MAXSTR) :: print_options
       !type(ESMF_GridConfig) :: config_set
       !type(ESMF_GridConfig) :: config_get
-      ! when get/set value routines enabled, comment these in and set
-      ! the appropriate values, and remove the temporary integers.
-      !<value type> :: value_set, value_get
-      integer :: value_set, value_get
-
 
       integer :: i, counts(2)
       integer :: nDE_i, nDE_j
       type(ESMF_GridHorzStagger) :: horz_stagger, Rhorz_stagger
-      type(ESMF_GridVertStagger) :: vert_stagger, Rvert_stagger
-      type(ESMF_CoordSystem) :: vert_coord_system
-      type(ESMF_CoordSystem) :: Rvert_coord_system
+      type(ESMF_GridVertStagger) :: vert_stagger
       integer :: status
-      integer :: phy_grid_id
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
       real(ESMF_KIND_R8) :: coord1(21), coord2(16)
       real(ESMF_KIND_R8) :: Rgrid_min(3), Rgrid_max(3)
       type(ESMF_Grid) :: grid, grid1, grid2
-      type(ESMF_GridClass) :: grid_class
-      type(ESMF_DELayout) :: layout, layout2
+      type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
 
 

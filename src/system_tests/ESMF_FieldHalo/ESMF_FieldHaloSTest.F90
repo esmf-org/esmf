@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.33 2004/06/21 19:38:35 theurich Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.34 2004/07/27 16:26:05 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -393,7 +393,7 @@
       integer :: rc
 
       ! Local variables
-      integer :: i, j, ni, nj, xpos, ypos, pos(2), nx, ny, ncount(2)
+      integer :: i, j, ni, nj, xpos, ypos, nx, ny
       integer :: de_id, mismatch, target
       integer :: pattern(3,3), nDE(2), myDE(2)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata

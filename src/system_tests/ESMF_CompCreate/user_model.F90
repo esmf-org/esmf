@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.5 2004/06/15 13:34:42 nscollins Exp $
+! $Id: user_model.F90,v 1.6 2004/07/27 16:25:06 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,7 +110,6 @@
         type(ESMF_Field) :: humidity
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
-        integer :: dtype
 
         print *, "User Comp Init 2 starting"
 
@@ -155,7 +154,6 @@
         integer, save :: onetime=1              ! static variable
 
         integer :: status
-        integer :: dtype
         type(mydata), pointer :: mydatablock
         type(wrapper) :: mywrapper
 

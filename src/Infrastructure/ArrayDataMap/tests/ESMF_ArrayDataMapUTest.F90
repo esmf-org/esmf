@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMapUTest.F90,v 1.4 2004/06/14 22:42:49 jwolfe Exp $
+! $Id: ESMF_ArrayDataMapUTest.F90,v 1.5 2004/07/27 16:15:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayDataMapUTest.F90,v 1.4 2004/06/14 22:42:49 jwolfe Exp $'
+      '$Id: ESMF_ArrayDataMapUTest.F90,v 1.5 2004/07/27 16:15:48 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,12 +52,12 @@
       character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      !character(ESMF_MAXSTR) :: validate_options
+      !character(ESMF_MAXSTR) :: print_options
       ! when get/set value routines enabled, comment these in and set
       ! the appropriate values, and remove the temporary integers.
       !<value type> :: value_set, value_get
-      integer :: value_set, value_get
+      !integer :: value_set, value_get
 
       ! instantiate a ESMF_ArrayDataMap
       type(ESMF_ArrayDataMap) :: ArrayDataMap

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.12 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.13 2004/07/27 16:25:05 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -27,7 +27,7 @@
     implicit none
     
 !   Local variables
-    integer :: i, my_pet, rc
+    integer :: my_pet, rc
     type(ESMF_VM):: vm
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
