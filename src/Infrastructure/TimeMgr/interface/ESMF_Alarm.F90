@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.18 2003/06/09 16:29:36 rstaufer Exp $
+! $Id: ESMF_Alarm.F90,v 1.19 2003/06/10 15:57:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,9 +31,6 @@
 ! Part of Time Manager F90 API wrapper of C++ implemenation
 !
 ! Defines F90 wrapper entry points for corresponding
-<<<<<<< ESMF_Alarm.F90
-! C++ class {\tt ESMC\_Alarm}
-=======
 ! C++ class {\tt ESMC\_Alarm}
 !
 ! See {\tt ../include/ESMC\_Alarm.h} for complete description
@@ -109,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.18 2003/06/09 16:29:36 rstaufer Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.19 2003/06/10 15:57:56 jwolfe Exp $'
 
 !==============================================================================
 !

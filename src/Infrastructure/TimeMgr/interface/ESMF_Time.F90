@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.31 2003/06/09 17:22:45 rstaufer Exp $
+! $Id: ESMF_Time.F90,v 1.32 2003/06/10 15:58:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.31 2003/06/09 17:22:45 rstaufer Exp $'
+      '$Id: ESMF_Time.F90,v 1.32 2003/06/10 15:58:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -431,7 +431,6 @@
 !
 !------------------------------------------------------------------------------
 !
-=======
 ! Generic Get/Set routines which use F90 optional arguments
 !
 !------------------------------------------------------------------------------
