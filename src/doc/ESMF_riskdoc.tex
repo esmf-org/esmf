@@ -47,13 +47,13 @@
 \section{Synopsis}
 
 This document lists a series of risks that the Earth System Modeling Framework project faces
-in delivering a system that meets the requirements of 
+in delivering a system that meets the requirements of a community standard with
 
 \begin{enumerate}
 \item adequate performance
 \item general present and future applicability to a range of applications and a broad mix of hardware platforms
 \item reasonable ease of adoption
-\item ongoing extensibility
+\item inbuilt support for ongoing extensibility
 \end{enumerate}
 
 Risks have been categorized as {\bf Very High}, {\bf High}, {\bf Medium}, {\bf Fairly Low} and {\bf Low}.
@@ -67,6 +67,8 @@ made. Preventitive measures are to be taken for any risk that has a status great
 Fix actions are taken for risks with a ({\bf High, Medium}) status or higher.
 
 \req{Community Adoption Issues}
+ESMF aims to be a widely used community standard. As such it faces a number of challenges that are
+related to a mix of technical and organizational factors.
 \sreq{Inadequate community dialog}
 \begin{reqlist}
 {\bf Level of Impact On Project:}  High \\
@@ -103,23 +105,25 @@ team only accountable to technical leads.\\
 {\bf Notes:} \\
 \end{reqlist}
 
-\sreq{Unable to achieve community adoption}
+\sreq{Unable to achieve sufficient community adoption in project time frame}
+The long-term viability of ESMF will rest on its broad use and a perception of
+its value to a large user base. This will take time, possibly longer 
+than the three-year project window.
 \begin{reqlist}
 {\bf Level of Impact On Project:}  High \\
 {\bf Problem Likelihood:} Fairly low \\
 {\bf Preventitive Measures Being Taken:} Broad range of dialog and visibility 
-forums being maintained. Example codes and workshops are being planned.
-Close monitoring of experiences of collaborator groups.
-\\
+forums being maintained. Example codes, extensive documentation and tutorial
+workshops are being planned.
+Close monitoring of experiences of collaborator groups.  \\
 {\bf Fix:} Solicit non-adopter input on what is missing or why framework is not working for them.\\
 {\bf Notes:} \\
 \end{reqlist}
 
 \req{Superstructure Level Issues}
 \sreq{Arbitrary SPMD and MPMD support}
-The {\it Control} layer in ESMF is required to manage arbitrary collections
-of SPMD and MPMD programs running across a potentially heterogeneous
-mix of platforms.
+ESMF is required to manage and direct arbitrary collections of SPMD and MPMD programs 
+running across a potentially heterogeneous mix of platforms.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
 {\bf Problem Likelihood:} Low \\
@@ -168,10 +172,12 @@ compiler availability as compilers exist almost all hardware for these languages
 \sreq{Vector Platform Availability of ESMF}
 \begin{reqlist}
 {\bf Level of Impact On Project:} Medium \\
-{\bf Problem Likelihood:} Fairly Low\\
-{\bf Preventitive Measures Being Taken:} ESMF being tested and built on a range of *NIX systems \\
+{\bf Problem Likelihood:} Medium\\
+{\bf Preventitive Measures Being Taken:} ESMF being tested and built on a range of *NIX systems. This will
+ensure fairly easy protability to other systems, however, effort will still be needed 
+to validate ESMF code and installation on a new platform. \\
 {\bf Fix:} Test and modify to build on apropriate system\\
-{\bf Notes:} This could require resources but otherwise would not be a major challenge.
+{\bf Notes:} This would require some resources but otherwise would not be a major challenge.
 \end{reqlist}
 
 \sreq{MS Windows Availability of ESMF}
@@ -181,7 +187,7 @@ compiler availability as compilers exist almost all hardware for these languages
 {\bf Preventitive Measures Being Taken:}  ESMF being tested and built on a range of *NIX systems.
 No specific tests of build actions are envisaged to ensure Windows compatability.\\
 {\bf Fix:} Test and modify to build on a Windows system\\
-{\bf Notes:} This could require resources but otherwise would not be a major challenge.
+{\bf Notes:} This would require resources but otherwise would not be a major challenge.
 \end{reqlist}
 
 \sreq{Other OS Validation}
@@ -189,8 +195,9 @@ No specific tests of build actions are envisaged to ensure Windows compatability
 {\bf Level of Impact On Project:} Low \\
 {\bf Problem Likelihood:} High \\
 {\bf Preventitive Measures Being Taken:} ESMF being tested and built on a range of *NIX systems\\
-{\bf Fix:}  Test and modify to build on a Windows system\\
+{\bf Fix:}  Test and modify to build on appropriate system\\
 {\bf Notes:} This could require resources but otherwise would not be a major challenge.
+However, for systems where no F90 compiler is available resource requirements could be substantial.
 \end{reqlist}
 
 \req{Infrastructure - Fields and Grid Level Issues}
@@ -207,11 +214,12 @@ applications and their experiences will be fed-back into the system design.\\
 {\bf Fix:} Interface redesign \\
 {\bf Notes:} 
 \end{reqlist}
+
 \sreq{Inadequate performance for certain grids}
 Grid operations, like halo-update and transpose, can have significant impact on parallel scaling.
 Regriddings between different grids can also greatly impact scaling.
 A general purpose system that can scale and perform as well as specialized, application and
-grid specific forms, could be hared to devise. Definciencies in this areana will
+grid specific forms, could be hard to devise. Deficiencies in this areana will
 impact adoption.
 \begin{reqlist} 
 {\bf Level of Impact On Project:} High \\ 
@@ -222,30 +230,49 @@ performance are being devised and will be tracked.\\
 to developing these parts of the system.\\
 {\bf Notes:} 
 \end{reqlist}
+
 \sreq{Inadequate performance for certain platforms}
-Grid operations can be spcialized to take advatage of platform specific
+Grid operations can be specialized to take advatage of platform specific
 architectural features. In a general purpose system it can be hard to compete with these
-specialized forms.
+specialized forms. Low performance in this area could deter community adoption of ESMF.
 \begin{reqlist}
 {\bf Level of Impact On Project:} Medium \\
 {\bf Problem Likelihood:} Medium \\
 {\bf Preventitive Measures Being Taken:} Quantitative measures of grid primitives
 performance are being devised and will be tracked.\\
 {\bf Fix:} Develop specialized forms and increase level of resources
-to developing these parts of the system.\\
+to developing these parts of the system. Reduce feature set for which
+optimized support is developed.
+\\
 {\bf Notes:} 
 \end{reqlist}
 
 \req{Infrastructure - Utilities Level Issues}
-Inadequate reqources for developing highly portable and versatile
-signaling, prefromance monitoring, I/O, communication, memory sharing and namespace sharing tools.
+Inadequate resources for developing highly portable and versatile
+signaling, performance monitoring, I/O, communication, memory sharing and namespace sharing tools.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
 {\bf Problem Likelihood:} Medium \\
 {\bf Preventitive Measures Being Taken:} Tools developed under other projects (for example PetSC, ALICE, TAU)
 will be adopted wherever possible.
 \\
-{\bf Fix:} Devote more resources to this area \\
+{\bf Fix:} Devote more resources to this area. Reduce feature set for which
+highly optimized support is provided initially. \\
+{\bf Notes:} 
+\end{reqlist}
+
+
+\req{Project Management}
+ESMF involves many institutions and a geographical distributed team. 
+This can create competing time pressures and difficulty in communication.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Problem Likelihood:} Low \\
+{\bf Preventitive Measures Being Taken:} Detailed scheduling. Frequent (bi-weekly) telephone
+conferencing. Quarterly meetings. Location of core framework implementation and development
+team in one place.
+\\
+{\bf Fix:} Hosting of team members at NCAR where needed.\\
 {\bf Notes:} 
 \end{reqlist}
 
