@@ -1,4 +1,4 @@
-# $Id: makefile.tests,v 1.2 2003/03/04 17:39:51 flanigan Exp $
+# $Id: makefile.tests,v 1.3 2003/03/06 18:52:52 flanigan Exp $
 
 ALL:  tests
 
@@ -14,52 +14,53 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/<Comp>/tests
 
-TESTEXAMPLES_3  = \
-	ESMF_<Class>Test RUN_ESMF_<Class>Test ESMF_<Class>Test.rm \
-	ESMC_<Class>Test RUN_ESMC_<Class>Test ESMC_<Class>Test.rm
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_<Class>UTest \
+	        $(ESMC_TESTDIR)/ESMC_<Class>UTest 
 
-TESTEXAMPLES_9  = \
-	ESMF_<Class>Test RUN_ESMF_<Class>TestUNI ESMF_<Class>Test.rm \
-	ESMC_<Class>Test RUN_ESMC_<Class>TestUNI ESMC_<Class>Test.rm
+TESTS_RUN     = RUN_ESMF_<Class>UTest \
+		RUN_ESMC_<Class>UTest 
 
-EXAMPLESF       = ESMF_<Class>Test.F90
-EXAMPLESC       = ESMC_<Class>Test.C
+TESTS_RUN_UNI = RUN_ESMF_<Class>UTestUNI \
+		RUN_ESMC_<Class>UTESTUNI 
+
+TESTS_RM      = ESMF_<Class>UTest.rm \
+                ESMC_<Class>UTest.rm
+
 
 include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 
-tests test: ESMF_<Class>Test ESMC_<Class>Test
+$(ESMC_TESTDIR)/ESMF_<Class>UTest: chkopts ESMF_<Class>UTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_<Class>UTest ESMF_<Class>UTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_<Class>UTest.o
 
-ESMF_<Comp>CreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+RUN_ESMF_<Class>UTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
 
-ESMF_<Class>Test: chkopts ESMF_<Class>Test.o
-	-${F90CXXLD} -o ESMF_<Class>Test ESMF_<Class>Test.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_<Class>Test.o
+RUN_ESMF_<Class>UTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
 
-RUN_ESMF_<Class>Test:
-	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>Test.tmps
-	${MPIRUN} -np 4 ESMF_<Class>Test > ESMF_<Class>Test.stdout
-
-RUN_ESMF_<Class>TestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>Test.tmps
-	${MPIRUN} -np 1 ESMF_<Class>Test > ESMF_<Class>Test.stdout
-
-ESMF_<Class>Test.rm:
+ESMF_<Class>UTest.rm:
 	echo "ESMF_<Class>Test.rm target called here."
 
-ESMC_<Class>Test: chkopts ESMC_<Class>Test.o
-	-${CXXF90LD} -o ESMC_<Class>Test ESMC_<Class>Test.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMC_<Class>Test.o
 
-RUN_ESMC_<Class>Test:
-	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>Test.tmps
-	${MPIRUN} -np 4 ESMC_<Class>Test > ESMC_<Class>Test.stdout
+$(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMC_<Class>UTest ESMC_<Class>UTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMC_<Class>UTest.o
 
-RUN_ESMC_<Class>TestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>Test.tmps
-	${MPIRUN} -np 1 ESMC_<Class>Test > ESMC_<Class>Test.stdout
+RUN_ESMF_<Class>UTest:
+	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
-ESMC_<Class>Test.rm:
+RUN_ESMF_<Class>UTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+
+ESMC_<Class>UTest.rm:
 	echo "ESMC_<Class>Test.rm target called here."
+
+
+
