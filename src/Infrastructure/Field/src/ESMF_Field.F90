@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.88 2003/12/09 20:39:38 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.89 2003/12/09 23:38:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.88 2003/12/09 20:39:38 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.89 2003/12/09 23:38:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2248,15 +2248,6 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength, ndes
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim, local_maxlengths
-      integer, dimension(:, :), pointer :: local_axis_counts
-      integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2268,83 +2259,16 @@
 
       ftypep => field%ftypep
 
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                           dimlist=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldAllGather: DataMapGet returned failure"
-        return
-      endif 
-      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-      call ESMF_DELayoutGetNumDEs(layout, ndes, status)
-      allocate(local_axis_counts(ndes, ESMF_MAXGRIDDIM), stat=status)
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, &
-                        local_cell_max_dim=local_cell_max_dim, &
-                        local_axis_length=local_axis_counts, &
-                        rc=status)
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldAllGather: GridGet returned failure"
-        goto 20
-      endif 
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldAllGather: ArrayGet returned failure"
-        goto 20
-      endif 
-
-      allocate(decompids(datarank), stat=status)
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        global_dimlengths(i) = dimlengths(i)
-        if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
-          global_dimlengths(i) = global_cell_dim(dimorder(i))
-          local_maxlengths(i) = local_cell_max_dim(dimorder(i))
-        endif
-      enddo
-
-      ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, gridrank
-          thisdim = dimorder(i)
-          if (thisdim .eq. 0) cycle
-     
-          thislength = dimlengths(thisdim)
-     
-          call ESMF_AxisIndexSet(axis(i), 1, thislength, thislength, rc=status)
-     
-      enddo
-
-      ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, totalindex=axis, &
-                                  rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldAllGather: ArraySetAxisIndex returned failure"
-        goto 20
-      endif 
-
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
- !!     call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
- !!                              global_dimlengths, local_maxlengths, array, status)
       call ESMF_ArrayAllGather(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: Array AllGather returned failure"
-        goto 20
+        return
       endif 
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
-
-20  continue  ! error exit
-      deallocate(local_axis_counts, stat=status)
 
       end subroutine ESMF_FieldAllGather
 
