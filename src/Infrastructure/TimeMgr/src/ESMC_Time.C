@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.19 2003/04/17 17:08:11 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.20 2003/04/21 19:05:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.19 2003/04/17 17:08:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.20 2003/04/21 19:05:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -185,10 +185,14 @@
     // TODO: create two calendar conversion method entry points ?
     if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
         DD != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+      } else return (ESMF_FAILURE);
     }
     if (D != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+      } else return (ESMF_FAILURE);
     }
     
     if (H != ESMC_NULL_POINTER) {
@@ -207,7 +211,9 @@
 
     if (d_ != ESMC_NULL_POINTER) {
       // integer part
-      Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this);
+      } else return (ESMF_FAILURE);
 
       // fractional part
       this->S +=
@@ -326,7 +332,12 @@
     // TODO: fractional, sub-seconds
     if (YR != ESMC_NULL_POINTER || MM != ESMC_NULL_POINTER ||
         DD != ESMC_NULL_POINTER || D  != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D);
+      }
+      else {
+        return (ESMF_FAILURE);
+      }
     }
 
     // for sub-day units, start with number of seconds into the date
@@ -352,12 +363,16 @@
     remainder = this->S % SECONDS_PER_DAY;
 
     if (d_ != ESMC_NULL_POINTER) {
-      int tmpD;
-      Calendar->ESMC_CalendarConvertToDate(this, ESMC_NULL_POINTER,
-                                                 ESMC_NULL_POINTER,
-                                                 ESMC_NULL_POINTER, &tmpD);
-
-      *d_ = (double) tmpD + (double) remainder / (double) SECONDS_PER_DAY;
+      if (Calendar != ESMC_NULL_POINTER) {
+        int tmpD;
+        Calendar->ESMC_CalendarConvertToDate(this, ESMC_NULL_POINTER,
+                                                   ESMC_NULL_POINTER,
+                                                   ESMC_NULL_POINTER, &tmpD);
+        *d_ = (double) tmpD + (double) remainder / (double) SECONDS_PER_DAY;
+      }
+      else {
+        return (ESMF_FAILURE);
+      }
     }
 
     if (h_ != ESMC_NULL_POINTER) {
@@ -428,10 +443,14 @@
     // TODO: create two calendar conversion method entry points ?
     if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
         DD != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToTime(*YR, *MM, *DD, 0, this);
+      } else return (ESMF_FAILURE);
     }
     if (D != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, *D, this);
+      } else return (ESMF_FAILURE);
     }
     
     if (H != ESMC_NULL_POINTER) {
@@ -450,7 +469,9 @@
 
     if (d_ != ESMC_NULL_POINTER) {
       // integer part
-      Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_, this);
+      } else return (ESMF_FAILURE);
 
       // fractional part
       this->S +=
@@ -545,7 +566,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (Calendar != ESMC_NULL_POINTER)
+    if (Calendar != ESMC_NULL_POINTER && Time->Calendar != ESMC_NULL_POINTER)
     {
       *rc = ESMF_SUCCESS;
       return(this->Calendar->Type == Time->Calendar->Type);
