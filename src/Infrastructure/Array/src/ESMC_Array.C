@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.38 2004/12/01 18:33:16 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.39 2004/12/02 17:58:49 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.38 2004/12/01 18:33:16 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.39 2004/12/02 17:58:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1930,7 +1930,7 @@
 //    part of the code is not implemented yet.
 //
 //EOPI
-    int fixedpart, nbytes;
+    int fixedpart, nbytes, rc;
     char *cp;
 
     fixedpart = sizeof(ESMC_Array);
@@ -1939,7 +1939,14 @@
         *length += 2 * fixedpart;
     }
 
-    // TODO: what about base object and attributes?  
+    // TODO: to do this correctly, we should serialize first the base,
+    //  then the localarray part, then finally the array part.  for now
+    //  just memcpy the block - but this will *not* preserve attributes
+    //  correctly.  
+    // rc = a->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+    // rc = a->ESMC_LocalArray::ESMC_Serialize(buffer, length, offset);
+    //  then serialize here just the additional data contained in an array:
+    //  the AI info and the halo widths.
 
     cp = (char *)(buffer + *offset);
     memcpy(cp, (void *)this, sizeof(ESMC_Array));
@@ -1980,7 +1987,8 @@
     ESMC_Array *a = new ESMC_Array;
     char *cp;
 
-    // TODO: what about base object and attributes?  
+    // TODO: see the comment above about explicitly calling the base
+    //  and localarray methods.
 
     cp = (char *)(buffer + *offset);
     memcpy((void *)a, cp, sizeof(ESMC_Array));
@@ -2027,7 +2035,8 @@
         *length += 2 * fixedpart;
     }
 
-    // TODO: what about base object and attributes?  
+    // TODO: see the comment above about explicitly calling the base
+    //  and localarray methods.
 
     cp = (char *)(buffer + *offset);
     memcpy(cp, (void *)this, sizeof(ESMC_Array));
@@ -2066,7 +2075,8 @@
     char *cp;
     int i, bytes;
 
-    // TODO: what about base object and attributes?  
+    // TODO: see the comment above about explicitly calling the base
+    //  and localarray methods.
 
     cp = (char *)(buffer + *offset);
     memcpy((void *)a, cp, sizeof(ESMC_Array));
