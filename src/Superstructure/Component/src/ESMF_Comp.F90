@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.90 2004/04/23 13:37:51 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.91 2004/04/23 15:01:27 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.90 2004/04/23 13:37:51 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.91 2004/04/23 15:01:27 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -605,15 +605,12 @@ end function
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
-        type(ESMF_newDELayout) :: GlobalLayout
         integer :: callrc
 
         ! Initialize return code; assume failure until success is certain
@@ -630,19 +627,6 @@ end function
         else
           blocking = ESMF_BLOCKING
         endif
-
-        ! See if this is currently running on a DE which is part of the
-        ! proper delayout.
-        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
-	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
-	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this delayout"
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-        endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! supply default objects if unspecified by the caller
         if (present(importState)) then
@@ -750,11 +734,8 @@ end function
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_newDELayout) :: GlobalLayout
 
         ! WriteRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -763,19 +744,6 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
-
-        ! See if this is currently running on a DE which is part of the
-        ! proper delayout.
-        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
-	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
-	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this delayout"
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-        endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         call ESMF_GetName(compp%base, cname, status)
 
@@ -841,11 +809,8 @@ end function
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
-        type(ESMF_newDELayout) :: GlobalLayout
 
         ! ReadRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -854,19 +819,6 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
-
-        ! See if this is currently running on a DE which is part of the
-        ! proper delayout.
-        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
-	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
-	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this delayout"
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-        endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         call ESMF_GetName(compp%base, cname, status)
 
@@ -940,15 +892,12 @@ end function
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
-        type(ESMF_newDELayout) :: GlobalLayout
         integer :: callrc
 
         ! Finalize return code; assume failure until success is certain
@@ -965,19 +914,6 @@ end function
         else
           blocking = ESMF_BLOCKING
         endif
-
-        ! See if this is currently finalizening on a DE which is part of the
-        ! proper delayout.
-        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
-	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
-	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this delayout"
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-        endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! supply default objects if unspecified by the caller
         if (present(importState)) then
@@ -1091,15 +1027,12 @@ end function
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
-        integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
-        type(ESMF_newDELayout) :: GlobalLayout
         integer :: callrc
 
         ! Run return code; assume failure until success is certain
@@ -1116,19 +1049,6 @@ end function
         else
           blocking = ESMF_BLOCKING
         endif
-
-        ! See if this is currently running on a DE which is part of the
-        ! proper delayout.
-        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
-	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
-	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this delayout"
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-        endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! handle creating defaults if not specified by the user
         if (present(importState)) then
