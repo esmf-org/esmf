@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldMacros.h,v 1.3 2004/03/11 16:21:59 nscollins Exp $
+! $Id: ESMF_FieldMacros.h,v 1.4 2004/03/15 21:52:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,13 +45,13 @@
 #define RNG6 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6)
 #define RNG7 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6),lb(7):ub(7)
 
-#define LOC1 1
-#define LOC2 1,1
-#define LOC3 1,1,1
-#define LOC4 1,1,1,1
-#define LOC5 1,1,1,1,1
-#define LOC6 1,1,1,1,1,1
-#define LOC7 1,1,1,1,1,1,1
+#define LOC1 lb(1)
+#define LOC2 lb(1),lb(1)
+#define LOC3 lb(1),lb(1),lb(1)
+#define LOC4 lb(1),lb(1),lb(1),lb(1)
+#define LOC5 lb(1),lb(1),lb(1),lb(1),lb(1)
+#define LOC6 lb(1),lb(1),lb(1),lb(1),lb(1),lb(1)
+#define LOC7 lb(1),lb(1),lb(1),lb(1),lb(1),lb(1),lb(1)
 
 
 #if 0
@@ -63,31 +63,31 @@
 #define FieldInterfaceMacro(funcname) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
-    module procedure ESMF_##funcname##I21D @\
-    module procedure ESMF_##funcname##I41D @\
-    module procedure ESMF_##funcname##I81D @\
-    module procedure ESMF_##funcname##I22D @\
-    module procedure ESMF_##funcname##I42D @\
-    module procedure ESMF_##funcname##I82D @\
-    module procedure ESMF_##funcname##I23D @\
-    module procedure ESMF_##funcname##I43D @\
-    module procedure ESMF_##funcname##I83D @\
-    module procedure ESMF_##funcname##I24D @\
-    module procedure ESMF_##funcname##I44D @\
-    module procedure ESMF_##funcname##I84D @\
-    module procedure ESMF_##funcname##I25D @\
-    module procedure ESMF_##funcname##I45D @\
-    module procedure ESMF_##funcname##I85D @\
-    module procedure ESMF_##funcname##R41D @\
-    module procedure ESMF_##funcname##R81D @\
-    module procedure ESMF_##funcname##R42D @\
-    module procedure ESMF_##funcname##R82D @\
-    module procedure ESMF_##funcname##R43D @\
-    module procedure ESMF_##funcname##R83D @\
-    module procedure ESMF_##funcname##R44D @\
-    module procedure ESMF_##funcname##R84D @\
-    module procedure ESMF_##funcname##R45D @\
-    module procedure ESMF_##funcname##R85D @\
+    module procedure ESMF_##funcname##1DI2 @\
+    module procedure ESMF_##funcname##1DI4 @\
+    module procedure ESMF_##funcname##1DI8 @\
+    module procedure ESMF_##funcname##2DI2 @\
+    module procedure ESMF_##funcname##2DI4 @\
+    module procedure ESMF_##funcname##2DI8 @\
+    module procedure ESMF_##funcname##3DI2 @\
+    module procedure ESMF_##funcname##3DI4 @\
+    module procedure ESMF_##funcname##3DI8 @\
+    module procedure ESMF_##funcname##4DI2 @\
+    module procedure ESMF_##funcname##4DI4 @\
+    module procedure ESMF_##funcname##4DI8 @\
+    module procedure ESMF_##funcname##5DI2 @\
+    module procedure ESMF_##funcname##5DI4 @\
+    module procedure ESMF_##funcname##5DI8 @\
+    module procedure ESMF_##funcname##1DR4 @\
+    module procedure ESMF_##funcname##1DR8 @\
+    module procedure ESMF_##funcname##2DR4 @\
+    module procedure ESMF_##funcname##2DR8 @\
+    module procedure ESMF_##funcname##3DR4 @\
+    module procedure ESMF_##funcname##3DR8 @\
+    module procedure ESMF_##funcname##4DR4 @\
+    module procedure ESMF_##funcname##4DR8 @\
+    module procedure ESMF_##funcname##5DR4 @\
+    module procedure ESMF_##funcname##5DR8 @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
@@ -101,10 +101,11 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
-! !IROUTINE: ESMF_FieldGetDataPointer##mtypekind##mrank##D - Retrieve F90 pointer directly from a Field @\
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field @\
  @\
 ! !INTERFACE: @\
-      subroutine ESMF_FieldGetDataPointer##mtypekind##mrank##D(field, f90ptr, copyflag, rc) @\
+      ! Private name; call using ESMF_FieldGetDataPointer() @\
+      subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, f90ptr, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_Field), intent(in) :: field @\
@@ -171,7 +172,7 @@
  @\
         if (rcpresent) rc = status @\
  @\
-        end subroutine ESMF_FieldGetDataPointer##mtypekind##mrank##D   @\
+        end subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind  @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
