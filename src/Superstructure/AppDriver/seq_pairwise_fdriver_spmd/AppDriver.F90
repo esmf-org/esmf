@@ -1,7 +1,7 @@
 !------------------------------------------------------------------------------
 !BOP
 !
-! !MODULE: AppDriver.F90 - generic main program for an ESMF Application
+! MODULE AppDriver.F90 - generic main program for an ESMF Application
 !
 ! !DESCRIPTION:
 ! ESMF Application Driver for any Gridded Component.  Creates the top 
