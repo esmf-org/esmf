@@ -1,11 +1,24 @@
-% $Id: Array_implnotes.tex,v 1.1 2003/10/22 14:36:36 cdeluca Exp $
+% $Id: Array_implnotes.tex,v 1.2 2004/04/22 17:53:44 nscollins Exp $
 
 %\subsection{Design and Implementation Notes}
 
 \begin{enumerate}
 
-\item{\bf Array design.}
-The purpose of the ESMF\_Array type is to fully describe a homogeneous
+\item{\bf Class and directory hierarchy.}
+The ESMF\_LocalArray class is the base of the ESMF\_Array class.
+This is an internal-only class which is not visible outside the framework.
+As described below it contains all the information needed to
+map memory into a multidimensional array.  It is used internally
+by other parts of the framework to provide a uniform interface to 
+internal data.  The public ESMF\_Array class
+adds the domain information needed to support simple communication of
+subdomains.  The communication routine source for operations such
+as halo and regrid are separated out into a separate directory 
+to allow Arrays to be used internally before all the 
+communication code has been compiled.
+
+\item{\bf LocalArray design.}
+The purpose of the ESMF\_LocalArray class is to fully describe a homogeneous
 multidimensional array, possibly strided, so that it can be understood
 and manipulated by multiple languages.   It fully describes the
 relationship between array indices and the linear form of the array
@@ -14,25 +27,8 @@ there are no hidden or implied dimensions.  The first dimension specified
 is always the one which varies fastest in linearized memory regardless of
 interface language used to create or access the array.
 
-The create routine in C++ will require the user to supply all values for
-rank, shape, strides, etc because there are no language constructs which
-allow a pointer to be queried for this information.
-
-There are two types of create routine in F90.  One mimics the C++
-interface and requires the user to supply all information.  
-The second
-type of routine, which is expected to be more useful and natural, is
-the routine is simply passed an existing F90 array pointer.   Many of the
-array attributes can be queried using language-defined functions which
-should be portable to any F90 compiler.   Other attributes may need to
-be discovered using compiler-dependent code.  The implementation approach
-will be to write specific platform-dependent code for the most common
-compilers and platforms, and then use less efficient or more indirect 
-methods for obtaining this information which will be the default if 
-no compiler-specific method has been written.
-
-The Array type is defined at the base level because it is used by the
-F90 interfaces in Fields, Grids, Route, Regrid to refer to data 
+The LocalArray type is defined separately because it is used by the
+F90 code in Fields, Grids, Route, Regrid to refer to data 
 independent of Type/Kind/Rank differences.  This abstraction removes
 the need for these other objects to provide
 heavily-overloaded interface blocks to hide the number of
@@ -46,6 +42,28 @@ and the C++ interfaces
 it is necessary to keep the information in a format which can be
 easily managed by the ESMF and not buried in the language layer.
 
+
+\item{\bf Array design.}
+The purpose of the ESMF\_Array class is to support all the functions of
+the ESMF\_LocalArray class plus domain information to support halo,
+regrid, and data redistribution operations.
+
+The create routine in C++ requires the user to supply all values for
+rank, shape, strides, etc because there are no language constructs which
+allow a pointer to be queried for this information.
+
+There are two types of create routines in F90.  One mimics the C++
+interface and requires the user to supply all information.  
+The second, which is expected to be more useful and natural, 
+is simply passed an existing F90 array pointer.  Most of the
+array attributes can be queried using language-defined functions which
+should be portable to any F90 compiler.   If other attributes are needed
+which require compiler-dependent code, the implementation approach
+will be to write specific platform-dependent code for the most common
+compilers and platforms, and then use less efficient or more indirect 
+methods for obtaining this information which will be the default if 
+no compiler-specific method has been written.
+
 The major challenge for the Array class implementation is that it 
 contains user data which can be of many different types, kinds,
 and ranks, each of which is a different type in Fortran 90 and
@@ -55,7 +73,7 @@ For the C++ interface polymorphism and templates can ease the burden of
 maintaining the interface; in Fortran the interface to the user
 is simplified by using interface blocks but the number of internal
 routines will be quite large.  Judicious use of the macro preprocessor
-will allow generic routines to be expanded on a per-datatype basis.
+allows generic routines to be expanded on a per-datatype basis.
 
 Another way the data interfaces will be kept down to a manageable
 size is to explicitly limit the number of supported user datatypes to:
@@ -67,6 +85,20 @@ size is to explicitly limit the number of supported user datatypes to:
 \item[real*4/float]
 \item[real*8/double]
 \end{description}
+
+
+\item{\bf ArrayComm design.}
+The source of the ESMF\_Array communication routines are separated out into 
+an ESMF\_ArrayComm directory.  This allows basic Array functions to be
+compiled and used by Grid, Field, and Bundle code before the communication
+code has been compiled.  
+
+The Array communication routines require Grid and DataMap information in 
+addition to the Array itself.   The DataMap is needed to identify which
+axes in the Array correspond to Grid axes.  The Grid is needed to compute
+where in the overall object this Array is located and which pieces of
+the overall object are located on which DE.
+
 
 \end{enumerate}
 

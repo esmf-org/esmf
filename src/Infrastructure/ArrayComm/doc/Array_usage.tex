@@ -1,10 +1,9 @@
-% $Id: Array_usage.tex,v 1.2 2004/04/22 16:28:11 nscollins Exp $
+% $Id: Array_usage.tex,v 1.3 2004/04/22 17:53:44 nscollins Exp $
 
 %\subsection{Usage}
 
 The variants of the ESMF\_Array creation method include 2 language interfaces, 
 3 allocation options, and 3 data type/kind/rank (TKR) specification options.  
-The Create method is overloaded in F90 with an interface block.
 From C++ the Create options are to specify
 either the type/kind/rank explicitly, or specify an ESMF\_ArraySpec
 object which contains this information.  The allocation options 
@@ -16,6 +15,7 @@ object, or to give a F90 array pointer which is queried by the
 Framework.  The allocation options are to allocate uninitialized
 space, to allocate space and copy data values into it, or to
 reference already allocated data space.
+The Create method is overloaded in F90 with an interface block.
 
 The Get/Set methods support returning either a pointer to
 the existing space, or allocating a new copy of the data
