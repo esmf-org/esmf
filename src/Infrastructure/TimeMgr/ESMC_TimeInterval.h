@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.2 2002/09/20 18:03:38 eschwab Exp $
 #ifndef ESMC_TIME_INTERVAL_H
 #define ESMC_TIME_INTERVAL_H
 
@@ -46,7 +46,7 @@ class ESMC_TimeInterval : public ESMC_Time
     //            no arg type checking -- user may pass-in bad args.
 	//   
 
-    int Get(const char *TimeList, ...);   // e.g. Get("DS", (int *)D, (int *)S);
+    int Get(const char *TimeList, ...);   // e.g. Get("D:S",(int *)D, (int *)S);
     int Set(const char *TimeList, ...);   // e.g. Set("s" , (double) s);
 
     // -- AND/OR -- individual/combo get/set

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInstant.h,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+// $Id: ESMC_TimeInstant.h,v 1.2 2002/09/20 18:03:38 eschwab Exp $
 #ifndef ESMC_TIME_INSTANT_H
 #define ESMC_TIME_INSTANT_H
 
@@ -53,7 +53,7 @@ class ESMC_TimeInstant : public ESMC_Time
     // generic interface -- via variable argument lists
     //   can map to F90 named-optional-arguments interface
 
-    int Get(const char *TimeList, ...);    // e.g. Get("YRMMDD", (int *)YR,
+    int Get(const char *TimeList, ...);    // e.g. Get("YR:MM:DD", (int *)YR,
                                            //         (int *)MM, (int *)DD);
     int Set(const char *TimeList, ...);    // e.g. Set("s" , (double) s);
 
