@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.111 2004/12/07 21:24:24 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.112 2004/12/07 22:17:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.111 2004/12/07 21:24:24 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.112 2004/12/07 22:17:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1707,16 +1707,15 @@ static int maxroutes = 10;
 //    int error return code
 //
 // !ARGUMENTS:
-      int rank,                    // in  - rank of data
-      int myDE,                    // in  - DE identifier in the DELayout
-      ESMC_DomainList *sendDomainList,
-                                   // in  - array of axis indices for all DE's
-                                   //       in the DELayout for the receiving
-                                   //       Field
-      ESMC_DomainList *recvDomainList,
-                                   // in  - array of axis indices for all DE's
-                                   //       in the DELayout for the receiving
-                                   //       Field
+      int rank,                       // in - rank of data
+      ESMC_DELayout *srcLayout,       // in - Source DELayout
+      ESMC_DELayout *dstLayout,       // in - Destination
+      ESMC_DomainList *srcDomainList, // in - array of axis indices for all DEs
+                                      //      in the DELayout for the receiving
+                                      //      Field
+      ESMC_DomainList *dstDomainList, // in - array of axis indices for all DEs
+                                      //      in the DELayout for the receiving
+                                      //      Field
       ESMC_Logical *hasSrcData,
       ESMC_Logical *hasDstData) {
 //
@@ -1732,6 +1731,7 @@ static int maxroutes = 10;
     ESMC_XPacket *theirXP = NULL;
     int myXPcount, theirXPcount;
     int globalCount[ESMF_MAXDIM];
+    int theirPET[1], nmatch;
     int rc;  
     int j, k, theirOffset, offset, count;
     int theirDE;
@@ -1742,22 +1742,25 @@ static int maxroutes = 10;
     // Calculate the sending table.
     // loop over DE's from DomainList to send to
     if (*hasSrcData == ESMF_TRUE) {
-      for (k=0; k<sendDomainList->num_domains; k++) {
-        theirDE = sendDomainList->ESMC_DomainListGetDE(k);
-        //theirDE = sendDomainList->domains[k].DE;
+      for (k=0; k<srcDomainList->num_domains; k++) {
+        theirDE = srcDomainList->ESMC_DomainListGetDE(k);
+        //theirDE = srcDomainList->domains[k].DE;
         // get "my" AI
         for (j=0; j<rank; j++) 
-          myAI[j] = sendDomainList->ESMC_DomainListGetAI(k, j);
-          //myAI[j] = sendDomainList->domains[k].ai_list[j];
+          myAI[j] = srcDomainList->ESMC_DomainListGetAI(k, j);
+          //myAI[j] = srcDomainList->domains[k].ai_list[j];
       
         // calculate "my" XPacket from the AxisIndices -- in this case the
         // AIs are in local space and so is the XPacket
         rc = ESMC_XPacketFromAxisIndex(myAI, rank, globalCount, NULL,
                                        &myXP, &myXPcount);
       
+        // get PET from DE here.  Single DE per PET.  TODO: fix this
+        srcLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
+
         // load the XPacket into the sending RTable
-        sendRT->ESMC_RTableSetEntry(theirDE, myXP);
-        ct->ESMC_CommTableSetPartner(theirDE);
+        sendRT->ESMC_RTableSetEntry(*theirPET, myXP);
+        ct->ESMC_CommTableSetPartner(*theirPET);
 
         // free each XP before allocating another in XPacketFromAxisIndex
         delete [] myXP;
@@ -1768,14 +1771,14 @@ static int maxroutes = 10;
     // loop over DE's from DomainList to receive from
     offset = 0;
     if (*hasDstData == ESMF_TRUE) {
-      for (k=0; k<recvDomainList->num_domains; k++) {
-        theirDE = recvDomainList->ESMC_DomainListGetDE(k);
-        //theirDE = recvDomainList->domains[k].DE;
+      for (k=0; k<dstDomainList->num_domains; k++) {
+        theirDE = dstDomainList->ESMC_DomainListGetDE(k);
+        //theirDE = dstDomainList->domains[k].DE;
         // get "their" AI
         count = 1;
         for (j=0; j<rank; j++) {
-          theirAI[j] = recvDomainList->ESMC_DomainListGetAI(k, j);
-          //theirAI[j] = recvDomainList->domains[k].ai_list[j];
+          theirAI[j] = dstDomainList->ESMC_DomainListGetAI(k, j);
+          //theirAI[j] = dstDomainList->domains[k].ai_list[j];
           count = count * (theirAI[j].max - theirAI[j].min + 1);
         }
  
@@ -1790,9 +1793,12 @@ static int maxroutes = 10;
         theirXP->ESMC_XPacketSetOffset(theirOffset);
         offset += count;
 
+        // get PET from DE here.  Single DE per PET.  TODO: fix this
+        dstLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
+
         // load the XPacket into the sending RTable
-        recvRT->ESMC_RTableSetEntry(theirDE, theirXP);
-        ct->ESMC_CommTableSetPartner(theirDE);
+        recvRT->ESMC_RTableSetEntry(*theirPET, theirXP);
+        ct->ESMC_CommTableSetPartner(*theirPET);
 
         // free each XP before allocating another in XPacketFromAxisIndex
         delete [] theirXP;
@@ -1802,8 +1808,8 @@ static int maxroutes = 10;
     //ESMC_RoutePrint("");
  
     // add this route to the cache table
-    ESMC_RouteAddCache(rank, myDE, NULL, NULL, 0, NULL,
-                             myDE, NULL, NULL, 0, NULL, NULL);
+    // ESMC_RouteAddCache(rank, myDE, NULL, NULL, 0, NULL,
+    //                          myDE, NULL, NULL, 0, NULL, NULL);
 
     return rc;
 
