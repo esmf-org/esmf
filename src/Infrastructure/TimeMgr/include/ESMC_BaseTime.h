@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.12 2003/04/27 19:30:27 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.13 2003/04/28 23:07:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -124,6 +124,10 @@ class ESMC_BaseTime {
     int Sn;     // Integer fractional seconds (exact) n/d; numerator (signed)
     int Sd;     // Integer fractional seconds (exact) n/d; denominator
 
+    // TODO:  move ESMC_Calendar* here to define seconds per day ? then could
+    //        add D (Julian Days) to Get()/Set() below, and remove secondsPerDay
+    //        from Get()
+
 //    pthread_mutex_t BaseTimeMutex; // for thread safety (TMG 7.5)
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -134,8 +138,18 @@ class ESMC_BaseTime {
     int ESMC_BaseTimeInit(ESMF_IKIND_I8 S, int Sn, int Sd);
 
     // Get/Set methods (primarily to support F90 interface)
-    int ESMC_BaseTimeGet(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
-    int ESMC_BaseTimeSet(ESMF_IKIND_I8 S, int Sn, int Sd);
+    int ESMC_BaseTimeGet(int secondsPerDay,
+                         int *H, int *M, ESMF_IKIND_I8 *S,
+                         int *MS, int *US, int *NS,
+                         double *h_, double *m_, double *s_,
+                         double *ms_, double *us_, double *ns_,
+                         int *Sn, int *Sd) const;
+
+    int ESMC_BaseTimeSet(int *H, int *M, ESMF_IKIND_I8 *S,
+                         int *MS, int *US, int *NS,
+                         double *h_, double *m_, double *s_,
+                         double *ms_, double *us_, double *ns_,
+                         int *Sn, int *Sd);
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.17 2003/04/27 19:30:28 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.18 2003/04/28 23:07:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.17 2003/04/27 19:30:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.18 2003/04/28 23:07:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -95,7 +95,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeGet - get core values of a basetime
+// !IROUTINE:  ESMC_BaseTimeGet - get sub-day units of a basetime
 //
 // !INTERFACE:
       int ESMC_BaseTime::ESMC_BaseTimeGet(
@@ -104,28 +104,73 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 *S,    // out - integer seconds
-      int *Sn,             // out - fractional seconds, numerator
-      int *Sd ) const {    // out - fractional seconds, denominator
+      int secondsPerDay,        // in  - seconds per day
+      int *H,                   // out - integer hours
+      int *M,                   // out - integer minutes
+      ESMF_IKIND_I8 *S,         // out - integer seconds
+      int *MS,                  // out - integer milliseconds
+      int *US,                  // out - integer microseconds
+      int *NS,                  // out - integer nanoseconds
+      double *h_,               // out - floating point hours
+      double *m_,               // out - floating point minutes
+      double *s_,               // out - floating point seconds
+      double *ms_,              // out - floating point milliseconds
+      double *us_,              // out - floating point microseconds
+      double *ns_,              // out - floating point nanoseconds
+      int *Sn,                  // out - fractional seconds numerator
+      int *Sd) const {          // out - fractional seconds denominator
+
 //
 // !DESCRIPTION:
-//      Get core values of a {\tt BaseTime}. Primarily to support F90
-//      interface
+//      Get sub-day (non-calendar dependent) values of a {\tt BaseTime}
+//      converted to user units.  Primarily to support F90 interface
 //
 //EOP
 // !REQUIREMENTS:  
 
-    if (S  != ESMC_NULL_POINTER) *S  = this->S;
-    if (Sn != ESMC_NULL_POINTER) *Sn = this->Sn;
-    if (Sn != ESMC_NULL_POINTER) *Sd = this->Sd;
-      
+    // TODO: fractional seconds
+
+    // for sub-day units, start with number of seconds into the date
+    ESMF_IKIND_I8 remainder = this->S % secondsPerDay;
+
+    if (H != ESMC_NULL_POINTER) {
+      *H = remainder / SECONDS_PER_HOUR;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (M != ESMC_NULL_POINTER) {
+      *M = remainder / SECONDS_PER_MINUTE;
+      remainder %= SECONDS_PER_MINUTE;
+    }
+    if (S != ESMC_NULL_POINTER) {
+      *S = remainder;
+    }
+
+    //
+    // floating point units
+    //
+
+    // for sub-day units, start with number of seconds into the date
+    remainder = this->S % secondsPerDay;
+
+    if (h_ != ESMC_NULL_POINTER) {
+      *h_ = (double) remainder / (double) SECONDS_PER_HOUR;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      *m_ = (double) remainder / (double) SECONDS_PER_MINUTE;
+      remainder %= SECONDS_PER_MINUTE;
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      *s_ = (double) remainder;
+    }
+
     return(ESMF_SUCCESS);
 
 }  // end ESMC_BaseTimeGet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeSet - set core values of a basetime
+// !IROUTINE:  ESMC_BaseTimeSet - set sub-day values of a basetime
 //
 // !INTERFACE:
       int ESMC_BaseTime::ESMC_BaseTimeSet(
@@ -134,22 +179,57 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,    // in - integer seconds
-      int Sn,             // in - fractional seconds, numerator
-      int Sd ) {          // in - fractional seconds, denominator
+      int *H,                   // out - integer hours
+      int *M,                   // out - integer minutes
+      ESMF_IKIND_I8 *S,         // out - integer seconds
+      int *MS,                  // out - integer milliseconds
+      int *US,                  // out - integer microseconds
+      int *NS,                  // out - integer nanoseconds
+      double *h_,               // out - floating point hours
+      double *m_,               // out - floating point minutes
+      double *s_,               // out - floating point seconds
+      double *ms_,              // out - floating point milliseconds
+      double *us_,              // out - floating point microseconds
+      double *ns_,              // out - floating point nanoseconds
+      int *Sn,                  // out - fractional seconds numerator
+      int *Sd) {                // out - fractional seconds denominator
 //
 // !DESCRIPTION:
-//      Sets a {\tt BaseTime} with given values. Primarily to support F90
-//      interface.
+//      Sets sub-day (non-calendar dependent) values of a {\tt BaseTime}.
+//      Primarily to support F90 interface.
 //
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_BaseTimeInit(S, Sn, Sd);
+    // TODO: fractional seconds
+
+    if (H != ESMC_NULL_POINTER) {
+      this->S += *H * SECONDS_PER_HOUR;
+    }
+    if (M != ESMC_NULL_POINTER) {
+      this->S += *M * SECONDS_PER_MINUTE;
+    }
+    if (S != ESMC_NULL_POINTER) {
+      this->S += *S;
+    }
+
+    //
+    // floating point units
+    //
+
+    if (h_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) *s_;
+    }
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_BaseTimeInit
+}  // end ESMC_BaseTimeSet
 
 //-------------------------------------------------------------------------
 //BOP
