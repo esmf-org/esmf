@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2004/06/15 13:34:42 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2004/10/08 14:39:09 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -105,6 +105,13 @@
         integer :: status
 
         print *, "User Coupler Run starting"
+
+        ! Since we are planning to use a communication call, we must
+        ! reconcile the object lists in the State objects.
+
+        ! New routine:
+        !!call ESMF_StateReconcile(importState, rc=rc)
+        !!call ESMF_StateReconcile(exportState, rc=rc)
 
         ! Get input data
         call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
