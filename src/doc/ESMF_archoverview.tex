@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.4 2003/05/07 20:05:44 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.5 2003/05/07 22:04:07 jwolfe Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -62,8 +62,7 @@ to, for example, fill an export state object with data to be shared with other c
 determine its contents. In keeping with the overall requirements for high-performance it is permitted for Import State and
 Export State contents to use references or pointers to component data, so that costly data copies of potentially
 very large data structures can be avoided where possible. The content of an Import State and an Export State is 
-self-describing, so that different standards can be applied to content labeling depending on the 
-by a suite of components.
+self-describing.
 
 \subsubsection{Interface Standards}
 The Import State and Export State abstractions are designed to be flexible enough
