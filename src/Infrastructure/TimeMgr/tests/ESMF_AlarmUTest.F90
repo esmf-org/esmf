@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.5 2004/04/13 18:58:38 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.6 2004/04/13 19:53:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.5 2004/04/13 18:58:38 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.6 2004/04/13 19:53:12 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -73,6 +73,7 @@
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, month, minute, second
       integer(ESMF_KIND_I4) :: day, hour
+      character(ESMF_MAXSTR) :: aName
 
 
       ! initialize ESMF framework
@@ -163,6 +164,15 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Validate Alarm Test"
+      call ESMF_AlarmValidate(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned not sticky"
@@ -188,6 +198,37 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
+      write(name, *) "Get Alarm name Test"
+      call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aName.eq."WAKEUP"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+	print *, "Alarm name is ", aName
+
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
+      write(name, *) "Set Alarm name Test"
+      call  ESMF_AlarmSet(alarm1, name="ALARM1", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS or name is not correct"
+      write(name, *) "Get Alarm name Test"
+      call  ESMF_AlarmGet(alarm1, name=aName, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(aName.eq."ALARM1"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+        print *, "Alarm name is ", aName
+
+
+      ! ----------------------------------------------------------------------------
+
       !NEX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned sticky"
       write(name, *) "Check if Alarm is not sticky Test"
@@ -239,6 +280,25 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(isringing), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Turn off Ringing Alarm "
+      call ESMF_AlarmRingerOff(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS or its ringing"
+      write(name, *) "Check if Alarm is not ringing Test"
+      isringing = ESMF_AlarmIsRinging(alarm1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.isringing), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
