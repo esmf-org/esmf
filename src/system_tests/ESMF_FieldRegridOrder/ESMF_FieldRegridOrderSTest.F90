@@ -1,7 +1,7 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.1 2004/03/22 19:46:44 nscollins Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.2 2004/03/23 23:40:40 nscollins Exp $
 !
-! System test code FieldRegrid
-!  Description on Sourceforge under System Test #79497
+! System test code FieldRegridOrder
+!  Description on Sourceforge under System Test #xxxxxx
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -9,8 +9,9 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldRegrid.  
+! System test FieldRegridOrder.
 !   Regrid test.  2 components and 1 coupler, one-way coupling.
+!                 The index orders of the grids are not the same.
 !                 The first component has a uniform A-grid.  It has
 !                 a Field whose data is set to a given geometric function,
 !
@@ -24,7 +25,7 @@
 !
 !\begin{verbatim}
 
-    program FieldRegrid
+    program FieldRegridOrder
 
 #include <ESMF_Macros.inc>
 
@@ -67,9 +68,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "-------------------------------- "
-    print *, "Start of System Test FieldRegrid:"
-    print *, "-------------------------------- "
+    print *, "------------------------------------- "
+    print *, "Start of System Test FieldRegridOrder:"
+    print *, "------------------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -160,11 +161,11 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
+      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, rc=rc)
       call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
       print *, "Comp 1 Initialize finished, rc =", rc
  
-      c2imp = ESMF_StateCreate("comp2 import", ESMF_STATEIMPORT, cname2)
+      c2imp = ESMF_StateCreate("comp2 import", ESMF_STATEIMPORT, rc=rc)
       call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
       print *, "Comp 2 Initialize finished, rc =", rc
  
@@ -248,14 +249,14 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegrid complete!"
+10    print *, "System Test FieldRegridOrder complete!"
 
       ! Only on de 0 or any DE with an error. 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
         ! Normal ESMF Test output
         write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test FieldRegrid: Field Regrid"
+        write(testname, *) "System Test FieldRegridOrder: Field Regrid Order"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
@@ -275,7 +276,7 @@
     
       call ESMF_Finalize(rc) 
 
-      end program FieldRegrid
+      end program FieldRegridOrder
     
 !\end{verbatim}
     
