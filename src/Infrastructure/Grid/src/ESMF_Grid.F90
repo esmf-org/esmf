@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.113 2003/10/20 23:25:05 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.114 2003/10/23 17:55:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,10 +68,10 @@
         integer :: horz_stagger             ! enum for horizontal grid staggering
         integer :: vert_stagger             ! enum for vertical grid staggering
         type (ESMF_CoordSystem) :: horz_coord_system
-                                            ! enum for horizontal physical
+                                            ! identifier for horizontal physical
                                             ! coordinate system
         type (ESMF_CoordSystem) :: vert_coord_system
-                                            ! enum for vertical physical
+                                            ! identifier for vertical physical
                                             ! coordinate system
         integer :: coord_order              ! enum for mapping of xyz 
                                             ! to ijk
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.113 2003/10/20 23:25:05 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.114 2003/10/23 17:55:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -255,12 +255,12 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Grid} create
 !     methods.
-!
+
 !EOP
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_GridConstruct
 
@@ -272,8 +272,8 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct a
 !     complete {\tt ESMF\_Grid}.
-!
-!EOP
+
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
@@ -295,7 +295,7 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     coordinates as part of a {\tt ESMF\_Grid}.
-!
+
 !EOP
       end interface
 !
@@ -313,7 +313,7 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     logical masks as part of a {\tt ESMF\_Grid}.
-!
+
 !EOP
       end interface
 !
@@ -331,7 +331,7 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     multiplicative masks as part of a {\tt ESMF\_Grid}.
-!
+
 !EOP
       end interface
 !
@@ -349,7 +349,7 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     metrics as part of a {\tt Grid}.
-!
+
 !EOP
       end interface
 !
@@ -366,12 +366,12 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
 !     region id's as part of a {\tt ESMF\_Grid}.
-!
+
 !EOP
       end interface
 !
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !INTERFACE:
 !      interface ESMF_GridSearch
 !
@@ -383,41 +383,41 @@
 !!     This interface provides a single entry point for methods that
 !!     search a {\tt ESMF\_Grid} for point(s).
 !!
-!!EOP
+!!EOPI
 !      end interface
 !!
 !------------------------------------------------------------------------------
-!!BOP
-!! !INTERFACE:
+!BOPI
+! !INTERFACE:
        interface ESMF_GridAddPhysGrid
-!
-!! !PRIVATE MEMBER FUNCTIONS:
+
+! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_GridAddPhysGridSpecd
           module procedure ESMF_GridAddPhysGridUniform
-!
-!! !DESCRIPTION:
-!!     This interface provides a single entry point for methods that
-!!     search a {\tt ESMF\_Grid} for point(s).
-!!
-!!EOP
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that
+!     search a {\tt ESMF\_Grid} for point(s).
+
+!EOPI
        end interface
-!!
-!------------------------------------------------------------------------------
-!!BOP
-!! !INTERFACE:
-       interface ESMF_GridSetBoundingBoxes
 !
-!! !PRIVATE MEMBER FUNCTIONS:
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+       interface ESMF_GridSetBoundingBoxes
+
+! !PRIVATE MEMBER FUNCTIONS:
           module procedure ESMF_GridSetBoundingBoxesUni
           module procedure ESMF_GridSetBoundingBoxesSpecd
-!
-!! !DESCRIPTION:
-!!     This interface provides a single entry point for methods that
-!!     set bounding boxes for all the DEs in a {\tt ESMF\_Grid}.
-!!
-!!EOP
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that
+!     set bounding boxes for all the DEs in a {\tt ESMF\_Grid}.
+
+!EOPI
        end interface
-!!
+!
 !------------------------------------------------------------------------------
 
 !    < add other interfaces here>
@@ -534,15 +534,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[numDims]}]
+!     \item[numDims]
 !          Number of grid dimensions.
-!     \item[{[counts]}]
+!     \item[counts]
 !          Array of number of grid increments in each dimension.
-!     \item[{[min]}]
+!     \item[min]
 !          Array of minimum physical coordinates in each dimension.
-!     \item[{[max]}]
+!     \item[max]
 !          Array of maximum physical coordinates in each direction.
-!     \item[{[layout]}]
+!     \item[layout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
@@ -553,9 +553,13 @@
 !     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger.
 !     \item[{[horz\_coord\_system]}]
-!          Integer specifier to denote horizontal coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
 !     \item[{[vert\_coord\_system]}]
-!          Integer specifier to denote vertical coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate axes.
 !     \item[{[name]}]
@@ -650,13 +654,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[min]}]
+!     \item[numDims]
+!          Number of grid dimensions.
+!     \item[min]
 !          Array of minimum physical coordinate in each direction.
-!     \item[{[delta1]}]
+!     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
-!     \item[{[delta2]}]
+!     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
-!     \item[{[layout]}]
+!     \item[layout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[countsPerDE1]}]
 !          Array of number of grid increments per DE in the first direction.
@@ -675,9 +681,13 @@
 !     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger.
 !     \item[{[horz\_coord\_system]}]
-!          Integer specifier to denote horizontal coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
 !     \item[{[vert\_coord\_system]}]
-!          Integer specifier to denote vertical coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -752,7 +762,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[iospec]}]
+!     \item[iospec]
 !          File I/O specification.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
@@ -822,7 +832,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[grid\_in]}]
+!     \item[grid\_in]
 !          {\tt ESMF\_Grid} to be copied.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
@@ -897,15 +907,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[grid\_in]}]
+!     \item[grid\_in]
 !          {\tt ESMF\_Grid} to be partially copied.
-!     \item[{[i\_min]}]
+!     \item[i\_min]
 !          Minimum global i-index for the region of the grid to be cutout.
-!     \item[{[i\_max]}]
+!     \item[i\_max]
 !          Maximum global i-index for the region of the grid to be cutout.
-!     \item[{[j\_min]}]
+!     \item[j\_min]
 !          Minimum global j-index for the region of the grid to be cutout.
-!     \item[{[j\_max]}]
+!     \item[j\_max]
 !          Maximum global j-index for the region of the grid to be cutout.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
@@ -978,11 +988,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[grid\_in]}]
+!     \item[grid\_in]
 !          Source {\tt ESMF\_Grid} to be coarsened or refined.
-!     \item[{[i\_resolution]}]
+!     \item[i\_resolution]
 !          Integer resolution factor in the i-direction.
-!     \item[{[j\_resolution]}]
+!     \item[j\_resolution]
 !          Integer resolution factor in the j-direction.
 !          Note:  The above arguments assume refinement by factor if positive
 !          and coarsening by absolute value of the factor if negative.  For
@@ -1059,9 +1069,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[grid\_in1]}]
+!     \item[grid\_in1]
 !          First source {\tt ESMF\_Grid}.
-!     \item[{[grid\_in2]}]
+!     \item[grid\_in2]
 !          Second source {\tt ESMF\_Grid}.
 !     \item[{[name]}]
 !          New {\tt ESMF\_Grid} name.
@@ -1132,8 +1142,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
 
@@ -1210,15 +1220,15 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid}
-!     \item[{[numDims]}]
+!     \item[numDims]
 !          Number of grid dimensions.
-!     \item[{[counts]}]
+!     \item[counts]
 !          Array of number of grid increments in each dimension.
-!     \item[{[min]}]
+!     \item[min]
 !          Array of minimum physical coordinates in each dimension.
-!     \item[{[max]}]
+!     \item[max]
 !          Array of maximum physical coordinates in each direction.
-!     \item[{[layout]}]
+!     \item[layout]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
@@ -1229,11 +1239,17 @@
 !     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger.
 !     \item[{[horz\_coord\_system]}]
-!          Integer specifier to denote horizontal coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
 !     \item[{[vert\_coord\_system]}]
-!          Integer specifier to denote vertical coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate axes.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1418,6 +1434,8 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid}
+!     \item[numDims]
+!          Number of grid dimensions.
 !     \item[min]
 !          Array of minimum physical coordinate in each direction.
 !     \item[delta1]
@@ -1443,9 +1461,18 @@
 !     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger.
 !     \item[{[horz\_coord\_system]}]
-!          Integer specifier to denote horizontal coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
 !     \item[{[vert\_coord\_system]}]
-!          Integer specifier to denote vertical coordinate system.
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1699,8 +1726,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -1724,7 +1751,7 @@
       end subroutine ESMF_GridDestruct
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAddPhysGridUniform - Add a uniform PhysGrid to a Grid
 
 ! !INTERFACE:
@@ -1750,12 +1777,15 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[numDims]}]
+!     \item[numDims]
 !          Number of grid dimensions.
-!     \item[{[globalCounts]}]
+!     \item[globalCounts]
 !          Array of global number of grid increments in each direction.
-!     \item [{[physgridId]}]
+!     \item [physgridId]
 !          Integer identifier for {\tt ESMF\_PhysGrid}.
+!     \item[relloc]
+!          Relative location of data at the centers, faces, and vertices of
+!          the {\tt Grid}.
 !     \item[{[min]}]
 !          Array of minimum physical coordinates in each direction.
 !     \item[{[max]}]
@@ -1766,8 +1796,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -1926,7 +1956,7 @@
       end subroutine ESMF_GridAddPhysGridUniform
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAddPhysGridSpecd - Add a specified PhysGrid to a Grid
 
 ! !INTERFACE:
@@ -1963,15 +1993,15 @@
 !     \item[relloc]
 !          Relative location of data at the centers, faces, and vertices of
 !          the {\tt Grid}.
-!     \item[{[numDims]}]
+!     \item[numDims]
 !          Number of grid dimensions.
-!     \item[{[delta1]}]
+!     \item[delta1]
 !          Array of physical increments between nodes in the first direction.
-!     \item[{[delta2]}]
+!     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
-!     \item[{[countsPerDE1]}]
+!     \item[countsPerDE1]
 !          Array of number of grid increments per DE in the x-direction.
-!     \item[{[countsPerDE2]}]
+!     \item[countsPerDE2]
 !          Array of number of grid increments per DE in the y-direction.
 !     \item[{[min]}]
 !          Array of minimum physical coordinates in each direction.
@@ -1985,8 +2015,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -2253,8 +2283,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       ! note: this is an internal routine.  rc isn't optional - so we
       ! don't have to fool with rcpresent and status here.
@@ -2356,8 +2386,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -2390,8 +2420,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -2425,8 +2455,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -2486,8 +2516,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2596,8 +2626,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -2647,8 +2677,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -2695,7 +2725,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[globalAI]}]
+!     \item[globalAI]
 !          Global axis indices on all DE's.
 !     \item[{[total]}]
 !          Logical flag for whether the axis indices should be for total
@@ -2704,8 +2734,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2750,14 +2780,14 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[layout]}]
+!     \item[layout]
 !          Pointer to the {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_Grid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2803,7 +2833,7 @@
       integer, intent(inout), optional :: numFaces
                                          ! number of faces for each cell
       type(ESMF_CoordSystem), intent(inout), optional :: coordSystem
-                                         ! TODO
+                                         ! coordinate system type identifier
       character(*), dimension(:), intent(inout), optional :: dimNames
                                          ! names for each dimension
       character(*), dimension(:), intent(inout), optional :: dimUnits
@@ -2823,32 +2853,35 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[physgridId]
-!          Physgrid identifier.
-!     \item[relloc]
+!     \item[{[relloc]}]
 !           Relative location to query
-!     \item[[name]]
+!     \item[{[physgridId]}]
+!          Physgrid identifier.
+!     \item[{[name]}]
 !          {\tt ESMF\_PhysGrid} name.
-!     \item[[numDims]]
+!     \item[{[numDims]}]
 !          Number of physical dimensions for this PhysGrid.
-!     \item[[dimNames]]
-!          Names for each physical dimension of this PhysGrid.
-!     \item[[dimUnits]]
-!          Units for each physical dimension of this PhysGrid.
-!     \item[[numCorners]]
+!     \item[{[numCorners]}]
 !          Number of corners for each PhysGrid cell (can be degenerate).
-!     \item[[numFaces]]
+!     \item[{[numFaces]}]
 !          Number of faces for each PhysGrid cell.
-!     \item[[localMin]]
+!     \item[{[coordSystem]}]
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.).
+!     \item[{[dimNames]}]
+!          Names for each physical dimension of this PhysGrid.
+!     \item[{[dimUnits]}]
+!          Units for each physical dimension of this PhysGrid.
+!     \item[{[localMin]}]
 !          Minimum local physical coordinate in each coordinate direction.
-!     \item[[localMax]]
+!     \item[{[localMax]}]
 !          Maximum local physical coordinate in each coordinate direction.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -3005,16 +3038,16 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[physgrid]
-!          Returned physgrid.
 !     \item[relloc]
-!           Relative location to query
+!          Relative location to query
+!     \item[physgridId]
+!          Returned physgrid identifier.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -3077,17 +3110,17 @@
 !     \item[grid]
 !          Class to be used.
 !     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers to be translated.
-!          Infers translating between positions in memory.
+!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers to be
+!          translated.  Infers translating between positions in memory.
 !     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers corresponding to
-!          global identifiers.
+!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers
+!          corresponding to global identifiers.
 !     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers to be translated.
-!          Infers translating between indices in ij space.
+!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers to be
+!          translated.  Infers translating between indices in ij space.
 !     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers corresponding to
-!          global identifiers.
+!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers
+!          corresponding to global identifiers.
 !     \item[{[globalAI1D]}]
 !          One-dimensional array of global AxisIndices to be translated.
 !     \item[{[localAI1D]}]
@@ -3100,8 +3133,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -3161,17 +3194,17 @@
 !     \item[grid]
 !          Class to be used.
 !     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be translated.
-!          Infers translating between positions in memory.
+!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
+!          translated.  Infers translating between positions in memory.
 !     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers corresponding to
-!          local identifiers.
+!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers
+!          corresponding to local identifiers.
 !     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers to be translated.
-!          Infers translating between indices in ij space.
+!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
+!          translated.  Infers translating between indices in ij space.
 !     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers corresponding to
-!          local identifiers.
+!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers
+!          corresponding to local identifiers.
 !     \item[{[localAI1D]}]
 !          One-dimensional array of local AxisIndices to be translated.
 !     \item[{[globalAI1D]}]
@@ -3184,8 +3217,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -3237,7 +3270,7 @@
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item[{[id]}]
+!     \item[id]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
 !             2  center\_y
@@ -3249,8 +3282,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -3280,26 +3313,29 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version of set internally computes coordinates for a {\tt ESMF\_Grid} via a
-!     prescribed method.
+!     This version of set internally computes coordinates for a {\tt ESMF\_Grid}
+!     via a prescribed method.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[physgridId]}]
+!     \item[physgridId]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
-!     \item[{[numDims]}]
+!     \item[numDims]
 !          Number of grid dimensions.
-!     \item[{[counts]}]
+!     \item[counts]
 !          Array of number of grid increments in each dimension.
-!     \item[{[relloc]}]
+!     \item[gridBoundWidth]
+!          Number of extra cell layers in the internal coordinate representation
+!          for halo and ghost cells.  Used by {\tt ESMF\_Regrid}.
+!     \item[relloc]
 !          Relative location in grid cell for which this PhysGrid.
-!     \item[{[delta1]}]
+!     \item[coord1]
 !          Array of specified grid coordinates in the first dimension.
-!     \item[{[delta2]}]
+!     \item[coord2]
 !          Array of specified grid coordinates in the second dimension.
-!     \item[{[min]}]
+!     \item[min]
 !          Array of minimum local physical coordinates in each dimension.
 !     \item[{[total]}]
 !          Logical flag to optionally set physical coordinate arrays of total cells.
@@ -3308,8 +3344,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -3461,17 +3497,20 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[physgridId]}]
+!     \item[physgridId]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
-!     \item[{[numDims]}]
+!     \item[numDims]
 !          Number of grid dimensions.
-!     \item[{[counts]}]
+!     \item[counts]
 !          Array of number of grid increments in each dimension.
-!     \item[{[relloc]}]
+!     \item[gridBoundWidth]
+!          Number of extra cell layers in the internal coordinate representation
+!          for halo and ghost cells.  Used by {\tt ESMF\_Regrid}.
+!     \item[relloc]
 !          Relative location in grid cell for which this PhysGrid.
-!     \item[{[delta]}]
+!     \item[delta]
 !          Array of uniform grid increments in each dimension.
-!     \item[{[min]}]
+!     \item[min]
 !          Array of minimum physical coordinates in each dimension.
 !     \item[{[total]}]
 !          Logical flag to optionally set physical coordinate arrays of total cells.
@@ -3480,8 +3519,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -3621,7 +3660,7 @@
 ! !IROUTINE: ESMF_GridSetCoordCopy - Copies coordinates from one grid to another
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordCopy(Grid, Grid_in, id, rc)
+      subroutine ESMF_GridSetCoordCopy(grid, grid_in, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -3638,7 +3677,7 @@
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[grid\_in]
 !          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
-!     \item[{[id]}]
+!     \item[id]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
 !             2  center\_y
@@ -3650,8 +3689,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -3666,8 +3705,8 @@
       subroutine ESMF_GridGet(grid, horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              coord_order, global_min_coords, &
-                              global_max_coords, global_cell_dim, &
+                              coord_order, global_min_coord, &
+                              global_max_coord, global_cell_dim, &
                               global_start, periodic, name, rc)
 !
 ! !ARGUMENTS:
@@ -3680,9 +3719,9 @@
       type(ESMF_CoordSystem), intent(out), optional :: vert_coord_system
       integer, intent(out), optional :: coord_order
       real(ESMF_KIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
-                            optional :: global_min_coords
+                            optional :: global_min_coord
       real(ESMF_KIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
-                            optional :: global_max_coords
+                            optional :: global_max_coord
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
                             optional :: global_cell_dim
       integer, intent(out), dimension(:,:), optional :: global_start
@@ -3699,25 +3738,31 @@
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[horz\_gridtype]}]
-!          Integer specifier to denote horizontal gridtype
+!          Integer specifier to denote horizontal gridtype.
 !     \item[{[vert\_gridtype]}]
-!          Integer specifier to denote vertical gridtype
+!          Integer specifier to denote vertical gridtype.
 !     \item[{[horz\_stagger]}]
-!          Integer specifier to denote horizontal grid stagger
+!          Integer specifier to denote horizontal grid stagger.
 !     \item[{[vert\_stagger]}]
-!          Integer specifier to denote vertical grid stagger
+!          Integer specifier to denote vertical grid stagger.
 !     \item[{[horz\_coord\_system]}]
-!          Integer specifier to denote horizontal coordinate system
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
 !     \item[{[vert\_coord\_system]}]
-!          Integer specifier to denote vertical coordinate system
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
 !     \item[{[coord\_order]}]
-!          Integer specifier to denote coordinate ordering
-!     \item[{[global\_min\_coords]}]
-!          Minimum global physical coordinates.
-!     \item[{[global\_max\_coords]}]
-!          Maximum global physical coordinates.
-!     \item[{[global\_nmax]}]
-!          Numbers of global grid increments.
+!          Integer specifier to denote coordinate ordering.
+!     \item[{[global\_min\_coord]}]
+!          Array of minimum global physical coordinates in each direction.
+!     \item[{[global\_max\_coord]}]
+!          Array of maximum global physical coordinates in each direction.
+!     \item[{[global\_cell\_dim]}]
+!          Array of numbers of global grid increments in each direction.
+!     \item[{[global\_start]}]
+!          Array of global starting locations for each DE and in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
 !     \item[{[name]}]
@@ -3726,8 +3771,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -3780,16 +3825,16 @@
       endif
 
       ! Get global coordinate extents
-      if(present(global_min_coords)) then
+      if(present(global_min_coord)) then
         do i=1,ESMF_MAXGRIDDIM
-          if (i > size(global_min_coords)) exit
-          global_min_coords(i) = gridp%globalMinCoord(i)
+          if (i > size(global_min_coord)) exit
+          global_min_coord(i) = gridp%globalMinCoord(i)
         enddo
       endif
-      if(present(global_max_coords)) then
+      if(present(global_max_coord)) then
         do i=1,ESMF_MAXGRIDDIM
-          if (i > size(global_max_coords)) exit
-          global_max_coords(i) = gridp%globalMaxCoord(i)
+          if (i > size(global_max_coord)) exit
+          global_max_coord(i) = gridp%globalMaxCoord(i)
         enddo
       endif
 
@@ -3839,27 +3884,36 @@
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[{[horz\_gridtype]}]
-!          Integer specifier to denote horizontal gridtype
+!          Integer specifier to denote horizontal gridtype.
 !     \item[{[vert\_gridtype]}]
-!          Integer specifier to denote vertical gridtype
+!          Integer specifier to denote vertical gridtype.
 !     \item[{[horz\_stagger]}]
-!          Integer specifier to denote horizontal grid stagger
+!          Integer specifier to denote horizontal grid stagger.
 !     \item[{[vert\_stagger]}]
-!          Integer specifier to denote vertical grid stagger
+!          Integer specifier to denote vertical grid stagger.
 !     \item[{[horz\_coord\_system]}]
-!          Integer specifier to denote horizontal coordinate system
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
 !     \item[{[vert\_coord\_system]}]
-!          Integer specifier to denote vertical coordinate system
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
 !     \item[{[coord\_order]}]
-!          Integer specifier to denote coordinate ordering
+!          Integer specifier to denote coordinate ordering.
+!     \item[{[global\_min\_coord]}]
+!          Array of minimum global physical coordinates in each direction.
+!     \item[{[global\_max\_coord]}]
+!          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate axes.
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -3906,7 +3960,7 @@
       end subroutine ESMF_GridSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
 
 ! !INTERFACE:
@@ -3930,27 +3984,20 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[physgridId]
+!     \item[maskArray]
+!          {\tt ESMF\_Array} to contain the internally-used cell array denoting
+!          whether cells are in the computational regime, a ghost region, or a
+!          halo region.
+!     \item[{[physgridId]}]
 !          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
-!     \item[numDims]
-!          Number of grid dimensions.
-!     \item[counts]
-!          Array of number of grid increments in each dimension.
-!     \item[gridBoundWidth]
-!          Width, in cells, of the ficticious boundary around the grid for
-!          halo and ghost regions.
-!     \item[relloc]
-!          Relative location in grid cell for which this PhysGrid.
-!     \item[cellType1]
-!          Array of cell type identifiers in the first dimension.
-!     \item[cellType2]
-!          Array of cell type identifiers in the second dimension.
+!     \item[{[relloc]}]
+!          Relative location in grid cell for this PhysGrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -4013,7 +4060,7 @@
       end subroutine ESMF_GridGetCellMask
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetCellMask - Compute cell identifier mask for a Grid
 
 ! !INTERFACE:
@@ -4062,8 +4109,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -4131,7 +4178,7 @@
 ! !IROUTINE: ESMF_GridSetLMaskFromArray - Set a logical mask in a Grid from an existing ESMF array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetLMaskFromArray(Grid, array, name, rc)
+      subroutine ESMF_GridSetLMaskFromArray(grid, array, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4155,8 +4202,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4168,7 +4215,7 @@
 ! !IROUTINE: ESMF_GridSetLMaskFromBuffer - Set a logical mask in a Grid from an existing data buffer
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetLMaskFromBuffer(Grid, buffer, name, rc)
+      subroutine ESMF_GridSetLMaskFromBuffer(grid, buffer, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4192,8 +4239,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4205,11 +4252,11 @@
 ! !IROUTINE: ESMF_GridSetLMaskFromMMask - Set a logical mask in a Grid from an existing multiplicative mask
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetLMaskFromMMask(Grid, mmask, name, rc)
+      subroutine ESMF_GridSetLMaskFromMMask(grid, mmask, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: mmask        ! TODO: name?
+      integer, intent(in) :: mmask
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -4221,7 +4268,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[mmask]}]
+!     \item[mmask]
 !          Multiplicative mask identifier.
 !     \item [{[name]}]
 !           {\tt ESMF\_LMask} name.
@@ -4229,8 +4276,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4242,7 +4289,7 @@
 ! !IROUTINE: ESMF_GridSetLMaskCopy - Copies a logical mask from one grid to another.
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetLMaskCopy(Grid, Grid_in, name, name_in, rc)
+      subroutine ESMF_GridSetLMaskCopy(grid, grid_in, name, name_in, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4268,8 +4315,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4281,7 +4328,7 @@
 ! !IROUTINE: ESMF_GridSetMMaskFromArray - Set a multiplicative mask in a Grid from an existing ESMF array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMMaskFromArray(Grid, array, name, rc)
+      subroutine ESMF_GridSetMMaskFromArray(grid, array, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4305,8 +4352,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4318,7 +4365,7 @@
 ! !IROUTINE: ESMF_GridSetMMaskFromBuffer - Set a multiplicative mask in a Grid from an existing data buffer
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMMaskFromBuffer(Grid, buffer, name, rc)
+      subroutine ESMF_GridSetMMaskFromBuffer(grid, buffer, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4342,8 +4389,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4355,7 +4402,7 @@
 ! !IROUTINE: ESMF_GridSetMMaskFromLMask - Set a multiplicative mask in a Grid from an existing logical mask
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMMaskFromLMask(Grid, lmask, name, rc)
+      subroutine ESMF_GridSetMMaskFromLMask(grid, lmask, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4379,8 +4426,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4392,7 +4439,7 @@
 ! !IROUTINE: ESMF_GridSetMMaskCopy - Copies a multiplicative mask from one grid to another.
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMMaskCopy(Grid, Grid_in, name, name_in, rc)
+      subroutine ESMF_GridSetMMaskCopy(grid, grid_in, name, name_in, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4419,8 +4466,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4432,7 +4479,7 @@
 ! !IROUTINE: ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMetricFromArray(Grid, array, name, rc)
+      subroutine ESMF_GridSetMetricFromArray(grid, array, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4456,8 +4503,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4469,7 +4516,7 @@
 ! !IROUTINE: ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMetricFromBuffer(Grid, buffer, name, rc)
+      subroutine ESMF_GridSetMetricFromBuffer(grid, buffer, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4493,8 +4540,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4506,7 +4553,7 @@
 ! !IROUTINE: ESMF_GridSetMetricCompute - Compute a metric for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMetricCompute(Grid, name, id, rc)
+      subroutine ESMF_GridSetMetricCompute(grid, name, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4522,7 +4569,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[{[id]}]
+!     \item[id]
 !          Identifier for predescribed metrics.  TODO: make list
 !     \item [{[name]}]
 !           {\tt ESMF\_Metric} name.
@@ -4530,8 +4577,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4543,7 +4590,7 @@
 ! !IROUTINE: ESMF_GridSetMetricCopy - Copies a metric from one grid to another
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMetricCopy(Grid, name, Grid_in, name_in, rc)
+      subroutine ESMF_GridSetMetricCopy(grid, name, grid_in, name_in, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4559,18 +4606,18 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item [{[name]}]
+!     \item [name]
 !           {\tt ESMF\_Metric} name to be set.
 !     \item[grid\_in]
 !          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
-!     \item [{[name\_in]}]
+!     \item [name\_in]
 !           {\tt ESMF\_Metric} name to be copied.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4582,7 +4629,7 @@
 ! !IROUTINE: ESMF_GridSetRegionIDFromArray - Set a region identifier in a Grid from an existing ESMF array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetRegionIDFromArray(Grid, array, name, rc)
+      subroutine ESMF_GridSetRegionIDFromArray(grid, array, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4600,14 +4647,14 @@
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[array]
 !          ESMF LocalArray of data.
-!     \item [{[name]}]
+!     \item [name]
 !           {\tt ESMF\_RegionID} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4619,7 +4666,7 @@
 ! !IROUTINE: ESMF_GridSetRegionIDFromBuffer - Set a region identifier in a Grid from an existing data buffer
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetRegionIDFromBuffer(Grid, buffer, name, rc)
+      subroutine ESMF_GridSetRegionIDFromBuffer(grid, buffer, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4637,14 +4684,14 @@
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item [{[name]}]
+!     \item [name]
 !           {\tt ESMF\_RegionID} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4656,7 +4703,7 @@
 ! !IROUTINE: ESMF_GridSetRegionIDCopy - Copies a region identifier from one grid to another
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetRegionIDCopy(Grid, name, Grid_in, name_in, rc)
+      subroutine ESMF_GridSetRegionIDCopy(grid, name, grid_in, name_in, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -4673,18 +4720,18 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item [{[name]}]
+!     \item [name]
 !           {\tt ESMF\_RegionID} name to be set.
 !     \item[grid\_in]
 !          Pointer to a {\tt ESMF\_Grid} whose coordinates are to be copied.
-!     \item [{[name\_in]}]
+!     \item [name\_in]
 !           {\tt ESMF\_RegionID} name to be copied.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
 
 !
 !  code goes here
@@ -4717,8 +4764,9 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOP
+
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
 
@@ -4735,7 +4783,7 @@
       end subroutine ESMF_GridGetBoundingBoxes
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetBoundingBoxesUni - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
@@ -4776,8 +4824,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -4858,7 +4906,7 @@
       end subroutine ESMF_GridSetBoundingBoxesUni
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridSetBoundingBoxesSpecd - Set the array of bounding boxes per DE
 
 ! !INTERFACE:
@@ -4900,8 +4948,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -5061,7 +5109,7 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[opt]
 !          Print options that control the type of information and level of
 !          detail.
 !     \item[{[rc]}]
@@ -5132,15 +5180,13 @@
 
 ! !ARGUMENTS:
 
-      real(ESMF_KIND_R8), intent(in) :: &
-         x1,y1,      &! x,y coordinates of two points between which 
-         x2,y2        !   the distance is to be computed
-
-      type(ESMF_CoordSystem) :: &
-         coord_system ! coordinate system in which the points are given
-
-      integer, optional :: &
-         rc           ! return code
+      real(ESMF_KIND_R8), intent(in) :: x1      ! x,y coordinates of two points
+      real(ESMF_KIND_R8), intent(in) :: y1      ! between which the distance is
+      real(ESMF_KIND_R8), intent(in) :: x2      ! to be computed
+      real(ESMF_KIND_R8), intent(in) :: y2
+      type(ESMF_CoordSystem) :: coord_system    ! coordinate system in which the
+                                                ! points are given
+      integer, optional :: rc                   ! return code
 
 ! !DESCRIPTION:
 !     This routine computes the distance between two points given the
@@ -5157,8 +5203,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
+!EOP
 
 !
 !     local variables
@@ -5189,7 +5235,7 @@
       end function ESMF_GridComputeDistance
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
@@ -5236,8 +5282,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -5379,7 +5425,7 @@
       end subroutine ESMF_GridBoxIntersectRecv
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
 !
 ! !INTERFACE:
@@ -5394,7 +5440,7 @@
       real(ESMF_KIND_R8), dimension(:), intent(in) :: local_max
                                                          ! array of local maxs
       type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
-      type(ESMF_DomainList), intent(inout) :: domainlist ! domain list
+      type(ESMF_DomainList), intent(inout) :: domainList ! domain list
       integer, intent(out), optional :: rc               ! return code
 
 ! !DESCRIPTION:
@@ -5405,8 +5451,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid]
+!     \item[dstGrid]
 !          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
+!     \item[srcGrid]
+!          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
 !     \item[local\_min]
 !          Array of local minimum coordinates, one per rank of the array,
@@ -5417,15 +5466,15 @@
 !     \item[myAI]
 !          {\tt ESMF\_AxisIndex} for this DE on the sending (source)
 !          {\tt ESMF\_Grid}, assumed to be in global indexing.
-!     \item[domainlist]
+!     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of 
 !          {\tt ESMF\_Domains} necessary to cover the box.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -5561,21 +5610,16 @@
 !!
 !! !ARGUMENTS:
 !
-!      integer, dimension(?) ::
-!         dst_add      ! location in grid of grid cell containing search point
-!
-!      real (kind=?), intent(in) :: &
-!         x,y          ! x,y coordinates of search point 
-!
-!      integer, intent(in) :: &
-!         DEid         ! DE which owns the search point
-!
-!      type(ESMF_Grid), intent(in) :: &
-!         search_grid  ! grid to search for location of point
-!
-!      integer, intent(in), optional :: &
-!         phys_grid_id ! id of the subgrid to search (if more than one subgrid)
-!
+!      integer, dimension(?) :: dst_add      ! location in grid of grid cell
+!                                            ! containing search point
+!      real (kind=?), intent(in) :: x        ! x coordinates of search point 
+!      real (kind=?), intent(in) :: y        ! y coordinates of search point 
+!      integer, intent(in) :: DEid           ! DE which owns the search point
+!      type(ESMF_Grid), intent(in) :: search_grid
+!                                            ! grid to search for location of point
+!      integer, intent(in), optional :: phys_grid_id
+!                                            ! id of the subgrid to search
+!                                            ! (if more than one subgrid)
 !      integer, intent(out), optional :: rc  ! return code
 !
 !!
@@ -5587,15 +5631,18 @@
 !!     \begin{description}
 !!     \item[dst\_add]
 !!          Address of grid cell containing the search point.
-!!     \item[x,y]
-!!          Coordinates of search point.
+!!     \item[x]
+!!          X coordinates of search point.
+!!     \item[y]
+!!          Y coordinates of search point.
 !!     \item[DEid]
 !!          id of {\tt ESMF\_DE} that owns search point.
 !!     \item[search\_grid]
 !!          ESMF {\tt ESMF\_Grid} to search for location.
 !!     \item[{[phys\_grid\_id]}]
-!!          If more than one {\tt ESMF\_PhysGrid} is contained in {\tt ESMF\_Grid}, choose which
-!!          grid to search (default is 1st {\tt ESMF\_PhysGrid}?).
+!!          If more than one {\tt ESMF\_PhysGrid} is contained in 
+!!          {\tt ESMF\_Grid}, choose which grid to search (default is 1st
+!!          {\tt ESMF\_PhysGrid}?).
 !!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
