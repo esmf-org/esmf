@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.5 2003/03/24 17:40:13 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.6 2003/03/27 01:41:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -90,6 +90,13 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // TimeInterval is a shallow class, so only Init methods are needed
     // TODO:  use default argument for calendar (NULL)
     int ESMC_TimeIntervalInit(ESMC_Calendar *Cal, const char *TimeList, ...);
+
+    // Init method to support the F90 optional arguments interface
+    int ESMC_TimeIntervalInit(int *YY, int *MO, int *D, int *H, int *M,
+                              ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                              double *d_, double *h_, double *m_, double *s_,
+                              double *ms_, double *us_, double *ns_,
+                              int *Sn, int *Sd, ESMC_Calendar *cal);
 
     // accessor methods
 
