@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.6 2003/07/28 15:19:36 jwolfe Exp $
+! $Id: ArraysGlobalMod.F90,v 1.7 2003/07/31 23:03:20 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -95,12 +95,12 @@
       call ESMF_FieldGetData(field_sie, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
 
-      field_u    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EAST, &
+      field_u    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EFACE, &
                    haloWidth=halo_width, name="U", rc=status)
       call ESMF_FieldGetData(field_u, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, u, ESMF_DATA_REF, status)
 
-      field_v    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_NORTH, &
+      field_v    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_NFACE, &
                    haloWidth=halo_width, name="V", rc=status)
       call ESMF_FieldGetData(field_v, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, v, ESMF_DATA_REF, status)
@@ -115,12 +115,12 @@
       call ESMF_FieldGetData(field_rhoi, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rhoi, ESMF_DATA_REF, status)
 
-      field_rhou = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EAST, &
+      field_rhou = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EFACE, &
                    haloWidth=halo_width, name="RHOU", rc=status)
       call ESMF_FieldGetData(field_rhou, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rhou, ESMF_DATA_REF, status)
 
-      field_rhov = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_NORTH, &
+      field_rhov = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_NFACE, &
                    haloWidth=halo_width, name="RHOV", rc=status)
       call ESMF_FieldGetData(field_rhov, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rhov, ESMF_DATA_REF, status)
