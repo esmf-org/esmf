@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.41 2004/01/29 04:45:31 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.42 2004/01/30 01:28:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.41 2004/01/29 04:45:31 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.42 2004/01/30 01:28:09 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -57,13 +57,15 @@ int ESMC_Clock::count=0;
 //     pointer to newly allocated ESMC_Alarm
 //
 // !ARGUMENTS:
-      int                nameLen,    // in
-      const char        *name,       // in
-      ESMC_TimeInterval *timeStep,   // in
-      ESMC_Time         *startTime,  // in
-      ESMC_Time         *stopTime,   // in
-      ESMC_Time         *refTime,    // in
-      int               *rc) {       // out - return code
+      int                nameLen,          // in
+      const char        *name,             // in
+      ESMC_TimeInterval *timeStep,         // in
+      ESMC_Time         *startTime,        // in
+      ESMC_Time         *stopTime,         // in
+      ESMC_TimeInterval *runDuration,      // in
+      int               *runTimeStepCount, // in
+      ESMC_Time         *refTime,          // in
+      int               *rc) {             // out - return code
 
 // !DESCRIPTION:
 //      Allocates and Initializes a {\tt ESMC\_Clock} with given values
@@ -106,6 +108,13 @@ int ESMC_Clock::count=0;
     if (timeStep  != ESMC_NULL_POINTER) clock->timeStep  = *timeStep;
     if (startTime != ESMC_NULL_POINTER) clock->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) clock->stopTime  = *stopTime;
+
+    if (runDuration != ESMC_NULL_POINTER) {
+      clock->stopTime = clock->startTime + *runDuration;
+    }
+    if (runTimeStepCount != ESMC_NULL_POINTER) {
+      clock->stopTime = clock->startTime + (*runTimeStepCount * *timeStep);
+    }
 
     if (refTime   != ESMC_NULL_POINTER) clock->refTime   = *refTime;
     else clock->refTime = clock->startTime;
@@ -163,14 +172,16 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int                nameLen,       // in
-      const char        *name,          // in
-      ESMC_TimeInterval *timeStep,       // in
-      ESMC_Time         *startTime,      // in
-      ESMC_Time         *stopTime,       // in
-      ESMC_Time         *refTime,        // in
-      ESMC_Time         *currTime,       // in
-      ESMF_KIND_I8      *advanceCount) { // in
+      int                nameLen,          // in
+      const char        *name,             // in
+      ESMC_TimeInterval *timeStep,         // in
+      ESMC_Time         *startTime,        // in
+      ESMC_Time         *stopTime,         // in
+      ESMC_TimeInterval *runDuration,      // in
+      int               *runTimeStepCount, // in
+      ESMC_Time         *refTime,          // in
+      ESMC_Time         *currTime,         // in
+      ESMF_KIND_I8      *advanceCount) {   // in
 
 // !DESCRIPTION:
 //      Sets a {\tt ESMC\_Clock}'s properties
@@ -196,6 +207,14 @@ int ESMC_Clock::count=0;
     if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
     if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
     if (stopTime  != ESMC_NULL_POINTER) this->stopTime  = *stopTime;
+
+    if (runDuration != ESMC_NULL_POINTER) {
+      this->stopTime = this->startTime + *runDuration;
+    }
+    if (runTimeStepCount != ESMC_NULL_POINTER) {
+      this->stopTime = this->startTime + (*runTimeStepCount * *timeStep);
+    }
+
     if (refTime   != ESMC_NULL_POINTER) this->refTime   = *refTime;
 
     if (currTime  != ESMC_NULL_POINTER) {
@@ -225,19 +244,21 @@ int ESMC_Clock::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int                nameLen,        // in
-      int               *tempNameLen,    // out
-      char              *tempName,       // out
-      ESMC_TimeInterval *timeStep,       // out
-      ESMC_Time         *startTime,      // out
-      ESMC_Time         *stopTime,       // out
-      ESMC_Time         *refTime,        // out
-      ESMC_Time         *currTime,       // out
-      ESMC_Time         *prevTime,       // out
-      ESMC_TimeInterval *currSimTime,    // out
-      ESMC_TimeInterval *prevSimTime,    // out
-      ESMF_KIND_I8      *advanceCount,   // out
-      int               *numAlarms) {    // out
+      int                nameLen,          // in
+      int               *tempNameLen,      // out
+      char              *tempName,         // out
+      ESMC_TimeInterval *timeStep,         // out
+      ESMC_Time         *startTime,        // out
+      ESMC_Time         *stopTime,         // out
+      ESMC_TimeInterval *runDuration,      // out
+      ESMF_KIND_R8      *runTimeStepCount, // out
+      ESMC_Time         *refTime,          // out
+      ESMC_Time         *currTime,         // out
+      ESMC_Time         *prevTime,         // out
+      ESMC_TimeInterval *currSimTime,      // out
+      ESMC_TimeInterval *prevSimTime,      // out
+      ESMF_KIND_I8      *advanceCount,     // out
+      int               *numAlarms) {      // out
 
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_Clock}'s property values
@@ -265,6 +286,14 @@ int ESMC_Clock::count=0;
     if (timeStep  != ESMC_NULL_POINTER) *timeStep  = this->timeStep;
     if (startTime != ESMC_NULL_POINTER) *startTime = this->startTime;
     if (stopTime  != ESMC_NULL_POINTER) *stopTime  = this->stopTime;
+
+    if (runDuration != ESMC_NULL_POINTER) {
+      *runDuration = this->stopTime - this->startTime;
+    }
+    if (runTimeStepCount != ESMC_NULL_POINTER) {
+      *runTimeStepCount = (this->stopTime - this->startTime) / this->timeStep;
+    }
+
     if (refTime   != ESMC_NULL_POINTER) *refTime   = this->refTime;
     if (currTime  != ESMC_NULL_POINTER) *currTime  = this->currTime;
     if (prevTime  != ESMC_NULL_POINTER) *prevTime  = this->prevTime;

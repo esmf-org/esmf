@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.26 2004/01/15 20:59:43 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.27 2004/01/30 01:28:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,6 +121,9 @@
                       ESMC_TimeInterval *timeStep=0,
                       ESMC_Time         *startTime=0,
                       ESMC_Time         *stopTime=0,
+                      ESMC_TimeInterval *runDuration=0,
+                      int               *runTimeStepCount=0,
+// TODO: add overload for ESMF_KIND_R8  *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0,
                       ESMF_KIND_I8      *advanceCount=0);
@@ -131,6 +134,8 @@
                       ESMC_TimeInterval *timeStep=0,
                       ESMC_Time         *startTime=0,
                       ESMC_Time         *stopTime=0,
+                      ESMC_TimeInterval *runDuration=0,
+                      ESMF_KIND_R8      *runTimeStepCount=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0, 
                       ESMC_Time         *prevTime=0, 
@@ -192,7 +197,9 @@
 
     // friend function to allocate and initialize clock from heap
     friend ESMC_Clock *ESMC_ClockCreate(int, const char*, ESMC_TimeInterval*,
-                                 ESMC_Time*, ESMC_Time*, ESMC_Time*, int*);
+                                 ESMC_Time*, ESMC_Time*, ESMC_TimeInterval*,
+                                 int*, ESMC_Time*, int*);
+// TODO: add overload for ESMF_KIND_R8  *runTimeStepCount
 
     // friend function to de-allocate clock
     friend int ESMC_ClockDestroy(ESMC_Clock *);
@@ -232,6 +239,9 @@
                                  ESMC_TimeInterval* timeStep=0,
                                  ESMC_Time*         startTime=0,
                                  ESMC_Time*         stopTime=0,
+                                 ESMC_TimeInterval *runDuration=0,
+                                 int               *runTimeStepCount=0,
+// TODO: add overload for ESMF_KIND_R8             *runTimeStepCount=0,
                                  ESMC_Time*         refTime=0,
                                  int*               rc=0);
 

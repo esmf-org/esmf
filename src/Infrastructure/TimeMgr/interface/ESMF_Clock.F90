@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.37 2003/12/23 00:33:52 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.38 2004/01/30 01:28:09 eschwab Exp $'
 
 !==============================================================================
 !
@@ -130,7 +130,7 @@
 
 ! !INTERFACE:
       function ESMF_ClockCreate(name, timeStep, startTime, stopTime, &
-                                refTime, rc)
+                                runDuration, runTimeStepCount, refTime, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Clock) :: ESMF_ClockCreate
@@ -140,6 +140,8 @@
       type(ESMF_TimeInterval), intent(in)            :: timeStep
       type(ESMF_Time),         intent(in)            :: startTime
       type(ESMF_Time),         intent(in),  optional :: stopTime
+      type(ESMF_TimeInterval), intent(in),  optional :: runDuration
+      integer,                 intent(in),  optional :: runTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
       integer,                 intent(out), optional :: rc
     
@@ -157,9 +159,19 @@
 !     \item[startTime]
 !          The {\tt ESMF\_Clock}'s starting time.
 !     \item[{[stopTime]}]
-!          The {\tt ESMF\_Clock}'s stopping time.  If not specified,
-!          clock runs "forever"; user uses other means to know when
-!          to stop (e.g. ESMF\_Alarm or ESMF\_ClockGet(clock, currTime)).
+!          The {\tt ESMF\_Clock}'s stopping time.  If neither stopTime,
+!          runDuration, nor runTimeStepCount is specified, clock runs "forever";
+!          user must use other means to know when to stop (e.g. ESMF\_Alarm or
+!          ESMF\_ClockGet(clock, currTime)).
+!          Mutually exclusive with runDuration and runTimeStepCount.
+!     \item[{[runDuration]}]
+!          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
+!             stopTime = startTime + runDuration.
+!          Mutually exclusive with stopTime and runTimeStepCount.
+!     \item[{[runTimeStepCount]}]
+!          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
+!             stopTime = startTime + (runTimeStepCount * timeStep).
+!          Mutually exclusive with stopTime and runDuration.
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
@@ -181,7 +193,8 @@
 
 !     invoke C to C++ entry point to allocate and initialize new clock
       call c_ESMC_ClockCreate(ESMF_ClockCreate, nameLen, name, timeStep, &
-                              startTime, stopTime, refTime, rc)
+                              startTime, stopTime, runDuration, &
+                              runTimeStepCount, refTime, rc)
 
       end function ESMF_ClockCreate
 
@@ -221,7 +234,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockSet(clock, name, timeStep, startTime, stopTime, &
-                               refTime, currTime, advanceCount, rc)
+                               runDuration, runTimeStepCount, refTime, &
+                               currTime, advanceCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)         :: clock
@@ -229,6 +243,8 @@
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       type(ESMF_Time),         intent(in),  optional :: startTime
       type(ESMF_Time),         intent(in),  optional :: stopTime
+      type(ESMF_TimeInterval), intent(in),  optional :: runDuration
+      integer,                 intent(in),  optional :: runTimeStepCount
       type(ESMF_Time),         intent(in),  optional :: refTime
       type(ESMF_Time),         intent(in),  optional :: currTime
       integer(ESMF_KIND_I8),   intent(in),  optional :: advanceCount
@@ -255,8 +271,19 @@
 !     \item[{[startTime]}]
 !          The {\tt ESMF\_Clock}'s starting time.
 !     \item[{[stopTime]}]
-!          The {\tt ESMF\_Clock}'s stopping time.
-!          See description in {\tt ESMF\_ClockCreate()} above.
+!          The {\tt ESMF\_Clock}'s stopping time.  If neither stopTime,
+!          runDuration, nor runTimeStepCount is specified, clock runs "forever";
+!          user must use other means to know when to stop (e.g. ESMF\_Alarm or
+!          ESMF\_ClockGet(clock, currTime)).
+!          Mutually exclusive with runDuration and runTimeStepCount.
+!     \item[{[runDuration]}]
+!          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
+!             stopTime = startTime + runDuration.
+!          Mutually exclusive with stopTime and runTimeStepCount.
+!     \item[{[runTimeStepCount]}]
+!          Alternative way to specify {\tt ESMF\_Clock}'s stopping time;
+!             stopTime = startTime + (runTimeStepCount * timeStep).
+!          Mutually exclusive with stopTime and runDuration.
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.
 !          See description in {\tt ESMF\_ClockCreate()} above.
@@ -282,7 +309,8 @@
 
 !     invoke C to C++ entry point
       call c_ESMC_ClockSet(clock, nameLen, name, timeStep, startTime, &
-                           stopTime, refTime, currTime, advanceCount, rc)
+                           stopTime, runDuration, runTimeStepCount, &
+                           refTime, currTime, advanceCount, rc)
     
       end subroutine ESMF_ClockSet
 
@@ -292,8 +320,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
-                               refTime, currTime, prevTime, &
-                               currSimTime, prevSimTime, &
+                               runDuration, runTimeStepCount, refTime, &
+                               currTime, prevTime, currSimTime, prevSimTime, &
                                advanceCount, numAlarms, rc)
 
 ! !ARGUMENTS:
@@ -302,6 +330,8 @@
       type(ESMF_TimeInterval), intent(out), optional :: timeStep
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Time),         intent(out), optional :: stopTime
+      type(ESMF_TimeInterval), intent(out), optional :: runDuration
+      real(ESMF_KIND_R8),      intent(out), optional :: runTimeStepCount
       type(ESMF_Time),         intent(out), optional :: refTime
       type(ESMF_Time),         intent(out), optional :: currTime
       type(ESMF_Time),         intent(out), optional :: prevTime
@@ -326,6 +356,12 @@
 !          The {\tt ESMF\_Clock}'s starting time.
 !     \item[{[stopTime]}]
 !          The {\tt ESMF\_Clock}'s stopping time.
+!     \item[{[runDuration]}]
+!          Alternative way to get {\tt ESMF\_Clock}'s stopping time;
+!             runDuration = stopTime - startTime.
+!     \item[{[runTimeStepCount]}]
+!          Alternative way to get {\tt ESMF\_Clock}'s stopping time;
+!             runTimeStepCount = (stopTime - startTime) / timeStep.
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.
 !     \item[{[currTime]}]
@@ -366,8 +402,8 @@
 !     invoke C to C++ entry point
       call c_ESMC_ClockGet(clock, nameLen, tempNameLen, tempName, &
                            timeStep, startTime, stopTime, &
-                           refTime, currTime, prevTime, &
-                           currSimTime, prevSimTime, &
+                           runDuration, runTimeStepCount, refTime, &
+                           currTime, prevTime, currSimTime, prevSimTime, &
                            advanceCount, numAlarms, rc)
 
       ! copy temp name back to given name to restore native F90 storage style

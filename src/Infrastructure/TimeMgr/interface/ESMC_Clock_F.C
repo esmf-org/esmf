@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.20 2004/01/15 21:00:18 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.21 2004/01/30 01:28:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,6 +40,8 @@ extern "C" {
                                     ESMC_TimeInterval *timeStep,
                                     ESMC_Time *startTime,
                                     ESMC_Time *stopTime,
+                                    ESMC_TimeInterval *runDuration,
+                                    int *runTimeStepCount,
                                     ESMC_Time *refTime,
                                     int *status) {
           *ptr = ESMC_ClockCreate(
@@ -50,12 +52,16 @@ extern "C" {
                     timeStep,   // required
                     startTime,  // required
 
-                    ((void*) stopTime == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : stopTime),
-                    ((void*) refTime  == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : refTime),
-                    ((void*) status   == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : status) );
+                    ((void*) stopTime    == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : stopTime),
+                    ((void*) runDuration == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : runDuration),
+                    ((void*) runTimeStepCount == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : runTimeStepCount),
+                    ((void*) refTime     == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : refTime),
+                    ((void*) status      == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : status) );
        }
 
        void FTN(c_esmc_clockdestroy)(ESMC_Clock **ptr, int *status) {
@@ -70,6 +76,8 @@ extern "C" {
                                  ESMC_TimeInterval *timeStep,
                                  ESMC_Time *startTime,
                                  ESMC_Time *stopTime,
+                                 ESMC_TimeInterval *runDuration,
+                                 int *runTimeStepCount,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
                                  ESMF_KIND_I8 *advanceCount,
@@ -78,19 +86,23 @@ extern "C" {
                  *nameLen,   // always present internal argument.
 
                  ((void*) name         == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : name),
+                                          ESMC_NULL_POINTER : name),
                  ((void*) timeStep     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : timeStep),
+                                          ESMC_NULL_POINTER : timeStep),
                  ((void*) startTime    == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : startTime),
+                                          ESMC_NULL_POINTER : startTime),
                  ((void*) stopTime     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : stopTime),
+                                          ESMC_NULL_POINTER : stopTime),
+                 ((void*) runDuration  == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : runDuration),
+                 ((void*) runTimeStepCount == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : runTimeStepCount),
                  ((void*) refTime      == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : refTime),
+                                          ESMC_NULL_POINTER : refTime),
                  ((void*) currTime     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : currTime),
+                                          ESMC_NULL_POINTER : currTime),
                  ((void*) advanceCount == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : advanceCount) );
+                                          ESMC_NULL_POINTER : advanceCount) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
@@ -102,6 +114,8 @@ extern "C" {
                                  ESMC_TimeInterval *timeStep,
                                  ESMC_Time *startTime,
                                  ESMC_Time *stopTime,
+                                 ESMC_TimeInterval *runDuration,
+                                 ESMF_KIND_R8 *runTimeStepCount,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
                                  ESMC_Time *prevTime,
@@ -116,27 +130,31 @@ extern "C" {
                  tempNameLen,   // always present internal argument.
 
                  ((void*) tempName     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : tempName),
+                                          ESMC_NULL_POINTER : tempName),
                  ((void*) timeStep     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : timeStep),
+                                          ESMC_NULL_POINTER : timeStep),
                  ((void*) startTime    == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : startTime),
+                                          ESMC_NULL_POINTER : startTime),
                  ((void*) stopTime     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : stopTime),
+                                          ESMC_NULL_POINTER : stopTime),
+                 ((void*) runDuration  == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : runDuration),
+                 ((void*) runTimeStepCount == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : runTimeStepCount),
                  ((void*) refTime      == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : refTime),
+                                          ESMC_NULL_POINTER : refTime),
                  ((void*) currTime     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : currTime),
+                                          ESMC_NULL_POINTER : currTime),
                  ((void*) prevTime     == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : prevTime),
+                                          ESMC_NULL_POINTER : prevTime),
                  ((void*) currSimTime  == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : currSimTime),
+                                          ESMC_NULL_POINTER : currSimTime),
                  ((void*) prevSimTime  == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : prevSimTime),
+                                          ESMC_NULL_POINTER : prevSimTime),
                  ((void*) advanceCount == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : advanceCount),
+                                          ESMC_NULL_POINTER : advanceCount),
                  ((void*) numAlarms    == (void*)ESMC_BAD_POINTER ?
-                                           ESMC_NULL_POINTER : numAlarms) );
+                                          ESMC_NULL_POINTER : numAlarms) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
