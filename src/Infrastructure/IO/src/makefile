@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.3 2004/04/27 20:44:49 slswift Exp $
+# $Id: makefile,v 1.4 2004/04/28 14:52:21 slswift Exp $
 
 ALL: build_here
 
 CFLAGS    =
-FFLAGS    =
+FFLAGS    = 
 SOURCEC   = 
-SOURCEF   = ESMF_IO.F90 wrf_io.F90 field_routines.F90
+SOURCEF   = wrf_io.F90 field_routines.F90# ESMF_IO.F90
 CODE      = ext_ncd_get_dom_ti.code ext_ncd_get_var_td.code ext_ncd_get_var_ti.code ext_ncd_put_dom_ti.code ext_ncd_put_var_td.code ext_ncd_put_var_ti.code transpose.code
 #STOREH    = ESMC_IO.h
 
@@ -31,14 +31,23 @@ CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-ESMF_IO.o:		wrf_io.o field_routines.o
+# ESMF_IO.o:		wrf_io.o field_routines.o
 
-wrf_io.f90:		wrf_io.F90 $(CODE)
+# wrf_io.o:		wrf_io.F90 $(CODE)
+# 			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
+# 			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $(addsuffix .f, $(basename $<))
+# 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $(addsuffix .f, $(basename $<))
+
+# field_routines.o:	field_routines.F90 wrf_io.F90
+# 			$(CPP) -x f77-cpp-input -E -P -I./ $< > $(addsuffix .f, $(basename $<))
+# 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $(addsuffix .f, $(basename $<))
+
+wrf_io.f:		wrf_io.F90 $(CODE)
 			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
 			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $@
 
-field_routines.f90:	field_routines.F90
+#field_routines.f:	field_routines.F90 wrf_io.F90
 			$(CPP) -x f77-cpp-input -E -P -I./ $< > $@
 
-# .f.o:
-# 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $<
+.f.o:			
+			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $<
