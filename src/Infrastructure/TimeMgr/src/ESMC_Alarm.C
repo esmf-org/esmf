@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.5 2003/03/22 05:44:12 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.6 2003/03/24 20:11:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.5 2003/03/22 05:44:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.6 2003/03/24 20:11:10 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -194,7 +194,7 @@
 
     return(Ringing);
 
- } // end ESMC_AlarmCheckRingTime
+ } // end ESMC_AlarmIsRinging
 
 //-------------------------------------------------------------------------
 //BOP
@@ -227,6 +227,30 @@
     }
 
  } // end ESMC_AlarmCheckRingTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Alarm(==) - Alarm equality comparison    
+//
+// !INTERFACE:
+      bool ESMC_Alarm::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt Alarm} with
+//      given {\tt Alarm}, return result
+//
+//EOP
+// !REQUIREMENTS:
+
+    return(ID == alarm.ID);
+
+}  // end ESMC_Alarm::operator==
 
 //-------------------------------------------------------------------------
 //BOP
