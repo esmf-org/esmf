@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.16 2003/03/24 22:06:31 nscollins Exp $
+// $Id: ESMC_Comm.C,v 1.17 2003/03/25 16:35:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.16 2003/03/24 22:06:31 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.17 2003/03/25 16:35:35 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -817,14 +817,23 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 //
 //EOP
 
-//#ifdef MPI
-#if 1 
   MPI_Status status;
 
-  MPI_Sendrecv(sbuf, snum, MPI_FLOAT, rde, ESMF_MPI_TAG,
-               rbuf, rnum, MPI_FLOAT, sde, MPI_ANY_TAG,
-               MPI_COMM_WORLD, &status);
-#endif
+  // if we're both sending and receiving from our own mpi process,
+  // then do a straight memory copy and don't call MPI.
+  if ((rde == DE->pID) && (sde == DE->pID)) {
+     if (snum != rnum) { 
+        printf("sending bytes != receiving bytes in CommSendRecv\n");
+        return ESMF_FAILURE;
+     }
+     memcpy(rbuf, sbuf, snum*sizeof(float));
+    
+  } else {
+      MPI_Sendrecv(sbuf, snum, MPI_FLOAT, rde, ESMF_MPI_TAG,
+                   rbuf, rnum, MPI_FLOAT, sde, MPI_ANY_TAG,
+                   MPI_COMM_WORLD, &status);
+      // TODO: check return status and set esmf error code if bad
+  }
 
   return(ESMF_SUCCESS);
 
