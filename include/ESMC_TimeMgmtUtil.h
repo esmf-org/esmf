@@ -1,4 +1,4 @@
-/* $Id: ESMC_TimeMgmtUtil.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_TimeMgmtUtil.h,v 1.3 2002/01/03 19:53:54 dneckels Exp $ */
 /* Time Management General Utilities */
 
 #include "ESMC_BasicUtil.h"
@@ -16,6 +16,7 @@
                                                    (3 * ( ((year) + 4900 + temp )/100))/4 + \
                                                    (day) - 32075;}
                                                          
+/* The calculation below fails for jday >= 536,802,343.  (4*templ = 2^31) */
 #define ESMC_JULIAN_DAY_2_DATE(jday,year,month,day)  {int tempi, tempj, templ, tempn; \
                                                    templ = (jday) + 68569; \
                                                    tempn = ( 4 * templ ) / 146097; \
