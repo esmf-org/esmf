@@ -45,11 +45,12 @@ module config_subrs
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
       integer :: result = 0
+   
 
 
       character(len=255) :: fname = 'ESMF_Resource_File_Sample.rc'
       character(len=255) :: restart_file
-      integer :: rc
+      integer :: rc, npets
       logical :: unique
       integer   :: nDE
       real      :: tau
@@ -65,6 +66,7 @@ module config_subrs
       integer, allocatable, dimension(:) :: ncol
       logical :: end
       real temp
+      type(ESMF_VM):: vm
       
       integer :: counter_total, counter_success
       integer :: rc_opening
@@ -1063,7 +1065,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.12 2004/08/09 19:53:55 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.13 2004/08/26 20:18:45 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1079,7 +1081,9 @@ end module config_subrs
 !-------------------------------------------------------------------------------
 
 
-      call ESMF_Initialize()
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
 
       !------------------------------------------------------------------------
       !NEX_UTest
