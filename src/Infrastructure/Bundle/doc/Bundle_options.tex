@@ -1,13 +1,15 @@
-% $Id: Bundle_options.tex,v 1.3 2004/03/24 00:04:07 cdeluca Exp $
+% $Id: Bundle_options.tex,v 1.4 2004/06/10 04:32:22 cdeluca Exp $
 
 \subsubsection{ESMF\_PackFlag}
 
+\label{opt:packflag}
 {\sf DESCRIPTION:\\}
 Specifies whether a Bundle is packed or not.  A packed 
 Bundle contains an array in which all the data in its 
 constituent Fields is packed contiguously.  Bundles that
 are not packed are not guaranteed to carry a contiguous 
-array of their data.  
+array of their data.  This flag is not yet implemented;
+the value is always set to {\tt ESMF\_NO\_PACKED\_DATA}.
 
 Valid values are:
 \begin{description}
@@ -16,3 +18,10 @@ Valid values are:
    \item [ESMF\_NO\_PACKED\_DATA]
          Does not contain a packed array.
 \end{description}
+
+
+
+
+
+
+

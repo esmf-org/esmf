@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.18 2004/06/09 23:26:44 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.19 2004/06/10 04:32:23 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -93,12 +93,12 @@
 \input{../Infrastructure/Bundle/doc/ESMF_BundleGet_fapi}
 #endif
 
-!\subsection{Class API: Bundle Communications}
-!#ifdef STANDALONE
-!\input{../../BundleComm/doc/ESMF_BundleComm_fapi}
-!#elif defined(CONSTITUENT)
-!\input{../Infrastructure/BundleComm/doc/ESMF_BundleComm_fapi}
-!#endif
+%\subsection{Class API: Bundle Communications}
+%#ifdef STANDALONE
+%\input{../../BundleComm/doc/ESMF_BundleComm_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/BundleComm/doc/ESMF_BundleComm_fapi}
+%#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}

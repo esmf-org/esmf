@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.49 2004/06/09 23:14:52 jwolfe Exp $
+! $Id: ESMF_Bundle.F90,v 1.50 2004/06/10 04:32:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -406,7 +406,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddIntAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set an integer attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -420,16 +420,17 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to an {\tt ESMF\_Bundle}.
+!      Attaches an integer attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The integer value of the attribute.
+!           The integer value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -463,7 +464,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddIntListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set an integer list attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -478,18 +479,21 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches an integer list attribute to an {\tt ESMF\_Bundle}.
+!     Attaches an integer list attribute to the {\tt bundle}.  
+!     The attribute has a {\tt name} and a {\tt value}.
+!     The number of integer items in the {\tt value} list is given 
+!     by {\tt count}. 
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [count]
-!           The number of values to be set.
+!           The number of integers in the {\tt value} list.
 !     \item [value]
-!           The integer values of the attribute.
+!           The integer values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -531,7 +535,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddRealAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a real attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -545,16 +549,17 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real attribute to an {\tt ESMF\_Bundle}.
-! 
+!      Attaches a real attribute to the {\tt bundle}.  
+!      The attribute has a {\tt name} and a {\tt value}. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The real value of the attribute.
+!           The real value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -588,7 +593,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddRealListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a real list attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -603,18 +608,21 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real list attribute to an {\tt ESMF\_Bundle}.
+!     Attaches a real list attribute to the {\tt bundle}.
+!     The attribute has a {\tt name} and a {\tt value}.
+!     The number of real items in the {\tt value} list is given 
+!     by {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [count]
-!           The number of values to be set.
+!           The number of reals in the {\tt value} list.
 !     \item [value]
-!           The real values of the attribute.
+!           The real values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -656,7 +664,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddLogicalAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a logical attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -670,16 +678,17 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical attribute to an {\tt ESMF\_Bundle}.
+!      Attaches a logical attribute to the {\tt bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute.
+!           The logical true/false value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -713,7 +722,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a logical list attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -728,18 +737,21 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical list attribute to an {\tt ESMF\_Bundle}.
+!     Attaches a logical list attribute to the {\tt bundle}.
+!     The attribute has a single {\tt name} and a {\tt value}.
+!     The number of logical items in the {\tt value} list is given 
+!     by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [count]
-!           The number of values to be set.
+!           The number of logicals in the {\tt value} list.
 !     \item [value]
-!           The logical true/false values of the attribute.
+!           The logical values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -781,7 +793,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAddCharAttr"
 !BOP
-! !IROUTINE: ESMF_BundleAddAttribute - Set a character attribute
+! !IROUTINE: ESMF_BundleAddAttribute - Add a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
@@ -796,15 +808,16 @@ end function
 !
 ! !DESCRIPTION:
 !      Attaches a character attribute to an {\tt ESMF\_Bundle}.
+!      The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The character value of the attribute.
+!           The character value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -849,15 +862,16 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Add a single Field reference to an existing {\tt ESMF\_Bundle}.  The Field must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
+!      Adds a single {\tt field} to an existing {\tt bundle}.  The
+!      {\tt field} must be associated with the same {\tt ESMF\_Grid} 
+!      as the other {\tt ESMF\_Field}s in the {\tt bundle}.   
+!      The {\tt field} is referenced by the {\tt bundle}, not copied.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_Bundle} to add {\tt ESMF\_Field} to.
-!     \item [field]
+!           The {\tt ESMF\_Bundle} to add the {\tt ESMF\_Field} to.
+!     \item [field] 
 !           The {\tt ESMF\_Field} to add.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -908,20 +922,20 @@ end function
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add an {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
-!      The {\tt ESMF\_Field} must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the 
-!      {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
+!      Adds a {\tt fieldList} to an existing {\tt ESMF\_Bundle}.  
+!      The items added from the {\tt ESMF\_fieldList} must be associated 
+!      with the same {\tt ESMF\_Grid} as the other {\tt ESMF\_Field}s in the 
+!      {\tt bundle}.  The items in the {\tt fieldList} are referenced by
+!      the {\tt bundle}, not copied.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
+!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s to.
 !     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
+!           Number of {\tt ESMF\_Field}s to be added to the 
+!           {\tt ESMF\_Bundle}; must be equal to or less than the 
+!           number of items in the {\tt fieldList}.
 !     \item [fieldList]
 !           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
 !           items will be added to the {\tt ESMF\_Bundle}.
@@ -965,7 +979,7 @@ end function
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleCreate()
       function ESMF_BundleCreateNew(fieldCount, fieldList, &
-                                  packflag, bundleInterleave, name, iospec, rc)
+                                  packflag, bundleinterleave, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNew
@@ -974,41 +988,46 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fieldList
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!   Create an {\tt ESMF\_Bundle} from a list of existing
-!   gridded {\tt ESMF\_Fields}.  Optionally create a packed
-!   {\tt ESMF\_Array} which collects all {\tt ESMF\_Field} data into
-!   a single contiguous memory buffer.  All {\tt ESMF\_Field}s
-!   must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
+!   Creates an {\tt ESMF\_Bundle} from a list of existing
+!   {\tt ESMF\_Fields} stored in a {\tt fieldList}.  All items in 
+!   the {\tt fieldList} must share a common {\tt ESMF\_Grid}.  
+!   Returns a new {\tt ESMF\_Bundle}.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item [fieldCount]
-!      Number of fields to be added to the {\tt ESMF\_Bundle}.
+!      Number of fields to be added to the new {\tt ESMF\_Bundle}.
 !      Must be equal to or less than the number of 
-!      {\tt ESMF\_Field}s in the following argument.
+!      {\tt ESMF\_Field}s in the {\tt fieldList}.
 !   \item [fieldList]
 !      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
-!      items will be added to the {\tt ESMF\_Bundle}.
+!      items will be added to the new {\tt ESMF\_Bundle}.
 !   \item [{[packflag]}]
-!      If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!      data in individual {\tt ESMF\_Array}s will be collected
-!      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
-!      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!   \item [{[bundleInterleave]}]
-!      {\tt ESMF\_BundleInterleave} type.  Controls whether the data in
-!      the packed bundle is interleaved by field or by item.
+!      The packing option is not yet implemented.  See Section~\ref{sec:bundlerest}
+!      for a description of packing, and Section~\ref{opt:packflag} for 
+!      anticipated values.  The current implementation corresponds to the
+!      value {\tt ESMF\_NO\_PACKED\_DATA}, which means that every {\tt ESMF\_Field}
+!      is referenced separately rather than being copied into a single contiguous
+!      buffer.  This is the case no matter what, if anything, is passed in for
+!      this argument.
+!   \item [{[bundleinterleave]}]
+!      The interleave option is not yet implemented.  See Section~\ref{sec:bundlerest}
+!      for a brief description of interleaving, and Section~\ref{opt:bundleinterleave}
+!      for anticipated values.  The flag is not applicable to the current implementation,
+!      since it applies only to packed data (see the {\tt packflag} argument).
 !   \item [{[name]}]
-!      {\tt ESMF\_Bundle} name.  A default name will be generated if
+!      {\tt ESMF\_Bundle} name.  A default name is generated if
 !      one is not specified.
 !   \item [{[iospec]}]
-!      I/O specification.
+!      The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_Bundle}s.  Any 
+!      values passed in will be ignored.
 !   \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1040,7 +1059,7 @@ end function
 
 !     Call construction method to allocate and initialize bundle internals.
       call ESMF_BundleConstructNew(btypep, fieldCount, fieldList, &
-                                   packflag, bundleInterleave, name, iospec, rc)
+                                   packflag, bundleinterleave, name, iospec, rc)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1080,14 +1099,15 @@ end function
 !     \begin{description}
 !     \item [{[grid]}]
 !           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
-!           {\tt ESMF\_Bundle} must have.  If not specified now, the 
+!           {\tt ESMF\_Bundle} must be associated with.  If not specified now, the 
 !           grid associated with the first {\tt ESMF\_Field} added will be
-!           used as the {\tt ESMF\_Grid} for this {\tt ESMF\_Bundle}.
+!           used as the reference grid for the {\tt ESMF\_Bundle}.
 !     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
+!           {\tt ESMF\_Bundle} name.  A default name is generated if
 !           one is not specified.
 !     \item [{[iospec]}]
-!           I/O specification.
+!           The {\tt ESMF\_IOSpec} is not yet used by {\tt ESMF\_Bundle}s.  Any 
+!           values passed in will be ignored.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1158,7 +1178,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with the {\tt ESMF\_Bundle}.
+!     Releases all resources associated with the {\tt bundle}.
 !
 !     \begin{description}
 !     \item [bundle]
@@ -1213,7 +1233,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGet"
 !BOP
-! !IROUTINE: ESMF_BundleGet - Return information about the Bundle
+! !IROUTINE: ESMF_BundleGet - Return information about a Bundle
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGet(bundle, grid, fieldCount, name, rc)
@@ -1226,7 +1246,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns information about the {\tt ESMF\_Bundle}.  
+!      Returns information about the {\tt bundle}.  
 !      If the {\tt ESMF\_Bundle} was originally created
 !      without specifying a name, a unique name will have been generated
 !      by the framework.
@@ -1236,11 +1256,11 @@ end function
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
 !     \item [{[grid]}]
-!           The {\tt ESMF\_Grid} associated with the {\tt ESMF\_Bundle}.
+!           The {\tt ESMF\_Grid} associated with the {\tt bundle}.
 !     \item [{[fieldCount]}]
-!           Number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
+!           Number of {\tt ESMF\_Field}s in the {\tt bundle}.
 !     \item [{[name]}]
-!           A character string where the {\tt ESMF\_Bundle} name is returned.
+!           A character string where the {\tt bundle} name is returned.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1364,7 +1384,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from an {\tt ESMF\_Bundle}.
+!     Returns an integer attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1422,7 +1442,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Returns an integer list attribute from an {\tt ESMF\_Bundle}.
+!     Returns an integer list attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1433,8 +1453,8 @@ end function
 !     \item [count]
 !           The number of values in the list.
 !     \item [value]
-!           The list (fortran array) of integer values of the named attribute.
-!           The list must be at least {\tt count} item long.
+!           The list (Fortran array) of integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1490,7 +1510,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from an {\tt ESMF\_Bundle}.
+!      Returns a real attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1547,7 +1567,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Returns a real list attribute from an {\tt ESMF\_Bundle}.
+!     Returns a real list attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1558,8 +1578,8 @@ end function
 !     \item [count]
 !           The number of values in the list.
 !     \item [value]
-!           The list (fortran array) of real values of the named attribute.
-!           The list must be at least {\tt count} item long.
+!           The list (Fortran array) of real values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1615,7 +1635,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from an {\tt ESMF\_Bundle}.
+!      Returns a logical attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1673,7 +1693,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from an {\tt ESMF\_Bundle}.
+!      Returns a logical list attribute from an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1684,8 +1704,8 @@ end function
 !     \item [count]
 !           The number of values in the list.
 !     \item [value]
-!           The list (fortran array) of logical values of the named attribute.
-!           The list must be at least {\tt count} item long.
+!           The list (Fortran array) of logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1741,7 +1761,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from an {\tt ESMF\_Bundle}.
+!      Returns a character attribute from the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1796,14 +1816,15 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns the number of attributes associated with the given {\tt bundle}
+!      in the argument {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [count]
-!           The number of attributes on this object.
+!           The number of attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1900,15 +1921,15 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetAttrInfoByNum"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an attribute by number
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an attribute by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByNum(bundle, num, name, datatype, count, rc)
+      subroutine ESMF_BundleGetAttrInfoByNum(bundle, attributeIndex, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
-      integer, intent(in) :: num
+      integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
@@ -1922,8 +1943,8 @@ end function
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
-!     \item [num]
-!           The number of the attribute to query.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
 !     \item [name]
 !           Returns the name of the attribute.
 !     \item [datatype]
@@ -1953,7 +1974,7 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, num, &
+      call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, attributeIndex, &
                                        localName, localDt, localCount, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1970,35 +1991,37 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetDataMap"
-!BOP
-! !IROUTINE: ESMF_BundleGetDataMap - Get packed array ordering
+!BOPI
+! !IROUTINE: ESMF_BundleGetDataMap - Get data ordering
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleGetDataMap(bundle, datamap, rc)
+      subroutine ESMF_BundleGetDataMap(bundle, bundledatamap, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_BundleDataMap), intent(out) :: datamap
+      type(ESMF_BundleDataMap), intent(out) :: bundledatamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      For querying current ordering of packed {\tt ESMF\_DataArray} type.
-!      Information is returned in the {\tt ESMF\_BundleDataMap} type, 
-!      and then can be queried by {\tt ESMF\_BundleDataMap} 
-!      subroutines for details.
+!      For querying the memory ordering of packed data associated with a {\tt bundle},
+!      where packed data refers to constituent {\tt ESMF\_Field} data that has been
+!      copied into a contiguous array.  Note that packing is not yet 
+!      implemented, so this method is merely a placeholder.  The method will 
+!      return a {\tt bundledatamap} which can be queried by {\tt ESMF\_BundleDataMap}
+!      methods.  However, those queries will not yield meaningful information.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} object to query.
 !     \item [datamap]
-!           The current order/interleaf.
+!           The current order/interleaving.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD2.5.8 (pri 2)
 
 
@@ -2025,20 +2048,18 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return an {\tt ESMF\_Field} from an {\tt ESMF\_Bundle} by name.
+!      Returns a {\tt field} from a {\tt bundle} using
+!      the {\tt field}'s {\tt name}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!
 !     \item [name]
 !           {\tt ESMF\_Field} name.
-!
 !     \item [field]
 !           Returned {\tt ESMF\_Field}.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -2123,23 +2144,23 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetField()
-      subroutine ESMF_BundleGetFieldByNum(bundle, index, field, rc)
+      subroutine ESMF_BundleGetFieldByNum(bundle, fieldIndex, field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      integer, intent(in) :: index
+      integer, intent(in) :: fieldIndex
       type(ESMF_Field), intent(out) :: field
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return an {\tt ESMF\_Field} from an {\tt ESMF\_Bundle} by index number.
+!      Returns an {\tt ESMF\_Field} from an {\tt ESMF\_Bundle} by index number.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
-!     \item [index]
-!           {\tt ESMF\_Field} index number; first {\tt ESMF\_Field} index is 1.
+!     \item [fieldIndex]
+!           {\tt ESMF\_Field} index number; first {\tt fieldIndex} is 1.
 !     \item [field]
 !           Returned {\tt ESMF\_Field}.
 !     \item [{[rc]}]
@@ -2187,8 +2208,8 @@ end function
       endif
 
 !     Check for out of range index number
-      if ((index .lt. 1) .or. (index .gt. btype%field_count)) then
-        ! "ERROR in ESMF_BundleGetField: Index ", index, &
+      if ((fieldIndex .lt. 1) .or. (fieldIndex .gt. btype%field_count)) then
+        ! "ERROR in ESMF_BundleGetField: fieldIndex ", fieldIndex, &
         !                "out of range. Min=1, max=", btype%field_count
         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                 "Index out of range", &
@@ -2197,7 +2218,7 @@ end function
       endif
 
 !     Fetch requested field
-      field = bundle%btypep%flist(index) 
+      field = bundle%btypep%flist(fieldIndex) 
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -2251,7 +2272,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetGridCellCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridCellCount - Returns global and local grid cell count
+! !IROUTINE: ESMF_BundleGetGridCellCount - Return global and local grid cell count
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridCellCount(bundle, localcount, globalcount, rc)
@@ -2329,7 +2350,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetGridDimSize"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridDimSize - Returns the number of items in each dimension
+! !IROUTINE: ESMF_BundleGetGridDimSize - Return the number of items in each dimension
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridDimSize(bundle, locallist, globallist, rc)
@@ -2371,7 +2392,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetGridIndexOrder"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridIndexOrder - Returns the order of the indices
+! !IROUTINE: ESMF_BundleGetGridIndexOrder - Return the order of the indices
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridIndexOrder(bundle, indexorder, rc)
@@ -2408,7 +2429,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetGridPointCount"
 !BOPI
-! !IROUTINE: ESMF_BundleGetGridPointCount - Returns global and local grids point count
+! !IROUTINE: ESMF_BundleGetGridPointCount - Return global and local grids point count
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridPointCount(bundle, localcount, globalcount, rc)
@@ -2696,15 +2717,15 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Delete a Field reference from an existing {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} 
-!      has packed data this will mean copying the data to remove this field.
+!      Delete an {\tt ESMF\_Field} reference from an existing {\tt bundle}
+!      by {\tt name}.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           The {\tt ESMF\_Bundle} to remove {\tt ESMF\_Field} from.
+!           The {\tt ESMF\_Bundle} to remove the {\tt ESMF\_Field} from.
 !     \item [name]
-!           Name of {\tt ESMF\_Field} to remove.
+!           The name of {\tt ESMF\_Field} to remove.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2813,7 +2834,7 @@ end function
 #define ESMF_METHOD "ESMF_BundleSetGrid"
 !BOP
 ! !IROUTINE: ESMF_BundleSetGrid - Associate a Grid with an empty Bundle
-!
+! 
 ! !INTERFACE:
       subroutine ESMF_BundleSetGrid(bundle, grid, rc)
 !
@@ -2823,9 +2844,10 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Sets the {\tt ESMF\_Grid} for an empty {\tt ESMF\_Bundle}.  All 
-!     {\tt ESMF\_Field}s added to this {\tt ESMF\_Bundle} must have this
-!     same {\tt ESMF\_Grid}.
+!     Sets the {\tt grid} for a {\tt bundle} that contains no {\tt ESMF\_Field}s.  
+!     All {\tt ESMF\_Field}s added to this {\tt bundle} must be
+!     associated with the same {\tt ESMF\_Grid}.  Returns an error if 
+!     there is already an {\tt ESMF\_Grid} associated with the {\tt bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2963,7 +2985,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleWrite"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleWrite - Save a Bundle to an external destination
 !
 ! !INTERFACE:
@@ -2991,7 +3013,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
 
 
@@ -3240,7 +3262,7 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_BundleConstructNew(btype, fieldCount, fields, &
-                                         packflag, bundleInterleave, &
+                                         packflag, bundleinterleave, &
                                          name, iospec, rc)
 !
 ! !ARGUMENTS:
@@ -3248,7 +3270,7 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
@@ -3277,7 +3299,7 @@ end function
 !      data in individual {\tt ESMF\_Array}s will be collected
 !      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
 !      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!   \item [{[bundleInterleave]}]
+!   \item [{[bundleinterleave]}]
 !      {\tt ESMF\_BundleInterleave} type.  Controls whether the data in
 !      the packed bundle is interleaved by field or by item.
 !   \item [{[name]}]
@@ -3311,7 +3333,7 @@ end function
 
       ! If specified, set packflag and interleave
       if(present(packflag)) btype%pack_flag = packflag
-      if(present(bundleInterleave)) btype%fil%field_bfa%bfa_type = bundleInterleave
+      if(present(bundleinterleave)) btype%fil%field_bfa%bfa_type = bundleinterleave
 
       ! Add the fields in the list, checking for consistency.
       call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
@@ -3451,4 +3473,15 @@ end function
 
 
       end module ESMF_BundleMod
+
+
+
+
+
+
+
+
+
+
+
 
