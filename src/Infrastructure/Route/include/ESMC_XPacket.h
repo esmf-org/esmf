@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.30 2005/03/04 00:28:14 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.31 2005/03/10 17:42:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,19 +51,25 @@
 
 // !PRIVATE TYPES:
 
+ enum ESMC_PackUnpackFlag { ESMC_BUFFER_PACK, ESMC_BUFFER_UNPACK};
+
  // class declaration type
  class ESMC_XPacket {    // does *not* inherit from base.
 
    private:
      // one of these blocks describes an N-d hyperslab of data
      // embedded in a larger N-d array.
+     
+     // TODO: stride and rep_count are really only ESMF_MAXDIM-1 because
+     // contig_length implicitly stores the first rep_count, and the first
+     // stride is always 1 item.
 
-     int rank;
-     int offset;
-     bool iscontig;
-     int contig_length;
-     int stride[ESMF_MAXDIM];        // TODO: this is really only MAXDIM-1
-     int rep_count[ESMF_MAXDIM];
+     int rank;                       // dimensionality of hyperslab
+     int offset;                     // offset from "base" of memory block
+     int contigrank;                 // highest rank for which block is contig
+     int contig_length;              // #contig items in fastest varying dim
+     int stride[ESMF_MAXDIM];        // number of items to skip in each dim-1
+     int rep_count[ESMF_MAXDIM];     // repeat count for each dim-1
      
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -85,8 +91,19 @@
 
     int ESMC_XPacketGetOffset(void) { return this->offset; }
 
-    bool ESMC_XPacketIsContig(void) { return this->iscontig; }
+    // returns true if entire xp describes a single chunk of mem
+    bool ESMC_XPacketIsContig(void) { return (this->contigrank == this->rank); }
+
+    // all slabs up to this rank number are contig.  (since the contig_length
+    // describes at least the first dim and it has an implicit stride of 1,
+    // the minimum rank that can be returned here is 1.)
+    int ESMC_XPacketGetContigRank(void) { return this->contigrank; }
+
+    // computes the contig rank based on the rank, strides, rep_count 
+    // alread in the xpacket.
     void ESMC_XPacketSetContig(void);
+
+    bool ESMC_XPacketIsEmpty();      // returns true if the xp is empty
 
  // miscellaneous fun stuff
     int ESMC_XPacketIntersect(ESMC_XPacket *xpacket1, 
@@ -95,7 +112,6 @@
                                   ESMC_AxisIndex *indexlist, int rank,
                                   int *global_start);
                          
-    bool ESMC_XPacketIsEmpty();      // returns true if the xp is empty
     int ESMC_XPacketPrint(const char *options);
 
  // native C++ constructors/destructors
@@ -116,6 +132,10 @@
     friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
                                       int VMType, int nbytes, char *buffer,
                                       void *dataAddr);
+    friend int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
+                                    int xpCount, ESMC_XPacket **xpList,
+                                    int VMType, int nbytes, void *dataAddr,
+                                    char *buffer);
 
     friend int ESMC_XPacketGetEmpty(int *nrank, int *noffset, 
                                     int *ncontig_length, 
@@ -144,8 +164,12 @@
                                int VMType, int nbytes, void *dataAddr,
                                char *buffer);
     int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
-                               int VMType, int nbytes, char *buffer,
-                               void *dataAddr);
+                                 int VMType, int nbytes, char *buffer,
+                                 void *dataAddr);
+    int ESMC_XPacketDoBuffer(ESMC_PackUnpackFlag packflag, 
+                             int xpCount, ESMC_XPacket **xpList,
+                             int VMType, int nbytes, void *dataAddr,
+                             char *buffer);
     int ESMC_XPacketGetEmpty(int *nrank, int *noffset, int *ncontig_length, 
                              int *nstride, int *nrep_count);
 
