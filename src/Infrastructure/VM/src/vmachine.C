@@ -1982,12 +1982,66 @@ void vmachine::vmachine_allglobalreduce(void *in, void *out, int len,
     }
     break;
   case vmMIN:
-    printf("vmachine: Reduce operation vmMIN is not yet implemented\n");
-    return;
+    switch (type){
+    case vmI4:
+      {
+        localresult = (void *)&local_i4;
+        int *tempdata = (int *)in;        // type cast for pointer arithmetic
+        local_i4 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] < local_i4) local_i4 = tempdata[j];
+      }
+      break;
+    case vmR4:
+      {
+        localresult = (void *)&local_r4;  // type cast for pointer arithmetic
+        float *tempdata = (float *)in;
+        local_r4 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] < local_r4) local_r4 = tempdata[j];
+      }
+      break;
+    case vmR8:
+      {
+        localresult = (void *)&local_r8;  // type cast for pointer arithmetic
+        double *tempdata = (double *)in;
+        local_r8 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] < local_r8) local_r8 = tempdata[j];
+      }
+      break;
+    }
     break;
   case vmMAX:
-    printf("vmachine: Reduce operation vmMAX is not yet implemented\n");
-    return;
+    switch (type){
+    case vmI4:
+      {
+        localresult = (void *)&local_i4;
+        int *tempdata = (int *)in;        // type cast for pointer arithmetic
+        local_i4 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] > local_i4) local_i4 = tempdata[j];
+      }
+      break;
+    case vmR4:
+      {
+        localresult = (void *)&local_r4;  // type cast for pointer arithmetic
+        float *tempdata = (float *)in;
+        local_r4 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] > local_r4) local_r4 = tempdata[j];
+      }
+      break;
+    case vmR8:
+      {
+        localresult = (void *)&local_r8;  // type cast for pointer arithmetic
+        double *tempdata = (double *)in;
+        local_r8 = tempdata[0];
+        for (int j=1; j<len; j++)
+          if (tempdata[j] > local_r8) local_r8 = tempdata[j];
+      }
+      break;
+    }
     break;
   }
   vmachine_allreduce(localresult, out, 1, type, op);
