@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.9 2003/06/19 15:47:07 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.10 2003/06/19 19:00:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -966,14 +966,18 @@ end function
       type(ESMF_Field) :: temp_list(1)
       type(ESMF_BundleType), pointer :: btype
 
+      ! Initialize return code in case we return early.
+      ! Otherwise, count on AddFieldList call to set rc
+      if(present(rc)) rc = ESMF_FAILURE
+
       temp_list(1) = field
 
       ! validate bundle before going further
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
+      if (.not. associated(bundle%btypep)) then
         print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
         return
       endif
+      btype => bundle%btypep
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
         print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
         return
@@ -1022,12 +1026,16 @@ end function
 !EOP
       type(ESMF_BundleType), pointer :: btype
 
+      ! Initialize return code in case we return early.
+      ! Otherwise, count on AddFieldList call to set rc
+      if(present(rc)) rc = ESMF_FAILURE
+
       ! validate bundle before going further
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
+      if (.not. associated(bundle%btypep)) then
         print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
         return
       endif
+      btype => bundle%btypep
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
         print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
         return
