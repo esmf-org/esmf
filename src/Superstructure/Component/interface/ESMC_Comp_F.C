@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.14 2003/10/01 22:17:43 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.15 2004/02/04 17:45:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,13 +148,13 @@ extern "C" {
      // ---------- Set Entry Point ---------------
      void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
-        ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
-        ESMC_SetTypedEP(ptr, tname, slen, phase, 2, FT_COMP2STAT, func, status);
+        //ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
+        ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_COMP2STAT, func, status);
      }
      void FTN(esmf_cplcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
-        ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
-        ESMC_SetTypedEP(ptr, tname, slen, phase, 2, FT_COMP2STAT, func, status);
+        //ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
+        ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_COMP2STAT, func, status);
      }
 
      void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname,
