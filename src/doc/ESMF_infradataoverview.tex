@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.2 2003/10/25 03:07:39 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.3 2003/11/13 18:12:36 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Classes}
 
@@ -33,6 +33,9 @@ A {\tt Bundle} object contains methods
 for setting and retrieving constituent fields, import and export
 data exchange during intercomponent communication,
 regridding, data I/O, and reordering of data in memory.
+
+
+
 
 
 \subsection{Programming Model}
@@ -221,187 +224,6 @@ when finished with it.
 
 \end{description}
 
-
-\subsubsection{Field and Bundle I/O}
-
-The I/O component layer isolates the higher level Field
-and Bundle
-code from the details of format-dependent library calls
-and some of the parallel I/O vs. scatter/gather issues, 
-but the Field and Bundle code must specify 
-what parts of the objects are read or written, and
-whether to individual files or multiple files.  
-
-
-\begin{description}
-
-\item{Write}
-
-The default behavior for Field and Bundle I/O
-is to write the entire object into a single file,
-preserving as much of the metadata information as is
-possible with the selected I/O format.  This means
-calling the appropriate Grid method to write the coordinates
-into the file, and then calling an Array method to
-write the associated data into the same file.  
-Most formats have the concept of a variable or dataset;
-the Field data will be written using the closest matching
-concept for the format.  The coordinates and data will
-be gathered for distributed fields so the contents can
-be written as a unified whole.  These defaults can of
-course be overridden by specifying the appropriate options.
-Unless specified, the Field name will be used as the
-variable or dataset name in the output file.
-If attributes such as units are associated with the
-Field they will be written as well.  
-
-Since Bundles must share the same Grid, the Grid
-will be written once into the file followed by the
-data associated with each of the constituent Fields.
-If the Bundle has an associated packed Array, the
-default will still be to write the Field data as separate
-variables in the file, but with an option to keep the
-array packed and write it as a single variable in the file.
-Other write options include writing each Field into a
-separate file, duplicating the Grid in each file.
-
-Other options include writing only the Grid or only the
-Array, or writing each decomposition of the Field
-or Bundle into separate files.
-
-While it is expected that the I/O layer will isolate the
-upper layers of code from most of the details of the
-process, there are still some considerations at the
-Field and Bundle level depending on 
-where the data
-is to be written from (single process or distributed) and into
-how many files (single, multiple).
-The following sections go into more detail about what the
-the Field and Bundle objects needs to do in order to 
-support various I/O strategies.
-
-\begin{description}
-
-\item{Serial write into a single file}
-
-In this style, the data is gathered on a single PE
-and written to a single file.  The Field code will have
-to have gather calls which allow the data to be assembled
-on a single processor for subsequent I/O layer calls.
-There will be an asynchronous version of Write which
-allows each PE to continue once it has sent its local
-data decomposition to the PE where assembly is occurring.
-
-\item{Parallel write into a single file}
-
-The I/O layer will have to manage the gather.  In this
-case each decomposition of the Field or Bundle makes
-its own call to the I/O layer and assembly happens at
-the lower layer.
-
-\item{Parallel write into multiple files}
-
-Each decomposition of the Field or Bundle makes its own
-call to the I/O layer and writes only the local decomposition
-of the Grid and Array.  One PE will have to
-write out the Distributed Grid information so the parts can
-be reconstituted into a single undecomposed object at 
-the lower layer.
-
-\item{Checkpoint/Restart considerations}
-
-At some level the Checkpoint/Restart functions are
-logically the same as Read/Write, and internally will use the
-same I/O interfaces.  But by giving them different
-names it is easy to separate out the places where performance
-is more important than the format; the implication of calling
-Checkpoint/Restart is that the data should be saved in the
-most efficient method possible on this system.
-The defaults for these routines will not match the defaults
-for normal Read/Write.
-
-\end{description}
-
-
-\item{Read}
-
-The defaults for Field and Bundle read will be to read
-in any coordinate information and create a Grid, and then
-any specified variables will be read and Fields created
-for single variables, and Bundles for Fields which share
-a Grid.  The defaults can be overridden by specifying
-specific variables/datasets to read in, to read only the
-data, only the grid, how to do the decomposition, and
-other options which would normally be specified at 
-Grid and Field and Bundle creation time.
-
-Field and Bundle Read routines also have options to associate
-an existing Grid with the Data in a file, so the Data is
-read but the Grid is given as an input.
-
-The input file formats vary in their capability to
-carry enough metadata to allow the file to be read
-in without directives from the calling code, but the
-goal is to have the read default as much as is possible
-to being controlled by the information in the file.
-
-While most I/O options are encapsulated in the I/O layer,
-the following section discusses some issues which pass
-up above that layer.
-
-\begin{description}
-
-\item{Serial read from a single file}
-
-The Field code may choose to first create an
-undecomposed Field on a single PE and then invoke a
-Field scatter routine which creates a Distributed Grid
-and distributes subsets of the Array to different PEs.
-The other option is to create a Physical and Distributed
-Grid and then read in subsets in multiple calls to the
-I/O layer and scatter pieces serially.  The former approach
-is simpler but if the Field is too large to fit in the
-physical memory of a single PE the latter approach may be
-necessary.  For asychronous reads, the FieldRead call can
-return immediately and a Poll routine must be available to
-call later to see if the Field is ready.
-
-\item{Parallel read from a single file}
-
-The Field/Bundle code must first query for enough
-Grid information to be able to construct a Distributed
-Grid object which defines the mapping of decompositions
-to the whole.  Then each individual PE can make calls
-to the I/O layer to read the appropriate decomposition
-into the local Array.  
-
-\item{Parallel read from multiple files}
-
-The Field/Bundle code must first query for enough
-Grid information to be able to construct a Distributed
-Grid object which defines the mapping of decompositions
-to the whole.  Then each individual PE can make calls
-to the I/O layer to read the appropriate decomposition
-into the local Array.  
-
-\item{Difficulties with Field Read}
-
-Decompositions can vary from run to run; unless all data
-is in a single file it is difficult to ensure that the data for
-each decomposition is local to the correct processor.  This is
-not a problem for Checkpoint/Restart during the run of a
-single simulation, and a somewhat easier problem if restarting
-a run with a different number of processors.  The restart files
-can contain enough information to rebalance the data and get it
-to the correct processors to continue.  But for data in an 
-external data file format in multiple files, 
-there may not be enough information about the original decomposition
-to map the data correctly.
-
-\end{description}
-
-\end{description}
-
 \subsubsection{Finalization}
 
 \begin{description}
@@ -423,6 +245,16 @@ The constituent Fields are not deleted by this call, since they
 can be contained by multiple Bundles.
 
 \end{description}
+
+
+
+\subsection{Data Class Communication Methods}
+
+\subsubsection{Regrid}
+
+\subsubsection{Halo}
+
+\subsubsection{Redistribution}
 
 
 \subsection{Internal Framework Use}
