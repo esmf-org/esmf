@@ -1,4 +1,4 @@
- $Id: README,v 1.3 2003/09/02 15:11:19 flanigan Exp $
+ $Id: README,v 1.4 2003/09/02 15:30:10 flanigan Exp $
 
 README file for esmf_build_config directory.
 
@@ -53,23 +53,44 @@ file contains settings for compiling with the Lahey Fortran90 compiler
 on a linux machine named jazz:
 
 
-      esmf_build_config/Linux.jazz_lahey.mk
+      build_config/Linux.jazz_lahey.mk
 
 
 Current site files for supported platforms:
 
-     esmf_build_config/AIX.default.mk
-                       IRIX64.default.mk
-                       OSF1.defalut.mk
+      build_config/AIX.default.mk
+                   IRIX64.default.mk
+                   OSF1.defalut.mk
 
 Current site files for unsupported platforms:
 
-     esmf_build_config/Linux.lahey.mk
-                       Darwin.defalut.mk
-                       SunOS.default.mk
+      build_config/Linux.lahey.mk
+                   Darwin.defalut.mk
+                   SunOS.default.mk
 
 Notice that there is no default site value for Linux machines.  This
 is because there is no common Fortran90 Linux compiler.
+
+The build system can be ported to other sites by adding new site and
+conf.h files.  The new site file has to follow the naming convention
+used by the existing site files.  The new site file will also have to
+define the same makefile variables as the existing site files.
+
+The conf.h is used to define machine attributes within C and C++
+source code.  The build system stores the conf. h files in
+subdirectories in build_config/conf.  The subdirectories following a
+naming convention using the environment variables ESMF_ARCH, ESMF_PREC
+and ESMF_SITE.  The naming convention is:
+  
+      build_config/conf/EMSF_ARCH.ESMF_PREC.ESMF_SITE/conf.h
+
+Like site files, new conf.h files have to define the same machine
+attributes as existing conf.h files.  If a machine supports both 32
+and 64 bit precision, then then two conf.h files are needed.  Example:
+
+      build_config/conf/AIX.32.default/conf.h
+      build_config/conf/AIX.64.default/conf.h
+
 
 
 Environment Variables
