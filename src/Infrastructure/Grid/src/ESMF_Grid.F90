@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.43 2003/04/17 20:40:57 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.44 2003/04/24 17:51:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.43 2003/04/17 20:40:57 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.44 2003/04/24 17:51:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -939,18 +939,29 @@
 !
 !EOP
 ! !REQUIREMENTS:
-      integer :: status=ESMF_SUCCESS          ! Error status
-      logical :: rcpresent=.FALSE.            ! Return code present
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_DistGridDestroy(grid%ptr%distgrid, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridDestroy: distgrid destroy"
+      ! If already destroyed or never created, return ok
+      if (.not. associated(grid%ptr)) then
+        print *, "GridDestroy called on uninitialized or destroyed Grid"
+        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
+        return
+      endif
+
+      ! Destruct all grid internals and then free field memory.
+      call ESMF_GridDestruct(grid%ptr, status)
+      ! If error write message and return.
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridDestroy from ESMF_GridDestruct"
         return
       endif
 
@@ -1186,7 +1197,7 @@
       subroutine ESMF_GridDestruct(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType), intent(in) :: grid
+      type(ESMF_GridType), pointer :: grid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1207,9 +1218,25 @@
 !EOP
 ! !REQUIREMENTS:
 
-!
-!  code goes here
-!
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call ESMF_DistGridDestroy(grid%distgrid, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridDestruct: distgrid destroy"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_GridDestruct
 
 !------------------------------------------------------------------------------
