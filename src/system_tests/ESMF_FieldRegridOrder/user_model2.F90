@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_model2.F90,v 1.3 2004/03/24 15:58:34 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -94,9 +94,10 @@
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
       integer :: de_id
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridType) :: horzGridtype
+      type(ESMF_GridStagger) :: horzStagger
+      type(ESMF_CoordSystem) :: horzCoordSystem
+      type(ESMF_CoordOrder) :: coordOrder
       integer :: status, myde
 
 
@@ -121,22 +122,24 @@
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
 
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_D_NE
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horzGridtype    = ESMF_GridType_XY
+      horzStagger     = ESMF_GridStagger_D_NE
+      horzCoordSystem = ESMF_CoordSystem_Cartesian
+      coordOrder      = ESMF_CoordOrder_YXZ
 
       call ESMF_DataMapInit(datamap, ESMF_INDEX_JI, rc=rc)
 
       grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
-                              countsPerDEDecomp1=countsPerDE1, &
-                              countsPerDEDecomp2=countsPerDE2, &
-                              minGlobalCoordPerDim=min, &
-                              delta1=delta1, delta2=delta2, &
-                              layout=layout, &
-                              horzGridType=horz_gridtype, &
-                              horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              name="source grid", rc=status)
+                                     countsPerDEDecomp1=countsPerDE1, &
+                                     countsPerDEDecomp2=countsPerDE2, &
+                                     minGlobalCoordPerDim=min, &
+                                     delta1=delta1, delta2=delta2, &
+                                     layout=layout, &
+                                     horzGridType=horzGridtype, &
+                                     horzStagger=horzStagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     coordOrder=coordOrder, &
+                                     name="source grid", rc=status)
 
       ! Figure out our local processor id
       call ESMF_DELayoutGetDEID(layout, de_id, rc)
@@ -155,7 +158,6 @@
       call ESMF_ArrayGetData(array1, idata, rc=rc)
 
       call ESMF_StateAddData(importState, humidity, rc)
-   !   call ESMF_StatePrint(importState, rc=rc)
 
       print *, de_id, "User Comp 2 Init returning"
    
@@ -182,14 +184,11 @@
       print *, "User Comp Run starting"
 
       ! Get information from the component.
-  !    call ESMF_StatePrint(importState, rc=status)
       call ESMF_StateGetData(importState, "humidity", humidity, rc=status)
-  !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
       call ESMF_FieldGetArray(humidity, array1, rc=status)
       print *, "Imported Array in user model 2:"
-  !    call ESMF_ArrayPrint(array1, "", rc)
 
       print *, "User Comp Run returning"
 
