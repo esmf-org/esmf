@@ -28,6 +28,7 @@
     
 !   ! Local variables
     integer :: i_max, j_max
+    integer :: nDE_i, nDE_j
     integer :: horz_gridtype, vert_gridtype
     integer :: horz_stagger, vert_stagger
     integer :: horz_coord_system, vert_coord_system
@@ -44,6 +45,8 @@
 
       i_max = 10
       j_max = 12
+      nDE_i = 1
+      nDE_j = 1
       horz_gridtype = ESMF_GridType_XY
       vert_gridtype = ESMF_GridType_Unknown
       horz_stagger = ESMF_GridStagger_A
@@ -56,10 +59,17 @@
       y_max = 12.0
       name = "test grid 1"
  
-      grid = ESMF_GridCreate(i_max, j_max, horz_gridtype, vert_gridtype, &
-                             horz_stagger, vert_stagger, &
-                             horz_coord_system, vert_coord_system, &
-                             x_min, x_max, y_min, y_max, name, status)
+      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             nDE_i=nDE_i, nDE_j=nDE_j, &
+                             horz_gridtype=horz_gridtype, &
+                             vert_gridtype=vert_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             vert_stagger=vert_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             vert_coord_system=vert_coord_system, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             name=name, rc=status)
 
       print *, "Grid example 1 returned"
 
