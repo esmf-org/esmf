@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23.2.1 2005/02/08 23:53:06 nscollins Exp $
+# $Id: build_rules.mk,v 1.23.2.2 2005/03/03 23:07:17 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -81,7 +81,7 @@ endif
 ifeq ($(ESMF_COMM),lam)
 # this section is set up for LAM mpi
 MPI_HOME       = 
-MPI_LIB        = -lmpi -llam
+MPI_LIB        = -llamf77mpi -lmpi -llam
 MPI_INCLUDE    = 
 MPIRUN         =  mpirun
 endif
