@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/03/21 17:58:01 flanigan Exp $ 
+# $Id: makefile,v 1.12 2003/03/25 00:18:31 flanigan Exp $ 
 
 all: alldocs
 
@@ -70,6 +70,11 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
+
+CLEANDIRS   = Component_desdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Component_desdoc.tex
+CLOBBERDIRS =
+
 
 # Dvi files
 Component_desdoc.dvi: Component_desdoc.ctex fsrc ccsrc

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/20 20:33:00 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/03/25 00:18:09 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -11,11 +11,16 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Fieldobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Field/src
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
+
 
 
 #ESMF_Array.o:	

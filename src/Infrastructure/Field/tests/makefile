@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/03/17 22:34:40 flanigan Exp $ 
+# $Id: makefile,v 1.10 2003/03/25 00:18:10 flanigan Exp $ 
 
 ALL:  tests
 
@@ -32,6 +32,11 @@ TESTS_RM      = ESMF_FieldUTest.rm \
 		ESMF_BundleUTest.rm 
 
 include ${ESMF_DIR}/makefile
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod 
+CLOBBERDIRS =
+
 
 #
 #  Bundles

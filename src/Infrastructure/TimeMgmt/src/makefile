@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/03/12 18:41:45 nscollins Exp $ 
+# $Id: makefile,v 1.12 2003/03/25 00:18:28 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -46,7 +46,7 @@ MANSEC	  = Timeobj
 LIBBASE	  = liboldworld
 DIRS	  = examples doc
 LOCDIR	  = src/Infrastructure/TimeMgmt/src
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+
 MVMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
 # RM MOD FILES does generate the right list, but the case of the basename isn't
 # correct - it needs to be all lower case.  try using tr first...
@@ -54,6 +54,11 @@ MVMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
 include $(ESMF_DIR)/makefile
 
 DIRS = 
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
+
 
 lib:: 
 	-@if [ ! -d ${ESMC_MODDIR}/oldworld ]; then \

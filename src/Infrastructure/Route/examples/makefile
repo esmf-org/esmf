@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/14 15:25:11 nscollins Exp $
+# $Id: makefile,v 1.4 2003/03/25 00:18:25 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -14,7 +14,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Route/examples
 
 TESTEXAMPLES_3  = \
@@ -29,6 +28,14 @@ EXAMPLESF       = ESMF_RouteEx.F90
 EXAMPLESC       = ESMC_RouteEx.C
 
 include ${ESMF_DIR}/makefile
+
+DIRS =
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod *.tmps
+CLOBBERDIRS =
+
+
 
 ESMF_RouteDir:
 	mkdir -p ${ESMC_TESTDIR}

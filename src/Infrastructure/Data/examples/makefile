@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/03/02 19:43:15 nscollins Exp $ 
+# $Id: makefile,v 1.10 2003/03/25 00:17:57 flanigan Exp $ 
 
 ALL:  examples
 
@@ -27,6 +27,11 @@ EXAMPLESF       = ESMF_ArrayCreateEx.F90
 include $(ESMF_DIR)/makefile
 
 DIRS = 
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod  
+CLOBBERDIRS =
+
 
 ESMF_ArrayCreateDir:
 	mkdir -p ${ESMC_TESTDIR}

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/05 20:35:26 nscollins Exp $
+# $Id: makefile,v 1.5 2003/03/25 00:18:22 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -32,10 +32,11 @@ LIBBASE	  = libesmf
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Regrid/interface
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
-
 include $(ESMF_DIR)/makefile
 
 # leave the following line blank.
 DIRS	  = 
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/24 20:55:10 ekluz Exp $ 
+# $Id: makefile,v 1.7 2003/03/25 00:17:48 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -43,6 +43,10 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 include $(ESMF_DIR)/makefile
 
 DIRS = 
+
+CLEANDIRS   = 
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi CommMem_desdoc.tex CommMem_reqdoc.tex
+CLOBBERDIRS =
 
 # Dvi files
 ${ESMC_DOCDIR}/CommMem_desdoc.dvi:

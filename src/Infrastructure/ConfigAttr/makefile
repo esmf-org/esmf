@@ -1,9 +1,11 @@
-# $Id: makefile,v 1.3 2003/03/20 20:32:49 flanigan Exp $
+# $Id: makefile,v 1.4 2003/03/25 00:17:50 flanigan Exp $
 
-
-#DIRS     = src interface examples doc
 LOCDIR    = src/Infrastructure/ConfigAttr
 
 include $(ESMF_DIR)/makefile
 
 DIRS      = doc
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/20 20:33:14 flanigan Exp $
+# $Id: makefile,v 1.7 2003/03/25 00:18:24 flanigan Exp $
 
 # this needs to be the path of this directory relative to the
 # top level esmf directory.
@@ -12,5 +12,8 @@ include ${ESMF_DIR}/makefile
 #  example/test code, or documents which need to be generated.
 DIRS	  = src interface examples tests doc
 
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
 
 

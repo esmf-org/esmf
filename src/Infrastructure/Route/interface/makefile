@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/20 20:33:15 flanigan Exp $
+# $Id: makefile,v 1.5 2003/03/25 00:18:25 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -26,16 +26,15 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Routeobj
 LIBBASE	  = libesmf
 
-# leave the following line blank.
-DIRS	  = 
-
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Route/interface
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
-
 include ${ESMF_DIR}/makefile
 
+DIRS =
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
 

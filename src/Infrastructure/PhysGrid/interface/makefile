@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/20 20:33:12 flanigan Exp $
+# $Id: makefile,v 1.5 2003/03/25 00:18:20 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -23,19 +23,18 @@ MANSEC	  = PhysGridobj
 LIBBASE	  = libesmf
 
 
-
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/PhysGrid/interface
-
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include $(ESMF_DIR)/makefile
 
 # leave the following line blank.
 DIRS	  = 
 
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
 
 # if you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.

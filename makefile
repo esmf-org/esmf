@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2003/03/20 20:32:31 flanigan Exp $
+# $Id: makefile,v 1.19 2003/03/25 00:17:39 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -20,9 +20,12 @@ ESMF_BUILD_DIR = $(ESMF_DIR)/build
 BOPT = g
 
 DIRS = src
-CLEANDIRS = lib mod test
 
 include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
+
+CLEANDIRS = $(LDIR) $(ESMC_MODDIR) doc
+CLOBBERDIRS = lib mod test 
+
 
 build_libs:
 	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
@@ -293,11 +296,11 @@ run_system_tests_uni:  chkopts chkdir_tests
 # Clean recursively deletes files that each makefile wants
 # deleted.   Remove the .mod files here manually since the case
 # of mods is not really predictable.
-clean: 
-	@rm -f ${ESMC_MODDIR}/*.mod
-	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=clean_recursive  tree 
+# clean: 
+# 	@rm -f ${ESMC_MODDIR}/*.mod
+# 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+# 	   ACTION=clean_recursive  tree 
 
-clobber: chkopts clean
-	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=clobber_recursive  tree 
+# clobber: chkopts clean
+# 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+# 	   ACTION=clobber_recursive  tree 

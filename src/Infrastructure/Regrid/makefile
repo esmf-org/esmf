@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/05 20:35:25 nscollins Exp $
+# $Id: makefile,v 1.5 2003/03/25 00:18:21 flanigan Exp $
 
 
 
@@ -15,3 +15,6 @@ include $(ESMF_DIR)/makefile
 #  example/test code, or documents which need to be generated.
 DIRS	  = src interface examples doc tests
 
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =

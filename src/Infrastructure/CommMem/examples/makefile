@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/03/13 22:56:11 cdeluca Exp $
+# $Id: makefile,v 1.10 2003/03/25 00:17:48 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -34,12 +34,13 @@ TESTEXAMPLES = ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMC_CommMemEx
 # to the top level esmf directory. 
 LOCDIR	  = src/Infrastructure/CommMem/examples
 
-# leave these alone 
-CLEANFILES = $(ESMC_MODDIR)/ESMF_DELayout_FEx $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
-
 include $(ESMF_DIR)/makefile
 
 DIRS = 
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod
+CLOBBERDIRS =
 
 ESMF_DELayout_FEx: ESMF_DELayout_FEx.o chkopts
 	-${F90CXXLD} -o ESMF_DELayout_FEx ESMF_DELayout_FEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}

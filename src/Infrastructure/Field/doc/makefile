@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/21 17:57:57 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/03/25 00:18:06 flanigan Exp $ 
 ALL: lib 
 
 DESTEX = Bundle_ccex.tex Bundle_ccparam.tex \
@@ -68,6 +68,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
+CLEANDIRS   = Field_desdoc Field_reqdoc Field_refdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Field_desdoc.tex Field_reqdoc.tex Field_refdoc.tex
+CLOBBERDIRS =
+
 
 doc: ${ESMC_DOCDIR}/Field_desdoc.pdf ${ESMC_DOCDIR}/Field_desdoc.html \
      ${ESMC_DOCDIR}/Field_reqdoc.pdf ${ESMC_DOCDIR}/Field_reqdoc.html 
@@ -98,16 +102,16 @@ ${ESMC_DOCDIR}/Field_refdoc.pdf: ${ESMC_DOCDIR}/Field_refdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/Field_refdoc.dvi ${ESMC_DOCDIR}/Field_refdoc.pdf
 
 # Html Files
-${ESMC_DOCDIR}/Field_desdoc.html: 
+${ESMC_DOCDIR}/Field_desdoc: 
 	rm -fr ${ESMC_DOCDIR}/Field_desdoc
 	${DO_L2H} Field des
 	mv -f Field_desdoc ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/Field_reqdoc.html: 
+${ESMC_DOCDIR}/Field_reqdoc: 
 	${DO_L2H} Field req
 	mv -f Field_reqdoc ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/Field_refdoc.html: 
+${ESMC_DOCDIR}/Field_refdoc: 
 	${DO_L2H} Field ref
 	mv -f Field_refdoc ${ESMC_DOCDIR}
 
@@ -157,8 +161,6 @@ fsrc:  ${FSRC}
 # 	do_fprotex arrayex ../../Data/examples/ESMF_ArrayCreateEx.F90
 # 	touch fsrc
 
-clean:
-	rm -f *.dvi *.ps Field_reqdoc/* Field_desdoc/* fsrc ccsrc
 
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/10 22:32:38 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/03/25 00:18:07 flanigan Exp $ 
 
 ALL: 
 
@@ -31,6 +31,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod ESMF_FieldCreateEx ESMF_BundleCreateEx ESMC_FieldCreateEx
+CLOBBERDIRS =
+
 
 examples: ESMF_FieldCreateEx ESMF_BundleCreateEx ESMC_FieldCreateEx
 
@@ -44,20 +48,10 @@ ESMF_FieldCreateEx: ESMF_FieldCreateEx.o  chkopts
 RUN_ESMF_FieldCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmps
 	${MPIRUN} -np 4 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_FieldCreateEx.tmp
-	#@if (diff ESMF_FieldCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_FieldCreateEx.out) then \
-	#echo "PASS FieldCreateEx test" > ${ESMC_TESTDIR}/ESMF_FieldCreateEx.log; else \
-	#echo "FAIL FieldCreateEx test" > ${ESMC_TESTDIR}/ESMF_FieldCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmp optlog
 
 RUN_ESMF_FieldCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmps
 	${MPIRUN} -np 1 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_FieldCreateEx.tmp
-	#@if (diff ESMF_FieldCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_FieldCreateEx.outuni) then \
-	#echo "PASS FieldCreateEx test" > ${ESMC_TESTDIR}/ESMF_FieldCreateEx.log; else \
-	#echo "FAIL FieldCreateEx test" > ${ESMC_TESTDIR}/ESMF_FieldCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmp optlog
 
 ESMF_FieldCreateEx.rm:
 	echo "ESMF_FieldCreateEx.rm target called here."
@@ -73,20 +67,10 @@ ESMF_BundleCreateEx: ESMF_BundleCreateEx.o  chkopts
 RUN_ESMF_BundleCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmps
 	${MPIRUN} -np 4 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_BundleCreateEx.tmp
-	#@if (diff ESMF_BundleCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_BundleCreateEx.out) then \
-	#echo "PASS BundleCreateEx test" > ${ESMC_TESTDIR}/ESMF_BundleCreateEx.log; else \
-	#echo "FAIL BundleCreateEx test" > ${ESMC_TESTDIR}/ESMF_BundleCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmp optlog
 
 RUN_ESMF_BundleCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmps
 	${MPIRUN} -np 1 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_BundleCreateEx.tmp
-	#@if (diff ESMF_BundleCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_BundleCreateEx.outuni) then \
-	#echo "PASS BundleCreateEx test" > ${ESMC_TESTDIR}/ESMF_BundleCreateEx.log; else \
-	#echo "FAIL BundleCreateEx test" > ${ESMC_TESTDIR}/ESMF_BundleCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmp optlog
 
 ESMF_BundleCreateEx.rm:
 	echo "ESMF_BundleCreateEx.rm target called here."
@@ -99,20 +83,10 @@ ESMC_FieldCreateEx: ESMC_FieldCreateEx.o  chkopts
 RUN_ESMC_FieldCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmps
 	${MPIRUN} -np 4 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMC_FieldCreateEx.tmp
-	#@if (diff ESMC_FieldCreateEx.tmp ${ESMC_DIR}/${LOCDIR}/output/ESMC_FieldCreateEx.out) then \
-	#echo "PASS FieldCreateEx test" > ${ESMC_TESTDIR}/ESMC_FieldCreateEx.log; else \
-	#echo "FAIL FieldCreateEx test" > ${ESMC_TESTDIR}/ESMC_FieldCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmp optlog
 
 RUN_ESMC_FieldCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmps
 	${MPIRUN} -np 1 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMC_FieldCreateEx.tmp
-	#@if (diff ESMC_FieldCreateEx.tmp ${ESMC_DIR}/${LOCDIR}/output/ESMC_FieldCreateEx.outuni) then \
-	#echo "PASS FieldCreateEx test" > ${ESMC_TESTDIR}/ESMC_FieldCreateEx.log; else \
-	#echo "FAIL FieldCreateEx test" > ${ESMC_TESTDIR}/ESMC_FieldCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmp optlog
 
 ESMC_FieldCreateEx.rm:
 	echo "ESMC_FieldCreateEx.rm target called here."

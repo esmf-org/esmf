@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/03/17 22:30:07 flanigan Exp $ 
+# $Id: makefile,v 1.14 2003/03/25 00:18:35 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/SystemTests/63029
 
 
@@ -27,6 +26,10 @@ SYSTEM_TESTS_RM      = ESMF_SysTest63029.rm
 include $(ESMF_DIR)/makefile
 
 DIRS = 
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod
+CLOBBERDIRS =
 
 # user_model (and .mod file) has to be built first
 ESMF_SysTest63029.o: user_model.o

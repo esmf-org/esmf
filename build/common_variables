@@ -24,8 +24,8 @@
 #
 
 ESMF_BUILD	= ${ESMF_TOP_DIR}
-LDIR		= ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
-ESMC_MODDIR     = ${ESMF_TOP_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
+LDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
+ESMC_MODDIR     = ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
 ESMF_INCDIR     = $(ESMF_TOP_DIR)/src/include
 
 

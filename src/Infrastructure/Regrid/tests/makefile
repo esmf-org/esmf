@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/15 00:13:32 nscollins Exp $
+# $Id: makefile,v 1.3 2003/03/25 00:18:23 flanigan Exp $
 
 ALL:  tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
 TESTEXAMPLES_3  =
@@ -28,6 +27,13 @@ EXAMPLESF       = ESMF_Regrid.F90
 EXAMPLESC       = ESMC_Regrid.F90
 
 include ${ESMF_DIR}/makefile
+
+DIRS =
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod
+CLOBBERDIRS =
+
 
 tests test:
 #tests test: ESMF_RegridTest ESMC_RegridTest

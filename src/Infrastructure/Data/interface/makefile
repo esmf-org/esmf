@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/03/20 20:32:51 flanigan Exp $
+# $Id: makefile,v 1.9 2003/03/25 00:17:57 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -30,14 +30,15 @@ LIBBASE	  = libesmf
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/Data/interface
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include $(ESMF_DIR)/makefile
 
 # leave the following line blank.
 DIRS	  = 
 
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
 
 
 # rule for making ESMF_Array.F90 from ESMF_Array_F90.cpp:

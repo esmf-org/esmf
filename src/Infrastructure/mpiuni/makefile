@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:59 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/03/25 00:18:30 flanigan Exp $ 
 
 ALL: lib 
 
@@ -12,11 +12,16 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Timeobj
 LIBBASE	  = libmpiuni
 LOCDIR	  = src/Infrastructure/mpiuni/
-CLEANFILES = $(LIBNAME) 
+
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
+
 
 
 

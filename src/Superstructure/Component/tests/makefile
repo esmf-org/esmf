@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/03/20 23:27:30 svasquez Exp $ 
+# $Id: makefile,v 1.6 2003/03/25 00:18:34 flanigan Exp $ 
 
 ALL:  tests
 
@@ -31,6 +31,12 @@ TESTS_RM      =	ESMF_CompCreate.rm \
 		ESMF_StateUTest.rm
 
 include $(ESMF_DIR)/makefile
+
+DIRS = 
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod 
+CLOBBERDIRS =
 
 #
 # Components

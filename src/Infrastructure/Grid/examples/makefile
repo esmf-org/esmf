@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:35 flanigan Exp $
+# $Id: makefile,v 1.4 2003/03/25 00:18:11 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -38,13 +38,13 @@ TESTEXAMPLES_9 = \
 # to the top level esmf directory. 
 LOCDIR	  = src/Infrastructure/Grid/examples
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
-
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod ESMF_GridCreateEx
+CLOBBERDIRS =
 
 ESMF_GridCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
@@ -56,20 +56,10 @@ ESMF_GridCreateEx: ESMF_GridCreateEx.o  chkopts
 RUN_ESMF_GridCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridCreateEx.tmps
 	${MPIRUN} -np 4 ESMF_GridCreateEx > ESMF_GridCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_GridCreateEx.tmp
-	#@if (diff ESMF_GridCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_GridCreateEx.out) then \
-	#echo "PASS GridCreateEx test" > ${ESMC_TESTDIR}/ESMF_GridCreateEx.log; else \
-	#echo "FAIL GridCreateEx test" > ${ESMC_TESTDIR}/ESMF_GridCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_GridCreateEx.tmp optlog
 
 RUN_ESMF_GridCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridCreateEx.tmps
 	${MPIRUN} -np 1 ESMF_GridCreateEx > ESMF_GridCreateEx.stdout
-	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_GridCreateEx.tmp
-	#@if (diff ESMF_GridCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_GridCreateEx.outuni) then \
-	#echo "PASS GridCreateEx test" > ${ESMC_TESTDIR}/ESMF_GridCreateEx.log; else \
-	#echo "FAIL GridCreateEx test" > ${ESMC_TESTDIR}/ESMF_GridCreateEx.log; fi
-	#@rm -f testlog stdlog.* logfile.* ESMF_GridCreateEx.tmp optlog
 
 ESMF_GridCreateEx.rm:
 	echo "ESMF_GridCreateEx.rm target called here."

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:55 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/25 00:18:29 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -13,9 +13,15 @@ MANSEC	  = Timeobj
 LIBBASE	  = libesmf
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/examples
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+
 
 include $(ESMF_DIR)/makefile
 
 
 DIRS = 
+
+CLEANDIRS   =
+CLEANFILES  =
+CLOBBERDIRS =
+
+

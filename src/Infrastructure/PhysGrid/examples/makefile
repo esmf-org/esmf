@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:46 flanigan Exp $
+# $Id: makefile,v 1.3 2003/03/25 00:18:20 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -34,12 +34,13 @@ TESTEXAMPLES =
 # to the top level esmf directory. 
 LOCDIR	  = src/Infrastructure/PhysGrid/examples
 
-# leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
-
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
+
+CLEANDIRS   =
+CLEANFILES  = *.o *.mod
+CLOBBERDIRS =
 
 
 # if you have dependencies between source files in this dir,
