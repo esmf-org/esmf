@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.16 2004/06/08 03:47:09 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.17 2004/06/11 15:32:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,10 +45,10 @@ extern "C" {
   // ESMC_VM interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN(c_esmc_vmallglobalreduce)(ESMC_VM **vm, void *input, void *output, 
+  void FTN(c_esmc_vmallfullreduce)(ESMC_VM **vm, void *input, void *output, 
     int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_vmallglobalreduce()"
+#define ESMC_METHOD "c_esmc_vmallfullreduce()"
     // start assuming local success
     int localrc = ESMF_SUCCESS;
     // need to type cast or transform dtk and op into vmachine types

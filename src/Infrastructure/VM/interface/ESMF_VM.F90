@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.29 2004/06/08 20:27:48 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.30 2004/06/11 15:32:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@ module ESMF_VMMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
-  public ESMF_VMAllGlobalReduce
+  public ESMF_VMAllFullReduce
   public ESMF_VMAllReduce
   public ESMF_VMBarrier
   public ESMF_VMGather
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.29 2004/06/08 20:27:48 cdeluca Exp $'
+      '$Id: ESMF_VM.F90,v 1.30 2004/06/11 15:32:50 theurich Exp $'
 
 !==============================================================================
 
@@ -160,20 +160,20 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_VMAllGlobalReduce -- Generic interface
+! !IROUTINE: ESMF_VMAllFullReduce -- Generic interface
 
 ! !INTERFACE:
-      interface ESMF_VMAllGlobalReduce
+      interface ESMF_VMAllFullReduce
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_VMAllGlobalReduceI4
-      module procedure ESMF_VMAllGlobalReduceR4
-      module procedure ESMF_VMAllGlobalReduceR8
+      module procedure ESMF_VMAllFullReduceI4
+      module procedure ESMF_VMAllFullReduceR4
+      module procedure ESMF_VMAllFullReduceR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMAllGlobalReduce} functions.   
+!  types of {\tt ESMF\_VMAllFullReduce} functions.   
 !EOPI 
       end interface
 
@@ -300,13 +300,13 @@ module ESMF_VMMod
         
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllGlobalReduceI4()"
+#define ESMF_METHOD "ESMF_VMAllFullReduceI4()"
 !BOP
-! !IROUTINE: ESMF_VMAllGlobalReduce - AllGlobalReduce 4-byte integers
+! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 4-byte integers
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllGlobalReduce()
-  subroutine ESMF_VMAllGlobalReduceI4(vm, sendData, recvData, count, &
+  ! Private name; call using ESMF_VMAllFullReduce()
+  subroutine ESMF_VMAllFullReduceI4(vm, sendData, recvData, count, &
     reduceflag,  blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
@@ -322,7 +322,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs an
-!   AllGlobalReduce on contigous data of kind {\tt ESMF\_KIND\_I4} across the
+!   AllFullReduce on contigous data of kind {\tt ESMF\_KIND\_I4} across the
 !   {\tt ESMF\_VM} object performing the specified operation.
 !
 !   The arguments are:
@@ -374,26 +374,26 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_I4, &
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, ESMF_I4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_VMAllGlobalReduceI4
+  end subroutine ESMF_VMAllFullReduceI4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllGlobalReduceR4()"
+#define ESMF_METHOD "ESMF_VMAllFullReduceR4()"
 !BOP
-! !IROUTINE: ESMF_VMAllGlobalReduce - AllGlobalReduce 4-byte reals
+! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 4-byte reals
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllGlobalReduce()
-  subroutine ESMF_VMAllGlobalReduceR4(vm, sendData, recvData, count, &
+  ! Private name; call using ESMF_VMAllFullReduce()
+  subroutine ESMF_VMAllFullReduceR4(vm, sendData, recvData, count, &
     reduceflag, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
@@ -409,7 +409,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs an
-!   AllGlobalReduce on contigous data of kind {\tt ESMF\_KIND\_R4} across the
+!   AllFullReduce on contigous data of kind {\tt ESMF\_KIND\_R4} across the
 !   {\tt ESMF\_VM} object performing the specified operation.
 !
 !   The arguments are:
@@ -461,26 +461,26 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_R4, &
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, ESMF_R4, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_VMAllGlobalReduceR4
+  end subroutine ESMF_VMAllFullReduceR4
 !------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllGlobalReduceR8()"
+#define ESMF_METHOD "ESMF_VMAllFullReduceR8()"
 !BOP
-! !IROUTINE: ESMF_VMAllGlobalReduce - AllGlobalReduce 8-byte reals
+! !IROUTINE: ESMF_VMAllFullReduce - AllFullReduce 8-byte reals
 
 ! !INTERFACE:
-  ! Private name; call using ESMF_VMAllGlobalReduce()
-  subroutine ESMF_VMAllGlobalReduceR8(vm, sendData, recvData, count, &
+  ! Private name; call using ESMF_VMAllFullReduce()
+  subroutine ESMF_VMAllFullReduceR8(vm, sendData, recvData, count, &
     reduceflag, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
@@ -496,7 +496,7 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs an
-!   AllGlobalReduce on contigous data of kind {\tt ESMF\_KIND\_R4} across the
+!   AllFullReduce on contigous data of kind {\tt ESMF\_KIND\_R4} across the
 !   {\tt ESMF\_VM} object performing the specified operation.
 !
 !   The arguments are:
@@ -548,14 +548,14 @@ module ESMF_VMMod
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_R8, &
+    call c_ESMC_VMAllFullReduce(vm, sendData, recvData, count, ESMF_R8, &
       reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_VMAllGlobalReduceR8
+  end subroutine ESMF_VMAllFullReduceR8
 !------------------------------------------------------------------------------
 
 
