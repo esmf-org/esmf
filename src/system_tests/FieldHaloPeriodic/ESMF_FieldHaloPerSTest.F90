@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.1 2003/09/19 21:40:19 jwolfe Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.2 2003/09/24 22:39:15 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -276,7 +276,7 @@
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
-      real :: x_min, x_max, y_min, y_max
+      real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       character(len=ESMF_MAXSTR) :: gname, fname
 
       if (verbose) print *, "Entering Initialization routine"
