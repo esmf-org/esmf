@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.7 2003/07/01 17:41:40 jwolfe Exp $ 
+# $Id: base.site,v 1.8 2003/07/02 17:58:46 jwolfe Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -16,24 +16,25 @@
 #  If you list -lessl or -lesslp2 below you must have -DESMC_HAVE_ESSL listed in the 
 # PCONF line at the bottom of this file.
 #
-BLAS_LIB       = 
-LAPACK_LIB     = -L/usr/lib -lcxml
-NETCDF_LIB     = -L/usr/ulocal/netcdf-3.5.0/lib -lnetcdf
-NETCDF_INCLUDE = -I/usr/ulocal/netcdf-3.5.0/include
-NETCDF64_LIB   = -L/usr/ulocal/netcdf-3.5.0/lib -lnetcdf
-HDF_LIB	       = /usr/ulocal/HDF4.1r5/lib/libmfhdf.a \
-                 /usr/ulocal/HDF4.1r5/lib/libdf.a \
-                 /usr/ulocal/HDF4.1r5/lib/libjpeg.a \
-                 /usr/ulocal/HDF4.1r5/lib/libz.a
-HDF_INCLUDE    = -I/usr/ulocal/HDF4.1r5/include
+BLAS_LIB         = 
+LAPACK_LIB       = -L/usr/lib -lcxml
+NETCDF_LIB       = -L/usr/local/unsupported/netcdf-3.5.0/lib -lnetcdf
+NETCDF_INCLUDE   = -I/usr/local/unsupported/netcdf-3.5.0/include
+NETCDF64_LIB     = -L/usr/local/unsupported/netcdf-3.5.0/lib -lnetcdf
+NETCDF64_INCLUDE = -I/usr/local/unsupported/netcdf-3.5.0/include
+HDF_LIB          = /usr/local/unsupported/HDF4.1r5/lib/libmfhdf.a \
+                   /usr/local/unsupported/HDF4.1r5/lib/libdf.a \
+                   /usr/local/unsupported/HDF4.1r5/lib/libjpeg.a \
+                   /usr/local/unsupported/HDF4.1r5/lib/libz.a
+HDF_INCLUDE      = -I/usr/local/unsupported/HDF4.1r5/include
 #
 # Location of MPI (Message Passing Interface) software
 #
-MPI_LIB        = -L/usr/opt/mpi/lib -lmpi
-MPI_INCLUDE    = -I/usr/opt/mpi/include
-MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
-MPI64_LIB      = 
+MPI_LIB          = -L/usr/opt/mpi/lib -lmpi
+MPI_INCLUDE      = -I/usr/opt/mpi/include
+MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
+MPI64_LIB        = 
 
 # For pthreads (or omp)
-THREAD_LIB      = -lpthread
+THREAD_LIB        = -lpthread
 
