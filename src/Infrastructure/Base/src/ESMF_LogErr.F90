@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.37 2004/11/01 23:00:31 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.38 2004/11/02 20:02:46 nscollins Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,6 +152,8 @@ end type ESMF_Log
    public ESMF_LogOpen
    public ESMF_LogSet
    public ESMF_LogWrite
+   public ESMF_HaltType
+   public ESMF_MsgType
 
 !  Overloaded = operator functions
    public operator(.eq.),operator(.gt.)
