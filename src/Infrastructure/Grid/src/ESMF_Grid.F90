@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.71 2003/07/31 23:01:20 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.72 2003/08/01 20:03:38 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,6 +38,7 @@
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_IOMod          ! ESMF I/O class
+      use ESMF_DataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod      ! ESMF layout class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysGridMod    ! ESMF physical grid class
@@ -132,6 +133,7 @@
     public ESMF_GridSetMetric
     !public ESMF_GridGetRegionID
     public ESMF_GridSetRegionID
+    public ESMF_GridGetPhysGrid
     public ESMF_GridValidate
     public ESMF_GridPrint
     public ESMF_GridComputeDistance
@@ -205,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.71 2003/07/31 23:01:20 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.72 2003/08/01 20:03:38 dneckels Exp $'
 
 !==============================================================================
 !
@@ -2069,6 +2071,84 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetDELayout
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetPhysGrid - Get PhysGrid for a given relative location
+
+! !INTERFACE:
+      subroutine ESMF_GridGetPhysGrid(grid, physgrid, relloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid 
+      type(ESMF_PhysGrid) :: physgrid
+      type(ESMF_RelLoc) :: relloc
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Return the {\tt ESMF\_PhysGrid} associated with the given relative
+!     location.  Return  error if the grid contains no physgrid at the
+!     specified location.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[physgrid]
+!          Returned physgrid.
+!     \item[relloc]
+!           Relative location to query
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+! This routine essentially defines the mapping between the physgrid
+! array index and the logical CELL_NORTH, etc...  Perhaps it should
+! be used in the construction routine when these are assigned, as well.
+
+      integer :: idx      ! The index into physgrid array
+
+      idx = -1
+
+! These are the values that the Relloc currently stores, but
+! this index transformation belongs close to the physgrid list,
+! so spell these out here.  Otherwise someone might change the
+! datamap file without realizing it will mess this ordering up.
+
+      if (relloc .eq. ESMF_CELL_CENTER) then
+         idx = 1
+      endif
+
+! For some (unknown) reason, these cases are coming up as unfound
+! references.  Fix later, TODO
+!      if (relloc .eq. ESMF_CELL_NORTH) then
+!         idx = 2
+!      endif
+!      if (relloc .eq. ESMF_CELL_EAST) then
+!         idx = 3
+!      endif
+!      if (relloc .eq. ESMF_CELL_NE) then
+!         idx = 4
+!      endif
+!      if (relloc .eq. ESMF_CELL_CELL) then
+!         idx = 5
+!      endif
+!      if (relloc .eq. ESMF_CELL_VERTEX) then
+!         idx = 6
+!      endif
+
+      if (idx .gt. grid%ptr%num_physgrids) then
+        rc = ESMF_FAILURE
+      else
+        physgrid = grid%ptr%physgrids(idx)
+        rc = ESMF_SUCCESS
+      endif
+
+      end subroutine ESMF_GridGetPhysGrid
+
 
 !------------------------------------------------------------------------------
 !BOP
