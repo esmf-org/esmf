@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/02/19 18:50:51 nscollins Exp $
+# $Id: makefile,v 1.8 2003/02/20 15:45:10 jwolfe Exp $
 
 # leave alone.
 ALL: lib 
@@ -10,9 +10,9 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_State.C ESMC_Xform.C ESMC_Comp.C ESMC_Comp_F.C 
+SOURCEC	  = ESMC_State.C ESMC_State_F.C ESMC_Xform.C ESMC_Xform_F.C ESMC_Comp.C ESMC_Comp_F.C 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Comp_C.F90 ESMF_State_C.F90 ESMF_Xform_C.F90
+SOURCEF	  =
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # list .h files to be copied to higher level common include directory
