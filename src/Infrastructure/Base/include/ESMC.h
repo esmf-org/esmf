@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.2 2003/10/17 19:44:26 nscollins Exp $
+// $Id: ESMC.h,v 1.3 2004/03/04 16:36:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,10 +10,16 @@
 //
 // main include file which includes all others
 
+
+// common macros and constants
+#include "ESMC_Macros.h"
+
+// shared macros between fortran and C++.  this must come first before
+// the system dependent file below.
+#include "ESMF_Macros.inc"
+
 // system dependent #defines from build process
 #include "ESMC_Conf.h"
-
-#include "ESMC_Macros.h"
 
 // TODO: this file needs any external include files added here
 

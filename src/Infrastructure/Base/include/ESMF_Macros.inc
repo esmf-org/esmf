@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.2 2003/09/09 20:07:31 nscollins Exp $
+$Id: ESMF_Macros.inc,v 1.3 2004/03/04 16:36:59 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,15 +20,22 @@ ends up being included multiple times.
 #define ESMF_MACROS_INC
 
 #if 0
-
-former file contents moved to ESMF_BaseMod
-so user code can be compiled without requiring
-the preprocessor.
-
+basic #defines for all architectures.  the Conf.h file is system
+dependent and can override or redefine macros or constants which
+are different on just a few systems.
 #endif 
 
 #if 0
-i left the following macro here for our own internal use.
+how do you get to the base address of a fortran array, when you are
+passing it from fortran to C++?  on most architectures you just use
+the array.  but there are exceptions...
+#endif 
+
+#define ESMF_DATA_ADDRESS(x)    x
+
+
+#if 0
+the following macro is here for the framework's own internal use.
 #endif
 
 #define ESMF_SRCLINE __FILE__, __LINE__
