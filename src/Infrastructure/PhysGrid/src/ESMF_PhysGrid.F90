@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.20 2003/01/28 17:04:06 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.21 2003/02/21 21:07:35 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,53 +55,56 @@
       private
 
         type (ESMF_Base) :: base
-        integer :: dim_num               ! number of dimensions
-        type (ESMF_Array) :: dim_name    ! dimension names
-        type (ESMF_Array) :: dim_units   ! dimension units
-        integer :: num_corners           ! number of corners for
-                                         ! each grid cell
-        integer :: num_faces             ! likely assume same as num_corners
-                                         ! but might specify storage of only
-                                         ! 2 of 4 faces, for example
-        integer :: num_metrics           ! a counter for the number of
-                                         ! metrics for this subgrid
-        integer :: num_lmasks            ! a counter for the number of
-                                         ! logical masks for this subgrid
-        integer :: num_mmasks            ! a counter for the number of
-                                         ! multiplicative masks for this
-                                         ! subgrid
-        integer :: num_region_ids        ! a counter for the number of
-                                         ! region identifiers for this
-                                         ! subgrid
-        real :: global_min_coord1        ! coordinate extents in 1st coord
-        real :: global_max_coord1        ! direction
-        real :: global_min_coord2        ! coordinate extents in 2nd coord
-        real :: global_max_coord2        ! direction
-        real :: local_min_coord1         ! coordinate extents in 1st coord
-        real :: local_max_coord1         ! direction
-        real :: local_min_coord2         ! coordinate extents in 2nd coord
-        real :: local_max_coord2         ! direction
-        type (ESMF_Array) :: center_coord1   ! coord of center of
-                                             ! each cell in 1st direction
-        type (ESMF_Array) :: center_coord2   ! coord of center of
-                                             ! each cell in 2nd direction
-        type (ESMF_Array) :: corner_coord1   ! coord of corner of
-                                             ! each cell in 1st direction
-        type (ESMF_Array) :: corner_coord2   ! coord of corner of
-                                             ! each cell in 2nd direction
-        type (ESMF_Array) :: face_coord1     ! coord of face center of
-                                             ! each cell in 1st direction
-        type (ESMF_Array) :: face_coord2     ! coord of face center of
-                                             ! each cell in 2nd direction
-        type (ESMF_Array) :: metrics         ! an array of defined metrics
-                                             ! for each cell
+        integer :: dim_num                  ! number of dimensions
+        character (len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dim_names
+                                            ! dimension names
+        character (len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dim_units
+                                            ! dimension units
+        real, dimension(ESMF_MAXGRIDDIM) :: global_min
+                                            ! global coordinate minimums
+        real, dimension(ESMF_MAXGRIDDIM) :: global_max
+                                            ! global coordinate maximums
+        real, dimension(ESMF_MAXGRIDDIM) :: local_min
+                                            ! local coordinate minimums
+        real, dimension(ESMF_MAXGRIDDIM) :: local_max
+                                            ! local coordinate maximums
+        integer :: num_corners              ! number of corners for
+                                            ! each grid cell
+        integer :: num_faces                ! likely assume same as num_corners
+                                            ! but might specify storage of only
+                                            ! 2 of 4 faces, for example
+        type (ESMF_Array) :: center_coord1  ! coordinates of centers of
+                                            ! each cell
+        type (ESMF_Array) :: center_coord2  ! coordinates of centers of
+                                            ! each cell
+! TODO:  figure out how to collapse the above two arrays into one -- trouble in
+!        set coord because it goes through and does one coordinate at a time
+        type (ESMF_Array) :: corner_coord   ! coordinates of corners of
+                                            ! each cell
+        type (ESMF_Array) :: face_coord     ! coordinates of face centers of
+                                            ! each cell
+        integer :: num_metrics              ! a counter for the number of
+                                            ! metrics for this subgrid
         character (len=ESMF_MAXSTR), dimension(:), pointer :: metric_names
-        type (ESMF_Array) :: lmask     ! an array of defined logical
-                                       ! masks for each cell
-        type (ESMF_Array) :: mmask     ! an array of defined
-                                       ! multiplicative masks for each cell
-        type (ESMF_Array) :: region_id ! an array of defined region identifiers
-                                       ! for each cell
+        type (ESMF_Array) :: metrics        ! an array of defined metrics
+                                            ! for each cell
+        integer :: num_lmasks               ! a counter for the number of
+                                            ! logical masks for this subgrid
+        character (len=ESMF_MAXSTR), dimension(:), pointer :: lmask_names
+        type (ESMF_Array) :: lmask          ! an array of defined logical
+                                            ! masks for each cell
+        integer :: num_mmasks               ! a counter for the number of
+                                            ! multiplicative masks for this
+                                            ! subgrid
+        character (len=ESMF_MAXSTR), dimension(:), pointer :: mmask_names
+        type (ESMF_Array) :: mmask          ! an array of defined
+                                            ! multiplicative masks for each cell
+        integer :: num_region_ids           ! a counter for the number of
+                                            ! region identifiers for this
+                                            ! subgrid
+        character (len=ESMF_MAXSTR), dimension(:), pointer :: region_id_names
+        type (ESMF_Array) :: region_id      ! an array of defined region identifiers
+                                            ! for each cell
 
       end type
 
@@ -126,8 +129,8 @@
    public ESMF_PhysGridCreate
    public ESMF_PhysGridDestroy
    public ESMF_PhysGridConstruct
-   public ESMF_PhysGridGetInfo
-   public ESMF_PhysGridSetInfo
+   public ESMF_PhysGridGet
+   public ESMF_PhysGridSet
 !   public ESMF_PhysGridGetCoord
    public ESMF_PhysGridSetCoord
 !   public ESMF_PhysGridGetMetric
@@ -176,7 +179,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.20 2003/01/28 17:04:06 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.21 2003/02/21 21:07:35 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -513,7 +516,7 @@
 
       integer :: status=ESMF_SUCCESS               ! Error status
       logical :: rcpresent=.FALSE.                 ! Return code present
-      character (len = ESMF_MAXSTR) :: defaultname ! default physgrid name
+      integer :: i
 
 !     Initialize return code
       if(present(rc)) then
@@ -535,14 +538,12 @@
       physgrid%num_lmasks = 0
       physgrid%num_mmasks = 0
       physgrid%num_region_ids = 0
-      physgrid%global_min_coord1 = 0.0
-      physgrid%global_max_coord1 = 0.0
-      physgrid%global_min_coord2 = 0.0
-      physgrid%global_max_coord2 = 0.0
-      physgrid%local_min_coord1 = 0.0
-      physgrid%local_max_coord1 = 0.0
-      physgrid%local_min_coord2 = 0.0
-      physgrid%local_max_coord2 = 0.0
+      do i = 1,ESMF_MAXGRIDDIM
+        physgrid%global_min(i) = 0.0
+        physgrid%global_max(i) = 0.0
+        physgrid%local_min(i) = 0.0
+        physgrid%local_max(i) = 0.0
+      enddo
 !     nullify(physgrid%center_coord1)
 !     nullify(physgrid%center_coord2)
       !physgrid%corner_coord1  TODO:  initialize ESMF_Arrays
@@ -657,13 +658,13 @@
       endif
 
 !     Fill in physgrid derived type with function arguments
-      call ESMF_PhysGridSetInfo(physgrid, local_min_coord1, local_max_coord1, &
-                                local_nmax1, local_min_coord2, local_max_coord2, &
-                                local_nmax2, global_min_coord1, global_max_coord1, &
-                                global_nmax1, global_min_coord2, global_max_coord2, &
-                                global_nmax2, status)
+      call ESMF_PhysGridSet(physgrid, local_min_coord1, local_max_coord1, &
+                            local_nmax1, local_min_coord2, local_max_coord2, &
+                            local_nmax2, global_min_coord1, global_max_coord1, &
+                            global_nmax1, global_min_coord2, global_max_coord2, &
+                            global_nmax2, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridConstructInternal: PhysGrid set info"
+        print *, "ERROR in ESMF_PhysGridConstructInternal: PhysGrid set"
         return
       endif
 
@@ -707,16 +708,16 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridGetInfo - Get information from a PhysGrid
+! !IROUTINE: ESMF_PhysGridGet - Get information from a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGetInfo(physgrid, local_min_coord1, &
-                                      local_max_coord1, local_nmax1, &
-                                      local_min_coord2, local_max_coord2, &
-                                      local_nmax2, global_min_coord1, &
-                                      global_max_coord1, global_nmax1, &
-                                      global_min_coord2, global_max_coord2, &
-                                      global_nmax2, rc)
+      subroutine ESMF_PhysGridGet(physgrid, local_min_coord1, &
+                                  local_max_coord1, local_nmax1, &
+                                  local_min_coord2, local_max_coord2, &
+                                  local_nmax2, global_min_coord1, &
+                                  global_max_coord1, global_nmax1, &
+                                  global_min_coord2, global_max_coord2, &
+                                  global_nmax2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGridType) :: physgrid
@@ -786,38 +787,38 @@
 
 !     if present, get information from physgrid derived type
       if(present(local_min_coord1)) &
-                 local_min_coord1 = physgrid%local_min_coord1
+                 local_min_coord1 = physgrid%local_min(1)
       if(present(local_max_coord1)) &
-                 local_max_coord1 = physgrid%local_max_coord1
+                 local_max_coord1 = physgrid%local_max(1)
       if(present(local_min_coord2)) &
-                 local_min_coord2 = physgrid%local_min_coord2
+                 local_min_coord2 = physgrid%local_min(2)
       if(present(local_max_coord2)) &
-                 local_max_coord2 = physgrid%local_max_coord2
+                 local_max_coord2 = physgrid%local_max(2)
       if(present(global_min_coord1)) &
-                 global_min_coord1 = physgrid%global_min_coord1
+                 global_min_coord1 = physgrid%global_min(1)
       if(present(global_max_coord1)) &
-                 global_max_coord1 = physgrid%global_max_coord1
+                 global_max_coord1 = physgrid%global_max(1)
       if(present(global_min_coord2)) &
-                 global_min_coord2 = physgrid%global_min_coord2
+                 global_min_coord2 = physgrid%global_min(2)
       if(present(global_max_coord2)) &
-                 global_max_coord2 = physgrid%global_max_coord2
+                 global_max_coord2 = physgrid%global_max(2)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_PhysGridGetInfo
+      end subroutine ESMF_PhysGridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridSetInfo - Set information for a PhysGrid
+! !IROUTINE: ESMF_PhysGridSet - Set information for a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSetInfo(physgrid, local_min_coord1, &
-                                      local_max_coord1, local_nmax1, &
-                                      local_min_coord2, local_max_coord2, &
-                                      local_nmax2, global_min_coord1, &
-                                      global_max_coord1, global_nmax1, &
-                                      global_min_coord2, global_max_coord2, &
-                                      global_nmax2, rc)
+      subroutine ESMF_PhysGridSet(physgrid, local_min_coord1, &
+                                  local_max_coord1, local_nmax1, &
+                                  local_min_coord2, local_max_coord2, &
+                                  local_nmax2, global_min_coord1, &
+                                  global_max_coord1, global_nmax1, &
+                                  global_min_coord2, global_max_coord2, &
+                                  global_nmax2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGridType) :: physgrid
@@ -887,25 +888,25 @@
 
 !     if present, set information filling in physgrid derived type
       if(present(local_min_coord1)) &
-                 physgrid%local_min_coord1 = local_min_coord1
+                 physgrid%local_min(1) = local_min_coord1
       if(present(local_max_coord1)) &
-                 physgrid%local_max_coord1 = local_max_coord1
+                 physgrid%local_max(1) = local_max_coord1
       if(present(local_min_coord2)) &
-                 physgrid%local_min_coord2 = local_min_coord2
+                 physgrid%local_min(2) = local_min_coord2
       if(present(local_max_coord2)) &
-                 physgrid%local_max_coord2 = local_max_coord2
+                 physgrid%local_max(2) = local_max_coord2
       if(present(global_min_coord1)) &
-                 physgrid%global_min_coord1 = global_min_coord1
+                 physgrid%global_min(1) = global_min_coord1
       if(present(global_max_coord1)) &
-                 physgrid%global_max_coord1 = global_max_coord1
+                 physgrid%global_max(1) = global_max_coord1
       if(present(global_min_coord2)) &
-                 physgrid%global_min_coord2 = global_min_coord2
+                 physgrid%global_min(2) = global_min_coord2
       if(present(global_max_coord2)) &
-                 physgrid%global_max_coord2 = global_max_coord2
+                 physgrid%global_max(2) = global_max_coord2
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_PhysGridSetInfo
+      end subroutine ESMF_PhysGridSet
 
 !------------------------------------------------------------------------------
 !BOP
