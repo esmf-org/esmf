@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.12 2004/01/29 04:51:37 eschwab Exp $
+! $Id: ESMF_CplEx.F90,v 1.13 2004/02/11 17:27:35 svasquez Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -19,14 +19,9 @@
     
 !   ! ESMF Framework module
     use ESMF_Mod
-    
     implicit none
-
     public CPL_SetServices
-    
     contains
-
-        
 !-------------------------------------------------------------------------
 !   !  The SetServices routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
@@ -47,11 +42,9 @@
 
     end subroutine
 
-
 !-------------------------------------------------------------------------
 !   !  Coupler Component created by higher level calls, here is the
 !   !   Initialization routine.
- 
     
     subroutine CPL_Init(comp, importstate, exportstate, clock, rc)
         type(ESMF_CplComp) :: comp
@@ -59,7 +52,6 @@
         type(ESMF_State) :: exportstate
         type(ESMF_Clock) :: clock
         integer :: rc
-
         type(ESMF_State) :: nestedstate
 
         print *, "Coupler Init starting"
@@ -78,7 +70,6 @@
         print *, "Coupler Init returning"
    
     end subroutine CPL_Init
-
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is exchanged.
@@ -109,7 +100,6 @@
 
     end subroutine CPL_Run
 
-
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
@@ -139,14 +129,10 @@
    
     end subroutine CPL_Final
 
-
     end module ESMF_CouplerEx
-    
-
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-
 
     program ESMF_AppMainEx
     
@@ -156,7 +142,6 @@
     ! User supplied modules
     use ESMF_CouplerEx, only: CPL_SetServices
     implicit none
-    
 !   ! Local variables
     integer :: x, y, i, rc
     logical :: finished
@@ -172,9 +157,7 @@
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework
-
     call ESMF_Initialize(rc=rc)
-
 !-------------------------------------------------------------------------
 !   !
 !   !  Create, Init, Run, Finalize, Destroy Components.
@@ -224,32 +207,25 @@
     call ESMF_CplCompInitialize(cpl, exportstate, importstate, tclock, rc=rc)
     print *, "Comp Initialize complete"
 
-
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-
         call ESMF_CplCompRun(cpl, exportstate, importstate, tclock, rc=rc)
         call ESMF_ClockAdvance(tclock, timestep)
-
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
-
     enddo
     print *, "Comp Run complete"
-
 
     ! Give the component a chance to write out final results, clean up.
     call ESMF_CplCompFinalize(cpl, exportstate, importstate, tclock, rc=rc)
     print *, "Comp Finalize complete"
-
 
     ! Destroy components.
     call ESMF_ClockDestroy(tclock, rc)
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
     call ESMF_CplCompDestroy(cpl, rc)
     print *, "Comp Destroy returned"
-
 
     print *, "Application Example 1 finished"
 
