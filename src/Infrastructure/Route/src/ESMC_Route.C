@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.129 2005/03/01 18:06:04 jwolfe Exp $
+//$Id: ESMC_Route.C,v 1.130 2005/03/02 00:28:42 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.129 2005/03/01 18:06:04 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.130 2005/03/02 00:28:42 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -875,6 +875,20 @@
       if (options & ESMC_ROUTE_OPTION_PACK_XP) {
         sendRT->ESMC_RTableGetTotalCount(&sendXPCount);
         recvRT->ESMC_RTableGetTotalCount(&recvXPCount); 
+        maxReps = 0;
+        for (i=0; i<commCount; i++) {
+
+          rc = ct->ESMC_CommTableGetPartner(i, &theirPET, &needed);
+          if (!needed) continue;
+
+          // find number of xpackets to be communicated with this PET
+          rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
+          rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
+
+          // loop over the XPs
+          maxXPCount += MAX(recvXPCount, sendXPCount);
+        }            // loop over PETs
+        sendXPCount = recvXPCount = maxXPCount;
       }
       if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {
         maxReps = 0;
