@@ -346,7 +346,7 @@ struct contrib_id{
 
 struct vmachine_spawn_arg{
   // members which are different for each new pet
-  void *myvm;                 // pointer to vm instance on heap
+  vmachine *myvm;             // pointer to vm instance on heap
   pthread_t pthid;            // pthread id of the spawned thread
   int mypet;                  // new mypet 
   int *ncontributors;         // number of pets that contributed cores 
@@ -382,7 +382,7 @@ static void *vmachine_spawn(void *arg){
   printf("hello from within vmachine_spawn, mypet=%d\n", sarg->mypet);
 #endif
   // obtain reference to the vm instance on heap
-  vmachine &vm = *((vmachine *)sarg->myvm);
+  vmachine &vm = *(sarg->myvm);
   // setup the pet section in this vm instance
   vm.vmachine_construct(sarg->mypet, sarg->npets, sarg->lpid, sarg->pid,
     sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
@@ -390,7 +390,7 @@ static void *vmachine_spawn(void *arg){
     sarg->commarray, sarg->pref_intra_ssi);
   // call the function pointer with the new vmachine as its argument
   // this is where we finally enter the user code again...  
-  sarg->fctp(sarg->myvm, sarg->cargo);
+  sarg->fctp((void *)sarg->myvm, sarg->cargo);
   // wrap-up...
   vm.vmachine_destruct();
   // before pet terminates it must send a signal indicating that core is free
@@ -1119,7 +1119,7 @@ int vmplan::vmplan_nspawn(void){
 }
 
 
-void vmplan::vmplan_myvms(void **myvms){
+void vmplan::vmplan_myvms(vmachine **myvms){
   // set the internal myvms pointer array
   this->myvms = myvms;
 }

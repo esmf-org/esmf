@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.5 2004/03/22 14:55:54 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.6 2004/04/01 16:20:38 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -153,6 +153,17 @@ extern "C" {
     else
       (*ptr)->vmplan_minthreads(**ptr_vm, 1);
     //debug: (*ptr)->vmplan_print();
+    // Allocate as many ESMC_VM instances as this PET will spawn 
+    // and hold the information in the public portion of ESMC_VMPlan
+    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    for (int i=0; i<(*ptr)->nspawn; i++){
+      (*ptr)->myvms[i] = new ESMC_VM;
+      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+    }
+    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    // Success...
     int rc = ESMF_SUCCESS;
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
@@ -168,7 +179,14 @@ extern "C" {
     // to NULL as well before passing them down further.
     (void*)status   == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : status;
     // Done sorting out non-present F90 optional arguments.
+    // Do garbage collection on this PET's VM instances that were allocated
+    for (int i=0; i<(*ptr)->nspawn; i++)
+      delete (*ptr)->myvms[i];
+    delete [] (*ptr)->myvms;
+    delete [] (*ptr)->myvmachs;
+    // Now delete the actual ESMC_VMPlan object
     delete (*ptr);
+    // Success...
     int rc = ESMF_SUCCESS;
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
@@ -206,9 +224,26 @@ extern "C" {
     int ppref_inter_ssi = -1;
     if ((void*)pref_inter_ssi != ESMC_NULL_POINTER)
       ppref_inter_ssi = *pref_inter_ssi;
+    // Do garbage collection on this PET's VM instances that were allocated
+    for (int i=0; i<(*ptr)->nspawn; i++)
+      delete (*ptr)->myvms[i];
+    delete [] (*ptr)->myvms;
+    delete [] (*ptr)->myvmachs;
+    // Now define a new vmplan
     (*ptr)->vmplan_maxthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
       ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     //debug: (*ptr)->vmplan_print();
+    // Allocate as many ESMC_VM instances as this PET will spawn 
+    // and hold the information in the public portion of ESMC_VMPlan
+    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    for (int i=0; i<(*ptr)->nspawn; i++){
+      (*ptr)->myvms[i] = new ESMC_VM;
+      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+    }
+    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    // Success...
     int rc = ESMF_SUCCESS;
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
@@ -246,9 +281,26 @@ extern "C" {
     int ppref_inter_ssi = -1;
     if ((void*)pref_inter_ssi != ESMC_NULL_POINTER)
       ppref_inter_ssi = *pref_inter_ssi;
+    // Do garbage collection on this PET's VM instances that were allocated
+    for (int i=0; i<(*ptr)->nspawn; i++)
+      delete (*ptr)->myvms[i];
+    delete [] (*ptr)->myvms;
+    delete [] (*ptr)->myvmachs;
+    // Now define a new vmplan
     (*ptr)->vmplan_minthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
       ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     //debug: (*ptr)->vmplan_print();
+    // Allocate as many ESMC_VM instances as this PET will spawn 
+    // and hold the information in the public portion of ESMC_VMPlan
+    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    for (int i=0; i<(*ptr)->nspawn; i++){
+      (*ptr)->myvms[i] = new ESMC_VM;
+      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+    }
+    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    // Success...
     int rc = ESMF_SUCCESS;
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
@@ -286,9 +338,26 @@ extern "C" {
     int ppref_inter_ssi = -1;
     if ((void*)pref_inter_ssi != ESMC_NULL_POINTER)
       ppref_inter_ssi = *pref_inter_ssi;
+    // Do garbage collection on this PET's VM instances that were allocated
+    for (int i=0; i<(*ptr)->nspawn; i++)
+      delete (*ptr)->myvms[i];
+    delete [] (*ptr)->myvms;
+    delete [] (*ptr)->myvmachs;
+    // Now define a new vmplan
     (*ptr)->vmplan_maxcores(**ptr_vm, maxx, (int*)petlist, *npetlist,
       ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
     //debug: (*ptr)->vmplan_print();
+    // Allocate as many ESMC_VM instances as this PET will spawn 
+    // and hold the information in the public portion of ESMC_VMPlan
+    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    for (int i=0; i<(*ptr)->nspawn; i++){
+      (*ptr)->myvms[i] = new ESMC_VM;
+      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+    }
+    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    // Success...
     int rc = ESMF_SUCCESS;
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
