@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.15 2004/04/05 17:34:47 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.16 2004/04/05 20:38:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.15 2004/04/05 17:34:47 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.16 2004/04/05 20:38:24 jwolfe Exp $'
 
 !==============================================================================
 
@@ -351,11 +351,13 @@
                                     srcGatheredCoordX, status)
       call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCoordY, &
                                     srcGatheredCoordY, status)
-      ! TODO: make RunF90PtrR831D
-     ! call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCornerX, &
-     !                               srcGatheredCornerX, status)
-     ! call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCornerY, &
-     !                               srcGatheredCornerY, status)
+      ! TODO: move this loop to a Route routine?
+      do i = 1,nC
+        call ESMF_RouteRunF90PtrR832D(tempRoute, srcLocalCornerX(nC,1,1), &
+                                      srcGatheredCornerX(nC,1), status)
+        call ESMF_RouteRunF90PtrR832D(tempRoute, srcLocalCornerY(nC,1,1), &
+                                      srcGatheredCornerY(nC,1), status)
+      enddo
       call ESMF_RouteRunF90PtrI421D(tempRoute, srcLocalMask, &
                                     srcGatheredMask, status)
 
