@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.77 2004/06/08 13:40:31 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.78 2004/06/09 17:47:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
 #define ESMF_FILENAME "ESMF_LogRectGrid.F90"
 !
 !     ESMF LogRectGrid Module
@@ -106,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.77 2004/06/08 13:40:31 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.78 2004/06/09 17:47:58 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -309,31 +310,25 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       type(ESMF_GridType)           :: horzGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_GridCreateHorzLatLon%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
       ! set applicable default values
       horzGridType    = ESMF_GRID_TYPE_XY
       horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
       call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
@@ -345,14 +340,14 @@
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordOrder, &
                                      coordIndex=coordIndex, &
-                                     periodic=periodic, name=name, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                     periodic=periodic, name=name, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_GridCreateHorzLatLon%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzLatLon
 
@@ -442,31 +437,25 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       type(ESMF_GridType)           :: horzGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_GridCreateHorzLatLonUni%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
       ! set applicable default values
       horzGridType    = ESMF_GRID_TYPE_LATLON_UNI
       horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
 
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
       call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
@@ -476,14 +465,14 @@
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
                                        coordOrder, coordIndex, periodic, &
-                                       name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                       name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_GridCreateHorzLatLonUni%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzLatLonUni
 
@@ -570,31 +559,25 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer                       :: localrc    ! Error status
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       type(ESMF_GridType)           :: horzGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_GridCreateHorzXY%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
       ! set applicable default values
       horzGridType    = ESMF_GRID_TYPE_XY
       horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
 
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
       call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
@@ -606,14 +589,14 @@
                                      dimNames=dimNames, dimunits=dimUnits, &
                                      coordOrder=coordOrder, &
                                      coordIndex=coordIndex, &
-                                     periodic=periodic, name=name, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                     periodic=periodic, name=name, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_GridCreateHorzXY%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzXY
 
@@ -703,31 +686,25 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer                       :: localrc    ! Error status
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
       type(ESMF_GridType)           :: horzGridType
       type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_GridCreateHorzXYUni%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
       ! set applicable default values
       horzGridType    = ESMF_GRID_TYPE_XY_UNI
       horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
 
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
       call ESMF_LRGridConstructUniform(grid, 2, counts(1:2), &
@@ -737,14 +714,14 @@
                                        horzCoordSystem, &
                                        dimNames, dimUnits, &
                                        coordOrder, coordIndex, periodic, &
-                                       name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                       name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_GridCreateHorzXYUni%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateHorzXYUni
 
@@ -816,21 +793,15 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: count, i
       real(ESMF_KIND_R8) :: minGlobalCoordUse, maxGlobalCoordUse
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse
       type(ESMF_LogRectGrid), pointer :: lrgrid
       type(ESMF_LocalArray), dimension(:), pointer :: coords
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! sanity check for bad values  TODO: more checks
       if (present(delta)) count = size(delta)
@@ -842,7 +813,9 @@
         ! TODO: "bad value for count, ", count
       endif
 
-      allocate(coords(3))
+      allocate(coords(3), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coords", &
+                                     ESMF_CONTEXT, rc)) return
       if (associated(grid%gridSpecific%logRectGrid%coords)) then
         coords(1) = grid%gridSpecific%logRectGrid%coords(1)
         coords(2) = grid%gridSpecific%logRectGrid%coords(2)
@@ -852,7 +825,10 @@
 
       ! Two ways to make a subgrid here: by coordinates or by minimum and delta
       ! by coordinates:
-      allocate(coordsUse(count+1))
+      allocate(coordsUse(count+1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating coordsUse", &
+                                     ESMF_CONTEXT, rc)) return
+
       if (present(coord)) then
         do i = 1,count+1
           coordsUse(i) = coord(i)
@@ -868,7 +844,11 @@
         enddo
       endif
 
-      coords(3) = ESMF_LocalArrayCreate(coordsUse, ESMF_DATA_COPY, status)
+      coords(3) = ESMF_LocalArrayCreate(coordsUse, ESMF_DATA_COPY, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       minGlobalCoordUse = minval(coordsUse)
       maxGlobalCoordUse = maxval(coordsUse)
 
@@ -895,10 +875,12 @@
       grid%maxGlobalCoordPerDim(3) = maxGlobalCoordUse
 
       ! Clean up
-      deallocate(coordsUse)
+      deallocate(coordsUse, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coordsUse", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Set return values.
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridAddVert
 
@@ -937,35 +919,29 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+      integer :: localrc                          ! Error status
 
-!     Initialize pointers
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateRead%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_LRGridCreateRead%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateRead
 
@@ -1004,35 +980,29 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateCopy%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_LRGridCreateCopy%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateCopy
 
@@ -1078,34 +1048,28 @@
 !EOPI
 
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateCutout%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_LRGridCreateCutout%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateCutout
 
@@ -1155,34 +1119,28 @@
 !EOPI
 
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateDiffRes%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_LRGridCreateDiffRes%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateDiffRes
 
@@ -1225,34 +1183,28 @@
 !EOPI
 
       type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize pointers
       nullify(grid)
       nullify(ESMF_LRGridCreateExchange%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid object", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_LRGridCreateExchange%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_LRGridCreateExchange
 
@@ -1289,7 +1241,7 @@
 
       integer :: i
 
-      ! Initialize return code
+      ! Initialize return code; assume failure until success is certain
       rc     = ESMF_FAILURE
 
       ! Initialize lrgrid contents to default values
@@ -1383,27 +1335,21 @@
 ! !REQUIREMENTS: TODO
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i
       type(ESMF_LogRectGrid), pointer :: lrgrid
       real(ESMF_KIND_R8) :: recheck
       real(ESMF_KIND_R8), dimension(dimCount) :: useMaxes, useDeltas
       character(len=ESMF_MAXSTR) :: msgbuf
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize the derived type contents, including setting name
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! sanity check for bad values
       do i=1,dimCount
@@ -1458,12 +1404,16 @@
       endif
 
       ! Fill in logRectGrid derived type with subroutine arguments
-      allocate(grid%gridSpecific%logRectGrid, stat=status)  ! todo: check ec
+      allocate(grid%gridSpecific%logRectGrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "logRectGrid", &
+                                     ESMF_CONTEXT, rc)) return
+
       lrgrid => grid%gridSpecific%logRectGrid
-      call ESMF_LRGridConstructSpecificNew(lrgrid, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_LRGridConstructSpecificNew(lrgrid, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       do i = 1,dimCount
         lrgrid%countPerDim(i) = counts(i)
         lrgrid%deltaPerDim(i) = useDeltas(i) 
@@ -1527,7 +1477,7 @@
 
       grid%gridStatus = ESMF_GRID_STATUS_INIT
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridConstructUniform
 
@@ -1634,10 +1584,10 @@
 ! !REQUIREMENTS: TODO
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i
       integer, dimension(dimCount) :: counts
+      logical :: dummy
       real(ESMF_KIND_R8), dimension(dimCount) :: minGlobalCoordPerDimUse, &
                                                  maxGlobalCoordPerDimUse
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse1, coordsUse2, &
@@ -1645,19 +1595,14 @@
       type(ESMF_LocalArray), dimension(:), pointer :: coords
       type(ESMF_LogRectGrid), pointer :: lrgrid
 
-      ! Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize the derived type contents, including setting name
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Fill in logRectGrid derived type with subroutine arguments
       ! TODO: check stat return code against 0 (not ESMF_FAILURE)
@@ -1665,13 +1610,19 @@
       grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_A
       grid%coordOrder      = ESMF_COORD_ORDER_XYZ
       grid%coordIndex      = ESMF_COORD_INDEX_LOCAL
-      allocate(grid%gridSpecific%logRectGrid, stat=status) 
+      allocate(grid%gridSpecific%logRectGrid, stat=localrc) 
+      if (ESMF_LogMsgFoundAllocError(localrc, "logRectGrid", &
+                                     ESMF_CONTEXT, rc)) return
+
       lrgrid => grid%gridSpecific%logRectGrid
-      call ESMF_LRGridConstructSpecificNew(lrgrid, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      allocate(grid%gridSpecific%logRectGrid%coords(dimCount), stat=status)
+      call ESMF_LRGridConstructSpecificNew(lrgrid, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      allocate(grid%gridSpecific%logRectGrid%coords(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "logRectGrid%coords", &
+                                     ESMF_CONTEXT, rc)) return
    
       coords => grid%gridSpecific%logRectGrid%coords
 
@@ -1679,11 +1630,14 @@
       ! by coordinates:
       if (present(coord1)) then    ! for now, assume if coord1 array is there then
                                    ! using coords for all directions
-        allocate(coordsUse1(size(coord1)))
+        allocate(coordsUse1(size(coord1)), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "coordsUse1", &
+                                       ESMF_CONTEXT, rc)) return
+
         do i = 1,size(coord1)
           coordsUse1(i) = coord1(i)
         enddo
-        coords(1) = ESMF_LocalArrayCreate(coordsUse1, ESMF_DATA_COPY, status)
+        coords(1) = ESMF_LocalArrayCreate(coordsUse1, ESMF_DATA_COPY, localrc)
         counts(1) = size(coord1) - 1   !TODO: coords indicate corner points
                                        !      or center points?
         minGlobalCoordPerDimUse(1) = minval(coord1)
@@ -1694,26 +1648,32 @@
                                 "dimCount not consistent with coords arrays", &
                                  ESMF_CONTEXT, rc)) return
           endif
-          allocate(coordsUse2(size(coord2)))
+          allocate(coordsUse2(size(coord2)), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "coordsUse2", &
+                                         ESMF_CONTEXT, rc)) return
           do i = 1,size(coord2)
             coordsUse2(i) = coord2(i)
           enddo
-          coords(2) = ESMF_LocalArrayCreate(coordsUse2, ESMF_DATA_COPY, status)
+          coords(2) = ESMF_LocalArrayCreate(coordsUse2, ESMF_DATA_COPY, localrc)
           counts(2) = size(coord2) - 1
           minGlobalCoordPerDimUse(2) = minval(coord2)
           maxGlobalCoordPerDimUse(2) = maxval(coord2)
         endif
         if (present(coord3)) then
           if (dimCount.le.2) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "dimCount not consistent with coords arrays", &
-                                 ESMF_CONTEXT, rc)) return
+            dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                         "dimCount not consistent with coords arrays", &
+                         ESMF_CONTEXT, rc)
+            return
           endif
-          allocate(coordsUse3(size(coord3)))
+          allocate(coordsUse3(size(coord3)), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "Allocating Grid ", &
+                                         ESMF_CONTEXT, rc)) return
+
           do i = 1,size(coord3)
             coordsUse3(i) = coord3(i)
           enddo
-          coords(3) = ESMF_LocalArrayCreate(coordsUse3, ESMF_DATA_COPY, status)
+          coords(3) = ESMF_LocalArrayCreate(coordsUse3, ESMF_DATA_COPY, localrc)
           counts(3) = size(coord3) - 1
           minGlobalCoordPerDimUse(3) = minval(coord3)
           maxGlobalCoordPerDimUse(3) = maxval(coord3)
@@ -1722,12 +1682,14 @@
       ! by deltas (and minCoordPerDim):     TODO: make it a starting value instead of min
       elseif (present(delta1)) then
         counts(1) = size(delta1)
-        allocate(coordsUse1(size(delta1)+1))
+        allocate(coordsUse1(size(delta1)+1), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "coordsUse1", &
+                                       ESMF_CONTEXT, rc)) return
         coordsUse1(1) = minGlobalCoordPerDim(1)    ! TODO: make sure it's here
         do i = 1,size(delta1)
           coordsUse1(i+1) = coordsUse1(i) + delta1(i)
         enddo
-        coords(1) = ESMF_LocalArrayCreate(coordsUse1, ESMF_DATA_COPY, status)
+        coords(1) = ESMF_LocalArrayCreate(coordsUse1, ESMF_DATA_COPY, localrc)
         minGlobalCoordPerDimUse(1) = minGlobalCoordPerDimUse(1)
         maxGlobalCoordPerDimUse(1) = maxval(coordsUse1)
         ! TODO: redefine minGlobalCoordPerDim in case deltas are negative
@@ -1738,35 +1700,41 @@
                                  ESMF_CONTEXT, rc)) return
           endif
           counts(2) = size(delta2)
-          allocate(coordsUse2(size(delta2)+1))
+          allocate(coordsUse2(size(delta2)+1), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "coordsUse2", &
+                                         ESMF_CONTEXT, rc)) return
           coordsUse2(1) = minGlobalCoordPerDim(2)    ! TODO: make sure it's here
           do i = 1,size(delta2)
             coordsUse2(i+1) = coordsUse2(i) + delta2(i)
           enddo
-          coords(2) = ESMF_LocalArrayCreate(coordsUse2, ESMF_DATA_COPY, status)
+          coords(2) = ESMF_LocalArrayCreate(coordsUse2, ESMF_DATA_COPY, localrc)
           minGlobalCoordPerDimUse(2) = minGlobalCoordPerDimUse(2)
           maxGlobalCoordPerDimUse(2) = maxval(coordsUse2)
         endif
         if (present(delta3)) then
           if (dimCount.le.2) then
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "dimCount not consistent with delta arrays", &
-                                 ESMF_CONTEXT, rc)) return
+            dummy =  ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                          "dimCount not consistent with delta arrays", &
+                          ESMF_CONTEXT, rc)
+            return
           endif
           counts(3) = size(delta3)
-          allocate(coordsUse3(size(delta3)+1))
+          allocate(coordsUse3(size(delta3)+1), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "coordsUse3", &
+                                         ESMF_CONTEXT, rc)) return
           coordsUse3(1) = minGlobalCoordPerDim(3)    ! TODO: make sure it's here
           do i = 1,size(delta3)
             coordsUse3(i+1) = coordsUse3(i) + delta3(i)
           enddo
-          coords(3) = ESMF_LocalArrayCreate(coordsUse3, ESMF_DATA_COPY, status)
+          coords(3) = ESMF_LocalArrayCreate(coordsUse3, ESMF_DATA_COPY, localrc)
           minGlobalCoordPerDimUse(3) = minGlobalCoordPerDimUse(3)
           maxGlobalCoordPerDimUse(3) = maxval(coordsUse3)
         endif
       else
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                           "must have either coords arrays or delta arrays", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                     "must have either coords arrays or delta arrays", &
+                     ESMF_CONTEXT, rc)
+        return
       endif
 
       ! either way, we have the counts now
@@ -1819,11 +1787,17 @@
       grid%gridStatus = ESMF_GRID_STATUS_INIT
 
       ! Clean up
-      deallocate(coordsUse1)
-      deallocate(coordsUse2)
-      if (dimCount.ge.3) deallocate(coordsUse3)
+      deallocate(coordsUse1, &
+                 coordsUse2, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coordsUse arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      if (dimCount.ge.3) then
+        deallocate(coordsUse3, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coordsUse3", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridConstructSpecd
 
@@ -1876,8 +1850,8 @@
 ! !REQUIREMENTS: TODO
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
+      logical :: dummy
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
       integer :: distGridId, physGridId, nDEs(0:2)
@@ -1895,32 +1869,25 @@
       type(ESMF_LocalArray), dimension(:), pointer :: coords
       type(ESMF_RelLoc) :: relloc
 
-      ! Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! validate the layout before going any further
- !jw     call ESMF_DELayoutValidate(delayout, rc=status)
- !nsc    if (ESMF_LogMsgFoundError(status, &
- !nsc                                 ESMF_ERR_PASSTHRU, &
- !nsc                                 ESMF_CONTEXT, rc)) return
- !jw     if (status .ne. ESMF_SUCCESS) then
- !jw       "ESMF_LogRectGridDistribute: bad delayout, cannot distribute grid"
- !jw       return
- !jw     endif
+ !jw     call ESMF_DELayoutValidate(delayout, rc=localrc)
+ !nsc    if (ESMF_LogMsgFoundError(localrc, &
+ !nsc                              ESMF_ERR_PASSTHRU, &
+ !nsc                              ESMF_CONTEXT, rc)) return
       
       ! Extract some information from the Grid
       dimCount = grid%dimCount
-      allocate(counts(dimCount))
-      allocate(min(dimCount))
-      allocate(max(dimCount))
-      allocate(dimNames(dimCount))
-      allocate(dimUnits(dimCount))
-      allocate(periodic(dimCount))
+      allocate(  counts(dimCount), &
+                    min(dimCount), &
+                    max(dimCount), &
+               dimNames(dimCount), &
+               dimUnits(dimCount), &
+               periodic(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Allocating dimCount arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
       nullify(coords)
       if (associated(grid%gridSpecific%logRectGrid%coords)) then
@@ -1938,14 +1905,18 @@
 
       if (grid%horzGridType.eq.ESMF_GRID_TYPE_LATLON_UNI .OR. &
           grid%horzGridType.eq.ESMF_GRID_TYPE_XY_UNI) then ! uniform
-        allocate(coord1(counts(1)+1))
+        allocate(coord1(counts(1)+1), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "coord1", &
+                                       ESMF_CONTEXT, rc)) return
         coord1(1) = min(1)
         delta     = (max(1) - min(1)) / real(counts(1))
         do i = 1,counts(1)
           coord1(i+1) = coord1(i) + delta
         enddo
         if (dimCount.ge.2) then
-          allocate(coord2(counts(2)+1))
+          allocate(coord2(counts(2)+1), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "coord2", &
+                                         ESMF_CONTEXT, rc)) return
           coord2(1) = min(2)
           delta     = (max(2) - min(2)) / real(counts(2))
           do i = 1,counts(2)
@@ -1953,17 +1924,19 @@
           enddo
         endif
       else   ! not uniform
-        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_COPY, status)
+        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_COPY, localrc)
         if (dimCount.ge.2) &
-          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, status)
+          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, localrc)
       endif
 
       ! the vertical grid is never uniform, so get its coordinates if 3d grid
       if (dimCount.ge.3) &
-          call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, status)
+        call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, localrc)
 
       ! Fill in defaults for necessary but optional variables
-      allocate(decompIdsUse(dimCount))
+      allocate(decompIdsUse(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "decompIdsUse", &
+                                     ESMF_CONTEXT, rc)) return
       decompIdsUse = 0
       if (present(decompIds)) then
         decompIdsUse = decompIds
@@ -1974,26 +1947,29 @@
       endif
 
       call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
-                            logRectFlag=lrFlag, rc=status)
+                            logRectFlag=lrFlag, rc=localrc)
 
       ! Check layout attributes
       if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                  "not a 1-to-1 layout", &
-                                  ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "not a 1-to-1 layout", &
+                                      ESMF_CONTEXT, rc)
+        return
       endif
       ! if (ndim .ne. 2) then               ! ensure this is 2D Layout
-      !  if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-      !                            "not a 2D layout", &
-      !                            ESMF_CONTEXT, rc)) return
+      !  dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+      !                                "not a 2D layout", &
+      !                                ESMF_CONTEXT, rc)
+      !   return
       ! endif
       ! if (lrFlag .ne. ESMF_TRUE) then     ! ensure this is logical rect layout
-      !  if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-      !                            "not a logically rectangular layout", &
-      !                            ESMF_CONTEXT, rc)) return
+      !  dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+      !                                "not a logically rectangular layout", &
+      !                                ESMF_CONTEXT, rc)
+      !   return
       ! endif
 
-      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
+      call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
       nDEs(0) = 1
 
       ! if there is an axis to decompose, either grab the specfied countsPerDE
@@ -2001,7 +1977,9 @@
       do i = 1,dimCount
         if (decompIdsUse(i).eq.1) then
           size = nDEs(1)
-          allocate(countsPerDEDecomp1Use(size))
+          allocate(countsPerDEDecomp1Use(size), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDEDecomp1Use", &
+                                         ESMF_CONTEXT, rc)) return
           if (present(countsPerDEDecomp1)) then
             countsPerDEDecomp1Use = countsPerDEDecomp1
           else
@@ -2010,7 +1988,9 @@
         endif
         if (decompIdsUse(i).eq.2) then
           size = nDEs(2)
-          allocate(countsPerDEDecomp2Use(size))
+          allocate(countsPerDEDecomp2Use(size), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDEDecomp2Use", &
+                                         ESMF_CONTEXT, rc)) return
           if (present(countsPerDEDecomp2)) then
             countsPerDEDecomp2Use = countsPerDEDecomp2
           else
@@ -2021,7 +2001,9 @@
 
       ! Determine if the axis are decomposed and load counts arrays
       size = nDEs(decompIdsUse(1))
-      allocate(countsPerDE1(size))
+      allocate(countsPerDE1(size), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE1", &
+                                     ESMF_CONTEXT, rc)) return
       if     (decompIdsUse(1).eq.0) then
         countsPerDE1(:) = counts(1)
       elseif (decompIdsUse(1).eq.1) then
@@ -2031,7 +2013,9 @@
       endif
 
       size = nDEs(decompIdsUse(2))
-      allocate(countsPerDE2(size))
+      allocate(countsPerDE2(size), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE2", &
+                                     ESMF_CONTEXT, rc)) return
       if     (decompIdsUse(2).eq.0) then
         countsPerDE2(:) = counts(2)
       elseif (decompIdsUse(2).eq.1) then
@@ -2042,7 +2026,9 @@
 
       if (dimCount.eq.3) then
         size = nDEs(decompIdsUse(3))
-        allocate(countsPerDE3(size))
+        allocate(countsPerDE3(size), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "countsPerDE3", &
+                                       ESMF_CONTEXT, rc)) return
         if     (decompIdsUse(3).eq.0) then
           countsPerDE3(:) = counts(3)
         elseif (decompIdsUse(3).eq.1) then
@@ -2064,17 +2050,19 @@
                                   delayout, decompIdsUse(1:2), periodic, &
                                   countsPerDEDim1=countsPerDE1, &
                                   countsPerDEDim2=countsPerDE2, &
-                                  distGridName=distGridName, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  distGridName=distGridName, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                   decompIdsUse(1:2), coord1, coord2, &
                                   countsPerDE1, countsPerDE2, &
-                                  dimNames, dimUnits, physGridName, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  dimNames, dimUnits, physGridName, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       grid%distGridIndex(physGridId) = distGridId
       distGridId = distGridId + 1 
       physGridId = physGridId + 1 
@@ -2096,17 +2084,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1 
           physGridId = physGridId + 1 
@@ -2120,17 +2110,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2144,17 +2136,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2168,17 +2162,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2193,17 +2189,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2214,17 +2212,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2239,17 +2239,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2260,17 +2262,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2285,17 +2289,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2306,17 +2312,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2331,17 +2339,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2352,17 +2362,19 @@
                                       delayout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDE1, &
                                       countsPerDEDim2=countsPerDE2, &
-                                      distGridName=distGridName, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      distGridName=distGridName, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, dimCountGrid, &
                                       decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
-                                      dimNames, dimUnits, physGridName, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                      dimNames, dimUnits, physGridName, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           grid%distGridIndex(physGridId) = distGridId
           distGridId = distGridId + 1
           physGridId = physGridId + 1
@@ -2378,15 +2390,17 @@
                                     delayout, decompIdsUse(3:3), &
                                     periodic(3:3), &
                                     countsPerDEDim1=countsPerDE3, &
-                                    distGridName=distGridName, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                    distGridName=distGridName, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         call ESMF_LRGridAddVertPhysGrid(grid, physGridId, relloc, coord3, &
-                                        countsPerDE3, physGridName, status)
-        if (ESMF_LogMsgFoundError(status, &
+                                        countsPerDE3, physGridName, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         grid%distGridIndex(physGridId) = distGridId
         distGridId = distGridId + 1
         physGridId = physGridId + 1
@@ -2405,15 +2419,17 @@
                                         delayout, decompIdsUse(3:3), &
                                         periodic(3:3), &
                                         countsPerDEDim1=countsPerDE3, &
-                                        distGridName=distGridName, rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                        distGridName=distGridName, rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+
             call ESMF_LRGridAddVertPhysGrid(grid, physGridId, relloc, coord3, &
-                                            countsPerDE3, physGridName, status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                            countsPerDE3, physGridName, localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
+
             grid%distGridIndex(physGridId) = distGridId
             distGridId = distGridId + 1
             physGridId = physGridId + 1
@@ -2424,30 +2440,48 @@
 
       ! Create the BoundingBoxes structure
       call ESMF_LRGridSetBoundingBoxes(grid, dimCount, coord1, coord2, &
-                                       countsPerDE1, countsPerDE2, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                       countsPerDE1, countsPerDE2, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Clean up
-      deallocate(counts)
-      deallocate(min)
-      deallocate(max)
-      deallocate(dimNames)
-      deallocate(dimUnits)
-      deallocate(periodic)
-      if (associated(coord1)) deallocate(coord1)
-      if (dimCount.ge.2 .and. associated(coord2)) deallocate(coord2)
-      if (dimCount.ge.3 .and. associated(coord3)) deallocate(coord3)
-      deallocate(decompIdsUse)
-      deallocate(countsPerDEDecomp1Use)
-      deallocate(countsPerDEDecomp2Use)
-      deallocate(countsPerDE1)
-      deallocate(countsPerDE2)
-      if (dimCount.ge.3) deallocate(countsPerDE3)
+      deallocate(               counts, &
+                                   min, &
+                                   max, &
+                              dimNames, &
+                              dimUnits, &
+                              periodic, &
+                          decompIdsUse, &
+                 countsPerDEDecomp1Use, &
+                 countsPerDEDecomp2Use, &
+                          countsPerDE1, &
+                          countsPerDE2, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
+      if (associated(coord1)) then
+        deallocate(coord1, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coord1", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      if (dimCount.ge.2 .and. associated(coord2)) then
+        deallocate(coord2, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coord2", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      if (dimCount.ge.3 .and. associated(coord3)) then
+        deallocate(coord3, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coord3", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      if (dimCount.ge.3) then
+        deallocate(countsPerDE3, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating countsPerDE3", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       grid%gridStatus = ESMF_GRID_STATUS_READY
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDistribute
 
@@ -2482,17 +2516,11 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: n
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       !TODO: destruct these
       !  type (ESMF_Base) :: base
@@ -2510,35 +2538,37 @@
       grid%numDistGrids    = 0
 
       do n = 1,grid%numPhysGridsAlloc
-         call ESMF_PhysGridDestroy(grid%physgrids(n), rc=status)
-         if (ESMF_LogMsgFoundError(status, &
+        call ESMF_PhysGridDestroy(grid%physgrids(n), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       end do
       grid%numPhysGridsAlloc = 0
-      !TODO: add status to deallocate calls and trap errors
-      deallocate(grid%physgrids)
-
-      deallocate(grid%distGridIndex)
+      deallocate(grid%physgrids, &
+                 grid%distGridIndex, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating physgrids", &
+                                     ESMF_CONTEXT, rc)) return
 
       do n = 1,grid%numDistGridsAlloc
-         call ESMF_DistGridDestroy(grid%distgrids(n), rc=status)
-         if (ESMF_LogMsgFoundError(status, &
+        call ESMF_DistGridDestroy(grid%distgrids(n), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       end do
       grid%numDistGridsAlloc = 0
-      deallocate(grid%distgrids)
+      deallocate(grid%distgrids, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrids", &
+                                     ESMF_CONTEXT, rc)) return
 
       grid%minGlobalCoordPerDim(:) = 0
       grid%maxGlobalCoordPerDim(:) = 0
 
-      call ESMF_LocalArrayDestroy(grid%boundingBoxes, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_LocalArrayDestroy(grid%boundingBoxes, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDestruct
 
@@ -2609,17 +2639,11 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       type(ESMF_DistGrid) :: distGrid
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Create the DistGrid
       distGrid = ESMF_DistGridCreate(dimCount=dimCount, counts=counts, &
@@ -2628,16 +2652,16 @@
                                      coversDomain=coversDomain, &
                                      countsPerDEDim1=countsPerDEDim1, &
                                      countsPerDEDim2=countsPerDEDim2, &
-                                     rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                     rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! now that it's created, add the distgrid to the grid
-      call ESMF_GridAddDistGrid(grid, distGrid, status)
+      call ESMF_GridAddDistGrid(grid, distGrid, localrc)
       distGridId = grid%numDistGrids
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridAddDistGrid
 
@@ -2706,13 +2730,13 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, j, i1, i2, j1, j2, gridBoundWidth, myDE(2), myDEDecomp(0:2)
       integer :: localDE
       integer, dimension(dimCount) :: counts, compCount, localStart
       integer, dimension(:), allocatable :: cellType1, cellType2
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
+      logical :: dummy
       logical, dimension(dimCount) :: coordAligned, coordEqualSpaced, coordCyclic
       real(ESMF_KIND_R8), dimension(dimCount) :: localMin, localMax
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
@@ -2723,13 +2747,8 @@
       type(ESMF_PhysGrid) :: physGrid
       type(ESMF_PhysCoord) :: tempCoord
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
@@ -2737,9 +2756,9 @@
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
       call ESMF_LRGridGet(gridp, delayout=delayout)
-      call ESMF_DELayoutGet(delayout, localDE=localDE, rc=status)
+      call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDE(delayout, de=localDE, coord=myDEDecomp(1:2), &
-                                 rc=status)
+                              rc=localrc)
       myDEDecomp(0) = 1
 
       ! modify myDE array by decompIds
@@ -2778,14 +2797,10 @@
       counts(2) = compCount(2) + 2*gridBoundWidth
 
       ! allocate and load coords
-      allocate(coordUse1(counts(1)), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                     "Allocating coordinate information", &
-                                      ESMF_CONTEXT, rc)) return
-      allocate(coordUse2(counts(2)), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                     "Allocating coordinate information", &
-                                      ESMF_CONTEXT, rc)) return
+      allocate(coordUse1(counts(1)), &
+               coordUse2(counts(2)), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "coordUse arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
       do i = 1,compCount(1)
         coordUse1(i+gridBoundWidth) = coord1(i)
@@ -2810,14 +2825,10 @@
 
       ! allocate and load cell type masks -- these are by cell and not vertex,
       ! so the counts are all one less
-      allocate(cellType1(counts(1)-1), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                     "Allocating celltype information", &
-                                      ESMF_CONTEXT, rc)) return
-      allocate(cellType2(counts(2)-1), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                     "Allocating celltype information", &
-                                      ESMF_CONTEXT, rc)) return
+      allocate(cellType1(counts(1)-1), &
+               cellType2(counts(2)-1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "cellType arrays", &
+                                     ESMF_CONTEXT, rc)) return
       cellType1 = 0
       cellType2 = 0
       do i = 1,gridBoundWidth
@@ -2881,40 +2892,41 @@
           coordCyclic(:)      = .false.
 
         case default
-            if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Unsupported Grid Type", &
-                                 ESMF_CONTEXT, rc)) return
-           status = ESMF_FAILURE
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                        "Unsupported Grid Type", &
+                                        ESMF_CONTEXT, rc)
+          return
 
       end select
 
       ! Create the actual PhysGrid object
       physGrid = ESMF_PhysGridCreate(dimCount, relloc, physGridName, &
-                                     coordSystem, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                     coordSystem, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       do i = 1,dimCount
         tempCoord = ESMF_PhysCoordCreate(coordType(i), coordNames(i), &
                                          coordUnits(i), &
                                          coordAligned(i), coordEqualSpaced(i), &
                                          coordCyclic(i), localMin(i), &
-                                         localMax(i), rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                         localMax(i), rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-        call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=i, rc=status) 
-        if (ESMF_LogMsgFoundError(status, &
+
+        call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=i, rc=localrc) 
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       enddo
 
       ! now that it's created, add the physgrid to the grid
-      call ESMF_GridAddPhysGrid(grid, physGrid, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridAddPhysGrid(grid, physGrid, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       physGridId = grid%numPhysGrids
 
       ! set coordinates using total cell count
@@ -2926,10 +2938,11 @@
       j2 = localStart(2) + counts(2) + 1
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
                                gridBoundWidth, relloc, coordUse1(i1:i2), &
-                               coordUse2(j1:j2), total=.true., rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                               coordUse2(j1:j2), total=.true., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       ! set coordinates using computational cell count
       counts(1) = countsPerDEDim1(myDE(1))
       counts(2) = countsPerDEDim2(myDE(2))
@@ -2940,10 +2953,10 @@
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
                                gridBoundWidth, relloc, &
                                coordUse1(i1:i2), coordUse2(j1:j2), &
-                               total=.false., rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                               total=.false., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set mask using total cell count
       counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
@@ -2954,17 +2967,19 @@
       j2 = localStart(2) + counts(2)
       call ESMF_LRGridSetCellMask(grid, physGridId, dimCount, counts, &
                                   gridBoundWidth, relloc, cellType1(i1:i2), &
-                                  cellType2(j1:j2), status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  cellType2(j1:j2), localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      deallocate(coordUse1)
-      deallocate(coordUse2)
-      deallocate(cellType1)
-      deallocate(cellType2)
+      deallocate(coordUse1, &
+                 coordUse2, &
+                 cellType1, &
+                 cellType2, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridAddPhysGrid
 
@@ -3012,8 +3027,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, i1, i2, gridBoundWidth, myDE(0:2)
       character(len=ESMF_MAXSTR) :: coordName, coordUnit
       logical :: coordAligned, coordEqualSpaced, coordCyclic
@@ -3029,13 +3043,8 @@
       type(ESMF_PhysGrid) :: physGrid
       type(ESMF_CoordSystem) :: coordSystem
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! initialize some values
       gridBoundWidth = 1   ! TODO: move into structure, make input?
@@ -3044,14 +3053,16 @@
 ! gjt: I took this out because it seems that it is not used...
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
-      call ESMF_GridGetDELayout(gridp, delayout, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      call ESMF_DELayoutGet(layout, deCountPerDim=myDE, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELayout(gridp, delayout, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      call ESMF_DELayoutGet(layout, deCountPerDim=myDE, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
      ! TODO: make Fortran interface get come back in F90 style
       nDEs(2) = nDEs(1)                        
       nDEs(1) = nDEs(0)
@@ -3076,10 +3087,9 @@
       count     = compCount + 2*gridBoundWidth
 
       ! allocate and load coords
-      allocate(coordUse(count), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                       "Allocating Grid use information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(coordUse(count), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "coordUse", &
+                                     ESMF_CONTEXT, rc)) return
 
       do i = 1,compCount
         coordUse(i+gridBoundWidth) = coord(i)
@@ -3093,10 +3103,9 @@
       enddo
 
       ! allocate and load cell type masks
-      allocate(cellType(count-1), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                       "Allocating cellType information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(cellType(count-1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "cellType", &
+                                     ESMF_CONTEXT, rc)) return
       cellType = 0
       do i = 1,gridBoundWidth
         cellType(i) = 1
@@ -3132,7 +3141,7 @@
 
       ! Create the actual PhysGrid object
       physGrid = ESMF_PhysGridCreate(1, relloc, physGridName, coordSystem, &
-                                     rc=status)
+                                     rc=localrc)
 
       tempCoord = ESMF_PhysCoordCreate(coordType, name=coordName, &
                                        units=coordUnit, &
@@ -3140,11 +3149,11 @@
                                        equalSpaced=coordEqualSpaced, &
                                        cyclic=coordCyclic, &
                                        minVal=localMinCoord, &
-                                       maxVal=localMaxCoord, rc=status)
-      call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=1, rc=status)
+                                       maxVal=localMaxCoord, rc=localrc)
+      call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=1, rc=localrc)
 
       ! now that it's created, add the physgrid to the grid
-      call ESMF_GridAddPhysGrid(grid, physGrid, status)
+      call ESMF_GridAddPhysGrid(grid, physGrid, localrc)
       physGridId = grid%numPhysGrids
 
       ! set coordinates using total cell count
@@ -3153,20 +3162,21 @@
       i2 = localStart + localCount(1) + 1
       call ESMF_LRGridSetCoord(grid, physGridId, 1, localCount, &
                                gridBoundWidth, relloc, coordUse(i1:i2), &
-                               total=.true., rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                               total=.true., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       ! set coordinates using computational cell count
       localCount(1) = countsPerDEDim(1)  ! TODO: indirect address for countPer
       i1 = localStart + 1 + gridBoundWidth
       i2 = i1 + localCount(1)
       call ESMF_LRGridSetCoord(grid, physGridId, 1, localCount, &
                                0, relloc, coordUse(i1:i2), &
-                               total=.false., rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                               total=.false., rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set mask using total cell count
       localCount(1) = countsPerDEDim(1) + 2*gridBoundWidth  ! TODO: indirect address for countPer
@@ -3175,16 +3185,18 @@
       ! TODO: fix setcellmask to work 1d
       ! call ESMF_LRGridSetCellMask(grid, physGridId, 1, localCount, &
       !                             gridBoundWidth, relloc, cellType(i1:i2), &
-      !                             rc=status)
-      !if (ESMF_LogMsgFoundError(status, &
-      !                            ESMF_ERR_PASSTHRU, &
-      !                            ESMF_CONTEXT, rc)) return
+      !                             rc=localrc)
+      !if (ESMF_LogMsgFoundError(localrc, &
+      !                          ESMF_ERR_PASSTHRU, &
+      !                          ESMF_CONTEXT, rc)) return
 
       ! clean up
-      deallocate(coordUse)
-      deallocate(cellType)
+      deallocate(coordUse, &
+                 cellType, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridAddVertPhysGrid
 
@@ -3251,23 +3263,18 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i
       integer :: horzPhysIdUse, vertPhysIdUse
       integer :: aSize, gridRank, index
       integer, dimension(3) :: order
+      logical :: dummy
       logical :: reorderUse
       type(ESMF_Array) :: tempArray
       type(ESMF_Array), dimension(:), pointer :: coord, coord2
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -3288,14 +3295,15 @@
       ! get physgrid identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         else
-            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "undefined horizontal relloc", &
-                                 ESMF_CONTEXT, rc)) return
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                       "undefined horizontal relloc", &
+                       ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
@@ -3306,14 +3314,14 @@
    !                              ESMF_CONTEXT, rc)) return
    !     endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
-          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
  !       else
- !           if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
- !                               "undefined vertical relloc", &
- !                                ESMF_CONTEXT, rc)) return
+ !         dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+ !                                       "undefined vertical relloc", &
+ !                                       ESMF_CONTEXT, rc)) return
         endif
       endif
 
@@ -3321,23 +3329,25 @@
       if (present(centerCoord)) then
         index = 1
         aSize = min(gridRank, size(centerCoord))
-        allocate(coord(aSize))
+        allocate(coord(aSize), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "coord", &
+                                       ESMF_CONTEXT, rc)) return
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           call ESMF_PhysGridGetLocations(grid%ptr%physGrids(horzPhysIdUse), &
                                          locationArray=coord(1:2), &
-                                         total=total, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                         total=total, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           call ESMF_PhysGridGetLocations(grid%ptr%physGrids(vertPhysIdUse), &
                                          locationArray=coord(index:index), &
-                                         total=total, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                         total=total, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
@@ -3347,7 +3357,7 @@
             if (gridOrder(1,grid%ptr%coordOrder%order,2).eq.1) then
               centerCoord(order(i)) = coord(i)
             else
-              call ESMF_LRGridReshape(coord(i), tempArray, status)
+              call ESMF_LRGridReshape(coord(i), tempArray, localrc)
               centerCoord(order(i)) = tempArray
             endif
           enddo
@@ -3356,28 +3366,32 @@
             centerCoord(i) = coord(i)
           enddo
         endif
-        deallocate(coord)
+        deallocate(coord, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coord", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       if (present(cornerCoord)) then
         index = 1
         aSize = min(gridRank, size(cornerCoord))
-        allocate(coord2(aSize))
+        allocate(coord2(aSize), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "coord2", &
+                                       ESMF_CONTEXT, rc)) return
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           call ESMF_PhysGridGetRegions(grid%ptr%physGrids(horzPhysIdUse), &
-                                       vertexArray=coord2(1:2), rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                       vertexArray=coord2(1:2), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           call ESMF_PhysGridGetRegions(grid%ptr%physGrids(horzPhysIdUse), &
                                        vertexArray=coord2(index:index), &
-                                       rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                       rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
@@ -3389,12 +3403,14 @@
             cornerCoord(i) = coord2(i)
           enddo
         endif
-        deallocate(coord2)
+        deallocate(coord2, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating coord2", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       ! TODO: face coords
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGetCoord
 
@@ -3521,8 +3537,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
@@ -3536,13 +3551,8 @@
       type(ESMF_PhysCoord) :: coord
       type(ESMF_DELayout) :: delayout
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -3565,10 +3575,10 @@
       ! get physgrid and distgrid identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
           horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
         else
@@ -3585,10 +3595,10 @@
   !                              ESMF_CONTEXT, rc)) return
   !      endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
-          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
   !      else
@@ -3605,7 +3615,7 @@
       ! vs. 1-based issues.  note: layout the same for all distgrids, so use 1
       if (present(myDE)) then
         call ESMF_LRGridGet(grid, delayout=delayout)
-        call ESMF_DELayoutGet(delayout, localDE=myDE, rc=status)
+        call ESMF_DELayoutGet(delayout, localDE=myDE, rc=localrc)
       endif
 
       ! make DistGrid calls first
@@ -3627,18 +3637,18 @@
         if (horzPhysIdUse.ne.-1) then
           call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
                                   horzCellCount, &
-                                  total=total, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  total=total, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (vertPhysIdUse.ne.-1) then
           call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
                                   vertCellCount, &
-                                  total=total, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  total=total, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         localCellCount = horzCellCount*vertCellCount
       endif
@@ -3650,20 +3660,20 @@
                     localCellCountPerDim=localCellCountPerDimUse(1:2), &
                     globalStartPerDim=globalStartPerDimUse(1:2), &
                     globalAIPerDim=globalAIPerDimUse(1:2), &
-                    total=total, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                    total=total, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
                     localCellCountPerDim=localCellCountPerDimUse(index:index), &
                     globalStartPerDim=globalStartPerDimUse(index:index), &
                     globalAIPerDim=globalAIPerDimUse(index:index), &
-                    total=total, rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                    total=total, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         ! load local values into return arguments
         if (reorderUse) then
@@ -3697,19 +3707,19 @@
           do i = 1,2
             coord = grid%ptr%physgrids(horzPhysIdUse)%ptr%coords(i)
             call ESMF_PhysCoordGetExtents(coord, minVal=minLCPDUse(i), &
-                                          rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                          rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
           enddo
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           coord = grid%ptr%physgrids(vertPhysIdUse)%ptr%coords(1)
           call ESMF_PhysCoordGetExtents(coord, minVal=minLCPDUse(index), &
-                                        rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                        rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
@@ -3731,19 +3741,19 @@
           do i = 1,2
             coord = grid%ptr%physgrids(horzPhysIdUse)%ptr%coords(i)
             call ESMF_PhysCoordGetExtents(coord, maxVal=maxLCPDUse(i), &
-                                          rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                          rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
           enddo
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           coord = grid%ptr%physgrids(vertPhysIdUse)%ptr%coords(1)
           call ESMF_PhysCoordGetExtents(coord, maxVal=maxLCPDUse(index), &
-                                        rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                        rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
@@ -3757,7 +3767,7 @@
         endif
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGetDE
 
@@ -3804,21 +3814,16 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: aSize, gridRank, index, sizeAI
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer, dimension(ESMF_MAXGRIDDIM) :: order
+      logical :: dummy
       type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -3836,49 +3841,54 @@
       ! Get the grid rank and check against size of globalAI
       gridRank = grid%ptr%dimCount
       if (size(globalAI,2).lt.gridRank) then
-         if (ESMF_LogWrite("globalAI array size smaller than grid rank", &
-                            ESMF_LOG_WARNING, &
-                            ESMF_CONTEXT)) continue
+        if (ESMF_LogWrite("globalAI array size smaller than grid rank", &
+                          ESMF_LOG_WARNING, &
+                          ESMF_CONTEXT)) continue
       endif
 
       ! Get the size of the AI array and allocate horz and vert temp AI arrays
       sizeAI = size(globalAI,1)
       aSize  = min(gridRank, size(globalAI,2))
-      allocate(horzAI(sizeAI,2))
-      allocate(vertAI(sizeAI,1))
+      allocate(horzAI(sizeAI,2), &
+               vertAI(sizeAI,1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "allocating AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! get distgrid identifiers from relative locations
       if (present(horzRelLoc)) then
         if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
           horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
         else
-          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "undefined horizontal relloc", &
-                                 ESMF_CONTEXT, rc)) return
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "undefined horizontal relloc", &
+                                        ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
       if (present(vertRelLoc)) then
-   !     if (gridRank.le.2) then
-   !         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-   !                             "cannot define vertical relloc on 2D grid", &
-   !                              ESMF_CONTEXT, rc)) return
-   !     endif
+        if (gridRank.le.2) then
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "cannot define vertical relloc on 2D grid", &
+                                        ESMF_CONTEXT, rc)
+          return
+        endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
-          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
-   !     else
-   !       if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-   !                               "undefined vertical relloc", &
-   !                                ESMF_CONTEXT, rc)) return
+        else
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                        "undefined vertical relloc", &
+                                        ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
@@ -3888,15 +3898,15 @@
       if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
         index = 3
         call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
-                                          horzAI, total, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                          horzAI, total, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
       if (aSize.ge.index .AND. vertDistIdUse.ne.-1) then
         call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(vertDistIdUse)%ptr, &
-                                          vertAI, total, rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                          vertAI, total, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       else
@@ -3915,10 +3925,12 @@
       endif
       if (aSize.ge.index) globalAI(:,order(3)) = vertAI(:,1)
 
-      deallocate(horzAI)
-      deallocate(vertAI)
+      deallocate(horzAI, &
+                 vertAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGetAllAxisIndex
 
@@ -3992,8 +4004,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i
       integer :: order(3)
       integer :: gridRank, aSize, tempSize, tempSize2
@@ -4001,22 +4012,18 @@
       integer :: horzPhysIdUse, vertPhysIdUse
       integer, dimension(:), allocatable :: dimOrderUse
       integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
+      logical :: dummy
       type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
-         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Invalid Grid object", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "Invalid Grid object", &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! Initialize other variables
@@ -4038,8 +4045,10 @@
         tempSize  = size(global2D,1)
         tempSize2 = size(global2D,2)
         aSize = max(aSize, tempSize)
-        allocate(gtemp2D(tempSize,tempSize2))
-        allocate(ltemp2D(tempSize,tempSize2))
+        allocate(gtemp2D(tempSize,tempSize2), &
+                 ltemp2D(tempSize,tempSize2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtemp2D(:,i) = global2D(:,order(i))
@@ -4053,8 +4062,10 @@
         tempSize  = size(globalAI2D,1)
         tempSize2 = size(globalAI2D,2)
         aSize = max(aSize, tempSize)
-        allocate(gtempAI2D(tempSize,tempSize2))
-        allocate(ltempAI2D(tempSize,tempSize2))
+        allocate(gtempAI2D(tempSize,tempSize2), &
+                 ltempAI2D(tempSize,tempSize2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           gtempAI2D(:,i) = globalAI2D(:,order(i))
@@ -4063,7 +4074,9 @@
       aSize = min(gridRank, aSize)
 
       ! calculate default if dimOrder is not present
-      allocate(dimOrderUse(aSize))
+      allocate(dimOrderUse(aSize), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dimOrderUse", &
+                                     ESMF_CONTEXT, rc)) return
       if (present(dimOrder)) then
         dimOrderUse(:) = dimOrder(:)
       else
@@ -4074,8 +4087,8 @@
 
       ! get distgrid identifier from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
@@ -4087,16 +4100,16 @@
 
       if (present(vertRelLoc)) then
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
-          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
         endif
- !     else
- !       if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
- !                               "undefined vertical relloc", &
- !                                ESMF_CONTEXT, rc)) return
+ !    else
+ !      dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+ !                                    "undefined vertical relloc", &
+ !                                    ESMF_CONTEXT, rc)) return
       endif
 
       hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
@@ -4119,14 +4132,15 @@
                                                global1D=global1D, &
                                                local1D=local1D, &
                                                dimOrder=dimOrderUse(1:2), &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         else
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
                              "1D operation not yet defined for 3d grids", &
-                              ESMF_CONTEXT, rc)) return
+                              ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
@@ -4135,19 +4149,20 @@
                                              global2D=gTemp2D(:,1:2), &
                                              local2D=lTemp2D(:,1:2), &
                                              dimOrder=dimOrderUse(1:2), &
-                                             rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                             rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
                                                global2D=gTemp2D(:,3:3), &
                                                local2D=lTemp2D(:,3:3), &
                                                dimOrder=dimOrderUse(3:3), &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
 
         tempSize2 = size(global2D,2)
@@ -4155,8 +4170,10 @@
         do i = 1,tempSize2
           local2D(:,order(i)) = ltemp2D(:,i)
         enddo
-        deallocate(gtemp2D)
-        deallocate(ltemp2D)
+        deallocate(gtemp2D, &
+                   ltemp2D, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating temp2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       if (present(globalAI1D)) then
@@ -4165,14 +4182,15 @@
                                                globalAI1D=globalAI1D, &
                                                localAI1D=localAI1D, &
                                                dimOrder=dimOrderUse(1:2), &
-                                               rc=status)
-           if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         else
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                             "1D operation not yet defined for 3d grids", &
-                              ESMF_CONTEXT, rc)) return
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                       "1D operation not yet defined for 3d grids", &
+                       ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
@@ -4181,32 +4199,37 @@
                                              globalAI2D=gTempAI2D(:,1:2), &
                                              localAI2D=lTempAI2D(:,1:2), &
                                              dimOrder=dimOrderUse(1:2), &
-                                             rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                             rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
                                                globalAI2D=gTempAI2D(:,3:3), &
                                                localAI2D=lTempAI2D(:,3:3), &
                                                dimOrder=dimOrderUse(3:3), &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         tempSize2 = size(globalAI2D,2)
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           localAI2D(:,order(i)) = ltempAI2D(:,i)
         enddo
-        deallocate(gtempAI2D)
-        deallocate(ltempAI2D)
+        deallocate(gtempAI2D, &
+                   ltempAI2D, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating tempAI2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
-      deallocate(dimOrderUse)
+      deallocate(dimOrderUse, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating dimOrderUse", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGlobalToLocalIndex
 
@@ -4278,24 +4301,19 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i
       integer :: order(3)
       integer :: gridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
+      logical :: dummy
       type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -4323,8 +4341,10 @@
         tempSize  = size(local2D,1)
         tempSize2 = size(local2D,2)
         aSize = max(aSize, tempSize)
-        allocate(gtemp2D(tempSize,tempSize2))
-        allocate(ltemp2D(tempSize,tempSize2))
+        allocate(gtemp2D(tempSize,tempSize2), &
+                 ltemp2D(tempSize,tempSize2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "temp2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           ltemp2D(:,i) = local2D(:,order(i))
@@ -4338,8 +4358,10 @@
         tempSize  = size(localAI2D,1)
         tempSize2 = size(localAI2D,2)
         aSize = max(aSize, tempSize)
-        allocate(gtempAI2D(tempSize,tempSize2))
-        allocate(ltempAI2D(tempSize,tempSize2))
+        allocate(gtempAI2D(tempSize,tempSize2), &
+                 ltempAI2D(tempSize,tempSize2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "tempAI2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           ltempAI2D(:,i) = localAI2D(:,order(i))
@@ -4349,23 +4371,24 @@
 
       ! get distgrid identifiers from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
       else
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "undefined horizontal relloc", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                     "undefined horizontal relloc", &
+                     ESMF_CONTEXT, rc)
+        return
       endif
 
       if (present(vertRelLoc)) then
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
-          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
         endif
       endif
@@ -4389,14 +4412,15 @@
           call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
                                                local1D=local1D, &
                                                global1D=global1D, &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         else
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                             "1D operation not yet defined for 3d grids", &
-                              ESMF_CONTEXT, rc)) return
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                       "1D operation not yet defined for 3d grids", &
+                       ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
@@ -4404,26 +4428,29 @@
         call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
                                              local2D=lTemp2D(:,1:2), &
                                              global2D=gTemp2D(:,1:2), &
-                                             rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                             rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
                                                local2D=lTemp2D(:,3:3), &
                                                global2D=gTemp2D(:,3:3), &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         tempSize2 = size(local2D,2)
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           global2D(:,order(i)) = gtemp2D(:,i)
         enddo
-        deallocate(gtemp2D)
-        deallocate(ltemp2D)
+        deallocate(gtemp2D, &
+                   ltemp2D, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating temp2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       if (present(localAI1D)) then
@@ -4431,14 +4458,15 @@
           call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
                                                localAI1D=localAI1D, &
                                                globalAI1D=globalAI1D, &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         else
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                             "1D operation not yet defined for 3d grids", &
-                              ESMF_CONTEXT, rc)) return
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                       "1D operation not yet defined for 3d grids", &
+                       ESMF_CONTEXT, rc)
+          return
         endif
       endif
 
@@ -4446,29 +4474,32 @@
         call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
                                              localAI2D=lTempAI2D(:,1:2), &
                                              globalAI2D=gTempAI2D(:,1:2), &
-                                             rc=status)
-        if (ESMF_LogMsgFoundError(status, &
+                                             rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
                                                localAI2D=lTempAI2D(:,3:3), &
                                                globalAI2D=gTempAI2D(:,3:3), &
-                                               rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                               rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
         endif
         tempSize2 = size(localAI2D,2)
         order(:) = gridOrder(:,grid%ptr%coordOrder%order,tempSize2)
         do i = 1,tempSize2
           globalAI2D(:,order(i)) = gtempAI2D(:,i)
         enddo
-        deallocate(gtempAI2D)
-        deallocate(ltempAI2D)
+        deallocate(gtempAI2D, &
+                   ltempAI2D, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating tempAI2D arrays", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridLocalToGlobalIndex
 
@@ -4573,10 +4604,10 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, j, i1, j1, offsetI, offsetJ, hWidth
       integer, dimension(:), allocatable :: cornerCounts
+      logical :: dummy
       real(ESMF_KIND_R8) :: centerUse1, centerUse2
       real(ESMF_KIND_R8) :: cornerUse11, cornerUse12, cornerUse21, cornerUse22
       real(ESMF_KIND_R8), dimension(:), pointer :: center
@@ -4586,21 +4617,18 @@
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! TODO: could be a 1-D array for each coord axis later, but that
       !       would have to be supported by Regrid first
 
       ! allocate arrays
-      allocate(cornerCounts(size(counts)+1))
-      allocate(centerArray(dimCount))
-      allocate(cornerArray(dimCount))
+      allocate(cornerCounts(size(counts)+1), &
+               centerArray(dimCount), &
+               cornerArray(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "local arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! set up cornerCounts arrays
       cornerCounts(1) = dimCount*2
@@ -4621,21 +4649,21 @@
       type = ESMF_DATA_REAL
       do i = 1,dimCount
         centerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, counts, &
-                                          haloWidth=hWidth, rc=status)
+                                          haloWidth=hWidth, rc=localrc)
         cornerArray(i) = ESMF_ArrayCreate(dimCount+1, type, kind, cornerCounts, &
-                                          haloWidth=hWidth, rc=status)
+                                          haloWidth=hWidth, rc=localrc)
       enddo
 
       select case (dimCount)
       case(1)   ! 1D coordinates, assumed mostly for vertical grids
 
         ! get data
-        call ESMF_ArrayGetData(centerArray(1), center, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(centerArray(1), center, ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(cornerArray(1), corner, ESMF_DATA_REF, localrc)
 
         ! For now, an if construct for the different relative locations
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
-          status = ESMF_FAILURE
+          localrc = ESMF_FAILURE
 
         elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
           do i = 1,counts(1)
@@ -4660,15 +4688,15 @@
       case(2)   ! 2D coordinates
 
         ! get data
-        call ESMF_ArrayGetData(centerArray(1), center1, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(centerArray(2), center2, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, status)
+        call ESMF_ArrayGetData(centerArray(1), center1, ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(centerArray(2), center2, ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(cornerArray(1), corner1, ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(cornerArray(2), corner2, ESMF_DATA_REF, localrc)
 
         ! For now, an if construct for the different relative locations
         ! TODO: also set corners and faces
         if (relloc .eq. ESMF_CELL_UNDEFINED) then
-          status = ESMF_FAILURE
+          localrc = ESMF_FAILURE
 
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,counts(1)
@@ -4959,41 +4987,45 @@
           endif
 
         else
-          if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                             "This relative location not yet supported", &
-                              ESMF_CONTEXT, rc)) return
+          dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                        "This relative location not yet supported", &
+                                        ESMF_CONTEXT, rc)
+          return
         endif
 
       case default
-        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                            "grids of this dimension are not yet supported", &
-                            ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                      "grids of this dimension are not yet supported", &
+                                     ESMF_CONTEXT, rc)
+        return
       end select
 
       ! now set the location array in PhysGrid
       call ESMF_PhysGridSetLocations(grid%physGrids(physGridId), &
                                      locationArray=centerArray, total=total, &
-                                     rc=status)
+                                     rc=localrc)
             ! TODO: add name to set call
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set the region array in PhysGrid
       if (.not.total) then
-      call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
-                                   regionType=ESMF_REGION_TYPE_POLYGON, &
-                                   vertexArray=cornerArray, &
-                                   numVertices=4, rc=status)
-            ! TODO: add name to set call
-      if (ESMF_LogMsgFoundError(status, &
+        call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
+                                     regionType=ESMF_REGION_TYPE_POLYGON, &
+                                     vertexArray=cornerArray, &
+                                     numVertices=4, rc=localrc)
+              ! TODO: add name to set call
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      deallocate(cornerCounts)
+      deallocate(cornerCounts, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating cornerCounts", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSetCoordCompute
 
@@ -5133,8 +5165,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, aSize, gridRank
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
@@ -5143,13 +5174,8 @@
       integer, dimension(:,:), allocatable :: gSPDEPDUse, cCPDEPDUse
       type(ESMF_GridClass), pointer :: gridp
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
  
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -5181,8 +5207,8 @@
 
       ! get name from base obj
       if (present(name)) then
-        call ESMF_GetName(gridp%base, name, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_GetName(gridp%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       endif
@@ -5237,8 +5263,8 @@
                                  ESMF_CONTEXT, rc)) return
         endif
         call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, &
-                                    status)
-        if (ESMF_LogMsgFoundError(status, &
+                                    localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
         horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
@@ -5250,8 +5276,8 @@
                                  ESMF_CONTEXT, rc)) return
           endif
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, &
-                                      status)
-          if (ESMF_LogMsgFoundError(status, &
+                                      localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
@@ -5260,104 +5286,124 @@
         ! Get distgrid info with global coordinate counts
         if (present(globalCellCountPerDim)) then
           aSize = min(gridRank, size(globalCellCountPerDim))
-          allocate(gCCPDUse(aSize))
+          allocate(gCCPDUse(aSize), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "gCCPDUse", &
+                                         ESMF_CONTEXT, rc)) return
           call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
                                 globalCellCountPerDim=gCCPDUse(1:2), &
-                                rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           if (aSize.ge.3) then
             call ESMF_DistGridGet(gridp%distgrids(vertDistIdUse), &
                                   globalCellCountPerDim=gCCPDUse(3:3), &
-                                  rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
           endif
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             globalCellCountPerDim(order(i)) = gCCPDUse(i)
           enddo
-          deallocate(gCCPDUse)
+          deallocate(gCCPDUse, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating gCCPDUse", &
+                                         ESMF_CONTEXT, rc)) return
         endif
 
         if (present(globalStartPerDEPerDim)) then
           aSize = min(gridRank, size(globalStartPerDEPerDim,2))
-          allocate(gSPDEPDUse(size(globalStartPerDEPerDim,1), aSize))
+          allocate(gSPDEPDUse(size(globalStartPerDEPerDim,1), aSize), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "gSPDEPUse", &
+                                         ESMF_CONTEXT, rc)) return
           call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
                                 globalStartPerDEPerDim=gSPDEPDUse(:,1:2), &
-                                rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           if (aSize.ge.3) then
             call ESMF_DistGridGet(gridp%distgrids(vertDistIdUse), &
                                   globalStartPerDEPerDim=gSPDEPDUse(:,3:3), &
-                                  rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
           endif
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             globalStartPerDEPerDim(:,order(i)) = gSPDEPDUse(:,i)
           enddo
-          deallocate(gSPDEPDUse)
+          deallocate(gSPDEPDUse, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating gSPDEPUse", &
+                                         ESMF_CONTEXT, rc)) return
         endif
 
         if (present(maxLocalCellCountPerDim)) then
           aSize = min(gridRank, size(maxLocalCellCountPerDim))
-          allocate(mLCCPDUse(aSize))
+          allocate(mLCCPDUse(aSize), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "mLCCPDUse", &
+                                         ESMF_CONTEXT, rc)) return
           call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
                                 maxLocalCellCountPerDim=mLCCPDUse(1:2), &
-                                rc=status)
-          if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
           if (aSize.ge.3) then
             call ESMF_DistGridGet(gridp%distgrids(vertDistIdUse), &
                                   maxLocalCellCountPerDim=mLCCPDUse(3:3), &
-                                  rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                  rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
           endif
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             maxLocalCellCountPerDim(order(i)) = mLCCPDUse(i)
           enddo
-          deallocate(mLCCPDUse)
+          deallocate(mLCCPDUse, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating mLCCPDUse", &
+                                         ESMF_CONTEXT, rc)) return
         endif
 
         if (present(cellCountPerDEPerDim)) then
           aSize = min(gridRank, size(cellCountPerDEPerDim,2))
-          allocate(cCPDEPDUse(size(cellCountPerDEPerDim,1), aSize))
+          allocate(cCPDEPDUse(size(cellCountPerDEPerDim,1), aSize), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "cCPDEPDUse", &
+                                         ESMF_CONTEXT, rc)) return
           call ESMF_DistGridGetAllCounts(gridp%distgrids(horzDistIdUse)%ptr, &
-                                         cCPDEPDUse(:,1:2), rc=status)
-          if (ESMF_LogMsgFoundError(status, &
+                                         cCPDEPDUse(:,1:2), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
           if (aSize.ge.3) then
             call ESMF_DistGridGetAllCounts(gridp%distgrids(vertDistIdUse)%ptr, &
-                                           cCPDEPDUse(:,3:3), rc=status)
-            if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                           cCPDEPDUse(:,3:3), rc=localrc)
+            if (ESMF_LogMsgFoundError(localrc, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
           endif
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
             cellCountPerDEPerDim(:,order(i)) = cCPDEPDUse(:,i)
           enddo
-          deallocate(cCPDEPDUse)
+          deallocate(cCPDEPDUse, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocating cCPDEPDUse", &
+                                         ESMF_CONTEXT, rc)) return
         endif
       endif
 
       if (present(delayout)) then
-        call ESMF_DistGridGet(gridp%distgrids(1), delayout=delayout, rc=status)
+        call ESMF_DistGridGet(gridp%distgrids(1), delayout=delayout, rc=localrc)
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGet
 
@@ -5430,17 +5476,11 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i                                ! loop index
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if present, set information filling in grid derived type
       if (present(horzGridType)) grid%horzGridType = horzGridType
@@ -5451,26 +5491,26 @@
       if (present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
       if (present(coordOrder)) grid%coordOrder = coordOrder
       if (present(periodic)) then
-         do i=1,ESMF_MAXGRIDDIM
-            if (i > size(periodic)) exit
-            grid%periodic(i) = periodic(i)
-         enddo
+        do i=1,ESMF_MAXGRIDDIM
+          if (i > size(periodic)) exit
+          grid%periodic(i) = periodic(i)
+        enddo
       endif
 
       if (present(minGlobalCoordPerDim)) then
    !      if (size(minGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
-         do i=1,size(minGlobalCoordPerDim)
-            grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
-         enddo
+        do i=1,size(minGlobalCoordPerDim)
+          grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
+        enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
    !      if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
-         do i=1,size(maxGlobalCoordPerDim)
-            grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
-         enddo
+        do i=1,size(maxGlobalCoordPerDim)
+          grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+        enddo
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSet
 
@@ -5514,17 +5554,11 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: physIdUse
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! some basic error checking    TODO: more
       if (.not.associated(grid%ptr)) then
@@ -5537,8 +5571,8 @@
       physIdUse = -1
 
       if (relloc.ne.ESMF_CELL_UNDEFINED) then
-        call ESMF_GridGetPhysGridId(grid%ptr, relloc, physIdUse, status)
-        if (ESMF_LogMsgFoundError(status, &
+        call ESMF_GridGetPhysGridId(grid%ptr, relloc, physIdUse, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       else
@@ -5554,12 +5588,12 @@
 
       ! call PhysGrid with the valid Id
       call ESMF_PhysGridGetMask(grid%ptr%physGrids(physIdUse), maskArray, id=1, &
-                                rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGetCellMask
 
@@ -5618,8 +5652,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       character(len=ESMF_MAXSTR) :: name
       integer :: i, j, iMax1, jMax1, iType, jType
       integer, dimension(:,:), pointer :: temp
@@ -5627,13 +5660,8 @@
       type(ESMF_DataKind) :: kind
       type(ESMF_DataType) :: type
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! TODO: different subroutines for different dimCount?  or case?
 
@@ -5641,8 +5669,8 @@
       kind = ESMF_I4
       type = ESMF_DATA_INTEGER
       arrayTemp = ESMF_ArrayCreate(dimCount, type, kind, counts, &
-                                   haloWidth=gridBoundWidth, rc=status)
-      call ESMF_ArrayGetData(arrayTemp, temp, ESMF_DATA_REF, status)
+                                   haloWidth=gridBoundWidth, rc=localrc)
+      call ESMF_ArrayGetData(arrayTemp, temp, ESMF_DATA_REF, localrc)
 
       ! TODO: should this be different for different relative locations?
       iMax1 = counts(1) - gridBoundWidth + 1
@@ -5669,12 +5697,12 @@
       call ESMF_PhysGridSetMask(grid%physGrids(physGridId), &
                                 maskArray=arrayTemp, &
                                 maskType=ESMF_GRID_MASKTYPE_REGION_ID, &
-                                name=name, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                name=name, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSetCellMask
 
@@ -6039,20 +6067,14 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! Error status
       integer :: DE, numDE1, numDE2, numDEs, npts
       integer :: i, i1, j
       real(ESMF_KIND_R8) :: start, stop
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
 
-      ! Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       numDE1 = size(countsPerDEDim1)
       numDE2 = size(countsPerDEDim2)
@@ -6073,11 +6095,9 @@
       !                 6. (Xmax,Ymin,Zmax)
       !                 7. (Xmax,Ymax,Zmax)
       !                 8. (Xmin,Ymax,Zmax)
-      allocate(boxes(numDEs,npts,dimCount), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                       "Allocating Grid box information", &
-                                       ESMF_CONTEXT, rc)) return
-      ! "allocation error, boxes(nDE,npt,dimCount) = ", numDEs,npts,dimCount
+      allocate(boxes(numDEs,npts,dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "boxes", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Calculate box for each DE
       ! Direction 1 first
@@ -6116,12 +6136,14 @@
         i1    = i1 + countsPerDEDim2(j)
       enddo
 
-      grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, status)
+      grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, localrc)
 
       ! Clean up
-      deallocate(boxes)
+      deallocate(boxes, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dellocating boxes", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSetBoundingBoxes
 
@@ -6156,7 +6178,7 @@
 
       character(len=ESMF_MAXSTR) :: name, str
       type(ESMF_GridClass), pointer :: gp
-      integer :: status
+      integer :: localrc                          ! Error status
 
       if (present(rc)) rc = ESMF_FAILURE
 
@@ -6171,10 +6193,10 @@
         return
       endif
 
-      call ESMF_GetName(gp%base, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_GetName(gp%base, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! TODO: add calls to PhysGrid and distgrid validates
 
@@ -6235,8 +6257,7 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
@@ -6244,49 +6265,39 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai, localAI
       type(ESMF_LocalArray) :: array
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! get set of bounding boxes from the grid
-      call ESMF_GridGetBoundingBoxes(grid%ptr, array, status)
+      call ESMF_GridGetBoundingBoxes(grid%ptr, array, localrc)
 
       ! get rank and counts from the bounding boxes array
-      call ESMF_LocalArrayGet(array, counts=counts, rc=status)
+      call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
       nDEs = counts(1)
       rank = counts(3)
 
       ! allocate arrays now
-      allocate(grid_ai(nDEs,rank), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                       "Allocating Grid AI information", &
-                                       ESMF_CONTEXT, rc)) return
-      allocate(localAI(nDEs,rank), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                       "Allocating Grid local AI information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid_ai(nDEs,rank), &
+               localAI(nDEs,rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "AI arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
-    !  allocate(boxes(nDEs,2**rank,rank), stat=status)
-    !  if (ESMF_LogMsgFoundAllocError(status, &
-    !                                   "Allocating Grid box information", &
-    !                                   ESMF_CONTEXT, rc)) return
+    !  allocate(boxes(nDEs,2**rank,rank), stat=localrc)
+    !  if (ESMF_LogMsgFoundAllocError(localrc, "boxes", &
+    !                                 ESMF_CONTEXT, rc)) return
 
       ! get pointer to the actual bounding boxes data
-      call ESMF_LocalArrayGetData(array, boxes, rc=status)
+      call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
       ! get set of axis indices from grid
       call ESMF_LRGridGetAllAxisIndex(grid, grid_ai, &
                                       horzRelLoc=ESMF_CELL_CENTER, total=total, &
-                                      rc=status)
+                                      rc=localrc)
 
       ! translate the AIs from global to local
       call ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc=ESMF_CELL_CENTER, &
                                          globalAI2D=grid_ai, &
-                                         localAI2D=localAI, rc=status)
+                                         localAI2D=localAI, rc=localrc)
 
       ! loop through bounding boxes, looking for overlap with our "box"
       ! TODO: a better algorithm
@@ -6367,10 +6378,12 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-      deallocate(grid_ai)
-      deallocate(localAI)
+      deallocate(grid_ai, &
+                 localAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridBoxIntersectRecv
 
@@ -6428,8 +6441,7 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
@@ -6437,35 +6449,29 @@
       type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI
       type(ESMF_LocalArray) :: array
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! get set of bounding boxes from the grid
-      call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, status)
+      call ESMF_GridGetBoundingBoxes(dstGrid%ptr, array, localrc)
 
       ! get rank and counts from the bounding boxes array
-      call ESMF_LocalArrayGet(array, counts=counts, rc=status)
+      call ESMF_LocalArrayGet(array, counts=counts, rc=localrc)
       nDEs = counts(1)
       rank = counts(3)
 
       ! allocate arrays now
-      allocate(myLocalAI(rank), stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, &
-                                    "Allocating Grid my local AI information", &
-                                    ESMF_CONTEXT, rc)) return
+      allocate(myLocalAI(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "myLocalAI", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! translate myAI to local index
       call ESMF_LRGridGlobalToLocalIndex(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
                                          globalAI1D=myAI, localAI1D=myLocalAI, &
-                                         rc=status)
+                                         rc=localrc)
 
       ! get pointer to the actual bounding boxes data
-      call ESMF_LocalArrayGetData(array, boxes, rc=status)
+      call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
 
       ! loop through bounding boxes, looking for overlap with our "box"
       ! TODO: a better algorithm
@@ -6545,9 +6551,11 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-      deallocate(myLocalAI)
+      deallocate(myLocalAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating myLocalAI", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridBoxIntersectSend
 
@@ -6583,26 +6591,22 @@
 !EOPI
 ! !REQUIREMENTS:
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: i, i1, j, j1
       real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! get data in source array
-      call ESMF_ArrayGetData(array1, temp1, rc=status)
+      call ESMF_ArrayGetData(array1, temp1, rc=localrc)
       i1 = size(temp1,1)
       j1 = size(temp1,2)
 
       ! allocate data for destination array
-      allocate(temp2(j1,i1))
+      allocate(temp2(j1,i1), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "temp2", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! transfer data
       do j = 1,j1
@@ -6612,11 +6616,13 @@
       enddo
  
       ! make destination array from data
-      array2 = ESMF_ArrayCreate(temp2, ESMF_DATA_COPY, rc=status)
+      array2 = ESMF_ArrayCreate(temp2, ESMF_DATA_COPY, rc=localrc)
 
-      deallocate(temp2)
+      deallocate(temp2, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating temp2", &
+                                     ESMF_CONTEXT, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridReshape
 
@@ -6692,21 +6698,21 @@
 !           ESMF_GRID_TYPE_LATLON_GAUSS, ESMF_GRID_TYPE_REDUCED)
 !         !*** simple search adequate for these cases
 !         call ESMF_PhysGridSearchBboxSpherical(dstAdd, x, y, DEId, physGrid, &
-!                                               distGrid, status)
+!                                               distGrid, localrc)
 !
 !      case(ESMF_GRID_TYPE_DIPOLE,   ESMF_GRID_TYPE_TRIPOLE, &
 !           ESMF_GRID_TYPE_GEODESIC, ESMF_GRID_TYPE_CUBEDSPHERE)
 !         !*** must use more general algorithm for these cases
 !         call ESMF_PhysGridSearchGeneralSpherical(dstAdd, x, y, DEId, physGrid, &
-!                                                  distGrid, status)
+!                                                  distGrid, localrc)
 !
 !      case(ESMF_GRIDTYPE_XY, ESMF_GRIDTYPE_XY_UNI)
 !         call ESMF_PhysGridSearchBboxCartesian(dstAdd, x, y, DEId, physGrid, &
-!                                               distGrid, status)
+!                                               distGrid, localrc)
 !
 !      case default
 !         print *,'GridSearchPoint: search of this grid type not supported'
-!         status = ESMF_Failure
+!         localrc = ESMF_Failure
 !      end select
 !
 !      end subroutine ESMF_LRGridSearchPoint
@@ -6732,30 +6738,25 @@
 !EOPI
 ! !REQUIREMENTS:
 
-
-!     Local variables.
-      integer :: status                ! Error status
-      logical :: rcpresent             ! Return code present
+      ! Local variables.
+      integer :: localrc                          ! Error status
       integer :: total, i
 
-!     Initialize return code; assume failure until success is certain.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Determine the decomposition 
+      ! Determine the decomposition 
       total = 0
-      do i=1, nDEs
+      do i  = 1, nDEs
         countsPerDE(i) = ((count*i + nDEs/2)/nDEs) - total
         total = total + countsPerDE(i)
       enddo
 
-!     set return code if user specified it
-      if (rcpresent) rc = ESMF_SUCCESS
+      ! set return code if user specified it
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDecompose
-      
+
+!------------------------------------------------------------------------------
+ 
       end module ESMF_LogRectGridMod

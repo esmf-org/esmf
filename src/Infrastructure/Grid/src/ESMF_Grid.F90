@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.170 2004/06/08 09:27:17 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.171 2004/06/09 17:47:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
 #define ESMF_FILENAME "ESMF_Grid.F90"
 !
 !     ESMF Grid Module
@@ -96,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.170 2004/06/08 09:27:17 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.171 2004/06/09 17:47:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -262,36 +263,31 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
+      logical :: dummy
+      real(ESMF_KIND_R8) :: minGlobalCoord
       type(ESMF_GridVertType) :: vertGridType
       type(ESMF_CoordSystem) :: vertCoordSystem
-      real(ESMF_KIND_R8) :: minGlobalCoord
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Set default values
+      ! Set default values
       vertGridType    = ESMF_GRID_VERT_TYPE_HEIGHT
       vertCoordSystem = ESMF_COORD_SYSTEM_HEIGHT
       minGlobalCoord  = 0.0d0
 
-!     Call GridAddVert routines based on GridStructure
+      ! Call GridAddVert routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
-        status = ESMF_FAILURE
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "GridStructureUnknown not supported", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -299,48 +295,52 @@
         call ESMF_LRGridAddVert(grid%ptr, minGlobalCoord, delta, coord, &
                                 vertGridType, vertStagger, &
                                 vertCoordSystem, dimName, dimUnit, &
-                                name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                      "GridStructureLogRectBlock not supported", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                      "GridStructureUnstruct not supported", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                      "GridStructureUser not supported", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                      "Invalid grid structure", &
+                                      ESMF_CONTEXT, rc)
+        return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAddVertHeight
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "GridCreateEmpty"
+#define ESMF_METHOD "ESMF_GridCreateEmpty"
 !BOP
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid with no contents
 
@@ -372,41 +372,36 @@
 ! !REQUIREMENTS:  TODO
 
       type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(grid)
       nullify(ESMF_GridCreateEmpty%ptr)
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-      allocate(grid, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(grid, stat=localrc)
+      ! If error write message and return.
+      if (ESMF_LogMsgFoundAllocError(localrc, "Grid type", &
+                                     ESMF_CONTEXT, rc)) return
 
-!     Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstructNew(grid, name, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      ! Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
+      ! Set return values.
       ESMF_GridCreateEmpty%ptr => grid
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateEmpty
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateRead"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid read in from a file
 
@@ -443,21 +438,15 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_GridCreateRead%ptr)
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridCreateRead routines based on GridStructure
+      ! Call GridCreateRead routines based on GridStructure
 
       select case(gridStructure)
 
@@ -471,10 +460,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        ESMF_GridCreateRead = ESMF_LRGridCreateRead(iospec, name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        ESMF_GridCreateRead = ESMF_LRGridCreateRead(iospec, name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -504,16 +490,19 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateRead
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateCopy"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid by copying another Grid
 
@@ -547,21 +536,15 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_GridCreateCopy%ptr)
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridCreateCopy routines based on GridStructure
+      ! Call GridCreateCopy routines based on GridStructure
 
       select case(gridIn%ptr%gridStructure%gridStructure)
 
@@ -575,10 +558,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        ESMF_GridCreateCopy = ESMF_LRGridCreateCopy(gridIn, name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        ESMF_GridCreateCopy = ESMF_LRGridCreateCopy(gridIn, name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -608,16 +588,19 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateCopy
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateCutout"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid as a subset of an existing Grid
 
@@ -657,21 +640,15 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_GridCreateCutout%ptr)
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridCreateCutout routines based on GridStructure
+      ! Call GridCreateCutout routines based on GridStructure
 
       select case(gridIn%ptr%gridStructure%gridStructure)
 
@@ -686,10 +663,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateCutout = ESMF_LRGridCreateCutout(gridIn, min, max, &
-                                                        name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                                        name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -719,16 +693,19 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateCutout
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateDiffRes"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid by coarsening or refining an existing Grid
 
@@ -772,21 +749,15 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_GridCreateDiffRes%ptr)
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridCreateDiffRes routines based on GridStructure
+      ! Call GridCreateDiffRes routines based on GridStructure
 
       select case(gridIn%ptr%gridStructure%gridStructure)
 
@@ -801,10 +772,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateDiffRes = &
-          ESMF_LRGridCreateDiffRes(gridIn, resolution, name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+          ESMF_LRGridCreateDiffRes(gridIn, resolution, name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -834,16 +802,19 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateDiffRes
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateExchange"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid from the intersection of two existing grids
 
@@ -880,21 +851,15 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize pointers
+      ! Initialize pointers
       nullify(ESMF_GridCreateExchange%ptr)
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridCreateExchange routines based on GridStructure
+      ! Call GridCreateExchange routines based on GridStructure
 
       select case(gridIn1%ptr%gridStructure%gridStructure)
 
@@ -909,10 +874,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateExchange = ESMF_LRGridCreateExchange(gridIn1, gridIn2, &
-                                                            name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                                            name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -942,9 +904,12 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateExchange
 
@@ -975,21 +940,18 @@
 !
 ! !REQUIREMENTS:
 !EOP
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      integer :: localrc                          ! local error status
+      logical :: dummy
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! If already destroyed or never created, return ok
       if (.not. associated(grid%ptr)) then
-        print *, "GridDestroy called on uninitialized or destroyed Grid"
-        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Uninitialized or destroyed Grid", &
+                                      ESMF_CONTEXT, rc)
         return
       endif
 
@@ -1002,17 +964,16 @@
       case(0)
         ! TODO: decide if it's ok to create an empty grid and then delete 
         !   it without being created further. (allow it for now)
-        !if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-        !                        "Unknown grid structure", &
-        !                         ESMF_CONTEXT, rc)) return
+        !localrc = ESMF_FAILURE
+        localrc = ESMF_SUCCESS
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "GridStructureUnknown not supported", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridDestruct(grid%ptr, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        call ESMF_LRGridDestruct(grid%ptr, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1042,20 +1003,26 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      ! If error write message and return.
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       ! delete the base class
-      call ESMF_BaseDestroy(grid%ptr%base, status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      call ESMF_BaseDestroy(grid%ptr%base, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! free field memory.
-      deallocate(grid%ptr, stat=status)
-      if (ESMF_LogMsgFoundAllocError(status, "Deallocating Grid information", &
-                                       ESMF_CONTEXT, rc)) return
+      deallocate(grid%ptr, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate Grid type", &
+                                     ESMF_CONTEXT, rc)) return
+
       ! so we can detect reuse of a deleted grid object
       nullify(grid%ptr)
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridDestroy
 
@@ -1102,18 +1069,12 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridDistribute routines based on GridStructure
+      ! Call GridDistribute routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1128,10 +1089,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDistribute(grid%ptr, delayout, countsPerDEDim1, &
-                                   countsPerDEDim2, decompIds, name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                   countsPerDEDim2, decompIds, name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1161,8 +1119,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridDistribute
 
@@ -1265,18 +1226,12 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridGet routines based on GridStructure
+      ! Call GridGet routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1298,10 +1253,7 @@
                             maxGlobalCoordPerDim, globalCellCountPerDim, &
                             globalStartPerDEPerDim, maxLocalCellCountPerDim, &
                             cellCountPerDEPerDim, periodic, delayout, &
-                            name, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                            name, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1331,8 +1283,12 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGet
 
@@ -1399,18 +1355,12 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridGetCoord routines based on GridStructure
+      ! Call GridGetCoord routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1425,10 +1375,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
-                                 cornerCoord, faceCoord, reorder, total, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                 cornerCoord, faceCoord, reorder, total, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1458,8 +1405,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetCoord
 
@@ -1541,18 +1491,12 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridGetDE routines based on GridStructure
+      ! Call GridGetDE routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1570,10 +1514,7 @@
                               myDE, localCellCount, localCellCountPerDim, &
                               minLocalCoordPerDim, maxLocalCoordPerDim, &
                               globalStartPerDim, globalAIPerDim, reorder, &
-                              total, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                              total, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1603,8 +1544,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetDE
 
@@ -1672,18 +1616,12 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridGlobalToLocalIndex routines based on GridStructure
+      ! Call GridGlobalToLocalIndex routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1702,10 +1640,7 @@
                                            global2D, local2D, &
                                            globalAI1D, localAI1D, &
                                            globalAI2D, localAI2D, &
-                                           dimOrder, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                           dimOrder, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1735,8 +1670,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGlobalToLocalIndex
 
@@ -1802,18 +1740,12 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridLocalToGlobalIndex routines based on GridStructure
+      ! Call GridLocalToGlobalIndex routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -1831,10 +1763,7 @@
                                            local1D, global1D, &
                                            local2D, global2D, &
                                            localAI1D, globalAI1D, &
-                                           localAI2D, globalAI2D, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                           localAI2D, globalAI2D, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -1864,8 +1793,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridLocalToGlobalIndex
 
@@ -1902,8 +1834,9 @@
       character(len=ESMF_MAXSTR) :: name, str
       type(ESMF_GridClass), pointer :: gp
       integer :: i
-      integer :: status
+      integer :: localrc                          ! local error status
 
+      ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       print *, "********Begin Grid Print:"
@@ -1924,11 +1857,10 @@
         return
       endif
 
-      call ESMF_BasePrint(gp%base, "", status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridPrint: BasePrint"
-        return
-      endif
+      call ESMF_BasePrint(gp%base, "", localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! TODO: add calls to //physgrid-Done\\ and distgrid prints
 
@@ -2017,54 +1949,48 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
       integer :: i                                ! loop index
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     if present, set information filling in grid derived type
-      if(present(horzGridType)) grid%horzGridType = horzGridType
-      if(present(vertGridType)) grid%vertGridType = vertGridType
-      if(present(horzStagger)) grid%horzStagger = horzStagger
-      if(present(vertStagger)) grid%vertStagger = vertStagger
-      if(present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
-      if(present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
-      if(present(coordOrder)) grid%coordOrder = coordOrder
+      ! if present, set information filling in grid derived type
+      if (present(horzGridType)) grid%horzGridType = horzGridType
+      if (present(vertGridType)) grid%vertGridType = vertGridType
+      if (present(horzStagger)) grid%horzStagger = horzStagger
+      if (present(vertStagger)) grid%vertStagger = vertStagger
+      if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
+      if (present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
+      if (present(coordOrder)) grid%coordOrder = coordOrder
       if (present(periodic)) then
-         do i=1,ESMF_MAXGRIDDIM
-            if (i > size(periodic)) exit
-            grid%periodic(i) = periodic(i)
-         enddo
+        do i=1,ESMF_MAXGRIDDIM
+          if (i > size(periodic)) exit
+          grid%periodic(i) = periodic(i)
+        enddo
       endif
 
       if (present(minGlobalCoordPerDim)) then
-   !      if (size(minGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
-         do i=1,size(minGlobalCoordPerDim)
-            grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
-         enddo
+   !     if (size(minGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
+        do i=1,size(minGlobalCoordPerDim)
+          grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
+        enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
-   !      if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
-         do i=1,size(maxGlobalCoordPerDim)
-            grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
-         enddo
+   !     if (size(maxGlobalCoordPerDim) .gt. ESMF_MAXGRIDDIM) exit  ! TODO
+        do i=1,size(maxGlobalCoordPerDim)
+          grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+        enddo
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridSet
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordCopy"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetCoord - Copies coordinates from one Grid to another
 
@@ -2108,9 +2034,9 @@
       end subroutine ESMF_GridSetCoordCopy
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordFromArray"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetCoord - Set the coordinates of a Grid from an existing ESMF array
 
@@ -2155,9 +2081,9 @@
       end subroutine ESMF_GridSetCoordFromArray
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetCoordFromBuffer"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetCoord - Set the coordinates of a Grid from an existing data buffer
 
@@ -2202,9 +2128,9 @@
       end subroutine ESMF_GridSetCoordFromBuffer
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMaskFromArray"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromArray - Set a mask in a Grid from an existing ESMF array
 
@@ -2242,9 +2168,9 @@
       end subroutine ESMF_GridSetMaskFromArray
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMaskFromBuffer"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromBuffer - Set a mask in a Grid from an existing data buffer
 
@@ -2282,9 +2208,9 @@
       end subroutine ESMF_GridSetMaskFromBuffer
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMaskCopy"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskCopy - Copies a mask from one grid to another.
 
@@ -2324,9 +2250,9 @@
       end subroutine ESMF_GridSetMaskCopy
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMaskFromMask"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromMask - Set a mask in a Grid from an existing mask
 
@@ -2365,9 +2291,9 @@
       end subroutine ESMF_GridSetMaskFromMask
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMetricFromArray"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
 
@@ -2405,9 +2331,9 @@
       end subroutine ESMF_GridSetMetricFromArray
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMetricFromBuffer"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
 
@@ -2445,9 +2371,9 @@
       end subroutine ESMF_GridSetMetricFromBuffer
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMetricCompute"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricCompute - Compute a metric for a Grid
 
@@ -2485,9 +2411,9 @@
       end subroutine ESMF_GridSetMetricCompute
 
 !------------------------------------------------------------------------------
-! TODO: make BOP when filled
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridSetMetricCopy"
+! TODO: make BOP when filled
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricCopy - Copies a metric from one grid to another
 
@@ -2555,42 +2481,35 @@
 !
 !EOP
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
+      logical :: dummy
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (.not. associated(grid%ptr)) then
-        print *, "Empty or Uninitialized Grid"
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Empty or Uninitialized Grid", &
+                                      ESMF_CONTEXT, rc)
         return
       endif
 
-!     Call validate routines based on GridStructure
+      ! Call validate routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        ! FIXME:  field needs to know the grid is ok -
-        ! if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-        !                        "Unknown grid structure", &
-        !                         ESMF_CONTEXT, rc)) return
-        print *, "Grid created, but Structure unknown"
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Unknown grid structure", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridValidate(grid, opt, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        call ESMF_LRGridValidate(grid, opt, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -2620,6 +2539,9 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2678,41 +2600,36 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
+      logical :: dummy
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (.not. associated(grid%ptr)) then
-        print *, "Empty or Uninitialized Grid"
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Empty or Uninitialized Grid", &
+                                      ESMF_CONTEXT, rc)
         return
       endif
 
-!     Call intersect routines based on GridStructure
+      ! Call intersect routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Unknown grid structure", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridBoxIntersectRecv(grid, localMinPerDim, localMaxPerDim, &
-                                         domainList, total, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                         domainList, total, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -2741,6 +2658,10 @@
                                 "Invalid Grid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2800,43 +2721,38 @@
 !
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
+      logical :: dummy
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       if ((.not. associated(dstGrid%ptr)) .or. &
           (.not. associated(srcGrid%ptr))) then
-        print *, "Empty or Uninitialized Grid"
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Empty or Uninitialized Grid", &
+                                      ESMF_CONTEXT, rc)
         return
       endif
 
-!     Call intersect routines based on GridStructure
+      ! Call intersect routines based on GridStructure
 
       select case(srcGrid%ptr%gridStructure%gridStructure)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "Unknown grid structure", &
+                                      ESMF_CONTEXT, rc)
+        return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, &
                                          localMinPerDim, localMaxPerDim, &
-                                         myAI, domainList, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                         myAI, domainList, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -2865,6 +2781,10 @@
                                 "Invalid Grid structure", &
                                  ESMF_CONTEXT, rc)) return
       end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2910,28 +2830,32 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !EOPI
 
-      integer :: status
-!
-!     branch to appropriate PhysGrid routine to compute
-!     distance
-!
-      status = ESMF_SUCCESS
+      integer :: localrc                          ! local error status
+      logical :: dummy
 
-      if(coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! branch to appropriate PhysGrid routine to compute distance
+      if (coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
         ESMF_GridComputeDistance = &
-          ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=status)
-      elseif(coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
+          ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=localrc)
+      elseif (coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
         ESMF_GridComputeDistance = &
-          ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=status)
+          ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=localrc)
       else
-        print *,'Distance in coordinate system not yet supported'
-        status = ESMF_FAILURE
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                      "Distance in coordinate system not yet supported", &
+                                      ESMF_CONTEXT, rc)
+        return
       endif
-!
-!     set return code and exit
-!
-      if (present(rc)) rc = status
-      return
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! set return code and exit
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridComputeDistance
 
@@ -2972,18 +2896,12 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridGetAllAxisIndex routines based on GridStructure
+      ! Call GridGetAllAxisIndex routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -2998,10 +2916,7 @@
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
-                                        total, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                                        total, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -3031,8 +2946,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetAllAxisIndex
 
@@ -3076,18 +2994,12 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! local error status
 
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-!     Call GridGetCellMask routines based on GridStructure
+      ! Call GridGetCellMask routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
 
@@ -3101,10 +3013,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, status)
-        if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -3134,8 +3043,11 @@
                                  ESMF_CONTEXT, rc)) return
       end select
 
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetCellMask
 
@@ -3190,16 +3102,11 @@
 !!
 !!EOPI
 !
-!      integer :: status                           ! Error status
-!      logical :: rcpresent                        ! Return code present
+!      integer :: localrc                          ! local error status
+!      logical :: dummy
 !
-!!     Initialize return code
-!      status = ESMF_FAILURE
-!      rcpresent = .FALSE.
-!      if(present(rc)) then
-!        rcpresent=.TRUE.
-!        rc = ESMF_FAILURE
-!      endif
+!      ! Initialize return code; assume failure until success is certain
+!      if (present(rc)) rc = ESMF_FAILURE
 !
 !!     Call Search routines based on GridStructure
 !
@@ -3208,50 +3115,52 @@
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_UNKNOWN
 !      case(0)
-!         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-!                                "Unknown grid structure", &
-!                                 ESMF_CONTEXT, rc)) return
+!        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+!                                      "Unknown grid structure", &
+!                                      ESMF_CONTEXT, rc))
+!        return
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_LOGRECT
 !      case(1)
 !        call ESMF_LRGridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
-!                                    physGridID, status)
-!        if (ESMF_LogMsgFoundError(status, &
-!                                  ESMF_ERR_PASSTHRU, &
-!                                  ESMF_CONTEXT, rc)) return
+!                                    physGridID, localrc)
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
 !      case(2)
-!         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-!                                "Grid structure Log Rect Block", &
-!                                 ESMF_CONTEXT, rc)) return
+!        dummy = (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+!                                       "Grid structure Log Rect Block", &
+!                                       ESMF_CONTEXT, rc))
+!        return
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_UNSTRUCT
 !      case(3)
-!         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-!                                "Grid structure Unstructured", &
-!                                 ESMF_CONTEXT, rc)) return
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureUnstruct not supported"
-!        status = ESMF_FAILURE
+!        dummy =  ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+!                                       "Grid structure Unstructured", &
+!                                       ESMF_CONTEXT, rc))
+!        return
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_USER
 !      case(4)
-!         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-!                                "Grid structure User", &
-!                                 ESMF_CONTEXT, rc)) return
+!        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+!                                      "Grid structure User", &
+!                                      ESMF_CONTEXT, rc))
+!        return
 !
 !      !-------------
 !      case default
-!         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-!                                "Invalid Grid structure", &
-!                                 ESMF_CONTEXT, rc)) return
+!        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+!                                      "Invalid Grid structure", &
+!                                      ESMF_CONTEXT, rc))
+!        return
 !      end select
 !
+!      if (ESMF_LogMsgFoundError(localrc, &
+!                                ESMF_ERR_PASSTHRU, &
+!                                ESMF_CONTEXT, rc)) return
 !
 !      if (present(rc)) rc = ESMF_SUCCESS
 !
