@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.48 2003/04/29 14:46:19 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.49 2003/04/29 19:30:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.48 2003/04/29 14:46:19 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.49 2003/04/29 19:30:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1230,7 +1230,8 @@
         ni_thisde = ni
         if(i.eq.nDE_i) ni_thisde = i_max - exc_global_e
         exc_global_e = exc_global_e + ni
-        tot_global_e = tot_global_e + ni + halo + halo
+!       tot_global_e = tot_global_e + ni + halo + halo
+        tot_global_e = tot_global_e + ni
         do j = 1,nDE_j
           de = (j-1)*nDE_i + i
           distgrid%lcelltot_index(de,1)%l = 1
@@ -1248,7 +1249,7 @@
         tot_global_s = tot_global_e + 1
       enddo
       do de = 1,nDE_i*nDE_j
-        distgrid%lcelltot_index(de,1)%max = tot_global_e
+        distgrid%lcelltot_index(de,1)%max = tot_global_e + halo + halo
       enddo
 
 !     Second in the 2 decomposition
@@ -1261,7 +1262,8 @@
         nj_thisde = nj
         if(j.eq.nDE_j) nj_thisde = j_max - exc_global_e
         exc_global_e = exc_global_e + nj
-        tot_global_e = tot_global_e + nj + halo + halo
+!       tot_global_e = tot_global_e + nj + halo + halo
+        tot_global_e = tot_global_e + nj
         do i = 1,nDE_i
           de = (j-1)*nDE_i + i
           distgrid%lcelltot_index(de,2)%l = 1
@@ -1279,7 +1281,7 @@
         tot_global_s = tot_global_e + 1
       enddo
       do de = 1,nDE_i*nDE_j
-        distgrid%lcelltot_index(de,2)%max = tot_global_e
+        distgrid%lcelltot_index(de,2)%max = tot_global_e + halo + halo
       enddo
 
 ! Calculate counts
@@ -1452,11 +1454,12 @@
 ! !IROUTINE: ESMF_DistGridGetAllAxisIndex - Get array of AxisIndices for DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetAllAxisIndex(distgrid, AI, rc)
+      subroutine ESMF_DistGridGetAllAxisIndex(distgrid, AI, AI_tot, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+      type(ESMF_AxisIndex), dimension(:,:), optional, pointer :: AI_tot
       integer, intent(out), optional :: rc            
 
 !
@@ -1487,6 +1490,7 @@
 
 !     get information from distgrid derived type
       AI => distgrid%lcellexc_index
+      if(present(AI_tot)) AI_tot => distgrid%lcelltot_index
 
       if(rcpresent) rc = ESMF_SUCCESS
 
