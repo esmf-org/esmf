@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.13 2004/06/18 21:47:30 theurich Exp $ 
+% $Id: VM_refdoc.ctex,v 1.14 2004/12/14 18:34:43 nscollins Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,9 +97,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_VM_fapi}
+\input{ESMF_VMBase_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/VM/doc/ESMF_VM_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMBase_fapi}
 #endif
 
 %#ifdef STANDALONE
