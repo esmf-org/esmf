@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.65 2004/06/16 12:02:43 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.66 2004/06/16 12:12:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -289,7 +289,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.65 2004/06/16 12:02:43 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.66 2004/06/16 12:12:26 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1821,7 +1821,7 @@ end function
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
           if (.not. exists) then
-              write(errmsg, *) "no nested state named", trim(nestedStateName), " found"
+              write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
@@ -1843,7 +1843,7 @@ end function
       exists = ESMF_StateClassFindData(top%statep, arrayName, .true., &
                                                           dataitem, rc=localrc)
       if (.not. exists) then
-          write(errmsg, *) "no Array found named", trim(arrayName)
+          write(errmsg, *) "no Array found named ", trim(arrayName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
@@ -2491,7 +2491,7 @@ end function
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
           if (.not. exists) then
-              write(errmsg, *) "no nested state named", trim(nestedStateName), " found"
+              write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                           ESMF_CONTEXT, rc)
               return
@@ -2513,7 +2513,7 @@ end function
       exists = ESMF_StateClassFindData(top%statep, bundleName, .true., &
                                                           dataitem, rc=localrc)
       if (.not. exists) then
-          write(errmsg, *) "no Bundle found named", trim(bundleName)
+          write(errmsg, *) "no Bundle found named ", trim(bundleName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
@@ -2597,7 +2597,7 @@ end function
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
           if (.not. exists) then
-              write(errmsg, *) "no nested state named", trim(nestedStateName), " found"
+              write(errmsg, *) "no nested state found named ", trim(nestedStateName)
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
                                          ESMF_CONTEXT, rc)
               return
@@ -2619,7 +2619,7 @@ end function
       exists = ESMF_StateClassFindData(top%statep, fieldName, .true., &
                                                           dataitem, rc=localrc)
       if (.not. exists) then
-          write(errmsg, *) "no Field found named", trim(fieldName)
+          write(errmsg, *) "no Field found named ", trim(fieldName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                      ESMF_CONTEXT, rc)
           return
@@ -2845,7 +2845,7 @@ end function
       exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                          dataitem, rc=localrc)
       if (.not. exists) then
-          write (errmsg,*) "no nested state named", trim(nestedStateName), " found"
+          write (errmsg,*) "no nested state found named ", trim(nestedStateName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
                                       ESMF_CONTEXT, rc)
           return
