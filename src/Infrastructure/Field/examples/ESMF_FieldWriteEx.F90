@@ -26,7 +26,7 @@
   implicit none
     
   ! Local variables
-  integer :: status, rc
+  integer :: status, rc, petcount
   type(ESMF_GridHorzStagger) :: horz_stagger
   integer, dimension(2) :: counts
   real(ESMF_KIND_R8), dimension(2) :: min, max
@@ -34,14 +34,12 @@
   type(ESMF_Grid) :: grid
   type(ESMF_VM) :: vm
   character (len = ESMF_MAXSTR) :: name
-  real (ESMF_KIND_R8), dimension(2) :: origin
   real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: u2
   type(ESMF_Field) :: field_u2
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Array) :: array_temp
   type(ESMF_Time) :: timestamp
   type(ESMF_IOSpec) :: iospec
-  integer i,j
 !EOC
 
   integer :: finalrc
@@ -78,8 +76,13 @@
   max(2) = 12.0
   name = "test grid 1"
  
-  ! Create a 2 x 2 layout for the Grid
-  layout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=status)
+  ! Create an 2 x N layout for the Grid, if possible (if running with >= 2 PETs)
+  call ESMF_VMGet(vm, petCount=petcount, rc=rc)
+  if (petcount .ge. 2) then
+    layout = ESMF_DELayoutCreate(vm, (/ 2, petcount/2 /), rc=status)
+  else
+    layout = ESMF_DELayoutCreate(vm, (/ 1, 1 /), rc=status)
+  endif
 
  
   if (status.NE.ESMF_SUCCESS) then
