@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.7 2005/01/06 18:40:01 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.8 2005/01/07 22:28:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,8 @@ typedef struct{
 
 typedef struct{
   int comm_type;    // communication type
-  int mpitag;       // tag for MPI communications
+  int mpitag_send;  // tag for MPI communications
+  int mpitag_recv;  // tag for MPI communications
   shared_mp *shmp;  // shared memory message passing structure
   pipc_mp *pipcmp;  // posix ipc message passing structure
 }comminfo;
