@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.4 2004/03/01 18:48:08 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.5 2004/03/02 21:49:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.4 2004/03/01 18:48:08 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.5 2004/03/02 21:49:18 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -116,70 +116,6 @@
 !   These include Reduction operations, Halo, and Transpose.
 !
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
-
-! !INTERFACE:
-      subroutine ESMF_BundleReduce(bundle, rtype, result, async, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle) :: bundle                 
-      integer :: rtype
-      integer :: result
-      type(ESMF_Async), intent(inout), optional :: async
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!     Perform a Reduction operation over the data in a {\tt ESMF\_Bundle}.
-!
-!     \begin{description}
-!     \item [bundle] 
-!           Bundle containing data to be reduced.
-!     \item [rtype]
-!           Type of reduction operation to perform.  Options include: ...
-!     \item [result] 
-!           Numeric result (may be single number, may be array)
-!     \item [{[async]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-   
-!     Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-!     Call Grid method to perform actual work
-      !call ESMF_GridReduce(field%btypep%grid, &
-      !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
-      !                     rtype, result, status)
-      !if(status .NE. ESMF_SUCCESS) then 
-      !  print *, "ERROR in BundleReduce: Grid reduce"
-      !  return
-      !endif 
-
-!     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleReduce
-
-
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_BundleAllGather - Data AllGather operation on a Bundle
@@ -390,6 +326,70 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
+
+! !INTERFACE:
+      subroutine ESMF_BundleReduce(bundle, rtype, result, async, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle) :: bundle                 
+      integer :: rtype
+      integer :: result
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a Reduction operation over the data in a {\tt ESMF\_Bundle}.
+!
+!     \begin{description}
+!     \item [bundle] 
+!           Bundle containing data to be reduced.
+!     \item [rtype]
+!           Type of reduction operation to perform.  Options include: ...
+!     \item [result] 
+!           Numeric result (may be single number, may be array)
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+   
+!     Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+!     Call Grid method to perform actual work
+      !call ESMF_GridReduce(field%btypep%grid, &
+      !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
+      !                     rtype, result, status)
+      !if(status .NE. ESMF_SUCCESS) then 
+      !  print *, "ERROR in BundleReduce: Grid reduce"
+      !  return
+      !endif 
+
+!     Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleReduce
+
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
 
 ! !INTERFACE:
@@ -507,91 +507,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleHaloStore - Precompute a Data Halo operation on a Bundle
-
-! !INTERFACE:
-      subroutine ESMF_BundleHaloStore(bundle, routehandle, halodirection, & 
-                                     blocking, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(inout) :: bundle
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_HaloDirection), intent(in), optional :: halodirection
-      type(ESMF_Async), intent(inout), optional :: blocking
-      integer, intent(out), optional :: rc               
-!
-! !DESCRIPTION:
-!     Perform a {\tt Halo} operation over the data
-!     in an {\tt ESMF\_Bundle}.  This routine updates the data 
-!     inside the {\tt ESMF\_Bundle} in place.
-!
-!     \begin{description}
-!     \item [bundle] 
-!           {\tt ESMF\_Bundle} containing data to be halo'd.
-!     \item [routehandle] 
-!           {\tt ESMF\_RouteHandle} containing index to precomputed 
-!           information for the Halo operation on this {\tt ESMF\_Bundle}.
-!           This handle must be supplied at run time to execute the Halo.
-!     \item [{halodirection]}]
-!           Optional argument to restrict halo direction to a subset of the
-!           possible halo directions.  If not specified, the halo is executed
-!           along all boundaries.
-!     \item [{blocking]}]
-!           Specify that the communications will be blocking, nonblocking,
-!           or that the option will be specified at run time.  If not 
-!           specified, the default is blocking.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: btypep     ! bundle type info
-   
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
-
-      ! Sanity checks for good bundle, and that it has an associated grid
-      ! and data before going down to the next level.
-      if (.not.associated(bundle%btypep)) then
-        print *, "Invalid or Destroyed Bundle"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
-
-      btypep => bundle%btypep
-
-      if (btypep%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "Bundle not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
-
-
-      call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
-                               btypep%flist(1)%ftypep%mapping, routehandle, &
-                               halodirection, blocking, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleHaloStore: ArrayHaloStore returned failure"
-        return
-      endif 
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleHaloStore
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_BundleHalo - Execute a Data Halo operation on a Bundle
 
 ! !INTERFACE:
@@ -687,52 +602,40 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleRedistStore - Data Redistribution operation on a Bundle
+! !IROUTINE: ESMF_BundleHaloStore - Precompute a Data Halo operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentLayout, &
-                                       routehandle, blocking, total, rc)
+      subroutine ESMF_BundleHaloStore(bundle, routehandle, halodirection, & 
+                                     blocking, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcBundle                 
-      type(ESMF_Bundle), intent(inout) :: dstBundle                 
-      type(ESMF_DELayout), intent(in) :: parentLayout
+      type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
       type(ESMF_Async), intent(inout), optional :: blocking
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Precompute a {\tt Redistribution} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and leaves 
-!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
-!     from the destination bundle and updates the array data in the destination.
-!     The {\tt ESMF\_Grid}s may have different decompositions (different
-!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
-!     destination grids must describe the same set of coordinates.
-!     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
-!     only data movement.
+!     Perform a {\tt Halo} operation over the data
+!     in an {\tt ESMF\_Bundle}.  This routine updates the data 
+!     inside the {\tt ESMF\_Bundle} in place.
 !
 !     \begin{description}
-!     \item [srcBundle]
-!           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstBundle]
-!           {\tt ESMF\_Bundle} containing destination grid.
-!     \item [parentlayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
-!           most commonly the layout
-!           of the Coupler if the redistribution is inter-component, 
-!           but could also be the individual layout for a component if the 
-!           redistribution is intra-component.  
-!     \item [routehandle]
-!           {\tt ESMF\_RouteHandle} which will be used to execute the
-!           redistribution when {\tt ESMF\_BundleRedist} is called.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communication.
+!     \item [bundle] 
+!           {\tt ESMF\_Bundle} containing data to be halo'd.
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} containing index to precomputed 
+!           information for the Halo operation on this {\tt ESMF\_Bundle}.
+!           This handle must be supplied at run time to execute the Halo.
+!     \item [{halodirection]}]
+!           Optional argument to restrict halo direction to a subset of the
+!           possible halo directions.  If not specified, the halo is executed
+!           along all boundaries.
+!     \item [{blocking]}]
+!           Specify that the communications will be blocking, nonblocking,
+!           or that the option will be specified at run time.  If not 
+!           specified, the default is blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -743,7 +646,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: stypep, dtypep
+      type(ESMF_BundleType), pointer :: btypep     ! bundle type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -755,44 +658,32 @@
 
       ! Sanity checks for good bundle, and that it has an associated grid
       ! and data before going down to the next level.
-      if (.not.associated(dstBundle%btypep)) then
-        print *, "Invalid or Destroyed Bundle"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
-      endif
-      if (.not.associated(srcBundle%btypep)) then
+      if (.not.associated(bundle%btypep)) then
         print *, "Invalid or Destroyed Bundle"
         if (present(rc)) rc = ESMF_FAILURE
         return
       endif
 
-      dtypep => dstBundle%btypep
-      stypep => srcBundle%btypep
+      btypep => bundle%btypep
 
-      if (dtypep%bundlestatus.ne.ESMF_STATE_READY .or. &
-          stypep%bundlestatus.ne.ESMF_STATE_READY) then
+      if (btypep%bundlestatus .ne. ESMF_STATE_READY) then
         print *, "Bundle not ready"
         if (present(rc)) rc = ESMF_FAILURE
         return
       endif
 
-      call ESMF_ArrayRedistStore(stypep%flist(1)%ftypep%localfield%localdata, &
-                                 stypep%grid, &
-                                 stypep%flist(1)%ftypep%mapping, &
-                                 dtypep%flist(1)%ftypep%localfield%localdata, &
-                                 dtypep%grid, &
-                                 dtypep%flist(1)%ftypep%mapping, &
-                                 parentLayout, &
-                                 routehandle, blocking, total, status)
+
+      call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
+                               btypep%flist(1)%ftypep%mapping, routehandle, &
+                               halodirection, blocking, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
+        print *, "ERROR in BundleHaloStore: ArrayHaloStore returned failure"
         return
       endif 
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_BundleRedistStore
-
+      end subroutine ESMF_BundleHaloStore
 
 !------------------------------------------------------------------------------
 !BOP
@@ -906,45 +797,53 @@
       end subroutine ESMF_BundleRedistRelease
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
+! !IROUTINE: ESMF_BundleRedistStore - Data Redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentlayout, async, rc)
+      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentLayout, &
+                                       routehandle, blocking, total, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle                 
-      type(ESMF_Bundle), intent(inout) :: dstbundle                 
-      type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_Bundle), intent(in) :: srcBundle                 
+      type(ESMF_Bundle), intent(inout) :: dstBundle                 
+      type(ESMF_DELayout), intent(in) :: parentLayout
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt ESMF\_Regrid} operation over the data
-!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
-!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
-!     {\tt ESMF\_DataMap} information in the destination bundle to
-!     control the transformation of data.  The array data in the 
-!     destination bundle is overwritten by this call.
+!     Precompute a {\tt Redistribution} operation over the data
+!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and leaves 
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     from the destination bundle and updates the array data in the destination.
+!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
+!     destination grids must describe the same set of coordinates.
+!     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
+!     only data movement.
 !
 !     \begin{description}
-!     \item [srcbundle] 
+!     \item [srcBundle]
 !           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstbundle] 
-!           {\tt ESMF\_Bundle} containing destination grid and data map.
+!     \item [dstBundle]
+!           {\tt ESMF\_Bundle} containing destination grid.
 !     \item [parentlayout]
 !           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
 !           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could 
-!           also be the individual layout for a component if the 
-!           regridding is intra-component.  
-!     \item [{[async]}]
+!           of the Coupler if the redistribution is inter-component, 
+!           but could also be the individual layout for a component if the 
+!           redistribution is intra-component.  
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} which will be used to execute the
+!           redistribution when {\tt ESMF\_BundleRedist} is called.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
+!           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -955,6 +854,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -964,14 +864,45 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! Sanity checks for good bundle, and that it has an associated grid
+      ! and data before going down to the next level.
+      if (.not.associated(dstBundle%btypep)) then
+        print *, "Invalid or Destroyed Bundle"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+      if (.not.associated(srcBundle%btypep)) then
+        print *, "Invalid or Destroyed Bundle"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
 
-      !TODO: add code  here
+      dtypep => dstBundle%btypep
+      stypep => srcBundle%btypep
 
+      if (dtypep%bundlestatus.ne.ESMF_STATE_READY .or. &
+          stypep%bundlestatus.ne.ESMF_STATE_READY) then
+        print *, "Bundle not ready"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
 
-      ! Set return values.
-      !if(rcpresent) rc = ESMF_SUCCESS
+      call ESMF_ArrayRedistStore(stypep%flist(1)%ftypep%localfield%localdata, &
+                                 stypep%grid, &
+                                 stypep%flist(1)%ftypep%mapping, &
+                                 dtypep%flist(1)%ftypep%localfield%localdata, &
+                                 dtypep%grid, &
+                                 dtypep%flist(1)%ftypep%mapping, &
+                                 parentLayout, &
+                                 routehandle, blocking, total, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
+        return
+      endif 
 
-      end subroutine ESMF_BundleRegridStore
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleRedistStore
 
 
 !------------------------------------------------------------------------------
@@ -1072,6 +1003,74 @@
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
       end subroutine ESMF_BundleRegridRelease
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
+
+! !INTERFACE:
+      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentlayout, async, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: srcbundle                 
+      type(ESMF_Bundle), intent(inout) :: dstbundle                 
+      type(ESMF_DELayout), intent(in) :: parentlayout
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a {\tt ESMF\_Regrid} operation over the data
+!     in a {\tt ESMF\_Bundle}.  This routine reads the source bundle and 
+!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     {\tt ESMF\_DataMap} information in the destination bundle to
+!     control the transformation of data.  The array data in the 
+!     destination bundle is overwritten by this call.
+!
+!     \begin{description}
+!     \item [srcbundle] 
+!           {\tt ESMF\_Bundle} containing source data.
+!     \item [dstbundle] 
+!           {\tt ESMF\_Bundle} containing destination grid and data map.
+!     \item [parentlayout]
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
+!           most commonly the layout
+!           of the Coupler if the regridding is inter-component, but could 
+!           also be the individual layout for a component if the 
+!           regridding is intra-component.  
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+
+      !TODO: add code  here
+
+
+      ! Set return values.
+      !if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleRegridStore
+
 
 !------------------------------------------------------------------------------
 
