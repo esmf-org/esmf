@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.2 2004/06/18 21:47:30 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.3 2004/06/21 19:57:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,9 +34,10 @@ program ESMF_DELayoutEx
 !BOE
 ! \subsubsection{Default 1-D DELayout}
 ! 
-! With no additional parameters provided the created {\tt ESMF\_DELayout} will\
+! Without additional parameters the created {\tt ESMF\_DELayout} will\
 ! default into a 1-dimensional DELayout with as many DEs as there are PETs in
-! the associated VM object.
+! the associated VM object. Consequently the resulting DELayout will always
+! be 1-to-1, i.e. each DE maps onto exactly one PET of the VM.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(vm, rc=rc)
@@ -54,9 +55,13 @@ program ESMF_DELayoutEx
 !BOE
 ! \subsubsection{1-D DELayout with fixed number of DEs}
 ! 
-! The {\tt deCountList} has to functions. First it specifies the total number
-! of DEs and second it specifies the dimensionallity of the DELayout. Here a 
-! 1-dimensional DELayout will be created with 4 DEs. 
+! The {\tt deCountList} argument has two functions when present. First it
+! specifies the total number
+! of DEs and second it specifies the dimensionality of the DELayout. Here a 
+! 1-dimensional DELayout will be created with 4 DEs. Note that it depends on the
+! VM whether this will be a 1-to-1 DELayout or not. If the VM contains
+! 4 PETs or more the DELayout will be 1-to-1, otherwise there will be virtual
+! DEs present.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(vm, deCountList=(/4/), rc=rc)
@@ -74,7 +79,11 @@ program ESMF_DELayoutEx
 !BOE
 ! \subsubsection{2-D DELayout with fixed number of DEs}
 ! 
-! Here a 2-dimensional DELayout will be created with 2x3 DEs. 
+! Here a 2-dimensional DELayout will be created with 6 DEs, layed out as 2x3.
+! As in the previous example  it depends on the
+! VM whether this will be a 1-to-1 DELayout or not. If the VM contains
+! 6 PETs or more the DELayout will be 1-to-1, otherwise there will be virtual
+! DEs present.
 !EOE
 !BOC
   delayout = ESMF_DELayoutCreate(vm, deCountList=(/2, 3/), rc=rc)
