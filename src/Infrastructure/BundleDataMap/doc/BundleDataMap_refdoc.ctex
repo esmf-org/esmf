@@ -1,4 +1,4 @@
-% $Id: BundleDataMap_refdoc.ctex,v 1.3 2004/05/27 22:55:14 cdeluca Exp $
+% $Id: BundleDataMap_refdoc.ctex,v 1.4 2004/06/03 14:08:42 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Bundle DataMap Design}
+\newcommand{\mytitle}{BundleDataMap Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -33,40 +33,6 @@
 \newpage
 #endif
 
-%\section{Overview}
-%#ifdef STANDALONE
-%\input{Field_syn}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Field_syn}
-%#endif
-
-%\section{Programming Model}
-%#ifdef STANDALONE
-%\input{Field_prog}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Field_prog}
-%#endif
-
-%
-% Field_obj.tex wants to include the graphics  file
-% fieldclassNH.eps.  In processing in CONSTITUENT
-% mode, this file can not be found.
-%
-%
-%% \section{Object Model}
-%% #ifdef STANDALONE
-%% \input{Field_obj}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/Field_obj}
-%% #endif
-
-% %\section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% %\input{Field_param}
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Field/doc/Field_param}
-% #endif
-
 \section{BundleDataMap Class}
 
 \subsection{Description}
@@ -79,40 +45,49 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{BundleDataMap_usage}
+\input{ESMF_BundleDataMapEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/BundleDataMap/doc/BundleDataMap_usage}
+\input{../Infrastructure/BundleDataMap/doc/ESMF_BundleDataMapEx_fapi}
 #endif
 
-%\subsubsection{Restrictions and Future Work}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{BundleDataMap_rest}
+\input{BundleDataMap_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_rest}
+\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_rest}
+#endif
+
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{BundleDataMap_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_implnotes}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{../../BundleDataMap/doc/ESMF_BundleDataMap_fapi}
+\input{ESMF_BundleDataMap_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/BundleDataMap/doc/ESMF_BundleDataMap_fapi}
 #endif
 
 %#ifdef STANDALONE
 %\section{Review Status}
-%\input{Field_desrev}
+%\input{BundleDataMap_desrev}
 %#endif
 
 %#ifdef STANDALONE
 %\section{Glossary}
-%\input{Field_glos}
+%\input{BundleDataMap_glos}
 %#endif
 
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
-#endif
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
 
 #ifdef STANDALONE
 \end{document}

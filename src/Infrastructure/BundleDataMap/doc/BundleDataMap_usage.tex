@@ -1,6 +1,12 @@
-% $Id: BundleDataMap_usage.tex,v 1.1 2004/05/05 15:40:26 nscollins Exp $
+% $Id: BundleDataMap_usage.tex,v 1.2 2004/06/03 14:08:42 nscollins Exp $
 
 %\subsection{Use and Examples}
 
-No examples of DataMap usage are available.
+A BundleDataMap is a shallow object.  It can simply be declared 
+as a local (stack) variable in a subroutine, and does not have
+to be created or destroyed.  To initialize the object with default
+values a setdefault method is provided.  To alter or query an existing
+object, use the set and get methods.  A print method is provided
+for human readable output or debugging.
+
 
