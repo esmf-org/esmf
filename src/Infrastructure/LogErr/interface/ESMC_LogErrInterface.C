@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.4 2003/04/01 14:17:09 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.5 2003/04/02 17:32:03 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -268,7 +268,7 @@ void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
   char file[],char dir[],char msg[])
 
 {
-   aLog->ESMC_LogWarningFortran(*errCode, *line,file,dir,msg);
+   aLog->ESMC_LogWarnFortran(*errCode, *line,file,dir,msg);
 
 }
 
@@ -296,7 +296,7 @@ void FTN(esmf_logwarn_)(ESMC_Log* aLog,int* errCode, int* line,
 {
    char msg[32];      
    msg[0]=NULL;
-   aLog->ESMC_LogWarningFortran(*errCode, *line,file,dir,msg);
+   aLog->ESMC_LogWarnFortran(*errCode, *line,file,dir,msg);
 
 }
 

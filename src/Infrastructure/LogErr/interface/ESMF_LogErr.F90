@@ -1,4 +1,4 @@
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogConstants.inc"
+#include "../include/ESMF_LogConstants.inc"
 
 module ESMF_LogErr
 implicit none
@@ -15,19 +15,25 @@ implicit none
 !
 !============================================================================
 !
-! !PRIVATE TYPES:
-private
 type:: ESMF_Log
+    private
     sequence
     integer oneLogErrFile     !An ESMF_Log object will write to one file if
 			      !oneLogErrFile is set to ESMF_LOG_TRUE.
+
+    integer standardOut       !If standardOut set to ESMF_LOG_TRUE, output
+                              !goes to standard out.
 
     integer fortIsOpen        !If fortIsOpen is set to ESMF_LOG_TRUE, an 
 			      !ESMF_Log object has a fortran file open.
 
     integer unitNumber        !Fortran unit number for output
 
-    integer numFilePtr        !Index into global array of Fortran unit numbers 
+    integer numFilePtr        !Index into global array of File pointers
+                              !for C/C++ I/O
+
+    integer numFileFort       !Index into global array of Fortran unit numbers
+
 
     integer verboseSet        !An ESMF_Log object will write output only if
 			      !verbose is set to ESMF_LOG_TRUE.
@@ -59,7 +65,7 @@ subroutine ESMF_LogInit(aLog,verbose,flush,haltOnErr,haltOnWarn)
 ! !ARGUMENTS:
 !
  type(ESMF_Log), intent(in) :: aLog
- integer, intent(inout),optional::verbose, flush, haltOnErr,haltOnWarn 
+ integer, intent(in),optional::verbose, flush, haltOnErr,haltOnWarn 
 !
 ! !DESCRIPTION:
 !   Most of the Fortran wrapper routines for the C/C++ ESMC\_Log class are
@@ -73,11 +79,18 @@ subroutine ESMF_LogInit(aLog,verbose,flush,haltOnErr,haltOnWarn)
 !EOP
 !==========================================================================
 
- if (.not. present(verbose)) verbose=ESMF_LOG_TRUE
- if (.not. present(flush)) flush=ESMF_LOG_FALSE
- if (.not. present(haltOnErr)) haltOnErr=ESMF_LOG_TRUE
- if (.not. present(haltOnWarn)) haltOnWarn=ESMF_LOG_FALSE
- call esmf_loginit_c(aLog,verbose,flush,haltOnErr,haltOnWarn)
+ integer :: verbosity,stopOnErr,stopOnWarn,flushOut
+
+ verbosity=ESMF_LOG_TRUE
+ flushOut=ESMF_LOG_FALSE
+ stopOnErr=ESMF_LOG_TRUE
+ stopOnWarn=ESMF_LOG_FALSE
+
+ if (present(verbose)) verbosity=verbose
+ if (present(flush)) flushOut=flush
+ if (present(haltOnErr)) stopOnErr=haltOnErr
+ if (present(haltOnWarn)) stopOnWarn=haltOnWarn
+ call esmf_loginit_c(aLog,verbosity,flushOut,stopOnErr,stopOnWarn)
 end subroutine
 
 end module ESMF_LogErr
@@ -282,10 +295,11 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 !
 !EOP
 !======================================================================
-  if (length /= 0) write(unitNumber,10) (msg(i:i),i=1,length)
+  if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) intData
   if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
   10 format(\I3)
+  20 format(\A1)
  end subroutine
 
 !======================================================================
@@ -306,9 +320,10 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 !
 !EOP
 !======================================================================
-  if (length /= 0) write(unitNumber,10) (msg(i:i),i=1,length)
+  if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) floatdata 
   if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
   10 format(\F14.7)
+  20 format(\A)
  end subroutine
 
