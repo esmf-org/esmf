@@ -1,4 +1,4 @@
-% $Id: BundleDataMap_refdoc.ctex,v 1.4 2004/06/03 14:08:42 nscollins Exp $
+% $Id: BundleDataMap_refdoc.ctex,v 1.5 2004/06/04 13:16:30 nscollins Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{BundleDataMap Design}
+\newcommand{\mytitle}{Bundle DataMap Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -33,13 +33,20 @@
 \newpage
 #endif
 
-\section{BundleDataMap Class}
+\section{Bundle DataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE
 \input{BundleDataMap_desc}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/BundleDataMap/doc/BundleDataMap_desc}
+#endif
+
+\subsection{Bundle DataMap Options}
+#ifdef STANDALONE
+\input{BundleDataMap_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_options}
 #endif
 
 \subsection{Use and Examples}

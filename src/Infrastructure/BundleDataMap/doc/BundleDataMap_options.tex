@@ -1,0 +1,18 @@
+% $Id: BundleDataMap_options.tex,v 1.1 2004/06/04 13:16:30 nscollins Exp $
+
+\subsubsection{ESMF\_BundleInterleaveType}
+ 
+{\sf DESCRIPTION:\\}
+Interleave types which are used when there are multiple data fields
+packed into a single array.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_BIL\_BLOCK]
+         Field data are listed in blocks, all items of one field followed
+         by all items of the next field.
+   \item [ESMF\_BIL\_ITEM]
+         Field data are interleaved item by item.
+\end{description}
+
+
