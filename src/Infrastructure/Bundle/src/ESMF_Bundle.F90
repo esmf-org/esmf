@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.7 2003/10/28 23:22:21 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.8 2003/11/06 16:41:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
       sequence
       private
         type(ESMF_Array) :: packed_data               ! local packed array
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_GridType), pointer :: gridp => NULL() ! local data
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT    ! is grid set 
         type(ESMF_Status) :: arraystatus = ESMF_STATE_UNINIT   ! is array set 
@@ -108,7 +108,7 @@
       sequence
       private
         type(ESMF_Base) :: base                   ! base class object
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_Status) :: bundlestatus = ESMF_STATE_UNINIT
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT     ! is grid set
         type(ESMF_GridType), pointer :: gridp => NULL() ! shortcut
