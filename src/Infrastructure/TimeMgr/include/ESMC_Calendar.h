@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.18 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_Calendar.h,v 1.19 2003/09/10 23:59:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,13 +120,13 @@ class ESMC_Calendar {
   public:
 
     int ESMC_CalendarSet(ESMC_CalendarType type);
-    int ESMC_CalendarSetGeneric(int          *daysPerMonth,
+    int ESMC_CalendarSetGeneric(int         *daysPerMonth,
                                 ESMF_KIND_I4 secondsPerDay,
                                 ESMF_KIND_I4 daysPerYear,
                                 ESMF_KIND_I4 daysPerYearDn,
                                 ESMF_KIND_I4 daysPerYearDd);
     int ESMC_CalendarGet(ESMC_CalendarType *type,
-                         int               *daysPerMonth,
+                         int              *daysPerMonth,
                          ESMF_KIND_I4     *secondsPerDay,
                          ESMF_KIND_I4     *secondsPerYear,
                          ESMF_KIND_I4     *daysPerYear,
@@ -152,14 +152,14 @@ class ESMC_Calendar {
 
     // for persistence/checkpointing
     int ESMC_CalendarReadRestart(ESMC_CalendarType type,
-                                 int          *daysPerMonth,
+                                 int         *daysPerMonth,
                                  ESMF_KIND_I4 secondsPerDay,
                                  ESMF_KIND_I4 secondsPerYear,
                                  ESMF_KIND_I4 daysPerYear,
                                  ESMF_KIND_I4 daysPerYeardN,
                                  ESMF_KIND_I4 daysPerYeardD);
     int ESMC_CalendarWriteRestart(ESMC_CalendarType *type,
-                                  int           *daysPerMonth,
+                                  int          *daysPerMonth,
                                   ESMF_KIND_I4 *secondsPerDay,
                                   ESMF_KIND_I4 *secondsPerYear,
                                   ESMF_KIND_I4 *daysPerYear,

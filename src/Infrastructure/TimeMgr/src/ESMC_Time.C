@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.44 2003/09/10 03:38:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.45 2003/09/11 00:05:06 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -57,8 +57,8 @@
 // !ARGUMENTS:
       ESMF_KIND_I4 *yr,        // in - integer year (>= 32-bit)
       ESMF_KIND_I8 *yr_i8,     // in - integer year (large, >= 64-bit)
-      int *mm,                  // in - integer month
-      int *dd,                  // in - integer day of the month
+      int *mm,                 // in - integer month
+      int *dd,                 // in - integer day of the month
       ESMF_KIND_I4 *d,         // in - integer days (>= 32-bit)
       ESMF_KIND_I8 *d_i8,      // in - integer days (large, >= 64-bit)
       ESMF_KIND_I4 *h,         // in - integer hours
@@ -77,9 +77,9 @@
       ESMF_KIND_R8 *ns_r8,     // in - floating point nanoseconds
       ESMF_KIND_I4 *sN,        // in - fractional seconds numerator
       ESMF_KIND_I4 *sD,        // in - fractional seconds denominator
-      ESMC_Calendar *calendar,  // in - associated calendar
-      int *timeZone) {          // in - timezone (hours offset from UTC,
-                                //      e.g. EST = -5)
+      ESMC_Calendar *calendar, // in - associated calendar
+      int *timeZone) {         // in - timezone (hours offset from UTC,
+                               //      e.g. EST = -5)
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt Time} with values given in arg list. Supports
@@ -217,8 +217,8 @@
 // !ARGUMENTS:
       ESMF_KIND_I4 *yr,           // out - integer year (>= 32-bit)
       ESMF_KIND_I8 *yr_i8,        // out - integer year (large, >= 64-bit)
-      int *mm,                     // out - integer month
-      int *dd,                     // out - integer day of the month
+      int *mm,                    // out - integer month
+      int *dd,                    // out - integer day of the month
       ESMF_KIND_I4 *d,            // out - integer days (>= 32-bit)
       ESMF_KIND_I8 *d_i8,         // out - integer days (large, >= 64-bit)
       ESMF_KIND_I4 *h,            // out - integer hours
@@ -237,12 +237,12 @@
       ESMF_KIND_R8 *ns_r8,        // out - floating point nanoseconds
       ESMF_KIND_I4 *sN,           // out - fractional seconds numerator
       ESMF_KIND_I4 *sD,           // out - fractional seconds denominator
-      ESMC_Calendar *calendar,     // out - associated calendar
-      int           *timeZone,     // out - timezone (hours offset from UTC)
-      char          *timeString,   // out - ISO 8601 format YYYY-MM-DDThh:mm:ss
-      int           *dayOfWeek,    // out - day of the week (Mon = 1, Sun = 7)
-      int           *dayOfMonth,   // out - day of the month
-      ESMC_Time     *midMonth,     // out - middle of the month time instant
+      ESMC_Calendar *calendar,    // out - associated calendar
+      int           *timeZone,    // out - timezone (hours offset from UTC)
+      char          *timeString,  // out - ISO 8601 format YYYY-MM-DDThh:mm:ss
+      int           *dayOfWeek,   // out - day of the week (Mon = 1, Sun = 7)
+      int           *dayOfMonth,  // out - day of the month
+      ESMC_Time     *midMonth,    // out - middle of the month time instant
       ESMF_KIND_I4 *dayOfYear,    // out - day of the year as an integer
       ESMF_KIND_R8 *dayOfYear_r8, // out - day of the year as a floating point
       ESMC_TimeInterval *dayOfYear_intvl) const {  // out - day of the year
@@ -423,7 +423,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,         // in - integer seconds
+      ESMF_KIND_I8 s,          // in - integer seconds
       int sN,                  // in - fractional seconds, numerator
       int sD,                  // in - fractional seconds, denominator
       ESMC_Calendar *calendar, // in - associated calendar
@@ -514,10 +514,10 @@
     if (time(&tm) < 0) return (ESMF_FAILURE);
     wallClock = *localtime(&tm);          
     ESMF_KIND_I8 yr_i8 = wallClock.tm_year + 1900;
-    int           mm    = wallClock.tm_mon + 1;
-    int           dd    = wallClock.tm_mday;
-    int           h     = wallClock.tm_hour;
-    int           m     = wallClock.tm_min;
+    int          mm    = wallClock.tm_mon + 1;
+    int          dd    = wallClock.tm_mday;
+    int          h     = wallClock.tm_hour;
+    int          m     = wallClock.tm_min;
     ESMF_KIND_I8 s_i8  = wallClock.tm_sec;
 
     // set this time to wall clock time
@@ -575,9 +575,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,         // in - integer seconds
-      ESMF_KIND_I4 sN,        // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,        // in - fractional seconds, denominator
+      ESMF_KIND_I8 s,          // in - integer seconds
+      ESMF_KIND_I4 sN,         // in - fractional seconds, numerator
+      ESMF_KIND_I4 sD,         // in - fractional seconds, denominator
       ESMC_Calendar *calendar, // in - associated calendar
       int timeZone) {          // in - associated timezone
 //
@@ -621,8 +621,8 @@
       ESMF_KIND_I8 *s,          // out - integer seconds
       ESMF_KIND_I4 *sN,         // out - fractional seconds, numerator
       ESMF_KIND_I4 *sD,         // out - fractional seconds, denominator
-      ESMC_Calendar *calendar,   // out - associated calendar
-      int *timeZone) const {     // out - associated timezone
+      ESMC_Calendar *calendar,  // out - associated calendar
+      int *timeZone) const {    // out - associated timezone
 //
 // !DESCRIPTION:
 //      return {\tt Time} state for persistence/checkpointing
@@ -794,9 +794,9 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,          // in - integer seconds
-      ESMF_KIND_I4 sN,         // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,         // in - fractional seconds, denominator
+      ESMF_KIND_I8 s,           // in - integer seconds
+      ESMF_KIND_I4 sN,          // in - fractional seconds, numerator
+      ESMF_KIND_I4 sD,          // in - fractional seconds, denominator
       ESMC_Calendar *calendar,  // in - associated calendar
       int timeZone) :           // in - timezone
 //

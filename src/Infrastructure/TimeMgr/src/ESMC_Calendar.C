@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.33 2003/09/11 00:05:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.33 2003/09/11 00:05:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -161,7 +161,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int          *daysPerMonth,     // in
+      int         *daysPerMonth,     // in
       ESMF_KIND_I4 secondsPerDay,    // in
       ESMF_KIND_I4 daysPerYear,      // in
       ESMF_KIND_I4 daysPerYeardN,    // in
@@ -216,8 +216,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType *type,           // out - Calendar type
-      int *daysPerMonth,                 // out
+      ESMC_CalendarType *type,          // out - Calendar type
+      int          *daysPerMonth,       // out
       ESMF_KIND_I4 *secondsPerDay,      // out
       ESMF_KIND_I4 *secondsPerYear,     // out
       ESMF_KIND_I4 *daysPerYear,        // out
@@ -283,7 +283,7 @@
 //
 // !ARGUMENTS:
       ESMF_KIND_I8 yr, int mm, int dd, ESMF_KIND_I8 d,    // in
-      ESMC_BaseTime *t) const {                             // out
+      ESMC_BaseTime *t) const {                           // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -397,8 +397,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime *t,                                      // in
-      ESMF_KIND_I4 *yr, ESMF_KIND_I8 *yr_i8, int *mm, int *dd,   // out
+      const ESMC_BaseTime *t,                                          // in
+      ESMF_KIND_I4 *yr, ESMF_KIND_I8 *yr_i8, int *mm, int *dd,         // out
       ESMF_KIND_I4 *d, ESMF_KIND_I8 *d_i8, ESMF_KIND_R8 *d_r8) const { // out
 //
 // !DESCRIPTION:
@@ -654,8 +654,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType type,        // in
-      int          *daysPerMonth,    // in
+      ESMC_CalendarType type,       // in
+      int         *daysPerMonth,    // in
       ESMF_KIND_I4 secondsPerDay,   // in
       ESMF_KIND_I4 secondsPerYear,  // in
       ESMF_KIND_I4 daysPerYear,     // in
@@ -699,8 +699,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType *type,              // out
-      int           *daysPerMonth,          // out
+      ESMC_CalendarType *type,             // out
+      int          *daysPerMonth,          // out
       ESMF_KIND_I4 *secondsPerDay,         // out
       ESMF_KIND_I4 *secondsPerYear,        // out
       ESMF_KIND_I4 *daysPerYear,           // out
@@ -865,7 +865,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int          *daysPerMonth,      // in
+      int         *daysPerMonth,      // in
       ESMF_KIND_I4 secondsPerDay,     // in
       ESMF_KIND_I4 daysPerYear,       // in
       ESMF_KIND_I4 daysPerYeardN,     // in

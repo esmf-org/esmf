@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.36 2003/09/10 03:39:53 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.37 2003/09/11 00:05:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.36 2003/09/10 03:39:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.37 2003/09/11 00:05:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -59,17 +59,17 @@
 //
 // !ARGUMENTS:
       ESMF_KIND_I4 *yy,        // in - integer number of interval years
-                                //                           (>= 32-bit)
+                               //                           (>= 32-bit)
       ESMF_KIND_I8 *yy_i8,     // in - integer number of interval years
-                                //                           (large, >= 64-bit)
+                               //                           (large, >= 64-bit)
       ESMF_KIND_I4 *mo,        // in - integer number of interval months
-                                //                           (>= 32-bit)
+                               //                           (>= 32-bit)
       ESMF_KIND_I8 *mo_i8,     // in - integer number of interval months
-                                //                           (large, >= 64-bit)
+                               //                           (large, >= 64-bit)
       ESMF_KIND_I4 *d,         // in - integer number of interval days
-                                //                           (>= 32-bit)
+                               //                           (>= 32-bit)
       ESMF_KIND_I8 *d_i8,      // in - integer number of interval days
-                                //                           (large, >= 64-bit)
+                               //                           (large, >= 64-bit)
       ESMF_KIND_I4 *h,         // in - integer hours
       ESMF_KIND_I4 *m,         // in - integer minutes
       ESMF_KIND_I4 *s,         // in - integer seconds (>= 32-bit)
@@ -168,34 +168,34 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 *yy,        // out - integer number of interval years
+      ESMF_KIND_I4 *yy,         // out - integer number of interval years
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *yy_i8,     // out - integer number of interval years
+      ESMF_KIND_I8 *yy_i8,      // out - integer number of interval years
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *mo,        // out - integer number of interval months
+      ESMF_KIND_I4 *mo,         // out - integer number of interval months
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *mo_i8,     // out - integer number of interval months
+      ESMF_KIND_I8 *mo_i8,      // out - integer number of interval months
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *d,         // out - integer number of interval days
+      ESMF_KIND_I4 *d,          // out - integer number of interval days
                                 //                           (>= 32-bit)
-      ESMF_KIND_I8 *d_i8,      // out - integer number of interval days
+      ESMF_KIND_I8 *d_i8,       // out - integer number of interval days
                                 //                           (large, >= 64-bit)
-      ESMF_KIND_I4 *h,         // out - integer hours
-      ESMF_KIND_I4 *m,         // out - integer minutes
-      ESMF_KIND_I4 *s,         // out - integer seconds (>= 32-bit)
-      ESMF_KIND_I8 *s_i8,      // out - integer seconds (large, >= 64-bit)
-      ESMF_KIND_I4 *ms,        // out - integer milliseconds
-      ESMF_KIND_I4 *us,        // out - integer microseconds
-      ESMF_KIND_I4 *ns,        // out - integer nanoseconds
-      ESMF_KIND_R8 *d_r8,      // out - floating point days
-      ESMF_KIND_R8 *h_r8,      // out - floating point hours
-      ESMF_KIND_R8 *m_r8,      // out - floating point minutes
-      ESMF_KIND_R8 *s_r8,      // out - floating point seconds
-      ESMF_KIND_R8 *ms_r8,     // out - floating point milliseconds
-      ESMF_KIND_R8 *us_r8,     // out - floating point microseconds
-      ESMF_KIND_R8 *ns_r8,     // out - floating point nanoseconds
-      ESMF_KIND_I4 *sN,        // out - fractional seconds numerator
-      ESMF_KIND_I4 *sD,        // out - fractional seconds denominator
+      ESMF_KIND_I4 *h,          // out - integer hours
+      ESMF_KIND_I4 *m,          // out - integer minutes
+      ESMF_KIND_I4 *s,          // out - integer seconds (>= 32-bit)
+      ESMF_KIND_I8 *s_i8,       // out - integer seconds (large, >= 64-bit)
+      ESMF_KIND_I4 *ms,         // out - integer milliseconds
+      ESMF_KIND_I4 *us,         // out - integer microseconds
+      ESMF_KIND_I4 *ns,         // out - integer nanoseconds
+      ESMF_KIND_R8 *d_r8,       // out - floating point days
+      ESMF_KIND_R8 *h_r8,       // out - floating point hours
+      ESMF_KIND_R8 *m_r8,       // out - floating point minutes
+      ESMF_KIND_R8 *s_r8,       // out - floating point seconds
+      ESMF_KIND_R8 *ms_r8,      // out - floating point milliseconds
+      ESMF_KIND_R8 *us_r8,      // out - floating point microseconds
+      ESMF_KIND_R8 *ns_r8,      // out - floating point nanoseconds
+      ESMF_KIND_I4 *sN,         // out - fractional seconds numerator
+      ESMF_KIND_I4 *sD,         // out - fractional seconds denominator
       char *timeString) const { // out - ISO 8601 format PyYmMdDThHmMsS
 //
 // !DESCRIPTION:
@@ -1160,9 +1160,9 @@
 
     // TODO: use native C++ Get, not F90 entry point, when ready
     ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                         ESMC_NULL_POINTER, &d_i8, &h, &m,
-                         ESMC_NULL_POINTER, &s_i8);
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, &d_i8, &h, &m,
+                          ESMC_NULL_POINTER, &s_i8);
     //ESMC_TimeIntervalGet(&yy_i8, &MM, &d_i8, &h, &m, &s_i8); // TODO: when
                                                      // calendar intervals
                                                      //  implemented

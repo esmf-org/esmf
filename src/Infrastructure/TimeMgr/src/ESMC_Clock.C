@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.33 2003/09/11 00:05:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.32 2003/09/10 03:36:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.33 2003/09/11 00:05:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -98,7 +98,7 @@
       ESMC_Time         *stopTime,       // in
       ESMC_Time         *refTime,        // in
       ESMC_Time         *currTime,       // in
-      ESMF_KIND_I8     *advanceCount) { // in
+      ESMF_KIND_I8      *advanceCount) { // in
 
 // !DESCRIPTION:
 //      Sets a {\tt ESMC\_Clock}'s properties
@@ -149,7 +149,7 @@
       ESMC_Time         *prevTime,       // out
       ESMC_Time         *currSimTime,    // out
       ESMC_Time         *prevSimTime,    // out
-      ESMF_KIND_I8     *advanceCount,   // out
+      ESMF_KIND_I8      *advanceCount,   // out
       int               *numAlarms) {    // out
 
 // !DESCRIPTION:
@@ -501,14 +501,13 @@
       ESMC_Time         *refTime,              // in
       ESMC_Time         *currTime,             // in
       ESMC_Time         *prevTime,             // in
-      ESMF_KIND_I8      advanceCount,         // in
+      ESMF_KIND_I8       advanceCount,         // in
       int                numAlarms,            // in 
       ESMC_Alarm        *alarmList[]) {        // in
 //
 // !DESCRIPTION:
-//      Restore information about a {\tt ESMC\_Clock}.  The options control the
-//      type of information and level of detail.  {\tt ESMC\_Base}
-//      class method.
+//      Restore information about a {\tt ESMC\_Clock}.
+//      {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -554,14 +553,13 @@
       ESMC_Time         *refTime,              // out
       ESMC_Time         *currTime,             // out
       ESMC_Time         *prevTime,             // out
-      ESMF_KIND_I8     *advanceCount,         // out
+      ESMF_KIND_I8      *advanceCount,         // out
       int               *numAlarms,            // out 
       ESMC_Alarm        *alarmList[]) const {  // out
 //
 // !DESCRIPTION:
-//      Save information about a {\tt ESMC\_Clock}.  The options control the
-//      type of information and level of detail.  {\tt ESMC\_Base}
-//      class method.
+//      Save information about a {\tt ESMC\_Clock}.
+//      {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
