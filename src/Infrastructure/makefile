@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.44 2003/10/09 14:53:36 nscollins Exp $ 
+# $Id: makefile,v 1.45 2003/10/14 22:12:26 cdeluca Exp $ 
 
 LOCDIR   = src/Infrastructure
 
@@ -9,7 +9,7 @@ include $(ESMF_DIR)/makefile
 # it compiles completely (so we can complete the documentation).
 DIRS     =	Base IO TimeMgmt Machine TimeMgr LocalArray DataMap \
 		DELayout Config PerfProf Array DistGrid PhysGrid Grid Route \
-		ArrayComm Field Bundle Regrid mpiuni
+		ArrayComm Field Bundle Regrid mpiuni 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
