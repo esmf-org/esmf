@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.42 2004/03/12 23:32:34 nscollins Exp $
+#  $Id: common.mk,v 1.43 2004/03/16 17:59:19 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -184,6 +184,7 @@ endif
 CC	       = ${C_CC}
 CXX	       = ${CXX_CC}
 FC	       = ${C_FC}
+CPP	       = gcc
 CLINKER_SLFLAG = ${C_CLINKER_SLFLAG}
 FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
 CLINKER	       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
@@ -249,8 +250,8 @@ chkdir_tests:
 	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
 
 chkdir_include:
-	-@if [ ! -d $(ESMF_BUILD)/src/include ]; then \
-	  echo Making directory $(ESMF_BUILD)/src/include for test output; mkdir -p $(ESMF_BUILD)/src/include ; fi
+	-@if [ ! -d $(ESMF_INCDIR) ]; then \
+	  echo Making directory $(ESMF_INCDIR) for test output; mkdir -p $(ESMF_INCDIR) ; fi
 
 chkdir_examples:
 	-@if [ ! -d ${ESMF_EXDIR} ]; then \
@@ -278,7 +279,7 @@ libf:${LIBNAME}(${OBJSF})
 storeh: chkdir_include
 	for hfile in ${STOREH} foo ; do \
 	  if [ $$hfile != "foo" ]; then \
-	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile $(ESMF_BUILD)/src/include ; \
+	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile $(ESMF_INCDIR) ; \
 	  fi ; \
 	done
 
@@ -551,6 +552,7 @@ check_tests:
 #
 examples: chkopts chkdir_examples build_libs
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples tree
+	$(DO_EX_RESULTS)
 
 
 tree_examples: tree_build_examples tree_run_examples
@@ -560,7 +562,6 @@ tree_examples: tree_build_examples tree_run_examples
 #
 examples_uni: chkopts chkdir_examples  
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples_uni tree
-	$(DO_EX_RESULTS)
 
 tree_examples_uni: tree_build_examples tree_run_examples_uni
 
@@ -639,7 +640,7 @@ build_demo: chkopts chkdir_tests
 tree_build_demo: $(DEMO_BUILD) 
 
 $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
-	$(SL_F_LINKER) -o $@ $< $(DEMO_OBJ) -lesmf ${F90CXXLIBS} \
+	$(SL_F_LINKER) -o $@ $(DEMO_OBJ) $< -lesmf ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
@@ -653,7 +654,6 @@ run_demo:  chkopts chkdir_tests
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo tree
 
 tree_run_demo: $(DEMO_RUN) 
-
 
 run_demo_uni:  chkopts chkdir_tests
 	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
@@ -814,6 +814,70 @@ tree: $(ACTION)
 # Suffixes
 #-------------------------------------------------------------------------------
 .SUFFIXES: .f .f90 .F .F90 ${SUFFIXES} .C .cc .cpp .r .rm .so
+
+#-------------------------------------------------------------------------------
+#  Compile rules for F90, C++, and c files for both to .o and .a files
+#-------------------------------------------------------------------------------
+
+.F90.o:
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+
+.F.o:
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
+
+.f90.o:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+
+.f.o:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
+
+.c.o:
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+
+.C.o:
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+
+.F90.a:
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FREECPP} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.F.a:
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPPP} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.f90.a:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} ${F_FIXCPP} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.f.a:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXNOCPP} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.c.a:
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.C.a:
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+# The rules below generate a value Fortran file using cpp.
+# The -P option prevents putting #line directives in the output, and
+# -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
+# translating @s into newlines to separate multiline macros, and
+# also translate ^ into # so that other include files are ready to
+# be processed by the second runthru of the preprocessor during the
+# actual compile. (These lines are: ^include "fred" in the
+# original source to shield them from the first preprocess pass.)
+#
+.cpp.F90:
+	gcc -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" > $(dir $< )$@
 
 
 #-------------------------------------------------------------------------------
