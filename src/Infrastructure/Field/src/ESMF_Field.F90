@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.101 2004/01/29 23:31:15 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.102 2004/02/05 21:49:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -195,7 +195,10 @@
 
 
    public ESMF_FieldSetAttribute       ! Set and Get Attributes
-   public ESMF_FieldGetAttribute       !   interface to Base class
+   public ESMF_FieldGetAttribute       !  
+
+   public ESMF_FieldGetAttributeCount  ! number of attribs
+   public ESMF_FieldGetAttributeInfo   ! get type, length by name or number
 
    public ESMF_FieldValidate           ! Check internal consistency
    public ESMF_FieldPrint              ! Print contents of a Field
@@ -214,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.101 2004/01/29 23:31:15 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.102 2004/02/05 21:49:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -346,11 +349,11 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldSetIntAttr
-       !module procedure ESMF_FieldSetIntListAttr
+        module procedure ESMF_FieldSetIntListAttr
         module procedure ESMF_FieldSetRealAttr
-       !module procedure ESMF_FieldSetRealListAttr
+        module procedure ESMF_FieldSetRealListAttr
         module procedure ESMF_FieldSetLogicalAttr
-       !module procedure ESMF_FieldSetLogicalListAttr
+        module procedure ESMF_FieldSetLogicalListAttr
         module procedure ESMF_FieldSetCharAttr
 
 ! !DESCRIPTION:
@@ -369,16 +372,34 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_FieldGetIntAttr
-       !module procedure ESMF_FieldGetIntListAttr
+        module procedure ESMF_FieldGetIntListAttr
         module procedure ESMF_FieldGetRealAttr
-       !module procedure ESMF_FieldGetRealListAttr
+        module procedure ESMF_FieldGetRealListAttr
         module procedure ESMF_FieldGetLogicalAttr
-       !module procedure ESMF_FieldGetLogicalListAttr
+        module procedure ESMF_FieldGetLogicalListAttr
         module procedure ESMF_FieldGetCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
 !     attributes from an {\tt ESMF\_Field}.
+ 
+!EOP
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field Attribute
+!
+! !INTERFACE:
+      interface ESMF_FieldGetAttributeInfo
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldGetAttrInfoByName
+        module procedure ESMF_FieldGetAttrInfoByNum
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     information about attributes from an {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -1757,6 +1778,7 @@
       end subroutine ESMF_FieldGetName
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldGetIntAttr - Retrieve an Attribute from a Field
 !
@@ -1801,7 +1823,8 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetInt(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldGetAttribute"
         return
@@ -1810,6 +1833,72 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetIntListAttr - Retrieve an Attribute from a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetIntListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer, dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an integer list attribute from a {\tt ESMF\_Field}.
+!
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The integer values of the named Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, count, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetIntListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1828,7 +1917,6 @@
 ! !DESCRIPTION:
 !      Returns a real attribute from a {\tt ESMF\_Field}.
 !
-! 
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
@@ -1856,7 +1944,8 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetReal(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldGetAttribute"
         return
@@ -1865,6 +1954,71 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetRealListAttr - Retrieve an Attribute from a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetRealListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real, dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a real attribute from a {\tt ESMF\_Field}.
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The real values of the named Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetRealListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1881,8 +2035,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Field}.
-!
+!      Returns an logical attribute from a {\tt ESMF\_Field}.
 ! 
 !     \begin{description}
 !     \item [field]
@@ -1911,7 +2064,8 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetLogical(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldGetAttribute"
         return
@@ -1920,6 +2074,71 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldGetLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetLogicalListAttr - Retrieve an Attribute from a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetLogicalListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an logical list attribute from a {\tt ESMF\_Field}.
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The logical values of the named Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetLogicalListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1976,6 +2195,192 @@
 
       end subroutine ESMF_FieldGetCharAttr
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of attrs
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetAttributeCount(field, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [count]
+!           The number of attributes on this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetCount(field%ftypep%base, count, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttributeCount"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetAttributeCount
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetAttrInfoByName - Query info about an attrs
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetAttrInfoByName(field, name, type, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character(len=*), intent(in) :: name
+      type(ESMF_DataType), intent(out), optional :: type
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [type]
+!           The type of the Attribute.
+!     \item [count]
+!           The number of items in this Attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_DataType) :: localDt
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetAttrInfoName(field%ftypep%base, name, &
+                                           localDt, localCount, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttributeInfo"
+        return
+      endif 
+
+      if (present(type)) type = localDt
+      if (present(count)) count = localCount
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetAttrInfoByName
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetAttrInfoByNum - Query info about an attrs
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetAttrInfoByNum(field, num, name, type, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      integer, intent(in) :: num
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DataType), intent(out), optional :: type
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [num]
+!           The number of the Attribute to query.
+!     \item [name]
+!           Returns the name of the Attribute.
+!     \item [type]
+!           Returns the type of the Attribute.
+!     \item [count]
+!           Returns the number of items in this Attribute.  For character types,
+!           this is the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_DataType) :: localDt
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, num, &
+                                         localName, localDt, localCount, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldGetAttributeInfo"
+        return
+      endif 
+
+      if (present(name)) name = localName
+      if (present(type)) type = localDt
+      if (present(count)) count = localCount
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetAttrInfoByNum
+
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldGetGrid - Return the Grid associated with a Field
@@ -2353,6 +2758,7 @@
         end subroutine ESMF_FieldSetDataMap
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldSetIntAttr - Set an Attribute on a Field
 !
@@ -2368,7 +2774,6 @@
 !
 ! !DESCRIPTION:
 !      Attaches an integer attribute to a {\tt ESMF\_Field}.
-!
 ! 
 !     \begin{description}
 !     \item [field]
@@ -2397,7 +2802,8 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetInt(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldSetAttribute"
         return
@@ -2406,6 +2812,71 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldSetIntListAttr - Set an Attribute on a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSetIntListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer, dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an integer list attribute to a {\tt ESMF\_Field}.
+!
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The integer values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+  
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldSetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetIntListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2423,7 +2894,6 @@
 !
 ! !DESCRIPTION:
 !      Attaches a real attribute to a {\tt ESMF\_Field}.
-!
 ! 
 !     \begin{description}
 !     \item [field]
@@ -2452,7 +2922,8 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetReal(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldSetAttribute"
         return
@@ -2461,6 +2932,72 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldSetRealListAttr - Set an Attribute on a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSetRealListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real, dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a real list attribute to a {\tt ESMF\_Field}.
+!
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The real values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldSetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetRealListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2477,7 +3014,7 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Field}.
+!      Attaches an logical attribute to a {\tt ESMF\_Field}.
 !
 ! 
 !     \begin{description}
@@ -2507,7 +3044,8 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetLogical(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldSetAttribute"
         return
@@ -2516,6 +3054,72 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldSetLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldSetLogicalListAttr - Set an Attribute on a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSetLogicalListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an logical list attribute to a {\tt ESMF\_Field}.
+!
+! 
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The logical true/false values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldSetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetLogicalListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2534,7 +3138,6 @@
 ! !DESCRIPTION:
 !      Attaches a character attribute to a {\tt ESMF\_Field}.
 !
-! 
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
