@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.21 2003/04/14 14:51:29 nscollins Exp $
+// $Id: ESMC_Comm.C,v 1.22 2003/04/28 19:23:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.21 2003/04/14 14:51:29 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.22 2003/04/28 19:23:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -330,14 +330,25 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //
 //EOP
 // !REQUIREMENTS:  
+ 
+  int finalized;
 
+#if 0
+  // TODO: if this isn't COMM_WORLD, it might be ok to finalize MPI,
+  // but in general we don't want this to happen until the very end
+  // of the program.  just deleting a layout is too early to do this.
   pthread_mutex_lock(&finalMutex);
     if (!commFinal) {
   //cout << "ESMC_CommFinal DE = " << DE << endl;
-      if (DE->deType == ESMC_PROCESS) MPI_Finalize();
+      if (DE->deType == ESMC_PROCESS) {
+          MPI_Finalized(&finalized);
+          if (!finalized)
+              MPI_Finalize();
+      }
       commFinal = true;
     }
   pthread_mutex_unlock(&finalMutex);
+#endif
 
   return(ESMF_SUCCESS);
 
