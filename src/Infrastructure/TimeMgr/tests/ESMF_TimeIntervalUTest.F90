@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.8 2004/02/11 21:52:58 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.9 2004/03/05 00:58:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.8 2004/02/11 21:52:58 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.9 2004/03/05 00:58:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, MM, DD, YY, days, totalDays, secs, testResults, ans
+      integer :: rc, H, M, S, MM, DD, YY, days, totalDays, &
+                 secs, testResults, ans
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -56,6 +57,7 @@
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
       type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2
       type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
+      type(ESMF_Calendar) :: gregorianCalendar, noLeapCalendar, day360Calendar
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       type(ESMF_TimeInterval) :: absoluteTime
       integer(ESMF_KIND_I8) :: advanceCounts, year, days2, month, minute, second
@@ -74,6 +76,829 @@
      ! initialize ESMF framework
       call ESMF_Initialize(rc)
 
+      ! ----------------------------------------------------------------------------
+      ! Calendar Interval tests
+      ! ----------------------------------------------------------------------------
+      ! initialize calendars
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
+      noLeapCalendar = ESMF_CalendarCreate("No Leap", &
+                                              ESMF_CAL_NOLEAP, rc)
+      day360Calendar = ESMF_CalendarCreate("360 Day", &
+                                              ESMF_CAL_360DAY, rc)
+
+      ! ----------------------------------------------------------------------------
+      ! Gregorian Leap year 2004 tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/29/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/29/2004 by mm= -1 Test"
+      write(failMsg, *) " Did not return 12/29/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==12 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval decrement 3/31/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval decrement 1/31/2004 by mm= -1 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/30/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by (mm=1, d=1) Test"
+      write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=2 Test"
+      write(failMsg, *) " Did not return 3/31/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=3 Test"
+      write(failMsg, *) " Did not return 4/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=3, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==4 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=49 Test"
+      write(failMsg, *) " Did not return 2/29/2008 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2008 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval decrement 1/31/2004 by mm=49 Test"
+      write(failMsg, *) " Did not return 12/31/1999 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1999 .and. MM==12 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 2/28/2004 by d=2 Test"
+      write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 2/29/2004 by yy=1 Test"
+      write(failMsg, *) " Did not return 2/28/2005 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=29, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2005 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 12/1/2004 by (yy=2, mm=24, d=90) Test"
+      write(failMsg, *) " Did not return 3/1/2009 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2009 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 12/1/2004 by (yy= -2, mm=24, d= -90) Test"
+      write(failMsg, *) " Did not return 9/2/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=-2, mm=24, d=-90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==9 .and. DD==2 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval decrement 3/1/2004 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
+      write(failMsg, *) " Did not return 12/1/1999 22:14:50 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, h=13, m=62, s=68, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1999 .and. MM==12 .and. DD==1 .and. &
+                      H==22 .and. M==14 .and. S==50 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval decrement 3/1/2004 by (yy=2, mm=-24, d=90, h=-13, m=62, s=-68) Test"
+      write(failMsg, *) " Did not return 12/3/2003 00:17:06 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=-24, d=90, h=-13, m=62, s=-68, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==12 .and. DD==3 .and. &
+                      H==0 .and. M==17 .and. S==6 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      ! Gregorian Non-leap year 2003 tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/29/2003 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/30/2003 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by (mm=1, d=1) Test"
+      write(failMsg, *) " Did not return 3/1/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=2 Test"
+      write(failMsg, *) " Did not return 3/31/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==3 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=3 Test"
+      write(failMsg, *) " Did not return 4/30/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=3, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==4 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=49 Test"
+      write(failMsg, *) " Did not return 2/28/2007 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2007 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 2/28/2003 by d=2 Test"
+      write(failMsg, *) " Did not return 3/2/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==3 .and. DD==2 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 2/28/2003 by yy=1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 12/1/2003 by (yy=2, mm=24, d=90) Test"
+      write(failMsg, *) " Did not return 2/29/2008 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2008 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      ! General Gregorian Calendar tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval increment 12/31/2004 by d=1 Test"
+      write(failMsg, *) " Did not return 1/1/2005 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=31, h=12, m=17, s=58, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2005 .and. MM==1 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Earth Calendar Time Step initialization with s=172800 (2 days) Test"
+      write(failMsg, *) "Days should = 2 and return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, s=172800, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, s=secs, rc=rc)
+      call ESMF_Test((days==2 .and. secs==0 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Earth Calendar Time Step initialization with d=1, s=172860 (3 days, 1 minute) Test"
+      write(failMsg, *) "Days should = 3, secs = 60 and return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, d=1, s=172860, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, s=secs, rc=rc)
+      call ESMF_Test((days==3 .and. secs==60 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Earth Calendar Time Step initialization with d=1, h=48, m=2880, s=86401 (6 days, 1 second) Test"
+      write(failMsg, *) "Days should = 6, secs = 1 and return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, d=1, h=48, m=2880, s=86401, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, s=secs, rc=rc)
+      call ESMF_Test((days==6 .and. secs==1 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Earth Calendar Time Step initialization with d=6, m=1, s=1 Test"
+      write(failMsg, *) "Hours should = 144, secs = 61 and return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, d=6, m=1, s=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, h=H, s=secs, rc=rc)
+      call ESMF_Test((H==144 .and. secs==61 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, " hours = ", H
+      print *, " secs = ", secs
+
+      ! ----------------------------------------------------------------------------
+      ! No Leap calendar 2004 tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/29/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 3/31/2004 by mm= -1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval decrement 3/31/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval decrement 1/31/2004 by mm= -1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/30/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/31/2004 by (mm=1, d=1) Test"
+      write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=2 Test"
+      write(failMsg, *) " Did not return 3/31/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=3 Test"
+      write(failMsg, *) " Did not return 4/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=3, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==4 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=49 Test"
+      write(failMsg, *) " Did not return 2/28/2008 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2008 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval decrement 1/31/2004 by mm=49 Test"
+      write(failMsg, *) " Did not return 12/31/1999 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1999 .and. MM==12 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 2/28/2004 by d=2 Test"
+      write(failMsg, *) " Did not return 3/2/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==2 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 2/28/2004 by yy=1 Test"
+      write(failMsg, *) " Did not return 2/28/2005 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2005 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval increment 12/1/2004 by (yy=2, mm=24, d=90) Test"
+      write(failMsg, *) " Did not return 3/1/2009 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2009 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval decrement 3/1/2004 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
+      write(failMsg, *) " Did not return 11/30/1999 22:14:50 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, h=13, m=62, s=68, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1999 .and. MM==11 .and. DD==30 .and. &
+                      H==22 .and. M==14 .and. S==50 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      ! 360 Day calendar 2004 tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 1/29/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 3/30/2004 by mm= -1 Test"
+      write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval decrement 3/30/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval decrement 1/30/2004 by mm= -1 Test"
+      write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 1/30/2004 by (mm=1, d=1) Test"
+      write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=2 Test"
+      write(failMsg, *) " Did not return 3/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==3 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=3 Test"
+      write(failMsg, *) " Did not return 4/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=3, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==4 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=49 Test"
+      write(failMsg, *) " Did not return 2/30/2008 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2008 .and. MM==2 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval decrement 1/30/2004 by mm=49 Test"
+      write(failMsg, *) " Did not return 12/30/1999 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1999 .and. MM==12 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 2/28/2004 by d=2 Test"
+      write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 2/28/2004 by yy=1 Test"
+      write(failMsg, *) " Did not return 2/28/2005 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2005 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval increment 12/1/2004 by (yy=2, mm=24, d=90) Test"
+      write(failMsg, *) " Did not return 3/1/2009 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2009 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval decrement 3/1/2004 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
+      write(failMsg, *) " Did not return 11/30/1999 22:14:50 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, h=13, m=62, s=68, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1999 .and. MM==11 .and. DD==30 .and. &
+                      H==22 .and. M==14 .and. S==50 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      call ESMF_CalendarDestroy(day360Calendar)
+      call ESMF_CalendarDestroy(noLeapCalendar)
+      call ESMF_CalendarDestroy(gregorianCalendar)
+
+      ! ----------------------------------------------------------------------------
+      ! End Calendar Interval tests
+      ! ----------------------------------------------------------------------------
 
       ! initialize clock time intervals and instants
 
