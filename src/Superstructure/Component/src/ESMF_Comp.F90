@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.103 2004/07/26 18:36:07 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.104 2004/07/30 22:26:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,12 +100,28 @@
       integer, parameter :: ESMF_SINGLEPHASE = 0
 
 !------------------------------------------------------------------------------
+!     ! wrapper for Component objects going across F90/C++ boundary
+      type ESMF_CWrap
+#ifndef ESMF_SEQUENCE_BUG
+      sequence
+#endif
+      !private
+#ifndef ESMF_NO_INITIALIZERS
+         type(ESMF_CompClass), pointer :: compp => NULL()
+#else
+         type(ESMF_CompClass), pointer :: compp
+#endif
+      end type
+
+!------------------------------------------------------------------------------
 !     ! ESMF_CompClass
 !
 !     ! Component internal class data.
 
       type ESMF_CompClass
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       private
          type(ESMF_Pointer) :: this       ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
@@ -123,7 +139,7 @@
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
          type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
-         type(ESMF_CWrap), pointer  :: compw      ! to satisfy the C interface
+         type(ESMF_CWrap)   :: compw              ! to satisfy the C interface
          type(ESMF_VM)      :: vm                 ! component VM
          type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
          integer            :: npetlist           ! number of PETs in petlist
@@ -134,24 +150,14 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! wrapper for Component objects going across F90/C++ boundary
-      type ESMF_CWrap
-      sequence
-!      private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_CompClass), pointer :: compp => NULL()
-#else
-         type(ESMF_CompClass), pointer :: compp
-#endif
-      end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_CplComp
 !
 !     ! Cplcomp wrapper
 
       type ESMF_CplComp
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       !private
 #ifndef ESMF_NO_INITIALIZERS
          type(ESMF_CompClass), pointer :: compp => NULL()
@@ -167,7 +173,9 @@
 !     ! Gridcomp wrapper
 
       type ESMF_GridComp
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       !private
 #ifndef ESMF_NO_INITIALIZERS
          type(ESMF_CompClass), pointer :: compp => NULL()
@@ -219,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.103 2004/07/26 18:36:07 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.104 2004/07/30 22:26:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -468,8 +476,9 @@ end function
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
                                   compp%npetlist, compp%petlist)
                                   
-        ! allocate memory for the CWrap member
-        allocate(compp%compw)
+        !! remove me.  nsc 30jul04
+        !! allocate memory for the CWrap member
+        !! allocate(compp%compw)
 
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
@@ -542,8 +551,9 @@ end function
         ! destruct the VMPlan
         call ESMF_VMPlanDestruct(compp%vmplan)
 
-        ! Deallocate memory held for CWrap member
-        deallocate(compp%compw)
+        !! remove me.   nsc 30jul04
+        !! Deallocate memory held for CWrap member
+        !! deallocate(compp%compw)
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
