@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.20 2004/01/28 22:49:17 nscollins Exp $
+! $Id: ESMF_GridUTest.F90,v 1.21 2004/02/18 20:36:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.20 2004/01/28 22:49:17 nscollins Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.21 2004/02/18 20:36:28 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -102,15 +102,12 @@
       grid_max(2) = 12.0
       name = "test grid 1"
 
+
+
+
+      !------------------------------------------------------------------------
       !NEX_UTest
-
-
-      ! Creating a layout test
       layout = ESMF_DELayoutCreate(rc=rc)
-      write(name, *) "Creating a DELayout Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
@@ -121,41 +118,38 @@
                               name=name, rc=status)
 
 
-      !NEX_UTest
-
-
       write(failMsg, *) "Returned ESMF_FAILURE"
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       !NEX_UTest
-
-
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       ! The following code is commented out because it crashes. 
       ! (Because the layout being passed in is uninitialized.)
       ! Bug report 796975 has been filed
-      !grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-      !                        minGlobalCoordPerDim=grid_min, &
-      !                        maxGlobalCoordPerDim=grid_max, &
-      !                        horzGridKind=horz_gridtype, &
-      !                        horzStagger=horz_stagger, &
-      !                        horzCoordSystem=horz_coord_system, &
-      !                        layout=layout2, &
-      !                        name=name, rc=status)
+      !NEX_UTest
+      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=grid_min, &
+                              maxGlobalCoordPerDim=grid_max, &
+                              horzGridKind=horz_gridtype, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
+                              layout=layout2, &
+                              name=name, rc=status)
 
+      write(failMsg, *) "Returned ESMF_SUCCESS"
+      write(name, *) "Creating a Grid with a non created layout Test"
+      call ESMF_Test((status.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
-
-      !write(failMsg, *) "Returned ESMF_SUCCESS"
-      !write(name, *) "Creating a Grid with a non created layout Test"
-      !call ESMF_Test((status.eq.ESMF_SUCCESS), &
-      !                name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       grid_min(1) = 7.0
