@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/25 00:18:30 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/06/23 20:25:14 jwolfe Exp $ 
 
 ALL: lib 
 
@@ -14,7 +14,7 @@ LIBBASE	  = libmpiuni
 LOCDIR	  = src/Infrastructure/mpiuni/
 
 
-include $(ESMF_DIR)/makefile
+include $(ESMF_TOP_DIR)/makefile
 
 DIRS	  = 
 
