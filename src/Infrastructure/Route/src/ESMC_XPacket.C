@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.32 2003/08/05 20:17:30 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.33 2003/08/05 22:53:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.32 2003/08/05 20:17:30 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.33 2003/08/05 22:53:58 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -336,8 +336,14 @@
                // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
 
           nxp = 1;
-          if ((periodic[0] == ESMF_TF_TRUE) && (global_start[0] <= 0)) nxp++;
-          if ((periodic[1] == ESMF_TF_TRUE) && (global_start[1] <= 0)) nxp++;
+          if (periodic[0] == ESMF_TF_TRUE) { 
+             if (global_start[0] <= 0) nxp++;
+             // if ((global_start[0] <= 0) || (global_start[0] >= foo)) nxp++;
+          }
+          if (periodic[1] == ESMF_TF_TRUE) {
+             if (global_start[1] <= 0) nxp++;
+             // if ((global_start[1] <= 0) || (global_start[1] >= foo)) nxp++;
+          }
 
           xps = new ESMC_XPacket[nxp];
         
