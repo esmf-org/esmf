@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.22 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.23 2003/08/01 22:49:23 jwolfe Exp $
 !
 ! System test code #70384
 
@@ -24,18 +24,17 @@
     implicit none
     
     ! Local variables
-    integer :: nx, ny, nz, i, j, k, ni, nj, nk, nj2, nk2, rc, ii, jj, kk
+    integer :: nx, ny, nz, i, j, k, rc, ii, jj, kk
     integer, dimension(:), allocatable :: delist
-    integer, dimension(3) :: global_start, global_position
-    integer :: result, len, base, de_id, de_x, de_y
+    integer, dimension(3) :: global_start, global_position, counts1, counts2, de_pos
+    integer :: result, len, base, de_id
     integer :: i_max, j_max, k_max, miscount
     integer :: status
-    integer :: ndex, ndey, ndes
+    integer :: nde(2), ndes
     logical :: match
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
-    integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans, &
-                             global_dimlengths
+    integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
     type(ESMF_DELayout) :: layout0, layout1, layout2
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
@@ -77,11 +76,11 @@
        goto 20
     endif
 
-    ndex = 2
-    ndey = ndes/2
+    nde(1) = 2
+    nde(2) = ndes/2
     allocate(delist(ndes))
     delist = (/ (i, i=0, ndes-1) /)
-    layout1 = ESMF_DELayoutCreate(layout0, 2, (/ ndex, ndey /), (/ 0, 0 /), &
+    layout1 = ESMF_DELayoutCreate(layout0, 2, (/ nde(1), nde(2) /), (/ 0, 0 /), &
                                                       de_indices=delist, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "DELayout Create finished, rc =", rc
@@ -110,29 +109,29 @@
     !  Data is type Integer, 3D.
 
     ! Allocate and set initial data values.  These are different on each DE.
-    ni = 10
-    nj = 06
-    nk = 12
-    allocate(srcdata(ni, nj, nk))
-    allocate(resdata(ni, nj, nk))
-    nj2 = 18
-    nk2 = 04
-    allocate(dstdata(ni, nj2, nk2))
-
-    ! Get our local DE id
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
+    counts1(1) = 10
+    counts1(2) = 06
+    counts1(3) = 12
+    allocate(srcdata(counts1(1), counts1(2), counts1(3)))
+    allocate(resdata(counts1(1), counts1(2), counts1(3)))
+    counts2(1) = 10
+    counts2(2) = 18
+    counts2(3) = 04
+    allocate(dstdata(counts2(1), counts2(2), counts2(3)))
 
     ! Get our position in the layout
-    call ESMF_DELayoutGetDEPosition(layout1, de_x, de_y, rc)
+    do i = 1,3
+      de_pos(i) = 0
+    enddo
+    call ESMF_DELayoutGetDEPosition(layout1, de_pos(1), de_pos(2), rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    de_x = de_x + 1  ! TODO:  Should not have to translate from C
-    de_y = de_y + 1
+    de_pos(1) = de_pos(1) + 1  ! TODO:  Should not have to translate from C
+    de_pos(2) = de_pos(2) + 1
 
     ! Calculate global_positions -- would otherwise come from a grid call
-    global_position(1) = ni*(de_x-1)
-    global_position(2) = nj*(de_y-1)
-    global_position(3) = 0
+    do i = 1,3
+      global_position(i) = counts1(i)*(de_pos(i)-1)
+    enddo
 
     ! Create arrays, set and get axis info here before initializing
     ! the data.
@@ -146,21 +145,19 @@
     print *, "Array Creates returned"
 
     ! Create axis indices  TODO:  move to an array method - ArrayDist?
-    global_counts(1) = ni*ndex
-    global_counts(2) = nj*ndey
-    global_counts(3) = nk
     decompids1(1) = 1
     decompids1(2) = 2
     decompids1(3) = 0
+    do i = 1,3
+      global_counts(i) = counts1(i)
+      if (decompids1(i).ne.0) global_counts(i) = counts1(i)*nde(decompids1(i))
+    enddo
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
                                    indexlist1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
                                    indexlist3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    global_counts(1) = ni*ndex
-    global_counts(2) = nj*ndey
-    global_counts(3) = nk
     decompids2(1) = 1
     decompids2(2) = 0
     decompids2(3) = 2
@@ -169,17 +166,17 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
-    call ESMF_ArraySetAxisIndex(array1, totalindex=indexlist1, rc=rc)
+    call ESMF_ArraySetAxisIndex(array1, compindex=indexlist1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array2, totalindex=indexlist2, rc=rc)
+    call ESMF_ArraySetAxisIndex(array2, compindex=indexlist2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array3, totalindex=indexlist3, rc=rc)
+    call ESMF_ArraySetAxisIndex(array3, compindex=indexlist3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Generate global cell numbers, where cell numbering scheme goes
     ! across the global mesh, rows first
-    i_max = indexlist1(1)%max
-    j_max = indexlist1(2)%max
+    i_max = global_counts(1)
+    j_max = global_counts(2)
     do k=1,indexlist1(3)%max-indexlist1(3)%min+1
       kk = k+global_position(3)
       do j=1,indexlist1(2)%max-indexlist1(2)%min+1
@@ -218,20 +215,14 @@
     print *, "Source Array retrieved from state"
     
     !! Call transpose method here, output ends up in array2
-    global_dimlengths(1) = ni
-    global_dimlengths(2) = nj
-    global_dimlengths(3) = nk
     do i=1,3
-      global_start(i) = global_position(i)
-      if(decompids1(i).ne.0) then
-        global_dimlengths(i) = global_counts(decompids1(i))
-        global_start(i) = global_position(decompids1(i))
+      rank_trans(i) = i
+      global_start(i) = 0
+      if(decompids2(i).ne.0) then
+        global_start(i) = counts2(i)*(de_pos(decompids2(i))-1)
       endif
     enddo
-    rank_trans(1) = 1
-    rank_trans(2) = 2
-    rank_trans(3) = 3
-    call ESMF_ArrayRedist(array1, layout1, global_start, global_dimlengths, &
+    call ESMF_ArrayRedist(array1, layout1, global_start, global_counts, &
                           rank_trans, decompids1, decompids2, array2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -241,20 +232,15 @@
 
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in array3
-    global_dimlengths(1) = ni
-    global_dimlengths(2) = nj
-    global_dimlengths(3) = nk
+
     do i=1,3
-      global_start(i) = global_position(i)
-      if(decompids2(i).ne.0) then
-        global_dimlengths(i) = global_counts(decompids2(i))
-        global_start(i) = global_position(decompids2(i))
+      rank_trans(i) = i
+      global_start(i) = 0
+      if(decompids1(i).ne.0) then
+        global_start(i) = counts1(i)*(de_pos(decompids1(i))-1)
       endif
     enddo
-    rank_trans(1) = 1
-    rank_trans(2) = 2
-    rank_trans(3) = 3
-    call ESMF_ArrayRedist(array2, layout1, global_start, global_dimlengths, &
+    call ESMF_ArrayRedist(array2, layout1, global_start, global_counts, &
                           rank_trans, decompids2, decompids1, array3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -288,9 +274,9 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     match = .true.
     miscount = 0
-    do i=1, ni
-      do j=1, nj
-        do k=1, nk
+    do i=1, counts1(1)
+      do j=1, counts1(2)
+        do k=1, counts1(3)
           if (srcptr(i,j,k) .ne. resptr(i,j,k)) then
             print *, "array contents do not match at: (", i,j,k, ") on DE ", &
                      de_id, ".  src=", srcptr(i,j,k), "dst=", resptr(i,j,k)
