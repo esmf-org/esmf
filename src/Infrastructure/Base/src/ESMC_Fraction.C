@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.2 2004/11/05 04:07:25 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.3 2004/11/12 01:02:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,6 +23,7 @@
 
  // higher level, 3rd party or system includes
  #include <iostream.h>
+ #include <limits.h>
 
  #include <ESMC_LogErr.h>
  #include <ESMF_LogMacros.inc>
@@ -33,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.2 2004/11/05 04:07:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.3 2004/11/12 01:02:38 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -878,6 +879,174 @@
     return(*this);
 
 }  // end ESMC_Fraction::operator-=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(*) - multiply Fraction by integer
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_Fraction::operator*(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 multiplier) const {   // in - integer multiplier
+//
+// !DESCRIPTION:
+//      Multiply current object's (this) {\tt ESMC\_Fraction} with given
+//      integer, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator*(integer)"
+
+    ESMC_Fraction product;
+
+    // fractional part multiplication.
+    product.n = n * multiplier;
+    product.d = d;
+
+    // whole part multiplication
+    product.w = w * multiplier;
+
+    // normalize, but don't reduce; maintains denominators where possible.
+    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
+    product.ESMC_FractionNormalize();
+
+    return(product);
+
+}  // end ESMC_Fraction::operator*
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(*=) - multiply Fraction by integer
+//
+// !INTERFACE:
+      ESMC_Fraction& ESMC_Fraction::operator*=(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction& result
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 multiplier) {   // in - integer multiplier
+//
+// !DESCRIPTION:
+//      Multiply current object's (this) {\tt ESMC\_Fraction} with given
+//      integer.
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator*=(integer)"
+
+    // just reuse (*) operator defined above!
+    *this = *this * multiplier;
+
+    return(*this);
+
+}  // end ESMC_Fraction::operator*=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(/) - divide Fraction by integer
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_Fraction::operator/(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 divisor) const {   // in - integer divisor
+//
+// !DESCRIPTION:
+//      Divide current object's (this) {\tt ESMC\_Fraction} with given
+//      integer, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator/(integer)"
+
+    // check for divide-by-zero
+    if (divisor == 0) {
+      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      return(ESMF_FAILURE);
+    }
+
+    ESMC_Fraction quotient;
+    ESMF_KIND_I4 remainder;
+    ESMF_KIND_I8 denominator;
+
+    // fractional part division.  don't just multiply the denominator; avoid
+    //   overflow, especially with large denominators such as 1,000,000,000
+    //   for nanoseconds.  So divide numerator and add back any remainder.
+    quotient.n = n / divisor;
+    quotient.d = d;
+
+    // check remainder and add back
+    remainder = n % divisor;
+    if (remainder != 0) {
+      // upper bounds check of (d * divisor)
+      denominator = (ESMF_KIND_I8) d * (ESMF_KIND_I8) divisor;
+      if (denominator < INT_MIN || denominator > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "; denominator value abs(%lld) > %d, won't fit in "
+                        "fraction denominator", denominator, INT_MAX);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_VALID, logMsg,
+                                              ESMC_NULL_POINTER);
+        return(ESMC_Fraction(0,0,1));
+      }
+      // if ok, add back
+      quotient += ESMC_Fraction(0, remainder, denominator);
+    }
+
+    // whole part division; add back any remainder
+    quotient.w = w / divisor;
+    if ((remainder = w % divisor) != 0) {
+      quotient += ESMC_Fraction(0, remainder, divisor);
+    }
+
+    // normalize, but don't reduce; maintains denominators where possible.
+    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
+    quotient.ESMC_FractionNormalize();
+
+    return(quotient);
+
+}  // end ESMC_Fraction::operator/
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(/=) - divide Fraction by integer
+//
+// !INTERFACE:
+      ESMC_Fraction& ESMC_Fraction::operator/=(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction& result
+//
+// !ARGUMENTS:
+      ESMF_KIND_I4 divisor) {   // in - integer divisor
+//
+// !DESCRIPTION:
+//      Divide current object's (this) {\tt ESMC\_Fraction} with given
+//      integer.
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator/=(integer)"
+
+    // just reuse (/) operator defined above!
+    *this = *this / divisor;
+
+    return(*this);
+
+}  // end ESMC_Fraction::operator/=
 
 //-------------------------------------------------------------------------
 //BOP
