@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2005/01/06 01:03:53 jwolfe Exp $
+# $Id: build_rules.mk,v 1.18 2005/02/08 18:48:49 theurich Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -63,8 +63,8 @@ endif
 # Version 1.1 or SGI's version of MPI you MUST retain it.
 #
 ifeq ($(ESMF_COMM),mpi)
-ESMC_MPIRUN      = mpirun 
-MPI_LIB        = -lmpi -lmpi++
+ESMC_MPIRUN     = mpirun 
+MPI_LIB         =
 MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
 MPIRUN          = ${ESMC_MPIRUN}
 endif
@@ -118,8 +118,8 @@ CXX_CLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_FLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 C_CXXF90LD         = CC -n32
 C_F90CXXLD         = f90 -n32
-C_CXXF90LIBS       = -rpath . -lpthread -lftn -lfortran -lCio
-C_F90CXXLIBS       = -rpath . -lpthread -lCsup -lC -lCio -lc 
+C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread
+C_F90CXXLIBS       = -rpath . -lCsup -lC -lCio -lc -lmpi++ -lmpi -lpthread
 SL_ABIOPTS         = -check_registry /usr/lib32/so_locations
 endif
 
@@ -145,8 +145,8 @@ CXX_CLINKER	   = CC -64 -mp -Wl,-woff,84,-woff,85,-woff,134
 CXX_FLINKER	   = CC -64 -mp -Wl,-woff,84,-woff,85,-woff,134
 C_CXXF90LD         = CC -64
 C_F90CXXLD         = f90 -64
-C_CXXF90LIBS       = -rpath . -lpthread -lftn -lfortran -lCio
-C_F90CXXLIBS       = -rpath . -lpthread -lC -lCio -lc
+C_CXXF90LIBS       = -rpath . -lftn -lfortran -lCio -lmpi++ -lmpi -lpthread
+C_F90CXXLIBS       = -rpath . -lC -lCio -lc -lmpi++ -lmpi -lpthread
 C_CXXSO            =  CC -64 -shared -rpath .
 SL_ABIOPTS         = -check_registry /usr/lib64/so_locations
 ###########################################################################
