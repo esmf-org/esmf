@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2002/09/20 15:34:20 jwolfe Exp $ 
+# $Id: base_variables,v 1.6 2002/12/17 02:27:01 eschwab Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -32,7 +32,10 @@ O_COPTFLAGS	   = -O
 O_FOPTFLAGS	   = -O
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = pgCC -mp -tlocal
+CXX_CC		   = pgCC -tlocal
+# TODO:  upgrade PGI suite?  "pgCC -mp" disables C++ exception handling !
+#        should be ok for now since we're not using OpenMP in the 1st ESMF ver.
+#CXX_CC		   = pgCC -mp -tlocal
 CXX_FC		   = pgf90 -mp -tlocal
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
