@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.12 2003/03/21 21:10:20 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.13 2003/03/21 22:37:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.12 2003/03/21 21:10:20 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.13 2003/03/21 22:37:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -349,14 +349,16 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    int i;
+    int i, j;
+    ESMC_XPacket *xptr;
 
     printf(" entrycount=%d, my_deid=%d\n", entrycount, my_deid);
    
     for(i=0; i<entrycount; i++) {
         printf("%2d: deid=%2d, xpcount=%2d, xpaddr=0x%08lx\n",
                  i, entry[i].deid, entry[i].xpcount, (long int)(entry[i].xp)); 
-        entry[i].xp->ESMC_XPacketPrint();
+       for (j=0, xptr=entry[i].xp; j<entry[i].xpcount; j++, xptr++)
+          xptr->ESMC_XPacketPrint();
     }
   
     return ESMF_SUCCESS;
