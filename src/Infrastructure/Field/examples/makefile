@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18.2.1 2005/02/10 18:56:48 nscollins Exp $ 
+# $Id: makefile,v 1.18.2.2 2005/02/10 23:12:03 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -60,7 +60,6 @@ LOCDIR	  = src/Infrastructure/Field/examples
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
                  $(ESMF_EXDIR)/ESMF_FieldCreateEx \
-                 $(ESMF_EXDIR)/ESMF_FieldFromUserEx \
                  $(ESMF_EXDIR)/ESMF_FieldGlobalEx \
                  $(ESMF_EXDIR)/ESMF_FieldWriteEx
 
@@ -72,13 +71,11 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_FieldCreateEx \
 
 EXAMPLES_RUN = run_ESMC_FieldCreateEx \
                run_ESMF_FieldCreateEx \
-               run_ESMF_FieldFromUserEx \
                run_ESMF_FieldGlobalEx \
                run_ESMF_FieldWriteEx 
 
 EXAMPLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
                    run_ESMF_FieldCreateEx_uni \
-                   run_ESMF_FieldFromUserEx_uni \
                    run_ESMF_FieldGlobalEx_uni \
                    run_ESMF_FieldWriteEx_uni
 
@@ -109,18 +106,6 @@ run_ESMF_FieldCreateEx:
 
 run_ESMF_FieldCreateEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_FieldCreateEx > $(ESMF_EXDIR)/ESMF_FieldCreateEx.stdout
-
-#
-# ESMF_FieldFromUserEx
-#
-EXAMPLE_FieldFromUser_OBJS = UserCodeMod.o
-ESMF_FieldFromUserEx.o	: UserCodeMod.o
-
-run_ESMF_FieldFromUserEx:
-	-${MPIRUN} -np 6 $(ESMF_EXDIR)/ESMF_FieldFromUserEx > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
-
-run_ESMF_FieldFromUserEx_uni:
-	echo "PASS: ESMF_FieldFromUserEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
 
 #
 # ESMF_FieldGlobalEx
