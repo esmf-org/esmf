@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.4 2004/06/14 13:49:53 nscollins Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.5 2004/06/14 21:53:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.4 2004/06/14 13:49:53 nscollins Exp $'
+      '$Id: ESMF_FieldDataMapUTest.F90,v 1.5 2004/06/14 21:53:07 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -112,13 +112,12 @@
 
 
       !------------------------------------------------------------------------
-      !This code crashes
-      ! Bug report 969243 opened
+      !EX_UTest
       ! Test FieldDataMap Print
       !call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Print FieldDataMap Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Print FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 
@@ -149,16 +148,13 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(horzRelloc.eq.ESMF_CELL_UNDEFINED), &
             name, failMsg, result, ESMF_SRCLINE)
 
-
-
       !------------------------------------------------------------------------
-      !This code crashes
-      ! Bug report 969243 opened
+      !EX_UTest
       ! Test FieldDataMap Print
-      !call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Print FieldDataMap Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Print FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 
