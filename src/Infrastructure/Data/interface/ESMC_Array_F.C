@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.21 2003/02/15 00:07:11 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.22 2003/02/18 15:04:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,6 +100,7 @@ extern "C" {
           *status = (*ptr)->ESMC_ArrayRedist(*layout, rank_trans, *size_rank_trans,
                                              olddecompids, decompids, *size_decomp,
                                              *RedistArray);
+       printf("redist rc = %d\n", *status);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {

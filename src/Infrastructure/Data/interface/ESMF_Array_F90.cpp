@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.8 2003/02/15 00:08:38 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.9 2003/02/18 15:04:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.8 2003/02/15 00:08:38 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.9 2003/02/18 15:04:57 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -896,13 +896,14 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedist(array, layout, rank_trans, decompids, &
-                                  redistarray, rc)
+      subroutine ESMF_ArrayRedist(array, layout, rank_trans, olddecompids, &
+                                  decompids, redistarray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
       type(ESMF_Layout) :: layout
       integer, dimension(:), intent(in) :: rank_trans
+      integer, dimension(:), intent(in) :: olddecompids
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_Array), intent(in) :: redistarray
       integer, intent(out), optional :: rc
@@ -913,7 +914,6 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !
 !EOP
 ! !REQUIREMENTS:
-  external :: c_ESMC_ArrayRedist
         integer :: status         ! local error status
         logical :: rcpresent      ! did user specify rc?
         integer :: size_rank_trans
@@ -927,13 +927,14 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
           rc = ESMF_FAILURE
         endif
 
-! call c routine to query indexA
+! call c routine to query index
         size_rank_trans = size(rank_trans)
         size_decomp = size(decompids)
         call c_ESMC_ArrayRedist(array, layout, rank_trans, size_rank_trans, &
-                                decompids, size_decomp, redistarray, rc)
+                                olddecompids, decompids, size_decomp, &
+                                redistarray, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_LayoutSetAxisIndex error"
+          print *, "c_ESMC_ArrayRedist returned error"
           return
         endif
 
