@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_ccprotex,v 1.3 2002/10/14 21:53:29 cdeluca Exp $
+# $Id: do_ccprotex,v 1.4 2003/02/27 18:16:03 eschwab Exp $
 #
 #===============================================================================
 # ccprotex
@@ -16,7 +16,11 @@
 # 
 # Process C++ prologue(s) using ProTex.
 #
-# Usage: cprotex <class> <c++ filename>
+# Usage: cprotex [-i] <class> <C++ filename.C>
+#
+#        [-i] is an optional argument to protex to cause printing of !BOPI
+#             prologues, which are intended for Reference Manuals but not
+#             User Guides.
 #
 #        <class> is the name of the class whose definition/methods
 #               are instrumented for ProTeX (e.g., ESMC_TimeInstant)
@@ -28,14 +32,21 @@
 # http://dao.gsfc.nasa.gov/software/protex
 # for a description of the command-line options used in this script.
 # 
-# E. Schwab                                                       July 23, 2002
 #===============================================================================
 
-if ($#argv != 2 ) then
-  echo "Usage: ccprotex <class> <C++_filename.C>"
+if ($#argv < 2 ) then
+  echo "Usage: ccprotex [-i] <class> <C++_filename.C>"
   exit
 else
+  if ($#argv == 3 && $1 == '-i') then
+    set option=$1
+    set fnsuffix='cciapi.tex'
+    shift
+  else
+    set option=''
+    set fnsuffix='ccapi.tex'
+  endif
   set class=$1
   set file=$2
-  perl $DOC_DIR/templates/protex -bC +f $file > ${class}_ccapi.tex
+  perl $DOC_DIR/templates/protex ${option} -bC +f $file > ${class}_${fnsuffix}
 endif

@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_fprotex,v 1.3 2002/10/14 21:53:31 cdeluca Exp $
+# $Id: do_fprotex,v 1.4 2003/02/27 18:16:02 eschwab Exp $
 #
 #===============================================================================
 # do_fprotex
@@ -16,7 +16,11 @@
 # 
 # Process Fortran prologue(s) using ProTex.
 #
-# Usage: do_fprotex <class> <fortran filename>
+# Usage: do_fprotex [-i] <class> <fortran filename>
+#
+#        [-i] is an optional argument to protex to cause printing of !BOPI
+#             prologues, which are intended for Reference Manuals but not
+#             User Guides.
 #
 #        <class> is the name of the class or module whose functions
 #               are instrumented for ProTeX (e.g., date)
@@ -31,21 +35,19 @@
 # C. DeLuca                                                       March 15, 2001
 #===============================================================================
 
-if ($#argv != 2 ) then
-  echo "Usage: do_fprotex <class> <fortran_filename.F[90]>"
+if ($#argv < 2 ) then
+  echo "Usage: do_fprotex [-i] <class> <fortran_filename.F[90]>"
   exit
 else
+  if ($#argv == 3 && $1 == '-i') then
+    set option=$1
+    set fnsuffix='fiapi.tex'
+    shift
+  else
+    set option=''
+    set fnsuffix='fapi.tex'
+  endif
   set class=$1
   set file=$2
-  perl $DOC_DIR/templates/protex -bF +f $file > ${class}_fapi.tex
+  perl $DOC_DIR/templates/protex ${option} -bF +f $file > ${class}_${fnsuffix}
 endif
-
-
-
-
-
-
-
-
-
-
