@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.1 2003/05/21 18:33:11 pwjones Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.2 2003/06/11 23:08:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.1 2003/05/21 18:33:11 pwjones Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.2 2003/06/11 23:08:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -69,8 +69,8 @@
       interface ESMF_RegridConstructNearNbr
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridConstructFromFieldNearNbr
-         module procedure ESMF_RegridConstructFromBundleNearNbr
+         module procedure ESMF_RegridConsByFieldNearNbr
+         module procedure ESMF_RegridConsByBundleNearNbr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry to the Regrid construct methods 
@@ -89,14 +89,14 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridConstructFromFieldNearNbr - Constructs nearest-neighbor Regrid structure for a field pair
+! !IROUTINE: ESMF_RegridConsByFieldNearNbr - Constructs nearest-neighbor Regrid structure for a field pair
 
 ! !INTERFACE:
-      function ESMF_RegridConstructFromFieldNearNbr(src_field, dst_field, &
+      function ESMF_RegridConsByFieldNearNbr(src_field, dst_field, &
                                                     name, num_nbrs, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_RegridType) :: ESMF_RegridConstructFromFieldNearNbr
+      type(ESMF_RegridType) :: ESMF_RegridConsByFieldNearNbr
 !
 ! !ARGUMENTS:
 
@@ -142,16 +142,16 @@
          tot_dst_DEs,      &! total num DEs in destination grid distribution
          tot_src_DEs,      &! total num DEs in source      grid distribution
          loc_dst_DEs,      &! num of local DEs in dest   distribution
-         loc_src_DEs       &! num of local DEs in source distribution
+         loc_src_DEs,      &! num of local DEs in source distribution
          nx_src,           &! dimension size of local DE in i-direction
          ny_src,           &! dimension size of local DE in j-direction
          noverlap_src_DEs, &! num overlapping source DEs
          ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
-         jb_dst, je_dst    &! beg, end of exclusive domain in j-dir of dest grid
+         jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
          status             ! error flag
 
-      integer, dimension(:,:), allocatable :: &
-         src_add,          &! src neighbor addresses (nnbr,3)
+      integer, dimension(:,3), allocatable :: &
+         src_add            ! src neighbor addresses (nnbr,3)
 
       integer, dimension(3) :: &
          dst_add            ! address in dest grid (i,j,DE)
@@ -165,7 +165,7 @@
          x1, y1,           &! dst grid x,y coordinates
          x2, y2             ! src grid x,y coordinates
 
-      real (r8), dimension(:,:,:), allocatable :: &
+      real (ESMF_IKIND_R8), dimension(:,:,:), allocatable :: &
          src_center_x,      &! cell center x-coord for gathered source grid
          src_center_y        ! cell center y-coord for gathered source grid
 
@@ -176,18 +176,18 @@
       rc = ESMF_SUCCESS
       status = ESMF_SUCCESS
 
-      call ESMF_RegridConstructEmpty(ESMF_RegridConstructFromFieldNearNbr, status)
+      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldNearNbr, status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
 
       !
       ! Set name and field pointers
       !
       
-      call ESMF_RegridTypeSet(ESMF_RegridConstructFromFieldNearNbr,          &
-                              name=name, src_field = src_field,               &
-                                         dst_field = dst_field,               &
+      call ESMF_RegridTypeSet(ESMF_RegridConsByFieldNearNbr,          &
+                              name=name, src_field = src_field,       &
+                                         dst_field = dst_field,       &
                                          method = ESMF_RegridMethod_NearNbr, &
-                                         status)
+                                         rc = status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
       
       !
@@ -352,7 +352,7 @@
       !               if (src_add(inbr,1) /= 0) then
       !                  wgtstmp(1) = weights(inbr)/dist_tot
       !                  call ESMF_RegridAddLink(&
-      !                           ESMF_RegridConstructFromFieldNearNbr, &
+      !                           ESMF_RegridConsByFieldNearNbr, &
       !                           src_add, dst_add, wgtstmp(1), rc)
       !               endif
       !            end do
@@ -366,18 +366,18 @@
       !deallocate(src_center_x, src_center_y)
       !deallocate(src_add, weights, wgtstmp)
       
-      end subroutine ESMF_RegridConstructFromFieldNearNbr
+      end function ESMF_RegridConsByFieldNearNbr
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridConstructFromBundleNearNbr - Constructs nearest-neighbor Regrid structure for a bundle pair
+! !IROUTINE: ESMF_RegridConsByBundleNearNbr - Constructs nearest-neighbor Regrid structure for a bundle pair
 
 ! !INTERFACE:
-      function ESMF_RegridConstructFromBundleNearNbr(src_bundle, dst_bundle, &
+      function ESMF_RegridConsByBundleNearNbr(src_bundle, dst_bundle, &
                                                       name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_RegridType) :: ESMF_RegridConstructFromBundleNearNbr
+      type(ESMF_RegridType) :: ESMF_RegridConsByBundleNearNbr
 !
 ! !ARGUMENTS:
 
@@ -413,7 +413,7 @@
 
       !TODO: Insert code here
  
-      end subroutine ESMF_RegridConstructFromBundleNearNbr
+      end function ESMF_RegridConsByBundleNearNbr
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.4 2003/06/11 23:08:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,21 +63,21 @@
       private
         type (ESMF_Base) :: base
 
-        type (ESMF_Bundle), pointer :: & ! if created with bundle pair
-           src_bundle,   &! pointer to source field bundle
-           dst_bundle     ! pointer to destination field bundle
+        type (ESMF_BundleType), pointer :: & ! if created with bundle pair
+           src_bundlep,   &! pointer to source field bundle
+           dst_bundlep     ! pointer to destination field bundle
 
-        type (ESMF_Field), pointer :: & ! if created with field pair
-           src_field,    &! pointer to source grid
-           dst_field      ! pointer to destination grid
+        type (ESMF_FieldType), pointer :: & ! if created with field pair
+           src_fieldp,    &! pointer to source grid
+           dst_fieldp      ! pointer to destination grid
 
         integer ::       &
-           method        &! method used for this regridding
+           method,       &! method used for this regridding
            num_links      ! number of unique links between grids
 
         type (ESMF_Array), pointer :: &
            src_add,      &! addresses of source field for regrid operation
-           dst_add       &! addresses of destination field for regrid op
+           dst_add        ! addresses of destination field for regrid op
 
         type (ESMF_Array), pointer :: &
            weights        ! array of weights for performing the
@@ -87,6 +87,31 @@
            gather             ! pre-stored communication patterns necessary for
                               ! doing data motion required for regrid
       end type
+
+
+!------------------------------------------------------------------------------
+! !PUBLIC DATA MEMBERS:
+!
+  
+      integer, parameter, public ::       &! supported regrid methods
+         ESMF_RegridMethod_none     =  0, &! no regridding or undefined regridding
+         ESMF_RegridMethod_Bilinear =  1, &! bilinear (logically-rect grids)
+         ESMF_RegridMethod_Bicubic  =  2, &! bicubic  (logically-rect grids)
+         ESMF_RegridMethod_Conserv1 =  3, &! 1st-order conservative
+         ESMF_RegridMethod_Conserv2 =  4, &! 2nd-order conservative
+         ESMF_RegridMethod_Raster   =  5, &! regrid by rasterizing domain
+         ESMF_RegridMethod_NearNbr  =  6, &! nearest-neighbor dist-weighted avg
+         ESMF_RegridMethod_Fourier  =  7, &! Fourier transform
+         ESMF_RegridMethod_Legendre =  8, &! Legendre transform
+         ESMF_RegridMethod_Index    =  9, &! index-space regridding (shift, stencil)
+         ESMF_RegridMethod_Linear   = 10, &! linear for 1-d regridding
+         ESMF_RegridMethod_Spline   = 11, &! cubic spline for 1-d regridding
+         ESMF_RegridMethod_Copy     = 51, &! copy existing regrid
+         ESMF_RegridMethod_Shift    = 52, &! shift addresses of existing regrid
+         ESMF_RegridMethod_Adjoint  = 53, &! create adjoint of existing regrid
+         ESMF_RegridMethod_File     = 89, &! read a regrid from a file
+         ESMF_RegridMethod_User     = 90   ! user-supplied method
+
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -107,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.3 2003/05/07 04:34:31 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.4 2003/06/11 23:08:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -268,16 +293,16 @@
 
       ! Get bundles if requested
       if (present(src_bundle)) then
-         if (associated(regrid%src_bundle)) then
-            src_bundle = regrid%src_bundle
+         if (associated(regrid%src_bundlep)) then
+            src_bundle%btypep => regrid%src_bundlep
          else
             print *,'ERROR in RegridTypeGet: requested non-existent bundle'
             status = ESMF_FAILURE
          endif
       endif
       if (present(dst_bundle)) then
-         if (associated(regrid%dst_bundle)) then
-            dst_bundle = regrid%dst_bundle
+         if (associated(regrid%dst_bundlep)) then
+            dst_bundle%btypep => regrid%dst_bundlep
          else
             print *,'ERROR in RegridTypeGet: requested non-existent bundle'
             status = ESMF_FAILURE
@@ -286,16 +311,16 @@
 
       ! Get fields if requested
       if (present(src_field)) then
-         if (associated(regrid%src_field)) then
-            src_field = regrid%src_field
+         if (associated(regrid%src_fieldp)) then
+            src_field%ftypep => regrid%src_fieldp
          else
             print *,'ERROR in RegridTypeGet: requested non-existent field'
             status = ESMF_FAILURE
          endif
       endif
       if (present(dst_field)) then
-         if (associated(regrid%dst_field)) then
-            dst_field = regrid%dst_field
+         if (associated(regrid%dst_fieldp)) then
+            dst_field%ftypep => regrid%dst_fieldp
          else
             print *,'ERROR in RegridTypeGet: requested non-existent field'
             status = ESMF_FAILURE
@@ -319,10 +344,10 @@
       subroutine ESMF_RegridTypeSet(regrid, name,            &
                                     src_bundle, dst_bundle,  &
                                     src_field,  dst_field,   &
-                                    method, num_links , gather, rc)
+                                    method, num_links, gather, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RegridType), intent(in) :: regrid
+      type(ESMF_RegridType), intent(inout) :: regrid
 
       character (*),      intent(in), optional :: name
       type (ESMF_Bundle), intent(in), optional :: src_bundle, dst_bundle
@@ -377,17 +402,17 @@
       
       ! Set name if requested
       if (present(name)) then
-         call ESMF_SetName(regrid%base, name, stat)
+         call ESMF_SetName(regrid%base, name, "Regrid", stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
       ! Set bundles if requested
-      if (present(src_bundle)) regrid%src_bundle => src_bundle
-      if (present(dst_bundle)) regrid%dst_bundle => dst_bundle
+      if (present(src_bundle)) regrid%src_bundlep => src_bundle%btypep
+      if (present(dst_bundle)) regrid%dst_bundlep => dst_bundle%btypep
       
       ! Set fields if requested
-      if (present(src_field)) regrid%src_field => src_field
-      if (present(dst_field)) regrid%dst_field => dst_field
+      if (present(src_field)) regrid%src_fieldp => src_field%ftypep
+      if (present(dst_field)) regrid%dst_fieldp => dst_field%ftypep
       
       ! get method or number of links
       if (present(method)) regrid%method = method
@@ -428,10 +453,10 @@
 
         ! nullify pointers
       
-        nullify(regrid%src_bundle)
-        nullify(regrid%dst_bundle)
-        nullify(regrid%src_field)
-        nullify(regrid%dst_field)
+        nullify(regrid%src_bundlep)
+        nullify(regrid%dst_bundlep)
+        nullify(regrid%src_fieldp)
+        nullify(regrid%dst_fieldp)
         nullify(regrid%src_add)
         nullify(regrid%dst_add)
         nullify(regrid%weights)
@@ -476,12 +501,12 @@
 ! !REQUIREMENTS:
 
 !       if created with bundles, nullify bundle pointer
-        if (associated(src_bundle)) nullify(src_bundle)
-        if (associated(dst_bundle)) nullify(dst_bundle)
+        if (associated(regrid%src_bundlep)) nullify(regrid%src_bundlep)
+        if (associated(regrid%dst_bundlep)) nullify(regrid%dst_bundlep)
 
 !       if created with fields, nullify field pointers
-        if (associated(src_field)) nullify(src_field)
-        if (associated(dst_field)) nullify(dst_field)
+        if (associated(regrid%src_fieldp)) nullify(regrid%src_fieldp)
+        if (associated(regrid%dst_fieldp)) nullify(regrid%dst_fieldp)
 
         regrid%method    = ESMF_RegridMethod_none
         regrid%num_links = 0

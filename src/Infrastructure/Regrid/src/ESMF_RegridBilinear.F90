@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.4 2003/05/21 18:33:11 pwjones Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.5 2003/06/11 23:08:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.4 2003/05/21 18:33:11 pwjones Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.5 2003/06/11 23:08:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -67,8 +67,8 @@
       interface ESMF_RegridConstructBilinear
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridConstructFromFieldBilinear
-         module procedure ESMF_RegridConstructFromBundleBilinear
+         module procedure ESMF_RegridConsByFieldBilinear
+         module procedure ESMF_RegridConsByBundleBilinear
 
 ! !DESCRIPTION:
 !     This interface provides a single entry to the Regrid construct methods 
@@ -87,14 +87,14 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridConstructFromFieldBilinear - Constructs bilinear Regrid structure for a field pair
+! !IROUTINE: ESMF_RegridConsByFieldBilinear - Constructs bilinear Regrid structure for a field pair
 
 ! !INTERFACE:
-      function ESMF_RegridConstructFromFieldBilinear(src_field, dst_field, &
+      function ESMF_RegridConsByFieldBilinear(src_field, dst_field, &
                                                      name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_RegridType) :: ESMF_RegridConstructFromFieldBilinear
+      type(ESMF_RegridType) :: ESMF_RegridConsByFieldBilinear
 !
 ! !ARGUMENTS:
 
@@ -135,19 +135,19 @@
          tot_dst_DEs,      &! total num DEs in destination grid distribution
          tot_src_DEs,      &! total num DEs in source      grid distribution
          loc_dst_DEs,      &! num of local DEs in dest   distribution
-         loc_src_DEs       &! num of local DEs in source distribution
+         loc_src_DEs,      &! num of local DEs in source distribution
          nx_src,           &! dimension size of local DE in i-direction
          ny_src,           &! dimension size of local DE in j-direction
          noverlap_src_DEs, &! num overlapping source DEs
          ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
-         jb_dst, je_dst    &! beg, end of exclusive domain in j-dir of dest grid
+         jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
          status             ! error flag
 
       integer, dimension(3) :: &
          src_add,          &! address in gathered source grid (i,j,DE)
          dst_add            ! address in dest grid (i,j,DE)
          
-      real (r8) ::
+      real (ESMF_IKIND_R8) ::  &
          lon_thresh,    &! threshold for checking longitude crossing
          lon_cycle,     &! 360 for degrees, 2pi for radians
          dx1, dx2, dx3, &! differences for iterative scheme
@@ -159,7 +159,7 @@
          determinant     ! determinant of above matrix
          
 
-      real (r8), dimension(4) ::     &
+      real (ESMF_IKIND_R8), dimension(4) ::     &
          src_DE_bbox,  &! bounding box for domain on the source DE
          dst_DE_bbox,  &! bounding box for domain on the destination DE
          corner_x,     &! x coordinate of bilinear box corners
@@ -170,15 +170,15 @@
          src_DE_overlap,    &! array to use for determining overlapping DEs
          src_DE_gather       ! array to keep track of source DEs to gather up
 
-      real (r8), dimension(:,:,:), allocatable :: &
+      real (ESMF_IKIND_R8), dimension(:,:,:), allocatable :: &
          src_center_x,      &! cell center x-coord for gathered source grid
          src_center_y        ! cell center y-coord for gathered source grid
 
       integer, parameter :: &
          max_iter = 100   ! max iteration count for i,j iteration
 
-      real (r8), parameter :: &
-         converge = 1.e-10_r8  ! convergence criterion
+      real (ESMF_IKIND_R8), parameter :: &
+         converge = 1.e-10  ! convergence criterion
 
 !
 !     Construct an empty regrid structure
@@ -187,18 +187,18 @@
       rc = ESMF_SUCCESS
       status = ESMF_SUCCESS
 
-      call ESMF_RegridConstructEmpty(ESMF_RegridConstructFromFieldBilinear, status)
+      call ESMF_RegridConsEmpty(ESMF_RegridConsByFieldBilinear, status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
 
       !
       ! Set name and field pointers
       !
       
-      call ESMF_RegridTypeSet(ESMF_RegridConstructFromFieldBilinear,          &
+      call ESMF_RegridTypeSet(ESMF_RegridConsByFieldBilinear,          &
                               name=name, src_field = src_field,               &
                                          dst_field = dst_field,               &
                                          method = ESMF_RegridMethod_Bilinear, &
-                                         status)
+                                         rc=status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
       
       !
@@ -569,7 +569,7 @@
         !             src_add(2) = jjj
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             ESMF_RegridConsByFieldBilinear, &
         !                             src_add, dst_add, weights(1), rc)
         !          endif
         !          if (src_mask(ip1,jjj)) then
@@ -580,7 +580,7 @@
         !             src_add(2) = jjj
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             ESMF_RegridConsByFieldBilinear, &
         !                             src_add, dst_add, weights(2), rc)
         !          endif
         !          if (src_mask(ip1,jp1)) then
@@ -591,7 +591,7 @@
         !             src_add(2) = jp1
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             ESMF_RegridConsByFieldBilinear, &
         !                             src_add, dst_add, weights(3), rc)
         !          endif
         !          if (src_mask(iii,jp1)) then
@@ -602,7 +602,7 @@
         !             src_add(2) = jp1
         !             src_add(3) = src_DEid
         !             call ESMF_RegridAddLink(                               &
-        !                             ESMF_RegridConstructFromFieldBilinear, &
+        !                             ESMF_RegridConsByFieldBilinear, &
         !                             src_add, dst_add, weights(4), rc)
         !          endif
 
@@ -616,18 +616,18 @@
       
       !deallocate(src_center_x, src_center_y)
       
-      end subroutine ESMF_RegridConstructFromFieldBilinear
+      end function ESMF_RegridConsByFieldBilinear
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridConstructFromBundleBilinear - Constructs bilinear Regrid structure for a bundle pair
+! !IROUTINE: ESMF_RegridConsByBundleBilinear - Constructs bilinear Regrid structure for a bundle pair
 
 ! !INTERFACE:
-      function ESMF_RegridConstructFromBundleBilinear(src_bundle, dst_bundle, &
+      function ESMF_RegridConsByBundleBilinear(src_bundle, dst_bundle, &
                                                       name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_RegridType) :: ESMF_RegridConstructFromBundleBilinear
+      type(ESMF_RegridType) :: ESMF_RegridConsByBundleBilinear
 !
 ! !ARGUMENTS:
 
@@ -662,7 +662,7 @@
 
       !TODO: Insert code here
  
-      end subroutine ESMF_RegridConstructFromBundleBilinear
+      end function ESMF_RegridConsByBundleBilinear
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.14 2003/05/21 18:33:11 pwjones Exp $
+! $Id: ESMF_Regrid.F90,v 1.15 2003/06/11 23:08:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,34 +99,13 @@
       public ESMF_RegridValidate   ! Error checking and validation
       public ESMF_RegridPrint      ! Prints various regrid info
 
-!------------------------------------------------------------------------------
-! !PUBLIC DATA MEMBERS:
-!
-      integer, parameter, public ::       &! supported regrid methods
-         ESMF_RegridMethod_none     =  0, &! no regridding or undefined regridding
-         ESMF_RegridMethod_Bilinear =  1, &! bilinear (logically-rect grids)
-         ESMF_RegridMethod_Bicubic  =  2, &! bicubic  (logically-rect grids)
-         ESMF_RegridMethod_Conserv1 =  3, &! 1st-order conservative
-         ESMF_RegridMethod_Conserv2 =  4, &! 2nd-order conservative
-         ESMF_RegridMethod_Raster   =  5, &! regrid by rasterizing domain
-         ESMF_RegridMethod_NearNbr  =  6, &! nearest-neighbor dist-weighted avg
-         ESMF_RegridMethod_Fourier  =  7, &! Fourier transform
-         ESMF_RegridMethod_Legendre =  8, &! Legendre transform
-         ESMF_RegridMethod_Index    =  9, &! index-space regridding (shift, stencil)
-         ESMF_RegridMethod_Linear   = 10, &! linear for 1-d regridding
-         ESMF_RegridMethod_Spline   = 11, &! cubic spline for 1-d regridding
-         ESMF_RegridMethod_Copy     = 51, &! copy existing regrid
-         ESMF_RegridMethod_Shift    = 52, &! shift addresses of existing regrid
-         ESMF_RegridMethod_Adjoint  = 53, &! create adjoint of existing regrid
-         ESMF_RegridMethod_File     = 89, &! read a regrid from a file
-         ESMF_RegridMethod_User     = 90   ! user-supplied method
 
 !
 !EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.14 2003/05/21 18:33:11 pwjones Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.15 2003/06/11 23:08:29 nscollins Exp $'
 
 !==============================================================================
 !
@@ -241,7 +220,7 @@
 
       integer :: stat = ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type (ESMF_RegridType) :: regrid
+      type (ESMF_RegridType), pointer :: regrid
       character (*) :: regrid_name
 
 !     Initialize return code
@@ -390,7 +369,7 @@
 
       integer :: stat = ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type (ESMF_RegridType) :: regrid
+      type (ESMF_RegridType), pointer :: regrid
       character (*) :: regrid_name
 
 !     Initialize return code
@@ -535,7 +514,7 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_RegridType) :: regrid     ! New regrid
+      type(ESMF_RegridType), pointer :: regrid     ! New regrid
       integer :: status=ESMF_FAILURE      ! Error status
       logical :: rcpresent=.FALSE.        ! Return code present
 
@@ -582,7 +561,7 @@
 ! !ARGUMENTS:
 
       type (ESMF_Field), intent(in) :: &
-         src_field,           ! field to be regridded
+         src_field            ! field to be regridded
          
       type (ESMF_Regrid), intent(in) :: &
          regrid               ! precomputed regrid structure with
@@ -637,7 +616,7 @@
 ! !ARGUMENTS:
 
       type (ESMF_Bundle), intent(in) :: &
-         src_bundle,           ! bundle of fields to be regridded
+         src_bundle            ! bundle of fields to be regridded
          
       type (ESMF_Regrid), intent(in) :: &
          regrid               ! precomputed regrid structure with
@@ -821,41 +800,41 @@
       
       ! Get name if requested
       if (present(name)) then
-         call ESMF_RegridTypeGet(regrid%ptr, name=name, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, name=name, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
       ! Get bundles if requested
       if (present(src_bundle)) then
-         call ESMF_RegridTypeGet(regrid%ptr, src_bundle=src_bundle, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, src_bundle=src_bundle, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
       if (present(dst_bundle)) then
-         call ESMF_RegridTypeGet(regrid%ptr, dst_bundle=dst_bundle, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, dst_bundle=dst_bundle, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
       ! Get fields if requested
       if (present(src_field)) then
-         call ESMF_RegridTypeGet(regrid%ptr, src_field=src_field, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, src_field=src_field, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
       if (present(dst_field)) then
-         call ESMF_RegridTypeGet(regrid%ptr, dst_field=dst_field, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, dst_field=dst_field, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
       ! get method or number of links or gather route
       if (present(method)) then
-         call ESMF_RegridTypeGet(regrid%ptr, method=method, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, method=method, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
       if (present(num_links)) then
-         call ESMF_RegridTypeGet(regrid%ptr, num_links=num_links, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, num_links=num_links, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
       if (present(gather)) then
-         call ESMF_RegridTypeGet(regrid%ptr, gather=gather, stat)
+         call ESMF_RegridTypeGet(regrid%ptr, gather=gather, rc=stat)
          if (stat /= ESMF_SUCCESS) status = ESMF_FAILURE
       endif
 
@@ -900,7 +879,8 @@
 
 !     Call destruct method to free up internally-allocated memory
 
-      call ESMF_RegridDestruct(regrid%ptr, status)
+      ! write one first
+      !call ESMF_RegridDestruct(regrid%ptr, status)
       if (status /= ESMF_SUCCESS) then
         ! Use error function eventually...
         print *, "ERROR in ESMF_RegridDestroy: Regrid destruct"
