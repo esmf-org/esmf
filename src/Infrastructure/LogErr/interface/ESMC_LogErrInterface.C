@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.10 2003/07/01 22:14:42 rstaufer Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.11 2003/07/01 22:25:56 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,10 +113,10 @@ void FTN(esmf_logopenfile)(ESMC_Log *aLog, int *numFiles, char name[],
 //
 // !DESCRIPTION:
 //  This routine allows the user to write miscellaneous information the
-//  {\tt ESMF\_Log} file. It uses a printf style character descriptor, e.g. 
-//  {\tt ESMF\_LogInfo}(aLog,"Hi there, %s ", shep), where shep here would be
+//  {\tt ESMC\_Log} file. It uses a printf style character descriptor, e.g. 
+//  {\tt ESMC\_LogInfo}(aLog,"Hi there, %s ", shep), where shep here would be
 //  a character string. The routine takes a variable number of arguments,
-//  so that any number of data items can be written to the {\tt ESMF\_Log} file.
+//  so that any number of data items can be written to the {\tt ESMC\_Log} file.
 //  Currently, only character, strings, integers, and reals are supported.
 //  However, field widths, precisions, and flags are ignored.
 //
@@ -232,8 +232,8 @@ void FTN(esmf_logwarnmsg_ln)(ESMC_Log *aLog,int *errCode, int *line,
                              char file[], char dir[], char msg[],
                              int filelen, int dirlen, int msglen)
 // !DESCRIPTION
-//    This routine is called by {\tt ESMF\_LogWarnMsg (defined in ESMF_LogErr.F90).  
-//    {\tt ESMF\_LogWarnMsg_Ln} calls the C++ method that actually writes the warning.
+//    This routine is called by {\tt ESMC\_LogWarnMsg (defined in ESMF_LogErr.F90).  
+//    {\tt ESMC\_LogWarnMsg_Ln} calls the C++ method that actually writes the warning.
 //
 //EOP
 //----------------------------------------------------------------------------------------------
@@ -282,8 +282,8 @@ void FTN(esmf_logwarnmsg_ln)(ESMC_Log *aLog,int *errCode, int *line,
 void FTN(esmf_logwarn_ln)(ESMC_Log *aLog, int *errCode, int *line,
                           char file[], char dir[], int filelen, int dirlen)
 // !DESCRIPTION
-//    This routine is called by {\tt ESMF\_LogWarn} (defined in ESMF_LogErr.F90).  
-//    {\tt ESMF\_LogWarn_Ln} calls the C++ method that actually writes the warning.
+//    This routine is called by {\tt ESMC\_LogWarn} (defined in ESMF_LogErr.F90).  
+//    {\tt ESMC\_LogWarn_Ln} calls the C++ method that actually writes the warning.
 //
 //EOP
 //-------------------------------------------------------------------------
@@ -410,7 +410,7 @@ void FTN(esmf_lognotverbose)(ESMC_Log* aLog)
 //
 // !DESCRIPTION:
 //    This function called from with a Fortran write statement, e.g.
-//    write(LogWrite(aLog),*)"Hi".  The {\tt ESMF\_LogWrite} function appends some
+//    write(LogWrite(aLog),*)"Hi".  The {\tt ESMC\_LogWrite} function appends some
 //    header information (time,date etc.) to what ever is printed out
 //    from the write, e.g. Hi.
 //EOP
@@ -430,8 +430,8 @@ void FTN(esmf_logerrmsg_ln)(ESMC_Log *aLog, int *errCode, int *line,
                             char file[], char dir[], char msg[], 
                             int filelen, int dirlen, int msglen)
 // !DESCRIPTION
-//    This routine is called by {\tt ESMF\_LogErrMsg} (defined in ESMF_LogErr.F90).  
-//    {\tt ESMF\_LogErrMsg_Ln} calls the C++ method that actually writes the warning.
+//    This routine is called by {\tt ESMC\_LogErrMsg} (defined in ESMF_LogErr.F90).  
+//    {\tt ESMC\_LogErrMsg_Ln} calls the C++ method that actually writes the warning.
 //
 //EOP
 //----------------------------------------------------------------------------------------------
@@ -479,8 +479,8 @@ void FTN(esmf_logerrmsg_ln)(ESMC_Log *aLog, int *errCode, int *line,
 void FTN(esmf_logerr_ln)(ESMC_Log *aLog, int *errCode, int *line, 
                          char file[], char dir[], int filelen, int dirlen)
 // !DESCRIPTION
-//    This routine is called by {\tt ESMF\_LogErr} (defined in ESMF_LogErr.F90).  
-//    {\tt ESMF\_LogErr_Ln} calls the C++ method that actually writes the warning.
+//    This routine is called by {\tt ESMC\_LogErr} (defined in ESMF_LogErr.F90).  
+//    {\tt ESMC\_LogErr_Ln} calls the C++ method that actually writes the warning.
 //
 //EOP
 //----------------------------------------------------------------------------------------------
@@ -523,8 +523,8 @@ void FTN(esmf_logerr_ln)(ESMC_Log *aLog, int *errCode, int *line,
 //    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
-//    This routine calls a {\tt ESMF\_Log} method that sets a flag to stop execution on
-//    reaching an error. This is the default behavior of the {\tt ESMF\_Log} class.
+//    This routine calls a {\tt ESMC\_Log} method that sets a flag to stop execution on
+//    reaching an error. This is the default behavior of the {\tt ESMC\_Log} class.
 //EOP
 //--------------------------------------------------------------------------
 void FTN(esmf_loghaltonerr)(ESMC_Log* aLog) 
@@ -544,7 +544,7 @@ void FTN(esmf_loghaltonerr)(ESMC_Log* aLog)
 //    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
-//    This routine calls a {\tt ESMF\_Log} method that sets a flag to prevent the program
+//    This routine calls a {\tt ESMC\_Log} method that sets a flag to prevent the program
 //    from stopping reaching an error. 
 //EOP
 //--------------------------------------------------------------------------
@@ -565,7 +565,7 @@ void FTN(esmf_lognothaltonerr)(ESMC_Log* aLog)
 //    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
-//    This routine calls a {\tt ESMF\_Log} method that sets a flag to stop execution on
+//    This routine calls a {\tt ESMC\_Log} method that sets a flag to stop execution on
 //    reaching a warning.
 //EOP
 //--------------------------------------------------------------------------
@@ -586,7 +586,7 @@ void FTN(esmf_loghaltonwarn)(ESMC_Log* aLog)
 //    typdef(ESMF_Log) :: aLog                                        
 //                              
 // !DESCRIPTION:                              
-//    This routine calls a {\tt ESMF\_Log} method that sets a flag to prevent the program
+//    This routine calls a {\tt ESMC\_Log} method that sets a flag to prevent the program
 //    from stopping reaching an error.                            
 //EOP                                                                           
 //--------------------------------------------------------------------------
