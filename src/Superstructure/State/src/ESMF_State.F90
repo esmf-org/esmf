@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.61 2004/06/14 01:29:43 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.62 2004/06/14 13:52:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.61 2004/06/14 01:29:43 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.62 2004/06/14 13:52:54 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1578,7 +1578,7 @@ end function
         call ESMF_StateConstruct(stypep, stateName, statetype, &
                    bundleList, fieldList, arrayList, nestedStateList, &
                    nameList, itemCount, &
-                   neededflag, readyflag, validflag, reqforrestartflag, rc)
+                   neededflag, readyflag, validflag, reqforrestartflag, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1820,9 +1820,6 @@ end function
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
           if (.not. exists) then
               print errmsg, "no nested state named", trim(nestedStateName), "found"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -1845,9 +1842,6 @@ end function
 
       exists = ESMF_StateClassFindData(top%statep, arrayName, .true., &
                                                           dataitem, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
       if (.not. exists) then
           print errmsg, "no Array found named", trim(arrayName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2496,9 +2490,6 @@ end function
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
           if (.not. exists) then
               print errmsg, "no nested state named", trim(nestedStateName), "found"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2521,9 +2512,6 @@ end function
 
       exists = ESMF_StateClassFindData(top%statep, bundleName, .true., &
                                                           dataitem, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
       if (.not. exists) then
           print errmsg, "no Bundle found named", trim(bundleName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -2608,9 +2596,6 @@ end function
       if (present(nestedStateName)) then
           exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                           dataitem, rc=localrc)
-          if (ESMF_LogMsgFoundError(localrc, &
-                                    ESMF_ERR_PASSTHRU, &
-                                    ESMF_CONTEXT, rc)) return
           if (.not. exists) then
               print errmsg, "no nested state named", trim(nestedStateName), "found"
               dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, &
@@ -2633,9 +2618,6 @@ end function
 
       exists = ESMF_StateClassFindData(top%statep, fieldName, .true., &
                                                           dataitem, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
       if (.not. exists) then
           print errmsg, "no Field found named", trim(fieldName)
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -2801,9 +2783,6 @@ end function
 
       exists = ESMF_StateClassFindData(state%statep, itemName, .true., &
                                       dataitem, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
       if (.not. exists) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(itemName), &
                                      ESMF_CONTEXT, rc)
@@ -2865,9 +2844,6 @@ end function
 
       exists = ESMF_StateClassFindData(state%statep, nestedStateName, .true., &
                                                          dataitem, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
       if (.not. exists) then
           print errmsg, "no nested state named", trim(nestedStateName), "found"
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, &
@@ -2942,7 +2918,7 @@ end function
                                       dataitem, rc=localrc)
       if (.not. exists) then
           dummy=ESMF_LogMsgFoundError(localrc, &
-                                      ESMF_ERR_PASSTHRU, &
+                                      "Item by that name not found", &
                                       ESMF_CONTEXT, rc)
           return
       endif
@@ -3001,13 +2977,14 @@ end function
        ! TODO: Add code here
        ! print num of states, state type, etc
 
-     !jw  write(msgbuf,*) "StatePrint: "  
-     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-       write(*,*) "StatePrint: "  
+       !nsc write(msgbuf,*) "StatePrint: "  
+       !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       print *, "StatePrint: "  
        if (.not.associated(state%statep)) then 
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                 "Uninitialized or already destroyed State", &
-                                  ESMF_CONTEXT, rc)) return
+           !nsc if (ESMF_LogWrite("Uninitialized or already destroyed State", &
+           !nsc                   ESMF_LOG_INFO)) return
+           print *, "Uninitialized or already destroyed State"
+           return
        endif
        sp => state%statep
 
@@ -3015,28 +2992,25 @@ end function
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-     !jw  if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) "  Import State"
-     !jw  if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) "  Export State"
-     !jw  if (sp%st .eq. ESMF_STATE_LIST) write(msgbuf, *) "  State List"
-       if (sp%st .eq. ESMF_STATE_IMPORT) write(*, *) "  Import State"
-       if (sp%st .eq. ESMF_STATE_EXPORT) write(*, *) "  Export State"
-       if (sp%st .eq. ESMF_STATE_LIST) write(*, *) "  State List"
+       if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) "  Import State"
+       if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) "  Export State"
+       if (sp%st .eq. ESMF_STATE_LIST)   write(msgbuf, *) "  State List"
        if (sp%st .eq. ESMF_STATE_INVALID) then
-           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                 "Uninitialized or already destroyed State", &
-                                  ESMF_CONTEXT, rc)) return
+           if (ESMF_LogWrite("Uninitialized or already destroyed State", &
+                             ESMF_LOG_INFO)) return
        endif
-     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-     !jw  write(msgbuf, *) "  Number of members: ", sp%datacount
-     !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-       write(*, *) "  Number of members: ", sp%datacount
+       !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       print *, trim(msgbuf)
+       !nsc write(msgbuf, *) "  Number of members: ", sp%datacount
+       !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       print *, "  Number of members: ", sp%datacount
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
-     !jw    write(msgbuf, *) "  Item ", i, ":"
-     !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-         write(*, *) "  Item ", i, ":"
+         !nsc write(msgbuf, *) "  Item ", i, ":"
+         !nsc if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+         print *, "  Item ", i, ":"
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
          select case (dp%otype%ot)
@@ -3063,8 +3037,8 @@ end function
              outbuf = trim(outbuf) //  " marked as NOT needed."
          end select
 
-      !jw  if (ESMF_LogWrite(outbuf, ESMF_LOG_INFO)) continue
-        write(*,*) outbuf
+        !nsc if (ESMF_LogWrite(outbuf, ESMF_LOG_INFO)) continue
+        print *, trim(outbuf)
 
         ! TODO: finish printing more info here
         !type(ESMF_ReadyFlag) :: ready
@@ -3758,7 +3732,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       integer :: localrc                  ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
@@ -3800,7 +3774,7 @@ end function
       endif
 
       allocate(atodo(acount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(ESMF_RC_INTNRL_INCONS, &
+      if (ESMF_LogMsgFoundAllocError(localrc, &
                                      "adding Arrays to a State", &
                                      ESMF_CONTEXT, rc)) return
 
@@ -3814,6 +3788,7 @@ end function
       do i=1, acount
 
         call ESMF_ArrayValidate(arrays(i), "", localrc)
+    print *, "array validate returned ", localrc, " to state"
         if (localrc .ne. ESMF_SUCCESS) then
             print errmsg, "item", i
             dummy=ESMF_LogMsgFoundError(localrc, errmsg, &
@@ -3953,7 +3928,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: fname
@@ -3975,6 +3950,15 @@ end function
           return
       endif
       
+      ! make sure sizes are consistent
+      newcount = size(fields)
+      if (fcount .gt. newcount) then
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                      "count must not be >= list length", &
+                                      ESMF_CONTEXT, rc)
+          return
+      endif
+
       ! Add the fields to the state, checking for name clashes
       !  and name placeholders
 
@@ -4151,7 +4135,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
@@ -4517,7 +4501,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       integer :: status                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
@@ -4710,7 +4694,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       integer :: localrc                   ! local error status
       integer :: i, dcount, itemindex
       logical :: itemfound
@@ -4802,7 +4786,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
@@ -4966,7 +4950,7 @@ end function
 !
 !EOPI
 
-#if 0
+#if 1
       type(ESMF_StateItem), dimension(:), pointer :: temp_list
       integer :: i
       integer :: allocsize 
