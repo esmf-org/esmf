@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.45 2004/03/22 20:29:58 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.46 2004/03/22 21:03:44 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -4903,7 +4903,7 @@
       name = 'cell type total'
       call ESMF_PhysGridSetMask(grid%physGrids(physGridId), &
                                 maskArray=arrayTemp, &
-                                maskType=ESMF_GridMaskKind_RegionId, &
+                                maskType=ESMF_GridMaskType_RegionId, &
                                 name=name, rc=status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridSetCellMask: PhysGrid set mask"

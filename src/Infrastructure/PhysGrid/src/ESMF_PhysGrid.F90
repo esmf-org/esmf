@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.67 2004/03/18 22:23:58 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.68 2004/03/22 21:03:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -129,13 +129,13 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_GridMaskKind
+!     ! ESMF_GridMaskType
 !
 !     ! Type to specify kind of region for defined PhysGrid regions.
 
-      type ESMF_GridMaskKind
+      type ESMF_GridMaskType
       sequence
-        integer :: maskKind
+        integer :: maskType
       end type
 
 !------------------------------------------------------------------------------
@@ -149,7 +149,7 @@
       sequence
 !      private
         type (ESMF_Base) :: base  ! ESMF Base class object
-        type (ESMF_GridMaskKind) :: maskType
+        type (ESMF_GridMaskType) :: maskType
                                   ! type of mask
         type (ESMF_Array) :: data ! mask data at each grid point
       end type
@@ -248,7 +248,7 @@
       public ESMF_PhysLocation
       public ESMF_RegionKind
       public ESMF_PhysRegion
-      public ESMF_GridMaskKind
+      public ESMF_GridMaskType
       public ESMF_GridMask
       public ESMF_PhysGridOrientation
       public ESMF_PhysGrid
@@ -325,18 +325,18 @@
       !   Mult      = multiplicative mask
       !   RegionID  = integer assigning unique ID to each point
 
-      type (ESMF_GridMaskKind), parameter, public :: &! types of grid masks
-         ESMF_GridMaskKind_Unknown        = ESMF_GridMaskKind( 0), &
-         ESMF_GridMaskKind_Logical        = ESMF_GridMaskKind( 1), &
-         ESMF_GridMaskKind_Mult           = ESMF_GridMaskKind( 2), &
-         ESMF_GridMaskKind_RegionID       = ESMF_GridMaskKind( 3)
+      type (ESMF_GridMaskType), parameter, public :: &! types of grid masks
+         ESMF_GridMaskType_Unknown        = ESMF_GridMaskType( 0), &
+         ESMF_GridMaskType_Logical        = ESMF_GridMaskType( 1), &
+         ESMF_GridMaskType_Mult           = ESMF_GridMaskType( 2), &
+         ESMF_GridMaskType_RegionID       = ESMF_GridMaskType( 3)
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.67 2004/03/18 22:23:58 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.68 2004/03/22 21:03:45 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -418,7 +418,7 @@
       interface operator (==)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMaskKindEqual
+         module procedure ESMF_GridMaskTypeEqual
          module procedure ESMF_RegionKindEqual
          module procedure ESMF_PhysGridOrientEqual
 
@@ -436,7 +436,7 @@
       interface operator (/=)
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridMaskKindNotEqual
+         module procedure ESMF_GridMaskTypeNotEqual
          module procedure ESMF_RegionKindNotEqual
          module procedure ESMF_PhysGridOrientNotEqual
 
@@ -1425,7 +1425,7 @@
       type(ESMF_Array) :: maskArray
                             ! array containing mask value for each cell
 
-      type(ESMF_GridMaskKind), intent(in) :: maskType
+      type(ESMF_GridMaskType), intent(in) :: maskType
                            ! type of mask (logical, mult, regionID)
 
       character(*), intent(in) :: name ! name to assign to mask
@@ -1448,7 +1448,7 @@
 !     \item[name]
 !          Name to assign to mask.
 !     \item[maskType]
-!          {\tt ESMF\_GridMaskKind} describing type of mask (e.g. logical,
+!          {\tt ESMF\_GridMaskType} describing type of mask (e.g. logical,
 !          multiplicative, region ID).
 !     \item[{[id]}]
 !          Integer id assigned to mask which allows faster access
@@ -2764,19 +2764,19 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridMaskKindEqual - equality of PhysGrid mask types
+! !IROUTINE: ESMF_GridMaskTypeEqual - equality of PhysGrid mask types
 !
 ! !INTERFACE:
-      function ESMF_GridMaskKindEqual(GridMaskKind1, GridMaskKind2)
+      function ESMF_GridMaskTypeEqual(GridMaskType1, GridMaskType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMaskKindEqual
+      logical :: ESMF_GridMaskTypeEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMaskKind), intent(in) :: &
-         GridMaskKind1,      &! Two region types to compare for
-         GridMaskKind2        ! equality
+      type (ESMF_GridMaskType), intent(in) :: &
+         GridMaskType1,      &! Two region types to compare for
+         GridMaskType2        ! equality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid mask types to see if
@@ -2784,33 +2784,33 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[GridMaskKind1, GridMaskKind2]
+!     \item[GridMaskType1, GridMaskType2]
 !          Two mask types to compare for equality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_GridMaskKindEqual = (GridMaskKind1%maskKind == &
-                                GridMaskKind2%maskKind)
+      ESMF_GridMaskTypeEqual = (GridMaskType1%maskType == &
+                                GridMaskType2%maskType)
 
-      end function ESMF_GridMaskKindEqual
+      end function ESMF_GridMaskTypeEqual
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridMaskKindNotEqual - non-equality of PhysGrid mask types
+! !IROUTINE: ESMF_GridMaskTypeNotEqual - non-equality of PhysGrid mask types
 !
 ! !INTERFACE:
-      function ESMF_GridMaskKindNotEqual(GridMaskKind1, GridMaskKind2)
+      function ESMF_GridMaskTypeNotEqual(GridMaskType1, GridMaskType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_GridMaskKindNotEqual
+      logical :: ESMF_GridMaskTypeNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMaskKind), intent(in) :: &
-         GridMaskKind1,      &! Two PhysGrid mask types to compare for
-         GridMaskKind2        ! inequality
+      type (ESMF_GridMaskType), intent(in) :: &
+         GridMaskType1,      &! Two PhysGrid mask types to compare for
+         GridMaskType2        ! inequality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid mask types to see if
@@ -2818,17 +2818,17 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[GridMaskKind1, GridMaskKind2]
+!     \item[GridMaskType1, GridMaskType2]
 !          Two kinds of PhysGrid mask types to compare for inequality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_GridMaskKindNotEqual = (GridMaskKind1%maskKind /= &
-                                   GridMaskKind2%maskKind)
+      ESMF_GridMaskTypeNotEqual = (GridMaskType1%maskType /= &
+                                   GridMaskType2%maskType)
 
-      end function ESMF_GridMaskKindNotEqual
+      end function ESMF_GridMaskTypeNotEqual
 
 !------------------------------------------------------------------------------
 !BOP
