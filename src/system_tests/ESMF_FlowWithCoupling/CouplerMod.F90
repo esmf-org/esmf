@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.2 2004/02/01 13:59:46 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.3 2004/02/13 18:08:36 jwolfe Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -131,7 +131,7 @@
       ! one way of telling.
 
       call ESMF_StateGetName(importstate, statename, rc)
-      if (trim(statename) .eq. "Injector Feedback") then
+      if (trim(statename) .eq. "Injection Feedback") then
           ! Injector to FlowSolver
           injecttoflow = .TRUE.
       else if (trim(statename) .eq. "FlowSolver Feedback") then
