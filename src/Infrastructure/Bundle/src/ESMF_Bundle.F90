@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.44 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.45 2004/06/08 11:59:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2555,28 +2555,32 @@ end function
 !  TODO: code goes here
 !
       character(len=ESMF_MAXSTR) :: bname, fname
+      character(len=ESMF_MAXSTR) :: msgbuf
       type(ESMF_BundleType), pointer :: btype
       type(ESMF_Field) :: field
       integer :: i
       integer :: status
 
-      print *, "Bundle print:"
+      print msgbuf, "Bundle print:"
+      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
 
       btype => bundle%btypep
       call c_ESMC_GetName(btype%base, bname, status)
-      print *, "  Bundle name = ", trim(bname)
+      print msgbuf, "  Bundle name = ", trim(bname)
+      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
     
-      print *, "  Field count = ", btype%field_count
+      print msgbuf, "  Field count = ", btype%field_count
+      if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
     
       do i = 1, btype%field_count
   
        call ESMF_FieldGet(btype%flist(i), name=fname, rc=status)
-       if (status .eq. ESMF_FAILURE) then
-         print *, "ERROR in ESMF_BundlePrint: Error getting Field name from Field ", i
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-       print *, "    Field", i, "name = ", trim(fname)
+       print msgbuf, "    Field", i, "name = ", trim(fname)
+       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
       enddo
 
       ! TODO: add more code here for printing more info
