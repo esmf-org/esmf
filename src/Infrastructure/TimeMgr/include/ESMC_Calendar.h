@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.44 2004/09/13 17:49:55 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.45 2004/12/03 00:58:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -212,7 +212,8 @@ class ESMC_Calendar {
     int ESMC_CalendarValidate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_CalendarPrint(const char *options=0) const;
+    int ESMC_CalendarPrint(const char *options=0, 
+                           const ESMC_Time *time=0) const;
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);

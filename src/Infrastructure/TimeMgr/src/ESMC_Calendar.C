@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.76 2004/12/01 00:06:16 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.77 2004/12/03 00:57:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.76 2004/12/01 00:06:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.77 2004/12/03 00:57:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1925,12 +1925,13 @@ int ESMC_Calendar::count=0;
 // !IROUTINE:  ESMC_CalendarValidate - validate Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarValidate(const char *options) const {
+      int ESMC_Calendar::ESMC_CalendarValidate(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
+      const char *options) const {   // in - validate options
 //    none
 //
 // !DESCRIPTION:
@@ -2010,13 +2011,16 @@ int ESMC_Calendar::count=0;
 // !IROUTINE:  ESMC_CalendarPrint - print Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarPrint(const char *options) const {
+      int ESMC_Calendar::ESMC_CalendarPrint(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      const char *options,            // in - print options
+      const ESMC_Time *time) const {  // in - optional time context in which
+                                      //      to print
+                                      //      (e.g. Leap Year => Feb. 29 days)
 //
 // !DESCRIPTION:
 //      print {\tt EMSC\_Calendar} state for testing/debugging
@@ -2033,6 +2037,17 @@ int ESMC_Calendar::count=0;
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
+    }
+
+    // determine leap year, if requested
+    bool isLeapYear = false;
+    if (time != ESMC_NULL_POINTER && calendarType == ESMC_CAL_GREGORIAN) {
+      ESMF_KIND_I8 yy_i8;
+      rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8);
+                              // TODO: use native C++ interface when ready
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+          ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(rc);
+      isLeapYear = ESMC_IS_LEAP_YEAR(yy_i8);
     }
 
     cout << "Calendar -------------------------------" << endl;
@@ -2061,7 +2076,11 @@ int ESMC_Calendar::count=0;
       else if (strncmp(opts, "dayspermonth", 12) == 0) {
         cout << "daysPerMonth = ";
         for (int i=0; i<this->monthsPerYear; i++) {
-          cout << daysPerMonth[i] << " ";
+          if (i == 1 && calendarType == ESMC_CAL_GREGORIAN && isLeapYear) {
+            cout << daysPerMonth[i]+1 << " ";   // leap year
+          } else {
+            cout << daysPerMonth[i]   << " ";   // non leap year
+          }
         }
       }
       else if (strncmp(opts, "monthsperyear", 13) == 0) {
@@ -2088,7 +2107,13 @@ int ESMC_Calendar::count=0;
       cout << "calendarType = " << calendarType << endl;
 
       cout << "daysPerMonth = "; 
-      for (int i=0; i<this->monthsPerYear; i++) cout << daysPerMonth[i] << " ";
+      for (int i=0; i<this->monthsPerYear; i++) {
+          if (i == 1 && calendarType == ESMC_CAL_GREGORIAN && isLeapYear) {
+            cout << daysPerMonth[i]+1 << " ";   // leap year
+          } else {
+            cout << daysPerMonth[i]   << " ";   // non leap year
+          }
+      }
       cout << endl;
       cout << "monthsPerYear = "  << monthsPerYear  << endl;
       cout << "secondsPerDay = "  << secondsPerDay  << endl;
