@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.6 2003/02/13 22:13:23 eschwab Exp $
+! $Id: ESMF_Layout.F90,v 1.7 2003/02/14 01:00:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,12 +86,13 @@
       public ESMF_LayoutPrint
 
       public ESMF_LayoutAllReduce
+      public ESMF_LayoutAllGatherVI
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.6 2003/02/13 22:13:23 eschwab Exp $'
+      '$Id: ESMF_Layout.F90,v 1.7 2003/02/14 01:00:01 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -834,7 +835,7 @@ end interface
       integer, intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
       integer, intent(out) :: rcvArray(:)
-      integer, intent(in) :: rcvLen
+      integer, intent(in) :: rcvLen(:)
       integer, intent(in) :: rcvDispls(:)
       integer, intent(out), optional :: rc 
 !
