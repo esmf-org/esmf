@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.20 2003/04/29 21:05:18 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.21 2003/04/30 23:22:52 flanigan Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -137,14 +137,14 @@
 
 %====================================================================================================
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
-\end{htmlonly}
-\part{Infrastructure Utilities: Communication and Memory Kernels}
-\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
+% \newpage
+% \begin{htmlonly}
+% \addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
+% \end{htmlonly}
+% \part{Infrastructure Utilities: Communication and Memory Kernels}
+% \label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
 
-#include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
+% #include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
 
 %====================================================================================================
 %\newpage

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2003/04/17 19:19:31 cdeluca Exp $ 
+# $Id: makefile,v 1.28 2003/04/30 23:22:52 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -41,8 +41,8 @@ HTMLFILES = 	${ESMC_DOCDIR}/ESMF_reqdoc \
 # all of the dependent files, but even a partial listing  will be helpful.
 #
 REQDOC_DEP_FILES = ESMF_syn.tex ESMF_auth.tex ESMF_buildreq.tex
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+DESDOC_DEP_FILES = 
+REFDOC_DEP_FILES = 
 
 #  Note that ESMF_usrdoc.tex is not a .ctex file.
 USRDOC_DEP_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex 
@@ -64,18 +64,12 @@ CLOBBERDIRS =
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
 	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):" ;\
 	${DO_LATEX} ESMF usr
+	mv -f ESMF_usrdoc.dvi $(ESMC_DOCDIR)
 
 ${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
-
-
-# Pdf files
-${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ESMF_usrdoc.dvi
-	dvipdf ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf
-
-${ESMC_DOCDIR}/ESMF_refdoc.pdf: ESMF_refdoc.dvi
-	dvipdf ESMF_refdoc.dvi ${ESMC_DOCDIR}/ESMF_refdoc.pdf
+	mv -f ESMF_refdoc.dvi $(ESMC_DOCDIR)
 
 
 # Html Files

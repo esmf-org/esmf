@@ -1,4 +1,4 @@
-# $Id: common,v 1.42 2003/04/24 15:57:16 flanigan Exp $ 
+# $Id: common,v 1.43 2003/04/30 23:22:50 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -521,7 +521,7 @@ $(ESMC_DOCDIR)/%_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 # Pdf files
-${ESMC_DOCDIR}/%.pdf: ${ESMC_DOCDIR}/%.dvi
+$(ESMC_DOCDIR)/%.pdf: $(ESMC_DOCDIR)/%.dvi
 	dvipdf $< $@
 
 # Html Files

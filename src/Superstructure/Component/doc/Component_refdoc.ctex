@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.9 2003/04/30 21:36:42 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.10 2003/04/30 23:22:51 flanigan Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -309,10 +309,10 @@
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_StateEx_ccapi}
+%\input{ESMC_StateEx_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
-%#endif
+%\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
+#endif
 
 %%\subsection{Class API}
 %#ifdef STANDALONE
