@@ -26,11 +26,9 @@
 !     ! Local variables
       integer :: status, rc
       integer :: delist(4)
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
+      type(ESMF_GridHorzStagger) :: horz_stagger
       integer, dimension(2) :: counts
       real(ESMF_KIND_R8), dimension(2) :: min, max
-      type(ESMF_CoordSystem) :: horz_coord_system
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_VM) :: vm
@@ -59,9 +57,7 @@
 
       counts(1) = 10
       counts(2) = 12
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       min(1) = 0.0
       max(1) = 10.0
       min(2) = 0.0
@@ -77,14 +73,13 @@
       if (status.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-      grid = ESMF_GridCreateLogRectUniform(dimCount=2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              delayout=layout, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
                               name=name, rc=status)
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
+
 !EOC
  
       if (status.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
