@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.5 2004/06/09 16:55:35 eschwab Exp $
+! $Id: ESMF_LogErr.F90,v 1.6 2004/06/10 22:08:01 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
 ! INCLUDES
 !! this should be including ESMF.h, but since it also includes the cover
 !! log macros, it can't be included here.  so just include each file 
-!! individually.  if we add files to ESMF.h they also need to be added here.
+!! individually.  If we add files to ESMF.h they also need to be added here.
 #include "ESMF_Conf.inc"
 #include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_LogConstants.inc"
@@ -185,7 +185,8 @@ end subroutine ESMF_LogClose
     integer, intent(out),optional	:: rc
 
 ! !DESCRIPTION:
-!      This routine finalizes the global log
+!      This routine finalizes the global log.  The default log will be flushed
+!      and the default log will be closed.
 !
 !      The arguments are:
 !      \begin{description}
@@ -226,7 +227,10 @@ end subroutine ESMF_LogFinalize
 	integer, intent(out),optional           :: rcToReturn
 
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate an error
+!      This function returns a logical true for return codes that indicate a
+!      memory allocation error.  A predefined memory allocation error message
+!      will be added to the log along with line, file and method.  Addtionally,
+!      rcToReturn will bet set to rcToCheck.
 !
 !      The arguments are:
 !      \begin{description}
@@ -284,7 +288,9 @@ end function ESMF_LogFoundAllocError
 	integer, intent(out), optional                  :: rcToReturn
 	
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate an error
+!      This function returns a logical true for return codes that indicate a
+!      an error.  A predefined error message will added to the log along with
+!      line, file and method.  Addtionally, rcToReturn will bet set to rcToCheck.
 !
 !      The arguments are:
 !      \begin{description}
@@ -326,67 +332,6 @@ end function ESMF_LogFoundError
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogMsgFoundAllocError - Returns logical associated with finding an error
-
-! !INTERFACE: 
-	function ESMF_LogMsgFoundAllocError(rcToCheck,msg,line,file,method,rcToReturn)
-!
-! !RETURN VALUE:
-	logical                                 ::ESMF_LogMsgFoundAllocError
-! !ARGUMENTS:
-!	
-	integer, intent(in)                     :: rcToCheck
-	character(len=*), intent(in)            :: msg
-	integer, intent(in), optional           :: line
-	character(len=*), intent(in), optional  :: file
-	character(len=*), intent(in), optional	:: method
-    integer, intent(out),optional            :: rcToReturn	
-
-! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate an error
-!
-!      The arguments are:
-!      \begin{description}
-! 	
-!      \item [rcToCheck]
-!            Return code to check.
-!      \item [msg]
-!            User-provided context string.
-!      \item [line]
-!            cpp provided line number.
-!      \item [file]
-!            cpp provided file string.
-!      \item [method]
-!            cpp provided method string.
-!      \item [rcToReturn]
-!            Return code to Return.
-!      
-!      \end{description}
-! 
-!EOP
-    logical :: logrc
-    character(len=ESMF_MAXSTR)::tempmsg
-    character(len=ESMF_MAXSTR)::allocmsg
-	integer::msglen=0
-    
-    ESMF_LogMsgFoundAllocError=.FALSE.
-    if (present(rcToReturn)) rcToReturn=rcToCheck
-    if (rcToCheck .NE. 0) then
-        call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
-        allocmsg=tempmsg(1:msglen)
-	    logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method)
-	    if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-        endif
-	    ESMF_LogMsgFoundAllocError=.TRUE.
-    endif	
-       
-end function ESMF_LogMsgFoundAllocError
-
-!--------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_LogGet - Returns information about a log object
 
 ! !INTERFACE: 
@@ -406,7 +351,7 @@ end function ESMF_LogMsgFoundAllocError
 	
 
 ! !DESCRIPTION:
-!      This subroutine returns various information about a log object.
+!      This subroutine returns properties about a log object.
 !
 !      The arguments are:
 !      \begin{description}
@@ -471,7 +416,9 @@ end subroutine ESMF_LogGet
       integer, intent(out),optional	            :: rc
 
 ! !DESCRIPTION:
-!      This routine initializes the global log
+!      This routine initializes the global default log.  The filename for the 
+!      log object will be set to the default log and associated with an open
+!      unit number.
 !
 !      The arguments are:
 !      \begin{description}
@@ -507,6 +454,70 @@ end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_LogMsgFoundAllocError - Returns logical associated with finding an error
+
+! !INTERFACE: 
+	function ESMF_LogMsgFoundAllocError(rcToCheck,msg,line,file,method,rcToReturn)
+!
+! !RETURN VALUE:
+	logical                                 ::ESMF_LogMsgFoundAllocError
+! !ARGUMENTS:
+!	
+	integer, intent(in)                     :: rcToCheck
+	character(len=*), intent(in)            :: msg
+	integer, intent(in), optional           :: line
+	character(len=*), intent(in), optional  :: file
+	character(len=*), intent(in), optional	:: method
+    integer, intent(out),optional           :: rcToReturn	
+
+! !DESCRIPTION:
+!      This function returns a logical true for return codes that indicate a
+!      memory allocation error.  A predefined memory allocation error message 
+!      will be added to the log along with a user added message, line, file and 
+!      method.  Addtionally, rcToReturn will bet set to rcToCheck.
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [rcToCheck]
+!            Return code to check.
+!      \item [msg]
+!            User-provided context string.
+!      \item [line]
+!            cpp provided line number.
+!      \item [file]
+!            cpp provided file string.
+!      \item [method]
+!            cpp provided method string.
+!      \item [rcToReturn]
+!            Return code to Return.
+!      
+!      \end{description}
+! 
+!EOP
+    logical :: logrc
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+	integer::msglen=0
+    
+    ESMF_LogMsgFoundAllocError=.FALSE.
+    if (present(rcToReturn)) rcToReturn=rcToCheck
+    if (rcToCheck .NE. 0) then
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
+        allocmsg=tempmsg(1:msglen)
+	    logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method)
+	    if (.not. logrc) then
+            print *, "Error writing previous error to log file"
+            ! what now?  we're already in the error code...
+            ! just fall through and return i guess.
+        endif
+	    ESMF_LogMsgFoundAllocError=.TRUE.
+    endif	
+       
+end function ESMF_LogMsgFoundAllocError
+
+!--------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_LogMsgFoundError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
@@ -525,7 +536,10 @@ end subroutine ESMF_LogInitialize
 	
 
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate an error
+!      This function returns a logical true for return codes that indicate a
+!      an error.  A predefined error message will added to the log along with
+!      a user added message. line, file and method.  Addtionally, rcToReturn 
+!      will bet set to rcToCheck.
 !
 !      The arguments are:
 !      \begin{description}
@@ -575,7 +589,8 @@ end function ESMF_LogMsgFoundError
     integer, intent(out),optional	:: rc
 
 ! !DESCRIPTION:
-!      This routine opens the file(s) associated with {\tt aLog}.
+!      This routine opens the file associated with a Log.  This is only
+!      used when the user does not want to use the default log.
 !
 !      The arguments are:
 !      \begin{description}
@@ -590,7 +605,7 @@ end function ESMF_LogMsgFoundError
 ! 
 !EOP
 	
-	integer 				:: status, i
+	integer 				    :: status, i
 	character(len=10) 			:: t
 	character(len=8) 			:: d
 	
@@ -632,7 +647,7 @@ end subroutine ESMF_LogOpen
 	integer, intent(out),optional			        :: rc
 	
 ! !DESCRIPTION:
-!      This subroutine sets the various options for the log object.
+!      This subroutine sets the properties for the log object.
 !
 !      The arguments are:
 !      \begin{description}
@@ -685,7 +700,10 @@ end subroutine ESMF_LogSet
 	character(len=*), intent(in), optional	:: method
 
 ! !DESCRIPTION:
-!      This routine writes to the file(s) associated with {\tt aLog}.
+!      This function writes to the file associated with a Log.  A message is
+!      passed in along with logtype, line, file and method.  If the write to
+!      the Log is successful, the function will return True.  This function
+!      is the base function used by all the other Log writing methods.
 !
 !      The arguments are:
 !      \begin{description}
