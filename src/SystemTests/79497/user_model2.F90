@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2003/08/01 22:03:53 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2003/08/07 16:51:54 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -89,8 +89,8 @@
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(:,:), pointer :: idata
-      real :: xMin, yMin
-      real :: dx(40), dy(50)
+      real :: min(2)
+      real :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
       integer :: de_id
       integer :: horz_gridtype, horz_stagger, horz_coord_system
@@ -104,24 +104,24 @@
       ! Add a "humidity" field to the import state.
       countsPerDE1 = (/ 10, 18, 12 /)
       countsPerDE2 = (/ 22, 28 /)
-      xMin = 0.0
-      dx = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
-              1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
-              1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
-              2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
-      yMin = 0.0
-      dy = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
-              0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
-              1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
-              1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
-              1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+      min(1) = 0.0
+      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
+                  1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
+                  1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
+                  2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
+      min(2) = 0.0
+      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
+                  0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
+                  1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
+                  1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
+                  1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_D
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
       grid1 = ESMF_GridCreate(countsPerDE1=countsPerDE1, &
                               countsPerDE2=countsPerDE2, &
-                              xMin=xMin, dx=dx, yMin=yMin, dy=dy, &
+                              min=min, delta1=delta1, delta2=delta2, &
                               layout=layout, &
                               horz_gridtype=horz_gridtype, &
                               horz_stagger=horz_stagger, &
