@@ -94,7 +94,7 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_CalendarEx_fapi}
 #endif
 
-\subsubsection{Restrictions and Future Work}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{Calendar_rest}
 #elif defined(CONSTITUENT)
