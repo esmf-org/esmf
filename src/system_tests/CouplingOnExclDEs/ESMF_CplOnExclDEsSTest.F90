@@ -1,4 +1,4 @@
-! $Id: ESMF_CouplingOnExclDEsSTest.F90,v 1.1 2003/09/19 21:26:12 jwolfe Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.1 2003/09/19 21:32:36 jwolfe Exp $
 !
 ! System test code CouplingOnExclDEs
 
