@@ -1,4 +1,4 @@
-# $Id: Linux.lahey.default.mk,v 1.3 2003/10/10 16:38:34 flanigan Exp $
+# $Id: Linux.lahey.default.mk,v 1.4 2003/10/17 18:09:07 svasquez Exp $
 #
 # Linux.default.default.mk
 #
@@ -65,11 +65,11 @@ SH_LD		   = gcc
 # ######################### C and Fortran compiler ########################
 #
 C_CC		   = gcc
-C_FC		   = lf95
+C_FC		   = lf95 
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
-C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = gcc
+C_FLINKER_SLFLAG   = -Wl,-rpath
+C_CLINKER	   = gcc 
 C_FLINKER	   = lf95
 C_CCV		   = ${C_CC} --version
 C_FCV              = lf95
@@ -91,7 +91,7 @@ F_FIXNOCPP         = --fix
 # ########################## C++ compiler ##################################
 #
 CXX_CC		   = g++ -fPIC
-CXX_FC		   = lf95
+CXX_FC		   = lf95 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = g++
@@ -130,18 +130,16 @@ OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
 ##################################################################################
 
-PARCH		   = linux_lf95
+PARCH		   = Linux
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = 
-#SL_LIBOPTS  = -shared
+SL_LIBOPTS  = --shared  
 SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD) 
-#SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
-SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR) -Wl,-rpath /usr/local/lf9560/lib
-SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
-SL_LIBS_TO_MAKE = 
-#SL_LIBS_TO_MAKE = libesmf liboldworld
+#SL_F_LINKER = $(F90CXXLD) 
+SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
+SL_C_LINKER = $(CXXF90LD) -Wl,-rpath,$(ESMF_LIBDIR) -Wl,-rpath /usr/local/lf9560/lib
+SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath,$(ESMF_LIBDIR) 
+SL_LIBS_TO_MAKE = libesmf liboldworld
 
 ############################################################
 #
