@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.20 2003/02/13 23:33:12 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.21 2003/02/14 17:15:16 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.20 2003/02/13 23:33:12 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.21 2003/02/14 17:15:16 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -596,7 +596,54 @@
           case 3:
             {
               // call allgatherv to fill this array or if Earl works out a method
-
+              // get layout size
+              int nx, ny;
+              layout->ESMC_LayoutGetSize(&nx, &ny);
+              int nde = nx*ny;
+              // figure out which ranks are decomposed and figure out the
+              // number of separate data chunks per rank and size of data
+              // chunks
+              int rankx, ranky;
+              int rmax[2];
+              int rsize[2];
+              int rstart[2];
+              for (int i=0; i<size_decomp; i++) {
+                rmax[i] = ai[i].max;
+                rsize[i] = ai[i].r - ai[i].l + 1;
+                rstart[i] = ai[i].l;
+                if (decompids[i] == 1) {
+                  rankx = i;
+                }
+                if (decompids[i] == 2) {
+                  ranky = i;
+                }
+              }
+              // loop over ranks, skipping the first decomposed one, loading
+              // up chunks of data to gather
+              int *ip0 = (int *)this->base_addr;
+              int *sendbuf, *recvbuf;
+              int sendcount;
+              int* recvcounts = new int[nde];
+              int* displs = new int[nde];
+              for (int i=0; i<size_decomp; i++) {
+                if (decompids[i] != 1) {
+                  for (int j=0; j<rsize[i]; j++) {
+                    sendbuf = (int *)ip0[j*rsize[rankx]];
+                    sendcount = rsize[rankx];
+                    recvbuf = (int *)ip[j*rmax[rankx]];
+                    for (int k=0; k<nde; k++) {
+                      recvcounts[k] = rsize[rankx]; // TODO: fix so variable
+                      displs[k] = rstart[i]*rmax[rankx] + rstart[rankx];
+                    }
+                  // call layout gather routine
+                  layout->ESMC_LayoutAllGatherVI(sendbuf, sendcount,
+                                                 recvbuf, recvcounts, displs);
+                  }
+                }
+              }
+              delete [] recvcounts;
+              delete [] displs;
+       
               //  copy decomposed piece of global array into new Array
               int gmax[3];
               int lmax[3];
