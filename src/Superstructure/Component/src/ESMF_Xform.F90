@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.2 2003/01/30 23:42:40 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.3 2003/02/03 17:10:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,15 +42,27 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
+!     ! ESMF_XformType
+!
+!     ! Internal Xform data type.
+
+      type ESMF_XformType
+      sequence
+      private
+        integer :: xformcount
+        character(len=ESMF_MAXSTR), pointer :: namelist(:)
+        type(ESMF_Pointer), pointer :: funclist(:)
+      end type
+
+!------------------------------------------------------------------------------
 !     ! ESMF_Xform
 !
-!     ! Xform data type.  All information is kept on the C++ side inside
-!     ! the class structure.
+!     ! Xform data type returned to the caller.  
 
       type ESMF_Xform
       sequence
       private
-        type(ESMF_Xform), pointer :: this       ! the C++ class data
+        type(ESMF_XformType), pointer :: xformp
       end type
 
 !------------------------------------------------------------------------------
@@ -76,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.2 2003/01/30 23:42:40 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.3 2003/02/03 17:10:20 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -93,8 +105,6 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
         module procedure ESMF_XformCreateNew
-        !module procedure ESMF_XformCreateSPMD
-        !module procedure ESMF_XformCreateMPMD
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -105,7 +115,7 @@
 !    Description of xxx.
 !  \item[yyy]
 !    Description of yyy.
-!  \item[[zzz]]
+!  \item[{[zzz]}]
 !    Description of optional arg zzz.
 !  \item[rc]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -151,7 +161,7 @@ end interface
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -161,12 +171,12 @@ end interface
 
 
 !       local vars
-        type (ESMF_Xform), pointer :: ptr   ! opaque pointer to new C++ Xform
+        type (ESMF_XformType), target :: newxform 
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        nullify(ptr)
+        nullify(ESMF_XformCreateNew%xformp)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -174,15 +184,10 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_XformCreate(status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Xform construction error"
-          return
-        endif
+!       !TODO : insert code here
 
 !       set return values
-        ESMF_XformCreateNew%this => ptr 
+        ESMF_XformCreateNew%xformp => newxform
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_XformCreateNew
@@ -190,118 +195,8 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_XformCreateSPMD
-
-! !INTERFACE:
-      function ESMF_XformCreateSPMD(rc)
+! !IROUTINE:  ESMF_XformDestroy - Destroy a Transform object
 !
-! !RETURN VALUE:
-      type(ESMF_Xform) :: ESMF_XformCreateSPMD
-!
-! !ARGUMENTS:
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Create a new empty {\tt Xform} object.
-!
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-
-!       ! Local variables
-        type (ESMF_Xform), pointer :: a    ! pointer to new Xform
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       ! Initialize pointer
-        nullify(a)
-
-!       ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-!       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_XformCreateSPMD(status)
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "Xform construction error"
-        !  return
-        !endif
-
-!       set return values
-        ESMF_XformCreateSPMD%this => a
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end function ESMF_XformCreateSPMD
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_XformCreateMPMD
-
-! !INTERFACE:
-      function ESMF_XformCreateMPMD(rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Xform) :: ESMF_XformCreateMPMD
-!
-! !ARGUMENTS:
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Create a new empty {\tt Xform} object.
-!
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-
-!       ! Local variables
-        type (ESMF_Xform), pointer :: a    ! pointer to new Xform
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       ! Initialize pointer
-        nullify(a)
-
-!       ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-!       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_XformCreateMPMD(status)
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "Xform construction error"
-        !  return
-        !endif
-
-!       set return values
-        ESMF_XformCreateMPMD%this => a
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end function ESMF_XformCreateMPMD
-
-
-!------------------------------------------------------------------------------
-!BOP
 ! !INTERFACE:
       subroutine ESMF_XformDestroy(xform, rc)
 !
@@ -318,7 +213,7 @@ end interface
 !     \item[xform]
 !       Destroy contents of this {\tt Xform}.
 !
-!     \item[[rc]]
+!     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -336,12 +231,8 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       call Destroy to release resources on the C++ side
-        call c_ESMC_XformDestroy(xform%this, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Xform contents destruction error"
-          return
-        endif
+!       ! TODO: insert code here
+        nullify(xform%xformp)
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -353,6 +244,8 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_XformSetData - Set information in a Transform
+!
 ! !INTERFACE:
       subroutine ESMF_XformSetData(xform, rc)
 !
@@ -379,6 +272,8 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_XformGetData - Get information from a Transform
+!
 ! !INTERFACE:
       subroutine ESMF_XformGet(xform, rc)
 !
@@ -407,6 +302,8 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_XformCheckpoint - Save Transform state
+!
 ! !INTERFACE:
       subroutine ESMF_XformCheckpoint(xform, iospec, rc)
 !
@@ -432,6 +329,8 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_XformRestore - Restore Transform state
+!
 ! !INTERFACE:
       function ESMF_XformRestore(name, iospec, rc)
 !
@@ -457,9 +356,9 @@ end interface
         type (ESMF_Xform) :: a 
 
 !       this is just to shut the compiler up
-        type (ESMF_Xform), target :: b 
-        a%this => b
-        nullify(a%this)
+        type (ESMF_XformType), target :: b 
+        a%xformp => b
+        nullify(a%xformp)
 
 !
 ! TODO: add code here
@@ -472,7 +371,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_XformPrint - Print information about a Transform object
 !
 ! !INTERFACE:
       subroutine ESMF_XformPrint(xform, options, rc)
@@ -502,11 +401,14 @@ end interface
          rc = ESMF_FAILURE
        endif
 
-!      ! Interface to call the C++ print code
+!      ! TODO: Add Print code  here
        if(present(options)) then
-           call c_ESMC_XformPrint(xform%this, options, status) 
+           ! decode options - long, short, whatever
+           print *, "Transform object", xform%xformp%xformcount
+ 	   status = ESMF_SUCCESS
        else
-           call c_ESMC_XformPrint(xform%this, defaultopts, status) 
+           print *, "Transform object", xform%xformp%xformcount
+ 	   status = ESMF_SUCCESS
        endif
 
        if (status .ne. ESMF_SUCCESS) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.3 2003/01/30 23:42:38 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.4 2003/02/03 17:10:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,8 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_LayoutMod
+      use ESMF_TimeMod
+      !use ESMF_ClockMod
       use ESMF_StateMod
       implicit none
 
@@ -88,10 +90,12 @@
          type(ESMF_State) :: exportstate
          type(ESMF_State), dimension(:), pointer :: statelist
          integer :: instance_id
-         ! these will be allocatable arrays of variable len
+         !TODO: add when clock module available
+         !type(ESMF_Clock) :: clock
+         ! lists of required entry points supplied by the component code
          integer :: function_count
-         character(len=ESMF_MAXSTR), dimension(5) :: function_name
-         type(ESMF_Pointer), dimension(5) :: function_list
+         character(len=ESMF_MAXSTR), dimension(:), pointer :: function_name
+         type(ESMF_Pointer), dimension(:), pointer :: function_list
       end type
 
 !------------------------------------------------------------------------------
@@ -125,6 +129,7 @@
       !public ESMF_CompGetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompSetState  ! (component, "import"/"export"/"list", state)
       !public ESMF_CompQueryState 
+      !public ESMF_Comp{Get/Set}Clock
  
       !public ESMF_CompCheckpoint
       !public ESMF_CompRestore
@@ -138,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.3 2003/01/30 23:42:38 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.4 2003/02/03 17:10:17 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -166,9 +171,9 @@
 !    Description of xxx.
 !  \item[yyy]
 !    Description of yyy.
-!  \item[[zzz]]
+!  \item[{[zzz]}]
 !    Description of optional arg zzz.
-!  \item[rc]
+!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -232,7 +237,7 @@ end interface
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -289,7 +294,7 @@ end interface
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -328,6 +333,8 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompDestroy -- Release resources for a Component
+
 ! !INTERFACE:
       subroutine ESMF_CompDestroy(component, rc)
 !
@@ -344,7 +351,7 @@ end interface
 !     \item[component]
 !       Destroy contents of this {\tt Component}.
 !
-!     \item[[rc]]
+!     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -403,7 +410,7 @@ end interface
 !   \item[component]
 !    Component to call Initialization routine for.
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -461,7 +468,7 @@ end interface
 !   \item[timesteps]
 !    How long the Run interval is.
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -515,7 +522,7 @@ end interface
 !   \item[component]
 !    Component to call finalization routine for.
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -550,6 +557,8 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompSetData -- Associate Data with a Component
+!
 ! !INTERFACE:
       subroutine ESMF_CompSetData(component, rc)
 !
@@ -558,7 +567,7 @@ end interface
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used only with the version of ComponentCreate which creates an empty 
+!      Used with the version of ComponentCreate which creates an empty 
 !      Component and allows the Data to be specified later. 
 !
 !EOP
@@ -576,6 +585,8 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompGet -- Query a component for various information
+!
 ! !INTERFACE:
       subroutine ESMF_CompGet(component, rc)
 !
@@ -587,7 +598,8 @@ end interface
 ! !DESCRIPTION:
 !      Returns information about the component.  For queries where the caller
 !      only wants a single value, specify the argument by name.
-!      All the arguments after the component input are optional to facilitate this.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -604,6 +616,8 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompCheckpoint - Save a Component's state to disk
+!
 ! !INTERFACE:
       subroutine ESMF_CompCheckpoint(component, iospec, rc)
 !
@@ -629,6 +643,8 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompRestore - Restore a Component's state from disk
+!
 ! !INTERFACE:
       function ESMF_CompRestore(name, iospec, rc)
 !
@@ -637,9 +653,9 @@ end interface
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! component name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
@@ -653,11 +669,8 @@ end interface
 !
         type (ESMF_Comp) :: a 
 
-!       this is just to shut the compiler up
+!       this is just to stop compiler warnings
         nullify(a%compp)
-!
-! TODO: add code here
-!
 
         ESMF_CompRestore = a 
  
@@ -666,6 +679,8 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompWrite - Write a Component to disk
+!
 ! !INTERFACE:
       subroutine ESMF_CompWrite(component, iospec, rc)
 !
@@ -691,6 +706,8 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CompRead - Read a Component from disk
+!
 ! !INTERFACE:
       function ESMF_CompRead(name, iospec, rc)
 !
@@ -698,9 +715,9 @@ end interface
       type(ESMF_Comp) :: ESMF_CompRead
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! component name to read
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
@@ -714,12 +731,8 @@ end interface
 !
         type (ESMF_Comp) :: a
 
-!       this is just to shut the compiler up
+!       this is just to stop compiler warnings
         nullify(a%compp)
-
-!
-! TODO: add code here
-!
 
         ESMF_CompRead = a 
  
@@ -728,11 +741,10 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_CompValidate -- Ensure the Component internal data is valid.
 !
 ! !INTERFACE:
       subroutine ESMF_CompValidate(component, options, rc)
-!
 !
 ! !ARGUMENTS:
       type(ESMF_Comp) :: component
@@ -777,7 +789,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: 
 !
 ! !INTERFACE:
       subroutine ESMF_CompPrint(component, options, rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.4 2003/01/30 23:42:39 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.5 2003/02/03 17:10:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,8 +28,8 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the Fortran interfaces to the
-! {\tt State} class and associated functions and subroutines.  
+! The code in this file implements the Fortran function and subroutine 
+!  interfaces to the {\tt State} class and associated data structures.
 !
 !
 ! !USES:
@@ -38,7 +38,7 @@
       use ESMF_ArrayMod
       use ESMF_FieldMod
       use ESMF_BundleMod
-      !use ESMF_ComponentMod
+      use ESMF_XformMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -194,7 +194,8 @@
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       !public ESMF_StateGetNeededList   ! returns an array of values
       !public ESMF_State{Get/Set}Ready  ! is data ready
-      !public ESMF_State{Get/Set}CompName  ! set only if not given at create time
+      !public ESMF_State{Get/Set}CompName  ! normally set at create time
+      public ESMF_StateTransform
  
       public ESMF_StateCheckpoint
       public ESMF_StateRestore
@@ -207,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.4 2003/01/30 23:42:39 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.5 2003/02/03 17:10:19 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -395,7 +396,7 @@ end function
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[\[rc\]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -453,14 +454,14 @@ end function
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[[compname]]
+!   \item[{[compname]}]
 !    Name of the {\tt Component} this {\tt State} is associated with.
 !
-!   \item[[statetype]]
+!   \item[{[statetype]}]
 !    Import or Export {\tt State}.  Returns either {\tt ESMF\_STATEIMPORT},
 !    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATEUNKNOWN}.
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -499,6 +500,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateDestroy -- Release resources for this State
+!
 ! !INTERFACE:
       subroutine ESMF_StateDestroy(state, rc)
 !
@@ -515,7 +518,7 @@ end function
 !     \item[state]
 !       Destroy contents of this {\tt State}.
 !
-!     \item[[rc]]
+!     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -556,6 +559,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateDestruct -- Internal routine to deallocate space
+!
 ! !INTERFACE:
       subroutine ESMF_StateDestruct(statetype, rc)
 !
@@ -572,7 +577,7 @@ end function
 !     \item[statetype]
 !       Destroy contents of this {\tt State}.
 !
-!     \item[[rc]]
+!     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
@@ -886,6 +891,8 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateGetInfo -- Get information about a State
+!
 ! !INTERFACE:
       subroutine ESMF_StateGetInfo(state, compname, statetype, statecount, rc)
 !
@@ -905,14 +912,14 @@ end function
 !  \begin{description}     
 !  \item[state]
 !    {\tt State} to query.
-!   \item[[compname]]
+!   \item[{[compname]}]
 !    Name of the {\tt Component} this {\tt State} is associated with.
-!   \item[[statetype]]
+!   \item[{[statetype]}]
 !    Import or Export {\tt State}.  Returns either {\tt ESMF\_STATEIMPORT},
 !    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATEUNKNOWN}.
-!   \item[[statecount]]
+!   \item[{[statecount]}]
 !    Count of data items in this {\tt state}, including placeholder names.
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -927,6 +934,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateGetNeeded -- Query whether a data item is needed
+!
 ! !INTERFACE:
       subroutine ESMF_StateGetNeeded(state, dataname, needed, rc)
 !
@@ -951,7 +960,7 @@ end function
 !    {\tt ESMF\_STATEDATANOTNEEDED}, or {\tt ESMF\_STATEDATADONOTCARE}.
 !    When data is added to a {\tt State} the default status of this flag
 !    is {\tt ESMF\_STATEDATADONOTCARE}.
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -966,6 +975,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateSetNeeded -- Set if a data item is needed
+!
 ! !INTERFACE:
       subroutine ESMF_StateSetNeeded(state, dataname, needed, rc)
 !
@@ -989,7 +1000,7 @@ end function
 !    Set status of data item to this.  Valid values are 
 !    {\tt ESMF\_STATEDATAISNEEDED}, {\tt ESMF\_STATEDATANOTNEEDED}, 
 !    or {\tt ESMF\_STATEDATADONOTCARE}.
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -1007,6 +1018,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateGetBundle -- Retrieve a data Bundle from a State
+!
 ! !INTERFACE:
       subroutine ESMF_StateGetBundle(state, name, bundle, rc)
 !
@@ -1027,7 +1040,7 @@ end function
 !    {\tt Bundle} name to be returned.
 !  \item[bundle]
 !    Where the {\tt bundle} is returned.
-!  \item[[rc]]
+!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -1042,6 +1055,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateGetField -- Retrieve a data Field from a State
+!
 ! !INTERFACE:
       subroutine ESMF_StateGetField(state, name, field, rc)
 !
@@ -1062,7 +1077,7 @@ end function
 !    {\tt Field} name to be returned.
 !  \item[field]
 !    Where the {\tt field} is returned.
-!  \item[[rc]]
+!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -1077,6 +1092,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateGetArray -- Retrieve a data Array from a State
+!
 ! !INTERFACE:
       subroutine ESMF_StateGetArray(state, name, array, rc)
 !
@@ -1097,7 +1114,7 @@ end function
 !    {\tt Array} name to be returned.
 !  \item[array]
 !    Where the {\tt array} is returned.
-!  \item[[rc]]
+!  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
 !
@@ -1113,10 +1130,54 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
+! This section is for State Transform routines.
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateTransform - Apply a Transform to State Data
+!
+! !INTERFACE:
+      subroutine ESMF_StateTransform(state, xformname, xform, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      character(len=*), intent(in) :: xformname
+      type(ESMF_Xform), intent(in) :: xform
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!      Apply a Transform to a State.  This routine is intended to be called
+!      from within a Component when it is not practical to return to the
+!      calling layer in order to do the coupling directly.  This call 
+!      passes through the framework back into user-written coupling code
+!      to allow exchange of data between Components.  It returns back to
+!      the calling location and allows the Component to continue from that
+!      place.  Components which run in sequential mode have no need to use
+!      this routine; Coupling code is called directly from the Application
+!      level code.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+
+        ! This is a wrapper which turns around and calls into the
+        ! transform code to execute the callback.
+
+        end subroutine ESMF_StateTransform
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
 ! This section is I/O for States
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateCheckpoint -- Save the internal data for a State
+!
 ! !INTERFACE:
       subroutine ESMF_StateCheckpoint(state, iospec, rc)
 !
@@ -1142,6 +1203,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateRestore -- Restore the internal data from a State
+!
 ! !INTERFACE:
       function ESMF_StateRestore(name, iospec, rc)
 !
@@ -1171,10 +1234,6 @@ end function
         a%statep => b
         nullify(a%statep)
 
-!
-! TODO: add code here
-!
-
         ESMF_StateRestore = a 
  
         end function ESMF_StateRestore
@@ -1182,11 +1241,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-!
+! !IROUTINE: ESMF_StatePrint -- Print the internal data for a State
 !
 ! !INTERFACE:
       subroutine ESMF_StatePrint(state, options, rc)
-!
 !
 ! !ARGUMENTS:
       type(ESMF_State) :: state
