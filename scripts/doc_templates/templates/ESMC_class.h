@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.8 2002/10/14 21:53:58 cdeluca Exp $
+// $Id: ESMC_class.h,v 1.9 2002/10/14 22:16:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 	ESMC_<Class>(args);
 	~ESMC_<Class>(args);
   
- // < list the rest of the public interface methods here >
+ // < declare the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

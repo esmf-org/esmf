@@ -1,4 +1,4 @@
-! $Id: ESMF_comp.h,v 1.2 2002/10/14 21:54:00 cdeluca Exp $
+! $Id: ESMF_comp.h,v 1.3 2002/10/14 22:16:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,12 +13,12 @@
 ! these lines prevent this file from being read more than once if it
 ! ends up being included multiple times
 
-#ifndef ESMF_<Comp>_h
-#define ESMF_<Comp>_h
+#ifndef ESMF_<Comp>_H
+#define ESMF_<Comp>_H
 
 !-------------------------------------------------------------------------
 !
-! !PURPOSE:
+! !DESCRIPTION:
 !
 ! The code in this file implements constants and macros for the <Comp>...
 !
@@ -53,4 +53,4 @@
 #define ESMF_<Comp>CONSTANT_FRED   23
 
 
-#endif  // ESMF_<Comp>_h
+#endif  // ESMF_<Comp>_H
