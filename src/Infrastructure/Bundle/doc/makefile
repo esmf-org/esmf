@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/02/25 17:57:35 cdeluca Exp $ 
+# $Id: makefile,v 1.5 2004/03/18 00:07:28 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -13,14 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Bundle/doc
 
-DVIFILES  = 	Bundle_desdoc.dvi \
-		Bundle_refdoc.dvi
+DVIFILES  = 	Bundle_refdoc.dvi
 
-PDFFILES  =	${ESMC_DOCDIR}/Bundle_desdoc.pdf \
-		${ESMC_DOCDIR}/Bundle_refdoc.pdf
+PDFFILES  =	${ESMC_DOCDIR}/Bundle_refdoc.pdf
 
-HTMLFILES = 	${ESMC_DOCDIR}/Bundle_desdoc \
-		${ESMC_DOCDIR}/Bundle_refdoc
+HTMLFILES = 	${ESMC_DOCDIR}/Bundle_refdoc
 
 #
 # Tex Files to make

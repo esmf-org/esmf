@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/03/17 18:23:28 nscollins Exp $ 
+# $Id: makefile,v 1.3 2004/03/18 00:07:28 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -12,11 +12,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/ArraySpec/doc
 
-DVIFILES  =   ArraySpec_reqdoc.dvi 
+DVIFILES  =   ArraySpec_refdoc.dvi 
 
-PDFFILES  =   ${ESMC_DOCDIR}/ArraySpec_reqdoc.pdf
+PDFFILES  =   ${ESMC_DOCDIR}/ArraySpec_refdoc.pdf
 
-HTMLFILES =   ${ESMC_DOCDIR}/ArraySpec_reqdoc 
+HTMLFILES =   ${ESMC_DOCDIR}/ArraySpec_refdoc 
 
 
 #
@@ -52,9 +52,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = ArraySpec_reqdoc $(HTMLFILES)
+CLEANDIRS   = ArraySpec_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
-              ArraySpec_Reqdoc.tex $(PDFFILES)
+              ArraySpec_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

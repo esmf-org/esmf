@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/09/18 16:19:27 cdeluca Exp $ 
+# $Id: makefile,v 1.8 2004/03/18 00:07:28 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -14,15 +14,12 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Field/doc
 
 DVIFILES  = 	Field_reqdoc.dvi \
-		Field_desdoc.dvi \
 		Field_refdoc.dvi
 
 PDFFILES  =     ${ESMC_DOCDIR}/Field_reqdoc.pdf \
-		${ESMC_DOCDIR}/Field_desdoc.pdf \
 		${ESMC_DOCDIR}/Field_refdoc.pdf
 
 HTMLFILES = 	${ESMC_DOCDIR}/Field_reqdoc \
-		${ESMC_DOCDIR}/Field_desdoc \
 		${ESMC_DOCDIR}/Field_refdoc
 
 #
