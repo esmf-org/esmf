@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.82 2003/11/13 00:10:43 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.83 2003/12/05 23:14:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.82 2003/11/13 00:10:43 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.83 2003/12/05 23:14:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -871,10 +871,16 @@
       endif
 
       ! Calculate other distgrid values from DE information
-!     dgtype%local_cell_max = GlobalCommMax()
-!     do i = 1,ESMF_MAXGRIDDIM
-!       dgtype%local_cell_max_dim(i) = GlobalCommMax()
-!     enddo
+      do i = 1,ESMF_MAXGRIDDIM
+        dgtype%global_comp%local_cell_max_dim(1) = maxval(countsPerDE1)
+        dgtype%global_comp%local_cell_max_dim(2) = maxval(countsPerDE2)
+        dgtype%global_total%local_cell_max_dim(1) = maxval(countsPerDE1) + 2*bnd
+        dgtype%global_total%local_cell_max_dim(2) = maxval(countsPerDE2) + 2*bnd
+      enddo
+      dgtype%global_comp%local_cell_max = dgtype%global_comp%local_cell_max_dim(1) &
+                                        * dgtype%global_comp%local_cell_max_dim(2)
+      dgtype%global_total%local_cell_max = dgtype%global_total%local_cell_max_dim(1) &
+                                         * dgtype%global_total%local_cell_max_dim(2)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
