@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.123 2004/09/21 17:02:50 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.124 2004/09/24 22:13:50 nscollins Exp $'
 
 !==============================================================================
 !
@@ -972,7 +972,6 @@
       integer :: i, ndim
       character(len=ESMF_MAXSTR) :: logMsg
       logical :: dummy
-      type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_Logical):: otoFlag, lrFlag
 
       ! Initialize return code; assume failure until success is certain
@@ -1823,7 +1822,6 @@
       !integer :: localrc                          ! Error status
       integer :: i, i2
       character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       type(ESMF_DistGridLocal), pointer :: me
 
       ! Initialize return code; assume failure until success is certain
@@ -2806,7 +2804,6 @@
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
       integer :: localrc                          ! Error status
-      type(ESMF_DistGridLocal), pointer :: me
 
       ! Initialize return code; assume failure until success is certain
       rc = ESMF_FAILURE
