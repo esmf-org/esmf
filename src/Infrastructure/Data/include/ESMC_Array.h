@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.23 2003/03/11 23:09:41 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.24 2003/04/01 23:46:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 struct c_F90ptr {
    unsigned char basepad[ESMF_F90_PTR_BASE_SIZE];      // one of these
 #if ESMF_F90_PTR_PLUS_RANK 
-   // extra space needed per rank
+   // plus extra space needed per rank
    unsigned char extrapad[MAX_F90_RANK_POSSIBLE*ESMF_F90_PTR_PLUS_RANK];
 #endif
 };
