@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/12/16 00:57:30 theurich Exp $ 
+# $Id: makefile,v 1.4 2004/12/16 01:11:36 theurich Exp $ 
 
 ALL:  build_tests
 
@@ -24,8 +24,8 @@ TESTS_RUN     = RUN_ESMF_VMUTest\
                 RUN_ESMF_VMScatterVMGatherUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
+                RUN_ESMF_VMSendVMRecvUTestUNI\
                 RUN_ESMF_VMScatterVMGatherUTestUNI
-# Don't run ESMF_VMSendVMRecvUTest on one processor.
 
 TESTS_RM      =
 
@@ -53,6 +53,10 @@ RUN_ESMF_VMUTestUNI:
 RUN_ESMF_VMSendVMRecvUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_VMSendVMRecvUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest.stdout
+
+RUN_ESMF_VMSendVMRecvUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMSendVMRecvUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest.stdout
 
 #
 # VM Scatter Gather
