@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.69 2003/08/28 16:49:11 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.70 2003/09/03 23:07:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,6 +129,7 @@
     public ESMF_DistGridGetDE
     public ESMF_DistGridSetDE
     public ESMF_DistGridGetAllAxisIndex
+    public ESMF_DistGridGetAllCounts
     public ESMF_DistGridGetDELayout
     ! TODO:  combine all the get subroutines into one
     public ESMF_DistGridGetValue
@@ -143,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.69 2003/08/28 16:49:11 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.70 2003/09/03 23:07:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -843,7 +844,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
-      integer :: i, j, nDEs
+      integer :: i, j, nDEs(2)
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -870,8 +871,8 @@
       if(present(global_start)) then
                  ! TODO: add check that global_start is large enough
                  !       or use the size of the array for the loop limit
-        call ESMF_DELayoutGetNumDEs(distgrid%layout, nDEs, status)
-        do i = 1, nDEs
+        call ESMF_DELayoutGetSize(distgrid%layout, nDEs(1), nDEs(2), rc)
+        do i = 1, nDEs(1)*nDEs(2)
           do j = 1,ESMF_MAXGRIDDIM
             global_start(i,j) = distgrid%global_start(i,j)
           enddo
@@ -1511,6 +1512,60 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridGetAllAxisIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridGetAllCounts - Get array of counts for DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetAllCounts(distgrid, counts, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, dimension(:,:), intent(inout), pointer :: counts
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid]
+!          Class to be modified.
+!     \item[[counts]]
+!          Array of the numbers of cells along each axis on each DE
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
+      integer :: nDEs(2), i, j
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     get information from distgrid derived type
+      ! TODO:  add check for array size or use size for loop limit
+      call ESMF_DELayoutGetSize(distgrid%layout, nDEs(1), nDEs(2), rc)
+      do i = 1,nDEs(1)*nDEs(2)
+        do j = 1,ESMF_MAXGRIDDIM
+          counts(i,j) = distgrid%local_axis_length(i,j)
+        enddo
+      enddo
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetAllCounts
 
 !------------------------------------------------------------------------------
 !BOP
