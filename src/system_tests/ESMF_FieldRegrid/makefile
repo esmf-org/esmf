@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/12/09 17:25:36 nscollins Exp $ 
+# $Id: makefile,v 1.6 2005/03/01 21:08:20 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -29,7 +29,6 @@ SYSTEM_TESTS_RUN      = RUN_FieldRegrid
 
 SYSTEM_TESTS_RUN_UNI  = RUN_FieldRegridUNI
 
-SYSTEM_TESTS_RM       = FieldRegrid.rm
 
 ESMF_FieldRegridSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -38,20 +37,15 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod core ESMF_LogFile 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
 RUN_FieldRegrid:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldRegridSTest.tmps
 	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldRegridSTest >$(ESMC_TESTDIR)/ESMF_FieldRegridSTest.stdout
 
 RUN_FieldRegridUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldRegridSTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldRegridSTest >$(ESMC_TESTDIR)/ESMF_FieldRegridSTest.stdout
-
-FieldRegrid.rm:
-	echo "FieldRegrid.rm target called here."
 
 
 

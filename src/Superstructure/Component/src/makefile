@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2004/05/20 11:51:26 nscollins Exp $
+# $Id: makefile,v 1.26 2005/03/01 21:06:17 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -41,7 +41,7 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod
+CLEANFILES  = 
 CLOBBERDIRS =
 
 ESMF_CplComp.o:  ESMF_Comp.o

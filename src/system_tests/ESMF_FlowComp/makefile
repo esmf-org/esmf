@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/12/09 17:25:36 nscollins Exp $ 
+# $Id: makefile,v 1.6 2005/03/01 21:08:50 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -29,7 +29,6 @@ SYSTEM_TESTS_RUN      = RUN_FlowComp
 
 SYSTEM_TESTS_RUN_UNI  = RUN_FlowCompUNI
 
-SYSTEM_TESTS_RM       = FlowComp.rm
 
 ESMF_FlowCompSTest.o : $(SYSTEM_TESTS_OBJ)
 
@@ -37,21 +36,16 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod core ESMF_LogFile *velocity.* SIE.* $(SYSTEM_TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
 RUN_FlowComp:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FlowCompSTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowCompSTest >$(ESMC_TESTDIR)/ESMF_FlowCompSTest.stdout
 
 RUN_FlowCompUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FlowCompSTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowCompSTest >$(ESMC_TESTDIR)/ESMF_FlowCompSTest.stdout
-
-FlowComp.rm:
-	echo "FlowComp.rm target called here."
 
 
 

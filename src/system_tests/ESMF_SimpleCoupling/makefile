@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/12/09 17:25:38 nscollins Exp $ 
+# $Id: makefile,v 1.6 2005/03/01 21:09:06 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -29,7 +29,6 @@ SYSTEM_TESTS_RUN      = RUN_SimpleCoupling
 
 SYSTEM_TESTS_RUN_UNI  = RUN_SimpleCouplingUNI
 
-SYSTEM_TESTS_RM       = SimpleCoupling.rm
 
 ESMF_SimpleCouplingSTest.o: $(SYSTEM_TESTS_OBJ)
 
@@ -37,21 +36,17 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core ESMF_LogFile $(SYSTEM_TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
 RUN_SimpleCoupling:
-	-@rm -f testlog stdlog.* logfile.* SimpleCoupling.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest >$(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest.stdout
 
 RUN_SimpleCouplingUNI:
-	-@rm -f testlog stdlog.* logfile.* SimpleCoupling.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest >$(ESMC_TESTDIR)/ESMF_SimpleCouplingSTest.stdout
 
-SimpleCoupling.rm:
-	echo "SimpleCoupling.rm target called here."
 
 
 

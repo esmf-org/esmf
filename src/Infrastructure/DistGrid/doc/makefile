@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/05/29 20:59:08 flanigan Exp $ 
+# $Id: makefile,v 1.11 2005/03/01 21:00:50 nscollins Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -58,7 +58,7 @@ DIRS	  =
 
 CLEANDIRS   = DistGrid_reqdoc DistGrid_desdoc DistGrid_refdoc \
               $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               DistGrid_desdoc.tex DistGrid_reqdoc.tex DistGrid_refdoc.tex \
               $(PDFFILES)
 CLOBBERDIRS =

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/08/03 19:33:49 nscollins Exp $
+# $Id: makefile,v 1.7 2005/03/01 21:04:10 nscollins Exp $
 
 ALL:  build_examples
 
@@ -73,8 +73,8 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt *.stdout NULL core ESMF_LogFile $(EXAMPLES_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 

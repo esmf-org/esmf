@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2005/02/28 17:17:19 nscollins Exp $ 
+# $Id: makefile,v 1.14 2005/03/01 21:05:35 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -42,8 +42,8 @@ TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
 
 include ${ESMF_DIR}/makefile
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod NULL *.txt stdoutfiles core ESMF_LogFile $(TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
 

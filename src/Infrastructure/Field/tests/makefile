@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.31 2005/02/28 21:32:43 svasquez Exp $ 
+# $Id: makefile,v 1.32 2005/03/01 21:01:22 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -29,9 +29,8 @@ TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
 
 include ${ESMF_DIR}/makefile
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod NULL *.txt stdoutfiles core ESMF_LogFile \
-               $(TESTS_BUILD) $(CPPFILES)
+CLEANDIRS   = 
+CLEANFILES  = $(TESTS_BUILD) $(CPPFILES)
 CLOBBERDIRS =
 
 ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90

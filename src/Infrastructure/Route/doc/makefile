@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/05/29 20:59:11 flanigan Exp $
+# $Id: makefile,v 1.8 2005/03/01 21:04:32 nscollins Exp $
 
 All: alldoc
 
@@ -42,6 +42,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   = Route_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               Route_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
+

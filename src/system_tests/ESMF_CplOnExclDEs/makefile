@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/12/09 17:25:35 nscollins Exp $ 
+# $Id: makefile,v 1.6 2005/03/01 21:07:38 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -29,28 +29,23 @@ SYSTEM_TESTS_RUN      = RUN_CouplingOnExclDEs
 
 SYSTEM_TESTS_RUN_UNI  = RUN_CouplingOnExclDEsUNI
 
-SYSTEM_TESTS_RM       = CouplingOnExclDEs.rm
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod ESMF_LogFile
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 ESMF_CplOnExclDEsSTest.o:  user_model1.o user_model2.o user_coupler.o
 
 RUN_CouplingOnExclDEs:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CplOnExclDEsSTest.tmps
 	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest >$(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest.stdout
 
 RUN_CouplingOnExclDEsUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CplOnExclDEsSTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest >$(ESMC_TESTDIR)/ESMF_CplOnExclDEsSTest.stdout
 
-CouplingOnExclDEs.rm:
-	echo "CouplingOnExclDEs.rm target called here."
 
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/10/26 16:06:26 nscollins Exp $ 
+# $Id: makefile,v 1.5 2005/03/01 21:07:42 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -36,16 +36,14 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod core ESMF_LogFile 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
 RUN_FieldExcl:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldExclSTest.tmps
 	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
 
 RUN_FieldExclUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldExclSTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldExclSTest >$(ESMC_TESTDIR)/ESMF_FieldExclSTest.stdout
 
 

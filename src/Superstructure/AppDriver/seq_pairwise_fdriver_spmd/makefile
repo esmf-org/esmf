@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/06/16 08:24:39 nscollins Exp $ 
+# $Id: makefile,v 1.9 2005/03/01 21:05:53 nscollins Exp $ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable
@@ -21,7 +21,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod loadmap.txt
+CLEANFILES  = 
 CLOBBERDIRS =
 
 # object files which need to be compiled into the executable.

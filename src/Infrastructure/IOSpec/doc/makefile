@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/03/18 05:24:22 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2005/03/01 21:02:59 nscollins Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -51,7 +51,7 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   = IOSpec_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               IOSpec_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

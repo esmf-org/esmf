@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/08/03 19:33:51 nscollins Exp $ 
+# $Id: makefile,v 1.8 2005/03/01 21:05:49 nscollins Exp $ 
 
 all: alldoc
 
@@ -57,7 +57,7 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   = AppDriver_desdoc AppDriver_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
               AppDriver_desdoc.tex AppDriver_refdoc.tex $(PDFFILES) 
 CLOBBERDIRS =
 

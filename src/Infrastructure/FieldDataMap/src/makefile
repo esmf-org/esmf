@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/08/03 19:33:48 nscollins Exp $
+# $Id: makefile,v 1.3 2005/03/01 21:02:19 nscollins Exp $
 
 # leave alone.
 ALL: build_here
@@ -30,8 +30,9 @@ LIBBASE	  = libesmf
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
 LOCDIR	  = src/Infrastructure/FieldDataMap/src
 
-# leave these alone 
-CLEANFILES = 
+CLEANDIRS  =
+CLEANFILES =
+CLOBBERDIS =
 
 include ${ESMF_DIR}/makefile
 

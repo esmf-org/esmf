@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/08/03 19:33:52 nscollins Exp $
+# $Id: makefile,v 1.6 2005/03/01 21:06:52 nscollins Exp $
 
 ALL:  build_tests
 
@@ -23,50 +23,35 @@ TESTS_RUN     = RUN_ESMF_ESMFModUTest \
 TESTS_RUN_UNI = RUN_ESMF_ESMFModUTestUNI \
 		RUN_ESMC_ESMFModUTestUNI 
 
-TESTS_RM      = ESMF_ESMFModUTest.rm \
-                ESMC_ESMFModUTest.rm
-
 
 include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt NULL core ESMF_LogFile $(TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
 #
 # Fortran unit test
 #
 RUN_ESMF_ESMFModUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ESMFModUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
 
 RUN_ESMF_ESMFModUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ESMFModUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
-
-ESMF_ESMFModUTest.rm:
-	echo "ESMF_ESMFModTest.rm target called here."
 
 
 #
 # C++ Unit tests
 #
-$(ESMC_TESTDIR)/ESMC_ESMFModUTest: chkopts ESMC_ESMFModUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ESMFModUTest ESMC_ESMFModUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	-${RM} ESMC_ESMFModUTest.o
 
 RUN_ESMC_ESMFModUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMC_ESMFModUTest.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
 
 RUN_ESMC_ESMFModUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_ESMFModUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
 
-ESMC_ESMFModUTest.rm:
-	echo "ESMC_ESMFModTest.rm target called here."
 
 
 

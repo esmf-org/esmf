@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/12/18 16:34:08 nscollins Exp $ 
+# $Id: makefile,v 1.7 2005/03/01 21:08:54 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -29,7 +29,6 @@ SYSTEM_TESTS_RUN      = RUN_FlowWithCoupling
 
 SYSTEM_TESTS_RUN_UNI  = RUN_FlowWithCouplingUNI
 
-SYSTEM_TESTS_RM       = FlowWithCoupling.rm
 
 ESMF_FlowWithCouplingSTest.o: $(SYSTEM_TESTS_OBJ)
 
@@ -37,21 +36,14 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core ESMF_LogFile $(SYSTEM_TESTS_BUILD) \
-              SIE* V_velocity.* U_velocity.* FLAG.*
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD) SIE* V_velocity.* U_velocity.* FLAG.*
 CLOBBERDIRS =
 
 RUN_FlowWithCoupling:
-	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
 
 RUN_FlowWithCouplingUNI:
-	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest >$(ESMC_TESTDIR)/ESMF_FlowWithCouplingSTest.stdout
-
-FlowWithCoupling.rm:
-	echo "FlowWithCoupling.rm target called here."
-
 
 

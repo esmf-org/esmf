@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/12/10 21:15:04 nscollins Exp $ 
+# $Id: makefile,v 1.10 2005/03/01 21:02:42 nscollins Exp $ 
 
 ALL:  tree_build_tests
 
@@ -30,8 +30,8 @@ TESTS_RM      = ESMF_GridUTest.rm  ESMF_GridCreateUTest.rm
 
 include $(ESMF_DIR)/makefile
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt NULL stdoutfiles core ESMF_LogFile $(TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
 

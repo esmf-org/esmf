@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/08/03 19:33:52 nscollins Exp $
+# $Id: makefile,v 1.6 2005/03/01 21:06:34 nscollins Exp $
 
 # makefile template for the examples directory.
 
@@ -24,8 +24,8 @@ TESTEXAMPLES_9  = \
 
 EXAMPLESF       = ESMF_BaseEx.F90
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt *.stdout NULL core ESMF_LogFile $(EXAMPLES_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 include ${ESMF_DIR}/makefile
@@ -40,13 +40,9 @@ ESMF_BaseEx: ESMF_BaseEx.o  chkopts
 	${RM} ESMF_BaseEx.o
 
 RUN_ESMF_BaseEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BaseEx.tmps
 	-${MPIRUN} -np 4 ESMF_BaseEx > ESMF_BaseEx.stdout
 
 RUN_ESMF_BaseExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BaseEx.tmps
 	-${MPIRUN} -np 1 ESMF_BaseEx > ESMF_BaseEx.stdout
 
-ESMF_BaseEx.rm:
-	echo "ESMF_BaseEx.rm target called here."
 

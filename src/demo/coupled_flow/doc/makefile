@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/08/03 19:33:53 nscollins Exp $
+# $Id: makefile,v 1.3 2005/03/01 20:55:54 nscollins Exp $
 ALL: alldoc 
 
 CFLAGS    =
@@ -50,8 +50,8 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   = CoupledFlow_usrdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
-              CoupledFlow_usrdoc.tex $(PDFFILES)
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
+               CoupledFlow_usrdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

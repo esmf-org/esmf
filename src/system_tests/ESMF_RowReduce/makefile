@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/10/14 20:46:37 nscollins Exp $ 
+# $Id: makefile,v 1.5 2005/03/01 21:09:02 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -28,26 +28,21 @@ SYSTEM_TESTS_RUN     = RUN_RowReduce
 
 SYSTEM_TESTS_RUN_UNI = RUN_RowReduceUNI
 
-SYSTEM_TESTS_RM      = RowReduce.rm
 
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core ESMF_LogFile $(SYSTEM_TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_RowReduce:
-	-@rm -f testlog stdlog.* logfile.* RowReduce.tmps
 	-${MPIRUN} -np 2 $(ESMC_TESTDIR)/ESMF_RowReduceSTest > $(ESMC_TESTDIR)/ESMF_RowReduceSTest.stdout
 
 RUN_RowReduceUNI:
-	-@rm -f testlog stdlog.* logfile.* RowReduce.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_RowReduceSTest > $(ESMC_TESTDIR)/ESMF_RowReduceSTest.stdout
 
-RowReduce.rm:
-	echo "RowReduce.rm target called here."
 
 
 

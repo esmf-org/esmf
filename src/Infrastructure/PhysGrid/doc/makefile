@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/05/29 20:59:10 flanigan Exp $ 
+# $Id: makefile,v 1.13 2005/03/01 21:04:03 nscollins Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -56,8 +56,8 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   = PhysGrid_reqdoc PhysGrid_desdoc PhysGrid_refdoc $(HTMLFILES)
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
-              PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex    \
+CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
+              PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex  \
               $(PDFFILES)
 CLOBBERDIRS =
 

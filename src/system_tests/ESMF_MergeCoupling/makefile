@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/12/09 17:25:37 nscollins Exp $ 
+# $Id: makefile,v 1.4 2005/03/01 21:08:58 nscollins Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -29,7 +29,6 @@ SYSTEM_TESTS_RUN      = RUN_MergeCoupling
 
 SYSTEM_TESTS_RUN_UNI  = RUN_MergeCouplingUNI
 
-SYSTEM_TESTS_RM       = MergeCoupling.rm
 
 ESMF_MergeCouplingSTest.o: $(SYSTEM_TESTS_OBJ)
 
@@ -37,21 +36,17 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core ESMF_LogFile $(SYSTEM_TESTS_BUILD)
+CLEANDIRS   = 
+CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
 RUN_MergeCoupling:
-	-@rm -f testlog stdlog.* logfile.* MergeCoupling.tmps
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_MergeCouplingSTest >$(ESMC_TESTDIR)/ESMF_MergeCouplingSTest.stdout
 
 RUN_MergeCouplingUNI:
-	-@rm -f testlog stdlog.* logfile.* MergeCoupling.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_MergeCouplingSTest >$(ESMC_TESTDIR)/ESMF_MergeCouplingSTest.stdout
 
-MergeCoupling.rm:
-	echo "MergeCoupling.rm target called here."
 
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.43 2004/08/03 22:29:10 nscollins Exp $ 
+# $Id: makefile,v 1.44 2005/03/01 20:56:10 nscollins Exp $ 
 
 #
 #  Note that the ref doc build rules are redefined here.
@@ -52,7 +52,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILES)
-CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.out *.ORIG ESMF.bib \
+CLEANFILES  = $(CLEAN_TEXFILES) ESMF.bib \
 	      ESMF_reqdoc.tex ESMF_refdoc.tex ESMF_usrdoc.tex \
 	      ESMF_reqdoc.pdf ESMF_refdoc.pdf ESMF_usrdoc.pdf ESMF_reqdoc.ps \
 	      ESMF_reqdoc.bib ESMF_refdoc.bib ESMF_usrdoc.bib \
