@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.7 2004/12/01 18:32:30 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.8 2004/12/02 17:36:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.7 2004/12/01 18:32:30 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.8 2004/12/02 17:36:20 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -165,12 +165,12 @@
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
     
-    call ESMF_StateProxyCreate(state, stateinfo, vm, rc)
+    call ESMF_StateProxyCreate(state, stateinfo, vm, localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
 
-    call ESMF_StateInfoDrop(stateinfo, rc=rc)
+    call ESMF_StateInfoDrop(stateinfo, rc=localrc)
     if (ESMF_LogMsgFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rc)) return
@@ -269,7 +269,7 @@
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldSerialize(stateitem%datap%fp, bptr, &
-                                       bufsize, offset, rc)
+                                       bufsize, offset, localrc)
             print *, "setting field, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_ARRAY%ot)
@@ -277,7 +277,7 @@
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerializeNoData(stateitem%datap%ap, bptr(1), &
-                                       bufsize, offset, rc)
+                                       bufsize, offset, localrc)
             print *, "setting array, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_STATE%ot)
@@ -285,7 +285,7 @@
              si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
-             call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, rc)
+             call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, localrc)
             print *, "setting state, obj=", si%objsend(i), " id=", si%idsend(i)
 
            case (ESMF_STATEITEM_NAME%ot)
@@ -293,7 +293,7 @@
              si%idsend(i) = -1
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, rc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
             print *, "setting placeholder, name=", stateitem%namep
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
@@ -301,7 +301,7 @@
              si%idsend(i) = -2
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, rc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
             print *, "setting field-in-bundle, name=", stateitem%namep
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_UNKNOWN%ot)
@@ -309,7 +309,7 @@
              si%idsend(i) = -3
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
-             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, rc)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
             print *, "setting unknown, name=", stateitem%namep
              localrc = ESMF_SUCCESS
         end select
@@ -437,6 +437,7 @@
     do j = 0, pets-1
        ! each takes turns sending to all, everyone else receives
        if (mypet .eq. j) then
+           ! i am the sender, send in turn to each other pet
            print *, j, "sends to everyone else"
            do i = 0, pets-1
                if (i .eq. j) cycle
@@ -456,6 +457,13 @@
                    print *, "object counts not same; ", &
                           si%mycount, " .ne. ", si%theircount
                endif
+
+               ! at this point i know how many objects they have
+        
+               ! TODO:
+               ! this code goes ahead and sends everything preemptively.
+               ! once the code is working, change this so it only sends
+               ! object numbers which appear in my list and not in theirs.
 
                if (si%mycount .gt. 0) then
                    call ESMF_VMSend(vm, si%idsend, si%mycount, i, rc=localrc)
@@ -477,6 +485,7 @@
 
                    enddo
                endif
+               ! done sending to the next pet
            enddo
        else  ! i was not the sender this time, so i am receiving
            print *, mypet, "receives from", j
@@ -496,6 +505,13 @@
                print *, "object counts not same; ", &
                           si%mycount, " .ne. ", si%theircount
            endif
+  
+           ! at this point, i know how many objects they have.
+
+           ! TODO:
+           ! go ahead and receive all objects preemptively and then decide
+           ! if we need them.  once this code is working, only receive
+           ! missing objects.
 
            if (si%theircount .gt. 0) then
                allocate(si%idrecv(si%theircount), stat=localrc)
@@ -531,6 +547,10 @@
                enddo
            endif
 
+           ! at this point we have all their objects here in our address
+           ! space.  we just need to sort thru the lists and figure out
+           ! if there are any which are missing from our list.
+
            do k=1, si%mycount
              print *, "i am", mypet, " my send ids and objs are:", &
                             k, si%idsend(k), si%objsend(k)
@@ -544,7 +564,6 @@
            !!!   make a combined object id list here, so only one copy of
            !!!   the missing object is sent.
 
-           !!offset = 0  !TODO: wrong place, yes??
            do k=1, si%theircount
              ihave = .false.
              do l=1, si%mycount
@@ -618,7 +637,23 @@
                               "Deallocating buffer for local buf list", &
                                ESMF_CONTEXT, rc)) return
            endif
-       endif
+           
+           ! and now, i have a different object list.   brute force
+           ! rebuild my send list.
+
+           call ESMF_StateInfoDrop(stateInfoList, rc=localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+           call ESMF_StateInfoBuild(state, stateInfoList, vm, localrc)
+           if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+
+           si => stateInfoList(1)
+
+       endif   ! sender vs receiver
     enddo
 
 
