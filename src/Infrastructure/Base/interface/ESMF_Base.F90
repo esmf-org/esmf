@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.104 2004/06/03 22:55:32 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.105 2004/06/07 05:21:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -437,7 +437,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.104 2004/06/03 22:55:32 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.105 2004/06/07 05:21:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -630,6 +630,8 @@ end function
 !
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseCreate"
 !BOPI
 ! !IROUTINE:  ESMF_BaseCreate - Create and initialize a Base object
 !
@@ -694,6 +696,8 @@ end function
       end subroutine ESMF_BaseCreate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseDestroy"
 !BOPI
 ! !IROUTINE:  ESMF_BaseDestroy - Release resources from a Base object
 !
@@ -734,6 +738,8 @@ end function
       end subroutine ESMF_BaseDestroy
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSet"
 !BOPI
 ! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
 !
@@ -775,6 +781,8 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGet"
 !BOPI
 ! !IROUTINE:  ESMF_AttributeGet - get attribute from an ESMF type
 !
@@ -816,8 +824,9 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetCount"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AttributeGetCount - get an ESMF object's number of attributes
 !
 ! !INTERFACE:
@@ -854,9 +863,10 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetbyNumber"
 !BOPI
-!
-! !IROUTINE:  ESMF_AttributeGetbyNumber - get an ESMF object's attribute by number
+! !IROUTINE:  ESMF_AttributeGetbyNumber - get an object attribute by number
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
@@ -903,9 +913,10 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetNameList"
 !BOPI
-!
-! !IROUTINE:  ESMF_AttributeGetNameList - get an ESMF object's attribute name list
+! !IROUTINE:  ESMF_AttributeGetNameList - get an object attribute name list
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetNameList(anytype, count, namelist, rc)
@@ -941,13 +952,13 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetList"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AttributeSetList - set an ESMF object's attributes 
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
-
 !
 ! !ARGUMENTS:
       type(ESMF_Base), intent(in) :: anytype
@@ -979,9 +990,10 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetList"
 !BOPI
-!
-! !IROUTINE:  ESMF_AttributeGetList - get an ESMF object's attributes
+! !IROUTINE:  ESMF_AttributeGetList - get an objects attributes
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
@@ -1018,8 +1030,9 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeSetObjectList"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AttributeSetObjectList - set an attribute on multiple ESMF objects 
 !
 ! !INTERFACE:
@@ -1053,9 +1066,9 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeGetObjectList"
 !BOPI
-!
-!
 ! !IROUTINE:  ESMF_AttributeGetObjectList - get an attribute from multiple ESMF objects 
 !
 ! !INTERFACE:
@@ -1092,8 +1105,9 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeCopy"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AttributeCopy - copy an attribute between two objects
 !
 ! !INTERFACE:
@@ -1130,10 +1144,10 @@ end function
 
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeCopyAll"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
-
 !
 ! !INTERFACE:
       subroutine ESMF_AttributeCopyAll(source, destination, rc)
@@ -1167,6 +1181,8 @@ end function
 
 !-------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SetName"
 !BOPI
 ! !IROUTINE:  ESMF_SetName - set the name of this object
 !
@@ -1232,6 +1248,8 @@ end function
       end subroutine ESMF_SetName
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GetName"
 !BOPI
 ! !IROUTINE:  ESMF_GetName - get the name of this object
 !
@@ -1270,10 +1288,10 @@ end function
 !-------------------------------------------------------------------------
 !  Print routine
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BasePrint"
 !BOPI
-!
 ! !IROUTINE:  ESMF_BasePrint - Call into C++ code to print base object
-
 !
 ! !INTERFACE:
       subroutine ESMF_BasePrint(base, options, rc)
@@ -1282,7 +1300,6 @@ end function
       type(ESMF_Base), intent(in) :: base
       character(len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
-
 !
 ! !DESCRIPTION:
 !  Interface to call through to C++ and print base object values.
@@ -1309,8 +1326,14 @@ end function
       endif
 
       if (base%this .eq. ESMF_NULL_POINTER) then
-         print *, " Uninitialized Base object"
-         return
+          print *, "Uninitialized Base Object"
+          if (present(rc)) rc = ESMF_RC_OBJ_BAD
+          return
+          ! TODO: how can we include logerr if we haven't compiled it yet?
+          ! need an interface block for it here, i guess.
+          !if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+          !                      "Uninitialized Base object", &
+          !                       ESMF_CONTEXT, rc) return
       endif
 
       call c_ESMC_BasePrint(base, opts, status)
@@ -1321,10 +1344,10 @@ end function
 !=========================================================================
 ! Domain List routines.
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListCreate"
 !BOPI
-!
 ! !IROUTINE:  ESMF_DomainListCreate - Create domain list
-
 !
 ! !INTERFACE:
       function ESMF_DomainListCreate(num_domains)
@@ -1333,7 +1356,6 @@ end function
 !
 ! !ARGUMENTS:
       integer :: num_domains
-
 !
 ! !DESCRIPTION:
 ! Create a list of {\tt ESMF\_Domain}s.  
@@ -1361,10 +1383,10 @@ end function
       end function ESMF_DomainListCreate
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListDestroy"
 !BOPI
-!
 ! !IROUTINE:  ESMF_DomainListDestroy - Destroy domain list
-
 !
 ! !INTERFACE:
       subroutine ESMF_DomainListDestroy(domainlist)
@@ -1389,10 +1411,10 @@ end function
       end subroutine ESMF_DomainListDestroy
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListPrint"
 !BOPI
-!
 ! !IROUTINE:  ESMF_DomainListPrint - Print domain list
-
 !
 ! !INTERFACE:
       subroutine ESMF_DomainListPrint(domainlist)
@@ -1431,10 +1453,10 @@ end function
       end subroutine ESMF_DomainListPrint
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListAdd2d"
 !BOPI
-!
 ! !IROUTINE:  ESMF_DomainListAdd2d - Add a 2D domainlist
-
 !
 ! !INTERFACE:
       subroutine ESMF_DomainListAdd2d(domainlist, &
@@ -1485,10 +1507,10 @@ end function
       end subroutine ESMF_DomainListAdd2d
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListAdd3d"
 !BOPI
-!
 ! !IROUTINE:  ESMF_DomainListAdd3d - Add a 3D domainlist
-
 !
 ! !INTERFACE:
       subroutine ESMF_DomainListAdd3d(domainlist, &
@@ -1549,10 +1571,10 @@ end function
       end subroutine ESMF_DomainListAdd3d
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DomainListAddObj"
 !BOPI
-!
 ! !IROUTINE:  ESMF_DomainListAddObj - Add a domain object 
-
 !
 ! !INTERFACE:
       subroutine ESMF_DomainListAddObj(domainlist, newdomain)
@@ -1613,10 +1635,10 @@ end function
 !=========================================================================
 ! Misc utility routines, perhaps belongs in a utility file?
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexSet"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AxisIndexSet - Initialize an AxisIndex object
-
 !
 ! !INTERFACE:
       subroutine ESMF_AxisIndexSet(ai, min, max, stride, rc)
@@ -1654,8 +1676,9 @@ end function
       end subroutine ESMF_AxisIndexSet
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AxisIndexGet"
 !BOPI
-!
 ! !IROUTINE:  ESMF_AxisIndexGet - Get contents of an AxisIndex object
 !
 ! !INTERFACE:
@@ -1695,10 +1718,10 @@ end function
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SetPointer"
 !BOPI
-!
 ! !IROUTINE:  ESMF_SetPointer - Set an opaque value
-
 !
 ! !INTERFACE:
       subroutine ESMF_SetPointer(ptype, contents, rc)
@@ -1730,10 +1753,10 @@ end function
       end subroutine ESMF_SetPointer
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SetNullPointer"
 !BOPI
-!
 ! !IROUTINE:  ESMF_SetNullPointer - Set an opaque value
-
 !
 ! !INTERFACE:
       subroutine ESMF_SetNullPointer(ptype, rc)
@@ -1741,7 +1764,6 @@ end function
 ! !ARGUMENTS:
       type(ESMF_Pointer) :: ptype 
       integer, intent(out), optional :: rc  
-
 !
 ! !DESCRIPTION:
 !   Set the contents of an opaque pointer type.
@@ -1765,6 +1787,8 @@ end function
 
       end subroutine ESMF_SetNullPointer
 !------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GetPointer"
 !BOPI
 !  !IROUTINE:  ESMF_GetPointer - get an opaque value 
 !  
@@ -1802,6 +1826,8 @@ end function
 !------------------------------------------------------------------------- 
 ! misc print routines
 !------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StatusString"
 !BOPI 
 !  !IROUTINE:  ESMF_StatusString - Return status as a string
 !  
@@ -1842,6 +1868,8 @@ end function
       end subroutine ESMF_StatusString
 
 !------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DataTypeString"
 !BOPI 
 !  !IROUTINE:  ESMF_DataTypeString - Return DataType as a string
 !  
@@ -1879,6 +1907,8 @@ end function
       end subroutine ESMF_DataTypeString
 
 !------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DataKindString"
 !BOPI 
 !  !IROUTINE:  ESMF_DataKindString - Return DataKind as a string
 !  
@@ -1921,6 +1951,8 @@ end function
       end subroutine ESMF_DataKindString
 
 !------------------------------------------------------------------------- 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogicalString"
 !BOPI 
 !  !IROUTINE:  ESMF_LogicalString - Return Logical as a string
 !  

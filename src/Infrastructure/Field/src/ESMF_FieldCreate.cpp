@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.3 2004/05/10 15:43:47 nscollins Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.4 2004/06/07 05:21:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+^define ESMF_FILENAME "ESMF_FieldCreate.F90"
 !
 !     ESMF FieldCreate module
       module ESMF_FieldCreateMod
@@ -28,6 +29,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
@@ -57,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.3 2004/05/10 15:43:47 nscollins Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.4 2004/06/07 05:21:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -101,6 +103,8 @@ InterfaceMacro(FieldCreateEPtr)
 !==============================================================================
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateNew"
 !BOP
 ! !IROUTINE:   ESMF_FieldCreate - Create a new Field
 
@@ -179,19 +183,17 @@ InterfaceMacro(FieldCreateEPtr)
       allocate(ftype, stat=status)
       ! If error write message and return.
       ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstruct(ftype, grid, arrayspec, allocflag, &
                                   horzRelloc, vertRelloc, haloWidth, &
                                   datamap, name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct new asp"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
    
       ! Set return values.
       ESMF_FieldCreateNew%ftypep => ftype
@@ -200,6 +202,8 @@ InterfaceMacro(FieldCreateEPtr)
       end function ESMF_FieldCreateNew
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateFromArray"
 !BOP
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from an existing ESMF Array
 
@@ -277,21 +281,16 @@ InterfaceMacro(FieldCreateEPtr)
       endif     
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateFromArray: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstruct(ftype, grid, array, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNew: Field construct NewArray"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
    
 
       ! Set return values.
@@ -301,6 +300,8 @@ InterfaceMacro(FieldCreateEPtr)
       end function ESMF_FieldCreateFromArray
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCreateRemap"
 !BOP
 ! !IROUTINE: ESMF_FieldCreate - Create a Field by remapping another Field
 
@@ -376,12 +377,8 @@ InterfaceMacro(FieldCreateEPtr)
       endif     
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateRemap: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! TODO: Insert field construction method
 

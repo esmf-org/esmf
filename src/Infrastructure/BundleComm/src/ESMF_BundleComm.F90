@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.26 2004/06/03 21:54:59 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.27 2004/06/07 05:21:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
       use ESMF_DELayoutMod
@@ -97,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.26 2004/06/03 21:54:59 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.27 2004/06/07 05:21:06 nscollins Exp $'
 
 !==============================================================================
 !
@@ -188,10 +189,9 @@
       ! Call Array method to perform actual work
       call ESMF_ArrayAllGather(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: Array Gather returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -274,10 +274,9 @@
       call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, &
                             btypep%grid, btypep%flist(1)%ftypep%mapping, &
                             destinationDE, array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: Array Gather returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -344,10 +343,9 @@
 
       call ESMF_ArrayHalo(btypep%flist(1)%ftypep%localfield%localdata, routehandle, &
                              blocking, commhandle, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleHalo: ArrayHalo returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -452,27 +450,26 @@
       ! Sanity checks for good bundle, and that it has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(bundle%btypep)) then
-        print *, "Invalid or Destroyed Bundle"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       btypep => bundle%btypep
 
       if (btypep%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "Bundle not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 
       call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, routehandle, &
                                halodirection, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleHaloStore: ArrayHaloStore returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -558,10 +555,9 @@
       call ESMF_ArrayRedist(stypep%flist(1)%ftypep%localfield%localdata, &
                             dtypep%flist(1)%ftypep%localfield%localdata, &
                             routehandle, blocking, commhandle, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in BundleRedist: ArrayRedist returned failure"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -668,14 +664,14 @@
       ! Sanity checks for good bundle, and that it has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(dstBundle%btypep)) then
-        print *, "Invalid or Destroyed Bundle"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (.not.associated(srcBundle%btypep)) then
-        print *, "Invalid or Destroyed Bundle"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       dtypep => dstBundle%btypep
@@ -683,9 +679,9 @@
 
       if (dtypep%bundlestatus.ne.ESMF_STATE_READY .or. &
           stypep%bundlestatus.ne.ESMF_STATE_READY) then
-        print *, "Bundle not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call ESMF_ArrayRedistStore(stypep%flist(1)%ftypep%localfield%localdata, &
@@ -696,10 +692,9 @@
                                  dtypep%flist(1)%ftypep%mapping, &
                                  parentDElayout, &
                                  routehandle, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -770,10 +765,9 @@
       !call ESMF_GridReduce(field%btypep%grid, &
       !                     field%btypep%flist(1)%ftypep%localfield%localdata, &
       !                     rtype, result, status)
-      !if(status .NE. ESMF_SUCCESS) then 
-      !  print *, "ERROR in BundleReduce: Grid reduce"
-      !  return
-      !endif 
+      !if (ESMF_LogMsgFoundError(status, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1059,25 +1053,22 @@
       !  match up the array indices and the grid indices.
       call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
                            dataIndices=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: FieldDataMapGet returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 !     call ESMF_GridGet(btypep%grid, decomps, rc=status)   !TODO
-!     if(status .NE. ESMF_SUCCESS) then 
-!       print *, "ERROR in BundleScatter: GridGet returned failure"
-!       return
-!     endif 
+      !if (ESMF_LogMsgFoundError(status, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
       decomps(1) = 1    ! TODO: remove this once the grid call is created
       decomps(2) = 2
 
       ! And get the Array sizes
       call ESMF_ArrayGet(btypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArrayGet returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       do i=1, datarank
         decompids(i) = dimorder(i)
@@ -1088,10 +1079,9 @@
       call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
       call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: Array Scatter returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! TODO: do we need to set dimorder here?  should datamap be an input
       !  to this routine, or specified at create time?   or should this be

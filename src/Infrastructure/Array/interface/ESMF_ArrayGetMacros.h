@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayGetMacros.h,v 1.3 2004/06/02 13:27:56 nscollins Exp $
+! $Id: ESMF_ArrayGetMacros.h,v 1.4 2004/06/07 05:20:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,7 +73,8 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_ArrayGetData##mrank##D##mtypekind" @\
+!define ESMF_METHOD "ESMF_ArrayGetData##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayGetData" @\
       subroutine ESMF_ArrayGetData##mrank##D##mtypekind(array, fptr, docopy, rc) @\
  @\
       type(ESMF_Array) :: array @\
@@ -106,28 +107,23 @@
         endif @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array - get pointer error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
           call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
-          if (status .ne. ESMF_SUCCESS) then @\
-            print *, "Array - cannot retrieve array dim sizes" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
           call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
-          if (status .ne. ESMF_SUCCESS) then @\
-            print *, "Array - cannot retrieve array dim sizes" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
           allocate(localp( mrng ), stat=status) @\
-          if (status .ne. 0) then     ! f90 status, not ESMF @\
-            print *, "Array do_copy allocate error" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundAllocError(status, "Array local copy", & @\
+                                       ESMF_CONTEXT, rc)) return @\
           ! this must do a contents assignment @\
           localp = wrap % ptr##mrank##D##mtypekind @\
           fptr => localp  @\

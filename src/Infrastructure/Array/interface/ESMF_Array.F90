@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.11 2004/06/03 12:19:56 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.12 2004/06/07 05:20:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
@@ -124,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.11 2004/06/03 12:19:56 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.12 2004/06/07 05:20:51 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -281,7 +282,8 @@ end subroutine
       endif
    
       if (present(strides)) then
-         print *, "Warning: strides not supported yet"
+         if (ESMF_LogWrite("Strides not yet supported", &
+                               ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
          strides(:) = 1
       endif
 
@@ -427,10 +429,9 @@ end subroutine
            call c_ESMC_ArrayPrint(array, defaultopts, status) 
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Array print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
        ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -764,10 +765,9 @@ end subroutine
 
       if (present(name)) then
           call c_ESMC_SetName(array, "Array", name, status)
-          if(status .eq. ESMF_FAILURE) then
-            print *, "ERROR in ESMF_ArraySet: error setting Name"
-            return
-          endif
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -822,8 +822,9 @@ end subroutine
 
        ! Simple validity checks
        if (array%this .eq. ESMF_NULL_POINTER) then
-           print *, "Array not initialized or Destroyed"
-           return 
+          ! TODO: this will always return.  
+          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+                                ESMF_CONTEXT, rc)) return
        endif
 
        if(present(options)) then
@@ -897,16 +898,14 @@ end subroutine
        else
            call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status) 
        endif
-
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Array write error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayWrite
+       end subroutine ESMF_ArrayWrite
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-!n $Id: ESMF_FieldComm.F90,v 1.36 2004/06/03 22:04:56 cdeluca Exp $
+!n $Id: ESMF_FieldComm.F90,v 1.37 2004/06/07 05:21:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
       use ESMF_DELayoutMod    ! ESMF layout class
@@ -96,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.36 2004/06/03 22:04:56 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.37 2004/06/07 05:21:07 nscollins Exp $'
 
 !==============================================================================
 !
@@ -204,10 +205,9 @@
       ! Call Array method to perform actual work
       call ESMF_ArrayAllGather(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldAllGather: Array AllGather returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -289,10 +289,9 @@
       call ESMF_ArrayGather(ftypep%localfield%localdata, &
                             ftypep%grid, ftypep%mapping, destinationDE, &
                             array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldGather: Array Gather returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -369,10 +368,9 @@
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
                              blocking, commhandle, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: ArrayHalo returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -476,27 +474,26 @@
       ! Sanity checks for good field, and that it has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(field%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ftypep => field%ftypep
 
       if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "Field not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 
       call ESMF_ArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, routehandle, &
                                halodirection, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHaloStore: ArrayHaloStore returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -581,10 +578,9 @@
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
                             routehandle, blocking, commhandle, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FieldRedist: ArrayRedist returned failure"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -691,14 +687,14 @@
       ! Sanity checks for good fields, and that each has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(dstField%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (.not.associated(srcField%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       dstFtypep => dstField%ftypep
@@ -706,9 +702,9 @@
 
       if (dstFtypep%fieldstatus.ne.ESMF_STATE_READY .or. &
           srcFtypep%fieldstatus.ne.ESMF_STATE_READY) then
-        print *, "Field not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call ESMF_ArrayRedistStore(srcFtypep%localfield%localdata, &
@@ -719,10 +715,9 @@
                                  dstFtypep%mapping, &
                                  parentDElayout, &
                                  routehandle, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRedistStore: ArrayRedistStore returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -798,17 +793,17 @@
       ! Sanity checks for good source field, and that it has an associated grid
       ! and data before going down to the next level.
       if (.not.associated(srcField%ftypep)) then
-        print *, "Invalid or Destroyed Field"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       srcFtypep => srcField%ftypep
 
       if (srcFtypep%fieldstatus.ne.ESMF_STATE_READY) then
-        print *, "Field not ready"
-        if (present(rc)) rc = ESMF_FAILURE
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! create the destination grid by copying the source grid and adding
@@ -828,10 +823,9 @@
                                  dstFtypep%mapping, &
                                  parentDElayout, &
                                  routehandle, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRedistStoreNew: ArrayRedistStore returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -903,10 +897,9 @@
       !call ESMF_GridReduce(field%ftypep%grid, &
       !                     field%ftypep%localfield%localdata, &
       !                     rtype, result, status)
-      !if(status .NE. ESMF_SUCCESS) then 
-      !  print *, "ERROR in FieldReduce: Grid reduce"
-      !  return
-      !endif 
+      !if (ESMF_LogMsgFoundError(status, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1063,10 +1056,9 @@
                                 dst_datamap, routehandle, &       
                                 srcmask, dstmask, blocking, commhandle, rc)
       endif
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRegrid: RouteRun returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 
       ! Set return values.
@@ -1328,28 +1320,25 @@
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
       call ESMF_FieldDataMapGet(ftypep%mapping, dataIndices=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldScatter: FieldDataMapGet returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_GridGet(ftypep%grid, dimCount=numDims, rc=status) 
 
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
-!     if(status .NE. ESMF_SUCCESS) then 
-!       print *, "ERROR in FieldScatter: GridGet returned failure"
-!       return
-!     endif 
+      !call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
+      !if (ESMF_LogMsgFoundError(status, &
+      !                            ESMF_ERR_PASSTHRU, &
+      !                            ESMF_CONTEXT, rc)) return
       decomps(1) = 1    ! TODO: remove this once the grid call is created
       decomps(2) = 2
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldGather: ArrayGet returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       do i=1, datarank
         decompids(i) = dimorder(i)
@@ -1360,10 +1349,9 @@
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
       call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldScatter: Array Scatter returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! TODO: do we need to set dimorder here?  should datamap be an input
       !  to this routine, or specified at create time?   or should this be
@@ -1467,18 +1455,16 @@
       call ESMF_FieldDataMapGet(ftypep%mapping, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            dataIndices=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: FieldDataMapGet returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
                          counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in FieldHalo: ArrayGet returned failure"
-         return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Get global starting counts and global counts
       call ESMF_DELayoutGet(delayout, deCount=nDEs, rc=status)
@@ -1497,10 +1483,9 @@
                         globalCellCountPerDim=global_count, &
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in FieldHalo: GridGet returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! set up things we need to find a cached route or precompute one
       call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
@@ -1512,18 +1497,16 @@
                                        vertRelLoc=vertRelLoc, &
                                        localAI2D=dst_AI, &
                                        globalAI2D=gl_dst_AI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in FieldHalo: GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       call ESMF_GridLocalToGlobalIndex(ftypep%grid, horzRelLoc=horzRelLoc, &
                                        vertRelLoc=vertRelLoc, &
                                        localAI2D=src_AI, &
                                        globalAI2D=gl_src_AI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in FieldHalo: GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.  Note the confusing ordering of args;
@@ -1550,10 +1533,9 @@
 
       local_array = ftypep%localfield%localdata
       call ESMF_RouteRun(route, local_array, local_array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: RouteRun returned failure"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! TODO: we are caching the route so don't delete it.
       !call ESMF_RouteDestroy(route, rc)

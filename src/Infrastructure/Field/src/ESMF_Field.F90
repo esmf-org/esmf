@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.149 2004/06/03 22:16:05 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.150 2004/06/07 05:21:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Field.F90"
 !
 !     ESMF Field module
       module ESMF_FieldMod
@@ -43,6 +44,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
@@ -225,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.149 2004/06/03 22:16:05 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.150 2004/06/07 05:21:06 nscollins Exp $'
 
 !==============================================================================
 !
@@ -365,7 +367,7 @@
 !==============================================================================
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddIntAttr()"
+#define ESMF_METHOD "ESMF_FieldAddIntAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set an integer attribute
@@ -413,10 +415,9 @@
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -425,7 +426,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddIntListAttr()"
+#define ESMF_METHOD "ESMF_FieldAddIntListAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list attribute
@@ -477,16 +478,16 @@
   
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldAddAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -495,7 +496,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddRealAttr()"
+#define ESMF_METHOD "ESMF_FieldAddRealAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a real attribute
@@ -543,10 +544,9 @@
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -555,7 +555,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddRealListAttr()"
+#define ESMF_METHOD "ESMF_FieldAddRealListAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a real list attribute
@@ -607,16 +607,16 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldAddAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -625,7 +625,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddLogicalAttr()"
+#define ESMF_METHOD "ESMF_FieldAddLogicalAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a logical attribute
@@ -673,10 +673,9 @@
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -685,7 +684,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddLogicalListAttr()"
+#define ESMF_METHOD "ESMF_FieldAddLogicalListAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list attribute
@@ -737,16 +736,16 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldAddAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -755,7 +754,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldAddCharAttr()"
+#define ESMF_METHOD "ESMF_FieldAddCharAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a character attribute
@@ -802,10 +801,9 @@
       endif
 
       call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -814,7 +812,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldCreateNoDataPtr()"
+#define ESMF_METHOD "ESMF_FieldCreateNoDataPtr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
@@ -887,21 +885,16 @@
       endif     
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in FieldCreateNoDataPtr: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call construction method to build field internals.
       call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldCreateNoDataPtr: Field construct NoBuf"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_FieldCreateNoDataPtr%ftypep => ftype
@@ -912,7 +905,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldCreateNoArray()"
+#define ESMF_METHOD "ESMF_FieldCreateNoArray"
 
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
@@ -982,20 +975,15 @@
       endif     
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in FieldCreateNoArray: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       haloWidth, datamap, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNoArray: Construct"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_FieldCreateNoArray%ftypep => ftype
@@ -1006,7 +994,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldCreateNoGridArray()"
+#define ESMF_METHOD "ESMF_FieldCreateNoGridArray"
 
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no Grid or Array
@@ -1060,19 +1048,14 @@
       endif     
 
       allocate(ftype, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then 
-        print *, "ERROR in ESMF_FieldCreateNoGridArray: Allocate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call field construction method
       call ESMF_FieldConstructNoGridArray(ftype, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldCreateNoGridArray: Construct"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       ESMF_FieldCreateNoGridArray%ftypep => ftype
@@ -1083,7 +1066,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldDestroy()"
+#define ESMF_METHOD "ESMF_FieldDestroy"
 
 !BOP
 ! !IROUTINE: ESMF_FieldDestroy - Free all resources associated with a Field
@@ -1123,26 +1106,21 @@
 
       ! If already destroyed or never created, return ok
       if (.not. associated(field%ftypep)) then
-        print *, "FieldDestroy called on uninitialized or destroyed Field"
-        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! Destruct all field internals and then free field memory.
       call ESMF_FieldDestruct(field%ftypep, status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldDestroy from ESMF_FieldDestruct"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
            
-      if (associated(field%ftypep)) deallocate(field%ftypep, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .ne. 0) then 
-        print *, "ERROR in ESMF_FieldDestroy: Deallocate of Field class"
-        return
+      if (associated(field%ftypep)) then
+         deallocate(field%ftypep, stat=status)
+         if (ESMF_LogMsgFoundAllocError(status, "Deallocating Field", &
+                                       ESMF_CONTEXT, rc)) return
       endif 
            
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1152,7 +1130,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGet()"
+#define ESMF_METHOD "ESMF_FieldGet"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
@@ -1209,53 +1187,55 @@
 
         ! Minimal error checking
         if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
         endif
  
         ftype => field%ftypep
         if (ftype%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         if (present(grid)) then
             if (ftype%gridstatus .ne. ESMF_STATE_READY) then
-              print *, "ERROR: No grid attached to Field"
-              return
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No Grid or Bad Grid attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
             endif
             grid = ftype%grid
         endif
 
         if (present(array)) then
             if (ftype%datastatus .ne. ESMF_STATE_READY) then
-              print *, "ERROR: No data attached to Field"
-              return
+                if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No data attached to Field", &
+                                 ESMF_CONTEXT, rc)) return
             endif
             array = ftype%localfield%localdata
         endif
 
         if (present(datamap)) then
             ! TODO: what's the proper test here?  you could have a map w/ no data yet
-            !if (ftype%datastatus .ne. ESMF_STATE_READY) then
-            !  print *, "ERROR: No data attached to Field"
-            !  return
-            !endif
+            !    if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+            !                    "No data attached to Field", &
+            !                     ESMF_CONTEXT, rc)) return
             datamap = ftype%mapping
         endif
 
         if (present(horzRelloc)) then
             ! TODO: what's the proper test here?  ditto code above.
             !if (ftype%datastatus .ne. ESMF_STATE_READY) then
-            !  print *, "ERROR: No data attached to Field"
-            !  return
+            !    if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+            !                    "No data attached to Field", &
+            !                     ESMF_CONTEXT, rc)) return
             !endif
             call ESMF_FieldDataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Horizontal RelLoc in ESMF_FieldDataMapGet"
-                rc = status
-                return
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(vertRelloc)) then
@@ -1265,20 +1245,16 @@
             !  return
             !endif
             call ESMF_FieldDataMapGet(ftype%mapping, vertRelloc=vertRelloc, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Vertical RelLoc in ESMF_FieldDataMapGet"
-                rc = status
-                return
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(name)) then
             call c_ESMC_GetName(ftype%base, name, status)
-            if (status .ne. ESMF_SUCCESS) then
-                print *, "ERROR in getting Field name in ESMF_FieldGet"
-                rc = status
-                return
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (present(rc)) rc = ESMF_SUCCESS
@@ -1288,7 +1264,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetArray()"
+#define ESMF_METHOD "ESMF_FieldGetArray"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
@@ -1336,20 +1312,23 @@
 
       ! Minimal error checking 
       if (.not.associated(field%ftypep)) then
-        print *, "ESMF_FieldGetArray: Invalid or Destroyed Field"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ftypep => field%ftypep
 
       if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "ESMF_FieldGetArray: Field not ready"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       if (ftypep%datastatus .ne. ESMF_STATE_READY) then
-          print *, "ESMF_FieldGetArray: no data associated with field"
-          return
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "No data associated with Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       !call ESMF_StatusString(ftypep%datastatus, str, rc)
@@ -1364,7 +1343,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetIntAttr()"
+#define ESMF_METHOD "ESMF_FieldGetIntAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer attribute
@@ -1412,10 +1391,9 @@
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1424,7 +1402,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetIntListAttr()"
+#define ESMF_METHOD "ESMF_FieldGetIntListAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer list attribute
@@ -1477,16 +1455,16 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1495,7 +1473,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetRealAttr()"
+#define ESMF_METHOD "ESMF_FieldGetRealAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real attribute
@@ -1543,10 +1521,9 @@
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1555,7 +1532,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetRealListAttr()"
+#define ESMF_METHOD "ESMF_FieldGetRealListAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real list attribute
@@ -1607,16 +1584,16 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1625,7 +1602,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetLogicalAttr()"
+#define ESMF_METHOD "ESMF_FieldGetLogicalAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical Attribute
@@ -1673,10 +1650,9 @@
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1685,7 +1661,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetLogicalListAttr()"
+#define ESMF_METHOD "ESMF_FieldGetLogicalListAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list attribute
@@ -1737,16 +1713,16 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1755,7 +1731,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetCharAttr()"
+#define ESMF_METHOD "ESMF_FieldGetCharAttr"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character attribute
@@ -1803,10 +1779,9 @@
       endif
 
       call c_ESMC_AttributeGetChar(field%ftypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1816,7 +1791,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetAttributeCount()"
+#define ESMF_METHOD "ESMF_FieldGetAttributeCount"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of attributes
@@ -1859,10 +1834,9 @@
       endif
 
       call c_ESMC_AttributeGetCount(field%ftypep%base, count, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttributeCount"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1871,7 +1845,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetAttrInfoByName()"
+#define ESMF_METHOD "ESMF_FieldGetAttrInfoByName"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by name
@@ -1925,10 +1899,9 @@
 
       call c_ESMC_AttributeGetAttrInfoName(field%ftypep%base, name, &
                                            localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttributeInfo"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(type)) type = localDt
       if (present(count)) count = localCount
@@ -1940,7 +1913,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum()"
+#define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum"
 
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by number
@@ -1998,10 +1971,9 @@
 
       call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, num, &
                                          localName, localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldGetAttributeInfo"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
       if (present(type)) type = localDt
@@ -2014,7 +1986,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetGlobalGridInfo()"
+#define ESMF_METHOD "ESMF_FieldGetGlobalGridInfo"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalGridInfo - Get information about the Global Grid
@@ -2068,7 +2040,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetLocalGridInfo()"
+#define ESMF_METHOD "ESMF_FieldGetLocalGridInfo"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalGridInfo - Get information about the Local Grid
@@ -2117,7 +2089,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetGlobalDataInfo()"
+#define ESMF_METHOD "ESMF_FieldGetGlobalDataInfo"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalDataInfo - Get information about Field Data
@@ -2166,7 +2138,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldGetLocalDataInfo()"
+#define ESMF_METHOD "ESMF_FieldGetLocalDataInfo"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalDataInfo - Get information about Field Data
@@ -2216,7 +2188,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldPrint()"
+#define ESMF_METHOD "ESMF_FieldPrint"
 
 !BOP
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
@@ -2311,7 +2283,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRead()"
+#define ESMF_METHOD "ESMF_FieldRead"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldRead - Read in a Field from external storage
@@ -2368,7 +2340,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldReadRestart()"
+#define ESMF_METHOD "ESMF_FieldReadRestart"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldReadRestart - Read back in a saved Field
@@ -2420,7 +2392,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldSetArray()"
+#define ESMF_METHOD "ESMF_FieldSetArray"
 
 !BOP
 ! !IROUTINE: ESMF_FieldSetArray - Set data Array associated with the Field
@@ -2468,21 +2440,24 @@
 
       ! Minimal error checking 
       if (.not.associated(field%ftypep)) then
-        print *, "ESMF_FieldSetData: Invalid or Destroyed Field"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ftypep => field%ftypep
 
       if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "ESMF_FieldSetData: Field not ready"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! TODO: do we allow this?  if so, do we just destroy the old array?
       !if (ftypep%datastatus .eq. ESMF_STATE_READY) then
-      !    print *, "ESMF_FieldSetData: data already associated with field"
-      !    return
+      !   if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+      !                          "Data already associated with Field", &
+      !                           ESMF_CONTEXT, rc)) return
       !endif
 
       ftypep%localfield%localdata = array
@@ -2499,7 +2474,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldSetGrid()"
+#define ESMF_METHOD "ESMF_FieldSetGrid"
 
 !BOP
 ! !IROUTINE: ESMF_FieldSetGrid - Set Grid associated with the Field
@@ -2538,13 +2513,15 @@
 
         ! Minimal error checking
         if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
         endif
  
         if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         ! decide if we're regridding or just adding a grid to a partially
@@ -2558,8 +2535,12 @@
            field%ftypep%gridstatus = ESMF_STATE_READY
         else
            ! this could be considered a request to regrid the data
-           print *, "not currently supported.  since a grid exists, this"
-           print *, "will be a request to regrid the field"
+           if (ESMF_LogWrite("Replacing existing grid not yet supported", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)) continue
+           if (ESMF_LogWrite("Will be considered a regrid request", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)) continue
         endif
 
         if (present(rc)) rc = ESMF_SUCCESS
@@ -2569,7 +2550,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldSetDataMap()"
+#define ESMF_METHOD "ESMF_FieldSetDataMap"
 
 !BOP
 ! !IROUTINE: ESMF_FieldSetDataMap - Set DataMap assocated with a Field
@@ -2608,13 +2589,15 @@
 
         ! Minimal error checking
         if (.not.associated(field%ftypep)) then
-          print *, "ERROR: Invalid or Destroyed Field"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
         endif
  
         if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "ERROR: Field not ready"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         ! decide if we're reordering data or just setting an initial map
@@ -2627,8 +2610,12 @@
            field%ftypep%mapping = datamap
         else
            ! this could be considered a request to reorder the data
-           print *, "not currently supported.  since data exists, this"
-           print *, "will be a request to reorder the data in the field"
+           if (ESMF_LogWrite("Replacing existing datamap not yet supported", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)) continue
+           if (ESMF_LogWrite("Will be considered a data reorder request", &
+                               ESMF_LOG_WARNING, &
+                               ESMF_CONTEXT)) continue
            return
         endif
 
@@ -2639,7 +2626,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldSetDataValues()"
+#define ESMF_METHOD "ESMF_FieldSetDataValues"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldSetDataValues - Set contents of Data array
@@ -2684,7 +2671,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldValidate()"
+#define ESMF_METHOD "ESMF_FieldValidate"
 
 !BOP
 ! !IROUTINE:  ESMF_FieldValidate - Check the internal consistency of a Field
@@ -2725,13 +2712,15 @@
       endif
 
       if (.not.associated(field%ftypep)) then 
-          print *, "Uninitialized or Destroyed Field"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif 
 
       if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Destroyed Field"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Field", &
+                                 ESMF_CONTEXT, rc)) return
       endif 
 
       ! TODO: add more code here
@@ -2743,7 +2732,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldWrite()"
+#define ESMF_METHOD "ESMF_FieldWrite"
 
 !BOP
 ! !IROUTINE: ESMF_FieldWrite - Write a Field to external storage
@@ -2831,7 +2820,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldWriteRestart()"
+#define ESMF_METHOD "ESMF_FieldWriteRestart"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldWriteRestart - Save Field in the quickest manner possible
@@ -2880,7 +2869,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNew()"
+#define ESMF_METHOD "ESMF_FieldConstructNew"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNew - Construct the internals of a Field
@@ -2970,21 +2959,18 @@
 
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       hwidth, datamap, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_ArraySpecGet"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGet"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! make sure hRelLoc has a value before GridGetDE call
       if (present(horzRelLoc)) then
@@ -2993,17 +2979,16 @@
           if (present(datamap)) then
               call ESMF_FieldDataMapGet(datamap, horzRelLoc=hRelLoc, rc=status)
           else
-              print *, "ERROR in ESMF_FieldConstructNew: ", & 
-                       "no valid RelLoc in either argument list or datamap."
-              return
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                       "no valid RelLoc in either argument list or datamap", &
+                                 ESMF_CONTEXT, rc)) return
           endif
       endif
       call ESMF_GridGetDE(grid, horzRelLoc=hRelLoc, vertRelLoc=vertRelLoc, &
                           localCellCountPerDim=gridcounts(1:gridRank), rc=status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGetDE"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! get information back from datamap
       call ESMF_FieldDataMapGet(ftype%mapping, dataIndices=dimorder, &
@@ -3021,10 +3006,9 @@
       enddo
 
       array = ESMF_ArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Array create"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ftype%localfield%localdata = array
       ftype%datastatus = ESMF_STATE_READY
@@ -3036,7 +3020,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNewArray()"
+#define ESMF_METHOD "ESMF_FieldConstructNewArray"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNewArray - Construct the internals of a Field
@@ -3105,16 +3089,14 @@
 
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       haloWidth, datamap, name, iospec, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA 2"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       call ESMF_ArrayValidate(array, "", status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "Error uninitialized or invalid array"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%localfield%localdata = array
       !ftype%localfield%datastatus = ESMF_STATE_READY
       ftype%datastatus = ESMF_STATE_READY
@@ -3126,7 +3108,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNoDataPtr()"
+#define ESMF_METHOD "ESMF_FieldConstructNoDataPtr"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoDataPtr - Construct a Field with no associated buffer
@@ -3196,18 +3178,16 @@
  
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoDataPtr: BaseCreate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! TODO: Check to see grid is valid first.
 
       call ESMF_GridValidate(grid, "", status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "Error uninitialized or invalid grid"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
@@ -3234,22 +3214,20 @@
         endif
       endif
 
-!     call ESMF_ArrayConstructNoDataPtr(ftype%array)
+      !call ESMF_ArrayConstructNoDataPtr(ftype%array)
 
       ! If I/O spec is present, copy it into the field object; otherwise just 
       ! initialize the I/O spec in the field object.
       if(present(iospec)) then
-!       ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNoDataPtr: IOSpec init"
-          return
-        endif 
+        !ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
+        !if (ESMF_LogMsgFoundError(status, &
+        !                          ESMF_ERR_PASSTHRU, &
+        !                          ESMF_CONTEXT, rc)) return
       else 
-!       ESMF_IOSpecInit(ftype%iospec, status)
-        if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNoDataPtr: IOSpec init"
-          return
-        endif 
+        !ESMF_IOSpecInit(ftype%iospec, status)
+        !if (ESMF_LogMsgFoundError(status, &
+        !                          ESMF_ERR_PASSTHRU, &
+        !                          ESMF_CONTEXT, rc)) return
       endif
 
       ftype%fieldstatus = ESMF_STATE_READY
@@ -3261,7 +3239,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNoArray()"
+#define ESMF_METHOD "ESMF_FieldConstructNoArray"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoArray - Construct a Field with no associated Array
@@ -3327,17 +3305,15 @@
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoArray: BaseCreate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Attach grid
       call ESMF_GridValidate(grid, "", status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "Error uninitialized or invalid grid"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
@@ -3380,7 +3356,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldConstructNoGridArray()"
+#define ESMF_METHOD "ESMF_FieldConstructNoGridArray"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
@@ -3431,10 +3407,9 @@
 
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftypep%base, "Field", name, 0, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoGridArray: BaseCreate"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Initialize field contents
       !ftypep%localfield%gridstatus = ESMF_STATE_UNINIT
@@ -3458,7 +3433,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldDestruct()"
+#define ESMF_METHOD "ESMF_FieldDestruct"
 
 !BOPI
 ! !IROUTINE:   ESMF_FieldDestruct - Free any Field memory allocated internally
@@ -3495,14 +3470,11 @@
       endif
 
 
-      print *, "Field Destruct called"
-
       ! release the base class resources
       call ESMF_BaseDestroy(ftype%base, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldDestruct: BaseDestroy failed"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 !
 ! TODO: more code goes here
@@ -3516,7 +3488,7 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBoxIntersect()"
+#define ESMF_METHOD "ESMF_FieldBoxIntersect"
 
 !BOPI
 ! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
@@ -3636,10 +3608,9 @@
         ! Query the datamap and set info for grid so it knows how to
         ! match up the array indices and the grid indices.
         call ESMF_FieldGet(srcField, grid=srcGrid, rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGet returned failure on Grid"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         ! From the grid get the bounding box on this DE
         call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
@@ -3656,10 +3627,9 @@
         ! Query the datamap and set info for grid so it knows how to
         ! match up the array indices and the grid indices.
         call ESMF_FieldGet(dstField, grid=dstGrid, rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGet returned failure on Grid"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         ! From the grid get the bounding box on this DE
         call ESMF_FieldGet(dstField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
@@ -3676,8 +3646,5 @@
       end subroutine ESMF_FieldBoxIntersect
 
 !------------------------------------------------------------------------------
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "No ESMF method defined"
 
       end module ESMF_FieldMod

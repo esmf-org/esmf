@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.1 2004/04/19 22:01:52 nscollins Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.2 2004/06/07 05:21:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,6 +74,8 @@
 #define FieldGetDataPointerMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldGetDataPointer" @\
       subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, fptr, copyflag, rc) @\
  @\
       type(ESMF_Field), intent(in) :: field @\
@@ -98,21 +100,20 @@
  @\
         ! Test to see if pointer already associated, and fail if so. @\
         if (associated(fptr)) then @\
-          print *, "Error: Data Pointer cannot already be associated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                              "Data Pointer cannot already be associated", & @\
+                              ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         call ESMF_FieldGetArray(field, array, rc=status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Error: FieldGetData failed" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_ArrayGetData(array, fptr, copyflag, rc=status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Error: ArrayGetData failed" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         if (rcpresent) rc = status @\
  @\

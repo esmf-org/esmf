@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.8 2004/06/04 11:58:29 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.9 2004/06/07 05:20:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
+      use ESMF_LogErrMod
 
 ! !PUBLIC TYPES:
       implicit none
@@ -207,7 +208,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.8 2004/06/04 11:58:29 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.9 2004/06/07 05:20:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -376,8 +377,9 @@ end function
         if (present(dataIndices)) then
            dimlength = size(dataIndices,1)
            if (dimlength .lt. datamap%dataRank) then
-             print *, "ESMF_ArrayDataMapGet: dataIndices array too short for dataRank"
-             return
+              if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "dataIndices array too short for dataRank", &
+                                 ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
@@ -518,8 +520,9 @@ end function
         if (present(dataIndices)) then
            dimlength = size(dataIndices,1)
            if (dimlength .lt. datamap%dataRank) then
-             print *, "ESMF_ArrayDataMapSet: dataIndices array too short for dataRank"
-             return
+              if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "dataIndices array too short for dataRank", &
+                                 ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
@@ -746,8 +749,9 @@ end function
             datamap%dataDimOrder(3) = 2
 
           case default 
-            print *, "ERROR: ESMF_ArrayDataMapSetDefault - unrecognized grid index order"
-            return
+            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "unrecognized grid index order", &
+                                 ESMF_CONTEXT, rc)) return
         end select
 
         datamap%dataNonGridCounts(:) = 1

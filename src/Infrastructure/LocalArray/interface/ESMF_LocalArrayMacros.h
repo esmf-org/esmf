@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.17 2004/04/23 21:22:43 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.18 2004/06/07 05:21:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -87,6 +87,9 @@
 #define LocalArrayCreateByMTPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrCreateByMTPtr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrCreateByMTPtr" @\
       function ESMF_LocalArrCreateByMTPtr##mrank##D##mtypekind(fptr, counts, lbounds, ubounds, rc) @\
  @\
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtr##mrank##D##mtypekind @\
@@ -114,17 +117,18 @@
  @\
         ! Test to see if array already allocated, and fail if so. @\
         if (associated(fptr)) then @\
-          print *, "Pointer cannot already be allocated" @\
-          return @\
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer cannot already be allocated", & @\
+                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         ! Call create routine @\
         call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
-          return @\
-        endif @\
+ @\
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer cannot already be allocated", & @\
+                                 ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, counts, fptr,& @\
                                   ESMF_DATA_SPACE, lbounds, ubounds, status) @\
@@ -229,8 +233,9 @@
  @\
         ! Test to see if array is not already associated, and fail if so. @\
         if (.not.associated(fptr)) then @\
-          print *, "Pointer must already be associated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer must already be allocated", & @\
+                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         ! Get sizes from current array, although the construct routine @\
@@ -242,10 +247,9 @@
         ! Call create routine @\
         call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_LocalArrConstrF90Ptr##mrank##D##mtypekind(array, counts, fptr,& @\
                                   copy, lbounds, ubounds, status) @\
@@ -401,10 +405,9 @@
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
             allocate(newp(mrng), stat=status) @\
-            if (status .ne. 0) then     ! f90 status, not ESMF @\
-              print *, "LocalArray space allocate error" @\
-              return @\
-            endif @\
+            if (ESMF_LogMsgFoundAllocError(status, & @\
+                                 "LocalArray data space", & @\
+                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         if (willcopy) then @\
@@ -423,10 +426,9 @@
                                  lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, status) @\
  @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "LocalArray internal set info error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         if (rcpresent) rc = status @\
  @\
@@ -511,28 +513,24 @@
         endif @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "LocalArray - get pointer error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
           call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
-          if (status .ne. ESMF_SUCCESS) then @\
-            print *, "Array - cannot retrieve array dim sizes" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
           call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
-          if (status .ne. ESMF_SUCCESS) then @\
-            print *, "Array - cannot retrieve array dim sizes" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
           allocate(lp(mrng), stat=status) @\
-          if (status .ne. 0) then     ! f90 status, not ESMF @\
-            print *, "LocalArray do_copy allocate error" @\
-            return @\
-          endif @\
+          if (ESMF_LogMsgFoundAllocError(status, & @\
+                                     "local data space", & @\
+                                      ESMF_CONTEXT, rc)) return @\
           ! this must do a contents assignment @\
           lp = wrap%ptr##mrank##D##mtypekind @\
           fptr => lp  @\

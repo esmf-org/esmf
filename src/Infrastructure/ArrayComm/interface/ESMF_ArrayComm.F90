@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.46 2004/06/03 21:52:20 cdeluca Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.47 2004/06/07 05:20:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.46 2004/06/03 21:52:20 cdeluca Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.47 2004/06/07 05:20:52 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -318,10 +318,9 @@
     call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
                               horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                               rc=status)
-    if(status .NE. ESMF_SUCCESS) then
-      print *, "ERROR in ArrayAllGatherGrid: FieldDataMapGet returned failure"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     call ESMF_GridGet(grid, &
                         horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
@@ -329,20 +328,18 @@
                         cellCountPerDEPerDim=tempCCPDEPD, &
                         maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
     ! call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
-    if(status .NE. ESMF_SUCCESS) then
-      print *, "ERROR in ArrayAllGatherGrid: GridGet returned failure"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     size_decomp = size(decompids)
     decomps(1) = 1    ! TODO: remove this once the grid call is created
     decomps(2) = 2
 
     ! get the Array sizes
     call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
-    if(status .NE. ESMF_SUCCESS) then
-      print *, "ERROR in ArrayAllGatherGrid: ArrayGet returned failure"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! calculate decompids and dimlengths, modified if necessary by dimorders
     do i=1, datarank
@@ -373,10 +370,9 @@
                                    localMaxDimCount, gatheredArray, status)
 #endif
 
-    if (status .ne. ESMF_SUCCESS) then
-      print *, "c_ESMC_ArrayAllGather returned error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Clean up
     deallocate(localAxisLengths)
@@ -556,10 +552,9 @@
         size_decomp = size(decompids)
         call c_ESMC_ArrayHalo(array, delayout, AI_global, global_dimlens, &
                               decompids, size_decomp, periodic, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayHalo returned error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -632,10 +627,9 @@
       ! Execute the communications call.
       local_array = array
       call ESMF_RouteRun(route, local_array, local_array, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayHalo: RouteRun returned failure"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -765,10 +759,9 @@
       call ESMF_FieldDataMapGet(datamap, horzRelLoc=horzRelLoc, &
                            vertRelLoc=vertRelLoc, &
                            dataIndices=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayHalo: FieldDataMapGet returned failure"
-        return
-      endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
      
       ! Extract more information from the Grid
       call ESMF_GridGet(grid, &
@@ -777,17 +770,15 @@
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
       ! TODO: get decompids, get grid rank here?
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHaloStore: GridGet returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! And get the Array sizes
       call ESMF_ArrayGet(array, rank=datarank, counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHaloStore: ArrayGet returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
@@ -799,19 +790,15 @@
       call ESMF_GridLocalToGlobalIndex(grid, horzRelLoc=horzRelLoc, &
                                        vertRelLoc=vertRelloc, localAI2D=dst_AI, &
                                        globalAI2D=gl_dst_AI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHaloStore: ", &
-                  "GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       call ESMF_GridLocalToGlobalIndex(grid, horzRelLoc=horzRelLoc, &
                                        vertRelLoc=vertRelloc, localAI2D=src_AI, &
                                        globalAI2D=gl_src_AI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayHaloStore: ", &
-                  "GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
@@ -894,10 +881,9 @@
         call c_ESMC_ArrayRedist(array, delayout, globalStart, global_dimlengths, &
                                 rank_trans, size_rank_trans, olddecompids, &
                                 decompids, size_decomp, redistarray, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayRedist returned error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! set return code if user specified it
         if (present(rc)) rc = ESMF_SUCCESS
@@ -977,10 +963,9 @@
       dstLocalArray = dstArray
       srcLocalArray = srcArray
       call ESMF_RouteRun(route, srcLocalArray, dstLocalArray, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedist: RouteRun returned failure"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1137,17 +1122,15 @@
       call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
                            vertRelLoc=dstVertRelLoc, &
                            dataIndices=dstDimOrder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedistStore: FieldDataMapGet returned failure"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       call ESMF_FieldDataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
                            vertRelLoc=srcVertRelLoc, &
                            dataIndices=srcDimOrder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRedistStore: FieldDataMapGet returned failure"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Extract more information from the Grids
       ! TODO: get decompids?
@@ -1155,25 +1138,22 @@
                         horzRelLoc=dstHorzRelLoc, vertRelLoc=dstVertRelLoc, &
                         globalCellCountPerDim=dstCellCountPerDim, &
                         globalStartPerDEPerDim=dstStartPerDEPerDim, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedistStore: GridGet returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       call ESMF_GridGet(srcGrid, &
                         horzRelLoc=srcHorzRelLoc, vertRelLoc=srcVertRelLoc, &
                         globalCellCountPerDim=srcCellCountPerDim, &
                         globalStartPerDEPerDim=srcStartPerDEPerDim, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedistStore: GridGet returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! And get the Array sizes
       call ESMF_ArrayGet(srcArray, rank=datarank, counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedistStore: ArrayGet returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
@@ -1191,58 +1171,54 @@
                                        vertRelLoc=dstVertRelLoc, &
                                        localAI2D=dstCLocalAI, &
                                        globalAI2D=dstCompAI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call ESMF_GridLocalToGlobalIndex(dstGrid, &
                                        horzRelLoc=dstHorzRelLoc, &
                                        vertRelLoc=dstVertRelLoc, &
                                        localAI2D=dstTLocalAI, &
                                        globalAI2D=dstTotalAI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedistStore: ", &
-                  "GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call ESMF_GridLocalToGlobalIndex(srcGrid, &
                                        horzRelLoc=srcHorzRelLoc, &
                                        vertRelLoc=srcVertRelLoc, &
                                        localAI2D=srcCLocalAI, &
                                        globalAI2D=srcCompAI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedistStore: ", &
-                  "GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
       call ESMF_GridLocalToGlobalIndex(srcGrid, &
                                        horzRelLoc=srcHorzRelLoc, &
                                        vertRelLoc=srcVertRelLoc, &
                                        localAI2D=srcTLocalAI, &
                                        globalAI2D=srcTotalAI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-         print *, "ERROR in ArrayRedistStore: ", &
-                  "GridLocalToGlobalIndex returned failure"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, &
-                               dstMyDE, dstCompAI, dstTotalAI, nDEs, dstDElayout, &
-                               srcMyDE, srcCompAI, srcTotalAI, nDEs, srcDElayout, &
-                               periodic, hascachedroute, route, status)
+                            dstMyDE, dstCompAI, dstTotalAI, nDEs, dstDElayout, &
+                            srcMyDE, srcCompAI, srcTotalAI, nDEs, srcDElayout, &
+                            periodic, hascachedroute, route, status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
           route = ESMF_RouteCreate(parentDElayout, rc)
 
           call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
-                                          dstTotalAI, dstStartPerDEPerDim, &
-                                          dstCellCountPerDim, dstDElayout, &
-                                          srcMyDE, srcCompAI, srcTotalAI, &
-                                          srcStartPerDEPerDim, &
-                                          srcCellCountPerDim, srcDElayout, status)
+                                       dstTotalAI, dstStartPerDEPerDim, &
+                                       dstCellCountPerDim, dstDElayout, &
+                                       srcMyDE, srcCompAI, srcTotalAI, &
+                                       srcStartPerDEPerDim, &
+                                       srcCellCountPerDim, srcDElayout, status)
       endif
 
       ! and set route into routehandle object

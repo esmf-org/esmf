@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_AllocMacros.h,v 1.9 2004/03/17 18:10:35 nscollins Exp $
+! $Id: ESMF_AllocMacros.h,v 1.10 2004/06/07 05:20:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,26 +26,21 @@
 #define AllocAllocateMacro(mtypekind, mrank, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
         allocate(l##mrank##D##mtypekind % ptr##mrank##D##mtypekind( mrng ), stat=status) @\
-        if (status .ne. 0) then @\
-          print *, "ESMC_ArrayCreate: Allocation error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundAllocError(status, "Local pointer", & @\
+                                       ESMF_CONTEXT, rc)) return @\
  @\
         ! Set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
- @\
-        ! Since I am not sure what these are used for, leave them 0 for now. @\
+        ! (Since I am not sure if these are used, set offsets to 0 for now.) @\
         offsets = 0 @\
  @\
         call c_ESMC_ArraySetInfo(array, l##mrank##D##mtypekind, & @\
                         ESMF_DATA_ADDRESS(l##mrank##D##mtypekind % ptr##mrank##D##mtypekind (mloc) ), & @\
                         counts, lb, ub, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, hwidth, status) @\
- @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array internal set info error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
 ! < End macro - do not edit directly >  @\
 
 #if 0

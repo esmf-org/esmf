@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $
+! $Id: ESMF_CommTable.F90,v 1.6 2004/06/07 05:21:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
+      use ESMF_LogErrMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -83,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CommTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $'
+      '$Id: ESMF_CommTable.F90,v 1.6 2004/06/07 05:21:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -170,10 +171,9 @@
 
         ! Call C++ create code
         call c_ESMC_CommTableCreate(arg1, arg2, arg3, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CommTableCreateNew = commtable
@@ -225,10 +225,9 @@
 
         ! Call C++ destroy code
         call c_ESMC_CommTableDestroy(commtable, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! nullify pointer
         commtable%this = ESMF_NULL_POINTER
@@ -295,10 +294,9 @@
 
         ! Call C++  code
         call c_ESMC_CommTableGet(commtable, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -362,10 +360,9 @@
 
         ! Call C++  code
         call c_ESMC_CommTableSet(commtable, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "CommTable Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -420,10 +417,9 @@
            call c_ESMC_CommTableValidate(commtable, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "CommTable validate error"
-         return
-       endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -480,10 +476,9 @@
            call c_ESMC_CommTablePrint(commtable, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "CommTable print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS

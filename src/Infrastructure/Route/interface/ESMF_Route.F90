@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.53 2004/06/02 11:54:40 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.54 2004/06/07 05:21:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,6 +34,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod       
+      use ESMF_LogErrMod
       use ESMF_DELayoutMod  
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod  
@@ -93,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.53 2004/06/02 11:54:40 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.54 2004/06/07 05:21:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -152,10 +153,9 @@
 
         ! Call C++ create code
         call c_ESMC_RouteCreate(route, delayout, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_RouteCreate = route
@@ -207,10 +207,9 @@
 
         ! Call C++ destroy code
         call c_ESMC_RouteDestroy(route, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route destroy error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! nullify pointer
         route%this = ESMF_NULL_POINTER
@@ -277,10 +276,9 @@
 
         ! Call C++  code
 !       call c_ESMC_RouteGet(route, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -511,10 +509,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteGetRecvItems(route, nitems, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1078,10 +1075,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteSetRecvItems(route, nitems, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1138,10 +1134,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteSetRecv(route, srcDE, xp, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1198,10 +1193,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteSetSend(route, destDE, xp, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1258,10 +1252,9 @@
            call c_ESMC_RoutePrint(route, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Route print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -1318,10 +1311,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Run error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1376,10 +1368,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Run error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1434,10 +1425,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Run error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1492,10 +1482,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Run error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1550,10 +1539,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Run error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1608,10 +1596,9 @@
 
         ! Call C++  code
         call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Run error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1666,10 +1653,9 @@
            call c_ESMC_RouteValidate(route, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Route validate error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.6 2004/06/02 08:02:59 nscollins Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.7 2004/06/07 05:20:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,6 +42,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -80,7 +81,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.6 2004/06/02 08:02:59 nscollins Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.7 2004/06/07 05:20:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -235,10 +236,11 @@
         if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
           arrayspec%rank = rank
         else
-          print *, "ERROR in ESMF_ArraySpecSet: bad rank"
           ! something to trigger on next time that this is bad
           arrayspec%rank = 0
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "bad value for rank", &
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         ! Since type and kind are derived types, you cannot set them to
@@ -306,10 +308,11 @@
         if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
           arrayspec%rank = rank
         else
-          print *, "ERROR in ESMF_ArraySpecSet: bad rank"
           ! something to trigger on next time that this is bad
           arrayspec%rank = 0
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "bad value for rank", &
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         ! Since type and kind are derived types, you cannot set them to

@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $
+! $Id: ESMF_RTable.F90,v 1.6 2004/06/07 05:21:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
+      use ESMF_LogErrMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -77,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $'
+      '$Id: ESMF_RTable.F90,v 1.6 2004/06/07 05:21:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -157,10 +158,9 @@
 
         ! Call C++ create code
         call c_ESMC_RTableCreate(mydeid, decount, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_RTableCreateNew = rtable
@@ -212,10 +212,9 @@
 
         ! Call C++ destroy code
         call c_ESMC_RTableDestroy(rtable, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! nullify pointer
         rtable%this = ESMF_NULL_POINTER
@@ -282,10 +281,9 @@
 
         ! Call C++  code
         call c_ESMC_RTableGet(rtable, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -341,10 +339,9 @@
            call c_ESMC_RTablePrint(rtable, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "RTable print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -408,10 +405,9 @@
 
         ! Call C++  code
         call c_ESMC_RTableSet(rtable, value1, value2, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RTable Set error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -466,10 +462,9 @@
            call c_ESMC_RTableValidate(rtable, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "RTable validate error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS

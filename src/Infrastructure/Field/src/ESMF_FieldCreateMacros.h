@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.2 2004/05/10 15:43:47 nscollins Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.3 2004/06/07 05:21:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,6 +93,8 @@
 #define FieldCreateDPtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_FieldCreateDPtr" @\
       function ESMF_FieldCreateDPtr##mrank##D##mtypekind(grid, fptr, copyflag, & @\
                 horzRelloc, vertRelloc, haloWidth, datamap, name, iospec, rc) @\
  @\
@@ -127,31 +129,28 @@
  @\
         ! Test to see if pointer not associated, and fail if so. @\
         if (.not.associated(fptr)) then @\
-          print *, "Error: Data Pointer must already be associated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                                "Data Pointer must already be associated", & @\
+                                ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         array = ESMF_ArrayCreate(fptr, copyflag, rc=status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Error: ArrayCreate failed" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         allocate(ftype, stat=status) @\
-        ! If error write message and return. @\
-        if(status .NE. 0) then @\
-          print *, "ERROR in ESMF_FieldCreate: Allocate" @\
-          return @\
-        endif  @\
+        if (ESMF_LogMsgFoundAllocError(status, & @\
+                                       "Allocating Field information", & @\
+                                       ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
         call ESMF_FieldConstruct(ftype, grid, array, & @\
                                     horzRelloc, vertRelloc, haloWidth, & @\
                                     datamap, name, iospec, status) @\
-        if(status .NE. ESMF_SUCCESS) then @\
-          print *, "ERROR in ESMF_FieldCreate: Field construct" @\
-          return @\
-        endif  @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ESMF_FieldCreateDPtr##mrank##D##mtypekind%ftypep => ftype  @\
         if (rcpresent) rc = status @\
@@ -284,28 +283,26 @@
  @\
         ! Test to see if pointer not already associated, and fail if so. @\
         if (associated(fptr)) then @\
-          print *, "Error: Data Pointer must not already be associated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                             "Data Pointer cannot already be associated", & @\
+                              ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         ! Get rank, type, kind from ptr and initialize arrayspec @\
         call ESMF_ArraySpecSet(arrayspec, mrank, ESMF_##mtypekind, status) @\
  @\
         allocate(ftype, stat=status) @\
-        ! If error write message and return. @\
-        if(status .NE. 0) then @\
-          print *, "ERROR in ESMF_FieldCreate: Allocate" @\
-          return @\
-        endif  @\
+        if (ESMF_LogMsgFoundAllocError(status, & @\
+                                       "Allocating Field information", & @\
+                                       ESMF_CONTEXT, rc)) return @\
  @\
         ! Construction method allocates and initializes field internals. @\
         call ESMF_FieldConstruct(ftype, grid, arrayspec, allocflag, & @\
                                     horzRelloc, vertRelloc, haloWidth, & @\
                                     datamap, name, iospec, status) @\
-        if(status .NE. ESMF_SUCCESS) then @\
-          print *, "ERROR in ESMF_FieldCreate: Field construct" @\
-          return @\
-        endif  @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! Set return value, and then get pointer back. @\
         ESMF_FieldCreateEPtr##mrank##D##mtypekind%ftypep => ftype  @\

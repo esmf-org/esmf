@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.168 2004/05/26 18:04:11 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.169 2004/06/07 05:21:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Grid.F90"
 !
 !     ESMF Grid Module
       module ESMF_GridMod
@@ -37,6 +38,7 @@
 ! !USES:
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_IOSpecMod      ! ESMF I/O class
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_ArrayDataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod ! ESMF layout class
@@ -93,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.168 2004/05/26 18:04:11 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.169 2004/06/07 05:21:07 nscollins Exp $'
 
 !==============================================================================
 !
@@ -198,6 +200,8 @@
       contains
 
 !==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddVertHeight"
 !BOP
 ! !IROUTINE: ESMF_GridAddVertHeight - add a vertical subGrid to an existing Grid
 
@@ -283,8 +287,9 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridAddVertHeight: ", &
-                 "GridStructureUnknown not supported"
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
         status = ESMF_FAILURE
 
       !-------------
@@ -294,39 +299,38 @@
                                 vertGridType, vertStagger, &
                                 vertCoordSystem, dimName, dimUnit, &
                                 name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridAddVertHeight: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridAddVertHeight: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridAddVertHeight: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridAddVertHeight: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridAddVertHeight: error in specific call'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -334,6 +338,8 @@
       end subroutine ESMF_GridAddVertHeight
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "GridCreateEmpty"
 !BOP
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid with no contents
 
@@ -381,19 +387,14 @@
       endif
 
       allocate(grid, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateEmpty: Allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Grid information", &
+                                       ESMF_CONTEXT, rc)) return
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_GridConstructNew(grid, name, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateEmpty: Grid construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_GridCreateEmpty%ptr => grid
@@ -403,6 +404,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateRead"
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid read in from a file
 
@@ -460,47 +463,46 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridCreateRead: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateRead = ESMF_LRGridCreateRead(iospec, name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridCreateRead: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridCreateRead: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridCreateRead: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridCreateRead: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridCreateRead: error in creation'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -509,6 +511,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateCopy"
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid by copying another Grid
 
@@ -563,47 +567,46 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridCreateCopy: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateCopy = ESMF_LRGridCreateCopy(gridIn, name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridCreateCopy: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridCreateCopy: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridCreateCopy: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridCreateCopy: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridCreateCopy: error in creation'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -612,6 +615,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateCutout"
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid as a subset of an existing Grid
 
@@ -672,48 +677,47 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridCreateCutout: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateCutout = ESMF_LRGridCreateCutout(gridIn, min, max, &
                                                         name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridCreateCutout: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridCreateCutout: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridCreateCutout: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridCreateCutout: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridCreateCutout: error in creation'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -722,6 +726,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateDiffRes"
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid by coarsening or refining an existing Grid
 
@@ -786,48 +792,47 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateDiffRes = &
           ESMF_LRGridCreateDiffRes(gridIn, resolution, name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridCreateDiffRes: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridCreateDiffRes: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridCreateDiffRes: error in creation'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -836,6 +841,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateExchange"
 !BOPI
 ! !IROUTINE: ESMF_GridCreate - Create a new Grid from the intersection of two existing grids
 
@@ -893,48 +900,47 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridCreateExchange: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateExchange = ESMF_LRGridCreateExchange(gridIn1, gridIn2, &
                                                             name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridCreateExchange: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridCreateExchange: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridCreateExchange: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridCreateExchange: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridCreateExchange: error in creation'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -942,6 +948,8 @@
       end function ESMF_GridCreateExchange
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridDestroy"
 !BOP
 ! !IROUTINE: ESMF_GridDestroy - Free all resources associated with a Grid 
 
@@ -993,62 +1001,56 @@
       case(0)
         ! TODO: decide if it's ok to create an empty grid and then delete 
         !   it without being created further. (allow it for now)
-        !print *, "ERROR in ESMF_GridDestroy: ", &
-        !         "GridStructureUnknown not supported"
-        !status = ESMF_FAILURE
-        status = ESMF_SUCCESS
+        !if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+        !                        "Unknown grid structure", &
+        !                         ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDestruct(grid%ptr, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridDestroy: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridDestroy: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridDestroy: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridDestroy: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
-
-      ! If error write message and return.
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridDestroy from grid destruct"
-        return
-      endif
 
       ! delete the base class
       call ESMF_BaseDestroy(grid%ptr%base, status)
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridDestroy from BaseDestroy"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! free field memory.
       deallocate(grid%ptr, stat=status)
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_GridDestroy: Grid deallocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Deallocating Grid information", &
+                                       ESMF_CONTEXT, rc)) return
       ! so we can detect reuse of a deleted grid object
       nullify(grid%ptr)
 
@@ -1057,6 +1059,8 @@
       end subroutine ESMF_GridDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridDistribute"
 !BOP
 ! !IROUTINE: ESMF_GridDistribute - Distribute a grid that has already been initialized
 
@@ -1115,54 +1119,55 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridDistribute: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDistribute(grid%ptr, delayout, countsPerDEDim1, &
                                    countsPerDEDim2, decompIds, name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridDistribute: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridDistribute: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridDistribute: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridDistribute: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridDistribute: error in specific call'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridDistribute
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGet"
 !BOP
 ! !IROUTINE: ESMF_GridGet - Gets a variety of information about the grid
 
@@ -1277,9 +1282,9 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridGet: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -1293,39 +1298,37 @@
                             globalStartPerDEPerDim, maxLocalCellCountPerDim, &
                             cellCountPerDEPerDim, periodic, delayout, &
                             name, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridGet: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridGet: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridGet: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridGet: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
-
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGet: error in get'
-        return
-      endif
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1333,6 +1336,8 @@
       end subroutine ESMF_GridGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCoord"
 !BOP
 ! !IROUTINE: ESMF_GridGetCoord - Get the coordinates of a Grid
 
@@ -1411,54 +1416,55 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridGetCoord: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
                                  cornerCoord, faceCoord, reorder, total, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridGetCoord: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridGetCoord: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridGetCoord: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridGetCoord: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGetCoord: error in get'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetCoord
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetDE"
 !BOP
 ! !IROUTINE: ESMF_GridGetDE - Get Local DE information for a Grid
 
@@ -1552,9 +1558,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridGetDE: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -1564,45 +1570,46 @@
                               minLocalCoordPerDim, maxLocalCoordPerDim, &
                               globalStartPerDim, globalAIPerDim, reorder, &
                               total, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridGetDE: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridGetDE: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridGetDE: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridGetDE: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGetDE: error in get'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetDE
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGlobalToLocalIndex"
 !BOP
 ! !IROUTINE: ESMF_GridGlobalToLocalIndex - Translate global indexing to local
 
@@ -1682,9 +1689,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -1695,45 +1702,46 @@
                                            globalAI1D, localAI1D, &
                                            globalAI2D, localAI2D, &
                                            dimOrder, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridGlobalToLocalIndex: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGlobalToLocalIndex: error in gtolindex'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGlobalToLocalIndex
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridLocalToGlobalIndex"
 !BOP
 ! !IROUTINE: ESMF_GridLocalToGlobalIndex - Translate local indexing to global
 
@@ -1811,9 +1819,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -1823,45 +1831,46 @@
                                            local2D, global2D, &
                                            localAI1D, globalAI1D, &
                                            localAI2D, globalAI2D, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridLocalToGlobalIndex: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridLocalToGlobalIndex: error in specific call'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridLocalToGlobalIndex
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridPrint"
 !BOP
 ! !IROUTINE: ESMF_GridPrint - Print the contents of a Grid
 
@@ -1941,6 +1950,8 @@
       end subroutine ESMF_GridPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSet"
 !BOP
 ! !IROUTINE: ESMF_GridSet - Sets a variety of information about the grid
 
@@ -2051,6 +2062,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordCopy"
 !BOPI
 ! !IROUTINE: ESMF_GridSetCoord - Copies coordinates from one Grid to another
 
@@ -2095,6 +2108,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordFromArray"
 !BOPI
 ! !IROUTINE: ESMF_GridSetCoord - Set the coordinates of a Grid from an existing ESMF array
 
@@ -2140,6 +2155,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetCoordFromBuffer"
 !BOPI
 ! !IROUTINE: ESMF_GridSetCoord - Set the coordinates of a Grid from an existing data buffer
 
@@ -2185,6 +2202,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMaskFromArray"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromArray - Set a mask in a Grid from an existing ESMF array
 
@@ -2223,6 +2242,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMaskFromBuffer"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromBuffer - Set a mask in a Grid from an existing data buffer
 
@@ -2261,6 +2282,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMaskCopy"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskCopy - Copies a mask from one grid to another.
 
@@ -2301,6 +2324,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMaskFromMask"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromMask - Set a mask in a Grid from an existing mask
 
@@ -2340,6 +2365,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMetricFromArray"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
 
@@ -2378,6 +2405,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMetricFromBuffer"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
 
@@ -2416,6 +2445,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMetricCompute"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricCompute - Compute a metric for a Grid
 
@@ -2454,6 +2485,8 @@
 
 !------------------------------------------------------------------------------
 ! TODO: make BOP when filled
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSetMetricCopy"
 !BOPI
 ! !IROUTINE: ESMF_GridSetMetricCopy - Copies a metric from one grid to another
 
@@ -2493,6 +2526,8 @@
       end subroutine ESMF_GridSetMetricCopy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridValidate"
 !BOP
 ! !IROUTINE: ESMF_GridValidate - Check internal consistency of a Grid
 
@@ -2543,55 +2578,55 @@
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         ! FIXME:  field needs to know the grid is ok -
-        !print *, "ERROR in ESMF_GridValidate: ", &
-        !         "GridStructureUnknown not supported"
-        !status = ESMF_FAILURE
+        ! if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+        !                        "Unknown grid structure", &
+        !                         ESMF_CONTEXT, rc)) return
         print *, "Grid created, but Structure unknown"
-        status = ESMF_SUCCESS
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridValidate(grid, opt, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridValidate: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridValidate: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridValidate: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         print *, "ERROR in ESMF_GridValidate: Invalid grid structure"
-         status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridValidate: error in specific validate'
-        return
-      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridBoxIntersectRecv"
 !BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 
@@ -2665,55 +2700,54 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridBoxIntersectRecv(grid, localMinPerDim, localMaxPerDim, &
                                          domainList, total, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         print *, "ERROR in ESMF_GridBoxIntersectRecv: Invalid grid structure"
-         status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
-
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
-                 "error in specific intersect code."
-        return
-      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridBoxIntersectRecv
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridBoxIntersectSend"
 !BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
 
@@ -2789,9 +2823,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -2799,46 +2833,45 @@
         call ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, &
                                          localMinPerDim, localMaxPerDim, &
                                          myAI, domainList, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         print *, "ERROR in ESMF_GridBoxIntersectSend: Invalid grid structure"
-         status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
-
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
-                 "error in specific intersect code."
-        return
-      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridBoxIntersectSend
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridComputeDistance"
 !BOPI
 ! !IROUTINE: ESMF_GridComputeDistance - Compute distance between points
 !
@@ -2902,6 +2935,8 @@
       end function ESMF_GridComputeDistance
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAllAxisIndex"
 !BOPI
 ! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a Grid
 
@@ -2954,54 +2989,55 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
                                         total, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridGetAllAxisIndex: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGetAllAxisIndex: error in get'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetAllAxisIndex
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetCellMask"
 !BOPI
 ! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
 
@@ -3057,53 +3093,54 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unknown grid structure", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetCellMask(grid, maskArray, relloc, status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureLogRectBlock not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Log Rect Block", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureUnstruct not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure Unstructured", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-        print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "GridStructureUser not supported"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "Grid structure User", &
+                                 ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-        print *, "ERROR in ESMF_GridGetCellMask: Invalid grid structure"
-        status = ESMF_FAILURE
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Invalid Grid structure", &
+                                 ESMF_CONTEXT, rc)) return
       end select
 
-      if (status /= ESMF_SUCCESS) then
-        rc = status
-        print *, 'ERROR in ESMF_GridGetCellMask: error in get call'
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetCellMask
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridSearchPoint"
 !!BOPI
 !! !IROUTINE: ESMF_GridSearchPoint - Search the grid for a cell containing point
 !
@@ -3170,26 +3207,32 @@
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_UNKNOWN
 !      case(0)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureUnknown not supported"
-!        status = ESMF_FAILURE
+!         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+!                                "Unknown grid structure", &
+!                                 ESMF_CONTEXT, rc)) return
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_LOGRECT
 !      case(1)
 !        call ESMF_LRGridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
 !                                    physGridID, status)
+!        if (ESMF_LogMsgFoundError(status, &
+!                                  ESMF_ERR_PASSTHRU, &
+!                                  ESMF_CONTEXT, rc)) return
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
 !      case(2)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureLogRectBlock not supported"
-!        status = ESMF_FAILURE
+!         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+!                                "Grid structure Log Rect Block", &
+!                                 ESMF_CONTEXT, rc)) return
 !
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_UNSTRUCT
 !      case(3)
+!         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+!                                "Grid structure Unstructured", &
+!                                 ESMF_CONTEXT, rc)) return
 !        print *, "ERROR in ESMF_GridSearch: ", &
 !                 "GridStructureUnstruct not supported"
 !        status = ESMF_FAILURE
@@ -3197,21 +3240,17 @@
 !      !-------------
 !      ! ESMF_GRID_STRUCTURE_USER
 !      case(4)
-!        print *, "ERROR in ESMF_GridSearch: ", &
-!                 "GridStructureUser not supported"
-!        status = ESMF_FAILURE
+!         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+!                                "Grid structure User", &
+!                                 ESMF_CONTEXT, rc)) return
 !
 !      !-------------
 !      case default
-!         print *, "ERROR in ESMF_GridSearch: Invalid grid structure"
-!         status = ESMF_FAILURE
+!         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+!                                "Invalid Grid structure", &
+!                                 ESMF_CONTEXT, rc)) return
 !      end select
 !
-!      if (status /= ESMF_SUCCESS) then
-!        rc = status
-!        print *, 'ERROR in ESMF_GridSearch: error in search'
-!        return
-!      endif
 !
 !      if (present(rc)) rc = ESMF_SUCCESS
 !

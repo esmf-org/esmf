@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.28 2004/05/25 20:07:05 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.29 2004/06/07 05:21:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_GridTypes.F90"
 !
 !     ESMF Grid Types Module
       module ESMF_GridTypesMod
@@ -21,7 +22,6 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-!!#include "ESMF_Grid.h"  ! unneeded
 #include "ESMF.h"
 !==============================================================================
 !BOPI
@@ -37,6 +37,7 @@
 ! !USES:
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_IOSpecMod      ! ESMF I/O class
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_ArrayDataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod ! ESMF layout class
@@ -492,7 +493,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.28 2004/05/25 20:07:05 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.29 2004/06/07 05:21:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -549,6 +550,8 @@
       contains
 
 !==============================================================================
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridConstructNew"
 !BOPI
 ! !IROUTINE: ESMF_GridConstructNew - Construct the internals of an allocated Grid
 
@@ -596,10 +599,9 @@
 
       ! Set the Grid name if present, otherwise construct a default one
       call ESMF_BaseCreate(grid%base, "Grid", name, 0, status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridConstructNew: BaseCreate"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Initialize grid contents
       grid%gridStatus      = ESMF_GRID_STATUS_READY
@@ -629,6 +631,8 @@
       end subroutine ESMF_GridConstructNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetDELayout"
 !BOP
 ! !IROUTINE: ESMF_GridGetDELayout - Get pointer to a DELayout from a Grid
 
@@ -672,16 +676,17 @@
       ! to the application level -- does not matter which one since they all share
       ! the same layout    !TODO: move layout to Grid class?
       call ESMF_DistGridGetDELayout(grid%ptr%distgrids(1)%ptr, delayout, status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGetDELayout: distgrid get delayout"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetDELayout
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddAttribute"
 !BOP
 ! !IROUTINE: ESMF_GridAddAttribute - sets some attributes of Grid
 
@@ -800,10 +805,9 @@
       ! Set the Grid name if present, otherwise construct a default one
       if (present(name)) then
          call ESMF_SetName(grid%ptr%base, name, "Grid", status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridAddAttribute: Setname"
-            return
-         endif
+         if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! Set number of physical grids - check to make sure number of
@@ -853,6 +857,8 @@
       end subroutine ESMF_GridAddAttribute
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetAttributes"
 !BOP
 ! !IROUTINE: ESMF_GridGetAttributes - retrieves some attributes of Grid
 
@@ -962,10 +968,9 @@
       ! Get the Grid name if present
       if (present(name)) then
          call ESMF_GetName(grid%ptr%base, name, status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridGetAttributes: GetName"
-            return
-         endif
+         if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! if present, get information from grid derived type
@@ -1013,6 +1018,8 @@
       end subroutine ESMF_GridGetAttributes
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddDistGrid"
 !BOPI
 ! !IROUTINE: ESMF_GridAddDistGrid - adds a complete DistGrid to Grid type
 
@@ -1056,10 +1063,9 @@
       ! Update the DistGridAlloc counter and check to see if DistGrid
       ! array needs to be resized to add the new distgrid
       call ESMF_GridMakeDistGridSpace(grid, grid%numDistGrids+1, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridAddDistGrid: make distgrid space"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       grid%numDistGrids = grid%numDistGrids + 1
 
       ! Add the DistGrid
@@ -1071,6 +1077,8 @@
       end subroutine ESMF_GridAddDistGrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMakeDistGridSpace"
 !BOPI
 ! !IROUTINE: ESMF_GridMakeDistGridSpace - Allocate or extend DistGrid array
 
@@ -1178,6 +1186,8 @@
      end subroutine ESMF_GridMakeDistGridSpace
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridAddPhysGrid"
 !BOPI
 ! !IROUTINE: ESMF_GridAddPhysGrid - adds a complete PhysGrid to Grid type
 
@@ -1221,10 +1231,9 @@
       ! Update the PhysGridAlloc counter and check to see if PhysGrid
       ! array needs to be resized to add the new physgrid
       call ESMF_GridMakePhysGridSpace(grid, grid%numPhysGrids+1, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridAddPhysGrid: make physgrid space"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       grid%numPhysGrids = grid%numPhysGrids + 1
 
       ! Add the PhysGrid
@@ -1236,6 +1245,8 @@
       end subroutine ESMF_GridAddPhysGrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMakePhysGridSpace"
 !BOPI
 ! !IROUTINE: ESMF_GridMakePhysGridSpace - Allocate or extend PhysGrid array
 
@@ -1364,6 +1375,8 @@
      end subroutine ESMF_GridMakePhysGridSpace
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetPhysGrid"
 !BOPI
 ! !IROUTINE: ESMF_GridGetPhysGrid - retrieves complete PhysGrid from Grid type
 
@@ -1420,10 +1433,9 @@
          found = .false.
          name_search: do n=1,grid%numPhysGridsAlloc
             call ESMF_PhysGridGet(grid%physgrids(n), name=nameTmp, rc=status)
-            if (status /= ESMF_SUCCESS) then
-               print *, "ERROR in ESMF_GridGetPhysGrid: error getting name"
-               return
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
             if (name == nameTmp) then
                physgrid = grid%physgrids(n)
                found = .true.
@@ -1439,10 +1451,9 @@
          found = .false.
          relloc_search: do n=1,grid%numPhysGridsAlloc
             call ESMF_PhysGridGet(grid%physgrids(n), relloc=rellocTmp, rc=status)
-            if (status /= ESMF_SUCCESS) then
-               print *, "ERROR in ESMF_GridGetPhysGrid: error getting relloc"
-               return
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
             if (relloc == rellocTmp) then
                physgrid = grid%physgrids(n)
                found = .true.
@@ -1466,6 +1477,8 @@
       end subroutine ESMF_GridGetPhysGrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetPhysGridID"
 !BOPI
 ! !IROUTINE: ESMF_GridGetPhysGridID - Get PhysGrid Id for a given relative location
 
@@ -1529,6 +1542,8 @@
       end subroutine ESMF_GridGetPhysGridID
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetDistGrid"
 !BOPI
 ! !IROUTINE: ESMF_GridGetDistGrid - retrieves complete DistGrid from Grid type
 
@@ -1578,10 +1593,9 @@
       found = .false.
       name_search: do n=1,grid%numDistGridsAlloc
          call ESMF_DistGridGet(grid%distgrids(n), name=nameTmp, rc=status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridGetDistGrid: error getting name"
-            return
-         endif
+         if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
          if (name == nameTmp) then
             distgrid = grid%distgrids(n)
             found = .true.
@@ -1598,6 +1612,8 @@
       end subroutine ESMF_GridGetDistGrid
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetBoundingBoxes"
 !BOPI
 ! !IROUTINE: ESMF_GridGetBoundingBoxes - Get the array of bounding boxes per DE
 
@@ -1645,6 +1661,8 @@
       end subroutine ESMF_GridGetBoundingBoxes
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridStatusEqual - equality of Grid statuses
 !
@@ -1679,6 +1697,8 @@
       end function ESMF_GridStatusEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStructureEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridStructureEqual - equality of Grid structures
 !
@@ -1713,6 +1733,8 @@
       end function ESMF_GridStructureEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridTypeEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridTypeEqual - equality of Grid types
 !
@@ -1747,6 +1769,8 @@
       end function ESMF_GridTypeEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridVertTypeEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridVertTypeEqual - equality of vertical Grid types
 !
@@ -1781,6 +1805,8 @@
       end function ESMF_GridVertTypeEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridHorzStaggerEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridHorzStaggerEqual - equality of Grid horizontal staggerings
 !
@@ -1815,6 +1841,8 @@
       end function ESMF_GridHorzStaggerEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridVertStaggerEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridVertStaggerEqual - equality of Grid vertical staggerings
 !
@@ -1849,6 +1877,8 @@
       end function ESMF_GridVertStaggerEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordOrderEqual"
 !BOPI
 ! !IROUTINE: ESMF_CoordOrderEqual - equality of Grid coordinate orders
 !
@@ -1883,6 +1913,8 @@
       end function ESMF_CoordOrderEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordIndexEqual"
 !BOPI
 ! !IROUTINE: ESMF_CoordIndexEqual - equality of Grid coordinate indexing
 !
@@ -1917,6 +1949,8 @@
       end function ESMF_CoordIndexEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridStatusNotEqual - non-equality of Grid statuses
 !
@@ -1951,6 +1985,8 @@
       end function ESMF_GridStatusNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStructureNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridStructureNotEqual - non-equality of Grid structures
 !
@@ -1985,6 +2021,8 @@
       end function ESMF_GridStructureNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridTypeNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridTypeNotEqual - non-equality of Grid kinds
 !
@@ -2018,6 +2056,8 @@
       end function ESMF_GridTypeNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridVertTypeNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridVertTypeNotEqual - non-equality of vertical Grid kinds
 !
@@ -2051,6 +2091,8 @@
       end function ESMF_GridVertTypeNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridHorzStaggerNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridHorzStaggerNotEqual - inequality of Grid horizontal staggerings
 !
@@ -2085,6 +2127,8 @@
       end function ESMF_GridHorzStaggerNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridVertStaggerNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridVertStaggerNotEqual - inequality of Grid vertical staggerings
 !
@@ -2119,6 +2163,8 @@
       end function ESMF_GridVertStaggerNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordOrderNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_CoordOrderNotEqual - inequality of Grid coordinate orders
 !
@@ -2153,6 +2199,8 @@
       end function ESMF_CoordOrderNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordIndexNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_CoordIndexNotEqual - inequality of Grid coordinate indexing
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.96 2004/05/26 11:13:18 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.97 2004/06/07 05:21:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_Comp.F90"
 !
 !     ESMF Component module
       module ESMF_CompMod
@@ -39,6 +40,7 @@
 !
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
       use ESMF_ConfigMod
@@ -215,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.96 2004/05/26 11:13:18 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.97 2004/06/07 05:21:09 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -363,10 +365,9 @@ end function
         ! initialize base class, including component name
         call ESMF_BaseCreate(compp%base, "Component", name, 0, status)
         ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CompConstruct: Base create error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! parent VM
         if (present(vm)) then
@@ -461,10 +462,9 @@ end function
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
         ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CompConstruct: Table create error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
    
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
@@ -513,18 +513,16 @@ end function
         ! call C++ to release function and data pointer tables.
         call c_ESMC_FTableDestroy(compp%this, status)
         ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component contents destruction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Release attributes and other things on base class
         call ESMF_BaseDestroy(compp%base, status)
         ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Base Component contents destruction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         
         ! Deallocate space held for petlist
         deallocate(compp%petlist)

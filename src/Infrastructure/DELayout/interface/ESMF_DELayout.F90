@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.25 2004/06/04 17:32:57 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.26 2004/06/07 05:21:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_DELayout.F90"
 !
 !     ESMF DELayout Module
       module ESMF_DELayoutMod
@@ -33,6 +34,7 @@
 
 ! !USES:
       use ESMF_BaseMod                          ! ESMF base class
+      use ESMF_LogErrMod
       use ESMF_VMMod                            ! ESMF VM
       
       implicit none
@@ -135,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.25 2004/06/04 17:32:57 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.26 2004/06/07 05:21:06 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -288,6 +290,8 @@ contains
       
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutCreateND"
 !BOP
 ! !IROUTINE: ESMF_DELayoutCreate - Create N-dimensional DELayout
 
@@ -396,10 +400,9 @@ contains
       call c_ESMC_DELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
         dePetList, len, status)
     endif
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutCreate error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     
     deallocate(dummy_nDEs)
     
@@ -412,6 +415,8 @@ contains
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutDestroy"
 !BOP
 ! !IROUTINE: ESMF_DELayoutDestroy - Destroy a DELayout object
 
@@ -450,10 +455,9 @@ contains
 
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutDestroy(delayout, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutDestroy error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -462,6 +466,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGet"
 !BOP
 ! !IROUTINE: ESMF_DELayoutGet - Get internal info
 
@@ -541,10 +547,9 @@ contains
     call c_ESMC_DELayoutGet(delayout, deCount, dimCount, localDeCount, &
       opt_localDeList, len_localDeList, localDe, oneToOneFlag, logRectFlag, &
       opt_deCountPerDim, len_deCountPerDim, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGet error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -553,6 +558,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGetDE"
 !BOP
 ! !IROUTINE: ESMF_DELayoutGetDE - Get DE specific internal info
 
@@ -636,10 +643,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGetDE(delayout, de, opt_DEcoord, len_coord, &
       opt_DEcde, len_cde, opt_DEcw, len_cw, connectionCount, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGet error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     if (present(coord)) then
       do i = 1, len_coord
@@ -654,6 +660,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGetDEMatch"
 !BOP
 ! !IROUTINE: ESMF_DELayoutGetDEMatch - Match DE's between DELayouts
 
@@ -719,10 +727,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGetDEMatch(delayout, de, delayoutMatch, &
       deMatchCount, opt_deMatchList, len_deMatchList, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGetDEMatch error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -731,6 +738,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutPrint"
 !BOP
 ! !IROUTINE: ESMF_DELayoutPrint - Print details of DELayout object
 
@@ -772,10 +781,9 @@ contains
 
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutPrint(delayout, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutPrint error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -784,6 +792,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGlobReduceGenI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data on a general DELayout
 
@@ -843,10 +853,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_I4, operation, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -855,6 +864,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGlobReduceGenR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data on a general DELayout
 
@@ -914,10 +925,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R4, operation, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -927,6 +937,8 @@ contains
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGlobReduceGenR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data on a general DELayout
 
@@ -986,10 +998,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R8, operation, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -998,6 +1009,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGlobReduceI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce I4 data on a one-to-one DELayout
 
@@ -1057,10 +1070,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_I4, operation, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1069,6 +1081,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGlobReduceR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R4 data on a one-to-one DELayout
 
@@ -1127,10 +1141,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R4, operation, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1139,6 +1152,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGlobReduceR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutAllGlobalReduce - Reduce R8 data on a one-to-one DELayout
 
@@ -1198,10 +1213,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R8, operation, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1210,6 +1224,8 @@ contains
 !------------------------------------------------------------------------------
         
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGatherGeneral"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutGather - Gather data on a general DELayout
 
@@ -1274,10 +1290,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGather error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1286,6 +1301,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGatherI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutGather - Gather I4 data on a one-to-one DELayout
 
@@ -1349,10 +1366,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGather error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1361,6 +1377,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGatherR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutGather - Gather R4 data on a one-to-one DELayout
 
@@ -1424,10 +1442,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGather error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1436,6 +1453,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGatherR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutGather - Gather R8 data on a one-to-one DELayout
 
@@ -1499,10 +1518,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutGather error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1511,6 +1529,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutScatterGeneral"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutScatter - Scatter data on a general DELayout
 
@@ -1576,10 +1596,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutScatter error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1588,6 +1607,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutScatterI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutScatter - Scatter I4 data 
 
@@ -1651,10 +1672,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutScatter error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1663,6 +1683,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutScatterR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutScatter - Scatter R4 data
 
@@ -1726,10 +1748,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutScatter error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1738,6 +1759,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutScatterR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutScatter - Scatter R8 data
 
@@ -1801,10 +1824,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutScatter error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1814,6 +1836,8 @@ contains
 
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutCopyGeneral"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutCopy - Copy data between DEs in a general DELayout
 
@@ -1882,10 +1906,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutCopy error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1895,6 +1918,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutCopyI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutCopy - Copy I4 data between DEs in a one-to-one DELayout
 
@@ -1962,10 +1987,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutCopy error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -1974,6 +1998,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutCopyR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutCopy - Copy R4 data between DEs in a one-to-one DELayout
 
@@ -2040,10 +2066,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutCopy error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -2052,6 +2077,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutCopyR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutCopy - Copy R8 data between DEs in a one-to-one DELayout
 
@@ -2118,10 +2145,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutCopy error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -2130,6 +2156,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutExchangeGeneral"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutExchange - Exchange data on a general DELayout
 
@@ -2210,10 +2238,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutExchange(delayout, srcData1, srcData2, &
       dstData1, dstData2, blen1, blen2, de1, de2, ESMF_FALSE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutExchange error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -2223,6 +2250,8 @@ contains
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutExchangeI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutExchange - Exchange I4 data on a one-to-one DELayout
 
@@ -2299,10 +2328,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutExchange(delayout, srcData1, srcData2, &
       dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutExchange error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -2311,6 +2339,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutExchangeR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutExchange - Exchange R4 data on a one-to-one DELayout
 
@@ -2387,10 +2417,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutExchange(delayout, srcData1, srcData2, &
       dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutExchange error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -2399,6 +2428,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutExchangeR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutExchange - Exchange R8 data on a general DELayout
 
@@ -2475,10 +2506,9 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutExchange(delayout, srcData1, srcData2, &
       dstData1, dstData2, blen1, blen2, de1, de2, ESMF_TRUE, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutExchange error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
@@ -2487,6 +2517,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutWait"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutWait - Wait for DELayout communication to finish
 
@@ -2532,6 +2564,8 @@ contains
   end subroutine ESMF_DELayoutWait
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutDataCreateI4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutDataCreate - Create I4 DELayoutData
 
@@ -2586,17 +2620,15 @@ contains
     
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutDataCreate(mydata, mydata%n, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutDataCreate error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     do i=1, mydata%n
       call c_ESMC_DELayoutDataAdd(mydata, array(i)%ap, i, status)
-      if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_DELayoutDataAdd error"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     enddo
 
     ! set return values
@@ -2607,6 +2639,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutDataCreateR4"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutDataCreate - Create R4 DELayoutData
 
@@ -2661,17 +2695,15 @@ contains
     
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutDataCreate(mydata, mydata%n, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutDataCreate error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     do i=1, mydata%n
       call c_ESMC_DELayoutDataAdd(mydata, array(i)%ap, i, status)
-      if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_DELayoutDataAdd error"
-        return
-      endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     enddo
 
     ! set return values
@@ -2682,6 +2714,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutDataCreateR8"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutDataCreate - Create R8 DELayoutData
 
@@ -2736,17 +2770,15 @@ contains
     
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutDataCreate(mydata, mydata%n, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutDataCreate error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     do i=1, mydata%n
       call c_ESMC_DELayoutDataAdd(mydata, array(i)%ap, i, status)
-      if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_DELayoutDataAdd error"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     enddo
 
     ! set return values
@@ -2757,6 +2789,8 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutDataDestroy"
 !BOPI
 ! !IROUTINE: ESMF_DELayoutDataDestroy - Destroy a DELayoutData object
 
@@ -2795,10 +2829,9 @@ contains
 
     ! Routine which interfaces to the C++ creation routine.
     call c_ESMC_DELayoutDataDestroy(delayoutData, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_DELayoutDataDestroy error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.9 2004/04/29 17:31:53 nscollins Exp $
+! $Id: ESMF_IOSpec.F90,v 1.10 2004/06/07 05:21:08 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -8,6 +8,7 @@
 !
 
 !-------------------------------------------------------------------------
+#define ESMF_FILENAME "ESMF_IOSpec.F90"
 !
 ! !PURPOSE:
 !
@@ -32,6 +33,7 @@
 !
 ! !USES:
       use ESMF_BaseMod
+      !use ESMF_LogErrMod
       implicit none
 
 ! !PUBLIC TYPES:
@@ -195,6 +197,8 @@ function ESMF_iorwne(iorw1, iorw2)
 end function
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IOFlush"
 !BOPI
 ! !IROUTINE: ESMF_IOFlush - flush output on a unit number
 !
@@ -238,6 +242,8 @@ end function
       end subroutine ESMF_IOFlush
 
 !-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IOSpecGet"
 !BOP
 ! !IROUTINE: ESMF_IOSpecGet - Get values in an IOSpec
 !

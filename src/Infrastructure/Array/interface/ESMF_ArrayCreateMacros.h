@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.4 2004/06/02 13:27:55 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.5 2004/06/07 05:20:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,8 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_ArrayCreateByMTPtr##rank##D##mtypekind" @\
+!define ESMF_METHOD "ESMF_ArrayCreateByMTPtr##rank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayCreateByMTPtr" @\
       function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind(fptr, counts, & @\
                                            haloWidth, lbounds, ubounds, rc) @\
  @\
@@ -125,8 +126,9 @@
  @\
         ! Test to see if array already allocated, and fail if so. @\
         if (associated(fptr)) then @\
-          print *, "Pointer cannot already be allocated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer cannot already be allocated", & @\
+                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
@@ -139,10 +141,9 @@
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                           ESMF_FROM_FORTRAN, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                  fptr, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
@@ -213,7 +214,8 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind" @\
+!define ESMF_METHOD "ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayCreateByFullPtr" @\
  @\
       function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind(fptr, docopy, & @\
                                                 haloWidth, rc) @\
@@ -254,8 +256,9 @@
  @\
         ! Test to see if array is not already allocated, and fail if so. @\
         if (.not.associated(fptr)) then @\
-          print *, "Pointer must already be associated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+                                "Pointer must already be allocated", & @\
+                                 ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         ! Get sizes from current array, although the construct routine @\
@@ -274,10 +277,9 @@
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_##mtypekind, & @\
                                       ESMF_FROM_FORTRAN, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array initial construction error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                   fptr, copy, lbounds, ubounds, status) @\
@@ -351,7 +353,8 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind" @\
+!define ESMF_METHOD "ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayConstructF90Ptr" @\
       subroutine ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth, fptr, & @\
                                                    docopy, lbounds, ubounds, rc) @\
  @\
@@ -429,10 +432,8 @@
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
             allocate(newp ( mrng ), stat=status) @\
-            if (status .ne. 0) then     ! f90 status, not ESMF @\
-              print *, "Array space allocate error" @\
-              return @\
-            endif @\
+            if (ESMF_LogMsgFoundAllocError(status, "Array data space", & @\
+                                       ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         if (willcopy) then @\
@@ -451,10 +452,9 @@
                                  lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, hwidth, status) @\
  @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Array internal set info error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         if (rcpresent) rc = status @\
  @\
@@ -502,7 +502,8 @@
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_ArrayDeallocate##mrank##D##mtypekind" @\
+!define ESMF_METHOD "ESMF_ArrayDeallocate##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_ArrayDeallocate" @\
       subroutine ESMF_ArrayDeallocate##mrank##D##mtypekind(array, wrap, rc) @\
  @\
       type(ESMF_Array) :: array @\

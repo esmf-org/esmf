@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.48 2004/05/26 14:27:16 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.49 2004/06/07 05:21:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 !
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
       use ESMF_LogErrMod
@@ -86,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.48 2004/05/26 14:27:16 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.49 2004/06/07 05:21:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -296,10 +297,8 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-        if(localrc .NE. 0) then
-          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
-          return
-        endif
+        if (ESMF_LogMsgFoundAllocError(localrc, "allocating compclass", &
+                                       ESMF_CONTEXT, rc)) return
    
         ! Call construction method to initialize gridcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
@@ -307,10 +306,9 @@
                                 configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
                                 rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "GridComp construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_GridCompCreateConf%compp => compclass
@@ -420,10 +418,9 @@
                                 config=config, grid=grid, clock=clock, &
                                 vm=vm, petList=petList, rc=localrc)
         ! if (ESMF_LogPassFoundError(localrc, rc)) return
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "GridComp construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_GridCompCreateVM%compp => compclass
@@ -537,10 +534,9 @@
                                 grid=grid, clock=clock, parent=parent%compp, &
                                 vm=vm, petList=petList, rc=localrc)
         ! if (ESMF_LogPassFoundError(localrc, rc)) return
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "GridComp construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_GridCompCreateGPar%compp => compclass
@@ -654,10 +650,9 @@
                                 grid=grid, clock=clock, parent=parent%compp, &
                                 vm=vm, petList=petList, rc=localrc)
         ! if (ESMF_LogPassFoundError(localrc, rc)) return
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "GridComp construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_GridCompCreateCPar%compp => compclass
@@ -701,17 +696,17 @@
 
         ! Check to see if already destroyed
         if (.not.associated(gridcomp%compp)) then
-          print *, "GridComp already destroyed"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                            "GridComp not initialized or already destroyed", &
+                             ESMF_CONTEXT, rc)) return
         endif
 
         ! call Destruct to release resources
         call ESMF_CompDestruct(gridcomp%compp, localrc)
         ! if (ESMF_LogPassFoundError(localrc, rc)) return
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "GridComp contents destruction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Deallocate the gridcomp struct itself
         deallocate(gridcomp%compp, stat=localrc)
@@ -1179,10 +1174,9 @@
     call ESMF_CompSetVMMaxThreads(gridcomp%compp, max, &
                  pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
-    if (localrc .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompSetVMMaxThreads error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1237,10 +1231,9 @@
     call ESMF_CompSetVMMinThreads(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
-    if (localrc .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompSetVMMinThreads error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1296,10 +1289,9 @@
     call ESMF_CompSetVMMaxPEs(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
-    if (localrc .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompSetVMMaxPEs error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1437,10 +1429,9 @@
     ! call CompClass method
     call ESMF_CompWait(gridcomp%compp, localrc)
     ! if (ESMF_LogPassFoundError(localrc, rc)) return
-    if (localrc .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompWait error"
-      return
-    endif
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.19 2004/06/02 11:54:40 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.20 2004/06/07 05:21:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod
       use ESMF_RouteMod    
       implicit none
@@ -129,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.19 2004/06/02 11:54:40 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.20 2004/06/07 05:21:09 nscollins Exp $'
 
 !==============================================================================
 
@@ -194,10 +195,9 @@
 
         ! Call C++ create code
         call c_ESMC_TransformValuesCreate(tv, nitems, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "TransformValues create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_TransformValuesCreate = tv
@@ -249,10 +249,9 @@
 
         ! Call C++ destroy code
         call c_ESMC_TransformValuesDestroy(tv, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "TransformValues create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! nullify pointer
         tv%this = ESMF_NULL_POINTER
@@ -323,10 +322,9 @@
         ! Call C++  code to get all current values
         call c_ESMC_TransformValuesGet(tv, curnumlist, cursrc, &
                                        curdst, curweights, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "TransformValues Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (present(numList)) then
             numList = curnumlist    
@@ -409,10 +407,9 @@
         ! Call C++  code to get all current values
         call c_ESMC_TransformValuesGetF90Ptr(tv, curnumlist, srcwrap, &
                                              dstwrap, wwrap, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "TransformValues Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (present(numList)) then
             numList = curnumlist    
@@ -523,10 +520,9 @@
             ! Call C++  code
             call c_ESMC_TransformValuesSet(tv, curnumlist, cursrc, &
                                            curdst, curweights, status)
-            if (status .ne. ESMF_SUCCESS) then  
-              print *, "TransformValues Set error"
-              return  
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (rcpresent) rc = ESMF_SUCCESS
@@ -582,10 +578,9 @@
            call c_ESMC_TransformValuesValidate(tv, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "TransformValues validate error"
-         return
-       endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -642,10 +637,9 @@
            call c_ESMC_TransformValuesPrint(tv, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "TransformValues print error"
-         return
-       endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -703,10 +697,9 @@
 
         ! Call C++ create code
         call c_ESMC_RouteHandleCreate(rhandle, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RouteHandle create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_RouteHandleCreate = rhandle
@@ -758,10 +751,9 @@
 
         ! Call C++ destroy code
         call c_ESMC_RouteHandleDestroy(rhandle, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RouteHandle create error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! nullify pointer
         rhandle%this = ESMF_NULL_POINTER
@@ -838,10 +830,9 @@
         call c_ESMC_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
                                    oldtdata, status)
         oldlabel = "fake"  ! not handing strings thru interface yet
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "RouteHandle Get error"
-          return  
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         if (present(htype)) then
             htype = oldhtype    
@@ -968,10 +959,9 @@
             ! TODO: handle label string going through the interface
             call c_ESMC_RouteHandleSet(rhandle, oldhtype, oldroute1, &
                                        oldroute2, oldtdata, status)
-            if (status .ne. ESMF_SUCCESS) then  
-              print *, "RouteHandle Set error"
-              return  
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         endif
 
         if (rcpresent) rc = ESMF_SUCCESS
@@ -1033,10 +1023,9 @@
            call c_ESMC_RouteHandleValidate(rhandle, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "RouteHandle validate error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
@@ -1093,10 +1082,9 @@
            call c_ESMC_RouteHandlePrint(rhandle, defaultopts, status)
        endif
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "RouteHandle print error"
-         return
-       endif
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS

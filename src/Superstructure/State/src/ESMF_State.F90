@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.46 2004/06/01 19:27:31 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.47 2004/06/07 05:21:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.46 2004/06/01 19:27:31 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.47 2004/06/07 05:21:09 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1708,15 +1708,15 @@ end function
       type(ESMF_StateData), pointer :: nextitem
 
       if (.not.associated(state%statep)) then
-        print *, "Error: uninitialized or invalid State"
-        if (present(rc)) rc=ESMF_FAILURE
-        return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or invalid State", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       stypep => state%statep
       if (stypep%statestatus .ne. ESMF_STATE_READY) then
-        print *, "Error: uninitialized or invalid State"
-        if (present(rc)) rc=ESMF_FAILURE
-        return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or invalid State", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       if (present(name)) call c_ESMC_GetName(stypep%base, name, localrc)
@@ -2983,7 +2983,6 @@ end function
        character (len=1024) :: outbuf
        integer :: localrc                          ! local error status
        integer :: i
-       logical :: dummy
 
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
@@ -2994,10 +2993,9 @@ end function
 
        print *, "StatePrint: "  
        if (.not.associated(state%statep)) then 
-           dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
-                                  ESMF_CONTEXT, rc)
-           return
+                                  ESMF_CONTEXT, rc)) return
        endif
        sp => state%statep
 
@@ -3009,10 +3007,9 @@ end function
        if (sp%st .eq. ESMF_STATEEXPORT) print *, "  Export State"
        if (sp%st .eq. ESMF_STATELIST) print *, "  State List"
        if (sp%st .eq. ESMF_STATEINVALID) then
-           dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
-                                  ESMF_CONTEXT, rc)
-           return
+                                  ESMF_CONTEXT, rc)) return
        endif
        print *, "  Number of members: ", sp%datacount
       
@@ -3477,10 +3474,9 @@ end function
 
         ! Set initial values
         call ESMF_StateConstructEmpty(stypep, statename, statetype, localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "State construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set the defaults for objects added to this state
         if (present(dataneeded)) then
@@ -3509,10 +3505,9 @@ end function
 
         ! Set the initial size of the datalist
         call ESMF_StateTypeExtendList(stypep, count, localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "State construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       
         ! For each item type, set the data values.  All the allocation 
         !  has already been done.
@@ -3520,10 +3515,9 @@ end function
           count = size(bundles)
           if (count .gt. 0) then
             call ESMF_StateTypeAddBundleList(stypep, count, bundles, localrc)
-            if (localrc .ne. ESMF_SUCCESS) then
-              print *, "State construction error adding bundles"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           endif
         endif
 
@@ -3531,10 +3525,9 @@ end function
           count = size(fields)
           if (count .gt. 0) then
             call ESMF_StateTypeAddFieldList(stypep, count, fields, localrc)
-            if (localrc .ne. ESMF_SUCCESS) then
-              print *, "State construction error adding fields"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           endif
         endif
 
@@ -3542,10 +3535,9 @@ end function
           count = size(arrays)
           if (count .gt. 0) then
             call ESMF_StateTypeAddArrayList(stypep, count, arrays, localrc)
-            if (localrc .ne. ESMF_SUCCESS) then
-              print *, "State construction error adding arrays"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           endif
         endif
 
@@ -3553,10 +3545,9 @@ end function
           count = size(states)
           if (count .gt. 0) then
             call ESMF_StateTypeAddStateList(stypep, count, states, localrc)
-            if (localrc .ne. ESMF_SUCCESS) then
-              print *, "State construction error adding states"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           endif
         endif
 
@@ -3564,10 +3555,9 @@ end function
           count = size(names)
           if (count .gt. 0) then
             call ESMF_StateTypeAddDataNameList(stypep, count, names, localrc)
-            if (localrc .ne. ESMF_SUCCESS) then
-              print *, "State construction error adding names"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           endif
         endif
 
@@ -3620,10 +3610,9 @@ end function
 
         ! Initialize the base object, set the name, etc.
         call ESMF_BaseCreate(stypep%base, "State", statename, 0, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateConstructEmpty: BaseCreate failed"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Fill in basic information
         if (present(statetype)) then
@@ -4054,10 +4043,9 @@ end function
 
       ! We now know how many total new items need to be added
       call ESMF_StateTypeExtendList(stypep, newcount, localrc)
-      if (localrc .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_StateTypeAddFieldList: datalist allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 
       ! There is enough space now to add new fields to the list.
@@ -4073,10 +4061,9 @@ end function
 
             ! Add name
             call ESMF_FieldGet(fields(i), name=nextitem%namep, rc=localrc)
-            if (localrc .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddFieldList: get field name"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
             allocate(nextitem%datap, stat=localrc)
             if (localrc .ne. 0) then    ! F90 return code
@@ -4174,7 +4161,7 @@ end function
       ! get a count of all fields in all bundles
       fruncount = 0
       do i=1, bcount
-        print *, "calling bundle validate "
+        !print *, "calling bundle validate "
         call ESMF_BundleValidate(bundles(i), "", localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4537,10 +4524,8 @@ end function
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
       allocate(stodo(scount), stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding states to a state"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "adding States", &
+                                       ESMF_CONTEXT, rc)) return
       stodo(1:scount) = 0
 
       ! Initialize counters to 0, indices to 1
@@ -4551,15 +4536,14 @@ end function
       do i=1, scount
 
         call ESMF_StateValidate(states(i), "", status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Bad State ", i
-          return
-        endif
+        ! TODO: add state number to error msg
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         call ESMF_StateGet(states(i), name=sname, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddStateList: get state name"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
     
         ! See if this name is already in the state
         exists = ESMF_StateTypeFindData(stypep, sname, .false., dataitem, sindex, status)
@@ -4578,10 +4562,9 @@ end function
             ! Check to see if this is a placeholder, and if so, replace it
             if (dataitem%otype .eq. ESMF_STATEDATANAME) then
                 allocate(dataitem%datap, stat=status)
-                if (status .ne. 0) then    ! F90 return code
-                  print *, "Error: adding states to a state"
-                  return
-                endif
+                if (ESMF_LogMsgFoundAllocError(status, &
+                                       "Adding States to a State", &
+                                       ESMF_CONTEXT, rc)) return
             endif
 
             dataitem%otype = ESMF_STATESTATE
@@ -4601,10 +4584,9 @@ end function
 
       ! We now know how many total new items need to be added
       call ESMF_StateTypeExtendList(stypep, newcount, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_StateTypeAddStateList: datalist allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 
       ! There is enough space now to add new states to the list.
@@ -4620,16 +4602,14 @@ end function
 
             ! Add name
             call ESMF_StateGet(states(i), name=nextitem%namep, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddStateList: get state name"
-              return
-            endif
+            if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
             allocate(nextitem%datap, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding state to a state"
-              return
-            endif
+            if (ESMF_LogMsgFoundAllocError(status, &
+                                       "Adding States to a State", &
+                                       ESMF_CONTEXT, rc)) return
             nextitem%datap%spp => states(i)%statep
  
             nextitem%needed = stypep%needed_default
@@ -4647,10 +4627,9 @@ end function
 
       ! Get rid of temp flag states
       deallocate(stodo, stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding states to a state"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, &
+                                       "Adding States to a State", &
+                                       ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 

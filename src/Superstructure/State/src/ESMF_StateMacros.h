@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.5 2004/05/21 09:25:29 nscollins Exp $
+! $Id: ESMF_StateMacros.h,v 1.6 2004/06/07 05:21:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -79,6 +79,8 @@
 #define StateGetDataPointerMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_StateGetDataPointer" @\
       subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind(state, dataname, fptr, copyflag, statename, rc) @\
  @\
       type(ESMF_State), intent(in) :: state @\
@@ -107,29 +109,27 @@
  @\
         ! Test to see if array already associated, and fail if so. @\
         if (associated(fptr)) then @\
-          print *, "Error: Data Pointer cannot already be associated" @\
-          return @\
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, & @\
+                              "Data Pointer cannot already be associated", & @\
+                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
         ! TODO: make this check the data type, and switch based on that. @\
         ! For now, assume field only. @\
         call ESMF_StateGetField(state, dataname, field, statename, status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Error: StateGetField failed" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_FieldGetArray(field, array, rc=status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Error: FieldGetArray failed" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         call ESMF_ArrayGetData(array, fptr, copyflag, rc=status) @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "Error: ArrayGetData failed" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         if (rcpresent) rc = status @\
  @\

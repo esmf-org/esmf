@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.42 2004/05/24 14:16:01 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.43 2004/06/07 05:21:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
 !
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_IOSpecMod
       use ESMF_ArrayDataMapMod
       use ESMF_GridTypesMod
@@ -449,10 +450,9 @@ end function
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -511,16 +511,16 @@ end function
   
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -575,10 +575,9 @@ end function
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -637,16 +636,16 @@ end function
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -701,10 +700,9 @@ end function
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -763,16 +761,16 @@ end function
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -826,10 +824,9 @@ end function
       endif
 
       call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleAddAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -879,14 +876,14 @@ end function
 
       ! validate bundle before going further
       if (.not. associated(bundle%btypep)) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       btype => bundle%btypep
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
     
       call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
 
@@ -942,13 +939,15 @@ end function
 
       ! validate bundle before going further
       if (.not. associated(bundle%btypep)) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       btype => bundle%btypep
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
     
       call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
@@ -1035,20 +1034,15 @@ end function
       endif
 
       allocate(btypep,  stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleCreateNew: Allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
 
 !     Call construction method to allocate and initialize bundle internals.
       call ESMF_BundleConstructNew(btypep, fieldCount, fields, &
                                    packflag, bundleInterleave, name, iospec, rc)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleCreateNew: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_BundleCreateNew%btypep => btypep
@@ -1119,29 +1113,23 @@ end function
       endif
 
       allocate(btypep, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleCreateNew: Allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Bundle allocate", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! Call construction method to allocate and initialize bundle internals.
       call ESMF_BundleConstructNoFields(btypep, name, iospec, rc)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleCreateNoFields: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! If specified, set the Grid.  All Fields added to this Bundle
       !  must be based on this same Grid.
       
       if (present(grid)) then
           call ESMF_GridValidate(grid, rc=status)
-          if (status .ne. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_BundleCreate: bad Grid object"
-            return
-          endif
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
           btypep%grid = grid
           btypep%gridstatus = ESMF_STATE_READY
       endif
@@ -1205,20 +1193,13 @@ end function
 
       ! Destruct all bundle internals and then free field memory.
       call ESMF_BundleDestruct(btype, status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleDestroy from ESMF_BundleDestruct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       deallocate(bundle%btypep, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleDestroy: Deallocate of Bundle class"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Bundle deallocate", &
+                                       ESMF_CONTEXT, rc)) return
       nullify(bundle%btypep)
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1285,19 +1266,22 @@ end function
       ! Validate bundle before using it.
       btype => bundle%btypep
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGet: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGet: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       if (present(grid)) then
           ! Validate bundle has grid before trying to return it.
           if (btype%gridstatus .ne. ESMF_STATE_READY) then
-            print *, "ERROR in ESMF_BundleGet: no associated Grid"
-            return
+               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Bad Grid", &
+                                 ESMF_CONTEXT, rc)) return
           endif
           
           ! OK to return grid
@@ -1312,10 +1296,9 @@ end function
       if (present(name)) then
           !OK to query for name
           call c_ESMC_GetName(btype%base, name, status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleGet getting Name"
-            return
-          endif
+          if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -1411,10 +1394,9 @@ end function
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1474,16 +1456,16 @@ end function
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1537,10 +1519,9 @@ end function
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1600,16 +1581,16 @@ end function
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1664,10 +1645,9 @@ end function
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1727,16 +1707,16 @@ end function
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_BundleGetAttribute: count longer than value list"
-          return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "count longer than value list", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1790,10 +1770,9 @@ end function
       endif
 
       call c_ESMC_AttributeGetChar(bundle%btypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttribute"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1843,10 +1822,9 @@ end function
       endif
 
       call c_ESMC_AttributeGetCount(bundle%btypep%base, count, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttributeCount"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1906,10 +1884,9 @@ end function
 
       call c_ESMC_AttributeGetAttrInfoName(bundle%btypep%base, name, &
                                            localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttributeInfo"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(type)) type = localDt
       if (present(count)) count = localCount
@@ -1977,10 +1954,9 @@ end function
 
       call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, num, &
                                        localName, localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_BundleGetAttributeInfo"
-        return
-      endif 
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
       if (present(type)) type = localDt
@@ -2093,28 +2069,31 @@ end function
 
 !     Validate bundle before using it.
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 !     Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
-        print *, "ERROR in ESMF_BundleGetField: Empty Bundle"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Empty Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 !     Check each field for a match
       do i = 1, btype%field_count
   
        call ESMF_FieldGet(btype%flist(i), name=temp_name, rc=status)
-       if (status .eq. ESMF_FAILURE) then
-         print *, "ERROR in ESMF_BundleGetField: Error getting Field name from Field ", i
-         return
-       endif
+       ! "Error getting Field name from Field ", i
+       if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
        if (name .eq. temp_name) then
            field = bundle%btypep%flist(i) 
@@ -2125,8 +2104,10 @@ end function
       enddo
 
       if (.not. found) then
-        print *, "ERROR in ESMF_BundleGetField: Field not found with name ", name
-        return
+        !"Field not found with name ", name
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Field not found with requested name", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -2187,24 +2168,30 @@ end function
 
 !     Validate bundle before using it.
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 !     Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
-        print *, "ERROR in ESMF_BundleGetField: Empty Bundle"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Empty Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 !     Check for out of range index number
       if ((index .lt. 1) .or. (index .gt. btype%field_count)) then
-        print *, "ERROR in ESMF_BundleGetField: Index ", index, &
-                        "out of range. Min=1, max=", btype%field_count
+        ! "ERROR in ESMF_BundleGetField: Index ", index, &
+        !                "out of range. Min=1, max=", btype%field_count
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                "Index out of range", &
+                                 ESMF_CONTEXT, rc)) return
         return
       endif
 
@@ -2509,19 +2496,20 @@ end function
 
 !     Validate bundle before using it.
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundlePackGrid: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundlePackGrid: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
 !     pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundlePackData: packed Array create"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       btype%pack_flag = ESMF_PACKED_DATA
 !     btype%localbundle%packed_data = pkarray
@@ -2722,7 +2710,9 @@ end function
 !
 !  TODO: code goes here
 !
-      print *, "ESMF_BundleRemoveField not implemented yet"
+      if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                "ESMF_BundleRemoveField", &
+                                 ESMF_CONTEXT, rc)) return
 
       end subroutine ESMF_BundleRemoveField
 
@@ -2861,27 +2851,29 @@ end function
       ! Validate bundle before using it.
       btype => bundle%btypep
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleSetGrid: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleSetGrid: bad Bundle object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif
    
       ! here we will only let someone associate a grid with a bundle
       ! if there is not one already associated with it.  
       if (btype%gridstatus .eq. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleSetGrid: A Grid is already associated with this Bundle"
-        return
+        if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Bundle is already associated with a Grid", &
+                                 ESMF_CONTEXT, rc)) return
       endif
 
       ! OK to set grid, but validate it first
       call ESMF_GridValidate(grid, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleSetGrid: bad Grid object"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       btype%grid = grid
       btype%gridstatus = ESMF_STATE_READY
 
@@ -2936,13 +2928,15 @@ end function
       endif
 
       if (.not.associated(bundle%btypep)) then 
-          print *, "Uninitialized or Destroyed Bundle"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif 
 
       if (bundle%btypep%bundlestatus .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Destroyed Bundle"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "Uninitialized or already destroyed Bundle", &
+                                 ESMF_CONTEXT, rc)) return
       endif 
 
       ! TODO: add more code here
@@ -3089,8 +3083,9 @@ end function
     
       ! early exit.
       if (fieldCount .le. 0) then
-          print *, "ERROR in ESMF_BundleAddField: called with 0 Fields"
-          return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                 "called with no Fields", &
+                                 ESMF_CONTEXT, rc)) return
       endif
       
    
@@ -3101,10 +3096,8 @@ end function
       if (btype%field_count .eq. 0) then
         
           allocate(btype%flist(fieldCount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleAddField: Fieldlist allocate"
-            return
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "Fieldlist allocate", &
+                                       ESMF_CONTEXT, rc)) return
          
           ! now add the fields to the new list
           do i=1, fieldCount
@@ -3115,10 +3108,8 @@ end function
       else
           ! make a list the right length
           allocate(temp_flist(btype%field_count + fieldCount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
-            return
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "temp Fieldlist allocate", &
+                                       ESMF_CONTEXT, rc)) return
 
           ! preserve old contents
           do i = 1, btype%field_count
@@ -3132,9 +3123,8 @@ end function
 
           ! delete old list
           deallocate(btype%flist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "Fieldlist deallocate", &
+                                       ESMF_CONTEXT, rc)) return
 
           ! and now make this the permanent list
           btype%flist => temp_flist
@@ -3216,10 +3206,9 @@ end function
       endif
 
 !     pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundlePackData: packed Array create"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       btype%pack_flag = ESMF_PACKED_DATA
 !     btype%localbundle%packed_data = pkarray
@@ -3302,10 +3291,9 @@ end function
 
       ! Initialize the derived type contents.
       call ESMF_BundleConstructNoFields(btype, name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! If specified, set packflag and interleave
       if(present(packflag)) btype%pack_flag = packflag
@@ -3313,10 +3301,9 @@ end function
 
       ! Add the fields in the list, checking for consistency.
       call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -3372,11 +3359,9 @@ end function
 
       ! Initialize the base object
       call ESMF_BaseCreate(btype%base, "Bundle", name, 0, status)
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleConstructNoFields: BaseCreate"
-        return
-      endif
-
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
       ! Initialize bundle contents
       

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalAllocMacros.h,v 1.8 2004/03/17 17:50:23 nscollins Exp $
+! $Id: ESMF_LocalAllocMacros.h,v 1.9 2004/06/07 05:21:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,10 +26,8 @@
 #define AllocAllocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
         allocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind(mrng), stat=status) @\
-        if (status .ne. 0) then @\
-          print *, "ESMC_LocalArrayCreate: Allocation error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundAllocError(status, "LocalArray allocate", & @\
+                                       ESMF_CONTEXT, rc)) return @\
  @\
         ! Set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
@@ -42,10 +40,9 @@
                         counts, lbounds, ubounds, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, status) @\
  @\
-        if (status .ne. ESMF_SUCCESS) then @\
-          print *, "LocalArray internal set info error" @\
-          return @\
-        endif @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
 ! < End macro - do not edit directly >  @\
 
 #if 0

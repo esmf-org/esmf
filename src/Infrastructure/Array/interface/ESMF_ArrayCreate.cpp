@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cpp,v 1.4 2004/06/02 13:27:55 nscollins Exp $
+! $Id: ESMF_ArrayCreate.cpp,v 1.5 2004/06/07 05:20:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
-#define ESMF_FILENAME "ESMF_ArrayCreate.F90"
+^define ESMF_FILENAME "ESMF_ArrayCreate.F90"
 !
 !     ESMF Array module
       module ESMF_ArrayCreateMod
@@ -32,6 +32,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_ArraySpecMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
@@ -81,7 +82,7 @@ AllTypesMacro(ArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayCreate.cpp,v 1.4 2004/06/02 13:27:55 nscollins Exp $'
+      '$Id: ESMF_ArrayCreate.cpp,v 1.5 2004/06/07 05:20:52 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -266,10 +267,9 @@ DeclarationMacro(ArrayCreateByFullPtr)
         !  set the counts after i have created the f90 array and not here.
         call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
                                             ESMF_FROM_FORTRAN, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array construction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
         call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, &
                                        kind, lb, ub, status)
@@ -427,8 +427,8 @@ DeclarationMacro(ArrayDeallocate)
 
         ! Simple validity check 
         if (array%this .eq. ESMF_NULL_POINTER) then
-            print *, "Array not initialized or Destroyed"
-            return 
+          if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
+                                 ESMF_CONTEXT, rc)) return
         endif
 
         needsdealloc = .FALSE.
@@ -445,20 +445,18 @@ DeclarationMacro(ArrayDeallocate)
           call c_ESMC_ArrayGetType(array, type, status)
           call c_ESMC_ArrayGetKind(array, kind, status)
           call ESMF_ArrayF90Deallocate(array, rank, type, kind, status)
-          if (status .ne. ESMF_SUCCESS) then
-            print *, "Array contents destruction error"
-            return
-          endif
+          if (ESMF_LogMsgFoundAllocError(status, "Array deallocate", &
+                                         ESMF_CONTEXT, rc)) return
+
           call c_ESMC_ArraySetNoDealloc(array, status)
         endif
 
         ! Calling deallocate first means this will not return back to F90
         !  before returning for good.
         call c_ESMC_ArrayDestroy(array, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array destruction error"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
         ! mark this as destroyed 
         array%this = ESMF_NULL_POINTER
@@ -568,7 +566,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr1DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (2)
@@ -586,7 +586,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr2DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (3)
@@ -604,7 +606,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr3DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (4)
@@ -622,7 +626,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr4DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (5)
@@ -640,7 +646,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr5DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (6)
@@ -658,7 +666,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr6DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (7)
@@ -676,11 +686,15 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr7DI8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case default
-                print *, "unsupported rank"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", &
+                                 ESMF_CONTEXT, rc)) return
             end select
     
            case (ESMF_DATA_REAL%dtype)
@@ -694,7 +708,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr1DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (2)
@@ -706,7 +722,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr2DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (3)
@@ -718,7 +736,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr3DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (4)
@@ -730,7 +750,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr4DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (5)
@@ -742,7 +764,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr5DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (6)
@@ -754,7 +778,9 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr6DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case (7)
@@ -766,14 +792,20 @@ DeclarationMacro(ArrayDeallocate)
                     call ESMF_ArrayConstructF90Ptr7DR8(array, counts, hwidth, &
                          lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
-                    print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
                 end select
     
               case default
-                print *, "unsupported rank"
+                 if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", &
+                                 ESMF_CONTEXT, rc)) return
             end select
           case default
-            print *, "unsupported type"
+            if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported type", &
+                                 ESMF_CONTEXT, rc)) return
          end select
 
         ! Note: rc is already set, nothing to do here.
@@ -875,7 +907,9 @@ AllocAllocateMacro(I4, 1, RNG1, LOC1)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 1, RNG1, LOC1)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (2)
@@ -889,7 +923,9 @@ AllocAllocateMacro(I4, 2, RNG2, LOC2)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 2, RNG2, LOC2)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (3)
@@ -903,7 +939,9 @@ AllocAllocateMacro(I4, 3, RNG3, LOC3)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 3, RNG3, LOC3)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (4)
@@ -917,7 +955,9 @@ AllocAllocateMacro(I4, 4, RNG4, LOC4)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 4, RNG4, LOC4)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (5)
@@ -931,7 +971,9 @@ AllocAllocateMacro(I4, 5, RNG5, LOC5)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 5, RNG5, LOC5)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (6)
@@ -945,7 +987,9 @@ AllocAllocateMacro(I4, 6, RNG6, LOC6)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 6, RNG6, LOC6)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (7)
@@ -959,11 +1003,15 @@ AllocAllocateMacro(I4, 7, RNG7, LOC7)
               case (ESMF_I8%dkind)
 AllocAllocateMacro(I8, 7, RNG7, LOC7)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case default
-            print *, "unsupported rank"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", &
+                                 ESMF_CONTEXT, rc)) return
         end select
 
        case (ESMF_DATA_REAL%dtype)
@@ -975,7 +1023,9 @@ AllocAllocateMacro(R4, 1, RNG1, LOC1)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 1, RNG1, LOC1)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (2)
@@ -985,7 +1035,9 @@ AllocAllocateMacro(R4, 2, RNG2, LOC2)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 2, RNG2, LOC2)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (3)
@@ -995,7 +1047,9 @@ AllocAllocateMacro(R4, 3, RNG3, LOC3)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 3, RNG3, LOC3)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (4)
@@ -1005,7 +1059,9 @@ AllocAllocateMacro(R4, 4, RNG4, LOC4)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 4, RNG4, LOC4)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (5)
@@ -1015,7 +1071,9 @@ AllocAllocateMacro(R4, 5, RNG5, LOC5)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 5, RNG5, LOC5)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (6)
@@ -1025,7 +1083,9 @@ AllocAllocateMacro(R4, 6, RNG6, LOC6)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 6, RNG6, LOC6)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (7)
@@ -1035,14 +1095,20 @@ AllocAllocateMacro(R4, 7, RNG7, LOC7)
               case (ESMF_R8%dkind)
 AllocAllocateMacro(R8, 7, RNG7, LOC7)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case default
-            print *, "unsupported rank"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", &
+                                 ESMF_CONTEXT, rc)) return
         end select
       case default
-        print *, "unsupported type"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported type", &
+                                 ESMF_CONTEXT, rc)) return
      end select
 
      if (present(rc)) rc = status 
@@ -1113,7 +1179,9 @@ AllocDeallocateMacro(I4, 1)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 1)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (2)
@@ -1127,7 +1195,9 @@ AllocDeallocateMacro(I4, 2)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 2)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (3)
@@ -1141,7 +1211,9 @@ AllocDeallocateMacro(I4, 3)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 3)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (4)
@@ -1155,7 +1227,9 @@ AllocDeallocateMacro(I4, 4)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 4)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (5)
@@ -1169,7 +1243,9 @@ AllocDeallocateMacro(I4, 5)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 5)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (6)
@@ -1183,7 +1259,9 @@ AllocDeallocateMacro(I4, 6)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 6)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (7)
@@ -1197,11 +1275,15 @@ AllocDeallocateMacro(I4, 7)
               case (ESMF_I8%dkind)
 AllocDeallocateMacro(I8, 7)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case default
-            print *, "unsupported rank"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", &
+                                 ESMF_CONTEXT, rc)) return
         end select
 
        case (ESMF_DATA_REAL%dtype)
@@ -1213,7 +1295,9 @@ AllocDeallocateMacro(R4, 1)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 1)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (2)
@@ -1223,7 +1307,9 @@ AllocDeallocateMacro(R4, 2)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 2)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (3)
@@ -1233,7 +1319,9 @@ AllocDeallocateMacro(R4, 3)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 3)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (4)
@@ -1243,7 +1331,9 @@ AllocDeallocateMacro(R4, 4)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 4)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (5)
@@ -1253,7 +1343,9 @@ AllocDeallocateMacro(R4, 5)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 5)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (6)
@@ -1263,7 +1355,9 @@ AllocDeallocateMacro(R4, 6)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 6)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case (7)
@@ -1273,21 +1367,25 @@ AllocDeallocateMacro(R4, 7)
               case (ESMF_R8%dkind)
 AllocDeallocateMacro(R8, 7)
               case default
-                print *, "unsupported kind"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported kind", &
+                                 ESMF_CONTEXT, rc)) return
             end select
 
           case default
-            print *, "unsupported rank"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported rank", &
+                                 ESMF_CONTEXT, rc)) return
         end select
       case default
-        print *, "unsupported type"
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                "Unsupported type", &
+                                 ESMF_CONTEXT, rc)) return
      end select
 
 
-     if (status .ne. 0) then 
-        print *, "ESMC_ArrayDelete: Deallocation error"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(status, "Array Deallocation", &
+                                       ESMF_CONTEXT, rc)) return
 
      if (present(rc)) rc = ESMF_SUCCESS
  
