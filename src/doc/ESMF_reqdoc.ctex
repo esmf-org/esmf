@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.15 2003/07/27 19:30:48 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.16 2003/07/28 21:13:38 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -89,11 +89,6 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \input{ESMF_req}
-
-%\section{Bibliography}
-\bibliography{ESMF} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{References}
 
 %================================================================================
 
