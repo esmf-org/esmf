@@ -1,4 +1,4 @@
-!n $Id: ESMF_FieldComm.F90,v 1.38 2004/06/08 09:27:17 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.39 2004/06/08 19:44:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.38 2004/06/08 09:27:17 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.39 2004/06/08 19:44:57 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -147,13 +147,13 @@
 ! !IROUTINE: ESMF_FieldAllGather - Data allgather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldAllGather(field, array, blocking, commhandle, rc)
+      subroutine ESMF_FieldAllGather(field, array, blockingflag, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -170,7 +170,7 @@
 !     \item [array] 
 !           Newly created array containing the collected data.
 !           It is the size of the entire undecomposed grid.
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between DEs has been scheduled.
@@ -178,7 +178,7 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
@@ -224,15 +224,15 @@
 ! !IROUTINE: ESMF_FieldGather - Data gather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldGather(field, destinationDE, array, blocking, &
+      subroutine ESMF_FieldGather(field, dstDe, array, blockingflag, &
                                   commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
-      integer, intent(in) :: destinationDE
+      integer, intent(in) :: dstDe
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -248,13 +248,13 @@
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be gathered.
-!     \item [destinationDE] 
+!     \item [dstDe] 
 !           Destination DE number where the gathered data is to be returned.
 !     \item [array] 
 !           Newly created {\tt ESMF\_Array} containing the collected data on the
 !           specified DE.  It is the size of the entire undecomposed grid.
 !           On all other DEs this argument returns an invalid object.
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between DEs has been scheduled.
@@ -262,7 +262,7 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
@@ -288,7 +288,7 @@
       ftypep => field%ftypep
 
       call ESMF_ArrayGather(ftypep%localfield%localdata, &
-                            ftypep%grid, ftypep%mapping, destinationDE, &
+                            ftypep%grid, ftypep%mapping, dstDe, &
                             array, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -308,13 +308,13 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldHalo()
-      subroutine ESMF_FieldHaloRun(field, routehandle, blocking, commhandle, rc)
+      subroutine ESMF_FieldHaloRun(field, routehandle, blockingflag, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -332,7 +332,7 @@
 !           {\tt ESMF\_FieldHaloStore()} call. It is associated with 
 !           the precomputed data movement and communication needed to 
 !           perform the halo operation.
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between DEs has been scheduled.
@@ -342,7 +342,7 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
@@ -368,7 +368,7 @@
       ftypep = field%ftypep
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
-                             blocking, commhandle, rc=status)
+                             blockingflag, commhandle, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -507,14 +507,14 @@
 ! !IROUTINE: ESMF_FieldRedist - Data redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blocking, &
+      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blockingflag, &
                                   commhandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -542,7 +542,7 @@
 !           {\tt ESMF\_FieldRedistStore()} call. It is associated with
 !           the precomputed data movement and communication needed to
 !           perform the redistribution operation.
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between DEs has been scheduled.
@@ -550,7 +550,7 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
@@ -578,7 +578,7 @@
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
-                            routehandle, blocking, commhandle, status)
+                            routehandle, blockingflag, commhandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -628,14 +628,14 @@
 ! !IROUTINE: ESMF_FieldRedistStore - Data redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedistStore(srcField, dstField, parentDElayout, &
+      subroutine ESMF_FieldRedistStore(srcField, dstField, parentDelayout, &
                                        routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDelayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -657,7 +657,7 @@
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid.
-!     \item [parentDElayout]
+!     \item [parentDelayout]
 !           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
 !           most commonly the layout
 !           of the Coupler if the redistribution is inter-component, 
@@ -714,7 +714,7 @@
                                  dstFtypep%localfield%localdata, &
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
-                                 parentDElayout, &
+                                 parentDelayout, &
                                  routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -734,14 +734,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStoreNew(srcField, decompIds, dstField, &
-                                          parentDElayout, routehandle, rc)
+                                          parentDelayout, routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       integer, dimension(:), intent(in) :: decompIds
       type(ESMF_Field), intent(out) :: dstField
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_DELayout), intent(in) :: parentDelayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -762,7 +762,7 @@
 !           Array of decomposition identifiers.
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid.
-!     \item [parentDElayout]
+!     \item [parentDelayout]
 !           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
 !           most commonly the layout
 !           of the Coupler if the redistribution is inter-component, 
@@ -822,7 +822,7 @@
                                  dstFtypep%localfield%localdata, &
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
-                                 parentDElayout, &
+                                 parentDelayout, &
                                  routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -836,11 +836,11 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldReduce"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldReduce - Reduction operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldReduce(field, rtype, result, blocking, &
+      subroutine ESMF_FieldReduce(field, rtype, result, blockingflag, &
                                   commhandle, rc)
 !
 !
@@ -848,7 +848,7 @@
       type(ESMF_Field) :: field                 
       integer :: rtype
       integer :: result
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -864,7 +864,7 @@
 !           (Not yet implemented).
 !     \item [result] 
 !           Numeric result (may be single number, may be array)
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between DEs has been scheduled.
@@ -872,7 +872,7 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
@@ -880,7 +880,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -915,17 +915,17 @@
 ! !IROUTINE: ESMF_FieldRegrid - Data regrid operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRegrid(srcfield, dstfield, routehandle, &
-                                  srcmask, dstmask, blocking, commhandle, rc)
+      subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, &
+                                  srcMask, dstMask, blockingflag, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcfield                 
-      type(ESMF_Field), intent(inout) :: dstfield                 
+      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Mask), intent(in), optional :: srcmask                 
-      type(ESMF_Mask), intent(in), optional :: dstmask                 
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_Mask), intent(in), optional :: srcMask                 
+      type(ESMF_Mask), intent(in), optional :: dstMask                 
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -939,22 +939,22 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcfield] 
+!     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
-!     \item [dstfield] 
+!     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid and data map.
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be returned after being
 !           associated with the precomputed
 !           information for a regrid operation on this {\tt ESMF\_Field}.
 !           This handle must be supplied at run time to execute the regrid.
-!     \item [{[srcmask]}]
+!     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !           (Not yet implemented.)
-!     \item [{[dstmask]}]
+!     \item [{[dstMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
 !           (Not yet implemented.)
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between DEs has been scheduled.
@@ -962,7 +962,7 @@
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
@@ -975,8 +975,8 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_DELayout) :: srcDElayout, dstDElayout
-      !type(ESMF_DELayout) :: parentDElayout
+      type(ESMF_DELayout) :: srcDelayout, dstDelayout
+      !type(ESMF_DELayout) :: parentDelayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
@@ -997,7 +997,7 @@
 
 
       ! Our DE number in the parent layout
-      ! call ESMF_DELayoutGet(parentDElayout, localDe=my_DE, status)
+      ! call ESMF_DELayoutGet(parentDelayout, localDe=my_DE, status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1009,29 +1009,29 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
-      call ESMF_GridGet(src_grid, delayout=srcDElayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, srcDElayout, hasdata)
+      call ESMF_FieldGet(srcField, grid=src_grid, rc=status)
+      call ESMF_GridGet(src_grid, delayout=srcDelayout, rc=status)
+ !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, srcDelayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
-          call ESMF_FieldGetArray(srcfield, src_array, rc=status)
-          call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
+          call ESMF_DELayoutGet(srcDelayout, localDE=my_src_DE, rc=status)
+          call ESMF_FieldGetArray(srcField, src_array, rc=status)
+          call ESMF_FieldGet(srcField, datamap=src_datamap, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
-      call ESMF_GridGet(dst_grid, delayout=dstDElayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, dstDElayout, hasdata)
+      call ESMF_FieldGet(dstField, grid=dst_grid, rc=status)
+      call ESMF_GridGet(dst_grid, delayout=dstDelayout, rc=status)
+ !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, dstDelayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
-          call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
-          call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
+          call ESMF_DELayoutGet(dstDelayout, localDE=my_dst_DE, rc=status)
+          call ESMF_FieldGetArray(dstField, dst_array, rc=status)
+          call ESMF_FieldGet(dstField, datamap=dst_datamap, rc=status)
       endif
 
       ! if neither are true this DE cannot be involved in the communication
@@ -1047,15 +1047,15 @@
       if ((hassrcdata) .and. (.not. hasdstdata)) then
           !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
           !                      dst_datamap, routehandle, &       
-          !                        srcmask, dstmask, blocking, commhandle, rc)
+          !                        srcMask, dstMask, blockingflag, commhandle, rc)
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
           !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
           !                      dst_datamap, routehandle, &       
-          !                        srcmask, dstmask, blocking, commhandle, rc)
+          !                        srcMask, dstMask, blockingflag, commhandle, rc)
       else
           call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
                                 dst_datamap, routehandle, &       
-                                srcmask, dstmask, blocking, commhandle, rc)
+                                srcMask, dstMask, blockingflag, commhandle, rc)
       endif
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1107,20 +1107,20 @@
 ! !IROUTINE: ESMF_FieldRegridStore - Data regrid operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRegridStore(srcfield, dstfield, parentDElayout, &
+      subroutine ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
                                        routehandle, regridmethod, regridnorm, &
-                                       srcmask, dstmask, rc)
+                                       srcMask, dstMask, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcfield                 
-      type(ESMF_Field), intent(inout) :: dstfield                 
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_Field), intent(in) :: srcField                 
+      type(ESMF_Field), intent(inout) :: dstField                 
+      type(ESMF_DELayout), intent(in) :: parentDelayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(in) :: regridmethod
       integer, intent(in), optional :: regridnorm
-      type(ESMF_Mask), intent(in), optional :: srcmask                 
-      type(ESMF_Mask), intent(in), optional :: dstmask                 
+      type(ESMF_Mask), intent(in), optional :: srcMask                 
+      type(ESMF_Mask), intent(in), optional :: dstMask                 
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1134,11 +1134,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcfield] 
+!     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
-!     \item [dstfield] 
+!     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid and data map.
-!     \item [parentDElayout]
+!     \item [parentDelayout]
 !           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
 !           most commonly the layout
 !           of the Coupler if the regridding is inter-component, but could 
@@ -1152,9 +1152,9 @@
 !           supplied.
 !     \item [{[regridnorm]}]
 !           Normalization option, only for specific regrid types.
-!     \item [{[srcmask]}]
+!     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
-!     \item [{[dstmask]}]
+!     \item [{[dstMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1165,7 +1165,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_DELayout) :: srcDElayout, dstDElayout
+      type(ESMF_DELayout) :: srcDelayout, dstDelayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
@@ -1184,7 +1184,7 @@
       endif     
 
       ! Our DE number in the parent layout
-      call ESMF_DELayoutGet(parentDElayout, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGet(parentDelayout, localDE=my_DE, rc=status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1196,29 +1196,29 @@
       !  in this communication.
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
-      call ESMF_GridGet(src_grid, delayout=srcDElayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, srcDElayout, hasdata)
+      call ESMF_FieldGet(srcField, grid=src_grid, rc=status)
+      call ESMF_GridGet(src_grid, delayout=srcDelayout, rc=status)
+ !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, srcDelayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
-          call ESMF_FieldGetArray(srcfield, src_array, rc=status)
-          call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
+          call ESMF_DELayoutGet(srcDelayout, localDE=my_src_DE, rc=status)
+          call ESMF_FieldGetArray(srcField, src_array, rc=status)
+          call ESMF_FieldGet(srcField, datamap=src_datamap, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
-      call ESMF_GridGet(dst_grid, delayout=dstDElayout, rc=status)
- !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, dstDElayout, hasdata)
+      call ESMF_FieldGet(dstField, grid=dst_grid, rc=status)
+      call ESMF_GridGet(dst_grid, delayout=dstDelayout, rc=status)
+ !jw   call ESMF_DELayoutGetDEExists(parentDelayout, my_DE, dstDelayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
-          call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
-          call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
+          call ESMF_DELayoutGet(dstDelayout, localDE=my_dst_DE, rc=status)
+          call ESMF_FieldGetArray(dstField, dst_array, rc=status)
+          call ESMF_FieldGet(dstField, datamap=dst_datamap, rc=status)
       endif
 
       ! if neither are true this DE cannot be involved in the communication
@@ -1229,9 +1229,9 @@
       endif
 
       call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
-                                 dst_grid, dst_datamap, parentDElayout, &
+                                 dst_grid, dst_datamap, parentDelayout, &
                                  routehandle, regridmethod, regridnorm, &    
-                                 srcmask, dstmask, status)
+                                 srcMask, dstMask, status)
 
 
       ! Set return values.
@@ -1246,15 +1246,15 @@
 ! !IROUTINE: ESMF_FieldScatter - Data scatter operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldScatter(array, sourceDE, field, &
-                                   blocking, commhandle, rc)
+      subroutine ESMF_FieldScatter(array, srcDe, field, &
+                                   blockingflag, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
-      integer, intent(in) :: sourceDE
+      integer, intent(in) :: srcDe
       type(ESMF_Field), intent(inout) :: field                 
-      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
@@ -1271,7 +1271,7 @@
 !     \item [array] 
 !      Input {\tt ESMF\_Array} containing the collected data.
 !      It must be the size of the entire undecomposed grid.
-!     \item [sourceDE]
+!     \item [srcDe]
 !      Integer DE number where the data to be Scattered is located.
 !      The {\tt ESMF\_Array} input is ignored on all other DEs.
 !     \item [field] 
@@ -1279,7 +1279,7 @@
 !      data in the array which will be scattered.  When this routine returns
 !      each {\tt ESMF\_Field} will contain a valid data array containing the 
 !      subset of the decomposed data.
-!     \item [{[blocking]}]
+!     \item [{[blockingflag]}]
 !      Optional argument which specifies whether the operation should
 !      wait until complete before returning or return as soon
 !      as the communication between DEs has been scheduled.
@@ -1287,7 +1287,7 @@
 !      Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !      {\tt ESMF\_NONBLOCKING}.
 !     \item [{[commhandle]}]
-!      If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!      If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !      argument is required.  Information about the pending operation
 !      will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !      or waited for later.
@@ -1348,7 +1348,7 @@
 
       ! Call Array method to perform actual work
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
-      call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
+      call ESMF_ArrayScatter(array, delayout, decompids, srcDe, dstarray, &
                              status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
