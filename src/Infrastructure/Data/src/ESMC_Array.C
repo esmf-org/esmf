@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.27 2003/02/18 22:38:31 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.28 2003/02/18 22:50:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.27 2003/02/18 22:38:31 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.28 2003/02/18 22:50:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -630,7 +630,7 @@
                 }
               }
               rskip[0] = 1;
-              for (int i=1; i<size_decomp; i++) {
+              for (i=1; i<size_decomp; i++) {
                 rskip[i] = rskip[i-1]*rmax[i-1];
               }
               // loop over ranks, skipping the first decomposed one, loading
