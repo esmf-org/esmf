@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.136 2004/02/05 00:07:29 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.137 2004/02/06 18:02:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.136 2004/02/05 00:07:29 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.137 2004/02/06 18:02:50 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2893,12 +2893,11 @@
         return
       endif
 
-      call ESMF_GetName(gp%base, name, status)
+      call ESMF_BasePrint(gp%base, "", status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGetName"
+        print *, "ERROR in ESMF_GridPrint: BasePrint"
         return
       endif
-      print *, "  Name = '",  trim(name), "'"
 
       ! TODO: add calls to //physgrid-Done\\ and distgrid prints
 
