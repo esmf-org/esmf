@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.7 2004/02/09 17:53:07 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.8 2004/02/17 23:18:59 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -328,10 +328,10 @@
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
       type(ESMF_Clock) :: clock
-      type(ESMF_Route) :: route
       integer :: rc
 
       ! Local variables
+      type(ESMF_Route) :: route
       type(ESMF_Field) :: field1
 
       print *, "Entering Run routine"
