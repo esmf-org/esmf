@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.26 2005/01/03 23:42:49 jwolfe Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.27 2005/01/05 17:06:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -188,19 +188,15 @@
  
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
       print *, "Grid example 2 returned"
 
       call ESMF_GridDestroy(grid2, rc)
 
       print *, "Grid example 2 destroyed"
-!EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-!BOC
       call ESMF_Finalize(rc)
-!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
@@ -212,6 +208,4 @@
         print *, "FAIL: ESMF_GridCreateEx.F90"
      end if
 
-!BOC
       end program ESMF_GridCreateEx
-!EOC   
