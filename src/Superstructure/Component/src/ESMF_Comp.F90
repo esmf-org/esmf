@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.65 2004/02/24 14:52:22 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.66 2004/02/26 16:48:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.65 2004/02/24 14:52:22 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.66 2004/02/26 16:48:52 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1466,9 +1466,11 @@ end function
 !     Initialize the ESMF framework.
 !
 !     \begin{description}
+!
 !     \item [lang]
 !           Flag to say whether main program is F90 or C++.  Affects things
 !           related to initialization, such as starting MPI.
+!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1602,12 +1604,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
+!
 !     \item[compp] 
 !          component object
+!
 !     \item[{[max]}] 
 !          Maximum threading level
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
@@ -1660,12 +1666,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
+!
 !     \item[compp] 
 !          component object
+!
 !     \item[{[max]}] 
 !          Maximum threading level
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
@@ -1718,12 +1728,16 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
+!
 !     \item[compp] 
 !          component object
+!
 !     \item[{[max]}] 
 !          Maximum threading level
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
@@ -1771,10 +1785,13 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
+!
 !     \item[compp] 
 !          component object
+!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
 !     \end{description}
 !
 !EOP
