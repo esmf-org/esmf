@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.24 2003/04/01 23:46:07 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.25 2003/04/15 21:35:37 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,6 +134,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     //int ESMC_ArraySet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
+    int ESMC_ArrayWrite(const char *options, const char *filename) const;
     int ESMC_ArrayValidate(const char *options) const;
     int ESMC_ArrayPrint(const char *options) const;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.33 2003/04/14 21:03:57 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.34 2003/04/15 21:35:37 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -161,21 +161,45 @@ extern "C" {
                                                                  int clen) {
          char *temp = NULL;
 
-         cout << "array print called, clen = " << clen << " ";
          // make a local copy because opts may be non-writable or not
          // long enough to add a trailing null safely.
          if (opts && (clen > 0)) {
              temp = new char[clen+1];
              strncpy(temp, opts, clen);
              temp[clen] = '\0';
-             cout << "null term opts = " << temp << endl;
-         } else 
-             cout << endl;
+         }
 
          *status = (*ptr)->ESMC_ArrayPrint(temp);
 
          if (temp)
              delete[] temp;
+     }
+
+     void FTN(c_esmc_arraywrite)(ESMC_Array **ptr, char *opts, char *fname,
+                                    int *status, int optlen, int flen) {
+         char *opttemp = NULL;
+         char *filetemp = NULL;
+
+         // make a local copy because opts may be non-writable or not
+         // long enough to add a trailing null safely.
+         if (opts && (optlen > 0)) {
+             opttemp = new char[optlen+1];
+             strncpy(opttemp, opts, optlen);
+             opttemp[optlen] = '\0';
+         }
+
+         if (fname && (flen > 0)) {
+             filetemp = new char[flen+1];
+             strncpy(filetemp, fname, flen);
+             filetemp[flen] = '\0';
+         }
+
+         *status = (*ptr)->ESMC_ArrayWrite(opttemp, filetemp);
+
+         if (opttemp)
+             delete[] opttemp;
+         if (filetemp)
+             delete[] filetemp;
      }
 
      void FTN(c_esmf_sizeprint)(char *p1, char *p2, int *rank, int *total) {

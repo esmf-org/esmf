@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.37 2003/04/04 23:23:32 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.38 2003/04/15 21:35:38 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.37 2003/04/04 23:23:32 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.38 2003/04/15 21:35:38 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1215,6 +1215,162 @@
     return rc;
 
  } // end ESMC_ArrayPrint
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayWrite - write contents of a Array
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayWrite(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options,             // in - write options
+      const char *filename) const {    // in - file name
+//
+// !DESCRIPTION:
+//      Write the contents of an Array to disk.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+    int rc = ESMF_FAILURE;
+    int i, j, k, l, m;
+    int imax, jmax, kmax, lmax, mmax;
+    int tcount, rcount;
+    FILE *ffile = NULL;
+
+    if ((filename == NULL) || (filename[0] == '-')) {
+        ffile = stdout;
+    } else {
+        ffile = fopen(filename, "w");
+        if (ffile == NULL) {
+            printf("error opening file '%s'\n", filename);
+            return ESMF_FAILURE;
+        }
+    }
+
+    fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:\n", (unsigned long)this);
+    fprintf(ffile, "            rank = %d, type = %d, kind = %d, ", 
+                             this->rank, this->type, this->kind);
+    fprintf(ffile, "            ");
+    for (i=0; i<this->rank; i++) 
+        fprintf(ffile, "dim[%d] = %d  ", i, this->length[i]);
+    fprintf(ffile, "\n");
+    
+    // TODO: make this look at one of the option letters to see how user
+    //   wants data written (ascii, binary, multifile, singlefile).
+    switch (this->type) {
+      case ESMF_DATA_REAL:
+        switch (this->rank) {
+          case 1:
+            fprintf(ffile, "  Real, Dim 1, Data values:\n");
+            imax = this->length[0];
+            tcount = imax;
+            for (i=0; i<tcount; i++) {
+                fprintf(ffile, "%lg\n", *((double *)(this->base_addr) + i));
+            }
+            break;
+          case 2:
+            fprintf(ffile, "  Real, Dim 2, Data values:\n");
+            imax = this->length[0];
+            jmax = this->length[1];
+            tcount = imax * jmax;
+            rcount = 0;
+            for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                    fprintf(ffile, "%lg ",  
+                               *((double *)(this->base_addr) + i + j*imax) );
+                }
+                fprintf(ffile, "\n");
+            }
+            break;
+          case 3:
+            fprintf(ffile, "  Real, Dim 3, Data values:\n");
+            imax = this->length[0];
+            jmax = this->length[1];
+            kmax = this->length[2];
+            tcount = imax * jmax * kmax;
+            rcount = 0; 
+            for (k=0; k<kmax; k++) {
+              for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                    fprintf(ffile, "%lg ",
+                     *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                }
+                fprintf(ffile, "\n");
+              }
+            }
+            break;
+          default:
+            fprintf(ffile, "no code to handle real rank %d yet\n", this->rank);
+            break;    
+        }
+        break;
+      case ESMF_DATA_INTEGER:
+        switch (this->rank) {
+          case 1:
+            imax = this->length[0];
+            tcount = imax;
+            fprintf(ffile, "  Integer, Dim 1, Data values:\n");
+            for (i=0; i<imax; i++) {
+                fprintf(ffile, "%d\n", *((int *)(this->base_addr) + i));
+            }
+            break;
+          case 2:
+            fprintf(ffile, "  Integer, Dim 2, Data values:\n");
+            imax = this->length[0];
+            jmax = this->length[1];
+            tcount = imax * jmax;
+            rcount = 0; 
+            for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                    fprintf(ffile, "%d ",
+                                *((int *)(this->base_addr) + i + j*imax) );
+                }
+                fprintf(ffile, "\n");
+            }
+            break;
+          case 3:
+            fprintf(ffile, "  Integer, Dim 3, Data values:\n");
+            imax = this->length[0];
+            jmax = this->length[1];
+            kmax = this->length[2];
+            tcount = imax * jmax * kmax;
+            rcount = 0; 
+            for (k=0; k<kmax; k++) {
+              for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                    fprintf(ffile, "%d ", 
+                       *((int *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                }
+                fprintf(ffile, "\n");
+              }
+            }
+            break;
+          default:
+            fprintf(ffile, "no code to handle integer rank %d yet\n", this->rank);
+            break;    
+        }
+        break;
+      default:
+            fprintf(ffile, "no code to handle data type %d yet\n", this->type);
+
+      break;
+    }
+
+    fclose(ffile);
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_ArrayWrite
+
 
 extern "C" {
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.20 2003/04/14 14:51:33 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.21 2003/04/15 21:35:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -171,7 +171,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.20 2003/04/14 14:51:33 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.21 2003/04/15 21:35:38 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1673,11 +1673,12 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayWrite(array, iospec, rc)
+      subroutine ESMF_ArrayWrite(array, iospec, filename, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
       type(ESMF_IOSpec), intent(in), optional :: iospec
+      character(len=*), intent(in), optional :: filename
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
@@ -1689,9 +1690,36 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
+       character (len=16) :: defaultopts      ! default write options 
+       character (len=16) :: defaultfile      ! default filename
+       integer :: status                      ! local error status
+       logical :: rcpresent        
+
+       ! Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
+       if (present(rc)) then
+         rcpresent = .TRUE.
+         rc = ESMF_FAILURE
+       endif
+
+       defaultopts = "singlefile"
+       defaultfile = "datafile"
+
+       if(present(filename)) then
+           call c_ESMC_ArrayWrite(array, defaultopts, filename, status) 
+       else
+           call c_ESMC_ArrayWrite(array, defaultopts, defaultfile, status) 
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "Array write error"
+         return
+       endif
+
+!      set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_ArrayWrite
 
 
