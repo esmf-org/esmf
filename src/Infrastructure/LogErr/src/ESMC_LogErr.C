@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.11 2003/04/25 20:07:34 shep_smith Exp $
+// $Id: ESMC_LogErr.C,v 1.12 2003/06/04 20:31:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.11 2003/04/25 20:07:34 shep_smith Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.12 2003/06/04 20:31:09 nscollins Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -292,7 +292,7 @@ void ESMC_Log::ESMC_LogInit(
    fortIsOpen=ESMF_LOG_FALSE;
    oneLogErrFile=ESMF_LOG_TRUE; 
    unitNumber=ESMF_LOG_FORT_STDOUT;
-   nameLogErrFile[0]=NULL;
+   nameLogErrFile[0]='\0';
 
  } // end ESMC_LogErrInit
 //-----------------------------------------------------------------------------
@@ -354,7 +354,7 @@ void ESMC_Log::ESMC_LogInfo(
                  *chPtr == 'h' || *chPtr=='l') chPtr++;
    switch (*chPtr) {
      case 'c':
-      fprintf(logErrCFilePtr[numFilePtr],"%c ",va_arg(argp, char));
+      fprintf(logErrCFilePtr[numFilePtr],"%c ",(char)(va_arg(argp, int)));
       if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
       break;
      case 's':
@@ -435,7 +435,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
  char stringToPrint[72];
  int len;
 
- stringToPrint[0]=NULL;
+ stringToPrint[0]='\0';
  for (chPtr=fmt; *chPtr; chPtr++)
   {
     if (*chPtr != '%') {
@@ -712,7 +712,7 @@ ESMC_Log::ESMC_Log(
 
 
 {
- nameLogErrFile[0]=NULL;
+ nameLogErrFile[0]='\0';
  oneLogErrFile=0;
  standardOut=ESMF_LOG_TRUE;
  verbose=ESMF_LOG_TRUE; 
@@ -750,7 +750,7 @@ void ESMC_Log::ESMC_LogErr_(
    if (verbose == ESMF_LOG_FALSE) return;
    int fortIO=ESMF_LOG_FALSE;
    char msg[1];
-   msg[0]=NULL;
+   msg[0]='\0';
    ESMC_LogPrintHeader(fortIO);
    ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
@@ -825,7 +825,7 @@ void ESMC_Log::ESMC_LogErrMsg_(
  if (verbose == ESMF_LOG_FALSE) return;
  int fortIO=ESMF_LOG_FALSE;
  char msg[1];
- msg[0]=NULL;
+ msg[0]='\0';
  ESMC_LogPrintHeader(fortIO);
  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
