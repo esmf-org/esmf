@@ -1,15 +1,22 @@
-% $Id: IO_background.tex,v 1.8 2002/05/07 20:08:14 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.9 2002/05/09 20:52:30 lzaslavsky Exp $
 
 
 Earth system modeling applications require efficient and robust tools
-for input and output of gridded data associated with
-structured and or unstructured grids, as well as observational data streams.
-Interfaces and methods provided by ESMF should allow reading and
-writing of data in several standard formats as well as support
-efficient internal data representations (see ESMF General
-Requirements \cite{ESMFGenReq}, Section 8.1.3). ESMF IO is supposed to
-provide a unified interface to input data from a file with automatic 
-detection of file-type in runtime, and to output data in a requested format.
+for input and output of structured andf unstructured gridded data, as
+well as observational data streams.  Interfaces and methods provided
+by ESMF should allow reading and writing of data in several standard
+formats as well as support efficient internal data representations
+(see ESMF General Requirements
+\cite{ESMFGenReq}, Section 8.1.3). The ESMF IO is supposed to provide
+a unified interface to input and output of high level ESMF objects
+such as Fields.  The system is expected to automatically detect file
+formats at runtime, and to output data in a variety of formats, with
+the posibility of creating companion metadata files. Other file IO
+functionalities, such as writing of error and log messages and input of
+configuration parameters from an ASCII file, are not covered in this
+document. These will be the subject of the Log Utility and
+Configuration Parameter requirement documents.
+
 
 \subsection{I/O architecture}
 
@@ -112,10 +119,20 @@ CF conventions specify standard dimensions, such as date or time ({\t t}),
 height or depth ({\it z}), latitude ({\it y}), and longitude ({\it x}), and 
 specify standard units for these dimensions and other quantities. 
 
+%%% Leonid %%%
+%%% We expect ESMF metadata conventions to be defined as extensions to
+%%% CF-conventions covering fields defined on both structural and unstructural 
+%%% grids, and observational data. Such conventions have to be accepted by all 
+%%% participants of the ESMF project.
+%%% Leonid %%%
+
 We expect ESMF metadata conventions to be defined as extensions to
-CF-conventions covering fields defined on both structural and unstructural 
-grids, and observational data. Such conventions have to be accepted by all 
-participants of the ESMF project.
+CF-convention s covering fields defined on both structured and
+unstructured grids, as well as observational data. Unlike the CF
+conventions which are tightly associated with NetCDF, the ESMF
+conventions are supposed to be format neutral, and conver all of the
+ESMF data formats.  These extensions will become the ESMF standard,
+and will be enforced by the ESMF IO subsystem.
 
 ESMF I\/O interfaces and software will cover only I\/O of data covered by
 the ESMF convention.
@@ -140,11 +157,12 @@ sharing of scientific data. The netCDF software was developed at the
 Unidata Program Center in Boulder, Colorado. See \cite{NetCDF3_UsersGuide_C}.
 In geoscience, NetCDF can be naturally used for represenation of fields 
 defined on logically rectangular grids. NetCDF use in geosciences is 
-specified by CF conventions mentioned above \cite{NetCDF_CF_v1_beta3}.
+specified by CF conventions mentioned above \cite{NetCDF_CF_v1_beta3}. 
 
-Although NetCDF format can be used for representation of other kind of data 
-(since they can be represented by array in the old Fortran fashion), it would 
-not provide an interface for structural representation of these data. 
+Although NetCDF format can be used for representation of other kind of
+data (since they can be represented by array in the old Fortran
+fashion), it would not provide an interface for structural
+representation of these data.
 
 \item[\bf DODS] The Distributed Oceanographic Data System is a system that 
 allows access to data over the internet. DODS is created and supported by 
@@ -174,14 +192,24 @@ in C language and a Fortran interface is provided. See \cite{HDF-EOS}.
 As well as HDF, it can be used for different data models within ESMF. Its 
 Point Format covers unstructured grid and observational data.
 
-\item[\bf GRIB] GRid in Binary (GRIB) format is a gridded data
-standard from the World Meteorological Organization. NCEP uses GRIB
-for all the files produced by its analyses. Unfortunately, not all
-GRIBs are the same and the ECMWF and EMC use slightly different
-formats, though they both claim to use GRIB. See \cite{GRIB_1}.
-We expect GRIB files to be co-described, e.g., accompanied by a metadata file.
-If metadata file is not provided, necessary information can be extracted from 
-GRIB file itself.
+% \item[\bf GRIB] GRid in Binary (GRIB) format is a gridded data
+% standard from the World Meteorological Organization. NCEP uses GRIB
+% for all the files produced by its analyses. Unfortunately, not all
+% GRIBs are the same and the ECMWF and EMC use slightly different
+% formats, though they both claim to use GRIB. See \cite{GRIB_1}.  We
+% expect GRIB files to be co-described, e.g., accompanied by a metadata
+% file.  If metadata file is not provided, necessary information can be
+% extracted from GRIB file itself.
+
+\item[\bf GRIB] 
+GRIdded Binary (GRIB) is the standard gridded data format from the
+World Meteorological Organization (WMO).  GRIB is a general purpose,
+bit-oriented data exchange format.  Most NWP centers use GRIB for all
+the files produced from its analyses and forecasts.  The GRIB format
+used in ESMF shall be configurable, and shall allow the creation of
+files which conform to the NCEP standard usage.  
+
+
 
 \item[\bf Binary]
 The most important way for a machine to represent data is to use a
@@ -201,13 +229,14 @@ message are described within BUFR message itself. In addition, BUFR provides
 condensation, or packing of data. 
 
 The BUFR is a table-driven code since the Data Description Section
-contains a sequence of data descriptors referring to a set of predefined and 
-internationally agreed tables. Thus, instead of writing all detailed
-definitions within a message, one will just write a number identifying
-a parameter with its descriptions.
+contains a sequence of data descriptors referring to a set of
+predefined and internationally agreed tables. Thus, instead of writing
+all detailed definitions within a message, one will just write a
+number identifying a parameter with its descriptions. The BUFR format
+used in ESMF shall be configurable, and shall allow the creation of
+files which conform to the NCEP standard usage, in which the
+predefined tables are contained in the file.
 
-We expect a meta-data file to accompany a BUFR file. Information necessary 
-to create a companion metadata file can be extracted from a BUFR file itself. 
 \end{itemize}
 
 Modern data management approaches could potentially provide significant 
