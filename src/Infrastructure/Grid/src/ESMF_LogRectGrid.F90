@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.39 2004/03/18 22:23:58 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.40 2004/03/19 20:01:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.39 2004/03/18 22:23:58 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.40 2004/03/19 20:01:42 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -443,7 +443,7 @@
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
 !     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer
 !     to the new {\tt ESMF\_Grid}.  This routine is for Grids with user-specified
-!     spaceing, and can create Grids from two different sets of arguments:
+!     spacing, and can create Grids from two different sets of arguments:
 !        (1). given min and arrays of deltas (variables minGlobalCoordPerDim and
 !             delta1, delta2, and delta3, if applicable);
 !        (2). given arrays of coordinates (variables coords1, coords2, and

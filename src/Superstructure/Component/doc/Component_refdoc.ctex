@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.23 2004/03/19 00:02:27 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.24 2004/03/19 20:01:42 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,9 +80,9 @@
 
 \subsection{Class API: SetServices and Related Methods}
 #ifdef STANDALONE
-\input{ESMF_GridSetServ_fapi}
+\input{ESMF_GridCompSetServ_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_GridSetServ_fapi}
+\input{../Superstructure/Component/doc/ESMF_GridCompSetServ_fapi}
 #endif
 
 
@@ -121,9 +121,9 @@
 
 \subsection{Class API: SetServices and Related Methods}
 #ifdef STANDALONE
-\input{ESMF_CplSetServ_fapi}
+\input{ESMF_CplCompSetServ_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_CplSetServ_fapi}
+\input{../Superstructure/Component/doc/ESMF_CplCompSetServ_fapi}
 #endif
 
 

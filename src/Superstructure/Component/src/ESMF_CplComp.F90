@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.20 2004/03/18 21:49:29 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.21 2004/03/19 20:01:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.20 2004/03/18 21:49:29 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.21 2004/03/19 20:01:42 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -166,7 +166,7 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
 !  The return value is a new {\tt ESMF\_CplComp}.
 !    
