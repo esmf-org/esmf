@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.67 2004/09/14 22:29:44 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.68 2004/10/27 18:49:29 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.67 2004/09/14 22:29:44 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.68 2004/10/27 18:49:29 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -46,10 +46,6 @@
 // This section includes all the ESMC_Time routines
 //
 //
-// TODO: override the BaseTime (-) method to first check if the two
-// times' calendars are the same before performing the difference.
-// The F90 interface will then call this overridden method, rather
-// than the BaseTime method.
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_TimeSet - initializer to support F90 interface
@@ -126,9 +122,11 @@
         s_r8  != ESMC_NULL_POINTER || ms_r8 != ESMC_NULL_POINTER ||
         us_r8 != ESMC_NULL_POINTER || ns_r8 != ESMC_NULL_POINTER ||
         sN    != ESMC_NULL_POINTER || sD    != ESMC_NULL_POINTER) {
-      this->s  = 0;
-      this->sN = 0;
-      this->sD = 1;                       // prevents divide-by-zero errors
+
+      ESMC_FractionSetw(0);  // set seconds = 0
+      ESMC_FractionSetn(0);  // set fractional seconds numerator = 0
+      ESMC_FractionSetd(1);  // set fractional seconds denominator = 1
+
       this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
       this->timeZone = 0;                 // default is UTC
     } else {
@@ -268,13 +266,14 @@
           { *this = saveTime; return(rc); }
 
       // fractional part
-      this->s += (ESMF_KIND_I8) (modf(*d_r8, ESMC_NULL_POINTER) * 
-                                             this->calendar->secondsPerDay);
+      ESMC_FractionSetw(ESMC_FractionGetw() +
+                         (ESMF_KIND_I8) (modf(*d_r8, ESMC_NULL_POINTER) *
+                                         this->calendar->secondsPerDay));
     }
     
     // use base class to convert sub-day values
     ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
-                     ms_r8, us_r8, ns_r8, sD, sN);
+                     ms_r8, us_r8, ns_r8, sN, sD);
 
     rc = ESMC_TimeValidate();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
@@ -362,13 +361,10 @@
 
     // get seconds based date (64-bit s_i8 or real s_r8) if requested;
     //   base time get needs to convert entire base time.  Requirements: TMG2.1
-    rc = ESMC_BaseTimeGet(this->s, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, s_i8, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, s_r8,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER);
+    rc = ESMC_BaseTimeGet(this, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                ESMC_NULL_POINTER, s_i8, ESMC_NULL_POINTER,
+                                ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                ESMC_NULL_POINTER, ESMC_NULL_POINTER, s_r8);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -378,14 +374,16 @@
       secPerDay = this->calendar->secondsPerDay;
     }
 
-    // 
-    ESMF_KIND_I8 timeToConvert = (secPerDay != 0) ?
-                                          this->s % secPerDay : this->s;
+    // seconds to convert within this day
+    ESMF_KIND_I8 secondsToConvert = (secPerDay != 0) ?
+                        ESMC_FractionGetw() % secPerDay : ESMC_FractionGetw();
+    ESMC_Time timeToConvert = *this;
+    timeToConvert.ESMC_FractionSetw(secondsToConvert);
 
     // use base class to get all other sub-day values (within date's day)
-    rc = ESMC_BaseTimeGet((timeToConvert), h, m, s, ESMC_NULL_POINTER,
-                         ms, us, ns, h_r8, m_r8, ESMC_NULL_POINTER, ms_r8,
-                         us_r8, ns_r8, sN, sD);
+    rc = ESMC_BaseTimeGet(&timeToConvert, h, m, s, ESMC_NULL_POINTER,
+                          ms, us, ns, h_r8, m_r8, ESMC_NULL_POINTER, ms_r8,
+                          us_r8, ns_r8, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -715,7 +713,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-//    Implementation note:  This overrides the ESMC_BaseTime (+) operator
+//    Implementation note:  This overrides the ESMC_Fraction (+) operator
 //                          in order to copy the ESMC_Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
@@ -744,7 +742,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-//    Implementation note:  This overrides the ESMC_BaseTime (-) operator
+//    Implementation note:  This overrides the ESMC_Fraction (-) operator
 //                          in order to copy the ESMC_Time-only properties
 //                          (calendar & timeZone) to the result. 
 //
@@ -827,16 +825,21 @@
 //EOP
 // !REQUIREMENTS:  
 
-//    Implementation note:  This overrides the 2nd ESMC_BaseTime (-) operator
+//    Implementation note:  This overrides the 2nd ESMC_Fraction (-) operator
 //                          simply because the 1st (-) operator is overridden.
-//                          Visibility into ESMC_BaseTime is lost; if not
+//                          Visibility into ESMC_Fraction is lost; if not
 //                          defined here, the compiler won't see the 2nd (-)
-//                          operator defined at ESMC_BaseTime!
+//                          operator defined at ESMC_Fraction!
 //
+// TODO: override the Fraction (-) method to first check if the two
+// times' calendars are the same before performing the difference.
+// The F90 interface will then call this overridden method, rather
+// than the ESMC_Fraction method.
+
     ESMC_TimeInterval diff;
 
-    // perform the decrement using the ESMC_BaseTime operator
-    diff = ESMC_BaseTime::operator-(time);
+    // perform the decrement using the ESMC_Fraction operator
+    diff = ESMC_Fraction::operator-(time);
 
     return(diff);
 
@@ -978,7 +981,8 @@
 
     // earliest Gregorian date representable by the Fliegel algorithm
     //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
-    if (calendar->calendarType == ESMC_CAL_GREGORIAN && s < -2768601600LL) {
+    if (calendar->calendarType == ESMC_CAL_GREGORIAN &&
+        ESMC_FractionGetw() < -2768601600LL) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
                                  "; Gregorian time is before -4800/3/1", &rc);
       return(rc);
@@ -1054,10 +1058,10 @@
 //EOP
 // !REQUIREMENTS:  
 
-//   ESMC_BaseTime(0, 0, 1) {  // TODO: F90 issue with base class constructor?
-   s  = 0;
-   sN = 0;
-   sD = 1;
+//   ESMC_BaseTime(0,0,1) {  // TODO: F90 issue with base class constructor?
+   ESMC_FractionSetw(0);  // set seconds = 0
+   ESMC_FractionSetn(0);  // set fractional seconds numerator = 0
+   ESMC_FractionSetd(1);  // set fractional seconds denominator = 1
    calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
                                   // TODO: replace with ESMC_Base logic
    timeZone = 0;
@@ -1181,17 +1185,35 @@
 
     ESMF_KIND_I8 yy_i8;
     int mm, dd;
-    ESMF_KIND_I4 h, m, s; 
+    ESMF_KIND_I4 h, m, s, sN, sD; 
+
     // TODO: use native C++ Get, not F90 entry point, when ready
     rc = ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                  &h, &m, &s, ESMC_NULL_POINTER);
+                  &h, &m, &s, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                              ESMC_NULL_POINTER, &sN, &sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
-    // ISO 8601 format YYYY-MM-DDThh:mm:ss
-    sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:%02d\0",
-            yy_i8, mm, dd, h, m, s);
+    // ISO 8601 format YYYY-MM-DDThh:mm:ss[.f], where f is fractional seconds
+
+    // format everything except seconds
+    sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:\0", yy_i8, mm, dd, h, m);
+
+    // convert integer fractional seconds to decimal form
+    double fractionalSeconds = 0.0;
+    if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+
+    // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
+    if (fabs(fractionalSeconds) >= 5e-10) {
+      sprintf(timeString, "%s%012.9f\0", timeString, (s + fractionalSeconds));
+    } else { // no fractional seconds, just append integer seconds
+      sprintf(timeString, "%s%02d\0", timeString, s);
+    }
 
     return(rc);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.68 2004/08/03 19:45:22 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.69 2004/10/27 18:49:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.68 2004/08/03 19:45:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.69 2004/10/27 18:49:30 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -119,9 +119,9 @@
     // save current value to restore in case of failure
     ESMC_TimeInterval saveTimeInterval = *this;
 
-    this->s  = 0;
-    this->sN = 0;
-    this->sD = 1;
+    ESMC_FractionSetw(0);  // set seconds = 0
+    ESMC_FractionSetn(0);  // set fractional seconds numerator = 0
+    ESMC_FractionSetd(1);  // set fractional seconds denominator = 1
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
@@ -424,7 +424,7 @@
               // calculate remaining baseTimeToConvert (remove years we got)
               ESMC_TimeInterval ti =
                                    tiToConvert.endTime - tiToConvert.startTime;
-              tiToConvert.s = ti.s;
+              tiToConvert.ESMC_FractionSetw(ti.ESMC_FractionGetw());
               //TODO: tiToConvert = tiToConvert.endTime - tiToConvert.startTime;
               //      should just copy base class part wholesale, rather than
               //      individual properties (including fraction sN/sD); breaks
@@ -441,16 +441,20 @@
 
               // convert remaining seconds to years
               if (tiToConvert.calendar->calendarType == ESMC_CAL_NOLEAP) {
-                years += tiToConvert.s / tiToConvert.calendar->secondsPerYear;
-                tiToConvert.s %= tiToConvert.calendar->secondsPerYear;
+                years += tiToConvert.ESMC_FractionGetw() /
+                         tiToConvert.calendar->secondsPerYear;
+                tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
+                                          tiToConvert.calendar->secondsPerYear);
 
               } else { // ESMC_CAL_GREGORIAN
                 // note: can't use abs() or labs() since result is (long long)
                 //       could use ISO llabs() if supported on all platforms
-                if (tiToConvert.s >= tiToConvert.calendar->secondsPerYear ||
-                    tiToConvert.s <= -tiToConvert.calendar->secondsPerYear){
-                  // tiToConvert.s >= 1 year => can't determine leap years
-                  //   without startTime or endTime !
+                if (tiToConvert.ESMC_FractionGetw() >=
+                    tiToConvert.calendar->secondsPerYear ||
+                    tiToConvert.ESMC_FractionGetw() <=
+                   -tiToConvert.calendar->secondsPerYear){
+                  // tiToConvert.ESMC_FractionGetw() >= 1 year =>
+                  //  can't determine leap years without startTime or endTime !
                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET,
                             "yy or yy_i8 because for Gregorian time interval "
                             ">= 1 year, can't determine leap years without "
@@ -461,8 +465,10 @@
           }
           break;
         case ESMC_CAL_360DAY:
-          years = tiToConvert.s / tiToConvert.calendar->secondsPerYear;
-          tiToConvert.s %= tiToConvert.calendar->secondsPerYear;
+          years = tiToConvert.ESMC_FractionGetw() /
+                  tiToConvert.calendar->secondsPerYear;
+          tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
+                                        tiToConvert.calendar->secondsPerYear);
           break;
         case ESMC_CAL_JULIANDAY:
           // years not defined!
@@ -533,17 +539,19 @@
 
             // calculate remaining baseTimeToConvert (remove months we got)
             ESMC_TimeInterval ti = tiToConvert.endTime - tiToConvert.startTime;
-            tiToConvert.s = ti.s;
+            tiToConvert.ESMC_FractionSetw(ti.ESMC_FractionGetw());
             //TODO: tiToConvert = tiToConvert.endTime - tiToConvert.startTime;
             //      should just copy base class part wholesale, rather than
             //      individual properties (including fraction sN/sD); breaks
             //      encapsulation principle.
 
           } else { // no startTime or endTime available, convert what we can
-            if (tiToConvert.s >= (28 * tiToConvert.calendar->secondsPerDay)
+            if (tiToConvert.ESMC_FractionGetw() >=
+                              (28 * tiToConvert.calendar->secondsPerDay)
                                   ||
-               tiToConvert.s <= (-28 * tiToConvert.calendar->secondsPerDay))
-                // note: can't use abs() or labs() since result is (long long)
+               tiToConvert.ESMC_FractionGetw() <=
+                              (-28 * tiToConvert.calendar->secondsPerDay))
+                // TODO: can't use abs() or labs() since result is (long long)
                 //       could use ISO llabs() if supported on all platforms
             {
               // can't determine months without startTime or endTime !
@@ -557,8 +565,10 @@
           }
           break;
         case ESMC_CAL_360DAY:
-          months = tiToConvert.s / (30 * tiToConvert.calendar->secondsPerDay);
-          tiToConvert.s %= (30 * tiToConvert.calendar->secondsPerDay);
+          months = tiToConvert.ESMC_FractionGetw() /
+                           (30 * tiToConvert.calendar->secondsPerDay);
+          tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
+                                    (30 * tiToConvert.calendar->secondsPerDay));
           break;
         case ESMC_CAL_JULIANDAY:
           // months not defined!
@@ -685,11 +695,13 @@
       // convert any days from base time
       if (tiToConvert.calendar->secondsPerDay != 0) {
         // absolute part
-        days += tiToConvert.s / tiToConvert.calendar->secondsPerDay;
+        days += tiToConvert.ESMC_FractionGetw() /
+                  tiToConvert.calendar->secondsPerDay;
                       // TODO: assign, not add, if tiToConvert.d always = 0 ?
         // remove days from base conversion time to get remaining sub-day
         // units (h,m,s)
-        tiToConvert.s %= tiToConvert.calendar->secondsPerDay;
+        tiToConvert.ESMC_FractionSetw(tiToConvert.ESMC_FractionGetw() %
+                                      tiToConvert.calendar->secondsPerDay);
       }
 
       // return requested days value
@@ -709,15 +721,16 @@
       }
       if (d_r8 != ESMC_NULL_POINTER) {
         *d_r8 = (ESMF_KIND_R8) days +
-                ((ESMF_KIND_R8) tiToConvert.s /
+                ((ESMF_KIND_R8) tiToConvert.ESMC_FractionGetw() /
                  (ESMF_KIND_R8) tiToConvert.calendar->secondsPerDay);
       }
     }
 
     // use base class to get sub-day values (h,m,s) on remaining
     //   unconverted base time
-    rc = ESMC_BaseTimeGet(tiToConvert.s, h, m, s, s_i8, ms, us, ns,
-                          h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD);
+    rc = ESMC_BaseTimeGet(&tiToConvert, h, m, s, s_i8,
+                          ms, us, ns, h_r8, m_r8, s_r8,
+                          ms_r8, us_r8, ns_r8, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
@@ -983,9 +996,15 @@
     // if absolute, simply perform absolute value on baseTime seconds and return
     if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0) {
       if (absValueType == ESMC_POSITIVE_ABS) {
-        if (absValue.s < 0) absValue.s *= -1;  // TODO: fractions
+        if (absValue.ESMC_FractionGetw() < 0) {
+          absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
+          // TODO: fractions
+        }
       } else { // ESMC_NEGATIVE_ABS
-        if (absValue.s > 0) absValue.s *= -1;  // TODO: fractions
+        if (absValue.ESMC_FractionGetw() > 0) {
+          absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
+          // TODO: fractions
+        }
       }
       return(absValue);
     }
@@ -1012,7 +1031,7 @@
           return(errorResult);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (absValue.s == 0) {
+        } else if (absValue.ESMC_FractionGetw() == 0) {
           if (absValueType == ESMC_POSITIVE_ABS) {
             if (absValue.mm < 0) absValue.mm *= -1;  // invert sign
           } else { // ESMC_NEGATIVE_ABS
@@ -1024,16 +1043,16 @@
         } else {
           // mm & s must have same sign
           if ( (absValueType == ESMC_POSITIVE_ABS && 
-                  absValue.mm < 0 && absValue.s < 0) ||
+                  absValue.mm < 0 && absValue.ESMC_FractionGetw() < 0) ||
                (absValueType == ESMC_NEGATIVE_ABS && 
-                  absValue.mm > 0 && absValue.s > 0) ) {
+                  absValue.mm > 0 && absValue.ESMC_FractionGetw() > 0) ) {
               absValue.mm *= -1;  // invert sign
-              absValue.s  *= -1;
+              absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
               return(absValue);
-          } else if ( (absValueType == ESMC_POSITIVE_ABS &&
-                         absValue.mm >= 0 && absValue.s >= 0) ||
-                      (absValueType == ESMC_NEGATIVE_ABS &&
-                         absValue.mm <= 0 && absValue.s <= 0) ) {
+          } else if ((absValueType == ESMC_POSITIVE_ABS &&
+                      absValue.mm >= 0 && absValue.ESMC_FractionGetw() >= 0) ||
+                     (absValueType == ESMC_NEGATIVE_ABS &&
+                      absValue.mm <= 0 && absValue.ESMC_FractionGetw() <= 0) ) {
               return(absValue);   // return as is
           } else {
             // mixed signs
@@ -1074,21 +1093,21 @@
         // all units must have same sign
         if ( (absValueType == ESMC_POSITIVE_ABS &&
                 absValue.yy < 0 && absValue.mm < 0 &&
-                absValue.d  < 0 && absValue.s  < 0) ||
+                absValue.d  < 0 && absValue.ESMC_FractionGetw()  < 0) ||
              (absValueType == ESMC_NEGATIVE_ABS &&
                 absValue.yy > 0 && absValue.mm > 0 &&
-                absValue.d  > 0 && absValue.s  > 0) ) {
+                absValue.d  > 0 && absValue.ESMC_FractionGetw()  > 0) ) {
           absValue.yy *= -1;   // invert sign
           absValue.mm *= -1;
           absValue.d  *= -1;
-          absValue.s  *= -1;
+          absValue.ESMC_FractionSetw(absValue.ESMC_FractionGetw() * -1);
           return(absValue);
         } else if ( (absValueType == ESMC_POSITIVE_ABS &&
-                       absValue.yy >= 0 && absValue.mm >= 0 &&
-                       absValue.d  >= 0 && absValue.s  >= 0) ||
+                      absValue.yy >= 0 && absValue.mm >= 0 &&
+                      absValue.d  >= 0 && absValue.ESMC_FractionGetw() >= 0) ||
                     (absValueType == ESMC_NEGATIVE_ABS &&
-                       absValue.yy <= 0 && absValue.mm <= 0 &&
-                       absValue.d  <= 0 && absValue.s  <= 0) ) {
+                      absValue.yy <= 0 && absValue.mm <= 0 &&
+                      absValue.d  <= 0 && absValue.ESMC_FractionGetw() <= 0) ) {
           return(absValue);    // return as is
         } else {
           // mixed signs
@@ -1173,8 +1192,9 @@
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
         ti1.d  == 0 && ti2.d  == 0) {
-      if (ti2.s != 0) {  // TODO: fractions
-        return((ESMF_KIND_R8) ti1.s / (ESMF_KIND_R8) ti2.s);
+      if (ti2.ESMC_FractionGetw() != 0) {  // TODO: fractions
+        return((ESMF_KIND_R8) ti1.ESMC_FractionGetw() /
+               (ESMF_KIND_R8) ti2.ESMC_FractionGetw());
       } else {
         ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
         return(0.0);
@@ -1205,7 +1225,8 @@
           return(0.0);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (ti1.s == 0 && ti2.s == 0) { // TODO: fractions (sN == 0)
+        } else if (ti1.ESMC_FractionGetw() == 0 &&
+                   ti2.ESMC_FractionGetw() == 0) { // TODO: fractions (sN == 0)
           if (ti2.mm != 0) {
             return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
           } else {
@@ -1217,11 +1238,11 @@
         // below here are mixed (relative, absolute) cases
 
         // dividend zero
-        } else if (ti1.mm == 0 && ti1.s == 0) {
+        } else if (ti1.mm == 0 && ti1.ESMC_FractionGetw() == 0) {
           return(0.0); // ok
 
         // divisor zero
-        } else if (ti2.mm == 0 && ti2.s == 0) {
+        } else if (ti2.mm == 0 && ti2.ESMC_FractionGetw() == 0) {
           ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                              ESMC_NULL_POINTER);
           return(0.0);
@@ -1262,7 +1283,7 @@
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
-              ti1.s  == 0 && ti2.s  == 0) {
+              ti1.ESMC_FractionGetw() == 0 && ti2.ESMC_FractionGetw() == 0) {
           // divide years only
           if (ti2.yy != 0) {
             return((ESMF_KIND_R8) ti1.yy / (ESMF_KIND_R8) ti2.yy);
@@ -1271,10 +1292,11 @@
                                                ESMC_NULL_POINTER);
             return(0.0);
           }
-        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
-                   (ti1.mm != 0 || ti2.mm != 0) &&
-                    ti1.d  == 0 && ti2.d  == 0  &&
-                    ti1.s  == 0 && ti2.s  == 0) {
+        } else if ( ti1.yy == 0 && ti2.yy == 0   &&
+                   (ti1.mm != 0 || ti2.mm != 0)  &&
+                    ti1.d  == 0 && ti2.d  == 0   &&
+                    ti1.ESMC_FractionGetw() == 0 &&
+                    ti2.ESMC_FractionGetw() == 0) {
           // divide months only
           if (ti2.mm != 0) {
             return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
@@ -1286,7 +1308,8 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
-                    ti1.s  == 0 && ti2.s  == 0) {
+                    ti1.ESMC_FractionGetw() == 0 &&
+                    ti2.ESMC_FractionGetw() == 0) {
           // divide days only
           if (ti2.d != 0) {
             return((ESMF_KIND_R8) ti1.d / (ESMF_KIND_R8) ti2.d);
@@ -1361,7 +1384,7 @@
       quotient.d  /= divisor;
 
       // divide absolute s part  // TODO: fractions
-      quotient.s /= divisor;
+      quotient.ESMC_FractionSetw(quotient.ESMC_FractionGetw() / divisor);
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1438,7 +1461,8 @@
       quotient.d  = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.d  / divisor);
 
       // divide absolute s part  // TODO: fractions
-      quotient.s  = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.s  / divisor);
+      quotient.ESMC_FractionSetw((ESMF_KIND_I8)
+                      ((ESMF_KIND_R8) quotient.ESMC_FractionGetw() / divisor));
 
     } else {
       // TODO: write LogErr message (divide-by-zero)
@@ -1566,8 +1590,9 @@
     if (ti1.yy == 0 && ti2.yy == 0 &&
         ti1.mm == 0 && ti2.mm == 0 &&
         ti1.d  == 0 && ti2.d  == 0) {
-      if (ti2.s != 0) {  // TODO: fractions
-        remainder.s = ti1.s % ti2.s;
+      if (ti2.ESMC_FractionGetw() != 0) {  // TODO: fractions
+        remainder.ESMC_FractionSetw(ti1.ESMC_FractionGetw() %
+                                    ti2.ESMC_FractionGetw());
         return(remainder);
       } else {
         ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
@@ -1599,7 +1624,8 @@
           return(remainder);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (ti1.s == 0 && ti2.s == 0) { // TODO: fractions (sN == 0)
+        } else if (ti1.ESMC_FractionGetw() == 0 &&
+                   ti2.ESMC_FractionGetw() == 0) { // TODO: fractions (sN == 0)
           if (ti2.mm != 0) {
             remainder.mm = ti1.mm % ti2.mm;
             return(remainder);
@@ -1612,11 +1638,11 @@
         // below here are mixed (relative, absolute) cases
 
         // dividend zero
-        } else if (ti1.mm == 0 && ti1.s == 0) {
+        } else if (ti1.mm == 0 && ti1.ESMC_FractionGetw() == 0) {
           return(remainder); // ok
 
         // divisor zero
-        } else if (ti2.mm == 0 && ti2.s == 0) {
+        } else if (ti2.mm == 0 && ti2.ESMC_FractionGetw() == 0) {
           ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO,
                                              ESMC_NULL_POINTER);
           return(remainder);
@@ -1657,7 +1683,8 @@
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
-              ti1.s  == 0 && ti2.s  == 0) {
+              ti1.ESMC_FractionGetw() == 0 &&
+              ti2.ESMC_FractionGetw() == 0) {
           // modulus years only
           if (ti2.yy != 0) {
             remainder.yy = ti1.yy % ti2.yy;
@@ -1670,7 +1697,8 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                    (ti1.mm != 0 || ti2.mm != 0) &&
                     ti1.d  == 0 && ti2.d  == 0  &&
-                    ti1.s  == 0 && ti2.s  == 0) {
+                    ti1.ESMC_FractionGetw() == 0 &&
+                    ti2.ESMC_FractionGetw() == 0) {
           // modulus months only
           if (ti2.mm != 0) {
             remainder.mm = ti1.mm % ti2.mm;
@@ -1683,7 +1711,8 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
-                    ti1.s  == 0 && ti2.s  == 0) {
+                    ti1.ESMC_FractionGetw() == 0 &&
+                    ti2.ESMC_FractionGetw() == 0) {
           // modulus days only
           if (ti2.d != 0) {
             remainder.d = ti1.d % ti2.d;
@@ -1777,7 +1806,7 @@
     product.d  *= multiplier;
 
     // multiply absolute s part  // TODO: fractions
-    product.s *= multiplier;
+    product.ESMC_FractionSetw(product.ESMC_FractionGetw() * multiplier);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -1948,7 +1977,8 @@
     product.d  = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.d  * multiplier);
 
     // multiply absolute s part  // TODO: fractions
-    product.s  = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.s  * multiplier);
+    product.ESMC_FractionSetw((ESMF_KIND_I8)
+                    ((ESMF_KIND_R8) product.ESMC_FractionGetw() * multiplier));
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -2345,7 +2375,8 @@
           return(false);
 
         // all relative case (yy (reduced to mm), mm, no seconds)
-        } else if (ti1.s == 0 && ti2.s == 0) { // TODO: fractions (sN == 0)
+        } else if (ti1.ESMC_FractionGetw() == 0 &&
+                   ti2.ESMC_FractionGetw() == 0) { // TODO: fractions (sN == 0)
           switch (comparisonType)
           {
             case ESMC_EQ:
@@ -2363,9 +2394,11 @@
           };
 
         // below here are mixed (relative, absolute) cases
-        } else if (((ti1.mm != 0 || ti1.s != 0) && ti2.mm == 0 && ti2.s == 0)
+        } else if (((ti1.mm != 0 || ti1.ESMC_FractionGetw() != 0) &&
+                     ti2.mm == 0 && ti2.ESMC_FractionGetw() == 0)
                                                 ||
-                   ((ti2.mm != 0 || ti2.s != 0) && ti1.mm == 0 && ti1.s == 0)) {
+                   ((ti2.mm != 0 || ti2.ESMC_FractionGetw() != 0) &&
+                     ti1.mm == 0 && ti1.ESMC_FractionGetw() == 0)) {
           // ti1 non-zero and ti2 zero or vice versa
           // TODO: sign analysis ?  can't do if mixed signs ?
           switch (comparisonType)
@@ -2421,7 +2454,7 @@
         if ( (ti1.yy != 0 || ti2.yy != 0) &&
               ti1.mm == 0 && ti2.mm == 0  &&
               ti1.d  == 0 && ti2.d  == 0  &&
-              ti1.s  == 0 && ti2.s  == 0) {
+              ti1.ESMC_FractionGetw() == 0 && ti2.ESMC_FractionGetw() == 0) {
           // compare years only
           switch (comparisonType)
           {
@@ -2441,7 +2474,8 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                    (ti1.mm != 0 || ti2.mm != 0) &&
                     ti1.d  == 0 && ti2.d  == 0  &&
-                    ti1.s  == 0 && ti2.s  == 0) {
+                    ti1.ESMC_FractionGetw() == 0 &&
+                    ti2.ESMC_FractionGetw() == 0) {
           // compare months only
           switch (comparisonType)
           {
@@ -2461,7 +2495,8 @@
         } else if ( ti1.yy == 0 && ti2.yy == 0  &&
                     ti1.mm == 0 && ti2.mm == 0  &&
                    (ti1.d  != 0 || ti2.d  != 0) &&
-                    ti1.s  == 0 && ti2.s  == 0) {
+                    ti1.ESMC_FractionGetw() == 0 &&
+                    ti2.ESMC_FractionGetw() == 0) {
           // compare days only
           switch (comparisonType)
           {
@@ -2509,7 +2544,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(=) - copy or assign from BaseTime expression
+// !IROUTINE:  ESMC_TimeInterval(=) - copy or assign from ESMC_Fraction expression
 //
 // !INTERFACE:
       ESMC_TimeInterval& ESMC_TimeInterval::operator=(
@@ -2518,18 +2553,18 @@
 //    ESMC_TimeInterval& result
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime to copy
+      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction to copy
 //
 // !DESCRIPTION:
-//    Assign {\tt ESMC\_BaseTime} expression to this time interval.
-//    Supports inherited operators from {\tt ESMC\_BaseTime}
+//    Assign {\tt ESMC\_Fraction} expression to this time interval.
+//    Supports inherited operators from {\tt ESMC\_Fraction}
 //
 //EOP
 // !REQUIREMENTS:  
 
     // invoke base class assignment operator
     // TODO:  should be implicit ?
-    ESMC_BaseTime::operator=(baseTime);
+    ESMC_Fraction::operator=(fraction);
 
     return(*this);
 
@@ -2695,9 +2730,10 @@
  #define ESMC_METHOD "ESMC_TimeInterval::ESMC_TimeInterval(void) constructor"
 
 //   ESMC_BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
-   s  = 0;
-   sN = 0;
-   sD = 1;
+
+   ESMC_FractionSetw(0);
+   ESMC_FractionSetn(0);
+   ESMC_FractionSetd(1);
    yy = 0;
    mm = 0;
    d  = 0;
@@ -2851,19 +2887,37 @@
     }
 
     ESMF_KIND_I8 yy_i8, mm_i8, d_i8;
-    ESMF_KIND_I4 h, m, s;
+    ESMF_KIND_I4 h, m, s, sN, sD;
 
     // TODO: use native C++ Get, not F90 entry point, when ready
     rc = ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
                           &yy_i8, ESMC_NULL_POINTER,
                           &mm_i8, ESMC_NULL_POINTER,
-                          &d_i8, &h, &m, &s, ESMC_NULL_POINTER);
+                          &d_i8, &h, &m, &s, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                          ESMC_NULL_POINTER, ESMC_NULL_POINTER, &sN, &sD);
+
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
-    // ISO 8601 format PyYmMdDThHmMsS
-    sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM%dS\0",
-		         yy_i8, mm_i8, d_i8, h, m, s);
+    // ISO 8601 format PyYmMdDThHmMs[.f]S, where f is fractional seconds
+
+    // format everything except seconds
+    sprintf(timeString, "P%lldY%lldM%lldDT%dH%dM\0", yy_i8, mm_i8, d_i8, h, m);
+
+    // convert integer fractional seconds to decimal form
+    double fractionalSeconds = 0.0;
+    if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+
+    // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
+    if (fabs(fractionalSeconds) >= 5e-10) {
+      sprintf(timeString, "%s%.9fS\0", timeString, (s + fractionalSeconds));
+    } else { // no fractional seconds, just append integer seconds
+      sprintf(timeString, "%s%dS\0", timeString, s);
+    }
 
     return(rc);
 
@@ -2907,7 +2961,7 @@
         if (startTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           endTime = startTime + *this;
           ESMC_TimeInterval ti = endTime - startTime;
-          s = ti.s;
+          ESMC_FractionSetw(ti.ESMC_FractionGetw());
           //TODO: *this = endTime - startTime;
           //      should just copy base class part wholesale, rather than
           //      individual properties (including fraction sN/sD); breaks
@@ -2918,7 +2972,7 @@
         } else if (endTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           startTime = endTime - *this;
           ESMC_TimeInterval ti = endTime - startTime;
-          s = ti.s;
+          ESMC_FractionSetw(ti.ESMC_FractionGetw());
           //TODO: *this = endTime - startTime;
           //      should just copy base class part wholesale, rather than
           //      individual properties (including fraction sN/sD); breaks
@@ -2936,14 +2990,15 @@
           } else { // ESMC_CAL_NOLEAP
             // reduce yy to seconds
             if (yy != 0) {
-              s += yy * calendar->secondsPerYear;
+              ESMC_FractionSetw(ESMC_FractionGetw() +
+                                yy * calendar->secondsPerYear);
               yy = 0;
             }
             // cannot reduce mm to seconds
           }
           // reduce d to seconds
           if (d != 0) {
-            s += d * calendar->secondsPerDay;
+            ESMC_FractionSetw(ESMC_FractionGetw() + d*calendar->secondsPerDay);
             d = 0;
           }
           // we now have (mm, s); yy and d have been reduced
@@ -2951,15 +3006,16 @@
         break;
       case ESMC_CAL_360DAY:
         if (yy != 0) {
-          s += yy * calendar->secondsPerYear;
+          ESMC_FractionSetw(ESMC_FractionGetw() + yy*calendar->secondsPerYear);
           yy = 0;
         }
         if (mm != 0) {
-          s += mm * 30 * calendar->secondsPerDay;
+          ESMC_FractionSetw(ESMC_FractionGetw() +
+                            mm * 30 * calendar->secondsPerDay);
           mm = 0;
         }
         if (d != 0) {
-          s += d * calendar->secondsPerDay;
+          ESMC_FractionSetw(ESMC_FractionGetw() + d * calendar->secondsPerDay);
           d = 0;
         }
         // yy, mm, d all reduced to base seconds
@@ -2969,7 +3025,7 @@
 
         // reduce days to seconds
         if (d != 0) {
-          s += d * calendar->secondsPerDay;
+          ESMC_FractionSetw(ESMC_FractionGetw() + d * calendar->secondsPerDay);
           d = 0;
         }
         break;
