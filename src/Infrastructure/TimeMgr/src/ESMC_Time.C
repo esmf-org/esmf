@@ -1,3 +1,4 @@
+// $Id: ESMC_Time.C,v 1.63 2004/05/24 20:27:33 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -17,6 +18,8 @@
 // in the companion file {\tt ESMC_Time.h}
 //
 //-------------------------------------------------------------------------
+//
+ #define ESMF_FILENAME "ESMC_Time.C"
 
  // higher level, 3rd party or system includes
  #include <iostream.h>
@@ -34,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.62 2004/05/21 00:27:34 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.63 2004/05/24 20:27:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -605,7 +608,8 @@
       return(this->calendar->calendarType == time->calendar->calendarType);
     }
     else {
-      if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                           "; calendar1 and/or calendar2 is NULL.", rc);
       return(false);
     }
 
@@ -630,11 +634,20 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate for calendar type
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL.", &rc);
+      return(rc);
+    }
+
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-        return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+      return(rc);
     }
 
     time_t tm;
@@ -656,7 +669,7 @@
     // TODO: use native C++ Set() version when ready
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+    rc = ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, &h, &m,
                  &s, ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -664,7 +677,9 @@
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER, &tz);
 
-    return(ESMF_SUCCESS);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+
+    return(rc);
 
  }  // end ESMC_TimeSyncToRealTime
 
@@ -898,6 +913,8 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // parse options
     if (options != ESMC_NULL_POINTER) {
 
@@ -906,36 +923,48 @@
 
       // validate calendar only, not time values
       if (strncmp(options, "calendar", 8) == 0) {
-        if (this->calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-        if (this->calendar->ESMC_CalendarValidate() != ESMF_SUCCESS) {
-          return(ESMF_FAILURE);
+        if (this->calendar == ESMC_NULL_POINTER) {
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                                "; calendar is NULL", &rc);
+          return(rc);
         }
-        return(ESMF_SUCCESS);
+        rc = this->calendar->ESMC_CalendarValidate();
+        ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+        return(rc);
 
       // validate timezone only, not time values
       } else if (strncmp(options, "timezone", 8) == 0) {
         // TODO: valid Timezones ?
-        return(ESMF_SUCCESS);
+        return(rc);
       }
     }
 
-    if (ESMC_BaseTime::ESMC_BaseTimeValidate() != ESMF_SUCCESS)
-      return(ESMF_FAILURE);
+    rc = ESMC_BaseTime::ESMC_BaseTimeValidate();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
-    if (this->calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
-    if (this->calendar->ESMC_CalendarValidate() != ESMF_SUCCESS)
-      return(ESMF_FAILURE);
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
+    rc = this->calendar->ESMC_CalendarValidate();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
 
     // earliest Gregorian date representable by the Fliegel algorithm
     //  is -4800/3/1 == -32044 Julian days == -2,768,601,600 core seconds
-    if (calendar->calendarType == ESMC_CAL_GREGORIAN && s < -2768601600LL)
-        return(ESMF_FAILURE);
+    if (calendar->calendarType == ESMC_CAL_GREGORIAN && s < -2768601600LL) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                                 "; Gregorian time is before -4800/3/1", &rc);
+      return(rc);
+    }
 
     // TODO: other calendar ranges ?
 
     // TODO: valid Timezones ?
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeValidate
 
@@ -1103,27 +1132,41 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
-    if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (timeString == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; timeString is NULL", &rc);
+      return(rc);
+    }
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-        return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+      return(rc);
     }
 
     ESMF_KIND_I8 yy_i8;
     int mm, dd;
     ESMF_KIND_I4 h, m, s; 
     // TODO: use native C++ Get, not F90 entry point, when ready
-    ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+    rc = ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                   &h, &m, &s, ESMC_NULL_POINTER);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // ISO 8601 format YYYY-MM-DDThh:mm:ss
     sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:%02d\0",
             yy_i8, mm, dd, h, m, s);
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeGetString
 
@@ -1147,9 +1190,19 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
-    if (dayOfWeek == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (dayOfWeek == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; dayOfWeek is NULL", &rc);
+      return(rc);
+    }
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
 
     // date variables
     ESMF_KIND_I8 yy_i8;
@@ -1177,7 +1230,9 @@
         case ESMC_CAL_NOCALENDAR:
         case ESMC_CAL_CUSTOM:
         default:
-          return(ESMF_FAILURE);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                "; calendarType is NOCALENDAR, CUSTOM, or unrecognized.", &rc);
+          return(rc);
           break;
     }
 
@@ -1187,18 +1242,21 @@
     // TODO: use native C++ Set() when ready
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    referenceMonday.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                                 &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, &cal,
-                                 ESMC_NULL_POINTER, &tz);
+    rc = referenceMonday.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                      &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, &cal,
+                                      ESMC_NULL_POINTER, &tz);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // calculate the difference in days between the given date and
     //  the reference date
@@ -1206,9 +1264,13 @@
     delta = *this - referenceMonday;
     ESMF_KIND_I8 diffDays;
     // TODO: use native C++ Get() when ready
-    delta.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER, &diffDays);
+    rc = delta.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                     ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                     ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                     &diffDays);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // calculate day of the week as simply modulo 7 from the reference date,
     //  adjusted for a 1-based count and negative deltas
@@ -1216,7 +1278,7 @@
     if (mod7 < 0) mod7 += 7;  // ensure positive (0 to 6) range
     *dayOfWeek = mod7 + 1;    // adjust to 1-based count (1 to 7)
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeGetDayOfWeek
 
@@ -1239,12 +1301,24 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
-    if (midMonth == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (midMonth == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; midMonth is NULL", &rc);
+      return(rc);
+    }
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-        return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+      return(rc);
     }
 
     // TODO: use table lookup per calendar type (14, 14.5, 15, 15.5 days) ?
@@ -1254,25 +1328,30 @@
     // get this date
     ESMF_KIND_I8 yy_i8;
     int mm, dd;
-    ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
+    rc = ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // set start of this month
     dd = 1;
     ESMC_Time startOfMonth;
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    startOfMonth.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                              &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                              ESMC_NULL_POINTER, &cal,
-                              ESMC_NULL_POINTER, &tz);
+    rc = startOfMonth.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                   &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, &cal,
+                                   ESMC_NULL_POINTER, &tz);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // set end of this month (start of next month)
     // TODO: use calendar interval logic when ready
@@ -1283,18 +1362,21 @@
       yy_i8++;
     }
     ESMC_Time endOfMonth;
-    endOfMonth.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                            &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                            ESMC_NULL_POINTER, &cal,
-                            ESMC_NULL_POINTER, &tz);
+    rc = endOfMonth.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                 &yy_i8, &mm, &dd, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, &cal,
+                                 ESMC_NULL_POINTER, &tz);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // size of this month
     ESMC_TimeInterval month;
@@ -1307,7 +1389,7 @@
     // TODO: add C++ infrastructure to enable the following expression:
     // *midMonth = startOfMonth + (endOfMonth - startOfMonth)/2;
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeGetMidMonth
 
@@ -1330,30 +1412,47 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
-    if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (dayOfYear == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; dayOfYear is NULL", &rc);
+      return(rc);
+    }
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-        return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+      return(rc);
     }
     
     // get day of year as time interval between now and 1/1/yy
     ESMC_TimeInterval yearDay;
-    if (ESMC_TimeGetDayOfYear(&yearDay) == ESMF_FAILURE) return(ESMF_FAILURE);
+    rc = ESMC_TimeGetDayOfYear(&yearDay);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // get difference in integer days
     ESMF_KIND_I8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
-    yearDay.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 &diffDays);
+    rc = yearDay.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      &diffDays);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // day-of-year is one-based count; i.e. day-of-year for 1/1/yy is 1
     *dayOfYear = (int) diffDays + 1;
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeGetDayOfYear
 
@@ -1379,34 +1478,51 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
-    if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (dayOfYear == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; dayOfYear is NULL", &rc);
+      return(rc);
+    }
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-        return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+      return(rc);
     }
 
     // get day of year as time interval between now and 1/1/yy
     ESMC_TimeInterval yearDay;
-    if (ESMC_TimeGetDayOfYear(&yearDay) != ESMF_SUCCESS) return(ESMF_FAILURE);
+    rc = ESMC_TimeGetDayOfYear(&yearDay);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // get difference in floating point days
     ESMF_KIND_R8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
-    yearDay.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 &diffDays);
+    rc = yearDay.ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      &diffDays);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // day-of-year is one-based count; i.e. day-of-year for 1/1/yy is 1
     *dayOfYear = diffDays + 1;
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeGetDayOfYear
 
@@ -1429,19 +1545,33 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
-    if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-    if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (dayOfYear == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; dayOfYear is NULL", &rc);
+      return(rc);
+    }
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL", &rc);
+      return(rc);
+    }
     if (this->calendar->calendarType == ESMC_CAL_JULIANDAY ||
         this->calendar->calendarType == ESMC_CAL_NOCALENDAR) {
-        return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                           "; calendarType is JULIANDAY or NOCALENDAR.", &rc);
+      return(rc);
     }
 
     // get year of our (this) time
     ESMF_KIND_I8 yy_i8;
     int mm, dd;
     // TODO: use native C++ Get, not F90 entry point
-    ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
+    rc = ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // create time for 1/1/yy
     ESMC_Time dayOne;
@@ -1449,21 +1579,25 @@
     // TODO: use native C++ Set(), not F90 entry point
     ESMC_Calendar *cal = this->calendar; // allows reset
     int tz = this->timeZone;             //   after Set() clears it
-    dayOne.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        &cal, ESMC_NULL_POINTER, &tz);
+    rc = dayOne.ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                             &yy_i8, &mm, &dd,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                             &cal, ESMC_NULL_POINTER, &tz);
+
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // calculate difference between 1/1/yy and our (this) time
     *dayOfYear = *this - dayOne;
     
-    return(ESMF_SUCCESS);
+    return(rc);
 
  }  // end ESMC_TimeGetDayOfYear

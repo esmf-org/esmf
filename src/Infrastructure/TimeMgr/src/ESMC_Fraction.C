@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.2 2003/06/13 17:48:24 rstaufer Exp $
+// $Id: ESMC_Fraction.C,v 1.3 2004/05/24 20:27:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,10 +14,12 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt ESMC\_Fraction} methods declared
-// in the companion file {\tt ESMC_Fraction.h}
+// The code in this file implements the C++ {\tt ESMC\_Fraction} methods
+// declared in the companion file {\tt ESMC_Fraction.h}
 //
 //-------------------------------------------------------------------------
+//
+ #define ESMF_FILENAME "ESMC_Fraction.C"
 
  // higher level, 3rd party or system includes
 
@@ -27,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.2 2003/06/13 17:48:24 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.3 2004/05/24 20:27:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //

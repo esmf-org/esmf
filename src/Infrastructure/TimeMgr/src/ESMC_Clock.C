@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.59 2004/05/18 23:08:37 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.60 2004/05/24 20:27:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -7,9 +7,9 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
-
+//
 // ESMC Clock method code (body) file
-
+//
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -19,6 +19,8 @@
 //
 //-------------------------------------------------------------------------
 //
+ #define ESMF_FILENAME "ESMC_Clock.C"
+
  // higher level, 3rd party or system includes here
  #include <iostream.h>
  #include <string.h>
@@ -33,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.59 2004/05/18 23:08:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.60 2004/05/24 20:27:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter

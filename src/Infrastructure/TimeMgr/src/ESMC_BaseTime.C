@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.31 2004/05/14 01:24:25 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.32 2004/05/24 20:27:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -7,9 +7,9 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
-
+//
 // ESMC BaseTime method code (body) file
-
+//
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -19,6 +19,8 @@
 //
 //-------------------------------------------------------------------------
 //
+ #define ESMF_FILENAME "ESMC_BaseTime.C"
+
  #include <iostream.h>
  #include <stdlib.h>
  #include <limits.h>
@@ -37,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.31 2004/05/14 01:24:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.32 2004/05/24 20:27:33 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
