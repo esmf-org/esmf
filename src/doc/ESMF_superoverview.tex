@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.20 2004/12/28 18:53:38 nscollins Exp $
+% $Id: ESMF_superoverview.tex,v 1.21 2004/12/30 19:16:01 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@ or the creation of nested higher resolution regions
 within a coarser grid.  The objective is to couple components at varying 
 scales both flexibly and efficiently.  ESMF encourages a hierachical
 application structure, in which large components branch into 
-smaller sub-components (see Figure \ref{fig:tree}).  ESMF also makes 
+smaller sub-components (see Figure \ref{fig:GEOS5}).  ESMF also makes 
 it easier for the same component to be used in multiple contexts 
 without changes to its source code.
 
@@ -111,19 +111,19 @@ parent Gridded Component is called by the AppDriver, it in turn
 calls the initialize methods of its child atmosphere and ocean 
 Gridded Components, and the initialize method of an 
 ocean-to-atmosphere Coupler Component.  Figure \ref{fig:appunit}
-shows this schematically for a coupled hurricane model with ocean
-and atmosphere components.
+shows this schematically for the atmospheric general circulation 
+model GEOS-5, from Goddard Space Flight Center.
 
 \begin{center}
 \begin{figure}
-\caption{ESMF enables applications such as a seasonal forecast
-model to be structured hierarchically, and reconfigured and 
-extended easily.}
-\label{fig:tree}
-\scalebox{1.0}{\includegraphics{ESMF_tree.eps}}
+\caption{ESMF enables applications such as the atmospheric general
+circulation model GEOS-5 to be structured hierarchically, and 
+reconfigured and extended easily.  Each box in this diagram is an
+ESMF Gridded Component.}
+\label{fig:GEOS5}
+\scalebox{1.0}{\includegraphics{ESMF_GEOS5.eps}}
 \end{figure}
 \end{center}
-
 
 \subsection{Hierarchical Creation of Components}
 \label{sec:hierarchy}
@@ -162,7 +162,38 @@ mode. When Gridded Components are created and run on mutually exclusive
 sets of PETs, and are coupled by a Coupler Component that extends over
 the union of these sets, the mode of execution is {\bf concurrent}.
 
-< TODO: add a figure here with a sequential vs concurrent 4-way application >
+Figure \ref{fig:serial} illustrates a typical configuration for 
+a simple coupled sequential
+application, and Figure \ref{fig:concurrent} shows a possible 
+configuration for the same application running in a concurrent mode.
+
+\begin{center}
+\begin{figure}
+\caption{Schematic of the run method of a coupled application, with an
+``Atmosphere'' and an ``Ocean'' Gridded Component running sequentially with 
+an ``Atm-Ocean Coupler.''  The top-level ``Hurricane Model'' 
+Gridded Component contains the sequencing information and time 
+advancement loop.  The AppDriver, Coupler, and all Gridded Components 
+are distributed over nine PETs.}
+\label{fig:serial}
+\scalebox{1.0}{\includegraphics{ESMF_serial.eps}}
+\end{figure}
+\end{center}
+
+\begin{center}
+\begin{figure}
+\caption{Schematic of the run method of a coupled application, with an
+``Atmosphere'' and an ``Ocean'' Gridded Component running concurrently with 
+an ``Atm-Ocean Coupler.''  The top-level ``Hurricane Model'' 
+Gridded Component contains the sequencing information and time 
+advancement loop.  The AppDriver, Coupler, and top-level ``Hurricane
+Model'' Gridded Component are distributed over nine PETs.  The
+``Atmosphere'' Gridded Component is distributed over three PETs and
+the ``Ocean'' Gridded Component is distributed over six PETs.}
+\label{fig:concurrent}
+\scalebox{1.0}{\includegraphics{ESMF_concurrent.eps}}
+\end{figure}
+\end{center}
 
 Parent Components can select if and when to wait for concurrently
 executing child Components, synchronizing only when required.
@@ -187,7 +218,7 @@ introduced without affecting the overall structure of the application.
 
 Since all data communication happens within a component, a Coupler
 Component must be created on the union of the PETs of all
-the Gridded Components that it couples.
+the Gridded Components that it couples.  
 
 \subsection{Data Distribution and Scoping in Components}
 \label{sec:scoping}
@@ -214,10 +245,16 @@ to describe
 the remote source for data being moved to the current PET,
 or as a remote destination for local data being moved from this PET.
 
-< TODO: image of before/after reconcile, 4-way coupler, 2-way children comps,
-single field >
+\begin{center}
+\begin{figure}
+\caption{An {\tt ESMF\_StateReconcile()} call creates proxy 
+objects for use in communication calls.  Such a call would normally
+be made during Coupler initialization.}
+\label{fig:reconcile}
+\scalebox{1.0}{\includegraphics{ESMF_reconcile.eps}}
+\end{figure}
+\end{center}
 
- 
 \subsection{Performance}
 \label{sec:performance}
 
