@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.74 2004/07/02 20:31:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.74 2004/07/02 20:31:24 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -548,7 +548,12 @@
 !     TMGn.n.n
 
       ! initialize name length to zero for non-existent name
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       integer :: nameLen = 0
+#else
+      integer :: nameLen
+      nameLen = 0
+#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -664,11 +669,17 @@
 !     TMG2.3.4
 
       ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
-
-      ! initialize number of months per year to zero for not-present
+      !   and initialize number of months per year to zero for not-present
       !   daysPerMonth
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+      integer :: nameLen = 0
       integer :: monthsPerYear = 0
+#else
+      integer :: nameLen
+      integer :: monthsPerYear
+      nameLen = 0
+      monthsPerYear = 0
+#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -827,11 +838,19 @@
       character (len=ESMF_MAXSTR) :: tempName
 
       ! initialize name lengths to zero for non-existent name
+      !   and initialize daysPerMonth list size to zero for not-present list
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       integer :: nameLen = 0
       integer :: tempNameLen = 0
-
-      ! initialize daysPerMonth list size to zero for not-present list
       integer :: sizeofDaysPerMonth = 0
+#else
+      integer :: nameLen
+      integer :: tempNameLen
+      integer :: sizeofDaysPerMonth
+      nameLen = 0
+      tempNameLen = 0
+      sizeofDaysPerMonth = 0
+#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1033,7 +1052,12 @@
 !     TMGn.n.n
     
       ! initialize name length to zero for non-existent name
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       integer :: nameLen = 0
+#else
+      integer :: nameLen
+      nameLen = 0
+#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -1110,11 +1134,17 @@
 !     TMG2.3.4
 
       ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
-
-      ! initialize number of months per year to zero for not-present
+      !   and initialize number of months per year to zero for not-present
       !   daysPerMonth
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+      integer :: nameLen = 0
       integer :: monthsPerYear = 0
+#else
+      integer :: nameLen
+      integer :: monthsPerYear
+      nameLen = 0
+      monthsPerYear = 0
+#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
