@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.3 2004/05/26 06:14:13 nscollins Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.4 2004/10/27 22:23:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,24 +32,31 @@
 ! !DESCRIPTION:
 !  Available to be called by an {\tt ESMF\_CplComp} at any time after 
 !  {\tt ESMF\_CplCompSetInternalState} has been called.
-!  Since init, run, and finalize must be separate subroutines, data that
+!  Since init, run, and finalize must be separate subroutines data that
 !  they need to share in common can either be module global data, or can
-!  be allocated in a private data block, and the address of that block
+!  be allocated in a private data block and the address of that block
 !  can be registered with the framework and retrieved by this call.
 !  When running multiple instantiations of an {\tt ESMF\_CplComp}, 
 !  for example during ensemble runs, 
 !  it may be simpler to maintain private data specific to 
 !  each run with private data blocks.  A corresponding 
 !  {\tt ESMF\_CplCompSetInternalState} call sets the data pointer to 
-!  this block, and this call retrieves the data pointer.
+!  this block, and this call retrieves the data pointer.   
+!  Note that the {\tt dataPointer} argument needs to be a derived type
+!  which contains only a pointer of the type of the data block defined
+!  by the user.  When making this call the pointer needs to be unassociated.
+!  When the call returns the pointer will now reference the original
+!  data block which was set during the previous call to
+!  {\tt ESMF\_CplCompSetInternalState}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
 !    An {\tt ESMF\_CplComp} object.
 !   \item[dataPointer]
-!    A derived type, containing only a pointer to the private data block.
-!    The framework will fill in the block and when this call returns the
+!    A derived type, containing only an unassociated pointer 
+!    to the private data block.
+!    The framework will fill in the pointer. When this call returns the
 !    pointer is set to the same address set during 
 !    {\tt ESMF\_CplCompSetInternalState}.
 !    This level of indirection is needed to reliably set and retrieve 
@@ -127,9 +134,9 @@
 !  Available to be called by an {\tt ESMF\_CplComp} at any time, but 
 !  expected to be
 !  most useful when called during the registration process, or initialization.
-!  Since init, run, and finalize must be separate subroutines, data that
+!  Since init, run, and finalize must be separate subroutines data that
 !  they need to share in common can either be module global data, or can
-!  be allocated in a private data block, and the address of that block
+!  be allocated in a private data block and the address of that block
 !  can be registered with the framework and retrieved by subsequent calls.
 !  When running multiple instantiations of an {\tt ESMF\_CplComp}, 
 !  for example during
