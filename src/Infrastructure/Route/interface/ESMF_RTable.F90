@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.3 2004/01/28 21:46:49 nscollins Exp $
+! $Id: ESMF_RTable.F90,v 1.4 2004/04/20 22:54:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMF.h"
 !!#include "ESMF_Route.h"
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_RTableMod - One line general statement about this class
 !
 ! !DESCRIPTION:
@@ -79,19 +79,19 @@
 ! < list the rest of the public interfaces here >
 !
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.3 2004/01/28 21:46:49 nscollins Exp $'
+      '$Id: ESMF_RTable.F90,v 1.4 2004/04/20 22:54:19 nscollins Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_RTableCreate 
 
@@ -102,7 +102,7 @@
 !     This interface provides a single entry point for RTable create
 !     methods.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
@@ -118,7 +118,7 @@
 ! This section includes the RTable Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RTableCreateNew - Create a new RTable
 
 ! !INTERFACE:
@@ -148,7 +148,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
@@ -182,7 +182,7 @@
         end function ESMF_RTableCreateNew
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RTableDestroy - Free all resources associated with a RTable 
 
 ! !INTERFACE:
@@ -204,7 +204,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -237,7 +237,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RTableGet - Get values from a RTable
 
 ! !INTERFACE:
@@ -265,7 +265,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -302,7 +302,7 @@
         end subroutine ESMF_RTableGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RTableSet - Set values in a RTable
 
 ! !INTERFACE:
@@ -331,7 +331,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -368,7 +368,7 @@
         end subroutine ESMF_RTableSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RTableValidate - Check internal consistency of a RTable
 
 ! !INTERFACE:
@@ -392,7 +392,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 !
        character (len=6) :: defaultopts      ! default validate options
@@ -426,7 +426,7 @@
        end subroutine ESMF_RTableValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RTablePrint - Print the contents of a RTable
 
 ! !INTERFACE:
@@ -451,7 +451,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
