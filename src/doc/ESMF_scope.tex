@@ -51,7 +51,7 @@ part, we expect components to be able to provide the required
 interface functionality through wrapping of internal data structures
 and methods.
 
-\section{ESMF Superstructure}
+\section{ESMF superstructure}
 
 All inter-component communication in the framework occurs through 
 component calls to the superstructure. \\
@@ -85,7 +85,7 @@ interface.  It is provided by a parallel support layer, described next.
 This support layer can be used within applications 
 to perform efficient parallel grid operations.
 
-\section{ESMF Infrastructure}
+\section{ESMF infrastructure}
 
 The ESMF contains the software necessary to support the data
 decomposition and communication requirements of the superstructure and
@@ -103,7 +103,7 @@ collective operations on vector and scalar fields.  A field is represented
 by metadata, a description of its associated distributed grid, and field 
 data itself.
 
-\subsubsection{Gridded and Observational Data}
+\subsubsection{Gridded and observational data}
 
 The ESMF supports regridding, interpolation, redistribution,
 transfer, and merging of data discretized on the following types of grids:
@@ -123,7 +123,7 @@ transfer, and merging of data discretized on the following types of grids:
 The supplied implementation will include highly-optimized versions of
 these operations for the most commonly-used grid types.
 
-\subsubsection{Grid Operations}
+\subsubsection{Grid operations}
 
 The ESMF provides interpolation algorithms for supported grids.  All
 interpolation algorithms included in ESMF are {\it linear} in the data
@@ -140,7 +140,7 @@ be supported.
 Dynamic load balancing will be provided for standard decompositions, 
 and general dynamic load-balancing tools for specialized decompositions.
 
-\subsection{Utility Infrastructure}
+\subsection{Utility infrastructure}
 
 The ESMF includes general purpose utility routines for use by both 
 the ESMF coupler and application codes.  These utilities include 
@@ -175,14 +175,14 @@ in a variety of data formats including netCDF, HDF, binary, GRIB, and
 BUFR. As much as possible, the utilities will offer scalable
 performance.
 
-\subsubsection{Performance Profiling}
+\subsubsection{Performance profiling}
 
 A performance profiling utility will enable application developers to 
 instrument code segments with timers. The profiling utility will also
 offer access to hardware statistics by offering an interface to a
 package such as PAPI or PCL.
 
-\subsubsection{Time Management}
+\subsubsection{Time management}
 
 The ESMF will include a library for performing routine 
 calculations with dates and time intervals.  For higher level model
@@ -196,7 +196,7 @@ The ESMF will offer comprehensive and integrated error handling
 services.  A mechanism to announce and query component failure will be
 provided.
 
-\subsection{Future Plans}
+\subsection{Future plans}
 
 The following are capabilities that might conceivably have been
 included in ESMF, but will not be developed under CAN 00-OES-01

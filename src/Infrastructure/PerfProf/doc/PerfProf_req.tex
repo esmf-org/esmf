@@ -1,6 +1,6 @@
-% $Id: PerfProf_req.tex,v 1.7 2002/05/15 23:29:08 cnh Exp $
+% $Id: PerfProf_req.tex,v 1.8 2002/05/18 07:39:38 cdeluca Exp $
 
-\req{Code Section Timing}
+\req{Code section timing}
 
 The profiler will have a means to time individual code sections.  An API will be 
 provided so that a user may insert calls to the profiler at the beginning and
@@ -14,7 +14,7 @@ end of a passage of interest.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Named Timers}
+\sreq{Named timers}
 
 Calls for recording time may be placed around numerous different code sections, 
 and the library shall provide a means for distinguishing these separate calls.  When
@@ -28,7 +28,7 @@ the results of the timing are reported, each timer will be associated with its n
 {\bf Notes:} 
 \end{reqlist}
 
-\ssreq{Named Timer Reset}
+\ssreq{Named timer reset}
 
 A named timer may be reset at any time.  All data will be cleared.
 
@@ -40,14 +40,14 @@ A named timer may be reset at any time.  All data will be cleared.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Types of Time}
+\sreq{Types of time}
 
-In the context of the profiler the word ``time'' is not well defined.  There are
+There are
 a number of different types of ``time'' that may be of interest to a profiler.
 These various types of time can be recorded.  Each will be recorded separately and reported
 as such.  The various types are enumerated below:
 
-\ssreq{User Time}
+\ssreq{User time}
 
 Process user time can be recorded.
 The timer will provide a means to estimate and reconcile the extra time added by its usage.
@@ -63,7 +63,7 @@ The timer will provide a means to estimate and reconcile the extra time added by
   
 \end{reqlist}
 
-\ssreq{System Time}
+\ssreq{System time}
 
 System time can be recorded.
 
@@ -76,7 +76,7 @@ System time can be recorded.
 \end{reqlist}
 
 
-\ssreq{Wall Time}
+\ssreq{Wall clock time}
 
 Wall clock time can be recorded.
 
@@ -89,7 +89,7 @@ Wall clock time can be recorded.
 \end{reqlist}
 
 
-\req{Hardware Counters}
+\req{Hardware counters}
 
 Most computers have special registers which keep track of information such
 as floating point operations, cycles, and cache hits/misses.  The profiler will
@@ -111,7 +111,7 @@ Collection of the following data will be supported, where available:
 {\bf Notes:} 
 \end{reqlist}
 
-\req{Process Granularity}
+\req{Process granularity}
 
 The profiler will be able to operate within a nested structure of processes (e.g.
 from MPI process 3, thread 6).
@@ -124,7 +124,7 @@ from MPI process 3, thread 6).
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Process Level}
+\sreq{Process level}
 
 The profiler can be called safely from any process (MPI or other).  It will 
 identify and report which process it was called from.
@@ -137,7 +137,7 @@ identify and report which process it was called from.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Thread Level}
+\sreq{Thread level}
 
 The profiler can be called safely from any thread.  It will 
 identify and report which thread it was called from.
@@ -155,9 +155,9 @@ identify and report which thread it was called from.
 The profiler will provide a means to output the data collected.  This output may
 be called at any point of execution, as many times as desired.
 
-\sreq{Log Output}
+\sreq{Log output}
 
-The profiler will write its output via the Log.  
+The profiler will write its output via the log.  
 
 \begin{reqlist}
 {\bf Priority:}  \\
@@ -167,7 +167,7 @@ The profiler will write its output via the Log.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{API Retrieval}
+\sreq{API retrieval}
 
 The profiler data will be accessible to the program by means of an API.
 \begin{reqlist}
@@ -183,7 +183,7 @@ The profiler data will be accessible to the program by means of an API.
 The profiler will be able to perform a variety of statistical analysis on its call
 data and report.
 
-\ssreq{Thread Statistics}
+\ssreq{Thread statistics}
 
 A named timer can perform analysis across threads and report the 
 minimum amount of time spent in any thread, the maximum, and the mean.
@@ -196,13 +196,13 @@ minimum amount of time spent in any thread, the maximum, and the mean.
 {\bf Notes:} 
 \end{reqlist}
 
-\req{Call Deactivation}
+\req{Call deactivation}
 
 Calling profiling routines typically has a performance impact and should not
 be done during production runs.  Therefore there will be some mechanisms to 
 disable the profiling calls.
 
-\sreq{Compile Deactivation}
+\sreq{Compile deactivation}
 
 The library can be turned into stub calls at compile time.
 
@@ -214,7 +214,7 @@ The library can be turned into stub calls at compile time.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Runtime Deactivation}
+\sreq{Runtime deactivation}
 
 A flag may be set so that calls to the profiling library do no more than check
 this flag and return.

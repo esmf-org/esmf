@@ -1,4 +1,4 @@
-% $Id: DistGrid_reqdoc.tex,v 1.9 2002/05/17 22:43:18 cdeluca Exp $
+% $Id: DistGrid_reqdoc.tex,v 1.10 2002/05/18 07:39:37 cdeluca Exp $
 
 %\documentclass[english]{article}
 % \usepackage{underscore}
@@ -43,32 +43,26 @@
 %\newpage
 %\tableofcontents
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Overview}
-\end{htmlonly}
-\chapter{\longname Overview}
-
 %===============================================================================
-\section{Target Codes and Review Team}
+\section{Target codes and review team}
 %-------------------------------------------------------------------------------
 
 \begin{tabular}{l l}
 
-{\bf Sign-Off Date:}          & <Date> \\ \\
+{\bf Review Date:}            & 7 May, 2002 \\ \\
 
 {\bf Target Codes}            & {\bf Reviewers} \\
 GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
 HIM                           & Hallberg \\
 CAM-EUL, CLM                  & Bettge \\
-CAM-FV, PSAS                  & da Silva\\
+CAM-FV, PSAS                  & da Silva, Sawyer\\
 POP, CICE                     & Jones \\
 WRF                           & Michalakes \\
 MIT-REG, MIT-CPL, ADJ         & Hill \\
 NSIPP-ATM, NSIPP-OCN          & Suarez \\
 NCEP-ATM, SSI                 & Iredell \\ \\
 
-{\bf Other Reviewers:}        & DeLuca, Neckels
+{\bf Other Reviewers:}        & DeLuca, Neckels, Larson, Jacob
 
 \end{tabular}
 
@@ -77,7 +71,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 %\section{Introduction}
 %\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
-\section{\longname Background}
+\section{Distributed grid background}
 \input{../Infrastructure/DistGrid/doc/DistGrid_background}
 
 %\section{\longname Terms} \label{DG:terms}
@@ -94,15 +88,12 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \newpage
 
+\section{Distributed grid requirements}
+
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Requirements}
-\end{htmlonly}
-\chapter{\longname Requirements}
 
 \input{../Infrastructure/DistGrid/doc/DistGrid_req}
 

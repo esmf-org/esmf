@@ -1,4 +1,4 @@
-% $Id: IO_req.tex,v 1.13 2002/05/15 22:41:55 cnh Exp $
+% $Id: IO_req.tex,v 1.14 2002/05/18 07:39:38 cdeluca Exp $
 
 %=============================================================================
 % Requirements may be itemized under a main topic:
@@ -9,9 +9,9 @@ The following are requirements for IO operations and are in addition
 to the applicable general ESMF requirements (see ESMF General 
 Requirements document, section 8.1.3).
 
-\req{General IO Requirements}
+\req{General IO requirements}
 
-\sreq{Establish ESMF Metadata Conventions}
+\sreq{Establish ESMF metadata conventions}
 
 A set of metadata conventions on gridded data on structured and
 unstuctured grids, as well as observational data has to be determined
@@ -40,10 +40,10 @@ cover all supported formats.
 \end{reqlist}
 
 
-\req{IO Requirements for Supporting Different Data Formats}
+\req{IO requirements for supporting different data formats}
 %-----------------------------------------------------------------------------
 
-\sreq{Reading and Writing netCDF files for Regular Gridded Data}
+\sreq{Reading and writing netCDF files for regular gridded data}
 
 ESMF has to provide interface and software to read and write netCDF
 files for regular gridded data covered by ESMF metadata conventions. 
@@ -56,7 +56,7 @@ files for regular gridded data covered by ESMF metadata conventions.
 \end{reqlist}
 
 
-\sreq{Reading and Writing netCDF files on Unstructured Grids}
+\sreq{Reading and writing netCDF files on unstructured grids}
 
 ESMF has to provide interface and software to read and write netCDF
 files for data on unstructured grids covered by ESMF metadata conventions. 
@@ -69,7 +69,7 @@ files for data on unstructured grids covered by ESMF metadata conventions.
 \end{reqlist}
 
 
-\sreq{Reading and Writing netCDF files for Observational Data}
+\sreq{Reading and writing netCDF files for observational Data}
 
 ESMF has to provide interface and software to read and write netCDF
 files for observational data  covered by ESMF metadata conventions. 
@@ -82,7 +82,7 @@ files for observational data  covered by ESMF metadata conventions.
 \end{reqlist}
 
 
-\sreq{Reading and Writing netCDF files using DODS}
+\sreq{Reading and writing netCDF files using DODS}
 
 ESMF has to provide interface and software to read and write netCDF
 files for data covered by ESMF metadata conventions over the Internet, 
@@ -97,7 +97,7 @@ using DODS.
 systems. \\
 \end{reqlist}
 
-\sreq{Reading and Writing HDF4 files for Regular Gridded Data}
+\sreq{Reading and writing HDF4 files for regular gridded data}
 
 ESMF has to provide interfaces and software to read and write HDF4 files for 
 regular gridded data covered by ESMF metadata conventions.
@@ -112,7 +112,7 @@ regular gridded data covered by ESMF metadata conventions.
 
 
 
-\sreq{Reading and Writing HDF4 files for Data on Unstructured Grids}
+\sreq{Reading and writing HDF4 files for data on unstructured grids}
 
 ESMF has to provide interfaces and software to read and write HDF4
 files for data on unstructured grids covered by ESMF metadata conventions.
@@ -125,9 +125,7 @@ files for data on unstructured grids covered by ESMF metadata conventions.
 {\bf Verification:} Unit test. \\
 \end{reqlist}
 
-
-
-\sreq{Reading and Writing HDF4 files for Observational Data}
+\sreq{Reading and writing HDF4 files for observational data}
 
 ESMF has to provide interfaces and software to read and write HDF4
 files for observational data  covered by ESMF metadata conventions.
@@ -140,10 +138,7 @@ files for observational data  covered by ESMF metadata conventions.
 {\bf Verification:} Unit test. \\
 \end{reqlist}
 
-
-
-
-\sreq{Reading and Writing HDF5 files for Regular Gridded Data}
+\sreq{Reading and writing HDF5 files for regular gridded data}
 
 ESMF has to provide interfaces and software to read and write HDF5
 files for regular gridded data covered by ESMF metadata conventions.
@@ -157,7 +152,7 @@ files for regular gridded data covered by ESMF metadata conventions.
 
 
 
-\sreq{Reading and Writing HDF5 files for Data on Unstructured Grids}
+\sreq{Reading and writing HDF5 files for data on unstructured grids}
 
 ESMF has to provide interfaces and software to read and write HDF5 for data 
 on unstructured grids covered by ESMF metadata conventions.
@@ -170,7 +165,7 @@ on unstructured grids covered by ESMF metadata conventions.
 \end{reqlist}
 
 
-\sreq{Reading and Writing HDF5 files for Observational Data}
+\sreq{Reading and writing HDF5 files for observational data}
 
 ESMF has to provide interfaces and software to read and write HDF5
 files for data for observational data  covered by ESMF metadata conventions.
@@ -184,7 +179,7 @@ files for data for observational data  covered by ESMF metadata conventions.
 
 
 
-\sreq{Reading and Writing HDF-EOS files for Regular Gridded Data}
+\sreq{Reading and writing HDF-EOS files for regular gridded data}
 
 ESMF has to provide interfaces and software to read and write HDF-EOS
 files for regular gridded data covered by ESMF metadata conventions.
@@ -198,7 +193,7 @@ files for regular gridded data covered by ESMF metadata conventions.
 \end{reqlist}
 
 
-\sreq{Reading and Writing HDF-EOS files for Data on Unstructured Grids}
+\sreq{Reading and writing HDF-EOS files for data on unstructured grids}
 
 ESMF has to provide interfaces and software to read and write HDF-EOS
 files for data on unstructured grids covered by ESMF metadata conventions.
@@ -212,7 +207,7 @@ files for data on unstructured grids covered by ESMF metadata conventions.
 \end{reqlist}
 
 
-\sreq{Reading and Writing HDF-EOS files for Observational Data}
+\sreq{Reading and writing HDF-EOS files for observational data}
 
 ESMF has to provide interfaces and software to read and write HDF-EOS
 files for observational data  covered by ESMF metadata conventions.
@@ -227,7 +222,7 @@ files for observational data  covered by ESMF metadata conventions.
 
 
 
-\sreq{Reading and Writing GRIB files for Regular Gridded Data}
+\sreq{Reading and writing GRIB files for regular gridded data}
 
 ESMF has to provide interfaces and software to read and write GRIB
 files for regular gridded data covered by ESMF metadata conventions.
@@ -243,7 +238,7 @@ in the next two years.
 \end{reqlist}
 
 
-\sreq{Reading and Writing GRIB files for Data on Unstructured Grids}
+\sreq{Reading and writing GRIB files for data on unstructured grids}
 
 ESMF has to provide interfaces and software to read and write GRIB
 files for data on unstructured grids covered by ESMF metadata conventions.
@@ -259,7 +254,7 @@ in the next two years.
 \end{reqlist}
 
 
-\sreq{Reading and Writing Native Binary Files}
+\sreq{Reading and writing native binary files}
 
 ESMF has to provide interfaces and software to read and write native
 binary files for regular gridded data, data on unstructured grids, and 
@@ -279,7 +274,7 @@ A byte swap and specified byte style facility is needed (MIT).
 \end{reqlist}
 
 
-\sreq{Reading and Writing BUFR Files}
+\sreq{Reading and writing BUFR files}
 
 ESMF has to provide interfaces and software to read and write BUFR files for
 observational data covered by ESMF metadata convensions.
@@ -293,7 +288,7 @@ observational data covered by ESMF metadata convensions.
 \end{reqlist}
 
 
-\req{Parallel I/O Requirements}
+\req{Parallel I/O requirements}
 
 
 \sreq{Single-threaded IO of distributed data}
@@ -360,3 +355,8 @@ file.
 enabled by underlying library - otherwise it should provide a status
 bit to indicate the operation is not possible i.e. it shouldn't crash!
 \end{reqlist}
+
+
+
+
+

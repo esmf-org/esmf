@@ -1,4 +1,4 @@
-% $Id: IO_reqdoc.tex,v 1.6 2002/05/17 22:43:18 cdeluca Exp $
+% $Id: IO_reqdoc.tex,v 1.7 2002/05/18 07:39:38 cdeluca Exp $
 
 %\documentclass[english]{article}
 %\usepackage{babel}
@@ -43,32 +43,26 @@ Mark Iredell}
 %\newpage
 %\tableofcontents
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Overview}
-\end{htmlonly}
-\part{\longname Overview}
-
 %===============================================================================
-\section{Target Codes and Review Team}
+\section{Target codes and review team}
 %-------------------------------------------------------------------------------
 
 \begin{tabular}{l l}
 
-{\bf Sign-Off Date:}          & <Date> \\ \\
+{\bf Review Date:}            & 16 May, 2002 \\ \\
 
 {\bf Target Codes}            & {\bf Reviewers} \\
 GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
 HIM                           & Hallberg \\
-CAM-EUL, CLM                  & Eaton \\
-CAM-FV, PSAS                  & da Silva\\
+CAM-EUL, CLM                  & Craig \\
+CAM-FV, PSAS                  & da Silva \\
 POP, CICE                     & Jones \\
 WRF                           & Michalakes \\
 MIT-REG, MIT-CPL, ADJ         & Hill \\
 NSIPP-ATM, NSIPP-OCN          & Suarez \\
-NCEP-ATM, SSI                 & Iredell \\ \\
+NCEP-ATM, SSI                 & Iredell, Young \\ \\
 
-{\bf Other Reviewers:}        & DeLuca, Neckels
+{\bf Other Reviewers:}        & DeLuca, Neckels, Jacob
 
 \end{tabular}
 
@@ -77,7 +71,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 %\section{Introduction}
 %\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
-%\section{\longname Background}
+%\section{IO Background}
 \input{../Infrastructure/IO/doc/IO_background}
 
 %\section{\longname Terms}
@@ -94,15 +88,12 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \newpage
 
+\section{IO requirements}
+
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Requirements}
-\end{htmlonly}
-\part{\longname Requirements}
 
 \input{../Infrastructure/IO/doc/IO_req}
 

@@ -1,4 +1,4 @@
-% $Id: Regrid_reqdoc.tex,v 1.8 2002/05/17 22:43:19 cdeluca Exp $
+% $Id: Regrid_reqdoc.tex,v 1.9 2002/05/18 07:39:38 cdeluca Exp $
 
 %\documentclass[english]{article}
 %\usepackage{babel}
@@ -41,32 +41,26 @@
 %\newpage
 %\tableofcontents
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Overview}
-\end{htmlonly}
-\chapter{\longname Overview}
-
 %===============================================================================
-\section{Target Codes and Review Team}
+\section{Target codes and review team}
 %-------------------------------------------------------------------------------
 
 \begin{tabular}{l l}
 
-{\bf Sign-Off Date:}          & <Date> \\ \\
+{\bf Review Date:}            & 30 April, 2002 \\ \\
 
 {\bf Target Codes}            & {\bf Reviewers} \\
 GFDL-SPEC, BGRID, MOM4        & Balaji \\
 HIM                           & Hallberg \\
-CAM-EUL, CLM                  & Eaton \\
+CAM-EUL, CLM, CCSM-CPL        & Craig \\
 CAM-FV, PSAS                  & da Silva\\
 POP, CICE                     & Jones \\
 WRF                           & Michalakes \\
 MIT-REG, MIT-CPL, ADJ         & Hill \\
 NSIPP-ATM, NSIPP-OCN          & Suarez \\
-NCEP-ATM, SSI                 & Iredell \\ \\
+NCEP-ATM, SSI                 & Iredell, Young \\ \\
 
-{\bf Other Reviewers:}        & DeLuca, Neckels, Craig
+{\bf Other Reviewers:}        & DeLuca, Neckels, Jacob, Larson
 
 \end{tabular}
 
@@ -75,7 +69,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 %\section{Introduction}
 %\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
-\section{\longname Background}
+\section{Regrid background}
 \input{../Infrastructure/Regrid/doc/Regrid_background}
 
 %\section{\longname Terms}
@@ -97,10 +91,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Requirements}
-\end{htmlonly}
-\chapter{\longname Requirements}
+\section{Regrid requirements}
 
 \input{../Infrastructure/Regrid/doc/Regrid_req}
 

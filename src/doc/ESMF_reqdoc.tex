@@ -1,6 +1,6 @@
 % $ Id: $
 
-\documentclass[english]{report}
+\documentclass[english]{article}
 \usepackage{babel}
 \usepackage{supertabular}
 \usepackage{html}
@@ -25,7 +25,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{GR}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Tony Craig, Byron Boville, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Max Suarez, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Tony Craig, Byron Boville, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Shepard Smithline, Max Suarez, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 \setlength{\textwidth}{6.5truein}
 \setlength{\textheight}{8.5truein}
@@ -49,26 +49,19 @@
 \end{htmlonly}
 \part{General Requirements}
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Overview}
-\end{htmlonly}
-\chapter{\longname Overview}
-
 %===============================================================================
-\section{Target Codes and Review Team}
+\section{Target codes and review team}
 %-------------------------------------------------------------------------------
 
 \begin{tabular}{l l}
 
-{\bf Sign-Off Date:}          & <Date> \\ \\
+{\bf Review Date:}          & 20 March, 2002 \\ \\
 
 {\bf Target Codes}            & {\bf Reviewers} \\
-GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
+GFDL-SPEC, BGRID, MOM4        & Balaji, Smithline \\ 
 HIM                           & Hallberg \\
-CAM-EUL, CLM                  & Eaton \\
-CCSM-CPL                      & Bettge, Craig, Kuffman \\
-CAM-FV, PSAS                  & da Silva\\
+CAM-EUL, CLM, CCSM-CPL        & Boville \\
+CAM-FV, PSAS                  & da Silva, Sawyer\\
 POP, CICE                     & Jones \\
 WRF                           & Michalakes \\
 MIT-REG, MIT-CPL, ADJ         & Hill \\
@@ -76,7 +69,7 @@ NSIPP-ATM, NSIPP-OCN          & Suarez \\
 NCEP-ATM, SSI                 & Iredell \\ \\
 
 
-{\bf Other Reviewers:}        & DeLuca, Neckels
+{\bf Other Reviewers:}        & DeLuca, Neckels, Larson, Jacob
 
 \end{tabular}
 
@@ -98,23 +91,23 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \section{Terms}
 \input{ESMF_terms}
 
-\section{Document Organization and Conventions}
+\section{Document organization and conventions}
 \input{../../scripts/doc_templates/templates/conv_reqdoc}
 
-\subsection{Requirement Attributes}
+\subsection{Requirement attributes}
 \input{../../scripts/doc_templates/templates/attr_reqdoc}
 
 \newpage
+
+\begin{htmlonly}
+\addcontentsline{toc}{section}{Framework-wide requirements}
+\end{htmlonly}
+\section{Framework-wide requirements}
 
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{Framework-Wide Requirements}
-\end{htmlonly}
-\chapter{Framework-Wide Requirements}
 
 \input{ESMF_req}
 
@@ -125,11 +118,10 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Superstructure: Control}
+\addcontentsline{toc}{part}{Superstructure: control}
 \end{htmlonly}
-\part{Superstructure: Control}
+\part{Superstructure: control}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -139,11 +131,10 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Superstructure: Components}
+\addcontentsline{toc}{part}{Superstructure: components}
 \end{htmlonly}
 \part{Superstructure: Components}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -157,7 +148,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Fields and Grids: Fields}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -165,18 +155,12 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \input{../Infrastructure/Fields/doc/Fields_reqdoc}
 
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{Infrastructure Requirements: Fields and Grids}
-\end{htmlonly}
-\chapter{Infrastructure Requirements: Fields and Grids}
-
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
 \end{htmlonly}
 \part{Infrastructure Fields and Grids: Physical Grids}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -190,7 +174,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Fields and Grids: Distributed Grids}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -204,7 +187,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Fields and Grids: Regridding}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -218,7 +200,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Utilities: Time Management}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -232,7 +213,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Utilities: Performance Profiling}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -246,7 +226,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Utilities: Log}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
@@ -260,7 +239,6 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{Infrastructure Utilities: I/O}
 
-\setcounter{chapter}{0}
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}

@@ -1,4 +1,4 @@
-% $Id: PerfProf_reqdoc.tex,v 1.5 2002/05/17 22:43:19 cdeluca Exp $
+% $Id: PerfProf_reqdoc.tex,v 1.6 2002/05/18 07:39:38 cdeluca Exp $
 
 %\documentclass[english]{article}
 %\usepackage{babel}
@@ -41,32 +41,26 @@
 %\newpage
 %\tableofcontents
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Overview}
-\end{htmlonly}
-\chapter{\longname Overview}
-
 %===============================================================================
-\section{Target Codes and Review Team}
+\section{Target codes and review team}
 %-------------------------------------------------------------------------------
 
 \begin{tabular}{l l}
 
-{\bf Sign-Off Date:}          & <Date> \\ \\
+{\bf Review Date:}          & TBD \\ \\
 
 {\bf Target Codes}            & {\bf Reviewers} \\
 GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
 HIM                           & Hallberg \\
-CAM-EUL, CLM                  & Eaton \\
-CAM-FV, PSAS                  & da Silva\\
+CAM-EUL, CLM                  & Rosinski \\
+CAM-FV, PSAS                  & da Silva, Zaslavsky, Sawyer\\
 POP, CICE                     & Jones \\
 WRF                           & Michalakes \\
 MIT-REG, MIT-CPL, ADJ         & Hill \\
 NSIPP-ATM, NSIPP-OCN          & Suarez \\
-NCEP-ATM, SSI                 & Iredell \\ \\
+NCEP-ATM, SSI                 & Iredell, Young \\ \\
 
-{\bf Other Reviewers:}        & DeLuca, Neckels
+{\bf Other Reviewers:}        & DeLuca, Neckels, Jacob, Larson
 
 \end{tabular}
 
@@ -92,15 +86,12 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 \newpage
 
+\section{Performance Profiling Requirements}
+
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-\begin{htmlonly}
-\addcontentsline{toc}{chapter}{\longname Requirements}
-\end{htmlonly}
-\chapter{\longname Requirements}
 
 \input{../Infrastructure/PerfProf/doc/PerfProf_req}
 
