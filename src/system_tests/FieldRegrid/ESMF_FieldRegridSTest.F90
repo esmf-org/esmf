@@ -1,4 +1,4 @@
-! $Id: FieldRegrid.F90,v 1.2 2003/09/18 22:38:21 cdeluca Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.1 2003/09/19 21:44:15 jwolfe Exp $
 !
 ! System test code FieldRegrid
 
