@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.5 2003/03/11 14:19:48 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.6 2003/03/11 17:12:29 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,7 +64,8 @@
    private:
      // name in base class
      int routeid;
-     ESMC_RTable *rt;
+     ESMC_RTable *SendRT;
+     ESMC_RTable *RecvRT;
      ESMC_CommTable *ct;
 
 // !PUBLIC MEMBER FUNCTIONS:

@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.h,v 1.3 2003/03/11 14:19:47 nscollins Exp $
+// $Id: ESMC_CommTable.h,v 1.4 2003/03/11 17:11:52 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,11 +49,6 @@
 
 // !PRIVATE TYPES:
 
- struct commpairs {
-    int src;
-    int dst;
- };
-
  // class configuration type
  class ESMC_CommTableConfig {
    private:
@@ -65,7 +60,8 @@
 
    private:
       int commcount;                 // number of pairwise send/recvs
-      struct commpairs *commpairs;   // array comm ids for source/dest 
+      int *commpartner;              // array comm ids for communication
+                                     // partners
 
 // !PUBLIC MEMBER FUNCTIONS:
 

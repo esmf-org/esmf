@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.3 2003/03/11 14:19:48 nscollins Exp $
+// $Id: ESMC_RTable.h,v 1.4 2003/03/11 17:12:12 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,6 +66,7 @@
      struct rtableentry {
         int dest_peid;
         int xpcount;
+        void* base_addr;
         ESMC_XPacket *xp;
      } *entry;
  

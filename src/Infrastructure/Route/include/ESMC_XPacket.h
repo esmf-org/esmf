@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.6 2003/03/11 14:19:49 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.7 2003/03/11 17:12:45 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,19 +63,13 @@
 
    private:
      // one of these per memory transfer
-     void *base_addr;
 
      int rank;
      int left;
      int right;
      int strides[ESMF_MAXDIM];
      int num[ESMF_MAXDIM];
-     int destpeid;
-// or
-//   ESMC_MemAxis tuple;     the memaxis stuff, based on rank
      
-     ESMC_XPacket *nextp;
-
 // !PUBLIC MEMBER FUNCTIONS:
 //
 
