@@ -223,6 +223,15 @@ to allow specialization to different categories of grid, whilst maintaining
 some common interface abstractions. The implementation strategy to enable this
 will be described in the class design documentation for {\tt Grid}, {\tt Physical Grid} and {\tt Distributed Grid}.
 
+\subsubsection{Grid Style (ESMF\_Gridstyle)}
+\label{sec:gridstyle} 
+The {\tt Grid Style} object provides for general extensibility of the grid class to
+both existing and as yet undefined gridding approaches. It allows, without requiring
+changes to the architecture, any particular
+style of grid (for example icosohedral horizontal grids) to either utilize a 
+grid-specific subtrees of code for methods or to share generic methods with 
+other grid styles as appropriate.
+
 \subsubsection{Physical Grid (ESMF\_PhysGrid)}
 \label{sec:physgrid} 
 A {\tt Physical Grid} is a discrete representation of a continuous physical space.  It contains the physical coordinates, sometimes as data values, but possibly
