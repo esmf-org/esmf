@@ -107,15 +107,22 @@ be validated, are given in the {\it Control} and the {\it Coupler and
 Gridded Component Interfaces} detailed requirements sections -
 parts \ref{part:Superstructure:_Control} and \ref{part:Superstructure:_Components} of this document. \\
 
-\noindent The main functions of the ESMF coupling superstructure are:
+\noindent The main functions that ESMF superstructure enables (either
+directly or through services provided by lower layer functions) are:
 
 \begin{itemize}
-\item to perform any merging, interpolation, or regridding 
-of data necessary for communication between components;
-\item to transfer data between components;
-\item sharing attribute information between components;
+\item any merging, interpolation, or regridding 
+of data necessary for communication between components
+(see part \ref{part:} for detailed requirements relating
+to this function);
+\item transfering data between components (see part \ref{part:} for detailed 
+requirements relating to this function);
+\item sharing attribute information between components
+(see part \ref{part:} for detailed requirements relating
+to this function);
 \item to coordinate execution, checkpointing and restarting of
-  components.
+  components (see part \ref{part:} for detailed 
+requirements relating to this function).
 \end{itemize}
 
 The superstructure provides a high-level interface that enables 
@@ -133,7 +140,7 @@ concurrently, and in mixed modes.
 Functionality for regridding, interpolation, redistribution and other 
 data communication will be abstracted away from the high-level coupling
 interface.  It is provided by a parallel support layer, described next.  
-This support layer can be used within applications 
+This support layer can be used within components
 to perform efficient parallel grid operations.
 
 \section{ESMF infrastructure}
