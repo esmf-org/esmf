@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.13 2005/03/28 20:04:30 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.14 2005/03/28 21:46:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.13 2005/03/28 20:04:30 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.14 2005/03/28 21:46:25 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -49,14 +49,19 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name, msg_type, Pet_num, todays_date, my_todays_date
+      character(10) :: log_time, my_time
+      character(1) :: pet_char
+      character(4) :: my_pet_char
+
       character :: random_char
       character (5) :: random_string, msg_string
 
 !     !LOCAL VARIABLES:
-      integer :: rc2, ran_num, i, input_status
-      real :: r1, real_number 
+      integer :: rc2, ran_num, i, input_status, my_pet
+      real :: r1
       logical :: is_error
       type(ESMF_Log) :: log1, log2
+      type(ESMF_VM):: vm
 
 
 !------------------------------------------------------------------------------
@@ -312,9 +317,12 @@
       end do
 	print *, "Random string is ", random_string
 
+
       !NEX_UTest
       ! Test Log Write 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
+      ! Get date and time to compare later in the test
+      call date_and_time(date=my_todays_date, time=my_time)
       call ESMF_LogWrite(log=log2, msg=random_string,msgtype=ESMF_LOG_INFO)
       write(name, *) "Write to log file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -335,7 +343,7 @@
       input_status = 0
       open (unit=1, file = "Log_Test_File_3", action = "read", form = "formatted")
       do
-      	read (1, *) todays_date, real_number, msg_type, Pet_num, msg_string
+      	read (1, *) todays_date, log_time, msg_type, Pet_num, msg_string
         if (input_status < 0) then
 		exit
         else 
@@ -357,9 +365,17 @@
       ! Verify correct date was written to log file
       write(failMsg, *) "Date in file is wrong"
       write(name, *) "Verify date in Log File Test"
-      call date_and_time(date=my_todays_date)
       call ESMF_Test((my_todays_date.eq.todays_date), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Verify correct date was written to log file
+      write(failMsg, *) "Date in file is wrong"
+      write(name, *) "Verify date in Log File Test"
+      call ESMF_Test((my_time.eq.log_time), name, failMsg, result, ESMF_SRCLINE)
+      print *, " my_time = ", my_time
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -367,8 +383,22 @@
       write(failMsg, *) "Message type in file is wrong"
       write(name, *) "Verify Message Type in Log File Test"
       call ESMF_Test((msg_type.eq."INFO"), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
+      !------------------------------------------------------------------------
+      ! Get the local PET number
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
+      ! Convert PET to character
+      pet_char  = achar(my_pet + 48)
+      ! Append tp "PET"
+      my_pet_char = "PET" // pet_char
+      !EX_UTest
+      ! Verify correct PET was written into log file
+      write(failMsg, *) "PET number in file is wrong"
+      write(name, *) "Verify PET number in Log File Test"
+      call ESMF_Test((my_pet_char.eq.Pet_num), name, failMsg, result, ESMF_SRCLINE)
+      print *, " My PET char is ", my_pet_char
+      
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Log Close
