@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.18 2004/06/21 18:25:17 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.19 2004/10/21 19:54:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,15 +118,24 @@ extern "C" {
     int *peCount, int *mpiCommunicator, ESMC_Logical *okOpenMpFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
+    MPI_Comm mpiCommTemp;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_VMGet(
       ESMC_NOT_PRESENT_FILTER(localPet), 
       ESMC_NOT_PRESENT_FILTER(petCount), 
       ESMC_NOT_PRESENT_FILTER(peCount),
-      ESMC_NOT_PRESENT_FILTER(mpiCommunicator), 
+      &mpiCommTemp, 
       ESMC_NOT_PRESENT_FILTER(okOpenMpFlag)),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
+    // deal with the MPI communicator  
+    if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
+#ifdef VM_DONT_HAVE_MPI_COMM_C2F
+      *mpiCommunicator = (int)(mpiCommTemp);
+#else
+      *mpiCommunicator = (int)MPI_Comm_c2f(mpiCommTemp);
+#endif
+    }
   }
 
   void FTN(c_esmc_vmgetpetlocalinfo)(ESMC_VM **ptr, int *pet, int *peCount, 

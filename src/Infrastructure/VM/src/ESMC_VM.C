@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.15 2004/06/21 18:25:18 theurich Exp $
+// $Id: ESMC_VM.C,v 1.16 2004/10/21 19:54:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.15 2004/06/21 18:25:18 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.16 2004/10/21 19:54:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -100,7 +100,7 @@ int ESMC_VM::ESMC_VMGet(
   int          *localPet,       // out - id of local PET
   int          *petCount,       // out - number of PETs
   int          *peCount,        // out - number of PEs
-  int          *mpiCommunicator,// out - MPI Intracommunicator for VM
+  MPI_Comm     *mpiCommunicator,// out - MPI Intracommunicator for VM
   ESMC_Logical *okOpenMpFlag){  // out - flag whether user-level OpenMP o.k.
 //
 // !DESCRIPTION:
@@ -119,10 +119,7 @@ int ESMC_VM::ESMC_VMGet(
       *peCount += this->vmachine_ncpet(i);
   }
   if (mpiCommunicator != ESMC_NULL_POINTER){
-    // TODO: Ensure that all of the MPI implementations have this MPI-2
-    // function implemented. If not then deal with those cases by static 
-    // type cast (int). LAM has it and needs the MPI-2 interlanguage cast.
-    *mpiCommunicator = (int) MPI_Comm_c2f(this->vmachine_mpi_comm());
+    *mpiCommunicator = this->vmachine_mpi_comm();
   }
   if (okOpenMpFlag != ESMC_NULL_POINTER)
     *okOpenMpFlag = ESMF_TRUE;    // TODO: Determine this at compile time...
