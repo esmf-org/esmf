@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.16 2003/04/17 17:08:06 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.17 2003/04/21 23:41:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -84,8 +84,8 @@
     int ESMC_TimeInit(ESMC_Calendar *cal, int tz, const char *timeList, ...);
 
     // Init method to support the F90 optional arguments interface
-    int ESMC_TimeInit(int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                      int *S, int *MS, int *US, int *NS,
+    int ESMC_TimeInit(ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D,
+                      int *H, int *M, int *S, int *MS, int *US, int *NS,
                       double *d_, double *h_, double *m_, double *s_,
                       double *ms_, double *us_, double *ns_,
                       int *Sn, int *Sd, ESMC_Calendar *cal, int *tz);
@@ -100,20 +100,20 @@
     //   can map to F90 named-optional-arguments interface
     // (TMG 2.1, 2.5.1, 2.5.6)
     int ESMC_TimeGet(const char *timeList, ...) const;
-    // e.g. ESMC_TimeGet("YY:MM:DD", (int *)YY,(int *)MM, (int *)DD);
+    // e.g. ESMC_TimeGet("YR:MM:DD", (int *)YR,(int *)MM, (int *)DD);
 
     int ESMC_TimeSet(const char *timeList, ...);
     // e.g. ESMC_TimeSet("s" , (double) s);
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeGet(int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                     int *S, int *MS, int *US, int *NS,
+    int ESMC_TimeGet(ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D,
+                     int *H, int *M, int *S, int *MS, int *US, int *NS,
                      double *d_, double *h_, double *m_, double *s_,
                      double *ms_, double *us_, double *ns_,
                      int *Sn, int *Sd) const;
 
-    int ESMC_TimeSet(int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                     int *S, int *MS, int *US, int *NS,
+    int ESMC_TimeSet(ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D,
+                     int *H, int *M, int *S, int *MS, int *US, int *NS,
                      double *d_, double *h_, double *m_, double *s_,
                      double *ms_, double *us_, double *ns_,
                      int *Sn, int *Sd);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.10 2003/04/17 17:08:09 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.11 2003/04/21 23:41:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,8 +32,9 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_timeinit)(ESMC_Time *ptr, int *YR, int *MM, int *DD,
-                                 int *D, int *H, int *M, int *S,
+       void FTN(c_esmc_timeinit)(ESMC_Time *ptr, ESMF_IKIND_I8 *YR, int *MM,
+                                 int *DD, ESMF_IKIND_I8 *D,
+                                 int *H, int *M, int *S,
                                  int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
@@ -44,8 +45,9 @@ extern "C" {
                                           us_, ns_, Sn, Sd, cal, tz);
        }
 
-       void FTN(c_esmc_timeget)(ESMC_Time *ptr, int *YR, int *MM, int *DD,
-                                int *D, int *H, int *M, int *S,
+       void FTN(c_esmc_timeget)(ESMC_Time *ptr, ESMF_IKIND_I8 *YR, int *MM,
+                                int *DD, ESMF_IKIND_I8 *D,
+                                int *H, int *M, int *S,
                                 int *MS, int *US, int *NS,
                                 double *d_, double *h_, double *m_,
                                 double *s_, double *ms_, double *us_,
@@ -55,8 +57,9 @@ extern "C" {
                                          us_, ns_, Sn, Sd);
        }
 
-       void FTN(c_esmc_timeset)(ESMC_Time *ptr, int *YR, int *MM, int *DD,
-                                int *D, int *H, int *M, int *S,
+       void FTN(c_esmc_timeset)(ESMC_Time *ptr, ESMF_IKIND_I8 *YR, int *MM,
+                                int *DD, ESMF_IKIND_I8 *D,
+                                int *H, int *M, int *S,
                                 int *MS, int *US, int *NS,
                                 double *d_, double *h_, double *m_,
                                 double *s_, double *ms_, double *us_,

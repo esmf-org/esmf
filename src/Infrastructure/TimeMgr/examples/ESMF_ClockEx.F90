@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.9 2003/04/19 00:33:33 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.10 2003/04/21 23:41:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.9 2003/04/19 00:33:33 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.10 2003/04/21 23:41:51 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -49,7 +49,8 @@
 
       ! temp variables for Get functions
       double precision :: d_
-      integer :: YR, MM, DD, D, H, M, S
+      integer(ESMF_IKIND_I8) :: YR, D
+      integer :: MM, DD, H, M, S
       type(ESMF_TimeInterval) :: time_step
       type(ESMF_TimeInterval) :: time_diff
       integer(ESMF_IKIND_I8) :: advanceCount
@@ -65,14 +66,17 @@
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 2 days, 4 hours (6 timesteps in 13 days)
-      call ESMF_TimeIntervalInit(timeStep, D=2, H=4, rc=rc)
+      D = 2
+      call ESMF_TimeIntervalInit(timeStep, D=D, H=4, rc=rc)
 
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
-      call ESMF_TimeInit(startTime, YR=2003, MM=4, DD=1, H=2, M=24, &
+      YR = 2003
+      call ESMF_TimeInit(startTime, YR=YR, MM=4, DD=1, H=2, M=24, &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
-      call ESMF_TimeInit(stopTime, YR=2003, MM=4, DD=14, H=2, M=24, &
+      YR = 2003
+      call ESMF_TimeInit(stopTime, YR=YR, MM=4, DD=14, H=2, M=24, &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values

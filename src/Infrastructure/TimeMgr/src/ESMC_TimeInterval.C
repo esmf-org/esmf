@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.15 2003/04/17 17:08:12 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.16 2003/04/21 23:41:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.15 2003/04/17 17:08:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.16 2003/04/21 23:41:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -85,9 +85,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *YY,                  // in - integer number of interval years
-      int *MO,                  // in - integer number of interval months
-      int *D,                   // in - integer number of interval days
+      ESMF_IKIND_I8 *YY,        // in - integer number of interval years
+      ESMF_IKIND_I8 *MO,        // in - integer number of interval months
+      ESMF_IKIND_I8 *D,         // in - integer number of interval days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
       int *S,                   // in - integer seconds 
@@ -234,9 +234,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *YY,                  // out - integer number of interval years
-      int *MO,                  // out - integer number of interval months
-      int *D,                   // out - integer number of interval days
+      ESMF_IKIND_I8 *YY,        // out - integer number of interval years
+      ESMF_IKIND_I8 *MO,        // out - integer number of interval months
+      ESMF_IKIND_I8 *D,         // out - integer number of interval days
       int *H,                   // out - integer hours
       int *M,                   // out - integer minutes
       int *S,                   // out - integer seconds 
@@ -323,9 +323,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *YY,                  // in - integer number of interval years
-      int *MO,                  // in - integer number of interval months
-      int *D,                   // in - integer number of interval days
+      ESMF_IKIND_I8 *YY,        // in - integer number of interval years
+      ESMF_IKIND_I8 *MO,        // in - integer number of interval months
+      ESMF_IKIND_I8 *D,         // in - integer number of interval days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
       int *S,                   // in - integer seconds 

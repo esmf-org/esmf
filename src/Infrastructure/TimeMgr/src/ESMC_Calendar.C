@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.18 2003/04/21 20:20:53 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.19 2003/04/21 23:41:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.18 2003/04/21 20:20:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.19 2003/04/21 23:41:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -208,8 +208,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int YR, int MM, int DD, int D,          // in
-      ESMC_BaseTime *T) const {               // out
+      ESMF_IKIND_I8 YR, int MM, int DD, ESMF_IKIND_I8 D,          // in
+      ESMC_BaseTime *T) const {                                   // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -259,20 +259,20 @@
 
             // convert Gregorian date to Julian days
             // Gregorian date (YR, MM, DD) => Julian days (jdays)
-            int temp = (MM - 14) / 12;
-            int jdays = (1461 * (YR + 4800 + temp)) / 4 +
-                        (367 * (MM - 2 - 12 * temp )) / 12 -
-                        (3 * ((YR + 4900 + temp) / 100)) / 4 + DD - 32075;
+            int temp            = (MM - 14) / 12;
+            ESMF_IKIND_I8 jdays = (1461 * (YR + 4800 + temp)) / 4 +
+                             (367 * (MM - 2 - 12 * temp )) / 12 -
+                             (3 * ((YR + 4900 + temp) / 100)) / 4 + DD - 32075;
 
             // convert Julian days to basetime seconds (>= 64 bit)
-            T->S = (ESMF_IKIND_I8) jdays * (ESMF_IKIND_I8) SecondsPerDay;
+            T->S = jdays * SecondsPerDay;
 
             break;
         }
         // convert No Leap Date => Time
         case ESMC_CAL_NOLEAP:
         {
-            T->S = (ESMF_IKIND_I8) YR * (ESMF_IKIND_I8) SecondsPerYear;
+            T->S = YR * SecondsPerYear;
             for(int month=0; month < MM-1; month++) {
               T->S += DaysPerMonth[month] * SecondsPerDay;
             }
@@ -283,7 +283,7 @@
         // convert 360 Day Date => Time
         case ESMC_CAL_360DAY:
         {
-            T->S  = (ESMF_IKIND_I8) YR * (ESMF_IKIND_I8) SecondsPerYear
+            T->S  = YR * SecondsPerYear
                   + (MM-1) * 30 * SecondsPerDay   // each month has 30 days
                   + (DD-1) * SecondsPerDay + 146565244800;
                                           // ^ adjust to match Julian time zero
@@ -293,7 +293,7 @@
         case ESMC_CAL_JULIAN:
         {
             // convert Julian days to basetime seconds (>= 64 bit)
-            T->S = (ESMF_IKIND_I8) D * (ESMF_IKIND_I8) SecondsPerDay;
+            T->S = D * SecondsPerDay;
 
             break;
         }
@@ -316,8 +316,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime *T,                      // in
-      int *YR, int *MM, int *DD, int *D) const {   // out
+      const ESMC_BaseTime *T,                                          // in
+      ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D) const {   // out
 //
 // !DESCRIPTION:
 //     Converts a core {\tt ESMC\_BaseTime} representation to a
@@ -347,19 +347,19 @@
             //    (4*templ = 2^31)
 
             // convert basetime seconds to Julian days
-            int jdays = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+            ESMF_IKIND_I8 jdays = T->S / SecondsPerDay;
             if (D != ESMC_NULL_POINTER) {
               *D = jdays;
             }
 
             // convert Julian days to Gregorian date
             // Julian days (jdays) => Gregorian date (YR, MM, DD)
-            int templ = jdays + 68569;
-            int tempn = (4 * templ) / 146097;
-                templ = templ - (146097 * tempn + 3) / 4;
-            int tempi = (4000 * (templ + 1)) / 1461001;
-                templ = templ - (1461 * tempi) / 4 + 31;
-            int tempj = (80 * templ) / 2447;
+            ESMF_IKIND_I8 templ = jdays + 68569;
+            ESMF_IKIND_I8 tempn = (4 * templ) / 146097;
+                          templ = templ - (146097 * tempn + 3) / 4;
+            ESMF_IKIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
+                          templ = templ - (1461 * tempi) / 4 + 31;
+            ESMF_IKIND_I8 tempj = (80 * templ) / 2447;
             if (DD != ESMC_NULL_POINTER) {
               *DD = templ - (2447 * tempj) / 80;
             }
@@ -401,7 +401,7 @@
 
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+              *D = T->S / SecondsPerDay;
             }
 
             break;
@@ -431,7 +431,7 @@
 
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+              *D = T->S / SecondsPerDay;
             }
 
             break;
@@ -441,7 +441,7 @@
         {
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+              *D = T->S / SecondsPerDay;
             }
             break;
         }

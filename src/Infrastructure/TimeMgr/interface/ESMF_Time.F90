@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.17 2003/04/17 17:08:09 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.18 2003/04/21 23:41:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.17 2003/04/17 17:08:09 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.18 2003/04/21 23:41:53 eschwab Exp $'
 
 !==============================================================================
 !
@@ -275,10 +275,10 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(out) :: time
-      integer, intent(in), optional :: YR
+      integer(ESMF_IKIND_I8), intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
-      integer, intent(in), optional :: D
+      integer(ESMF_IKIND_I8), intent(in), optional :: D
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
       integer, intent(in), optional :: S
@@ -307,13 +307,13 @@
 !     \item[time]
 !          The object instance to initialize
 !     \item[{[YR]}]
-!          Integer year CCYR
+!          Integer year CCYR (64-bit)
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
 !          Integer day of the month 1-31
 !     \item[{[D]}]
-!          Integer Julian days
+!          Integer Julian days (64-bit)
 !     \item[{[H]}]
 !          Integer hours
 !     \item[{[M]}]
@@ -381,10 +381,10 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(in) :: time
-      integer, intent(out), optional :: YR
+      integer(ESMF_IKIND_I8), intent(out), optional :: YR
       integer, intent(out), optional :: MM
       integer, intent(out), optional :: DD
-      integer, intent(out), optional :: D
+      integer(ESMF_IKIND_I8), intent(out), optional :: D
       integer, intent(out), optional :: H
       integer, intent(out), optional :: M
       integer, intent(out), optional :: S
@@ -411,13 +411,13 @@
 !     \item[time]
 !          The object instance to query
 !     \item[{[YR]}]
-!          Integer year CCYR
+!          Integer year CCYR (64-bit)
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
 !          Integer day of the month 1-31
 !     \item[{[D]}]
-!          Integer Julian days
+!          Integer Julian days (64-bit)
 !     \item[{[H]}]
 !          Integer hours
 !     \item[{[M]}]
@@ -472,10 +472,10 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(out) :: time
-      integer, intent(in), optional :: YR
+      integer(ESMF_IKIND_I8), intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
-      integer, intent(in), optional :: D
+      integer(ESMF_IKIND_I8), intent(in), optional :: D
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
       integer, intent(in), optional :: S
@@ -502,13 +502,13 @@
 !     \item[time]
 !          The object instance to query
 !     \item[{[YR]}]
-!          Integer year CCYR
+!          Integer year CCYR (64-bit)
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
 !          Integer day of the month 1-31
 !     \item[{[D]}]
-!          Integer Julian days
+!          Integer Julian days (64-bit)
 !     \item[{[H]}]
 !          Integer hours
 !     \item[{[M]}]

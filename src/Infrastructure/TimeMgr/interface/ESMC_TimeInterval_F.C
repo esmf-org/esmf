@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.10 2003/04/17 17:08:08 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.11 2003/04/21 23:41:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,8 +33,9 @@
 extern "C" {
 
        void FTN(c_esmc_timeintervalinit)(ESMC_TimeInterval *ptr,
-                                 int *YY, int *MO, int *D, int *H, int *M,
-                                 int *S, int *MS, int *US, int *NS,
+                                 ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                 ESMF_IKIND_I8 *D, int *H, int *M, int *S,
+                                 int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,
@@ -45,8 +46,9 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
-                                 int *YY, int *MO, int *D, int *H, int *M,
-                                 int *S, int *MS, int *US, int *NS,
+                                 ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                 ESMF_IKIND_I8 *D, int *H, int *M, int *S,
+                                 int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,
@@ -57,8 +59,9 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalset)(ESMC_TimeInterval *ptr,
-                                 int *YY, int *MO, int *D, int *H, int *M,
-                                 int *S, int *MS, int *US, int *NS,
+                                 ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                                 ESMF_IKIND_I8 *D, int *H, int *M, int *S,
+                                 int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,

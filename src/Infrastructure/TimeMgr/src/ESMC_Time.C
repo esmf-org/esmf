@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.21 2003/04/21 20:20:53 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.22 2003/04/21 23:41:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.21 2003/04/21 20:20:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.22 2003/04/21 23:41:53 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -117,10 +117,10 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *YR,                  // in - integer year
+      ESMF_IKIND_I8 *YR,        // in - integer year
       int *MM,                  // in - integer month
       int *DD,                  // in - integer day of the month
-      int *D,                   // in - integer days
+      ESMF_IKIND_I8 *D,         // in - integer days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
       int *S,                   // in - integer seconds 
@@ -300,10 +300,10 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *YR,                  // out - integer year
+      ESMF_IKIND_I8 *YR,        // out - integer year
       int *MM,                  // out - integer month
       int *DD,                  // out - integer day of the month
-      int *D,                   // out - integer days
+      ESMF_IKIND_I8 *D,         // out - integer days
       int *H,                   // out - integer hours
       int *M,                   // out - integer minutes
       int *S,                   // out - integer seconds 
@@ -367,7 +367,7 @@
 
     if (d_ != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        int tmpD;
+        ESMF_IKIND_I8 tmpD;
         Calendar->ESMC_CalendarConvertToDate(this, ESMC_NULL_POINTER,
                                                    ESMC_NULL_POINTER,
                                                    ESMC_NULL_POINTER, &tmpD);
@@ -405,10 +405,10 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *YR,                  // in - integer year
+      ESMF_IKIND_I8 *YR,        // in - integer year
       int *MM,                  // in - integer month
       int *DD,                  // in - integer day of the month
-      int *D,                   // in - integer days
+      ESMF_IKIND_I8 *D,         // in - integer days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
       int *S,                   // in - integer seconds 
@@ -684,7 +684,8 @@
 // !REQUIREMENTS:  
 
     // get year of our (this) time
-    int YR, MM, DD;
+    ESMF_IKIND_I8 YR;
+    int MM, DD;
     // TODO: use native C++ Get, not F90 entry point
     ESMC_TimeGet(&YR, &MM, &DD, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,

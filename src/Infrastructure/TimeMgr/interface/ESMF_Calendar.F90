@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.13 2003/04/14 22:21:23 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.14 2003/04/21 23:41:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -125,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.13 2003/04/14 22:21:23 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.14 2003/04/21 23:41:53 eschwab Exp $'
 
 !==============================================================================
 
@@ -223,31 +223,13 @@
 ! !IROUTINE: ESMF_CalendarConvertToTime - Convert user time units to ESMF_BaseTime
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
-                                            MS, US, NS, &
-                                            d_, h_, m_, s_, ms_, us_, ns_, &
-                                            Sn, Sd, basetime, rc)
+      subroutine ESMF_CalendarConvertToTime(YR, MM, DD, D, basetime, rc)
 
 ! !ARGUMENTS:
-      integer, intent(in), optional :: YR
+      integer(ESMF_IKIND_I8), intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
-      integer, intent(in), optional :: D
-      integer, intent(in), optional :: H
-      integer, intent(in), optional :: M
-      integer(ESMF_IKIND_I8), intent(in), optional :: S
-      integer, intent(in), optional :: MS
-      integer, intent(in), optional :: US
-      integer, intent(in), optional :: NS
-      double precision, intent(in), optional :: d_
-      double precision, intent(in), optional :: h_
-      double precision, intent(in), optional :: m_
-      double precision, intent(in), optional :: s_
-      double precision, intent(in), optional :: ms_
-      double precision, intent(in), optional :: us_
-      double precision, intent(in), optional :: ns_
-      integer, intent(in), optional :: Sn
-      integer, intent(in), optional :: Sd
+      integer(ESMF_IKIND_I8), intent(in), optional :: D
       type(ESMF_BaseTime), intent(out) :: basetime
       integer, intent(out), optional :: rc
 
@@ -258,43 +240,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[{[YR]]}]
-!          Integer year CCYR
+!          Integer year CCYR (64-bit)
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
 !          Integer day of the month 1-31
 !     \item[{[D]}]
-!          Integer Julian days
-!     \item[{[H]}]
-!          Integer hours
-!     \item[{[M]}]
-!          Integer minutes
-!     \item[{[S]}]
-!          64-bit integer seconds
-!     \item[{[MS]}]
-!          Integer milliseconds
-!     \item[{[US]}]
-!          Integer microseconds
-!     \item[{[NS]}]
-!          Integer nanoseconds
-!     \item[{[d\_]}]
-!          Double precision days
-!     \item[{[h\_]}]
-!          Double precision hours
-!     \item[{[m\_]}]
-!          Double precision minutes
-!     \item[{[s\_]}]
-!          Double precision seconds
-!     \item[{[ms\_]}]
-!          Double precision milliseconds
-!     \item[{[us\_]}]
-!          Double precision microseconds
-!     \item[{[ns\_]}]
-!          Double precision nanoseconds
-!     \item[{[Sn]}]
-!          Integer fractional seconds - numerator
-!     \item[{[Sd]}]
-!          Integer fractional seconds - denominator
+!          Integer Julian days (64-bit)
 !     \item[basetime]
 !          Returned {\tt BaseTime} value
 !     \item[{[rc]}]
@@ -307,10 +259,7 @@
 
       ! invoke C to C++ entry point
       ! use optional args for any subset
-!       call c_ESMC_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
-!                                         MS, US, NS, &
-!                                         d_, h_, m_, s_, ms_, us_, ns_, &
-!                                         Sn, Sd, basetime, rc)
+!       call c_ESMC_CalendarConvertToTime(YR, MM, DD, D, basetime, rc)
     
       end subroutine ESMF_CalendarConvertToTime
 
@@ -319,32 +268,14 @@
 ! !IROUTINE: ESMF_CalendarConvertToDate - Convert ESMF_BaseTime into user units
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarConvertToDate(basetime, YR, MM, DD, D, H, &
-                                            M, S, MS, US, NS, &
-                                            d_, h_, m_, s_, ms_, us_, ns_, &
-                                            Sn, Sd, rc)
+      subroutine ESMF_CalendarConvertToDate(basetime, YR, MM, DD, D, rc)
 
 ! !ARGUMENTS:
       type(ESMF_BaseTime), intent(in) :: basetime
-      integer, intent(out), optional :: YR
+      integer(ESMF_IKIND_I8), intent(out), optional :: YR
       integer, intent(out), optional :: MM
       integer, intent(out), optional :: DD
-      integer, intent(out), optional :: D
-      integer, intent(out), optional :: H
-      integer, intent(out), optional :: M
-      integer(ESMF_IKIND_I8), intent(out), optional :: S
-      integer, intent(out), optional :: MS
-      integer, intent(out), optional :: US
-      integer, intent(out), optional :: NS
-      double precision, intent(out), optional :: d_
-      double precision, intent(out), optional :: h_
-      double precision, intent(out), optional :: m_
-      double precision, intent(out), optional :: s_
-      double precision, intent(out), optional :: ms_
-      double precision, intent(out), optional :: us_
-      double precision, intent(out), optional :: ns_
-      integer, intent(out), optional :: Sn
-      integer, intent(out), optional :: Sd
+      integer(ESMF_IKIND_I8), intent(out), optional :: D
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -356,43 +287,13 @@
 !     \item[basetime]
 !          Given {\tt BaseTime} value
 !     \item[{[YR]}]
-!          Integer year CCYR
+!          Integer year CCYR (64-bit)
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
 !          Integer day of the month 1-31
 !     \item[{[D]}]
-!          Integer Julian days
-!     \item[{[H]}]
-!          Integer hours
-!     \item[{[M]}]
-!          Integer minutes
-!     \item[{[S]}]
-!          64-bit integer seconds
-!     \item[{[MS]}]
-!          Integer milliseconds
-!     \item[{[US]}]
-!          Integer microseconds
-!     \item[{[NS]}]
-!          Integer nanoseconds
-!     \item[{[d\_]}]
-!          Double precision days
-!     \item[{[h\_]}]
-!          Double precision hours
-!     \item[{[m\_]}]
-!          Double precision minutes
-!     \item[{[s\_]}]
-!          Double precision seconds
-!     \item[{[ms\_]}]
-!          Double precision milliseconds
-!     \item[{[us\_]}]
-!          Double precision microseconds
-!     \item[{[ns\_]}]
-!          Double precision nanoseconds
-!     \item[{[Sn]}]
-!          Integer fractional seconds - numerator
-!     \item[{[Sd]}]
-!          Integer fractional seconds - denominator
+!          Integer Julian days (64-bit)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -403,10 +304,7 @@
 
 !     invoke C to C++ entry point
       ! use optional args for any subset
-!       call c_ESMC_CalendarConvertToDate(basetime, YR, MM, DD, D, H, &
-!                                         M, S, MS, US, NS, &
-!                                         d_, h_, m_, s_, ms_, us_, ns_, &
-!                                         Sn, Sd, rc)
+!       call c_ESMC_CalendarConvertToDate(basetime, YR, MM, DD, D, rc)
     
       end subroutine ESMF_CalendarConvertToDate
 
