@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.22 2003/01/23 20:23:12 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.23 2003/02/06 22:36:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,8 +140,8 @@
       public ESMF_ArraySpecCreate
       !public ESMF_ArraySpecDestroy
 
-      public ESMF_ArraySetData
-      public ESMF_ArrayGetData
+      public ESMF_ArraySetData, ESMF_ArrayGetData
+      public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
       public ESMF_ArrayGet
  
       public ESMF_ArrayCheckpoint
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.22 2003/01/23 20:23:12 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.23 2003/02/06 22:36:53 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -860,6 +860,8 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArraySetData
+!
 ! !INTERFACE:
       subroutine ESMF_ArraySetData(array, dataspec, databuf, docopy, rc)
 !
@@ -882,6 +884,57 @@ end function
 ! TODO: code goes here
 !
         end subroutine ESMF_ArraySetData
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArraySetAxisIndex
+!
+! !INTERFACE:
+      subroutine ESMF_ArraySetAxisIndex(array, indexlist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array 
+      type(ESMF_AxisIndex), intent(in) :: indexlist
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Used to annotate an Array with information used to map local to global
+!      indicies.  
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        ! call c routine to add index
+
+        end subroutine ESMF_ArraySetAxisIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayGetAxisIndex
+!
+! !INTERFACE:
+      subroutine ESMF_ArrayGetAxisIndex(array, indexlist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array 
+      type(ESMF_AxisIndex), intent(out) :: indexlist
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Used to retrieve the index annotation from an Array.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        ! call c routine to query index
+
+        end subroutine ESMF_ArrayGetAxisIndex
 
 !------------------------------------------------------------------------------
 !BOP

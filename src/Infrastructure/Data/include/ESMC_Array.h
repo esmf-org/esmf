@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.12 2003/01/23 22:21:54 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.13 2003/02/06 22:36:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,6 +93,7 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
  // int lbounds[ESMF_MAXDIM];      // real lower indicies
  // int ubounds[ESMF_MAXDIM];      // real upper indicies
  // void *first_element;           // memory address of the first element
+    struct ESMC_AxisIndex ai[ESMF_MAXDIM];   // global-local mapping help
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -114,6 +115,10 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_ArrayGetConfig(ESMC_ArrayConfig *config) const;
     int ESMC_ArraySetConfig(const ESMC_ArrayConfig *config);
 
+ // optional index values for subsetting and handling arrays standalone
+    int ESMC_ArrayGetAxisIndex(struct ESMC_AxisIndex *index) const;
+    int ESMC_ArraySetAxisIndex(struct ESMC_AxisIndex *index);
+    
  // accessor methods for class members
     //int ESMC_ArrayGet<Value>(<value type> *value) const;
     //int ESMC_ArraySet<Value>(<value type>  value);

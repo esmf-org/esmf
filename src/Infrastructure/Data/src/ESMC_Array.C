@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.18 2003/01/23 22:21:54 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.19 2003/02/06 22:36:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.18 2003/01/23 22:21:54 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.19 2003/02/06 22:36:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -397,6 +397,70 @@
 //
 
  //} // end ESMC_ArraySet<Value>
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArraySetAxisIndex - set annotation on Arrays for local/global
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArraySetAxisIndex(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      struct ESMC_AxisIndex *indexlist) {     // in - values to set
+//
+// !DESCRIPTION:
+//     Sets the Array member AxisIndex with the given value.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+//
+//  code goes here
+//
+     int i;
+
+     for (i=0; i<this->rank; i++) {
+         this->ai[i] = indexlist[i];
+     }
+
+     return ESMF_SUCCESS;
+
+ } // end ESMC_ArraySetAxisIndex
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayGetAxisIndex - get annotation on Arrays for local/global
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayGetAxisIndex(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      struct ESMC_AxisIndex *indexlist) const {     // out - values to get
+//
+// !DESCRIPTION:
+//     Gets the Array member AxisIndex with the given value.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+//
+//  code goes here
+//
+     int i;
+
+     for (i=0; i<this->rank; i++) {
+         indexlist[i] = this->ai[i];
+     }
+
+     return ESMF_SUCCESS;
+
+ } // end ESMC_ArrayGetAxisIndex
 
 //-----------------------------------------------------------------------------
 //BOP
