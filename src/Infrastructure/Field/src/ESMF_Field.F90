@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.179 2004/08/20 00:03:01 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.180 2004/08/20 17:21:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.179 2004/08/20 00:03:01 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.180 2004/08/20 17:21:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3096,6 +3096,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+
       type(ESMF_FieldType), pointer :: ftypep
       type(ESMF_Relloc) :: horzRelloc
       character(len=ESMF_MAXSTR) :: msgbuf
@@ -3106,7 +3107,6 @@
       integer :: gridrank, maprank, arrayrank, halo
       integer :: i, j
     
-
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -3157,6 +3157,67 @@
 
       ! and now see if it is at all consistent.
       if (arrayrank .ne. maprank) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                         "rank in fielddatamap must match rank in array", &
+                                   ESMF_CONTEXT, rc)) return
+      endif
+
+      j = 1
+      do i = 1, arrayrank
+          if (maplist(i) .ne. 0) then
+              ! maplist is 0 if the axes does not correspond to the grid.
+              ! in that case, it must correspond to the counts in the map.
+              if (arraycounts(i) .ne. otheraxes(j)) then
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+       "counts of non-grid axes in array must match counts in field datamap", &
+                                            ESMF_CONTEXT, rc)) return
+              
+              endif
+              j = j + 1
+          else
+              ! maplist is not 0, so this axes does correspond to the grid.
+              ! the sizes must match, taking into account the halo widths
+              ! and the index reordering.
+              if (arraycounts(maplist(i)) .ne. (gridcounts(i) + (2*halo))) then
+                  if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                               "axes in array does not match counts in grid", &
+                                            ESMF_CONTEXT, rc)) return
+              
+              endif
+
+          endif
+      enddo
+      
+
+      ! get needed info from datamap
+      call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
+                                dataRank=maprank, dataIndexList=maplist, &
+                                counts=otheraxes, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! get grid dim and extents for the local piece
+      call ESMF_GridGet(ftypep%grid, dimCount=gridrank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, &
+                                   localCellCountPerDim=gridcounts, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! get array counts and other info
+      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
+                         haloWidth=halo, rank=arrayrank, rc=status)
+      if (ESMF_LogMsgFoundError(status, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+#if 0
+      ! and now see if it is at all consistent.
+      if (arrayrank .ne. maprank) then
           write(msgbuf, *) "Rank in FieldDataMap", maprank, &
                            "must match rank in Array", arrayrank
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, msgbuf, &
@@ -3195,10 +3256,8 @@
 
           endif
       enddo
+#endif
       
-
-
-      ! TODO: add more code here
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -4348,22 +4407,20 @@
         rc = ESMF_FAILURE
       endif     
 
-      ! make sure the array is a valid object first.
-      call ESMF_ArrayValidate(array, "", status)
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-
-      ! this validates the grid internally, no need to validate it here.
-    !jw  call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-    !jw                                  haloWidth, arrayrank, counts, datamap, &
-    !jw                                  name, iospec, status)
+      ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       haloWidth, datamap=datamap, name=name, &
                                       iospec=iospec, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
+
+      ! make sure the array is a valid object first.
+      call ESMF_ArrayValidate(array, "", status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
 
       ftype%localfield%localdata = array
       ftype%datastatus = ESMF_STATUS_READY
