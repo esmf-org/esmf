@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.12 2003/04/15 20:19:07 svasquez Exp $
+# $Id: makefile,v 1.13 2003/07/11 01:12:05 eschwab Exp $
 
 # makefile template for the examples directory.
 
-ALL: ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMC_CommMemEx
+ALL: ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMF_DELayout_FEx3 ESMC_CommMemEx
 
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
@@ -19,7 +19,7 @@ OBJSF     =
 TEXFILES  = 
 
 # fill in the names of the F90 source files for the tests/examples
-EXAMPLESF = ESMF_DELayout_FEx.F90 ESMF_DELayout_FEx2.F90
+EXAMPLESF = ESMF_DELayout_FEx.F90 ESMF_DELayout_FEx2.F90 ESMF_DELayout_FEx3.F90
 # fill in the names of the C++ source files for the tests/examples
 EXAMPLESC = ESMC_CommMemEx.C
 
@@ -28,7 +28,7 @@ MANSEC	  =
 LIBBASE	  = 
 
 # fill in the following with the executable names
-TESTEXAMPLES = ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMC_CommMemEx
+TESTEXAMPLES = ESMF_DELayout_FEx ESMF_DELayout_FEx2 ESMF_DELayout_FEx3 ESMC_CommMemEx
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. 
@@ -49,6 +49,10 @@ ESMF_DELayout_FEx: ESMF_DELayout_FEx.o chkopts
 ESMF_DELayout_FEx2: ESMF_DELayout_FEx2.o chkopts
 	-${F90CXXLD} -o ESMF_DELayout_FEx2 ESMF_DELayout_FEx2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_DELayout_FEx2.o
+
+ESMF_DELayout_FEx3: ESMF_DELayout_FEx3.o chkopts
+	-${F90CXXLD} -o ESMF_DELayout_FEx3 ESMF_DELayout_FEx3.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_DELayout_FEx3.o
 
 ESMC_CommMemEx: ESMC_CommMemEx.o  chkopts
 	-${CXXF90LD} -o ESMC_CommMemEx ESMC_CommMemEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} -lm
