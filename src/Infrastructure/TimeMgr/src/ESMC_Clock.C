@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.39 2004/01/12 21:29:56 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.40 2004/01/15 20:59:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.39 2004/01/12 21:29:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.40 2004/01/15 20:59:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -230,8 +230,8 @@ int ESMC_Clock::count=0;
       ESMC_Time         *refTime,        // out
       ESMC_Time         *currTime,       // out
       ESMC_Time         *prevTime,       // out
-      ESMC_Time         *currSimTime,    // out
-      ESMC_Time         *prevSimTime,    // out
+      ESMC_TimeInterval *currSimTime,    // out
+      ESMC_TimeInterval *prevSimTime,    // out
       ESMF_KIND_I8      *advanceCount,   // out
       int               *numAlarms) {    // out
 
@@ -394,7 +394,9 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    *rc = ESMF_SUCCESS;
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = ESMF_SUCCESS;
+    }
 
     // TODO:  first check if stopTime has been specified; if not, return false.
 
