@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.14 2004/02/05 21:50:58 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.15 2004/02/05 23:25:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2293,7 +2293,7 @@ end function
           return
       endif
 
-      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, count, &
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleGetAttribute"

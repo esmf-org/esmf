@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.102 2004/02/05 21:49:55 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.103 2004/02/05 23:25:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.102 2004/02/05 21:49:55 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.103 2004/02/05 23:25:48 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1889,7 +1889,7 @@
           return
       endif
 
-      call c_ESMC_AttributeGetValue(field%ftypep%base, name, count, &
+      call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
                                     ESMF_DATA_INTEGER, count, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldGetAttribute"
