@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.6 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_ClockEx.C,v 1.7 2003/10/22 01:21:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.6 2003/09/04 18:57:56 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.7 2003/10/22 01:21:14 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -37,7 +37,7 @@
    int rc;
 
    // instantiate a clock
-   ESMC_Clock clock;
+   ESMC_Clock *clock;
 
    // instantiate a calendar
    ESMC_Calendar gregorianCalendar;
@@ -68,18 +68,20 @@
                               &gregorianCalendar);
 
    // initialize the clock with the above values
-   rc = clock.ESMC_ClockSetup(&timeStep, &startTime, &stopTime);
+   clock = ESMC_ClockCreate(&timeStep, &startTime, &stopTime);
 
    // time step from start time to stop time
-   while (!clock.ESMC_ClockIsStopTime(&rc)) {
-     rc = clock.ESMC_ClockAdvance();
+   while (!clock->ESMC_ClockIsStopTime(&rc)) {
+     rc = clock->ESMC_ClockAdvance();
    }
 
    // get the number of times the clock was advanced
    ESMF_KIND_I8 advanceCount;
-   rc = clock.ESMC_ClockGet(0, 0, 0, 0, 0, 0, 0, 0, &advanceCount);
+   rc = clock->ESMC_ClockGet(0, 0, 0, 0, 0, 0, 0, 0, &advanceCount);
 
    cout << "The clock was advanced " << advanceCount << " times." << endl;
+
+   rc = ESMC_ClockDestroy(clock);
 
    return(ESMF_SUCCESS);
 
