@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.30 2003/02/21 21:43:19 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.31 2003/02/26 20:24:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.30 2003/02/21 21:43:19 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.31 2003/02/26 20:24:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -477,10 +477,12 @@
         distgrid%MyDE%lcelltot_index(i)%r = 0
         distgrid%MyDE%lcelltot_index(i)%max = 0
         distgrid%MyDE%lcelltot_index(i)%decomp = 0
+        distgrid%MyDE%lcelltot_index(i)%gstart = 0
         distgrid%MyDE%lcellexc_index(i)%l = 0
         distgrid%MyDE%lcellexc_index(i)%r = 0
         distgrid%MyDE%lcellexc_index(i)%max = 1
         distgrid%MyDE%lcellexc_index(i)%decomp = 0
+        distgrid%MyDE%lcellexc_index(i)%gstart = 0
       enddo
       distgrid%covers_domain = .false.
       distgrid%gcell_count = 0
@@ -1175,7 +1177,11 @@
       integer :: status=ESMF_FAILURE                 ! Error status
       integer :: i, j, de                            !
       integer :: ni, nj                              ! increment counters
-      integer :: global_s, global_e                  ! global counters
+      integer :: ni_thisde, nj_thisde                ! increment counters
+      integer :: exc_global_s, exc_global_e          ! global counters
+      integer :: tot_global_s, tot_global_e          ! global counters
+      integer :: global_exc, global_tot              ! global counters
+      integer :: halo
       logical :: rcpresent=.FALSE.                   ! Return code present
 
 !     Initialize return code
@@ -1186,60 +1192,91 @@
 
 !     Set extent counts for each axis from the number of de's and number
 !     of cells
+!     First in the 1 decomposition
 !     TODO:  this is not quite the correct algorithm to distribute over a
 !            large number of DE's along an axis -- it loads up the residual
 !            to the last one instead of spreading it around.  But OK for now.
 !     TODO:  make a layout method to calculate this so it's consistent
+      halo = distgrid%halo_width
       ni = i_max/nDE_i
-      global_s = 1
-      global_e = 0
+      exc_global_s = 1
+      exc_global_e = 0
+      tot_global_s = 1
+      tot_global_e = 0
       do i = 1,nDE_i
-        global_e = global_e + ni
-        if(i.eq.nDE_i) global_e = i_max
+        ni_thisde = ni
+        if(i.eq.nDE_i) ni_thisde = i_max - exc_global_e
+        exc_global_e = exc_global_e + ni
+        tot_global_e = tot_global_e + ni + halo + halo
         do j = 1,nDE_j
-          de = (j-1)*nDE_j + i
-          distgrid%lcellexc_index(de,1)%l = global_s
-          distgrid%lcellexc_index(de,1)%r = global_e
+          de = (j-1)*nDE_i + i
+          distgrid%lcelltot_index(de,1)%l = 1
+          distgrid%lcellexc_index(de,1)%l = halo + 1
+          distgrid%lcellexc_index(de,1)%r = halo + ni_thisde
+          distgrid%lcelltot_index(de,1)%r = distgrid%lcellexc_index(de,1)%r &
+                                          + halo
           distgrid%lcellexc_index(de,1)%max = i_max
           distgrid%lcellexc_index(de,1)%decomp = 1
-          distgrid%lcelltot_index(de,1)%l = global_s
-          distgrid%lcelltot_index(de,1)%r = global_e
-          distgrid%lcelltot_index(de,1)%max = i_max
           distgrid%lcelltot_index(de,1)%decomp = 1
+          distgrid%lcellexc_index(de,1)%gstart = exc_global_s
+          distgrid%lcelltot_index(de,1)%gstart = tot_global_s
         enddo
-        global_s = global_e + 1
+        exc_global_s = exc_global_e + 1
+        tot_global_s = tot_global_e + 1
       enddo
+      do de = 1,nDE_i*nDE_j
+        distgrid%lcelltot_index(de,1)%max = tot_global_e
+      enddo
+
+!     Second in the 2 decomposition
       nj = j_max/nDE_j
-      global_s = 1
-      global_e = 0
+      exc_global_s = 1
+      exc_global_e = 0
+      tot_global_s = 1
+      tot_global_e = 0
       do j = 1,nDE_j
-        global_e = global_e + nj
-        if(j.eq.nDE_j) global_e = j_max
+        nj_thisde = nj
+        if(j.eq.nDE_j) nj_thisde = j_max - exc_global_e
+        exc_global_e = exc_global_e + nj
+        tot_global_e = tot_global_e + nj + halo + halo
         do i = 1,nDE_i
-          de = (j-1)*nDE_j + i
-          distgrid%lcellexc_index(de,2)%l = global_s
-          distgrid%lcellexc_index(de,2)%r = global_e
+          de = (j-1)*nDE_i + i
+          distgrid%lcelltot_index(de,2)%l = 1
+          distgrid%lcellexc_index(de,2)%l = halo + 1
+          distgrid%lcellexc_index(de,2)%r = halo + nj_thisde
+          distgrid%lcelltot_index(de,2)%r = distgrid%lcellexc_index(de,2)%r &
+                                          + halo
           distgrid%lcellexc_index(de,2)%max = j_max
           distgrid%lcellexc_index(de,2)%decomp = 2
-          distgrid%lcelltot_index(de,2)%l = global_s
-          distgrid%lcelltot_index(de,2)%r = global_e
-          distgrid%lcelltot_index(de,2)%max = j_max
           distgrid%lcelltot_index(de,2)%decomp = 2
+          distgrid%lcellexc_index(de,2)%gstart = exc_global_s
+          distgrid%lcelltot_index(de,2)%gstart = tot_global_s
         enddo
-        global_s = global_e + 1
+        exc_global_s = exc_global_e + 1
+        tot_global_s = tot_global_e + 1
       enddo
-      global_s = 0
+      do de = 1,nDE_i*nDE_j
+        distgrid%lcelltot_index(de,2)%max = tot_global_e
+      enddo
+
+! Calculate counts
+      global_exc = 0
+      global_tot = 0
       do j = 1,nDE_j
         do i = 1,nDE_i
-          de = (j-1)*nDE_j + i
-          distgrid%gcellexc_start(de) = global_s
-          distgrid%gcelltot_start(de) = global_s
-          global_s = global_s + (distgrid%lcellexc_index(de,1)%r - &
-                                 distgrid%lcellexc_index(de,1)%l + 1)* &
-                                (distgrid%lcellexc_index(de,2)%r - &
-                                 distgrid%lcellexc_index(de,2)%l + 1)
-                                ! TODO: add third dimension?
-                                ! TODO: add total cells
+          de = (j-1)*nDE_i + i
+          distgrid%gcellexc_start(de) = global_exc
+          distgrid%gcelltot_start(de) = global_tot
+          global_exc = global_exc + (distgrid%lcellexc_index(de,1)%r - &
+                                     distgrid%lcellexc_index(de,1)%l + 1)* &
+                                    (distgrid%lcellexc_index(de,2)%r - &
+                                     distgrid%lcellexc_index(de,2)%l + 1)
+                                    ! TODO: add third dimension?
+          global_tot = global_tot + (distgrid%lcelltot_index(de,1)%r - &
+                                     distgrid%lcelltot_index(de,1)%l + 1)* &
+                                    (distgrid%lcelltot_index(de,2)%r - &
+                                     distgrid%lcelltot_index(de,2)%l + 1)
+                                    ! TODO: add third dimension?
         enddo
       enddo
 
@@ -1571,16 +1608,15 @@
 
 !     Set decompids and local axis indices based on mapping of Array to
 !     Grid
-      do j = 1,ESMF_MAXGRIDDIM
-        do i = 1,rank
+      do i = 1,rank
+        decompids(i) = 0
+        AI_exc(i) = AI_array(i)
+        AI_tot(i) = AI_array(i)
+        do j = 1,ESMF_MAXGRIDDIM
           if (AI_array(i)%decomp .eq. j) then
             decompids(i) = j
             AI_exc(i) = distgrid%MyDE%lcellexc_index(j)
             AI_tot(i) = distgrid%MyDE%lcelltot_index(j)
-          else
-            decompids(i) = 0
-            AI_exc(i) = AI_array(i)
-            AI_tot(i) = AI_array(i)
           endif
         enddo
       enddo
