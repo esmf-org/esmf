@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.8 2005/02/28 17:31:25 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.9 2005/03/01 15:45:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,14 +40,16 @@
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_Test
       public ESMF_TestEnd
+      public ESMF_TestNumPETs
       public ESMF_TestMinPETs
+      public ESMF_TestMaxPETs
       public ESMF_TestStart
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.8 2005/02/28 17:31:25 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.9 2005/03/01 15:45:17 nscollins Exp $'
 
 !==============================================================================
 
@@ -203,6 +205,8 @@
       ! that we print "PASS" - but the nightly scripts need to know that
       ! we are successfully bypassing this test intentionally, and it was
       ! not because of a system error, crash, or other actual problem.
+      ! We do return .false. from the function, which is how the caller
+      ! knows not to continue.
       if (petCount .gt. numPETs) then
         write(failMsg, *) "This test must run on at least", petCount, "processors."
         write(msg, *) "PASS ", trim(file), ", line", &
@@ -217,6 +221,156 @@
       return
 
       end function ESMF_TestMinPETs
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestMaxPETs - Verify there are not too many PETs
+!
+! !INTERFACE:
+      function ESMF_TestMaxPETs(petCount, file, line, unit)
+
+! !RETURN VALUE:
+      logical :: ESMF_TestMaxPETs
+
+! !ARGUMENTS:
+      integer, intent(in) :: petCount       ! maximum number of acceptable PETs
+      character(*), intent(in) :: file      ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+
+! !DESCRIPTION:
+!     Verifies we are not running on too many PETs.
+!     If {\tt unit} is specified, will in addition write the same message 
+!     to that Fortran unit number.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      character(ESMF_MAXSTR) :: msg, failMsg
+      type(ESMF_VM) :: globalVM
+      integer :: numPETs, localrc
+
+      ! assume failure until sure of success
+      ESMF_TestMaxPETs = .false.
+
+      ! Get the global VM and pet count.
+      call ESMF_VMGetGlobal(globalVM, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        failMsg = "Unable to get global VM" 
+        write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      end if
+
+      call ESMF_VMGet(globalVM, petCount=numPETs, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        failMsg = "Unable to query global VM" 
+        write(msg, *) "FAIL ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      endif
+
+      ! This seems strange that if we have too many processors
+      ! that we print "PASS" - but the nightly scripts need to know that
+      ! we are successfully bypassing this test intentionally, and it was
+      ! not because of a system error, crash, or other actual problem.
+      ! We do return .false. from the function, which is how the caller
+      ! knows not to continue.
+      if (petCount .lt. numPETs) then
+        write(failMsg, *) "This test must run not more than", petCount, "processors."
+        write(msg, *) "PASS ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("PASS ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      endif
+
+      ESMF_TestMaxPETs = .true.
+      return
+
+      end function ESMF_TestMaxPETs
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestNumPETs - Verify there are the correct number of PETs
+!
+! !INTERFACE:
+      function ESMF_TestNumPETs(petCount, file, line, unit)
+
+! !RETURN VALUE:
+      logical :: ESMF_TestNumPETs
+
+! !ARGUMENTS:
+      integer, intent(in) :: petCount       ! exact number of acceptable PETs
+      character(*), intent(in) :: file      ! test file name
+      integer, intent(in) :: line           ! test file line number
+      integer, intent(in), optional :: unit ! additional output unit number
+
+! !DESCRIPTION:
+!     Verifies we are running on exactly the required number of PETs.
+!     If {\tt unit} is specified, will in addition write the same message 
+!     to that Fortran unit number.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      character(ESMF_MAXSTR) :: msg, failMsg
+      type(ESMF_VM) :: globalVM
+      integer :: numPETs, localrc
+
+      ! assume failure until sure of success
+      ESMF_TestNumPETs = .false.
+
+      ! Get the global VM and pet count.
+      call ESMF_VMGetGlobal(globalVM, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        failMsg = "Unable to get global VM" 
+        write(msg, *) "FAIL ", trim(file), ", line", line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      end if
+
+      call ESMF_VMGet(globalVM, petCount=numPETs, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        failMsg = "Unable to query global VM" 
+        write(msg, *) "FAIL ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      endif
+
+      ! This seems strange that if we do not have the right number of processors
+      ! that we print "PASS" - but the nightly scripts need to know that
+      ! we are successfully bypassing this test intentionally, and it was
+      ! not because of a system error, crash, or other actual problem.
+      ! We do return .false. from the function, which is how the caller
+      ! knows not to continue.
+      if (petCount .ne. numPETs) then
+        write(failMsg, *) "This test must run on exactly", petCount, "processors."
+        write(msg, *) "PASS ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite("PASS ", ESMF_LOG_INFO, line, file)
+        if (present(unit)) write(unit, *) msg
+        return
+      endif
+
+      ESMF_TestNumPETs = .true.
+      return
+
+      end function ESMF_TestNumPETs
 
 !------------------------------------------------------------------------------
 !BOP
