@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.144 2004/03/16 21:54:51 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.145 2004/03/17 17:22:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.144 2004/03/16 21:54:51 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.145 2004/03/17 17:22:21 svasquez Exp $'
 
 !==============================================================================
 !
@@ -228,8 +228,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -301,8 +301,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -402,8 +402,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -509,8 +509,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -621,8 +621,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -726,8 +726,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
