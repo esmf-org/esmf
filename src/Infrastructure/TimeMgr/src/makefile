@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.1 2002/10/08 18:58:09 nscollins Exp $ 
+# $Id: makefile,v 1.2 2002/10/14 16:20:03 eschwab Exp $ 
 ALL: lib 
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC	  = 
+SOURCEC	  = ESMC_TimeInstant.C
 SOURCEF	  = 
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -16,4 +16,3 @@ LOCDIR	  = src/Infrastructure/TimeMgr/src
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
-
