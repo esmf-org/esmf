@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.79 2004/10/27 20:48:54 svasquez Exp $
+#  $Id: common.mk,v 1.80 2004/10/28 22:09:32 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -400,14 +400,14 @@ libf:${LIBNAME}(${OBJSF})
 # subdir and it will go up to the top dir and build from there.
 build_libs: chk_dir include cppfiles
 	cd $(ESMF_TOP_DIR) ;\
-	${MAKE} ACTION=vpathlib tree shared
+	${MAKE} ACTION=tree_lib tree shared
 
 # Build only stuff in and below the current dir.
 build_here: chk_dir
-	${MAKE} ACTION=vpathlib tree shared
+	${MAKE} ACTION=tree_lib tree shared
 
 # Builds library - action for the 'tree' target.
-vpathlib:
+tree_lib:
 	dir=`pwd`; cd ${ESMC_OBJDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile lib
 
 # Builds library
@@ -1044,23 +1044,25 @@ tree: $(ACTION)
 #-------------------------------------------------------------------------------
 #  Build shared library from regular lib (.so from .a)
 #-------------------------------------------------------------------------------
-build_shared:
-	@echo making shared libraries in $(LDIR) 
-	@cd $(LDIR) ;\
-	rm -rf tmp* *.so;\
-	for NEXTLIB in $(SL_LIBS_TO_MAKE) foo ;\
-	do \
-	if [ -f $$NEXTLIB.a ] ; then \
-	    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(SL_SUFFIX) ;\
-	    mkdir tmp_$$NEXTLIB ;\
-	    cd tmp_$$NEXTLIB  ;\
-            $(AR) $(AR_EXTRACT) ../$$NEXTLIB.a ;\
-	    echo $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
-	    $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
-	    cd .. ;\
-	    rm -rf tmp_$$NEXTLIB ;\
-	fi ;\
-	done 
+shared:
+	@if [ "${SL_LIBS_TO_MAKE}" != "" ] ; then \
+		echo making shared libraries in $(LDIR); \
+		cd $(LDIR) ; \
+		rm -rf tmp_* ; \
+		for NEXTLIB in $(SL_LIBS_TO_MAKE) foo ;\
+		do \
+		if [ -f $$NEXTLIB.a ] ; then \
+		    rm -f $$NEXTLIB.$(SL_SUFFIX) ; \
+		    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(SL_SUFFIX) ;\
+		    mkdir tmp_$$NEXTLIB ;\
+		    cd tmp_$$NEXTLIB  ;\
+	            $(AR) $(AR_EXTRACT) ../$$NEXTLIB.a ;\
+		    $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
+		    cd .. ;\
+		    rm -rf tmp_$$NEXTLIB ;\
+		fi ;\
+		done ; \
+	fi \
 
 #-------------------------------------------------------------------------------
 # Pattern rules for making Tex files using protex script.  Input to 
