@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.27 2003/02/21 17:44:51 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.28 2003/02/21 18:02:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.27 2003/02/21 17:44:51 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.28 2003/02/21 18:02:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1637,10 +1637,10 @@
       endif
 
       ! TODO: add code which calls array methods here.
-      call ESMF_ArraySetAxisIndex(array, axis1, status)
-      call ESMF_ArraySetAxisIndex(array, axis2, status)
+      !call ESMF_ArraySetAxisIndex(array, axis1, status)
+      !call ESMF_ArraySetAxisIndex(array, axis2, status)
 
-      call ESMF_ArrayRedist(array, layout, etc, status)
+      !call ESMF_ArrayRedist(array, layout, etc, status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in DistGridHalo: ArrayRedist returned failure"
