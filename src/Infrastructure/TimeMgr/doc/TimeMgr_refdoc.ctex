@@ -81,6 +81,13 @@
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_usagenotes}
 #endif
 
+%\subsection{Implementation Notes}
+#ifdef STANDALONE
+\input{TimeMgr_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_implnotes}
+#endif
+
 #ifdef INCLUDE_UML
 %\subsection{Object Model}
 #ifdef STANDALONE
@@ -88,13 +95,6 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj.tex}
 #endif
-#endif
-
-%\subsection{Implementation Notes}
-#ifdef STANDALONE
-\input{TimeMgr_implnotes}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeMgr_implnotes}
 #endif
 
 % -------------------
