@@ -1,4 +1,4 @@
-! $Id: ArrayRedist.F90,v 1.2 2003/09/18 21:59:21 cdeluca Exp $
+! $Id: ArrayRedist.F90,v 1.3 2003/09/18 22:15:59 cdeluca Exp $
 !
 ! System test ArrayRedist
 
@@ -13,7 +13,7 @@
 !
 !\begin{verbatim}
 
-    program ESMF_ArrayRedist
+    program ArrayRedist
 
 #include <ESMF_Macros.inc>
 
@@ -340,7 +340,7 @@
     
     call ESMF_FrameworkFinalize(rc)
 
-    end program ESMF_ArrayRedist
+    end program ArrayRedist
     
 !\end{verbatim}
     

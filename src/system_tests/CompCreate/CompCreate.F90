@@ -1,6 +1,6 @@
-! $Id: CompCreate.F90,v 1.1 2003/09/18 21:26:46 cdeluca Exp $
+! $Id: CompCreate.F90,v 1.2 2003/09/18 22:15:59 cdeluca Exp $
 !
-! System test code #63029
+! System test CompCreate
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,12 +8,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 63029.
+! System test CompCreate.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest63029
+    program CompCreate
 
 #include <ESMF_Macros.inc>
 
@@ -45,7 +45,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test #63029:"
+    print *, "System Test CompCreate:"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -78,7 +78,7 @@
                                                    de_indices=delist, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    cname = "System Test #63029"
+    cname = "System Test CompCreate"
     comp1 = ESMF_GridCompCreate(cname, layout=layout2, mtype=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompPrint(comp1)
@@ -176,12 +176,12 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
- 10   print *, "System Test #63029 complete!"
+ 10   print *, "System Test CompCreate complete!"
 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         ! Standard ESMF Test output to log file
         write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test 63029: Component Create Test"
+        write(testname, *) "System Test CompCreate: Component Create Test"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
@@ -201,7 +201,7 @@
 
       call ESMF_FrameworkFinalize(rc)
 
-      end program ESMF_SysTest63029
+      end program CompCreate
     
 !\end{verbatim}
     
