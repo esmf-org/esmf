@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.107 2004/11/01 22:43:09 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.108 2004/11/04 22:31:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.107 2004/11/01 22:43:09 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.108 2004/11/04 22:31:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -6106,15 +6106,17 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "local arrays", &
                                      ESMF_CONTEXT, rc)) return
 
+      ! set halo width
+      hWidth = 0
+      if (total) hWidth = gridBoundWidth
+
       ! set up cornerCounts arrays
       cornerCounts(1) = dimCount*2
       do i = 1,size(counts)
-        cornerCounts(i+1) = counts(i)
+        cornerCounts(i+1) = counts(i) - 2*hWidth
       enddo
 
       ! create ESMF_Arrays
-      hWidth = 0
-      if (total) hWidth = gridBoundWidth
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
@@ -6178,11 +6180,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = coord1(i  )
             cornerUse12 = coord1(i+1)
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = coord2(j  )
               cornerUse22 = coord2(j+1)
@@ -6208,11 +6210,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = coord1(i  )
             cornerUse12 = coord1(i+1)
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
               cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
@@ -6238,11 +6240,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = coord1(i  )
             cornerUse12 = coord1(i+1)
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
               cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
@@ -6268,11 +6270,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
             cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = coord2(j  )
               cornerUse22 = coord2(j+1)
@@ -6298,11 +6300,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
             cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = coord2(j  )
               cornerUse22 = coord2(j+1)
@@ -6328,11 +6330,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
             cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
               cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
@@ -6358,11 +6360,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
             cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
               cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
@@ -6388,11 +6390,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
             cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
               cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
@@ -6418,11 +6420,11 @@
             enddo
           enddo
           if (total) then
-          do i = 1+hWidth,counts(1)-2*hWidth
+          do i = 1+hWidth,counts(1)-hWidth
             i1 = i - hWidth
             cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
             cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
-            do j = 1+hWidth,counts(2)-2*hWidth
+            do j = 1+hWidth,counts(2)-hWidth
               j1 = j - hWidth
               cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
               cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
