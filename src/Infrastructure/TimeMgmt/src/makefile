@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/11 03:17:51 cdeluca Exp $ 
+# $Id: makefile,v 1.11 2003/03/12 18:41:45 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -47,7 +47,7 @@ LIBBASE	  = liboldworld
 DIRS	  = examples doc
 LOCDIR	  = src/Infrastructure/TimeMgmt/src
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
-RMMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
+MVMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
 # RM MOD FILES does generate the right list, but the case of the basename isn't
 # correct - it needs to be all lower case.  try using tr first...
 
@@ -56,7 +56,13 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 lib:: 
-	rm -f `echo ${RMMODFILES} | tr [:upper:]  [:lower:] `
-	echo "removing TimeMgmt module files to prevent name collisions with newer TimeMgr"
+	-@if [ ! -d ${ESMC_MODDIR}/oldworld ]; then \
+          echo Making directory ${ESMC_MODDIR}/oldworld for old mod files; \
+	  mkdir -p ${ESMC_MODDIR}/oldworld ; \
+	fi
+	-@for i in `echo ${MVMODFILES} | tr [:upper:]  [:lower:] ` ; do \
+	  if [ -f $$i ] ; then mv -f $$i ${ESMC_MODDIR}/oldworld ; fi ; \
+	done
+	echo "moving TimeMgmt module files to prevent name collisions with newer TimeMgr"
 
 
