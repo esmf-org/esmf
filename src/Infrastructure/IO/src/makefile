@@ -1,25 +1,44 @@
-# $Id: makefile,v 1.2 2004/02/13 15:36:46 nscollins Exp $
+# $Id: makefile,v 1.3 2004/04/27 20:44:49 slswift Exp $
 
 ALL: build_here
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC   = 
-SOURCEF   =
-STOREH    = ESMC_IO.h
+SOURCEF   = ESMF_IO.F90 wrf_io.F90 field_routines.F90
+CODE      = ext_ncd_get_dom_ti.code ext_ncd_get_var_td.code ext_ncd_get_var_ti.code ext_ncd_put_dom_ti.code ext_ncd_put_var_td.code ext_ncd_put_var_ti.code transpose.code
+#STOREH    = ESMC_IO.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 MANSEC    = IOobj
 LIBBASE   = libesmf
-DIRS      =
+
+# This needs to be the path of this directory relative to the
+# top level esmf directory.
 LOCDIR    = src/Infrastructure/IO/src
 
+# Leave this line alone.
 include $(ESMF_DIR)/makefile
 
+# The DIRS line needs to contain all subdirectories which exist 
+# directly below this directory, and have either library,
+# example/test code, or documents which need to be generated.
 DIRS =
 
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
+
+ESMF_IO.o:		wrf_io.o field_routines.o
+
+wrf_io.f90:		wrf_io.F90 $(CODE)
+			sed -e '1,/BEGINIOFLAGS/d' -e '/ENDIOFLAGS/,$$d' $< > wrf_io_flags.h
+			$(CPP) -x f77-cpp-input -E -P -I./ $< | $(M4)  -Uinclude -Uindex -Ulen - > $@
+
+field_routines.f90:	field_routines.F90
+			$(CPP) -x f77-cpp-input -E -P -I./ $< > $@
+
+# .f.o:
+# 			${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} ${NETCDF_INCLUDE} $<
