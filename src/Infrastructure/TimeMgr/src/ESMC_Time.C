@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.22 2003/04/21 23:41:53 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.23 2003/04/24 02:59:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.22 2003/04/21 23:41:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.23 2003/04/24 02:59:56 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -509,16 +509,44 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Calendar *calendar) const {    // out - Time's calendar
+      ESMC_Calendar **calendar) const {    // out - Time's calendar
 //
 // !DESCRIPTION:
-//      Gets a {\tt Time}'s associated calendar
+//      Gets a {\tt Time}'s associated calendar (pointer)
 //
 //EOP
 // !REQUIREMENTS:  
 
-    calendar = Calendar;
-    return(ESMF_SUCCESS);
+    if (calendar != ESMC_NULL_POINTER) {
+      *calendar = Calendar;  // return calendar pointer
+      return(ESMF_SUCCESS);
+    } else return(ESMF_FAILURE);
+
+ }  // end ESMC_TimeGetCalendar
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetCalendar - Get a Time's associated calendar
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetCalendar(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Calendar *calendar) const {    // out - Time's calendar
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s associated calendar (copy)
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (calendar != ESMC_NULL_POINTER) {
+      *calendar = *Calendar;  // return calendar copy
+      return(ESMF_SUCCESS);
+    } else return(ESMF_FAILURE);
 
  }  // end ESMC_TimeGetCalendar
 

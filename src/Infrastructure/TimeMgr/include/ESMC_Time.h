@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.17 2003/04/21 23:41:52 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.18 2003/04/24 02:59:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -118,8 +118,9 @@
                      double *ms_, double *us_, double *ns_,
                      int *Sn, int *Sd);
 
-    int ESMC_TimeGetCalendar(ESMC_Calendar *calendar) const;
-    int ESMC_TimeSetCalendar(ESMC_Calendar *calendar);
+    int ESMC_TimeGetCalendar(ESMC_Calendar **calendar) const;  // pointer
+    int ESMC_TimeGetCalendar(ESMC_Calendar  *calendar) const;  // copy
+    int ESMC_TimeSetCalendar(ESMC_Calendar  *calendar);
 
     bool ESMC_TimeIsSameCal(ESMC_Time *time, int *rc) const;
 
