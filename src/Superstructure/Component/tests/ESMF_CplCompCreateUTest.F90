@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.2 2004/08/23 16:09:34 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.3 2004/08/23 17:37:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -174,6 +174,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Get Internal State
+    !EX_UTest
 
     wrap2%p=>data2
     !EX_UTest
@@ -182,6 +183,16 @@
     call ESMF_CplCompGetInternalState(cpl, wrap2, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-------------------------------------------------------------------------
+!   !
+!   !  Verify Internal State
+    !EX_UTest
+
+    !EX_UTest
+    write(failMsg, *) "Did not return correct data"
+    write(name, *) "Verify Internal State Test"
+    call ESMF_Test((data2%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
+    print *, "data2%testnumber = ", data2%testnumber
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest
