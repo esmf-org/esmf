@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.37 2004/06/16 14:48:31 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.38 2004/06/21 22:13:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.37 2004/06/16 14:48:31 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.38 2004/06/21 22:13:42 jwolfe Exp $'
 
 !==============================================================================
 
@@ -732,9 +732,9 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "weights", &
                                        ESMF_CONTEXT, rc)) return
       else
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "2nd order conservative not currently supported", &
-                                    ESMF_CONTEXT, rc)
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                   "2nd order conservative", &
+                   ESMF_CONTEXT, rc)
         return
         allocate(weights(3), stat=localrc)  ! 2nd-order requires 3 weights
         if (ESMF_LogMsgFoundAllocError(localrc, "weights", &
@@ -809,9 +809,9 @@
               ! near cell or threshold boundary
               numSubseg = numSubseg + 1
               if (numSubseg > maxSubseg) then
-                dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                            "numSubseg exceeded maxSubseg", &
-                                            ESMF_CONTEXT, rc)
+                dummy=ESMF_LogMsgFoundError(ESMF_RC_INTNRL_BAD, &
+                           "numSubseg exceeded maxSubseg", &
+                           ESMF_CONTEXT, rc)
                 return
               endif
 
@@ -933,9 +933,9 @@
               ! threshold boundary
               numSubseg = numSubseg + 1
               if (numSubseg > maxSubseg) then
-                dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                            "numSubseg exceeded maxSubseg", &
-                                            ESMF_CONTEXT, rc)
+                dummy=ESMF_LogMsgFoundError(ESMF_RC_INTNRL_BAD, &
+                           "numSubseg exceeded maxSubseg", &
+                           ESMF_CONTEXT, rc)
                 return
               endif
 
@@ -1248,9 +1248,9 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "weights", &
                                        ESMF_CONTEXT, rc)) return
       else
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "2nd order conservative not currently supported", &
-                                    ESMF_CONTEXT, rc)
+        dummy = ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                     "2nd order conservative", &
+                     ESMF_CONTEXT, rc)
         return
         allocate(weights(3), stat=localrc)  ! 2nd-order requires 3 weights
         if (ESMF_LogMsgFoundAllocError(localrc, "weights", &
@@ -1309,8 +1309,11 @@
 
       do srcAdd = 1,srcSize
         if (srcArea(srcAdd) < -.01) then
-          write(logMsg, *) "Source grid area < -0.01, value is ", srcArea(srcAdd), &
-                        " at location ", srcAdd
+          write(logMsg, *) "Source grid area < -0.01"
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          write(logMsg, *) " value is ", srcArea(srcAdd)
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          write(logMsg, *) " at location ", srcAdd
           dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
       enddo
@@ -1318,8 +1321,11 @@
       do jDst   = 1,dstSizeY
         do iDst = 1,dstSizeX
           if (dstArea(iDst,jDst) < -.01) then
-            write(logMsg, *) "Dest grid area < -0.01, value is ", &
-                           dstArea(iDst,jDst), " at location ", iDst, jDst
+            write(logMsg, *) "Dest grid area < -0.01"
+            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            write(logMsg, *) " value is ", dstArea(iDst,jDst)
+            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            write(logMsg, *) " at location ", iDst, jDst
             dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
           temp2d(iDst,jDst) = 0.0d0
@@ -1333,13 +1339,19 @@
         weights(1) = weightsData(n)             ! TODO: fix this for second order
 
         if (weightsData(n) < -.05) then
-          write(logMsg, *) "Regrid weight < 0, value is ", weights(1), &
-                        " at location ", srcAdd, iDst, jDst
+          write(logMsg, *) "Regrid weight < 0"
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          write(logMsg, *) " value is ", weights(1)
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          write(logMsg, *) " at location ", srcAdd, iDst, jDst
           dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         if (regridnorm /= ESMF_REGRID_NORM_NONE .AND. weights(1) > 1.05d0) then
-          write(logMsg, *) "Regrid weight > 1.05, value is ", weights(1), &
-                        " at location ", srcAdd, iDst, jDst
+          write(logMsg, *) "Regrid weight > 1.05"
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          write(logMsg, *) " value is ", weights(1)
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          write(logMsg, *) " at location ", srcAdd, iDst, jDst
           dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         ! sum the weight for each dest grid point
@@ -1364,9 +1376,12 @@
 
           if (abs(temp2d(iDst,jDst)) > 1.d-12 .AND. &
               abs(temp2d(iDst,jDst)-normFactor) > .05) then
-            write(logMsg, *) "Sum of weights for regrid , value is ", &
-                           temp2d(iDst,jDst), " should be ", normFactor, &
-                          " at location ", srcAdd, iDst, jDst
+            write(logMsg, *) "Sum of weights for regrid"
+            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            write(logMsg, *) " value is ", temp2d(iDst,jDst), &
+                             " should be ", normFactor
+            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            write(logMsg, *) " at location ", srcAdd, iDst, jDst
             dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
         enddo
