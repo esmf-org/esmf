@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.13 2004/12/08 20:41:32 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.14 2004/12/17 16:08:01 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -23,10 +23,10 @@
 !                 accuracy of the Regrid.  Those values are output for
 !                 each DE.
 !
-! WARNING - this system test is being used to debug some of the
-!  new routines used for concurrent components.  it currently generates
-!  a lot of debugging output.  this will be removed when the code is
-!  all working.
+!                 The Gridded Components are running on separate sets of
+!                 PETs, concurrently.  The coupler is running on all PETs
+!                 and we synchronize before calling the coupler.
+!
 !
 !\begin{verbatim}
 
@@ -45,13 +45,12 @@
     implicit none
     
     ! Local variables
-    integer :: i, pet_id, npets, splitnum, rc
+    integer :: pet_id, npets, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_VM):: vm, vmsub1, vmsub2
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
-    logical :: firstflag = .true.
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -94,7 +93,6 @@
     if (npets .lt. 8) then
       print *, "This system test needs to run at least 8-way, current np = ", &
                npets
-      rc = ESMF_FAILURE
       goto 10
     endif
    
@@ -199,31 +197,30 @@
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc))
     
+      ! Run the first component.  After the first time thru the loop
+      ! this will be running concurrently with the second component.
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
-                            !blockingFlag=ESMF_BLOCKING, rc=rc)
                             blockingFlag=ESMF_NONBLOCKING, rc=rc)
       print *, "Comp 1 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
  
+      ! Wait for both components to finish before coupling
       call ESMF_GridCompWait(comp1, rc)
       print *, "Comp 1 Wait returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      if (firstflag) then
-        firstflag = .false.
-      else
-      	call ESMF_GridCompWait(comp2, rc)
-        print *, "Comp 2 Wait returned, rc =", rc
-        if (rc .ne. ESMF_SUCCESS) goto 10
-      endif
+      call ESMF_GridCompWait(comp2, rc)
+      print *, "Comp 2 Wait returned, rc =", rc
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
+      ! Run the coupler in sequential mode.
       call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, &
                             blockingFlag=ESMF_BLOCKING, rc=rc)
       print *, "Coupler Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
+      ! Run the second component concurrently with the first component.
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
-                            !blockingFlag=ESMF_BLOCKING, rc=rc)
                             blockingFlag=ESMF_NONBLOCKING, rc=rc)
       print *, "Comp 2 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
@@ -234,11 +231,9 @@
 
     enddo
  
-!    TODO: this should not cause a crash, but currently does.
-!    cannot wait for components which have already returned.
-!    call ESMF_GridCompWait(comp1, rc)
-!    print *, "Comp 1 Wait returned, rc =", rc
-!    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_GridCompWait(comp1, rc)
+    print *, "Comp 1 Wait returned, rc =", rc
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     call ESMF_GridCompWait(comp2, rc)
     print *, "Comp 2 Wait returned, rc =", rc
