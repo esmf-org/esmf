@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.13 2003/09/10 03:30:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,13 +10,13 @@
 !
 !==============================================================================
 !
-      program ESMF_ClockEx
+      program ESMF_ClockAdvEx
 
 !------------------------------------------------------------------------------
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_ClockEx - Clock initialization and time-stepping
+! !PROGRAM: ESMF_ClockAdvEx - Clock initialization and time-stepping
 !
 ! !DESCRIPTION:
 !
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.13 2003/09/10 03:30:55 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -235,4 +235,4 @@
       ! finalize ESMF framework
       call ESMF_FrameworkFinalize(rc)
 
-      end program ESMF_ClockEx
+      end program ESMF_ClockAdvEx
