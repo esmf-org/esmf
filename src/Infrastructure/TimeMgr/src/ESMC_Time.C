@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.33 2003/05/01 00:32:39 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.34 2003/05/02 01:05:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.33 2003/05/01 00:32:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.34 2003/05/02 01:05:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -575,11 +575,7 @@
     ESMF_IKIND_I8 YR, S;
     int MM, DD, H, M; 
     // TODO: use native C++ Get, not F90 entry point, when ready
-    ESMC_TimeGet(&YR, &MM, &DD, ESMC_NULL_POINTER, &H, &M, &S,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+    ESMC_TimeGet(&YR, &MM, &DD, ESMC_NULL_POINTER, &H, &M, &S);
 
     // ISO 8601 format YYYY-MM-DDThh:mm:ss
     sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:%02lld\0",
@@ -628,13 +624,7 @@
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-
-                                 ESMC_NULL_POINTER, &diffDays,
-
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+                                 ESMC_NULL_POINTER, &diffDays);
 
     // day-of-year is one-based count; i.e. day-of-year for 1/1/YR is 1
     *dayOfYear = diffDays + 1;
@@ -676,17 +666,7 @@
     ESMF_IKIND_I8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
     yearDay.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-
-                                 &diffDays,
-
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER);
+                                 &diffDays);
 
     // day-of-year is one-based count; i.e. day-of-year for 1/1/YR is 1
     *dayOfYear = (int) diffDays + 1;
@@ -724,26 +704,13 @@
     ESMF_IKIND_I8 YR;
     int MM, DD;
     // TODO: use native C++ Get, not F90 entry point
-    ESMC_TimeGet(&YR, &MM, &DD, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+    ESMC_TimeGet(&YR, &MM, &DD);
 
     // create time for 1/1/YR
     ESMC_Time dayOne = *this;  // initialize calendar & timezone
     MM=1, DD=1;
     // TODO: use native C++ Init, not F90 entry point
-    dayOne.ESMC_TimeSet(&YR, &MM, &DD,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+    dayOne.ESMC_TimeSet(&YR, &MM, &DD);
 
     // calculate difference between 1/1/YR and our (this) time
     *dayOfYear = *this - dayOne;
@@ -786,46 +753,13 @@
 
     //  The day of the week is simply modulo 7 from a reference date,
     //  adjusted for a 1-based count and negative deltas.
-    //  The reference date is any known Monday (day of the week = 1),
-    //  either before or after the Gregorian Reformation of 9/3/1752,
-    //  depending on the date in question.  The Gregorian Reformation 
-    //  eliminated 10 days (9/4-9/13) from the calendar, thereby causing a 
-    //  re-alignment of the week timeline.
+    //  The reference date is any known Monday (day of the week = 1)
+    //  after the Gregorian reformation of 9/14/1752
 
-    ESMC_Time referenceMonday = *this;
-                                // copy calendar & timezone from this time
-
-    // initialize Gregorian reformation date to September 14, 1752, the
-    //   first valid post-reformation date
-    ESMC_Time GregorianReformation = *this;  // copy calendar & timezone
-    YR=1752; MM=9; DD=14;
-    GregorianReformation.ESMC_TimeSet(&YR, &MM, &DD,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER);
-
-    // Set the reference date to any Monday depending on whether the given
-    //   date is before or after the Gregorian Reformation.  Assume the
-    //   10 eliminated days fall on the pre-reformation week alignment.
-    if (*this >= GregorianReformation) {
-      YR=1796; MM=7; DD=4;    // America's 20th birthday
-    } else {
-      YR=1492; MM=10; DD=29;  // Christopher Columbus lands in Cuba
-    }
-    referenceMonday.ESMC_TimeSet(&YR, &MM, &DD,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+    ESMC_Time referenceMonday = *this; // initialize calendar & timezone
+    YR=1796; MM=7; DD=4;    // America's 20th birthday was a Monday !
+    // TODO: use native C++ Set() when ready
+    referenceMonday.ESMC_TimeSet(&YR, &MM, &DD);
 
     // calculate the difference in days between the given date and
     //  the reference date
@@ -834,17 +768,7 @@
     ESMF_IKIND_I8 diffDays;
     // TODO: use native C++ Get() when ready
     delta.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-
-                               &diffDays,
-
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                               ESMC_NULL_POINTER);
+                               &diffDays);
 
     // calculate day of the week as simply modulo 7 from the reference date,
     //  adjusted for a 1-based count and negative deltas
@@ -882,13 +806,7 @@
         Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
     // TODO: use native C++ Get() when ready
-    ESMC_TimeGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER, dayOfMonth, 
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER);
+    ESMC_TimeGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER, dayOfMonth);
  
     return(ESMF_SUCCESS);
 
@@ -926,24 +844,12 @@
     // get this date
     ESMF_IKIND_I8 YR;
     int MM, DD;
-    ESMC_TimeGet(&YR, &MM, &DD, 
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER);
+    ESMC_TimeGet(&YR, &MM, &DD);
 
     // set start of this month
     DD = 1;
     ESMC_Time startOfMonth = *this;  // initialize calendar & timezone
-    startOfMonth.ESMC_TimeSet(&YR, &MM, &DD, 
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER);
+    startOfMonth.ESMC_TimeSet(&YR, &MM, &DD);
 
     // set end of this month (start of next month)
     // TODO: use calendar interval logic when ready
@@ -954,13 +860,7 @@
       YR++;
     }
     ESMC_Time endOfMonth = *this;  // initialize calendar & timezone
-    endOfMonth.ESMC_TimeSet(&YR, &MM, &DD, 
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER);
+    endOfMonth.ESMC_TimeSet(&YR, &MM, &DD);
 
     // size of this month
     ESMC_TimeInterval month;
@@ -1016,12 +916,7 @@
 
     // set this time to wall clock time
     // TODO: use native C++ version when ready
-    ESMC_TimeSet(&YR, &MM, &DD, ESMC_NULL_POINTER,
-                 &H, &M, &S, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                 ESMC_NULL_POINTER);
+    ESMC_TimeSet(&YR, &MM, &DD, ESMC_NULL_POINTER, &H, &M, &S);
 
     return(ESMF_SUCCESS);
 
