@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.139 2004/04/19 22:01:48 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.140 2004/04/20 22:47:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -190,7 +190,6 @@
    public ESMF_FieldGetArray           ! Return the data Array
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
-   public ESMF_FieldGetRelLoc          ! Return relative location
 
    public ESMF_FieldSetGrid            ! Set a Grid (may regrid if different
                                        !   Grid is already present)
@@ -225,7 +224,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.139 2004/04/19 22:01:48 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.140 2004/04/20 22:47:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2107,46 +2106,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldGetRelLoc - Return relative location
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetRelLoc(field, horzRelloc, vertRelloc, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field 
-      type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
-      type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!     Finds and returns the relative location of the field. Use
-!     DataMap access routines to get relloc.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [name]
-!           An {\tt ESMF\_Field} name.
-!     \item [{[horzRelloc]}]
-!           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
-!     \item [{[vertRelloc]}]
-!            Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-
-      call ESMF_DataMapGet(field%ftypep%mapping, horzRelloc=horzRelloc, &
-                           vertRelloc=vertRelloc, rc=rc)
-
-      end subroutine ESMF_FieldGetRelLoc
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
 
 ! !INTERFACE:
@@ -3472,7 +3431,8 @@
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_newDELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
         call ESMF_GridGet(stypep%grid, dimCount=gridrank, rc=status)
-        call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
+        call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
+                           vertRelloc=vertRelLoc, rc=rc)
         call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
                             vertRelLoc=vertRelLoc, &
                             globalAIPerDim=myAI(1:gridrank), rc=status)
@@ -3505,7 +3465,8 @@
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
+        call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
+                           vertRelloc=vertRelLoc, rc=rc)
         call ESMF_GridGetDE(srcGrid, &
                             horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                             minLocalCoordPerDim=src_min, &
@@ -3524,7 +3485,8 @@
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_FieldGetRelLoc(dstField, horzRelLoc, vertRelLoc, rc)
+        call ESMF_FieldGet(dstField, horzRelloc=horzRelLoc, &
+                           vertRelloc=vertRelLoc, rc=rc)
         call ESMF_GridGetDE(dstGrid, &
                             horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                             minLocalCoordPerDim=dst_min, &
