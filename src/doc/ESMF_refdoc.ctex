@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.53 2004/06/02 00:03:03 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.54 2004/06/21 23:12:02 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -177,6 +177,12 @@
 #include "../Infrastructure/VM/doc/VM_refdoc.ctex"
 
 %#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
+
+\newpage
+\section{Bibliography}
+\bibliography{ESMF_refdoc} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
 
 \newpage
 \begin{htmlonly}
