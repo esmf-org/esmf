@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.47 2004/02/10 23:49:08 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.48 2004/02/19 21:31:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.47 2004/02/10 23:49:08 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.48 2004/02/19 21:31:46 jwolfe Exp $'
 
 !==============================================================================
 
@@ -83,10 +83,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Grid), intent(inout) :: srcGrid
+      type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_DataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(inout) :: dstArray
-      type(ESMF_Grid), intent(inout) :: dstGrid
+      type(ESMF_Array), intent(in) :: dstArray
+      type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DataMap), intent(in) :: dstDataMap
       type(ESMF_Mask), intent(in), optional :: srcMask
       type(ESMF_Mask), intent(in), optional :: dstMask
@@ -129,6 +129,7 @@
       integer :: start, stop, startComp, stopComp, indexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
+      integer :: datarank
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
@@ -252,8 +253,12 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      route = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, recvDomainList, &
-                                        total=.false., rc=status)
+      call ESMF_ArrayGet(srcArray, rank=datarank, rc=status)
+      route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
+                                      recvDomainList, &
+                                      srcArray=srcArray, srcDataMap=srcDataMap, &
+                                      dstArray=dstArray, dstDataMap=dstDataMap, &
+                                      total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
