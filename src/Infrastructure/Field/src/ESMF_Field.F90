@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.178 2004/08/19 16:52:20 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.179 2004/08/20 00:03:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.178 2004/08/19 16:52:20 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.179 2004/08/20 00:03:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4355,9 +4355,12 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! this validates the grid internally, no need to validate it here.
+    !jw  call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
+    !jw                                  haloWidth, arrayrank, counts, datamap, &
+    !jw                                  name, iospec, status)
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, arrayrank, counts, datamap, &
-                                      name, iospec, status)
+                                      haloWidth, datamap=datamap, name=name, &
+                                      iospec=iospec, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4447,7 +4450,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: gridRank
+      integer :: gridRank, arrayRank
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -4480,7 +4483,8 @@
         call ESMF_FieldDataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
-          call ESMF_FieldDataMapSetDefault(ftype%mapping, arrayspec%rank, 
+          call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
+          call ESMF_FieldDataMapSetDefault(ftype%mapping, arrayRank, &
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
       endif
