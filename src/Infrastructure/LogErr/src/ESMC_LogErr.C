@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.30 2004/04/23 21:56:10 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.31 2004/04/27 20:16:35 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.30 2004/04/23 21:56:10 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.31 2004/04/27 20:16:35 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -201,17 +201,17 @@ int ESMC_Log::ESMC_LogWrite(
 	  return ESMF_FAILURE;
 	switch(logtype)
 	{
-		case 0:
+		case ESMF_LOG_INFO:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"INFO",__FILE__,__LINE__,msg);
 			break;
-		case 1:
+		case ESMF_LOG_WARN:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"WARNING",__FILE__,__LINE__,msg);
 			break;
-		case 2:
+		case ESMF_LOG_ERROR:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"ERROR",__FILE__,__LINE__,msg);
@@ -259,17 +259,17 @@ int ESMC_Log::ESMC_LogWrite(
 	  return ESMF_FAILURE;
 	switch(logtype)
 	{
-		case 0:
+		case ESMF_LOG_INFO:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"INFO",__FILE__,__LINE__,modmeth,msg);
 			break;
-		case 1:
+		case ESMF_LOG_WARN:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"WARNING",__FILE__,__LINE__,modmeth,msg);
 			break;
-		case 2:
+		case ESMF_LOG_ERROR:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"ERROR",__FILE__,__LINE__,modmeth,msg);
@@ -376,9 +376,9 @@ int ESMC_Log::ESMC_LogFoundError(
 //
 // !ARGUMENTS:
     int rc,
-	char msg[],	// Log Entry
+	  char msg[],	// Log Entry
     int logtype,// Log Type   
-	char modmeth[]      
+	  char modmeth[]      
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory

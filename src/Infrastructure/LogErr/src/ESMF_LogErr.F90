@@ -41,7 +41,23 @@
 !EOPI
    implicit none
    private
-   
+
+!------------------------------------------------------------------------------
+!     ! ESMF_LogFileType
+!
+!     ! Log File Types
+
+      type ESMF_LogFileType
+      sequence
+      private
+        integer :: filetype
+      end type
+
+      type(ESMF_LogFileType), parameter ::  &
+                               ESMF_LOG_INFO  = ESMF_LogFileType(1), &
+                               ESMF_LOG_WARNING = ESMF_LogFileType(2), &
+                               ESMF_LOG_ERROR = ESMF_LogFileType(3)
+                                  
 type ESMF_LOGENTRY
 	private
     sequence
@@ -62,7 +78,7 @@ type ESMF_Log
     type(ESMF_Logical) :: flush
     type(ESMF_Logical) :: root_only
     integer halt
-    integer filetype
+    type(ESMF_LogFileType) :: logtype
     integer stream 
     integer max_elements
     type(ESMF_LOGENTRY), dimension(1)::LOG_ENTRY
@@ -190,12 +206,12 @@ end subroutine ESMF_LogOpen
 	subroutine ESMF_LogWrite(msg,logtype,module,method,rc,aLog)
 !
 ! !ARGUMENTS:
-	character(len=*), intent(in)			:: msg
-	integer, intent(in)						:: logtype
-	character(len=*), intent(in), optional  :: module
-	character(len=*), intent(in), optional	:: method
-	integer, intent(out),optional			:: rc
-	type(ESMF_Log), intent(in) , optional	:: aLog
+	character(len=*), intent(in)			        :: msg
+	type(ESMF_LogFileType), intent(in)		:: logtype
+	character(len=*), intent(in), optional          :: module
+	character(len=*), intent(in), optional	        :: method
+	integer, intent(out),optional			        :: rc
+	type(ESMF_Log), intent(in) , optional	        :: aLog
 
 ! !DESCRIPTION:
 !      This routine writes to the file(s) associated with {\tt aLog}.
@@ -236,9 +252,9 @@ end subroutine ESMF_LogOpen
 		if (aLog%FileIsOpen .eq. ESMF_TRUE) then
 			call DATE_AND_TIME(d,t)	
 			select case (logtype)
-				case (0)
+				case (ESMF_LOG_INFO)
 					lt="INFO"
-				case (1)
+				case (ESMF_LOG_WARNING)
 					lt="WARNING"
 				case default
 					lt="ERROR"
@@ -282,9 +298,9 @@ end subroutine ESMF_LogOpen
 		if (gLog%FileIsOpen .eq. ESMF_TRUE) then
 			call DATE_AND_TIME(d,t)	
 			select case (logtype)
-				case (0)
+				case (ESMF_LOG_INFO)
 					lt="INFO"
-				case (1)
+				case (ESMF_LOG_WARNING)
 					lt="WARNING"
 				case default
 					lt="ERROR"
@@ -338,9 +354,9 @@ end subroutine ESMF_LogWrite
 	logical								::ESMF_LogFoundError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)						:: rc
+	integer, intent(in)						            :: rc
 	character(len=*), intent(in),optional				:: msg
-	integer, intent(in),optional					:: logtype
+	type(ESMF_LogFileType), intent(in) 	                :: logtype
 	character(len=*), intent(in), optional  			:: module
 	character(len=*), intent(in), optional				:: method
 	type(ESMF_Log), intent(in), optional				:: aLog
@@ -395,11 +411,11 @@ end function ESMF_LogFoundError
 	type(ESMF_Logical), intent(in),optional					:: verbose
 	type(ESMF_Logical), intent(in),optional					:: flush
 	type(ESMF_Logical), intent(in),optional					:: root_only
-	integer, intent(in),optional					:: halt
-	integer, intent(in),optional					:: filetype
-	integer, intent(in),optional					:: stream  
-	integer, intent(in),optional					:: max_elements
-	integer, intent(out),optional					:: rc
+	integer, intent(in),optional					        :: halt
+	type(ESMF_LogFileType), intent(in),optional		        :: logtype
+	integer, intent(in),optional					        :: stream  
+	integer, intent(in),optional					        :: max_elements
+	integer, intent(out),optional					        :: rc
 	
 
 !      \item [aLog]
@@ -441,15 +457,15 @@ end subroutine ESMF_LogSet
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log), intent(in) 					:: aLog
+	type(ESMF_Log), intent(in) 					                :: aLog
 	type(ESMF_Logical), intent(out),optional					:: verbose
 	type(ESMF_Logical), intent(out),optional					:: flush
 	type(ESMF_Logical), intent(out),optional					:: root_only
-	integer, intent(out),optional					:: halt
-	integer, intent(out),optional					:: filetype
-	integer, intent(out),optional					:: stream  
-	integer, intent(out),optional					:: max_elements
-	integer, intent(out),optional					:: rc
+	integer, intent(out),optional					            :: halt
+	type(ESMF_LogFileType), intent(in),optional		            :: logtype
+	integer, intent(out),optional					            :: stream  
+	integer, intent(out),optional					            :: max_elements
+	integer, intent(out),optional					            :: rc
 	
 
 !      \item [aLog]

@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.27 2004/04/22 22:31:59 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.28 2004/04/27 20:16:35 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,6 +40,10 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
 
+char nameLogErrFile[32];    // name of logfile.
+
+enum EMSC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
+                        
 class ESMC_Log {
   private:
 // !PRIVATE MEMBER FUNCIONS:
@@ -63,11 +67,6 @@ class ESMC_Log {
     int stream;
 
     int max_elements;
-
-    char nameLogErrFile[32];    // name of logfile.
-                                // If multiple files are written out,
-                                // PE rank is automatically
-                                // appended to name.
 		
     ESMC_Logical fileI0;        // If true, output written to files
 
@@ -111,6 +110,7 @@ class ESMC_Log {
     FILE *ESMC_LogFile;
     //ESMC_Log();
 };
+
 //EOP
 
 #endif  //ESMC_LOG
