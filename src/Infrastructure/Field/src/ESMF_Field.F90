@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.81 2003/10/13 23:07:24 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.82 2003/10/22 17:13:51 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -235,7 +235,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.81 2003/10/13 23:07:24 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.82 2003/10/22 17:13:51 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -474,8 +474,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.1, FLD1.5.1
 !EOP
+! !REQUIREMENTS: FLD1.1.1, FLD1.5.1
+
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: status                           ! Error status
@@ -565,8 +566,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.2, FLD1.5.1
 !EOP
+! !REQUIREMENTS: FLD1.1.2, FLD1.5.1
+
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
@@ -652,8 +654,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOP
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
       integer :: status                           ! Error status
@@ -735,8 +738,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOP
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
@@ -806,8 +810,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOP
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
@@ -873,8 +878,9 @@
 ! and a new {\tt ESMF\_Grid}.  The {\tt ESMF\_Grid} is referenced by the 
 ! new {\tt ESMF\_Field}.  Data is copied.
 !
-! !REQUIREMENTS: FLD1.1.5, FLD1.5.1, FLD1.6.1
 !EOP
+! !REQUIREMENTS: FLD1.1.5, FLD1.5.1, FLD1.6.1
+
 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
@@ -930,8 +936,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.4
 !EOP
+! !REQUIREMENTS: FLD1.4
+
       ! Local variables
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1027,8 +1034,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOPI
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1136,8 +1144,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOPI
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1222,8 +1231,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOPI
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1320,8 +1330,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOPI
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1378,8 +1389,9 @@
 !     Constructs {\tt ESMF\_Field} internals except those related to {\tt ESMF\_Grid} 
 !     and {\tt ESMF\_Data}.
 !
-! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOPI
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
 
       ! Local variables
       integer :: status                           ! Error status
@@ -1441,8 +1453,9 @@
 !           
 !     \end{description}
 !
-! !REQUIREMENTS: 
 !EOPI
+! !REQUIREMENTS: 
+
 
       logical :: rcpresent                          ! Return code present
 
@@ -1489,8 +1502,9 @@
 !     Associates a data buffer with a {\tt ESMF\_Field} and sets a flag in 
 !     the {\tt ESMF\_Field} indicating that data is present.  
 !
-! !REQUIREMENTS: FLD1.6.5
 !EOP
+! !REQUIREMENTS: FLD1.6.5
+
 
         end subroutine ESMF_FieldAttachBuffer
 
@@ -1511,8 +1525,9 @@
 ! Associates an {\tt ESMF\_Array} with a {\tt ESMF\_Field} and sets a 
 !  flag in the {\tt ESMF\_Field} indicating that data is present.
 !
-! !REQUIREMENTS: FLD1.6.5
 !EOP
+! !REQUIREMENTS: FLD1.6.5
+
 
         end subroutine ESMF_FieldAttachArray
 
@@ -1535,8 +1550,9 @@
 !     {\tt ESMF\_Field} and sets a flag in 
 !     the {\tt ESMF\_Field} indicating that data is present.
 !
-! !REQUIREMENTS: FLD1.6.5
 !EOP
+! !REQUIREMENTS: FLD1.6.5
+
 
         end subroutine ESMF_FieldAttachGridArray
 
@@ -1556,9 +1572,10 @@
 ! !DESCRIPTION:
 !     Returns a pointer to the {\tt ESMF\_Field}'s data buffer and marks the 
 !     {\tt ESMF\_Field} as not having any associated data.
-!
-! !REQUIREMENTS: FLD1.6.5
+
 !EOP
+! !REQUIREMENTS: FLD1.6.5
+
 
 !
 ! TODO: code goes here
@@ -1582,8 +1599,9 @@
 !     Returns a pointer to the {\tt ESMF\_Field}'s {\tt ESMF\_Array} and marks the 
 !     {\tt ESMF\_Field} as not having any associated data.
 !
-! !REQUIREMENTS: FLD1.6.5
 !EOP
+! !REQUIREMENTS: FLD1.6.5
+
 
 !
 ! TODO: code goes here
@@ -1616,8 +1634,9 @@
 !      the {\tt Field} are optional.  To select individual items use the
 !      named\_argument=value syntax.
 !
-! !REQUIREMENTS: FLD1.6.2
 !EOP
+! !REQUIREMENTS: FLD1.6.2
+
         type(ESMF_FieldType), pointer :: ftypep
         integer :: status
 
@@ -1706,8 +1725,9 @@
 !      Returns the name of the field.  If the field was created without 
 !      specifying a name, the framework will have assigned it a unique one.
 !
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 !EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -1773,8 +1793,9 @@
 !     \end{description}
 !
 !
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 !EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -1814,8 +1835,9 @@
 !      Returns whether a {\tt ESMF\_Field} has a grid, array, or buffer 
 !      associated with it.
 !
-! !REQUIREMENTS: FLD1.6.2, FLD1.1.3
 !EOP
+! !REQUIREMENTS: FLD1.6.2, FLD1.1.3
+
 
 !
 ! TODO: code goes here
@@ -1838,8 +1860,9 @@
 ! !DESCRIPTION:
 !      Returns a reference to the {\t ESMF\_Grid} associated with this {\tt ESMF\_Field}.
 !
-! !REQUIREMENTS: FLD1.6.2
 !EOP
+! !REQUIREMENTS: FLD1.6.2
+
 
         ! assume failure
         if (present(rc)) rc = ESMF_FAILURE
@@ -1885,8 +1908,9 @@
 ! !DESCRIPTION:
 !     Return global {\tt ESMF\_Grid} information. 
 !
-! !REQUIREMENTS: FLD1.7.2
 !EOP
+! !REQUIREMENTS: FLD1.7.2
+
 
 !
 ! TODO: code goes here
@@ -1912,8 +1936,9 @@
 ! !DESCRIPTION:
 !      Get {\tt ESMF\_Grid} information specific to the local {\tt ESMF\_DE}.
 !
-! !REQUIREMENTS: FLD1.7.2
 !EOP
+! !REQUIREMENTS: FLD1.7.2
+
 
 !
 ! TODO: code goes here
@@ -1939,8 +1964,9 @@
 !     Get data either in {\tt ESMF\_Array} or buffer form.
 
 !
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 !EOP
+! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
+
 
 !
 ! TODO: code goes here
@@ -2024,8 +2050,9 @@
 !     Retrieve global {\tt ESMF\_Field} data information.
 
 !
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 !EOP
+! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
+
 
 !
 ! TODO: code goes here
@@ -2053,8 +2080,9 @@
 !     Retrieve {\tt ESMF\_Field} data information specific to the local
 !     {\tt ESMF\_DE}.
 !
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 !EOP
+! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
+
 
 !
 ! TODO: code goes here
@@ -2076,9 +2104,10 @@
 !      Returns a description of the actual ordering of data in the
 !      memory buffer, e.g. row-major/column-major.
 
-!
-! !REQUIREMENTS: FLD1.2, FLD1.6.3 (pri 2?)
+
 !EOP
+! !REQUIREMENTS: FLD1.2, FLD1.6.3 (pri 2?)
+
 
 
         ! assume failure
@@ -3551,8 +3580,9 @@
 !      {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  Otherwise it is 
 !      an error to try to change the {\tt ESMF\_Grid} associated with a {\tt ESMF\_Field}.
 !
-! !REQUIREMENTS: FLD1.1.3
 !EOP
+! !REQUIREMENTS: FLD1.1.3
+
 
 !
 ! TODO: code goes here
@@ -3578,8 +3608,9 @@
 !      through the {\tt ESMF\_Field} interface instead of detaching data and setting 
 !      it outside the framework.
 !
-! !REQUIREMENTS: FLD1.6.7
 !EOP
+! !REQUIREMENTS: FLD1.6.7
+
 
 !
 ! TODO: code goes here
@@ -3603,8 +3634,9 @@
 !     and associated data are already in the {\tt ESMF\_Field}, the data will be 
 !     reordered according to the new speciification.
 !
-! !REQUIREMENTS: FLD1.2
 !EOP
+! !REQUIREMENTS: FLD1.2
+
 
 !
 ! TODO: code goes here
@@ -3642,8 +3674,9 @@
 !     \end{description}
 !
 !
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 !EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -3685,8 +3718,9 @@
 ! !DESCRIPTION:
 !     Routine to validate the internal state of a {\tt ESMF\_Field}.
 !
-! !REQUIREMENTS:  FLD4.1
 !EOP
+! !REQUIREMENTS:  FLD4.1
+
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
@@ -3813,8 +3847,9 @@
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-! !REQUIREMENTS: FLD1.6.8
 !EOP
+! !REQUIREMENTS: FLD1.6.8
+
 
 !
 ! TODO: code goes here
@@ -3843,8 +3878,9 @@
 !      all data associated with a {\tt ESMF\_Field} from the 
 !      last call to WriteRestart.
 !
-! !REQUIREMENTS: FLD1.6.8
 !EOP
+! !REQUIREMENTS: FLD1.6.8
+
 
 !
 ! TODO: code goes here; this is just filler to make the compiler not complain
@@ -3878,8 +3914,9 @@
 !      options specified in the IOSpec derived type. 
 !
 !
-! !REQUIREMENTS: FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
 !EOP
+! !REQUIREMENTS: FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
+
 
 !
 ! TODO: code goes here
@@ -3914,8 +3951,9 @@
 !      To share a single {\tt ESMF\_Grid} betwen multiple {\tt ESMF\_Field}s, see the {\tt ESMF\_FieldCreate} calls.
 !
 !
-! !REQUIREMENTS: 
 !EOP
+! !REQUIREMENTS: 
+
 
 !
 ! TODO: code goes here.  this is filler to keep the compiler from complaining.
@@ -3945,8 +3983,9 @@
 !     Finds and returns the relative location of the field. Use
 !     DataMap access routines to get relloc.
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
+
 
       call ESMF_DataMapGet(field%ftypep%mapping, relloc=relloc, rc=rc)
 
