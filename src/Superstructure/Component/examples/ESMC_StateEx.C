@@ -1,6 +1,6 @@
-// $Id: ESMC_StateEx.C,v 1.1 2003/02/03 17:09:50 nscollins Exp $
+// $Id: ESMC_StateEx.C,v 1.2 2003/02/04 20:19:25 nscollins Exp $
 //
-// Example/test code which creates a new comp.
+// Example/test code which creates a new State.
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -9,99 +9,165 @@
 //
 // !DESCRIPTION:
 // See the following code fragments for general examples of working
-//  with Components.  For more specific examples, see the Application,
-//  Gridded, or Coupling examples.
+//  with States.
 // Also see the Programming Model section of this document.
 //
 //
 //\begin{verbatim}
 
-//   // Example program showing various interfaces to Components.
+//   // Example program showing various interfaces to States.
 //   // See the more specific example programs for details of how
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_Comp.h"
+#include "ESMC_State.h"
 
 #include <stdio.h>
     
 main(int argc, char **argv) {
 //   // Local variables
-     int x, y, rc, mycell;
-     char compname[32]
-     ESMC_Layout *layout;
-     ESMC_Comp *comp1, *comp2, *comp3, *comp4;
+     int x, y, rc;
+     char *statename, *compname;
+     ESMC_State *state1, *state2, *state3, *state4;
         
-//-------------------------------------------------------------------------
-//   // Setup:
-     // create clock, layout here.
-
 //-------------------------------------------------------------------------
 //   // Example 1:
 //   //
+//   // Creation of a state, might also be from a query of a component.
+//   //
 
-     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
-     //                         ESMF_ATM, "/usr/local', &rc);
+    printf("State Example 1: Import State\n");
 
-     //rc = ESMC_CompRegMethod(comp1, "initialize", ATM_Init);
-     //rc = ESMC_CompRegMethod(comp1, "run", ATM_Run);
-     //rc = ESMC_CompRegMethod(comp1, "finalize", ATM_Final);
-     //printf("Comp example 1 returned\n");
+//   // This will probably be called from inside the Component Init code
+    compname = "Atmosphere";
+    state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, &rc);
+    printf("State Create returned, name = %s\n", compname);
+
+    // Data would be added here and the State reused inside the run
+    //  routine of a sequential application.
+
+    // User code will probably get a handle to the state by querying
+    // the component, maybe something like:
+    // rc = ESMF_CompGetState(comp, ESMF_COMP_IMPORTSTATE, &state1);
+
+
+    printf("State Example 1 finished\n");
+
+
 
 //-------------------------------------------------------------------------
 //   // Example 2:
 //   //
+//   //  Create, Add Data, Query, then Destroy a State.
 
-//   //rc = ESMC_CompInit(comp1, ...);
-     //  internally calls ATM_Init() 
+    printf("State Example 2: Export State\n");
 
-     //printf("Comp example 2 returned\n");
+    compname = "Ocean";
+    state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)
+    printf("State Create returned, name = %s\n", compname);
+
+    bundlename = "Temperature";
+    bundle1 = ESMF_BundleCreate(bundlename, rc=rc);
+    printf("Bundle Create returned, rc = %d", rc);
+
+    rc = ESMF_StateAddData(state2, bundle1);
+    printf("StateAddData returned, rc = %d", rc);
+
+    // Loop here, updating Bundle contents each time step
+
+    rc = ESMF_StateDestroy(state2);
+    printf("State Destroy returned, rc = %d", rc);
+
+    rc = ESMF_BundleDestroy(bundle1);
+    printf("Bundle Destroy returned, rc = %d", rc);
+
+    printf("State Example 2 finished");
+
 
 //-------------------------------------------------------------------------
 //   // Example 3:
 //   //
+//   //  Create, Add Placeholder, Query, then Destroy a State.
+//   //  This example applies to a Gridded Component which potentially
+//   //  could create a large number of export items but it is unlikely
+//   //  that any other component would require all of them.  This allows
+//   //  the consuming component to mark those needed, and the producer
+//   //  only has to fill the data items requested.
 
-     // pass in time: 
-     //    as clock, as timestep count, as time interval, as stoptime
-     //rc = ESMC_CompRun(comp1, ...);
-     //  internally calls ATM_Run()
+    printf("State Example 3: Export State with Placeholder"
 
-     //printf("Comp example 3 returned\n");
+    // The producing Component creates the menu of data items available.
+    compname = "Ocean";
+    state3 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc);
+    printf("State Create returned", rc, " name = ", trim(compname)
+
+    dataname = "Downward wind";
+    rc = ESMF_StateAddNameOnly(state3, dataname);
+    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
+
+    dataname = "Humidity";
+    rc = ESMF_StateAddNameOnly(state3, dataname)
+    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
+
+    // See next example for how this is used.
+
+    printf("State Example 3 finished\n");
+
 
 //-------------------------------------------------------------------------
 //   // Example 4:
 //   //
+//   //  Mark and Query Needed flags, and add Bundle data
 
-//   //rc = ESMC_CompFinal(comp1, ...);
-     //  internally calls ATM_Final()
+    printf("State Example 4: Get/Set Needed flags in Export State\n");
 
-     //printf("Comp example 4 returned\n");
+    // Given state3 from the previous example, the Coupler or Application
+    // is given an opportunity to mark which data items are needed.
+
+    dataname = "Downward wind";
+    rc = ESMF_StateSetNeeded(state3, dataname, ESMF_STATEDATAISNEEDED);
+    printf("StateSetNeeded returned, rc = %d\n", rc);
+
 
 //-------------------------------------------------------------------------
 //   // Example 5:
 //   //
+//   //  Query Needed flags, and add Bundle data
 
-     //rc = ESMC_CompDestroy(comp1);
-     //rc = ESMC_LayoutDestroy(layout);
+    printf("State Example 5: Get/Set Needed flags in Export State, cont.\n");
 
-     //printf("Comp example 5 returned\n");
+    // Given state3 from the previous examples, the producing Component
+    // can check the state to see what data items are required.
+
+    dataname = "Downward wind";
+    if (ESMF_StateIsNeeded(state3, dataname, rc)) {
+
+        printf("Data marked as needed, name = %s\n", dataname);
+
+        bundlename = dataname;
+        bundle2 = ESMF_BundleCreate(bundlename, rc=rc);
+        printf("Bundle Create returned, rc = %d, name = %s\n", rc, bundlename);
+
+        rc = ESMF_StateAddData(state3, bundle2);
+        printf("StateAddData returned, rc = %d\n", rc);
+    } else 
+        printf("Data marked as not needed, name = %s\n", statename);
+
+    rc = ESMF_StateDestroy(state3);
+    printf("State Destroy returned, rc = %d\n", rc);
+
+    printf("State Example 5 finished\n");
+
+//-------------------------------------------------------------------------
+//   // Similar flags exist for "Ready" and for "Valid" to mark each data
+//   //  item as ready or having been validated, to help synchronize data
+//   //  exchange between Components and Couplers.
+//-------------------------------------------------------------------------
+
+
 
 }
 
-// the actual arguments to these routines are yet to be decided.
-int ATM_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to set up internal data for component
-}
-    
-// the actual arguments to these routines are yet to be decided.
-int ATM_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // computational code runs model timesteps here
-}
-
-// the actual arguments to these routines are yet to be decided.
-int ATM_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to flush output, close files, release memory and shut down
-}
     
 //\end{verbatim}
     

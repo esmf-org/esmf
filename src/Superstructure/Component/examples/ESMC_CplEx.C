@@ -1,4 +1,4 @@
-// $Id: ESMC_CplEx.C,v 1.1 2003/02/03 17:09:49 nscollins Exp $
+// $Id: ESMC_CplEx.C,v 1.2 2003/02/04 20:19:25 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -40,12 +40,12 @@ main(int argc, char **argv) {
 //   // Example 1:
 //   //
 
-     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
+     //comp1 = ESMC_CompCreate("AtmToOcean", layout, ESMF_CPLCOMP,
      //                         ESMF_ATM, "/usr/local', &rc);
 
-     //rc = ESMC_CompRegMethod(comp1, "initialize", ATM_Init);
-     //rc = ESMC_CompRegMethod(comp1, "run", ATM_Run);
-     //rc = ESMC_CompRegMethod(comp1, "finalize", ATM_Final);
+     //rc = ESMC_CompRegMethod(comp1, "initialize", CPL_Init);
+     //rc = ESMC_CompRegMethod(comp1, "run", CPL_Run);
+     //rc = ESMC_CompRegMethod(comp1, "finalize", CPL_Final);
      //printf("Comp example 1 returned\n");
 
 //-------------------------------------------------------------------------
@@ -53,7 +53,7 @@ main(int argc, char **argv) {
 //   //
 
 //   //rc = ESMC_CompInit(comp1, ...);
-     //  internally calls ATM_Init() 
+     //  internally calls CPL_Init() 
 
      //printf("Comp example 2 returned\n");
 
@@ -64,7 +64,7 @@ main(int argc, char **argv) {
      // pass in time: 
      //    as clock, as timestep count, as time interval, as stoptime
      //rc = ESMC_CompRun(comp1, ...);
-     //  internally calls ATM_Run()
+     //  internally calls CPL_Run()
 
      //printf("Comp example 3 returned\n");
 
@@ -73,7 +73,7 @@ main(int argc, char **argv) {
 //   //
 
 //   //rc = ESMC_CompFinal(comp1, ...);
-     //  internally calls ATM_Final()
+     //  internally calls CPL_Final()
 
      //printf("Comp example 4 returned\n");
 
@@ -89,17 +89,17 @@ main(int argc, char **argv) {
 }
 
 // the actual arguments to these routines are yet to be decided.
-int ATM_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to set up internal data for component
+int CPL_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+     // code to set up internal data for coupling
 }
     
 // the actual arguments to these routines are yet to be decided.
-int ATM_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // computational code runs model timesteps here
+int CPL_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+     // coupling manages data exchange here
 }
 
 // the actual arguments to these routines are yet to be decided.
-int ATM_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int CPL_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
      // code to flush output, close files, release memory and shut down
 }
     

@@ -1,6 +1,6 @@
-! $Id: ESMF_GCompEx.F90,v 1.1 2003/02/03 17:09:51 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.2 2003/02/04 20:19:24 nscollins Exp $
 !
-! Example/test code which creates a new Component
+! Example/test code which shows Gridded Component calls.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,15 +8,14 @@
 !BOP
 !
 ! !DESCRIPTION:
-! Generic calls to Component routines.  See the other example files for
-!  more specific examples of Application, Gridded, and Coupler Components.
+!  One of many possible examples of a Gridded component.
 !  Also see the Programming Model section of this document.
 !
 !
 !\begin{verbatim}
 
-!   ! Example program showing calls to the Component routines.
-    program ESMF_CompCreateEx
+!   ! Example module showing Gridded Comp calls to the Component routines.
+    module ESMF_GriddedCompEx
     
 !   ! Some common definitions.  This requires the C preprocessor.
     #include "ESMF.h"
@@ -28,56 +27,74 @@
     
     implicit none
     
-!   ! Local variables
-    integer :: x, y, rc
-    integer :: timestep
-    integer, dimension(2) :: delist
-    character(ESMF_MAXSTR) :: cname
-    type(ESMF_Layout) :: layout
-    type(ESMF_Comp) :: comp1, comp2, comp3, comp4
+    contains
+
         
 !-------------------------------------------------------------------------
-!   ! Example 1:
-!   !
-!   !  Create, Init, Run, Finalize, Destroy a Component.
+!   !  Gridded Comp Component created by higher level calls, here is the
+!   !   Initialization routine.
  
-    print *, "Component Example 1:"
+    
+    subroutine GCOMP_Init(comp, rc)
+        ESMF_Comp :: comp
+        integer :: rc
 
-    delist = (/ 0, 1 /)
-    layout = ESMF_LayoutCreate(2, 1, delist, ESMF_XFAST, rc)
+!     ! Local variables
+        type(ESMF_State), pointer :: import, export
 
-    cname = "Atmosphere"
-    comp1 = ESMF_CompCreate(cname, layout, ESMF_GRIDCOMP, &
-                                       ESMF_ATM, "/usr/local", rc=rc)  
+        print *, "Gridded Comp Init starting"
+    
+        !call ESMF_CompGetState(comp, ESMF_STATEIMPORT, import, rc)
+        !call ESMF_CompGetState(comp, ESMF_STATEEXPORT, export, rc)
+        ! TODO: add whatever code here needed
 
-    print *, "Comp Create returned, name = ", trim(cname)
-
-    call ESMF_CompInit(comp1, rc)
-    print *, "Comp Init returned"
-
-
-    !call ESMF_CompPrint(comp1, rc=rc)
-    !print *, "Comp Print returned"
-
-    timestep = 1
-    call ESMF_CompRun(comp1, timestep, rc)
-    print *, "Comp Run returned"
+        print *, "Gridded Comp Init returning"
+   
+    end subroutine GCOMP_Init
 
 
-    call ESMF_CompFinalize(comp1, rc)
-    print *, "Comp Finalize returned"
+!-------------------------------------------------------------------------
+!   !  The Run routine where data is exchanged.
+!   !
+ 
+    subroutine GCOMP_Run(comp, timestep, rc)
+        ESMF_Comp :: comp(:)
+        integer :: timestep
+        intger :: rc
+
+        print *, "Comp Run starting"
+
+        ! TODO: add code here
+        !  take data from import state, compute, fill in export state & return
+
+        print *, "Comp Run returning"
+
+    end subroutine GCOMP_Run
 
 
-    call ESMF_CompDestroy(comp1, rc)
-    print *, "Comp Destroy returned"
+!-------------------------------------------------------------------------
+!   !  The Finalization routine where things are deleted and cleaned up.
+!   !
+ 
+    subroutine GCOMP_Final(comp, rc)
+        ESMF_Comp :: comp
+        integer :: rc
 
-    call ESMF_LayoutDestroy(layout, rc);
-    print *, "Layout Destroy returned"
+!     ! Local variables
 
-    print *, "Component Example 1 finished"
+        print *, "Gridded Comp Final starting"
+    
+        ! TODO: add whatever code here needed
+
+        print *, "Gridded Comp Final returning"
+   
+    end subroutine GCOMP_Final
 
 
-    end program ESMF_CompCreateEx
+    print *, "Gridded Comp Example 1 finished"
+
+
+    end module ESMF_GriddedCompEx
     
 !\end{verbatim}
     

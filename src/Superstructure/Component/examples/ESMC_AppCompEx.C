@@ -1,4 +1,4 @@
-// $Id: ESMC_AppCompEx.C,v 1.1 2003/02/03 17:09:47 nscollins Exp $
+// $Id: ESMC_AppCompEx.C,v 1.2 2003/02/04 20:19:24 nscollins Exp $
 //
 // Example code which creates an Application which can also
 // be embedded as a Component in another Application.
@@ -25,7 +25,11 @@
 
 #include <stdio.h>
     
-main(int argc, char **argv) {
+//-------------------------------------------------------------------------
+//   // Example 1:
+//   //
+
+int ATM_Init(ESMF_Comp *topcomp, int rc) {
 //   // Local variables
      int x, y, rc, mycell;
      char compname[32]
@@ -34,11 +38,6 @@ main(int argc, char **argv) {
         
 //-------------------------------------------------------------------------
 //   // Setup:
-     // create clock, layout here.
-
-//-------------------------------------------------------------------------
-//   // Example 1:
-//   //
 
      //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
      //                         ESMF_ATM, "/usr/local', &rc);
@@ -48,18 +47,13 @@ main(int argc, char **argv) {
      //rc = ESMC_CompRegMethod(comp1, "finalize", ATM_Final);
      //printf("Comp example 1 returned\n");
 
+}
+
 //-------------------------------------------------------------------------
 //   // Example 2:
 //   //
 
-//   //rc = ESMC_CompInit(comp1, ...);
-     //  internally calls ATM_Init() 
-
-     //printf("Comp example 2 returned\n");
-
-//-------------------------------------------------------------------------
-//   // Example 3:
-//   //
+int ATM_Run(ESMC_Comp *topcomp, ESMC_Clock *clock) {
 
      // pass in time: 
      //    as clock, as timestep count, as time interval, as stoptime
@@ -68,40 +62,21 @@ main(int argc, char **argv) {
 
      //printf("Comp example 3 returned\n");
 
+}
+
 //-------------------------------------------------------------------------
-//   // Example 4:
+//   // Example 3:
 //   //
+
+int ATM_Final(ESMF_Comp *topcomp, int rc) {
 
 //   //rc = ESMC_CompFinal(comp1, ...);
      //  internally calls ATM_Final()
 
      //printf("Comp example 4 returned\n");
-
-//-------------------------------------------------------------------------
-//   // Example 5:
-//   //
-
-     //rc = ESMC_CompDestroy(comp1);
-     //rc = ESMC_LayoutDestroy(layout);
-
-     //printf("Comp example 5 returned\n");
-
 }
 
-// the actual arguments to these routines are yet to be decided.
-int ATM_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to set up internal data for component
-}
-    
-// the actual arguments to these routines are yet to be decided.
-int ATM_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // computational code runs model timesteps here
-}
 
-// the actual arguments to these routines are yet to be decided.
-int ATM_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to flush output, close files, release memory and shut down
-}
     
 //\end{verbatim}
     

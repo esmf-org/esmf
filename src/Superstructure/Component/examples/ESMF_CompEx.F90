@@ -1,4 +1,4 @@
-! $Id: ESMF_CompEx.F90,v 1.1 2003/02/03 17:09:51 nscollins Exp $
+! $Id: ESMF_CompEx.F90,v 1.2 2003/02/04 20:19:23 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -30,8 +30,9 @@
     
 !   ! Local variables
     integer :: x, y, rc
-    integer :: timestep
-    integer, dimension(2) :: delist
+    integer :: timestep, endtime
+    logical :: finished
+    integer, dimension(8) :: delist
     character(ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout
     type(ESMF_Comp) :: comp1, comp2, comp3, comp4
@@ -43,8 +44,8 @@
  
     print *, "Component Example 1:"
 
-    delist = (/ 0, 1 /)
-    layout = ESMF_LayoutCreate(2, 1, delist, ESMF_XFAST, rc)
+    delist = (/ (i, i=0,7) /)
+    layout = ESMF_LayoutCreate(4, 2, delist, ESMF_XFAST, rc)
 
     cname = "Atmosphere"
     comp1 = ESMF_CompCreate(cname, layout, ESMF_GRIDCOMP, &
@@ -56,12 +57,18 @@
     print *, "Comp Init returned"
 
 
-    !call ESMF_CompPrint(comp1, rc=rc)
-    !print *, "Comp Print returned"
-
+    finished = .false.
     timestep = 1
-    call ESMF_CompRun(comp1, timestep, rc)
-    print *, "Comp Run returned"
+    endtime = 10
+    while (.not. finished) do
+        call ESMF_CompRun(comp1, timestep, rc)
+        print *, "Comp Run returned"
+   
+        timestep = timestep + 1
+        if (timestep .gt. endtime) finished = .true.
+    enddo
+    print *, "Comp Run finished"
+
 
 
     call ESMF_CompFinalize(comp1, rc)

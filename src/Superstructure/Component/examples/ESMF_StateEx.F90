@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.1 2003/02/03 17:09:51 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.2 2003/02/04 20:19:24 nscollins Exp $
 !
 ! Example code for creating States.
 
@@ -8,12 +8,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! Examples of creating {\tt States}.
+! Examples of creating {\tt States}.  
 !
 !
 !\begin{verbatim}
 
-    program ESMF_StateCreateExample
+    program ESMF_StateExample
     
 !   ! Some common definitions.  This requires the C preprocessor.
     #include "ESMF.h"
@@ -29,11 +29,7 @@
     
 !   ! Local variables
     integer :: x, y, rc
-    integer :: timestep
-    integer, dimension(2) :: delist
-    type(ESMF_StateDataNeeded) :: isneeded
-    character(ESMF_MAXSTR) :: compname, statename, bundlename, fieldname
-    type(ESMF_Array) :: array1
+    character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
     type(ESMF_Field) :: field1
     type(ESMF_Bundle) :: bundle1, bundle2
     type(ESMF_State) :: state1, state2, state3, state4
@@ -46,17 +42,17 @@
  
     print *, "State Example 1: Import State"
 
-!   ! This will probably happen inside the component code.
+!   ! This will probably be called from inside the Component Init code
     compname = "Atmosphere"
     state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, rc)  
     print *, "State Create returned, name = ", trim(compname)
 
-    ! Data would be added here and the State reused inside the inner
-    !  time loop of a sequential application.
+    ! Data would be added here and the State reused inside the run
+    !  routine of a sequential application.
 
-    ! The user code will probably get a handle to the state by querying
-    ! the component:
-    ! call ESMF_CompQueryState(comp, ESMF_COMP_IMPORTSTATE, state1, rc)
+    ! User code will probably get a handle to the state by querying
+    ! the component, maybe something like:
+    ! call ESMF_CompGetState(comp, ESMF_COMP_IMPORTSTATE, state1, rc)
    
 
     print *, "State Example 1 finished"
@@ -108,9 +104,13 @@
     state3 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)  
     print *, "State Create returned", rc, " name = ", trim(compname)
 
-    statename = "Downward wind"
-    call ESMF_StateAddNameOnly(state3, statename, rc)
-    print *, "StateAddNameOnly returned", rc, " name = ", trim(statename)
+    dataname = "Downward wind"
+    call ESMF_StateAddNameOnly(state3, dataname, rc)
+    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
+    
+    dataname = "Humidity"
+    call ESMF_StateAddNameOnly(state3, dataname, rc)
+    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
     
     ! See next example for how this is used.
 
@@ -124,37 +124,33 @@
  
     print *, "State Example 4: Get/Set Needed flags in Export State"
 
-    ! Given state3 from the previous example, the consuming Component
+    ! Given state3 from the previous example, the Coupler or Application
     ! is given an opportunity to mark which data items are needed.
 
-    statename = "Downward wind"
-    isneeded = ESMF_STATEDATAISNEEDED
-    call ESMF_StateSetNeeded(state3, statename, isneeded, rc)
+    dataname = "Downward wind"
+    call ESMF_StateSetNeeded(state3, dataname, ESMF_STATEDATAISNEEDED, rc)
     print *, "StateSetNeeded returned", rc
     
-    ! Back in the producing Component, it can check the state to see
-    ! which data items are needed.
+!-------------------------------------------------------------------------
+!   ! Example 5:
+!   !
+!   !  Query Needed flags, and add Bundle data
+ 
+    print *, "State Example 5: Get/Set Needed flags in Export State, continued"
 
-    call ESMF_StateGetNeeded(state3, statename, isneeded, rc)
-    print *, "StateGetNeeded returned", rc
+    ! Given state3 from the previous examples, the producing Component
+    ! can check the state to see what data items are required.
 
-    ! this should work - the operator is overloaded by the State module.
-    !if (isneeded .eq. ESMF_STATEDATAISNEEDED) then
-    if (ESMF_needeq(isneeded, ESMF_STATEDATAISNEEDED)) then
-      print *, "Data marked as needed", trim(statename)
+    dataname = "Downward wind"
+    if (ESMF_StateIsNeeded(state3, dataname, rc)) then
 
-      bundlename = statename
+      print *, "Data marked as needed", trim(dataname)
+
+      bundlename = dataname
       bundle2 = ESMF_BundleCreate(bundlename, rc=rc)
       print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
       
-      fieldname = "Downward wind field"
-      field1 = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      print *, "Field Create returned", rc, "name = ", trim(fieldname)
-
-      call ESMF_BundleAddFields(bundle2, field1, rc) 
-      print *, "Bundle AddField returned", rc
-
-      call ESMF_StateAddData(state3, bundle1, rc)
+      call ESMF_StateAddData(state3, bundle2, rc)
       print *, "StateAddData returned", rc
     else
       print *, "Data marked as not needed", trim(statename)
@@ -163,11 +159,16 @@
     call ESMF_StateDestroy(state3, rc)
     print *, "State Destroy returned", rc
 
-    print *, "State Example 4 finished"
+    print *, "State Example 5 finished"
+
+!-------------------------------------------------------------------------
+!   ! Similar flags exist for "Ready" and for "Valid" to mark each data
+!   !  item as ready or having been validated, to help synchronize data
+!   !  exchange between Components and Couplers.
+!-------------------------------------------------------------------------
 
 
-
-    end program ESMF_StateCreateExample
+    end program ESMF_StateExample
     
 !\end{verbatim}
     

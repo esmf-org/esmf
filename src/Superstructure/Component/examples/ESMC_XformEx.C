@@ -1,6 +1,6 @@
-// $Id: ESMC_XformEx.C,v 1.1 2003/02/03 17:09:50 nscollins Exp $
+// $Id: ESMC_XformEx.C,v 1.2 2003/02/04 20:19:26 nscollins Exp $
 //
-// Example/test code which creates a new comp.
+// Example/test code which creates a new Transforms.
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -9,98 +9,58 @@
 //
 // !DESCRIPTION:
 // See the following code fragments for general examples of working
-//  with Components.  For more specific examples, see the Application,
-//  Gridded, or Coupling examples.
+//  with Transforms.
 // Also see the Programming Model section of this document.
 //
 //
 //\begin{verbatim}
 
-//   // Example program showing various interfaces to Components.
+//   // Example program showing various interfaces to Transforms.
 //   // See the more specific example programs for details of how
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_Comp.h"
+#include "ESMC_State.h"
+#include "ESMC_Xform.h"
 
 #include <stdio.h>
     
 main(int argc, char **argv) {
 //   // Local variables
-     int x, y, rc, mycell;
-     char compname[32]
-     ESMC_Layout *layout;
-     ESMC_Comp *comp1, *comp2, *comp3, *comp4;
+     int rc;
+     ESMC_State *state1;
+     ESMC_Xform xformlist[2];
         
-//-------------------------------------------------------------------------
-//   // Setup:
-     // create clock, layout here.
 
 //-------------------------------------------------------------------------
-//   // Example 1:
-//   //
+!-------------------------------------------------------------------------
+!   ! Example 1:
+!   !
+!   !  Initializing a Transform.
 
-     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
-     //                         ESMF_ATM, "/usr/local', &rc);
+    printf("Xform Example 1n");
 
-     //rc = ESMC_CompRegMethod(comp1, "initialize", ATM_Init);
-     //rc = ESMC_CompRegMethod(comp1, "run", ATM_Run);
-     //rc = ESMC_CompRegMethod(comp1, "finalize", ATM_Final);
-     //printf("Comp example 1 returned\n");
+    ! The third arguments here are names of subroutines.
+    rc = ESMF_XformInit(xformlist[0], "AtmToOcn", A2OCPLxform)
+    rc = ESMF_XformInit(xformlist[1], "OcnToAtm", O2ACPLxform)
 
-//-------------------------------------------------------------------------
-//   // Example 2:
-//   //
+    printf("Xform Example 1 finished\n");
 
-//   //rc = ESMC_CompInit(comp1, ...);
-     //  internally calls ATM_Init() 
 
-     //printf("Comp example 2 returned\n");
+!-------------------------------------------------------------------------
+!   ! Example 2:      
+!   !
+!   !  Calling a Transform from within a concurrently running Component
 
-//-------------------------------------------------------------------------
-//   // Example 3:
-//   //
+    printf("Xform Example 2: Using a Xform from within a Component\n");
 
-     // pass in time: 
-     //    as clock, as timestep count, as time interval, as stoptime
-     //rc = ESMC_CompRun(comp1, ...);
-     //  internally calls ATM_Run()
+    rc = ESMF_StateTransform(state1, "AtmToOcn", xformlist);
 
-     //printf("Comp example 3 returned\n");
+    ! When this returns, the transform code has been executed.
 
-//-------------------------------------------------------------------------
-//   // Example 4:
-//   //
+    printf("Xform Example 2 finished\n");
 
-//   //rc = ESMC_CompFinal(comp1, ...);
-     //  internally calls ATM_Final()
 
-     //printf("Comp example 4 returned\n");
-
-//-------------------------------------------------------------------------
-//   // Example 5:
-//   //
-
-     //rc = ESMC_CompDestroy(comp1);
-     //rc = ESMC_LayoutDestroy(layout);
-
-     //printf("Comp example 5 returned\n");
-
-}
-
-// the actual arguments to these routines are yet to be decided.
-int ATM_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to set up internal data for component
-}
-    
-// the actual arguments to these routines are yet to be decided.
-int ATM_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // computational code runs model timesteps here
-}
-
-// the actual arguments to these routines are yet to be decided.
-int ATM_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
-     // code to flush output, close files, release memory and shut down
 }
     
 //\end{verbatim}
