@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.12 2004/02/09 21:54:57 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.13 2004/02/11 22:24:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.12 2004/02/09 21:54:57 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.13 2004/02/11 22:24:45 svasquez Exp $'
 
 !==============================================================================
 !
@@ -454,6 +454,33 @@
 !      All the arguments after the component input are optional 
 !      to facilitate this.
 !
+!  The arguments are:
+!  \begin{description}
+!  
+!   \item[component]
+!    Component to query.
+!
+!   \item[{[name]}]
+!    Component name.
+!    
+!   \item[{[layout]}]
+!    Component layout.
+!    
+!   \item[{[clock]}]
+!    Component-specific clock.
+!
+!   \item[{[configfile]}]
+!    Component-specific configuration filename.
+!
+!   \item[{[config]}]
+!    Already created {\tt Config} object.  If specified, takes
+!    priority over config filename.
+!    
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -464,7 +491,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompSet -- Query a component for various information
+! !IROUTINE: ESMF_CplCompSet -- Sets or resets information about the component.
 !
 ! !INTERFACE:
       subroutine ESMF_CplCompSet(component, name, layout, clock, &
@@ -485,6 +512,34 @@
 !      only wants to set a single value specify the argument by name.
 !      All the arguments after the component input are optional 
 !      to facilitate this.
+!
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to set information for. 
+!
+!   \item[{[name]}]
+!    Component name.
+!
+!   \item[{[layout]}]
+!    Component layout.
+!
+!   \item[{[clock]}]
+!    Component-specific clock.
+!
+!   \item[{[configfile]}]
+!    Component-specific configuration filename.
+!
+!   \item[{[config]}]
+!    Already created {\tt Config} object.  If specified, takes
+!    priority over config filename.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -509,6 +564,21 @@
 ! !DESCRIPTION:
 !      Routine to ensure a Component is valid.
 !
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to validate.
+!
+!   \item[{[options]}]
+!    Object to be validated.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -531,6 +601,20 @@
 !
 ! !DESCRIPTION:
 !      Routine to print information about a component.
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to print.
+!
+!   \item[{[options]}]
+!    Options on print.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
