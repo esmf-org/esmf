@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.18 2004/04/23 21:59:32 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.19 2004/06/07 15:30:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC RTable method implementation (body) file
+#define ESMF_FILENAME "ESMC_RTable.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -28,11 +29,13 @@
 
  // associated class definition file
  #include "ESMC_RTable.h"
+ #include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.18 2004/04/23 21:59:32 nscollins Exp $";
+ static const char *const version = 
+            "$Id: ESMC_RTable.C,v 1.19 2004/06/07 15:30:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -44,6 +47,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableCreate"
 //BOP
 // !IROUTINE:  ESMC_RTableCreate - Create a new RTable
 //
@@ -81,6 +86,8 @@
  } // end ESMC_RTableCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableDestroy"
 //BOP
 // !IROUTINE:  ESMC_RTableDestroy - free a RTable created with Create
 //
@@ -108,6 +115,8 @@
  } // end ESMC_RTableDestroy
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableConstruct"
 //BOP
 // !IROUTINE:  ESMC_RTableConstruct - fill in an already allocated RTable
 //
@@ -156,17 +165,19 @@
  } // end ESMC_RTableConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableDestruct"
 //BOP
 // !IROUTINE:  ESMC_RTableDestruct - release resources associated w/a RTable
 //
 // !INTERFACE:
-      int ESMC_RTable::ESMC_RTableDestruct(void) {
+      int ESMC_RTable::ESMC_RTableDestruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
@@ -190,6 +201,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableGetValue"
 //BOP
 // !IROUTINE:  ESMC_RTableGet<Value> - get <Value> for a RTable
 //
@@ -216,6 +229,8 @@
 // } // end ESMC_RTableGet<Value>
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableSetEntry"
 //BOP
 // !IROUTINE:  ESMC_RTableSetEntry - set entry for a RTable
 //
@@ -234,13 +249,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  
-
-//    if (entry[ndeid].xpcount > 0) {
-//        printf("already an entry for deid %d\n", ndeid);
-//        printf("need to implement multiple xp's per src/dst pair\n"); 
-//        return ESMF_FAILURE;
-//    }
+    int rc;
 
 // TODO  SetEntry will append an xp to the current table.
 //       Do we want to add the ability to replace an entry?
@@ -255,9 +264,10 @@
       entry[ndeid].xp = (ESMC_XPacket *)realloc(entry[ndeid].xp, 
                                           entry[ndeid].alloccount * sizeof(ESMC_XPacket));
       if (entry[ndeid].xp == NULL) {
-	 printf("Not enough memory to add more XPackets!?\n");
-	 return ESMF_FAILURE;
-	 }
+	!printf("Not enough memory to add more XPackets!?\n");
+        ESMC_LogDefault.ESMC_LogAllocError(&rc);
+        return(rc);
+      }
     }
 
     // This is a contents copy; when this routine returns
@@ -269,6 +279,8 @@
  } // end ESMC_RTableSetEntry
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableGetEntry"
 //BOP
 // !IROUTINE:  ESMC_RTableGetEntry - Get entry from an RTable
 //
@@ -287,12 +299,16 @@
 //     Gets an RTable entry with the given value.
 //
 //EOP
-// !REQUIREMENTS:  
+
+    int rc;
+    char msgbuf[ESMF_MAXSTR];
 
     if (ndeid < 0 || ndeid > entrycount) {
-        printf("ndeid out of range, %d must be between 0 and %d\n", 
+        sprintf(msgbuf, "ndeid out of range, %d must be between 0 and %d\n", 
 		                                	ndeid, entrycount);
-        return ESMF_FAILURE;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+
+        return(rc);
     }
 
     *xp = &(entry[ndeid].xp[ xpcount ]);
@@ -302,6 +318,8 @@
  } // end ESMC_RTableGetEntry
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableGetCount"
 //BOP
 // !IROUTINE:  ESMC_RTableGetCount - Get number of XPackets from RTable
 //
@@ -319,12 +337,16 @@
 //     Gets the RTable xpcount
 //
 //EOP
-// !REQUIREMENTS:  
+
+    int rc;
+    char msgbuf[ESMF_MAXSTR];
 
     if (ndeid < 0 || ndeid > entrycount) {
-        printf("ndeid out of range, %d must be between 0 and %d\n", 
+        sprintf(msgbuf, "ndeid out of range, %d must be between 0 and %d\n", 
 		                                	ndeid, entrycount);
-        return ESMF_FAILURE;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+
+        return(rc);
     }
 
     *xpcount = entry[ndeid].xpcount;
@@ -334,6 +356,8 @@
  } // end ESMC_RTableGetCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableSetValue"
 //BOP
 // !IROUTINE:  ESMC_RTableSet<Value> - set <Value> for a RTable
 //
@@ -360,6 +384,8 @@
 // } // end ESMC_RTableSet<Value>
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableValidate"
 //BOP
 // !IROUTINE:  ESMC_RTableValidate - internal consistency check for a RTable
 //
@@ -385,6 +411,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTablePrint"
 //BOP
 // !IROUTINE:  ESMC_RTablePrint - print contents of a RTable
 //
@@ -421,6 +449,8 @@
  } // end ESMC_RTablePrint
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTable()"
 //BOP
 // !IROUTINE:  ESMC_RTable - native C++ constructor
 //
@@ -443,17 +473,19 @@
  } // end ESMC_RTable
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_RTable()"
 //BOP
 // !IROUTINE:  ~ESMC_RTable - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_RTable::~ESMC_RTable(void) {
+      ESMC_RTable::~ESMC_RTable(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //

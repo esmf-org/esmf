@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.96 2004/06/04 17:34:17 theurich Exp $
+// $Id: ESMC_Route.C,v 1.97 2004/06/07 15:30:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC Route method implementation (body) file
+#define ESMF_FILENAME "ESMC_Route.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -27,12 +28,13 @@
 
  // associated class definition file
  #include <ESMC_Route.h>
+ #include <ESMC_LogErr.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.96 2004/06/04 17:34:17 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.97 2004/06/07 15:30:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -49,6 +51,8 @@ static int maxroutes = 10;
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteCreate"
 //BOP
 // !IROUTINE:  ESMC_RouteCreate - Create a new Route
 //
@@ -86,6 +90,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteDestroy"
 //BOP
 // !IROUTINE:  ESMC_RouteDestroy - free a Route created with Create
 //
@@ -118,6 +124,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteDestroy
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteConstruct"
 //BOP
 // !IROUTINE:  ESMC_RouteConstruct - fill in an already allocated Route
 //
@@ -170,17 +178,19 @@ static int maxroutes = 10;
  } // end ESMC_RouteConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteDestruct"
 //BOP
 // !IROUTINE:  ESMC_RouteDestruct - release resources associated w/a Route
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteDestruct(void) {
+      int ESMC_Route::ESMC_RouteDestruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
@@ -215,6 +225,8 @@ static int maxroutes = 10;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteGet"
 //BOP
 // !IROUTINE:  ESMC_RouteGet - get <Value> for a Route
 //
@@ -243,6 +255,8 @@ static int maxroutes = 10;
  //} // end ESMC_RouteGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteAddCache"
 //BOP
 // !IROUTINE:  ESMC_RouteAddCache - If space, add a route to the cache table
 //
@@ -347,7 +361,9 @@ static int maxroutes = 10;
         //printf("Info: this route added to Cache, entry %d\n", 
         //                                       routetable.nroutes-1);
     } else {
-        printf("Warning: this route not Cached - Cache table full\n");
+        ESMC_LogDefault.ESMC_LogWrite(
+        "Warning: this route not Cached - Cache table full\n", ESMC_LOG_WARN);
+        // not an error - this can be recomputed later.
     }
     
     return ESMF_SUCCESS;
@@ -355,14 +371,19 @@ static int maxroutes = 10;
  } // end ESMC_RouteAddCache
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteDropCache"
 //BOP
 // !IROUTINE:  ESMC_RouteDropCache - Drop a route from the cache table.
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteDropCache(void) {
+      int ESMC_Route::ESMC_RouteDropCache(
 //
 // !RETURN VALUE:
 //    int error return code
+//
+// !ARGUMENTS:
+      void) {
 //
 // !DESCRIPTION:
 //     Delete a route from the cache table.
@@ -403,6 +424,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteDropCache
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteGetCached"
 //BOP
 // !IROUTINE:  ESMC_RouteGetCached - Retrieve a precomputed Route
 //
@@ -514,6 +537,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteGetCached
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteSetSend"
 //BOP
 // !IROUTINE:  ESMC_RouteSetSend - set send work request in route table
 //
@@ -546,6 +571,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteSetSend
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteSetRecv"
 //BOP
 // !IROUTINE:  ESMC_RouteSetRecv - set recv work request in route table
 //
@@ -579,6 +606,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteSetRecv
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteGetRecvItems"
 //BOP
 // !IROUTINE:  ESMC_RouteGetRecvItems - get size of receive buffer in N items
 //
@@ -606,6 +635,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteGetRecvItems
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteSetRecvItems"
 //BOP
 // !IROUTINE:  ESMC_RouteSetRecvItems - set size of receive buffer in N items
 //
@@ -637,6 +668,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteSetRecvItems
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteRun"
 //BOP
 // !IROUTINE:  ESMC_RouteRun - Execute the comm routine described by this obj
 //
@@ -672,6 +705,7 @@ static int maxroutes = 10;
     int scontig_length, rcontig_length;
     int sstride[ESMF_MAXDIM], rstride[ESMF_MAXDIM];
     int srep_count[ESMF_MAXDIM], rrep_count[ESMF_MAXDIM];
+    char msgbuf[ESMF_MAXSTR];
     void *srcmem, *rcvmem;
     int srccount, rcvcount;
     int srctcount, rcvtcount;
@@ -711,7 +745,11 @@ static int maxroutes = 10;
 
             // look up the corresponding send/recv xpackets in the rtables
 
-            if (xscount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xscount);
+            if (xscount > 1)  {
+               sprintf(msgbuf, "cannot handle multiple (%d) send xps yet",
+                       xscount);
+               ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
+            }
             if (ixs < xscount) {
                 rc = sendRT->ESMC_RTableGetEntry(theirdeid, ixs, &sendxp);
                 rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
@@ -730,7 +768,11 @@ static int maxroutes = 10;
             }
   //          printf("soffset: %d\n", soffset);
 
-            if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xrcount);
+            if (xrcount > 1) {
+               sprintf(msgbuf, "cannot handle multiple (%d) receive xps yet",
+                       xrcount);
+               ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
+            }
             if (ixr < xrcount) {
                 rc = recvRT->ESMC_RTableGetEntry(theirdeid, ixr, &recvxp);
                 rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
@@ -813,8 +855,10 @@ static int maxroutes = 10;
                  }
                  break;
                default:
-                 printf("no code to handle rank %d yet\n", srank);
-                 return ESMF_FAILURE;
+                 sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
+                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                                         msgbuf, &rc);
+                 return (rc);
              }
            }
 
@@ -849,8 +893,10 @@ static int maxroutes = 10;
                  }
                  break;
                default:
-                 printf("no code to handle rank %d yet\n", rrank);
-                 return ESMF_FAILURE;
+                 sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
+                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                                         msgbuf, &rc);
+                 return (rc);
              }
            }
 
@@ -870,6 +916,8 @@ static int maxroutes = 10;
  } // end ESMC_RouteRun
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrecomputeHalo"
 //BOP
 // !IROUTINE:  ESMC_RoutePrecomputeHalo - initialize a a Route for a Halo
 //
@@ -1065,6 +1113,8 @@ static int maxroutes = 10;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrecomputeRedist"
 //BOP
 // !IROUTINE:  ESMC_RoutePrecomputeRedist - initialize a Route
 //
@@ -1285,6 +1335,8 @@ static int maxroutes = 10;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrecomputeRegrid"
 //BOP
 // !IROUTINE:  ESMC_RoutePrecomputeRegrid - initialize a Route
 //
@@ -1512,6 +1564,8 @@ static int maxroutes = 10;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrecomputeDomList"
 //BOP
 // !IROUTINE:  ESMC_RoutePrecomputeDomList - initialize a Route from a DomainList
 //
@@ -1621,6 +1675,8 @@ static int maxroutes = 10;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteValidate"
 //BOP
 // !IROUTINE:  ESMC_RouteValidate - internal consistency check for a Route
 //
@@ -1650,6 +1706,8 @@ static int maxroutes = 10;
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrint"
 //BOP
 // !IROUTINE:  ESMC_RoutePrint - print contents of a Route
 //
@@ -1688,6 +1746,8 @@ static int maxroutes = 10;
  } // end ESMC_RoutePrint
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_Route()"
 //BOP
 // !IROUTINE:  ESMC_Route - native C++ constructor
 //
@@ -1698,7 +1758,7 @@ static int maxroutes = 10;
 //    none
 //
 // !ARGUMENTS:
-      void) {  // in
+      void) { 
 //
 // !DESCRIPTION:
 //
@@ -1710,17 +1770,19 @@ static int maxroutes = 10;
  } // end ESMC_Route
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_Route()"
 //BOP
 // !IROUTINE:  ~ESMC_Route - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Route::~ESMC_Route(void) {
+      ESMC_Route::~ESMC_Route(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //

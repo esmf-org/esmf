@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.44 2004/06/02 11:54:40 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.45 2004/06/07 15:30:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC XPacket method implementation (body) file
+#define ESMF_FILENAME "ESMC_XPacket.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -23,6 +24,7 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <ESMC_Start.h>
+ #include <ESMC_LogErr.h>
 
 // for printf
 #include <stdio.h>
@@ -34,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.44 2004/06/02 11:54:40 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.45 2004/06/07 15:30:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -46,6 +48,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketGet"
 //BOP
 // !IROUTINE:  ESMC_XPacketGet - Get values back out of an exchange packet
 //
@@ -81,6 +85,8 @@
  } // end ESMC_XPacketGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketSet"
 //BOP
 // !IROUTINE:  ESMC_XPacketSet - set <Value> for a XPacket
 //
@@ -109,6 +115,8 @@
  //} // end ESMC_XPacketSet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketSetDefault"
 //BOP
 // !IROUTINE:  ESMC_XPacketSetDefault - Initialize an XPacket
 //
@@ -147,6 +155,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketIntersect"
 //BOP
 // !IROUTINE:  ESMC_XPacketIntersect - intersection of two XPackets
 //
@@ -291,6 +301,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketFromAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_XPacketFromAxisIndex - calculate an XPacket from an AxisIndex
 //
@@ -495,6 +507,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketGlobalToLocal"
 //BOP
 // !IROUTINE:  ESMC_XPacketGlobalToLocal - get a local XPacket from a global one
 //
@@ -566,16 +580,19 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketPrint"
 //BOP
 // !IROUTINE:  ESMC_XPacketPrint - Print an XPacket
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketPrint(void) {
+      int ESMC_XPacket::ESMC_XPacketPrint(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
+      void) {
 //     none
 //
 // !DESCRIPTION:
@@ -601,16 +618,19 @@
  } // end ESMC_XPacketPrint
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketEmpty"
 //BOP
 // !IROUTINE:  ESMC_XPacketEmpty - Return true (1) if xp is empty, 0 otherwise
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketEmpty(void) {
+      int ESMC_XPacket::ESMC_XPacketEmpty(
 //
 // !RETURN VALUE:
 //    True/False (1)/(0) return code
 //
 // !ARGUMENTS:
+      void) {
 //     none
 //
 // !DESCRIPTION:
@@ -629,6 +649,8 @@
  } // end ESMC_XPacketEmpty
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacket()"
 //BOP
 // !IROUTINE:  ESMC_XPacket - native C++ constructor
 //
@@ -655,16 +677,19 @@
  } // end ESMC_XPacket
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_XPacket()"
 //BOP
 // !IROUTINE:  ~ESMC_XPacket - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_XPacket::~ESMC_XPacket(void) {
+      ESMC_XPacket::~ESMC_XPacket(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
+      void) {
 //    none
 //
 // !DESCRIPTION:

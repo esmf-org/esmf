@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.22 2004/04/23 21:59:03 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.23 2004/06/07 15:30:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC CommTable method implementation (body) file
+#define ESMF_FILENAME "ESMC_CommTable.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -28,12 +29,13 @@
 
  // associated class definition file
  #include <ESMC_CommTable.h>
+ #include <ESMC_LogErr.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.22 2004/04/23 21:59:03 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.23 2004/06/07 15:30:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -45,6 +47,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableCreate"
 //BOPI
 // !IROUTINE:  ESMC_CommTableCreate - Create a new CommTable
 //
@@ -79,6 +83,8 @@
  } // end ESMC_CommTableCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableDestroy"
 //BOPI
 // !IROUTINE:  ESMC_CommTableDestroy - free a CommTable created with Create
 //
@@ -106,6 +112,8 @@
  } // end ESMC_CommTableDestroy
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableConstruct"
 //BOPI
 // !IROUTINE:  ESMC_CommTableConstruct - fill in an already allocated CommTable
 //
@@ -218,17 +226,19 @@
  } // end ESMC_CommTableConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableDestruct"
 //BOPI
 // !IROUTINE:  ESMC_CommTableDestruct - release resources associated w/a CommTable
 //
 // !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableDestruct(void) {
+      int ESMC_CommTable::ESMC_CommTableDestruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
@@ -249,6 +259,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableGetCount"
 //BOPI
 // !IROUTINE:  ESMC_CommTableGetCount - get partner list count
 //
@@ -274,6 +286,8 @@
  } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableGetPartner"
 //BOPI
 // !IROUTINE:  ESMC_CommTableGetPartner - get partner list count
 //
@@ -309,6 +323,8 @@
  } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableSetPartner"
 //BOPI
 // !IROUTINE:  ESMC_CommTableSetPartner - set processor id to communicate with
 //
@@ -327,14 +343,17 @@
 //EOPI
 // !REQUIREMENTS:  
  
-      int i;
+      int i, rc;
+      char msgbuf[ESMF_MAXSTR];
 
       if (partner < 0 || partner >= commcount) {
-          fprintf(stderr, "CommTable partner value out of range, %d not >= 0 and < %d\n",
+          sprintf(msgbuf, "CommTable partner value out of range, %d not >= 0 and < %d\n",
                         partner, commcount);
-          fprintf(stderr, "CommTable current values are:\n");
-          this->ESMC_CommTablePrint("");
-          return ESMF_FAILURE;
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+
+          //fprintf(stderr, "CommTable current values are:\n");
+          //this->ESMC_CommTablePrint("");
+          return(rc);  
       }
 
       for (i=0; i<commcount; i++) {
@@ -349,6 +368,8 @@
  } // end ESMC_CommTableSetPartner
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableValidate"
 //BOPI
 // !IROUTINE:  ESMC_CommTableValidate - internal consistency check for a CommTable
 //
@@ -375,6 +396,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTablePrint"
 //BOPI
 // !IROUTINE:  ESMC_CommTablePrint - print contents of a CommTable
 //
@@ -430,6 +453,8 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTableFill"
 //BOPI
 // !IROUTINE:  ESMC_CommTableFill - private routine for computing comm patterns
 //
@@ -482,17 +507,19 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_CommTable()"
 //BOPI
 // !IROUTINE:  ESMC_CommTable - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_CommTable::ESMC_CommTable(void) {
+      ESMC_CommTable::ESMC_CommTable(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //
@@ -507,17 +534,19 @@ fill(int max, int size, int xpos, int ypos, int base, int *results)
  } // end ESMC_CommTable
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_CommTable()"
 //BOPI
 // !IROUTINE:  ~ESMC_CommTable - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_CommTable::~ESMC_CommTable(void) {
+      ESMC_CommTable::~ESMC_CommTable(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for destruction

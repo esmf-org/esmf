@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.4 2004/04/23 21:59:12 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.5 2004/06/07 15:30:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC RHandle method implementation (body) file
+#define ESMF_FILENAME "ESMC_RHandle.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -28,11 +29,13 @@
 
  // associated class definition file
  #include "ESMC_RHandle.h"
+ #include "ESMC_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RHandle.C,v 1.4 2004/04/23 21:59:12 nscollins Exp $";
+ static const char *const version = 
+       "$Id: ESMC_RHandle.C,v 1.5 2004/06/07 15:30:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -44,6 +47,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleCreate"
 //BOP
 // !IROUTINE:  ESMC_RouteHandleCreate - Create a new RouteHandle
 //
@@ -57,15 +62,9 @@
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Create a new RouteHandle from ... Allocates memory for a new RouteHandle
+//      Allocates memory for a new RouteHandle
 //      object and uses the internal routine ESMC_RouteHandleConstruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_RouteHandleInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_RouteHandle.h)
+//      initialize it. 
 //
 //EOP
 
@@ -78,6 +77,8 @@
  } // end ESMC_RouteHandleCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleDestroy"
 //BOP
 // !IROUTINE:  ESMC_RouteHandleDestroy - free a RouteHandle created with Create
 //
@@ -105,6 +106,8 @@
  } // end ESMC_RouteHandleDestroy
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleConstruct"
 //BOP
 // !IROUTINE:  ESMC_RouteHandleConstruct - fill in an already allocated RouteHandle
 //
@@ -138,17 +141,19 @@
  } // end ESMC_RouteHandleConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleDestruct"
 //BOP
 // !IROUTINE:  ESMC_RouteHandleDestruct - release resources associated w/a RouteHandle
 //
 // !INTERFACE:
-      int ESMC_RouteHandle::ESMC_RouteHandleDestruct(void) {
+      int ESMC_RouteHandle::ESMC_RouteHandleDestruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
@@ -167,6 +172,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleGet"
 //BOP
 // !IROUTINE:  ESMC_RouteHandleGet - Get multiple values in one call.
 //
@@ -201,6 +208,8 @@
 } // end ESMC_RouteHandleGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleSet"
 //BOP
 // !IROUTINE:  ESMC_RouteHandleSet - Set multiple values in one call.
 //
@@ -241,6 +250,8 @@
 } // end ESMC_RouteHandleSet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandleValidate"
 //BOP
 // !IROUTINE: ESMC_RouteHandleValidate - validate a handle
 //
@@ -265,6 +276,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandlePrint"
 //BOP
 // !IROUTINE:  ESMC_RouteHandlePrint - print contents of a RouteHandle
 //
@@ -290,6 +303,8 @@
  } // end ESMC_RouteHandlePrint
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RouteHandle()"
 //BOP
 // !IROUTINE:  ESMC_RouteHandle - native C++ constructor
 //
@@ -310,17 +325,19 @@
  } // end ESMC_RouteHandle
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_RouteHandle()"
 //BOP
 // !IROUTINE:  ~ESMC_RouteHandle - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_RouteHandle::~ESMC_RouteHandle(void) {
+      ESMC_RouteHandle::~ESMC_RouteHandle(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-//    none
+      void) {
 //
 // !DESCRIPTION:
 //

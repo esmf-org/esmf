@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.C,v 1.8 2004/04/23 21:59:39 nscollins Exp $
+// $Id: ESMC_TValues.C,v 1.9 2004/06/07 15:30:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC RHandle method implementation (body) file
+#define ESMF_FILENAME "ESMC_TValues"
 
 //-----------------------------------------------------------------------------
 //
@@ -26,6 +27,7 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include "ESMC_LocalArray.h"
+ #include "ESMC_LogErr.h"
 
  // associated class definition file
  #include "ESMC_TValues.h"
@@ -33,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TValues.C,v 1.8 2004/04/23 21:59:39 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_TValues.C,v 1.9 2004/06/07 15:30:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -45,6 +47,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesCreate"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesCreate - Create a new TransformValues
 //
@@ -79,6 +83,8 @@
  } // end ESMC_TransformValuesCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesCreate"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesCreate - Create a new TransformValues
 //
@@ -114,6 +120,8 @@
  } // end ESMC_TransformValuesCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesDestroy"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesDestroy - free a TransformValues created with Create
 //
@@ -141,6 +149,8 @@
  } // end ESMC_TransformValuesDestroy
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesConstruct"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesConstruct - fill in an already allocated TransformValues
 //
@@ -189,16 +199,19 @@
  } // end ESMC_TransformValuesConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesDestruct"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesDestruct - release resources associated w/a TransformValues
 //
 // !INTERFACE:
-      int ESMC_TransformValues::ESMC_TransformValuesDestruct(void) {
+      int ESMC_TransformValues::ESMC_TransformValuesDestruct(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
+      void) {
 //    none
 //
 // !DESCRIPTION:
@@ -219,6 +232,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesGet"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesGet - Get multiple values in one call.
 //
@@ -251,6 +266,8 @@
 } // end ESMC_TransformValuesGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesGet"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesGet - Get multiple values in one call.
 //
@@ -283,6 +300,8 @@
 } // end ESMC_TransformValuesGet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesSet"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesSet - Set multiple values in one call.
 //
@@ -316,6 +335,8 @@
 } // end ESMC_TransformValuesSet
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesValidate"
 //BOP
 // !IROUTINE: ESMC_TransformValuesValidate - validate a handle
 //
@@ -340,6 +361,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValuesPrint"
 //BOP
 // !IROUTINE:  ESMC_TransformValuesPrint - print contents of a TransformValues
 //
@@ -372,6 +395,8 @@
  } // end ESMC_TransformValuesPrint
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_TransformValues()"
 //BOP
 // !IROUTINE:  ESMC_TransformValues - native C++ constructor
 //
@@ -392,16 +417,19 @@
  } // end ESMC_TransformValues
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_TransformValues()"
 //BOP
 // !IROUTINE:  ~ESMC_TransformValues - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_TransformValues::~ESMC_TransformValues(void) {
+      ESMC_TransformValues::~ESMC_TransformValues(
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
+      void) {
 //    none
 //
 // !DESCRIPTION:
