@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2004/09/23 21:45:26 jwolfe Exp $
+! $Id: user_model1.F90,v 1.3 2004/10/05 23:05:35 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,7 +98,7 @@
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
-        integer :: npets, de_id, countsPerDE1(3), countsPerDE2(2)
+        integer :: npets, de_id, countsPerDE1(4), countsPerDE2(2)
         type(ESMF_GridHorzStagger) :: horz_stagger
         integer :: status
 
@@ -117,11 +117,11 @@
         print *, de_id, "User Comp 1 Init starting"
 
         ! Add a "humidity" field to the export state.
-        countsPerDE1 = (/ 10, 18, 12 /)
-        countsPerDE2 = (/ 30, 0 /)
+        countsPerDE1 = (/ 15, 15, 15, 15 /)
+        countsPerDE2 = (/ 40, 0 /)
 
-        counts(1) = 40
-        counts(2) = 30
+        counts(1) = 60
+        counts(2) = 40
         min(1) = 0.0
         max(1) = 60.0
         min(2) = 0.0
@@ -135,11 +135,10 @@
                                 name="source grid", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_GridDistribute(grid1, delayout=delayout, &
-                               countsPerDEDim1=countsPerDE1, &
-                               countsPerDEDim2=countsPerDE2, &
-                               rc=status)
+                                 countsPerDEDim1=countsPerDE1, &
+                                 countsPerDEDim2=countsPerDE2, &
+                                 rc=status)
 
-        call ESMF_GridDistribute(grid1, delayout=delayout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D real array

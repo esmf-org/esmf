@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2004/09/23 21:47:52 jwolfe Exp $
+! $Id: user_model2.F90,v 1.3 2004/10/05 23:07:13 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -91,7 +91,7 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2), max(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      integer :: countsPerDE1(3), countsPerDE2(2), counts(2)
+      integer :: countsPerDE1(4), countsPerDE2(2), counts(2)
       integer :: npets, de_id
       type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: status
@@ -113,7 +113,7 @@
       print *, de_id, "User Comp 2 Init starting"
 
       ! Add a "humidity" field to the import state.
-      countsPerDE1 = (/ 10, 18, 12 /)
+      countsPerDE1 = (/ 10, 6, 12, 12 /)
       countsPerDE2 = (/ 0, 50 /)
       min(1) = 0.0
       delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
@@ -126,19 +126,14 @@
                   1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
-      counts(1) = 40
-      counts(2) = 50
       min(1) = 0.0
-      max(1) = 60.0
       min(2) = 0.0
-      max(2) = 50.0
       horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
 
-      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
-                              minGlobalCoordPerDim=min, &
-                              maxGlobalCoordPerDim=max, &
-                              horzStagger=horz_stagger, &
-                              name="source grid", rc=status)
+      grid1 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+                                    delta1=delta1, delta2=delta2, &
+                                    horzStagger=horz_stagger, &
+                                    name="source grid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridDistribute(grid1, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1, &
@@ -313,8 +308,8 @@
       print *, "rc from array get data = ", rc
       !if (associated(data)) print *, "pointer is associated"
       !if (.not.associated(data)) print *, "pointer is *NOT* associated"
-      call ESMF_ArrayPrint(array)
-      print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
+  !    call ESMF_ArrayPrint(array)
+  !    print *, "data in validate: ", data(1,1), data(1, 2), data(2, 1)
 
       ! allocate array for computed results and fill it
       if (counts(1)*counts(2).ne.0) then
