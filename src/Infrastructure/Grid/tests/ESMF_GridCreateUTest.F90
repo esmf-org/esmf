@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.23 2004/06/18 21:57:51 jwolfe Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.23.2.1 2004/07/22 21:03:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.23 2004/06/18 21:57:51 jwolfe Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.23.2.1 2004/07/22 21:03:32 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,7 +64,7 @@
       integer :: value_set, value_get
 
 
-      integer :: counts(2)
+      integer :: i, counts(2)
       integer :: nDE_i, nDE_j
       type(ESMF_GridHorzStagger) :: horz_stagger, Rhorz_stagger
       type(ESMF_GridVertStagger) :: vert_stagger, Rvert_stagger
@@ -73,6 +73,7 @@
       integer :: status
       integer :: phy_grid_id
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
+      real(ESMF_KIND_R8) :: coord1(21), coord2(16)
       real(ESMF_KIND_R8) :: Rgrid_min(3), Rgrid_max(3)
       type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridClass) :: grid_class
@@ -127,23 +128,36 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! Create a Grid Test.
+      ! Create a HorzXYUni Grid Test.
       !NEX_UTest
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzstagger=horz_stagger, &
                               name=gName, rc=status)
-      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
-                                  rc=status)
-
-      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
-
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Creating a LogRectUniform Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      ! Add Vert Height Test
+      !NEX_UTest
+      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
+                                  rc=status)
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Add Vert Height Grid Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      ! Grid Distribute Test
+      !NEX_UTest
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
+
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest 
@@ -151,6 +165,76 @@
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Destroy the Grid Test"
       call ESMF_GridDestroy(grid, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+                              
+      !------------------------------------------------------------------------
+      ! Create a HorzLatLon Grid Test.
+      !NEX_UTest
+      coord1(1) = grid_min(1)
+      do i = 2, size(coord1)
+        coord1(i) = coord1(i-1) + 0.50d0
+      enddo
+      coord2(1) = grid_min(2)
+      do i = 2, size(coord2)
+        coord2(i) = coord2(i-1) + 0.40d0
+      enddo
+      grid1 = ESMF_GridCreateHorzLatLon(coord1=coord1, coord2=coord2, &
+                                        horzstagger=horz_stagger, &
+                                        name=gName, rc=status)
+
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Creating a HorzLatLon Grid Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute Test
+      !NEX_UTest
+      call ESMF_GridDistribute(grid1, delayout=layout, rc=status)
+
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest 
+      ! Destroy the Grid test
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Destroy the Grid Test"
+      call ESMF_GridDestroy(grid1, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+                              
+      !------------------------------------------------------------------------
+      ! Create a HorzLatLon Grid Uni Test.
+      !NEX_UTest
+      grid2 = ESMF_GridCreateHorzLatLonUni(counts=counts, &
+			      minGlobalCoordPerDim=grid_min, &
+                              deltaPerDim=(/0.60d0, 0.55d0/), &
+                              horzstagger=horz_stagger, &
+                              name=gName, rc=status)
+
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Creating a HorzLatLon Uni Grid Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Grid Distribute Test
+      !NEX_UTest
+      call ESMF_GridDistribute(grid2, delayout=layout, rc=status)
+
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Grid Distribute Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest 
+      ! Destroy the Grid test
+      write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      write(name, *) "Destroy the Grid Test"
+      call ESMF_GridDestroy(grid2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
                               
 #ifdef ESMF_EXHAUSTIVE
