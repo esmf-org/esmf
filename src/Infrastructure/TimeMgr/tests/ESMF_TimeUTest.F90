@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.2 2004/05/18 22:29:43 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.3 2004/05/18 23:37:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.2 2004/05/18 22:29:43 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.3 2004/05/18 23:37:08 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -344,7 +344,7 @@
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       bool =  ESMF_TimeIsSameCalendar(stopTime, stopTime, rc=rc)
       write(name, *) "Time Is Same CalendarTest"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
 
