@@ -1,4 +1,4 @@
-% $Id: HWMonitor_design.tex,v 1.3 2002/11/20 15:24:05 ekluz Exp $
+% $Id: HWMonitor_design.tex,v 1.4 2002/11/22 23:28:38 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,8 +41,10 @@ code will be returned and the function will abort. Technically, we could
 add events individually, and keep track of which events are available. Since
 we are tracking very common events we expect that if hardware counters are
 available on a machine -- the counters we are tracking will all work or all fail.
-When using PCL, the PCLinit call needs to be done for all possible threads.
-So in this case PCLinit will be called for each thread. Note, that if later
+For both PCL and PAPI setting of the counter types needs to be done for
+all possible threads. The HWMonitor method does not ensure that this is done
+for all threads, but the SegmentCreate method does ensure that the HWMonitorInit
+method is called for each thread.  Note, that if later
 the number of threads increases beyond the value used in initialization -- this
 will be a problem and the code will need to abort. Also when using PCL memory
 for the desc pointer will need to be allocated. For all performance libraries the 

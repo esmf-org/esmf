@@ -1,4 +1,4 @@
-% $Id: Perf_design.tex,v 1.1 2002/11/20 15:24:05 ekluz Exp $
+% $Id: Perf_design.tex,v 1.2 2002/11/22 23:28:38 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,20 +10,21 @@
 
 %\subsection{Design}
 
-The Perf class has four high level interfaces accessable by the user:
-PerfInit, PerfStart, PerfEnd, and PerfPrint. PerfInit does the needed
-initialization, and sets the monitoring, and doHW flags. If the monitoring
-flag is set to false by the user performance monitoring will be turned
-off. If the doHW flag is set, it's value will be used as the default value
-to determine if hardware performance monitoring is done. Inidividual code
+The Perf class has five high level interfaces accessable by the user:
+PerfCreate, PerfStart, PerfEnd, PerfPrint, and PerfDestroy. PerfCreate does the needed
+initialization and allocates needed memory, and sets the monitoring, and doHW 
+flags. If the monitoring flag is set to false by the user performance monitoring 
+will be turned off. If the doHW flag is set, it's value will be used as the 
+default value to determine if hardware performance monitoring is done. Inidividual code
 segments that are timed can also turn hardware monitoring on or off for
 a particular code segment. PerfStart begins timing a code segment, PerfEnd
 ends timing a code segment. PerfPrint prints a report on the timing results
-for all code segments timed.
+for all code segments timed. PerfDestroy then deallocates memory that was
+allocated in PerfCreate.
 
-More information on PerfInit. PerfInit sets MaxThreads the Maximum number of 
-threads that will be used, and allocates an array of Segments that is two
-dimensional in code segment and thread.
+More information on PerfCreate. PerfCreate sets the maximum number of code-segments
+that can be used (which will be increased if exceeded) and does the initial
+allocates of the array of Segments.
 
 More information on PerfStart. When called PerfStart figures out if the given
 code segment has been activated before or not. If it hasn't it increments
@@ -37,5 +38,5 @@ More information on PerfEnd. PerfEnd deactivates a code segment, and calls
 the SegmentEnd method to accumulate the relevent counters.
 
 More information on PerfPrint. PerfPrint figures out the maximum, minimum, and
-average times across both threads and distributed PE's. The results are then printed
-to the Log file.
+average times across both threads and distributed PE's. The results are then 
+printed to the Log file.

@@ -1,4 +1,4 @@
-% $Id: PerfProf_desdoc.ctex,v 1.5 2002/11/20 15:24:05 ekluz Exp $
+% $Id: PerfProf_desdoc.ctex,v 1.6 2002/11/22 23:28:38 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,36 +66,6 @@
 \input{PerfProf_param}
 #elif defined(CONSTITUENT)
 \input{comppath/PerfProf_param}
-#endif
-
-\section{<Name1> Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{class_desc}
-#elif defined(CONSTITUENT)
-\input{comppath/class_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{class_design}
-#elif defined(CONSTITUENT)
-\input{comppath/class_design}
-#endif
-
-\subsubsection{Class Definition}
-#ifdef STANDALONE
-\input{class_def}
-#elif defined(CONSTITUENT)
-\input{comppath/class_def}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{class_rest}
-#elif defined(CONSTITUENT)
-\input{comppath/class_rest}
 #endif
 
 \section{Perf Design}
@@ -223,6 +193,45 @@
 \input{comppath/HWMonitor_ccapi}
 #endif
 
+\section{Timer Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Timer_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/Timer_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Timer_design}
+#elif defined(CONSTITUENT)
+\input{comppath/Timer_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Timer_def}
+#elif defined(CONSTITUENT)
+\input{comppath/Timer_def}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{Timer_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/Timer_rest}
+#endif
+
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{Timer_chapi}
+%\input{Timer_ccapi}
+%#elif defined(CONSTITUENT)
+%\input{comppath/Timer_chapi}
+%\input{comppath/Timer_ccapi}
+%#endif
+
 \section{Perf F90 Interface}
 
 \subsection{Use and Examples}
@@ -232,46 +241,14 @@
 \input{comppath/Perf_fex}
 #endif
 
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-\input{class_fparam}
-#elif defined(CONSTITUENT)
-\input{comppath/class_fparam}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{class_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/class_fapi}
-#endif
-
-\section{<Name1> C++ Interface}
+\section{Perf C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{class_ccex}
+\input{Perf_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/class_ccex}
+\input{comppath/Perf_ccex}
 #endif
-
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-\input{class_ccparam}
-#elif defined(CONSTITUENT)
-\input{comppath/class_ccparam}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{class_ccapi}
-#elif defined(CONSTITUENT)
-\input{comppath/class_ccapi}
-#endif
-
-\section{<Name2> Design}
-
-% Subsections same as <Name1> Design ...
 
 #ifdef STANDALONE
 \section{Review Status}

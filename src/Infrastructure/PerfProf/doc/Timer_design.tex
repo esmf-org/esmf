@@ -1,4 +1,4 @@
-% $Id: Timer_design.tex,v 1.1 2002/11/14 18:25:45 cdeluca Exp $
+% $Id: Timer_design.tex,v 1.2 2002/11/22 23:28:38 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,18 +10,5 @@
 
 %\subsection{Design}
 
-The HWMonitor class uses Hardware monitoring libraries (PCL or PAPI)
-to do performance profiling of code segments. Floating point operations
-per second, data cache utilization and miss rates, floating point unit
-utilization, and cycle counts are the desired statistics to be reported.
-The HWMonitor class is meant to be created by the CodeSeg
-class. There are three important methods for HWMonitor: Init, BeginMonitoring,
-EndMonitoring, and Report. The Init method does the initialization needed
-to figure out which hardware monitoring counters need to be used and verify
-that they are available. It also prepares arrays for the counters that
-will be activated. BeginMonitoring turns performance monitoring on, for
-a given code segment. EndMonitoring turns performance monitoring off, for
-a given code segment. The Report method then gives a report on the statistics
-for the code segment timed.
-
+The Timer class.
 

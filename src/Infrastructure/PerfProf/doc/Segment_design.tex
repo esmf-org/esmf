@@ -1,4 +1,4 @@
-% $Id: Segment_design.tex,v 1.1 2002/11/20 15:24:05 ekluz Exp $
+% $Id: Segment_design.tex,v 1.2 2002/11/22 23:28:38 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,13 @@
 
 %\subsection{Design}
 
+The Segment object has five main methods: SegmentCreate, SegmentBegin, SegmentEnd,
+SegmentGetTime, and SegmentDestroy. SegmentCreate initializes values and
+allocates memory for the maximum number of threads for an array of HWMonitor and Timer
+objects. SegmentBegin, then queries the thread being used and prepares
+monitoring for that given thread. SegmentEnd, again queries which thread is
+being used and ends monitoring for that thread. SegmentGetTime figures out and
+prints the timing statistics across all threads as well as distrubuted memory
+tasks. Finally, SegmentDestroy, dealloces memory for the HWMonitor and
+Timer arrays used in Segment.
 
