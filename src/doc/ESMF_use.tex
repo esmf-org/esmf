@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.9 2003/10/14 22:00:25 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.10 2003/10/20 23:10:31 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -95,6 +95,34 @@ LIBDIR = ${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_PREC}.${ESMF_SITE}
 \begin{verbatim}
    f90 -free -I${MODDIR} myModel.F \
    -L${LIBDIR} -rpath ${LIBDIR}  -lesmf  -lcxx -lmpi -o myModel
+\end{verbatim}
+
+
+\noindent The following are the linking commands for platforms for which
+we offer limited support.
+
+\noindent{\it Linking using the Linux Lahey Fortran compiler:}
+
+\begin{verbatim}
+    Define:
+    LD_LIBRARY_PATH=/usr/local/lf9560/lib:$LIBDIR
+
+    lf95 -I${MODDIR} -o myModel myModel.F \
+    -L${LIBDIR} -lesmf -lmpiuni
+
+\end{verbatim}
+
+   
+
+\noindent{\it Linking using the Linux Portland Fortran compiler:}
+
+\begin{verbatim}
+    Define:
+    LD_LIBRARY_PATH=/local/pgi/linux86/lib
+
+    pgf90 -I${MODDIR} -o myModel myModel.F \
+    -L${LIBDIR} -lesmf -lmpiuni -lpgc -lstd -lC
+
 \end{verbatim}
 
 
