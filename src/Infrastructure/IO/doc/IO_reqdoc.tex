@@ -1,0 +1,131 @@
+% $Id: IO_reqdoc.tex,v 1.1 2002/03/05 20:33:03 cnh Exp $
+
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{html}
+\usepackage[T1]{fontenc}
+
+\newcommand{\docmttype}{Requirements}
+\newcommand{\reqtitle}[1]{\shortname#1}
+\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+\newcommand{\mytitle}{\longname \docmttype ~~- Draft <Num>}
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{<Class Name> }
+\newcommand{\funcname}{<ClassNm> }
+\newcommand{\shortname}{<CN>}
+\newcommand{\myauthors}{<Authors>}
+%===============================================================================
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{\longname Overview}
+\end{htmlonly}
+\part{\longname Overview}
+
+%===============================================================================
+\section{Target Codes and Review Team}
+%-------------------------------------------------------------------------------
+
+\begin{tabular}{l l}
+
+{\bf Sign-Off Date:}          & <Date> \\ \\
+
+{\bf Target Codes}            & {\bf Reviewers} \\
+GFDL-SPEC, BGRID, MOM4        & Balaji \\ 
+HIM                           & Hallberg \\
+CAM-EUL, CLM                  & Eaton \\
+CAM-FV, PSAS                  & da Silva\\
+POP, CICE                     & Jones \\
+WRF                           & Michalakes \\
+MIT-REG, MIT-CPL, ADJ         & Hill \\
+NSIPP-ATM, NSIPP-OCN          & Suarez \\
+NCEP-ATM, SSI                 & Iredell \\ \\
+
+{\bf Other Reviewers:}        & DeLuca, Neckels
+
+\end{tabular}
+
+%===============================================================================
+
+\section{Introduction}
+%\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
+
+%\section{\longname Background}
+\input{IO_background}
+
+\section{\longname Terms}
+\input{IO_terms}
+
+\section{Document Organization and Conventions}
+%\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
+
+\subsection{Requirement Attributes}
+%\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
+
+\section{\longname Abbreviations}
+\input{IO_abbr}
+
+\newpage
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\begin{htmlonly}
+\addcontentsline{toc}{part}{\longname Requirements}
+\end{htmlonly}
+\part{\longname Requirements}
+
+\input{IO_req}
+
+\section*{Glossary}
+\input{IO_glos}
+\addcontentsline{toc}{section}{Glossary}
+
+%\section{References}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
