@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.17 2005/02/15 17:54:30 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.18 2005/04/02 00:27:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.17 2005/02/15 17:54:30 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.18 2005/04/02 00:27:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -46,6 +46,7 @@
       ! individual test result code
       integer :: rc, H, M, S, US, MM, DD, YY, D, dayOfYear, dayOfWeek
       integer :: sN, sD
+      integer(ESMF_KIND_I8) :: year
       logical :: bool
 
       ! individual test name
@@ -59,7 +60,8 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_Time) :: startTime, stopTime, startTime2, midMonth
-      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
+      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
+                             julianDayCalendar, &
                              noLeapCalendar, day360Calendar
 
       ! instantitate some general times and timeintervals
@@ -85,6 +87,8 @@
       ! initialize calendars
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
+      julianCalendar = ESMF_CalendarCreate("Julian", &
+                                              ESMF_CAL_JULIAN, rc)
       noLeapCalendar = ESMF_CalendarCreate("No Leap", &
                                               ESMF_CAL_NOLEAP, rc)
       day360Calendar = ESMF_CalendarCreate("360 Day", &
@@ -204,6 +208,59 @@
       write(name, *) "Time Get middle of the month test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2004).and.(MM.eq.1) &
                     .and.(DD.eq.16).and.(H.eq.12).and.(M.eq.0).and.(S.eq.0), &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Setting Time with Julian calendar
+      ! Use a leap year in the Julian, but not Gregorian calendar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeSet(time1, yy=2100, mm=2, dd=29, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      write(name, *) "Set Julian Time Initialization Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Time have the same Julian calendar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      bool =  ESMF_TimeIsSameCalendar(time1, time1, rc=rc)
+      write(name, *) "Time Is Same Julian CalendarTest"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Julian Time day of the year
+      write(failMsg, *) " Did not return dayOfYear = 60 and ESMF_SUCCESS"
+      call ESMF_TimeGet(time1, dayOfYear=dayOfYear, rc=rc)
+      write(name, *) "Julian Time Get day of the year test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfYear.eq.60), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test day of the week
+      write(failMsg, *) " Did not return dayOfWeek = 7 and ESMF_SUCCESS"
+      call ESMF_TimeGet(time1, dayOfWeek=dayOfWeek, rc=rc)
+      write(name, *) "Time Get day of the week test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfWeek.eq.7), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test middle of the month
+      write(failMsg, *) " Did not return midMonth = 2/15/2100 12:00:00 and ESMF_SUCCESS"
+      call ESMF_TimeGet(time1, midMonth=midMonth, rc=rc)
+      call ESMF_TimeGet(midMonth, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      write(name, *) "Julian Time Get middle of the month test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2100).and.(MM.eq.2) &
+                    .and.(DD.eq.15).and.(H.eq.12).and.(M.eq.0).and.(S.eq.0), &
                     name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -541,32 +598,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !EX_UTest
-      ! Test Converting Gregorian date to Julian Day
-      !   from http://www.friesian.com/numbers.htm
-      write(failMsg, *) " Did not return D = 2450713 and ESMF_SUCCESS"
-      call ESMF_TimeSet(stopTime, yy=1997, mm=9, dd=21, &
-                                   calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeGet(stopTime, d=D, calendar=julianDayCalendar, rc=rc)
-      write(name, *) "Convert Gregorian to Julian Day Test 1"
-      call ESMF_Test((D.eq.2450713).and.(rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-      !EX_UTest
-      ! Test Converting Gregorian date to Julian Day
-      !   from Henry F. Fliegel and Thomas C. Van Flandern, in
-      !   Communications of the ACM, CACM, volume 11, number 10,
-      !   October 1968, p. 657.
-      write(failMsg, *) " Did not return D = 2440588 and ESMF_SUCCESS"
-      call ESMF_TimeSet(stopTime, yy=1970, mm=1, dd=1, &
-                                   calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeGet(stopTime, d=D, rc=rc)
-      write(name, *) "Convert Gregorian to Julian Day Test 2"
-      call ESMF_Test((D.eq.2440588).and.(rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
       ! Fractional times tests
       ! ----------------------------------------------------------------------------
 
@@ -759,12 +790,73 @@
       write(name, *) "Fractional time1 <= time3 Test"
       call ESMF_Test(bool, name, failMsg, result, ESMF_SRCLINE)
 
+ 
+      ! ----------------------------------------------------------------------------
+      ! Leap Year tests
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year Test 1
+      call ESMF_TimeSet(time1, yy=2000, mm=2, dd=29, &
+                                   calendar=gregorianCalendar, rc=rc)
+      bool =  ESMF_TimeIsLeapYear(time1, rc=rc)
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      write(name, *) "Time Is Leap Year Test 1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year Test 2
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 100 !    are 32-bit
+      call ESMF_TimeSet(time1, yy_i8=year, mm=2, dd=28, &
+                                   calendar=gregorianCalendar, rc=rc)
+      bool =  ESMF_TimeIsLeapYear(time1, rc=rc)
+      write(failMsg, *) " Did not return false and ESMF_SUCCESS"
+      write(name, *) "Time Is Leap Year Test 2"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year Test 3
+      call ESMF_TimeSet(time1, yy=2100, mm=2, dd=29, &
+                                   calendar=julianCalendar, rc=rc)
+      bool =  ESMF_TimeIsLeapYear(time1, rc=rc)
+      write(failMsg, *) " Did not return true and ESMF_SUCCESS"
+      write(name, *) "Time Is Leap Year Test 3"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Leap Year Test 4
+      year = 500000000  ! break up initialization,
+      year = year * 10  !  since F90 constants
+      year = year + 10  !   are 32-bit
+      call ESMF_TimeSet(time1, yy_i8=year, mm=2, dd=28, &
+                                   calendar=julianCalendar, rc=rc)
+      bool =  ESMF_TimeIsLeapYear(time1, rc=rc)
+      write(failMsg, *) " Did not return false and ESMF_SUCCESS"
+      write(name, *) "Time Is Leap Year Test 4"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
 #endif
+
+      ! free calendar memory
+      call ESMF_CalendarDestroy(julianDayCalendar)
+      call ESMF_CalendarDestroy(day360Calendar)
+      call ESMF_CalendarDestroy(noLeapCalendar)
+      call ESMF_CalendarDestroy(julianCalendar)
+      call ESMF_CalendarDestroy(gregorianCalendar)
+
   
       ! finalize ESMF framework
       call ESMF_TestEnd(result, ESMF_SRCLINE)
