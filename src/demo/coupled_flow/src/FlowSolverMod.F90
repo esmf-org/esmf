@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.21 2004/09/23 17:02:59 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.22 2004/09/24 15:21:16 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -244,12 +244,11 @@
 !
 ! Read in input file
 !
-      open(9, status="old", file="coupled_flow_input",action="read",iostat=rc)
+      open(10, status="old", file="coupled_flow_input",action="read",iostat=rc)
       if (rc .ne. 0) then
-        print *, "Error!  Failed to open namelist file 'coupled_app_input' "
+        print *, "Error!  Failed to open namelist file 'coupled_flow_input' "
         stop
       endif
-
       read(10, input, end=20)
    20 continue
 !
