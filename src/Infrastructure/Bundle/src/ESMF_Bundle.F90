@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.16 2004/02/25 18:59:10 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.17 2004/02/25 22:33:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1576,6 +1576,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleDataDetach - Obtain direct data access to Packed data
+!
 ! !INTERFACE:
       subroutine ESMF_BundleDataDetachRO(bundle, databuffer, rc)
 !
@@ -1600,6 +1602,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleDataDetachCopy - Obtain copy of Packed data
+!
 ! !INTERFACE:
       subroutine ESMF_BundleDataDetachCopy(bundle, data, subarray, rc)
 !
@@ -1652,6 +1656,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleDataDrop - Returns responsibility for ReadOnly data
+!
 ! !INTERFACE:
       subroutine ESMF_BundleDataDrop(bundle, rc)
 !
@@ -1673,6 +1679,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleDataDropCopy - Returns copy of data
+!
 ! !INTERFACE:
       subroutine ESMF_BundleDataDropCopy(databuffer, rc)
 !
@@ -1874,6 +1882,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleGetGridDimSize - Returns the number of items in each dimension
+!
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridDimSize(bundle, locallist, globallist, rc)
 !
@@ -1899,6 +1909,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleGetIndexOrder - Returns the order of the indicies
+!
 ! !INTERFACE:
       subroutine ESMF_BundleGetIndexOrder(bundle, indexorder, rc)
 !
@@ -1922,6 +1934,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleGridGetCellCount - Returns global and local grids cell count
+!
 ! !INTERFACE:
       subroutine ESMF_BundleGridGetCellCount(bundle, localcount, globalcount, rc)
 !
@@ -1945,6 +1959,8 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleGetGridPointCount - Returns global and local grids point count
+!
 ! !INTERFACE:
       subroutine ESMF_BundleGetGridPointCount(bundle, localcount, globalcount, rc)
 !
