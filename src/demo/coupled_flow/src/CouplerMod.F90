@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.16 2004/07/27 16:33:49 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.17 2004/09/21 16:41:44 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -116,7 +116,7 @@
 
     print *, "Coupler Init starting"
 
-    ! Get VM from coupler component and create default layout
+    ! Get VM from coupler component and create default delayout
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
 
@@ -232,7 +232,7 @@
 !   The following piece of code provides an example of calling Route
 !   between two Fields in the Coupler Component.  
 !   Unlike Regrid, which translates between
-!   different Grids, Route translates between different Layouts on
+!   different Grids, Route translates between different DELayouts on
 !   the same Grid.   The first two lines get the Fields from the 
 !   States, each corresponding to a different subcomponent.  One is
 !   an Export State and the other is an Import State.
@@ -243,7 +243,7 @@
 !\end{verbatim}
 !
 !   The Route routine uses information contained in the Fields and the
-!   Coupler Layout object to call the Communication routines to move the data.
+!   Coupler DELayout object to call the Communication routines to move the data.
 !   Because many Fields may share the same Grid association, the same
 !   routing information may be needed repeatedly.  Route information is cached 
 !   so the precomputed information can be retained.  The following is an

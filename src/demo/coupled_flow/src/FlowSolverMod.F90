@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.19 2004/07/27 16:33:49 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.20 2004/09/21 16:41:44 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -456,11 +456,11 @@
       nbc(3) = 3
       nbc(4) = 3
 !
-! set flags, based on NBC's and position in layout
+! set flags, based on NBC's and position in delayout
 ! note: since we're operating on a five-point stencil, we don't
 !       really care out how the corners get set
 !
-! First, get size of layout and position of my DE to determine if
+! First, get size of delayout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
       call ESMF_GridGet(grid, delayout=layout, rc=status)
@@ -471,14 +471,14 @@
       call ESMF_DELayoutGet(layout, deCountPerDim=ncounts, localDE=de_id, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  layout get size"
+        print *, "ERROR in Flowinit:  delayout get size"
         return
       endif
       nx = ncounts(1)
       ny = ncounts(2)
       call ESMF_DELayoutGetDELocalInfo(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in Flowinit:  layout get position"
+        print *, "ERROR in Flowinit:  delayout get position"
         return
       endif
       x = pos(1)

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.17 2004/05/26 22:20:59 jwolfe Exp $
+! $Id: CoupledFlowApp.F90,v 1.18 2004/09/21 16:41:44 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -31,7 +31,7 @@
     ! State, Virtual Machine, and DELayout
     type(ESMF_VM) :: vm
     type(ESMF_State) :: flowstate
-    type(ESMF_DELayout) :: layoutTop
+    type(ESMF_DELayout) :: DELayoutTop
     integer :: pet_id
 
     ! A common grid
@@ -187,8 +187,8 @@
       ! Create the Grid and attach it to the Component
       !
 
-      ! Create a default layout for the grid based on the global VM
-      layoutTop = ESMF_DELayoutCreate(vm, rc=rc)
+      ! Create a default DELayout for the grid based on the global VM
+      DELayoutTop = ESMF_DELayoutCreate(vm, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
@@ -197,9 +197,9 @@
 !  The following piece of code provides an example of Grid creation used in
 !  the Demo.  The extents of the Grid were previously read in from an input
 !  file, but the rest of the Grid parameters are set here by default.  The
-!  Grid spans the Application's Layout, while the type of the Grid is assumed to
-!  be horizontal and cartesian x-y with an Arakawa C staggering.  The Halo width
-!  for the Grid is set to one and the name to "source grid":
+!  Grid spans the Application's DELayout, while the type of the Grid is 
+!  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
+!  The Halo width for the Grid is set to one and the name to "source grid":
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
@@ -212,7 +212,7 @@
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=ESMF_GRID_HORZ_STAGGER_C_NE, &
                              name="source grid", rc=rc)
-      call ESMF_GridDistribute(grid, delayout=layoutTop, rc=rc)
+      call ESMF_GridDistribute(grid, delayout=DELayoutTop, rc=rc)
 
 !\end{verbatim}
 !     The Grid can then be attached to the Gridded Component with a Set call:
@@ -267,7 +267,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
-      call ESMF_DELayoutDestroy(layoutTop, rc)
+      call ESMF_DELayoutDestroy(DELayoutTop, rc)
 
 
 !------------------------------------------------------------------------------

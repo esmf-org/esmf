@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.22 2004/07/27 16:33:49 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.23 2004/09/21 16:41:44 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -33,7 +33,7 @@
     type(ESMF_GridComp), save :: INcomp, FScomp
     type(ESMF_CplComp), save :: cpl
 
-    ! States and Layouts for the Subcomponents
+    ! States and DELayouts for the Subcomponents
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
     type(ESMF_DELayout), save :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
@@ -171,20 +171,20 @@
        by4 = 4
      endif
 
-    ! Set up the component layouts so they are different, so we can show
+    ! Set up the component DELayouts so they are different, so we can show
     !  we really are routing data between processors.
 
     ! Create the 2 model components and coupler.  The first component will
-    !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
-    !  The coupler will run on the original default 1 x N layout.
+    !  run on a 2 x N/2 DELayout, the second will be on a 4 x N/4 DELayout.
+    !  The coupler will run on the original default 1 x N DELayout.
 
 !BOP
 ! !DESCRIPTION:
-! \subsubsection{Example of Layout Creation:}
+! \subsubsection{Example of DELayout Creation:}
 !
-!   The following code creates 2 sublayouts on the same set of PEs (processing
-!   elements) as the top level Component, but each of the sublayouts has a
-!   different connectivity.
+!   The following code creates 2 sublayouts on the same set of PETs 
+!   (persistent execution threads) as the top level Component, but each 
+!   of the sublayouts has a different connectivity.
 !\begin{verbatim}
     cnameIN = "Injector model"
     layoutIN = ESMF_DELayoutCreate(vm, (/ mid, by2 /), rc=rc)
@@ -220,7 +220,7 @@
  
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!  Init section for subcomponents.  Create subgrids on separate layouts,
+!  Init section for subcomponents.  Create subgrids on separate DELayouts,
 !    and create import/export states for subcomponents.
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -448,7 +448,7 @@ end subroutine coupledflow_run
       call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      print *, "ready to destroy all layouts"
+      print *, "ready to destroy all delayouts"
       !call ESMF_DELayoutDestroy(layoutIN, rc)
       !call ESMF_DELayoutDestroy(layoutFS, rc)
 
