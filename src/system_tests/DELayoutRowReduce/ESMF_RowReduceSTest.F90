@@ -1,4 +1,4 @@
-! $Id: DELayoutRowReduce.F90,v 1.3 2003/09/18 22:32:11 cdeluca Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.1 2003/09/24 22:36:19 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 
@@ -34,7 +34,7 @@
     integer :: horz_stagger, vert_stagger
     integer :: horz_coord_system, vert_coord_system
     integer :: status
-    real :: x_min, x_max, y_min, y_max
+    real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
