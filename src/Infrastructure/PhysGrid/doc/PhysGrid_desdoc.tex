@@ -1,0 +1,146 @@
+% $Id: PhysGrid_desdoc.tex,v 1.1 2003/01/16 17:02:15 jwolfe Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\bf PhysGrid Design}
+\newcommand{\myauthors}{\it Phil Jones and Jon Wolfe}
+
+
+
+\begin{document}
+
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+
+
+\section{Synopsis}
+
+\input{PhysGrid_syn}
+
+
+%\section{Algorithmic Description}
+
+%\input{PhysGrid_alg}
+
+
+\section{Object Model}
+
+\input{PhysGrid_obj}
+
+
+% \section{Global Parameters and Definitions}
+% #ifdef 1 
+% \input{PhysGrid_param}
+% #elif defined(CONSTITUENT)
+% \input{comppath/PhysGrid_param}
+% #endif
+
+\section{PhysGrid Design}
+
+\subsection{Description}
+
+\input{PhysGrid_desc}
+
+
+\subsection{Design}
+
+\input{PhysGrid_design}
+
+
+\subsubsection{Class Definition}
+
+\input{PhysGrid_def}
+
+
+\subsubsection{Restrictions}
+
+\input{PhysGrid_rest}
+
+
+\section{PhysGrid F90 Interface}
+
+\subsection{Use and Examples}
+
+\input{PhysGrid_fex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{PhysGrid_fparam}
+
+
+%\subsection{Class API}
+
+\input{PhysGrid_fapi}
+
+
+\section{PhysGrid C++ Interface}
+
+\subsection{Use and Examples}
+
+\input{PhysGrid_ccex}
+
+
+\subsection{Parameters and Definitions}
+
+\input{PhysGrid_ccparam}
+
+
+% %\subsection{Class API}
+% #ifdef 1 
+% \input{PhysGrid_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{comppath/PhysGrid_ccapi}
+% #endif
+
+\section{<Name2> Design}
+
+% Subsections same as PhysGrid Design ...
+
+
+\section{Review Status}
+\input{PhysGrid_desrev}
+
+
+
+%\section{Glossary}
+\input{PhysGrid_glos}
+
+
+
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+
+
+\end{document}
+
