@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.19 2004/04/13 17:30:31 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.20 2004/04/15 19:09:06 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
@@ -208,14 +208,16 @@
     integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname, cname1, cname2
     type(ESMF_newDELayout) :: layoutall, layout1, layout2, layout3
+    type(ESMF_VM) :: vm
     type(ESMF_State) :: states(2)
     type(ESMF_GridComp) :: top
     type(ESMF_GridComp) :: gcomp1, gcomp2
     type(ESMF_CplComp) :: cpl
         
 !-------------------------------------------------------------------------
-!   ! Initialize the Framework
+!   ! Initialize the Framework, and get the default VM
     call ESMF_Initialize(rc=rc)
+    call ESMF_VMGetGlobal(vm, rc)
 !-------------------------------------------------------------------------
 !   !
 !   !  Create, Init, Run, Finalize, Destroy Components.
@@ -226,8 +228,9 @@
 
     cname = "Top Level Atmosphere Model Component"
     top = ESMF_GridCompCreate(cname, configFile="setup.rc", rc=rc)  
-    delist1 = (/ (i, i=0,3) /)
-    layout1 = ESMF_newDELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
+    !delist1 = (/ (i, i=0,3) /)
+    !layout1 = ESMF_newDELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
+    layout1 = ESMF_newDELayoutCreate(vm, (/ 1, 4 /), rc=rc)
     cname1 = "Atmosphere Physics"
     gcomp1 = ESMF_GridCompCreate(cname1, layout1, ESMF_ATM, rc=rc)  
 
@@ -240,8 +243,9 @@
 
     print *, "Comp Create returned, name = ", trim(cname1)
 
-    delist2 = (/ (i, i=0,3) /)
-    layout2 = ESMF_newDELayoutCreate(delist1, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
+    !delist2 = (/ (i, i=0,3) /)
+    !layout2 = ESMF_newDELayoutCreate(delist1, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
+    layout2 = ESMF_newDELayoutCreate(vm, (/ 4, 1 /), rc=rc)
     cname2 = "Atmosphere Dynamics"
     gcomp2 = ESMF_GridCompCreate(cname2, layout2, ESMF_ATM, rc=rc)
 
@@ -250,8 +254,9 @@
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
-    delist3 = (/ (i, i=0,3) /)
-    layout3 = ESMF_newDELayoutCreate(delist1, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+    !delist3 = (/ (i, i=0,3) /)
+    !layout3 = ESMF_newDELayoutCreate(delist1, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+    layout3 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
     cname = "Atmosphere Coupler"
     cpl = ESMF_CplCompCreate(cname, layout3, rc=rc)
 
