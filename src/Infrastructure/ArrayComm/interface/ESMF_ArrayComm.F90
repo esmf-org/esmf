@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.63 2004/12/28 07:19:18 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.63.2.1 2005/03/02 21:23:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.63 2004/12/28 07:19:18 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.63.2.1 2005/03/02 21:23:00 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -776,7 +776,6 @@
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       integer :: nDEs, my_DE
       integer :: gridrank, datarank
-      logical :: hascachedroute    ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -835,7 +834,7 @@
 
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
-      ! set up things we need to find a cached route or precompute one
+      ! set up things we need to precompute a route
       call ESMF_ArrayGetAllAxisIndices(array, grid, datamap, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)
 
@@ -855,23 +854,14 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_DE, gl_dst_AI, gl_dst_AI, &
-                               nDEs, delayout, my_DE, gl_src_AI, gl_src_AI, &
-                               nDEs, delayout, periodic, hascachedroute, &
-                               route, status)
+      ! Create the route object.
+      route = ESMF_RouteCreate(vm, rc)
 
-      if (.not. hascachedroute) then
-          ! Create the route object.
-          route = ESMF_RouteCreate(vm, rc)
-
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
-                                        gl_dst_AI, nDEs, &
-                                        globalStartPerDEPerDim, &
-                                        globalCellCountPerDim, delayout, &
-                                        periodic, status)
-      endif
+      call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+                                    gl_dst_AI, nDEs, &
+                                    globalStartPerDEPerDim, &
+                                    globalCellCountPerDim, delayout, &
+                                    periodic, status)
 
       ! and set route into routehandle object
       call ESMF_RouteHandleSet(routehandle, route1=route, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.66.2.1 2005/02/08 23:45:30 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.66.2.2 2005/03/02 21:23:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.66.2.1 2005/02/08 23:45:30 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.66.2.2 2005/03/02 21:23:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1574,7 +1574,6 @@
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       type(ESMF_Route) :: route
       type(ESMF_LocalArray) :: local_array
-      logical :: hascachedroute    ! can we reuse an existing route?
       integer :: nDEs
       integer :: my_DE
       integer, dimension(:), allocatable :: global_count
@@ -1640,7 +1639,7 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! set up things we need to find a cached route or precompute one
+      ! set up things we need to precompute a route
       call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
                                        ftypep%mapping, totalindex=dst_AI, &
                                        compindex=src_AI, rc=status)       
@@ -1661,26 +1660,14 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
           
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.  Note the confusing ordering of args;
-      ! in this case, the receiving exclusive is the same as the source,
-      ! and the receiving total is the same as dst.  ditto for the sending
-      ! side.  these names should be changed to make this clearer.  TODO!
-      call ESMF_RouteGetCached(datarank, my_DE, gl_src_AI, gl_dst_AI, &
-                               AI_count, delayout, my_DE, gl_src_AI, gl_dst_AI, &
-                               AI_count, delayout, periodic, &
-                               hascachedroute, route, status)
+      ! Create the route object.
+      route = ESMF_RouteCreate(vm, rc) 
 
-      if (.not. hascachedroute) then
-          ! Create the route object.
-          route = ESMF_RouteCreate(vm, rc) 
+      call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+                                    gl_dst_AI, AI_count, &
+                                    globalStartPerDEPerDim, &
+                                    global_count, delayout, periodic, status)
 
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
-                                        gl_dst_AI, AI_count, &
-                                        globalStartPerDEPerDim, &
-                                        global_count, delayout, periodic, status)
-
-      endif
 
       ! Once table is full, execute the communications it represents.
 
