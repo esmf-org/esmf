@@ -1,4 +1,4 @@
-% $Id: ESMF_buildreq.tex,v 1.4 2003/02/07 21:35:27 flanigan Exp $
+% $Id: ESMF_buildreq.tex,v 1.5 2003/03/20 00:00:44 btwomack Exp $
 
 \sreq{Build}
 
@@ -30,17 +30,23 @@ for all releases:
 \begin{description}
 \item[all] Builds all libraries, test programs and documentation.
 \item[install] Installs ESMF products.
+
 \item[build\_libs] Builds .so archive files.
 \item[build\_c] Compiles all c and c++ source code.  
 \item[build\_f] Compiles all FORTRAN source code 
-\item[unit\_test\_all] Builds and runs the unit tests
-\item[unit\_test\_c] Builds and runs the unit tests written in c/c++.
-\item[unit\_test\_uni\_c] Builds and runs single processor tests written in c/c++.
-\item[unit\_test\_f] Builds and runs unit tests written in FORTRAN.
-\item[unit\_test\_uni\_f] Builds and runs the single processor tests written in FORTRAN.
-\item[system\_test\_all] Builds and runs all system tests.
-\item[system\_test\_number] Builds and runs a specific system test.
-\item[docs] Builds all formats of the documentation.
+
+\item[tests] Builds and runs the unit tests
+\item[tests\_uni] Builds and runs single processor unit tests.
+\item[build\_tests] Builds the unit tests.
+\item[run\_tests] Runs unit tests.
+\item[run\_tests\_uni] Runs the single processor tests.
+\item[system\_tests] Builds and runs system tests.
+\item[system\_tests\_uni] Builds and runs single processor system tests.
+\item[build\_system\_tests] Builds system tests.
+\item[run\_system\_tests] Runs system tests.
+\item[run\_system\_tests\_uni] Runs single processor system tests.
+
+\item[alldoc] Builds all formats of the documentation.
 \item[dvi] Builds dvi documentation files.
 \item[pdf] Builds pdf documentation files.
 \item[html] Builds html documentation files.
