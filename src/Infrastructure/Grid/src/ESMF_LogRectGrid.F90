@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.26 2004/03/02 00:03:39 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.27 2004/03/03 17:44:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.26 2004/03/02 00:03:39 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.27 2004/03/03 17:44:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3021,13 +3021,40 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.  Since a single
+!     {\tt ESMF\_Grid} can have many {\tt ESMF\_DistGrids}, the correct
+!     {\tt ESMF\_DistGrid} must be identified by this calling routine.  For a 3D
+!     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
+!     and vertical grids if querying for an array of values, like
+!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} can be identified
+!     using one of three input variables:
+!        (1) horzDistGridId and/or vertDistGridId;
+!        (2) horzPhysGridId and/or vertPhysGridId;
+!        (3) horzRelLoc and/or vertRelLoc.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[MyDE]}]
+!     \item[{[horzDistGridId]}]
+!          Integer identifier for {\tt ESMF\_DistGrid} corresponding to the
+!          horizontal grid.
+!     \item[{[vertDistGridId]}]
+!          Integer identifier for {\tt ESMF\_DistGrid} corresponding to the
+!          vertical grid.
+!     \item[{[horzPhysGridId]}]
+!          Integer identifier for {\tt ESMF\_PhysGrid} corresponding to the
+!          horizontal grid.
+!     \item[{[vertPhysGridId]}]
+!          Integer identifier for {\tt ESMF\_PhysGrid} corresponding to the
+!          vertical grid.
+!     \item[{[horzRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
+!     \item[{[myDE]}]
 !          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
@@ -3049,7 +3076,15 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: distGridIdUse
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      integer :: gridRank, aSize(3), i
+      logical :: horzIsNeeded, vertIsNeeded
+      logical ::  horzIsValid,  vertIsValid
+      integer :: horzCellCount, vertCellCount
+      integer, dimension(3) :: localCellCountPerDimUse, &
+                               globalStartPerDimUse
+      type(ESMF_AxisIndex), dimension(3) :: globalAIPerDimUse
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -3059,21 +3094,156 @@
         rc = ESMF_FAILURE
       endif
 
-! TODO: add code to get distgridId from relloc or physgridId, test for the
-!       presence of at least one of these optional arguments
-      distGridIdUse = 1          ! default
-      if (present(horzDistGridId)) distGridIdUse = horzDistGridId
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
+      horzIsNeeded  = .false.
+      vertIsNeeded  = .false.
+      horzIsValid   = .false.
+      vertIsValid   = .false.
+
+      ! Get the grid rank -- to be used to decide if there is even a
+      !                      vertical grid available
+      gridRank = grid%ptr%numDims
+
+      ! if one of the identifiers is valid, get the distgrid identifier
+      if (present(horzRelLoc)) then
+        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
+          return
+        endif
+      endif
+      if (present(horzPhysGridId)) then
+        if ((horzPhysGridId.ge.1) .and. &
+            (horzPhysGridId.le.grid%ptr%numPhysGrids)) then
+          if (horzPhysIdUse.ne.-1) then
+             ! TODO: print warning that the distgrid identifier has mult ids 
+          endif
+          horzPhysIdUse = horzPhysGridId
+          horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+          horzIsValid   = .true.
+       endif
+      endif
+      if (present(horzDistGridId)) then
+        if ((horzDistGridId.ge.1) .and. &
+            (horzDistGridId.le.grid%ptr%numDistGrids)) then
+          if (horzDistIdUse.ne.-1) then
+             ! TODO: print warning that the distgrid identifier has mult ids 
+          endif
+          horzDistIdUse = horzDistGridId
+          horzIsValid   = .true.
+       endif
+      endif
+
+      if (present(vertRelLoc)) then
+        call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
+          return
+        endif
+      endif
+      if (present(vertPhysGridId)) then
+        if ((vertPhysGridId.ge.1) .and. &
+            (vertPhysGridId.le.grid%ptr%numPhysGrids)) then
+          if (vertPhysIdUse.ne.-1) then
+             ! TODO: print warning that the distgrid identifier has mult ids 
+          endif
+          vertPhysIdUse = vertPhysGridId
+          vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+          vertIsValid   = .true.
+       endif
+      endif
+      if (present(vertDistGridId)) then
+        if ((vertDistGridId.ge.1) .and. &
+            (vertDistGridId.le.grid%ptr%numDistGrids)) then
+          if (vertDistIdUse.ne.-1) then
+             ! TODO: print warning that the distgrid identifier has mult ids 
+          endif
+          vertDistIdUse = vertDistGridId
+          vertIsValid   = .true.
+       endif
+      endif
+
+      ! TODO: make sure the horzDistIdUse points to a horizontal distgrid,
+      !       same for vert
+
+      ! decide if the user is querying the horz grid, the vert grid, or both
+      ! first check maximum size of array variables
+      aSize = 0
+      if (present(localCellCountPerDim)) aSize(1)=size(localCellCountPerDim)
+      if (present(   globalStartPerDim)) aSize(2)=size(   globalStartPerDim)
+      if (present(      globalAIPerDim)) aSize(3)=size(      globalAIPerDim)
+      if (maxval(aSize).lt.gridRank) then
+        print *, "ERROR in ESMF_LRGridGetDE: ", &
+                 "input array sizes less than the corresponding grid rank"
+        return
+      endif
+      if (maxval(aSize).gt.0) horzIsNeeded = .true.
+      if (maxval(aSize).ge.3 .and. gridRank.eq.3) vertIsNeeded = .true.
+
+      ! next look at scalar variables
+      if (present(localCellCount)) then
+        horzIsNeeded = .true.
+        if (gridRank.eq.3) vertIsNeeded = .true.
+      endif
+      ! myDE could come from either.  if it is the only query argument this
+      ! could cause an error because at least one of the distgrids will be needed
+      ! TODO: fix
+
+      ! print error message if an identifier is needed but not valid
+      if (horzIsNeeded .and. .not.(horzIsValid)) then
+        print *, "ERROR in ESMF_LRGridGetDE: ", &
+                 "need a valid horizontal distgrid identifier"
+        return
+      endif
+      if (vertIsNeeded .and. .not.(vertIsValid)) then
+        print *, "ERROR in ESMF_LRGridGetDE: ", &
+                 "need a valid vertical distgrid identifier"
+        return
+      endif
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridGetDE(grid%ptr%distgrids(distGridIdUse)%ptr, MyDE, &
-                              localCellCount, localCellCountPerDim, &
-                              globalStartPerDim, globalAIPerDim, &
-                              total=total, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
-        return
+      horzCellCount = 1
+      vertCellCount = 1
+      if (horzIsNeeded) then
+        call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, myDE, &
+                                horzCellCount, &
+                                localCellCountPerDimUse(1:2), &
+                                globalStartPerDimUse(1:2), &
+                                globalAIPerDimUse(1:2), &
+                                total=total, rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
+          return
+        endif
       endif
+      if (vertIsNeeded) then
+        call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, myDE, &
+                                vertCellCount, &
+                                localCellCountPerDimUse(3:3), &
+                                globalStartPerDimUse(3:3), &
+                                globalAIPerDimUse(3:3), &
+                                total=total, rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
+          return
+        endif
+      endif
+
+      ! load local values into return arguments
+      if (present(localCellCount)) localCellCount = horzCellCount*vertCellCount
+      do i = 1,gridRank
+        if (present(localCellCountPerDim)) &
+                    localCellCountPerDim(i) = localCellCountPerDimUse(i)
+        if (present(   globalStartPerDim)) &
+                       globalStartPerDim(i) =    globalStartPerDimUse(i)
+        if (present(      globalAIPerDim)) &
+                          globalAIPerDim(i) =       globalAIPerDimUse(i)
+      enddo
 
       if(rcpresent) rc = ESMF_SUCCESS
 
