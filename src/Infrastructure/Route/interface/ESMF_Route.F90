@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.46 2004/04/09 19:55:35 theurich Exp $
+! $Id: ESMF_Route.F90,v 1.47 2004/04/09 21:58:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,14 +97,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.46 2004/04/09 19:55:35 theurich Exp $'
+      '$Id: ESMF_Route.F90,v 1.47 2004/04/09 21:58:33 nscollins Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
 !      interface ESMF_RouteCreate 
 
@@ -115,7 +115,7 @@
 !     This interface provides a single entry point for Route create
 !     methods.
 !
-!EOP
+!EOPI
 !      end interface 
 !
 !------------------------------------------------------------------------------
@@ -770,7 +770,7 @@
         end subroutine ESMF_RouteRun
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteRunF90PtrI411D - Execute the communications the Route represents
 
 ! !INTERFACE:
@@ -798,7 +798,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -827,7 +827,7 @@
         end subroutine ESMF_RouteRunF90PtrI411D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteRunF90PtrI421D - Execute the communications the Route represents
 
 ! !INTERFACE:
@@ -855,7 +855,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -884,7 +884,7 @@
         end subroutine ESMF_RouteRunF90PtrI421D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteRunF90PtrR811D - Execute the communications the Route represents
 
 ! !INTERFACE:
@@ -912,7 +912,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -941,7 +941,7 @@
         end subroutine ESMF_RouteRunF90PtrR811D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteRunF90PtrR821D - Execute the communications the Route represents
 
 ! !INTERFACE:
@@ -969,7 +969,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -998,9 +998,9 @@
         end subroutine ESMF_RouteRunF90PtrR821D
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RouteRunF90PtrR832D - Execute the communications the Route represents
-
+!
 ! !INTERFACE:
       subroutine ESMF_RouteRunF90PtrR832D(route, srcarray, dstarray, rc)
 !
@@ -1026,7 +1026,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -1154,7 +1154,7 @@
         end subroutine ESMF_RoutePrecomputeHalo
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RoutePrecomputeRedist - Precompute communication paths
 
 ! !INTERFACE:
@@ -1195,7 +1195,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -1268,7 +1268,7 @@
         end subroutine ESMF_RoutePrecomputeRedist
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RoutePrecomputeRegrid - Precompute communication paths
 
 ! !INTERFACE:
@@ -1310,7 +1310,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
@@ -1376,7 +1376,7 @@
         end subroutine ESMF_RoutePrecomputeRegrid
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RoutePrecomputeDomList - Precompute communication paths
 
 ! !INTERFACE:
@@ -1404,7 +1404,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
         ! local variables
