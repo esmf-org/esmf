@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.4 2004/08/26 19:12:48 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.5 2004/09/17 22:16:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,10 +44,12 @@
 
     ! Internal State Variables
     type testData
+    sequence
         integer :: testNumber
     end type
 
     type dataWrapper
+    sequence
         type(testData), pointer :: p
     end type
 
