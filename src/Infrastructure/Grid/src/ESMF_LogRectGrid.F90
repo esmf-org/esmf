@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.6 2004/01/28 21:46:48 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.7 2004/01/28 22:00:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.6 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.7 2004/01/28 22:00:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1508,7 +1508,7 @@
         ! Arakawa A (centered velocity)
         case (1)
 
-        ! Arakawa B (velocities at grid corner)
+        ! Arakawa B_NE (velocities at NE grid corner)
         case (2)
           distGridName = 'cell_necorner'
           physGridName = 'cell_necorner'
@@ -1530,8 +1530,75 @@
           distGridId = distGridId + 1
           physGridId = physGridId + 1 
 
-        ! Arakawa C (velocities at cell faces)
+        ! Arakawa B_SW (velocities at SW grid corner)
         case (3)
+          distGridName = 'cell_swcorner'
+          physGridName = 'cell_swcorner'
+          relloc = ESMF_CELL_SWCORNER
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1 
+
+        ! Arakawa B_SE (velocities at SE grid corner)
+        case (4)
+          distGridName = 'cell_secorner'
+          physGridName = 'cell_secorner'
+          relloc = ESMF_CELL_SECORNER
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+
+        ! Arakawa B_NW (velocities at NW grid corner)
+        case (5)
+          distGridName = 'cell_nwcorner'
+          physGridName = 'cell_nwcorner'
+          relloc = ESMF_CELL_NWCORNER
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+
+        ! Arakawa C_NE (U at E face, V at N face) and 
+        ! Arakawa D_NE (V at E face, U at N face)
+        case (6,10)
           distGridName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
@@ -1551,9 +1618,6 @@
           endif
           distGridId = distGridId + 1
           physGridId = physGridId + 1
-
-        ! Arakawa D
-        case (4)
           distGridName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
@@ -1574,9 +1638,115 @@
           distGridId = distGridId + 1
           physGridId = physGridId + 1
 
+        ! Arakawa C_SW (U at W face, V at S face) and
+        ! Arakawa D_SW (V at W face, U at S face)
+        case (7,11)
+          distGridName = 'cell_wface'
+          physGridName = 'cell_wface'
+          relloc = ESMF_CELL_WFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+          distGridName = 'cell_sface'
+          physGridName = 'cell_sface'
+          relloc = ESMF_CELL_SFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+
+        ! Arakawa C_SE (U at E face, V at S face) and
+        ! Arakawa D_SE (V at E face, U at S face)
+        case (8,12)
           distGridName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+          distGridName = 'cell_sface'
+          physGridName = 'cell_sface'
+          relloc = ESMF_CELL_SFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+
+        ! Arakawa C_NW (U at W face, V at N face) and
+        ! Arakawa D_NW (V at W face, U at N face)
+        case (9,13)
+          distGridName = 'cell_wface'
+          physGridName = 'cell_wface'
+          relloc = ESMF_CELL_WFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add DistGrid"
+            return
+          endif
+          call ESMF_LRGridAddPhysGrid(grid, numDimsGrid, counts, physGridId, &
+                                      distGridId, relloc, min, max, &
+                                      physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeUniform: Add PhysGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
+          distGridName = 'cell_nface'
+          physGridName = 'cell_nface'
+          relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
                                       distGridName=distGridName, rc=status)
@@ -1622,10 +1792,10 @@
         select case (grid%vertStagger%stagger)
 
           ! ESMF_GridStagger_VertCenter - vertical velocity at vertical midpoints
-          case (7)
+          case (16)
 
-          ! ESMF_GridStagger_VertFace - vertical velocity at vertical face
-          case (8)
+          ! ESMF_GridStagger_VertFace - vertical velocity at top vertical face
+          case (17)
             distGridName = 'vertical top face'
             physGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
@@ -1817,7 +1987,7 @@
         ! Arakawa A (centered velocity)
         case (1)
 
-        ! Arakawa B (velocities at grid corner)
+        ! Arakawa B_NE (velocities at NE grid corner)
         case (2)
           distGridName = 'cell_necorner'
           physGridName = 'cell_necorner'
@@ -1841,8 +2011,81 @@
           endif
           physGridId = physGridId + 1 
 
-        ! Arakawa C (velocities at cell faces)
+        ! Arakawa B_SW (velocities at SW grid corner)
         case (3)
+          distGridName = 'cell_swcorner'
+          physGridName = 'cell_swcorner'
+          relloc = ESMF_CELL_SWCORNER
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+
+        ! Arakawa B_SE (velocities at SE grid corner)
+        case (4)
+          distGridName = 'cell_secorner'
+          physGridName = 'cell_secorner'
+          relloc = ESMF_CELL_SECORNER
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+
+        ! Arakawa B_NW (velocities at NW grid corner)
+        case (5)
+          distGridName = 'cell_nwcorner'
+          physGridName = 'cell_nwcorner'
+          relloc = ESMF_CELL_NWCORNER
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+
+        ! Arakawa C_NE (U at E face, V at N face) and
+        ! Arakawa D_NE (V at E face, U at N face)
+        case (6,10)
           distGridName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
@@ -1864,9 +2107,6 @@
             return
           endif
           physGridId = physGridId + 1 
-
-        ! Arakawa D
-        case (4)
           distGridName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
@@ -1889,9 +2129,125 @@
           endif
           physGridId = physGridId + 1 
 
+        ! Arakawa C_SW (U at W face, V at S face) and
+        ! Arakawa D_SW (V at W face, U at S face)
+        case (7,11)
+          distGridName = 'cell_wface'
+          physGridName = 'cell_wface'
+          relloc = ESMF_CELL_WFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+          distGridName = 'cell_sface'
+          physGridName = 'cell_sface'
+          relloc = ESMF_CELL_SFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+
+        ! Arakawa C_SE (U at E face, V at S face) and
+        ! Arakawa D_SE (V at E face, U at S face)
+        case (8,12)
           distGridName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+          distGridName = 'cell_sface'
+          physGridName = 'cell_sface'
+          relloc = ESMF_CELL_SFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+
+        ! Arakawa C_NW (U at W face, V at N face) and
+        ! Arakawa D_NW (V at W face, U at N face)
+        case (9,13)
+          distGridName = 'cell_wface'
+          physGridName = 'cell_wface'
+          relloc = ESMF_CELL_WFACE
+          call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
+                                      layout, decompIdsUse(1:2), periodic, &
+                                      countsPerDEDim1=countsPerDEDim1, &
+                                      countsPerDEDim2=countsPerDEDim2, &
+                                      distGridName=distGridName, rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add DistGrid"
+            return
+          endif
+          distGridId = distGridId + 1
+          call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
+                                      coord2, countsPerDEDim1, countsPerDEDim2, min, &
+                                      dimNames, dimUnits, physGridName, status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridDistributeSpecd: Add PhysGrid"
+            return
+          endif
+          physGridId = physGridId + 1 
+          distGridName = 'cell_nface'
+          physGridName = 'cell_nface'
+          relloc = ESMF_CELL_NFACE
           call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                       layout, decompIdsUse(1:2), periodic, &
                                       countsPerDEDim1=countsPerDEDim1, &
@@ -3504,7 +3860,35 @@
           enddo
         enddo
 
-        ! TODO: rest of the corners
+      elseif (relloc .eq. ESMF_CELL_SWCORNER) then
+        do i = 1,counts(1)
+          coordUse1 = coord1(i)
+          do j = 1,counts(2)
+            coordUse2 = coord2(j)
+            temp1(i,j) = coordUse1 
+            temp2(i,j) = coordUse2
+          enddo
+        enddo
+
+      elseif (relloc .eq. ESMF_CELL_SECORNER) then
+        do i = 1,counts(1)
+          coordUse1 = coord1(i+1)
+          do j = 1,counts(2)
+            coordUse2 = coord2(j)
+            temp1(i,j) = coordUse1 
+            temp2(i,j) = coordUse2
+          enddo
+        enddo
+
+      elseif (relloc .eq. ESMF_CELL_NWCORNER) then
+        do i = 1,counts(1)
+          coordUse1 = coord1(i)
+          do j = 1,counts(2)
+            coordUse2 = coord2(j+1)
+            temp1(i,j) = coordUse1 
+            temp2(i,j) = coordUse2
+          enddo
+        enddo
 
       else
         print *, "This relative location not yet supported in ", &
@@ -3724,7 +4108,41 @@
             enddo
           enddo
 
-        ! TODO: rest of the corners
+        elseif (relloc .eq. ESMF_CELL_SWCORNER) then
+          do i = 1,counts(1)
+            i1 = i - gridBoundWidth
+            coord1 = delta(1)*real(i1-1) + min(1)
+            do j = 1,counts(2)
+              j1 = j - gridBoundWidth
+              coord2 = delta(2)*real(j1-1) + min(2)
+              temp1(i,j) = coord1 
+              temp2(i,j) = coord2 
+            enddo
+          enddo
+
+        elseif (relloc .eq. ESMF_CELL_SECORNER) then
+          do i = 1,counts(1)
+            i1 = i - gridBoundWidth
+            coord1 = delta(1)*real(i1) + min(1)
+            do j = 1,counts(2)
+              j1 = j - gridBoundWidth
+              coord2 = delta(2)*real(j1-1) + min(2)
+              temp1(i,j) = coord1 
+              temp2(i,j) = coord2 
+            enddo
+          enddo
+
+        elseif (relloc .eq. ESMF_CELL_NWCORNER) then
+          do i = 1,counts(1)
+            i1 = i - gridBoundWidth
+            coord1 = delta(1)*real(i1-1) + min(1)
+            do j = 1,counts(2)
+              j1 = j - gridBoundWidth
+              coord2 = delta(2)*real(j1) + min(2)
+              temp1(i,j) = coord1 
+              temp2(i,j) = coord2 
+            enddo
+          enddo
 
         else
           print *, "This relative location not yet supported in ", &
