@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_l2h,v 1.3 2002/10/14 21:53:31 cdeluca Exp $
+# $Id: do_l2h,v 1.4 2003/02/03 18:15:35 nscollins Exp $
 #
 #===============================================================================
 # do_l2h
@@ -44,6 +44,7 @@ else
 	    -toc_depth 5 \
 	    -split +1 \
 	    -show_section_numbers \
+	    -local_icons \
 	    -address "<A HREF="mailto:esmf@ucar.edu">esmf@ucar.edu</A>" \
 	    $1_$2doc.tex
 endif
