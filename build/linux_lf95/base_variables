@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.10 2003/04/10 22:44:17 flanigan Exp $ 
+# $Id: base_variables,v 1.11 2003/04/11 20:03:53 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -40,7 +40,7 @@ CXX_CLINKER	   = g++
 CXX_FLINKER	   = g++
 CXX_CCV		   = ${CXX_CC} --version
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
-CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+CXX_SYS_LIB	   = -ldl -lc -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = lf95 -verbose 
 C_F90CXXLIBS       = /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/libgcc.a \
@@ -68,6 +68,7 @@ SL_LIBOPTS  = -shared
 #SL_LINKOPTS = -rpath $(ESMF_LIBDIR)
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR)
-SL_C_LINKER = $(CXXF90LD)
+SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
 
 include $(ESMF_BUILD_DIR)/common_variables
+`
