@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/02/11 23:20:02 nscollins Exp $ 
+# $Id: makefile,v 1.5 2004/02/25 00:00:52 jwolfe Exp $ 
 
 ALL:  build_examples
 
@@ -57,8 +57,8 @@ LOCDIR	  = src/Superstructure/Xform/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_XformEx \
-                 $(ESMF_EXDIR)/ESMF_XformEx 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_XformEx
+#                 $(ESMF_EXDIR)/ESMC_XformEx 
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -66,12 +66,12 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_XformEx \
 # in this makefile.
 #
 
-EXAMPLES_RUN   = run_ESMC_XformEx \
-                 run_ESMF_XformEx   
+EXAMPLES_RUN   = run_ESMF_XformEx
+#                 run_ESMC_XformEx   
 
 
-EXAPMLES_RUN_UNI = run_ESMC_XformEx_uni \
-                   run_ESMF_XformEx_uni   
+EXAPMLES_RUN_UNI = run_ESMF_XformEx_uni \
+#                   run_ESMC_XformEx_uni   
 
 include $(ESMF_DIR)/makefile
 
@@ -93,10 +93,10 @@ run_ESMC_XformEx_uni:
 
 
 #
-# EMSF_XformEx
+# ESMF_XformEx
 #
-run_EMSF_XformEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_XformEx > $(ESMF_EXDIR)/EMSF_XformEx.stdout
+run_ESMF_XformEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_XformEx > $(ESMF_EXDIR)/ESMF_XformEx.stdout
 
-run_EMSF_XformEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_XformEx > $(ESMF_EXDIR)/EMSF_XformEx.stdout
+run_ESMF_XformEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_XformEx > $(ESMF_EXDIR)/ESMF_XformEx.stdout
