@@ -1,11 +1,52 @@
-% $Id: user_arch.tex,v 1.15 2005/03/10 22:02:41 jwolfe Exp $
+% $Id: user_arch.tex,v 1.16 2005/03/11 20:59:30 nscollins Exp $
 
 % List of architectures supported.  This file is 
 % meant to be included in a user doc.
 
-The following table lists the environment variable settings used by
-the ESMF build system for supported platforms (default values are bold if 
-options are available). \vspace{1ex}
+The following two tables list various combinations of environment 
+variable settings used by the ESMF build system.   A {\tt default}
+value in the compiler column indicates the vendor compiler.
+
+The first table lists the exact combinations
+which are tested regularly and are fully supported.
+The second table lists all
+possible combinations which are included in the build system.
+
+\vspace{1ex}
+{\bf Fully tested combinations}:
+\vspace{1ex}
+
+\begin{tabular}{lcccc}
+  &{\bfseries ESMF\_ARCH} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_PREC} \\
+
+Alpha       &  OSF1    &  default      &  mpi       &  64  \\
+Cray X1     &  Unicos  &  default      &  mpi       &  64  \\
+IBM RS6000  &  AIX     &  default      &  mpi       &  32  \\
+IBM RS6000  &  AIX     &  default      &  mpi       &  64  \\
+Linux 	    &  Linux   &  absoft       &  mpich     &  32  \\
+Linux 	    &  Linux   &  intel        &  mpich     &  32  \\
+Linux 	    &  Linux   &  intel        &  lam       &  64  \\
+Linux 	    &  Linux   &  lahey        &  mpich     &  32  \\
+Linux 	    &  Linux   &  lahey        &  mpiuni    &  32  \\
+Linux 	    &  Linux   &  nag          &  mpich     &  32  \\
+Linux 	    &  Linux   &  pgi          &  mpich     &  32  \\
+Linux 	    &  Linux   &  pgi          &  mpiuni    &  32  \\
+Mac OS X    &  Darwin  &  absoft       &  lam       &  32  \\
+Mac OS X    &  Darwin  &  absoft       &  mpiuni    &  32  \\
+Mac OS X    &  Darwin  &  xlf          &  lam       &  32  \\
+Mac OS X    &  Darwin  &  xlf          &  mpiuni    &  32  \\
+SGI         &  IRIX64  &  default      &  mpi       &  32  \\
+SGI         &  IRIX64  &  default      &  mpi       &  64  \\
+SGI Altix   &  Linux   &  intel        &  mpi       &  64 
+\end{tabular}
+
+\vspace{1ex}
+
+{\bf All possible options}, by platform/compiler.  Where multiple options exist
+the default value is in bold:
+
+\vspace{1ex}
+
 
 \begin{tabular}{lcccc}
   &{\bfseries ESMF\_ARCH} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_PREC} \\
@@ -17,31 +58,16 @@ Linux 	    &  Linux   &  absoft       &  lam, mpich, {\bf mpiuni}      &  32    
 Linux 	    &  Linux   &  intel        &  lam, mpi, mpich, {\bf mpiuni} &  32, {\bf 64} \\
 Linux 	    &  Linux   &  {\bf lahey}  &  lam, mpich, {\bf mpiuni}      &  32           \\
 Linux 	    &  Linux   &  nag          &  lam, mpich, {\bf mpiuni}      &  32           \\
-Linux 	    &  Linux   &  pgi          &  lam, mpich, {\bf mpiuni}      &  32           \\
+Linux 	    &  Linux   &  pathscale    &  lam, mpich, {\bf mpiuni}      &  64           \\
+Linux 	    &  Linux   &  pgi          &  lam, mpich, {\bf mpiuni}      &  {\bf 32}, 64 \\
+Blue Gene   &  Linux   &  xlf          &  mpi                           &  32           \\
 Mac OS X    &  Darwin  &  {\bf absoft} &  lam, mpich, {\bf mpiuni}      &  32           \\
+Mac OS X    &  Darwin  &  nag          &  lam, mpich, {\bf mpiuni}      &  32           \\
 Mac OS X    &  Darwin  &  xlf          &  lam, mpich, {\bf mpiuni}      &  32           \\
 SGI         &  IRIX64  &  default      &  {\bf mpi}, mpiuni             &  32, {\bf 64} \\
 SGI Altix   &  Linux   &  intel        &  {\bf mpi}, mpiuni             &  64 
-\end{tabular}
-
-\vspace{1ex}
-
-The following table lists the environment variable settings used by
-the ESMF build system for platforms where makefiles are provided
-and support is being added. \vspace{1ex}
-
-
-\begin{tabular}{lcccc}
-  &{\bfseries ESMF\_ARCH} &{\bfseries ESMF\_COMPILER} & {\bfseries ESMF\_COMM} & {\bfseries ESMF\_PREC} \\
-
-Mac OS X    &  Darwin  &  nag          &  lam, mpich, {\bf mpiuni}      &  32
 
 \end{tabular}
 
-% these are blue gene and the lightning cluster, respectively
-%Linux 	    &  Linux   &  xlf     &  mpi &  32 \\
-%Linux 	    &  Linux   &  pgi          &  lam, mpich, {\bf mpiuni}      &  64
-
 \vspace{1ex}
-
 
