@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.5 2003/02/03 17:10:19 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.6 2003/02/03 21:40:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,6 +115,21 @@
 
 
 !------------------------------------------------------------------------------
+!     ! ESMF_StateDataValid
+!
+      type ESMF_StateDataValid
+      sequence
+      private
+         integer :: valid
+      end type
+
+      type(ESMF_StateDataValid), parameter :: &
+                ESMF_STATEDATAISVALID = ESMF_StateDataValid(1), &
+                ESMF_STATEDATAINVALID= ESMF_StateDataValid(2), &
+                ESMF_STATEDATAVALIDITYUNKNOWN = ESMF_StateDataValid(3)
+
+
+!------------------------------------------------------------------------------
 !     ! ESMF_DataHolder
 !
 !     ! Make a single data type for Bundles, Fields, and Arrays.
@@ -143,6 +158,7 @@
         type(ESMF_DataHolder), pointer :: datap
         type(ESMF_StateDataNeeded) :: needed
         type(ESMF_StateDataReady) :: ready
+        type(ESMF_StateDataValid) :: valid
         type(ESMF_StateData), pointer :: nextdata
       end type
 
@@ -157,6 +173,7 @@
         type(ESMF_Base) :: base
         type(ESMF_StateImpExpType) :: st
         character (len=ESMF_MAXSTR) :: compname
+        type(ESMF_StateDataValid) :: stvalid
         integer :: datacount
         type(ESMF_StateData), dimension(:), pointer :: datalist
       end type
@@ -182,6 +199,9 @@
       public ESMF_StateDataReady,  ESMF_STATEDATAREADYTOWRITE, &
                                    ESMF_STATEDATAREADYTOREAD, &
                                    ESMF_STATEDATAREADYUNKNOWN
+      public ESMF_StateDataValid,  ESMF_STATEDATAISVALID, &
+                                   ESMF_STATEDATAINVALID, &
+                                   ESMF_STATEDATAVALIDITYUNKNOWN
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -194,6 +214,7 @@
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       !public ESMF_StateGetNeededList   ! returns an array of values
       !public ESMF_State{Get/Set}Ready  ! is data ready
+      !public ESMF_State{Get/Set}Valid  ! has data been validated?
       !public ESMF_State{Get/Set}CompName  ! normally set at create time
       public ESMF_StateTransform
  
@@ -201,14 +222,14 @@
       public ESMF_StateRestore
  
       public ESMF_StatePrint
-      public ESMF_imexeq, ESMF_needeq, ESMF_redyeq
-      public ESMF_imexne, ESMF_needne, ESMF_redyne
+      public ESMF_imexeq, ESMF_needeq, ESMF_redyeq, ESMF_valideq
+      public ESMF_imexne, ESMF_needne, ESMF_redyne, ESMF_validne
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.5 2003/02/03 17:10:19 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.6 2003/02/03 21:40:56 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -303,12 +324,14 @@ interface operator (.eq.)
  module procedure ESMF_imexeq
  module procedure ESMF_needeq
  module procedure ESMF_redyeq
+ module procedure ESMF_valideq
 end interface
 
 interface operator (.ne.)
  module procedure ESMF_imexne
  module procedure ESMF_needne
  module procedure ESMF_redyne
+ module procedure ESMF_validne
 end interface
 
 
@@ -362,6 +385,21 @@ function ESMF_redyne(s1, s2)
  type(ESMF_StateDataReady), intent(in) :: s1, s2
 
  ESMF_redyne = (s1%ready .ne. s2%ready)
+end function
+
+
+function ESMF_valideq(s1, s2)
+ logical ESMF_valideq
+ type(ESMF_StateDataValid), intent(in) :: s1, s2
+
+ ESMF_valideq = (s1%valid .eq. s2%valid)
+end function
+
+function ESMF_validne(s1, s2)
+ logical ESMF_validne
+ type(ESMF_StateDataValid), intent(in) :: s1, s2
+
+ ESMF_validne = (s1%valid .ne. s2%valid)
 end function
 
 
