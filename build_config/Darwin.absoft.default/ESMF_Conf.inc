@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/10/17 19:34:55 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.2 2004/02/11 22:01:46 eschwab Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,7 +11,8 @@ Licensed under the GPL.
 #endif
 
 #if 0
-currently an empty file.  available if #defines needed
-on a per-system basis for F90 code
+Initializers compile & link, but cause several TimeMgr examples and tests
+to crash when trying to "Get" a time or timeinterval or their properties.
 #endif
 
+#define ESMF_NO_INITIALIZERS 1
