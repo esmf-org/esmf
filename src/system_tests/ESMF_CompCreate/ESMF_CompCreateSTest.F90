@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.9 2004/04/26 15:48:04 nscollins Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.10 2004/04/27 13:44:59 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -27,13 +27,11 @@
     implicit none
     
 !   Local variables
-    integer :: delist(64), dummy(2)
-    integer :: i, de_id, ndes, mid, by2, rc
-    character(len=ESMF_MAXSTR) :: cname
+    integer :: i, my_pet, rc
     type(ESMF_VM):: vm
-    type(ESMF_newDELayout) :: layout1, layout2
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
+    character(len=ESMF_MAXSTR) :: cname
         
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -59,11 +57,16 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! get the default global VM
+    ! Get the default global VM
     call ESMF_VMGetGlobal(vm, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    ! Get our pet number for output print statements
+    call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test CompCreate"
-    comp1 = ESMF_GridCompCreate(cname, gridcompType=ESMF_ATM, rc=rc)
+    comp1 = ESMF_GridCompCreate(vm, cname, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompPrint(comp1)
 
@@ -126,12 +129,10 @@
       call ESMF_GridCompFinalize(comp1, imp, exp, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_newDELayoutGet(layout1, localDe=de_id, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
-      print *, "Test finished, de_id = ", de_id
+      print *, "Test finished, my_pet = ", my_pet
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
 
@@ -151,10 +152,6 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(exp, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_newDELayoutDestroy(layout2, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_newDELayoutDestroy(layout1, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -162,7 +159,7 @@
  
  10   print *, "System Test CompCreate complete!"
 
-      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         ! Standard ESMF Test output to log file
         write(failMsg, *) "System Test failure"
         write(testname, *) "System Test CompCreate: Component Create Test"
