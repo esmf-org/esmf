@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.33 2004/02/19 21:21:33 jwolfe Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.34 2004/02/25 22:56:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.33 2004/02/19 21:21:33 jwolfe Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.34 2004/02/25 22:56:32 svasquez Exp $'
 !
 !==============================================================================
 !
@@ -282,6 +282,8 @@ end subroutine
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayReorder
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayReorder(array, newarrayspec, newarray, rc)
 !
@@ -322,6 +324,8 @@ end subroutine
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayGet
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayGet(array, rank, type, kind, counts, &
                                lbounds, ubounds, strides, base, name, rc)
@@ -507,6 +511,8 @@ end subroutine
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayCheckpoint
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayCheckpoint(array, iospec, rc)
 !
@@ -534,6 +540,8 @@ end subroutine
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayRestore
+!
 ! !INTERFACE:
       function ESMF_ArrayRestore(name, iospec, rc)
 !
@@ -574,6 +582,8 @@ end subroutine
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayWrite
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayWrite(array, iospec, filename, rc)
 !
@@ -627,6 +637,8 @@ end subroutine
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayRead
+!
 ! !INTERFACE:
       function ESMF_ArrayRead(name, iospec, rc)
 !
