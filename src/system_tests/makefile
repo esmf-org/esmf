@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.2 2003/09/18 21:54:15 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/18 22:47:17 cdeluca Exp $ 
 
 all: system_tests
 
-LOCDIR   = src/SystemTests
+LOCDIR   = src/system_tests
 
 include $(ESMF_DIR)/makefile
 

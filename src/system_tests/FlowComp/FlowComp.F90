@@ -1,6 +1,6 @@
-! $Id: FlowComp.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: FlowComp.F90,v 1.2 2003/09/18 22:47:18 cdeluca Exp $
 !
-! System test code #74558
+! System test FlowComp
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,12 +8,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 74558.  1 components solving fluid flow PDE's using.
+! System test FlowComp.  1 components solving fluid flow PDE's using.
 ! ESMF Infrastructure.
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest74558
+    program FlowComp
 
 #include <ESMF_Macros.inc>
 
@@ -57,7 +57,7 @@
 !
     rc = ESMF_FAILURE
 
-    print *, "System Test #74558:"
+    print *, "System Test FlowComp:"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -67,7 +67,7 @@
 !
 
     ! Create the top level application component.
-    aname = "System Test #74558"
+    aname = "System Test FlowComp"
     app = ESMF_AppCompCreate(aname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(aname), ",  rc =", rc
@@ -206,12 +206,12 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test #74558 complete!"
+10    print *, "System Test FlowComp complete!"
 
 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         write(failMsg, *)  "System Test failure"
-        write(testname, *) "System Test 74558: Fluid Solver, single component"
+        write(testname, *) "System Test FlowComp: Fluid Solver, single component"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
@@ -232,7 +232,7 @@
       call ESMF_AppCompDestroy(app, rc)
       ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
 
-      end program ESMF_SysTest74558
+      end program FlowComp
     
 !\end{verbatim}
     
