@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.h,v 1.8 2003/03/14 22:55:35 nscollins Exp $
+// $Id: ESMC_CommTable.h,v 1.9 2003/07/02 17:14:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,6 +56,7 @@
 
    private:
       int myid;            // this de's id number
+      int decount;         // actual number of DEs
       int commcount;       // number of pairwise send/recvs
       int *commpartner;    // array of comm ids for communication partners
       int *commneeded;     // array of flags set if comm needed between partners
@@ -90,6 +91,8 @@
 //
   private: 
     int ESMC_CommTableExtend(int newcount);
+    // generate a communication list/pattern for the requested number of DEs
+    int ESMC_CommTableFill(void);
 
 //
 //EOP
@@ -106,5 +109,6 @@
 
  ESMC_CommTable *ESMC_CommTableCreate(int myid, int partnercount, int *rc);
  int ESMC_CommTableDestroy(ESMC_CommTable *commtable);
+
 
  #endif  // ESMC_CommTable_H
