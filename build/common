@@ -1,4 +1,4 @@
-# $Id: common,v 1.11 2002/11/04 22:59:40 nscollins Exp $ 
+# $Id: common,v 1.12 2002/12/11 18:31:59 nscollins Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -237,40 +237,40 @@ alltree: ${ACTION}
 # --------------------------------------------------------------------
 .SUFFIXES: .f .f90 .F .F90 ${SUFFIXES} .C .cc .cpp .r .rm .so
 
-.c.o: 
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-.c.a:
-	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-.cpp.o .cc.o .C.o: 
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-.cpp.a .cc.a .C.a: 
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.F.o .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
-
-.h.tex:
-	${PROTEX} -bF +f $< > doc/$*.tex
-
-.F.tex .F90.tex:
-	${PROTEX} -bF +f $< > doc/$*.tex
-
-.F.a: 
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
-.f.o .f90.o: 
-	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
-.f.a: 
-	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
-	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-	${RM} $*.o
-
+#  .c.o: 
+#  	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+#  .c.a:
+#  	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+#  	${RM} $*.o
+#  .cpp.o .cc.o .C.o: 
+#  	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+#  .cpp.a .cc.a .C.a: 
+#  	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
+#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+#  	${RM} $*.o
+#  
+#  .F.o .F90.o:
+#  	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+#  
+#  .h.tex:
+#  	${PROTEX} -bF +f $< > doc/$*.tex
+#  
+#  .F.tex .F90.tex:
+#  	${PROTEX} -bF +f $< > doc/$*.tex
+#  
+#  .F.a: 
+#  	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+#  	${RM} $*.o
+#  
+#  .f.o .f90.o: 
+#  	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
+#  .f.a: 
+#  	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
+#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+#  	${RM} $*.o
+#  
 #
 #  These rules are for compiling the test examples.
 #
