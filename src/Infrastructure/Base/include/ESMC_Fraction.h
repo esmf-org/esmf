@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.h,v 1.3 2004/11/12 01:02:37 eschwab Exp $
+// $Id: ESMC_Fraction.h,v 1.4 2004/11/18 23:00:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,6 +96,11 @@ class ESMC_Fraction
     // division methods
     ESMC_Fraction  operator/ (ESMF_KIND_I4 divisor) const;
     ESMC_Fraction& operator/=(ESMF_KIND_I4 divisor);
+    ESMF_KIND_R8   operator/ (const ESMC_Fraction &) const;
+
+    // modulus methods
+    ESMC_Fraction  operator% (const ESMC_Fraction &) const;
+    ESMC_Fraction& operator%=(const ESMC_Fraction &); 
 
     // explicit assignment operator to support ESMC_BaseTime::operator=
     // and ESMC_TimeInterval::operator=

@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.3 2004/11/12 01:02:38 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.4 2004/11/18 23:00:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.3 2004/11/12 01:02:38 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.4 2004/11/18 23:00:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -506,7 +506,7 @@
       ESMF_KIND_I4 b) {  // in - the second number
 //
 // !DESCRIPTION:
-//      Uses GCD determine the Least Common Multiple of a and b.
+//      Uses GCD to determine the Least Common Multiple of a and b.
 //      LCM = (a * b) / GCD(a,b)
 //
 //EOP
@@ -982,17 +982,17 @@
     ESMF_KIND_I4 remainder;
     ESMF_KIND_I8 denominator;
 
-    // fractional part division.  don't just multiply the denominator; avoid
-    //   overflow, especially with large denominators such as 1,000,000,000
-    //   for nanoseconds.  So divide numerator and add back any remainder.
+    // fractional part division.  don't just blindly multiply denominator;
+    //   avoid overflow, especially with large denominators such as
+    //   1,000,000,000 for nanoseconds.  So divide numerator and add back
+    //   any remainder.
     quotient.n = n / divisor;
     quotient.d = d;
 
     // check remainder and add back
-    remainder = n % divisor;
-    if (remainder != 0) {
+    if ((remainder = n % divisor) != 0) {
       // upper bounds check of (d * divisor)
-      denominator = (ESMF_KIND_I8) d * (ESMF_KIND_I8) divisor;
+      denominator = (ESMF_KIND_I8) d * (ESMF_KIND_I8) divisor; // must do it!
       if (denominator < INT_MIN || denominator > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "; denominator value abs(%lld) > %d, won't fit in "
@@ -1047,6 +1047,132 @@
     return(*this);
 
 }  // end ESMC_Fraction::operator/=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(/) - Divide two fractions, return double precision result
+//
+// !INTERFACE:
+      ESMF_KIND_R8 ESMC_Fraction::operator/(
+//
+// !RETURN VALUE:
+//    ESMF_KIND_R8 result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {  // in - ESMC_Fraction
+                                              //        to divide by
+//
+// !DESCRIPTION:
+//    Returns this fraction divided by given fraction as a double
+//    precision quotient.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator/(fraction)"
+
+    // check for divide-by-zero
+    if (d == 0 || fraction.d == 0 || 
+        fraction.w * fraction.d + fraction.n == 0) {
+      ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+      return(ESMF_FAILURE);
+    }
+
+    ESMF_KIND_R8 quotient = 
+      (w + (ESMF_KIND_R8) n / (ESMF_KIND_R8) d) /
+        (fraction.w + (ESMF_KIND_R8) fraction.n / (ESMF_KIND_R8) fraction.d);
+
+    return(quotient);
+
+}  // end ESMC_Fraction::operator/
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(\%) - Computes the modulus of two fractions
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_Fraction::operator%(
+//
+// !RETURN VALUE:    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) const {  // in - ESMC_Fraction
+                                              //        to modulo by
+//// !DESCRIPTION:
+//    Returns this fraction modulo by given fraction
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Fraction::operator%(fraction)"
+
+    ESMC_Fraction remainder;
+
+    // if no fractional part, just modulus the whole parts
+    if (n == 0 && fraction.n == 0) {
+      // check for divide-by-zero
+      if (fraction.w != 0) {
+        remainder.n = w % fraction.w;
+      } else {
+        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+        return(ESMF_FAILURE);
+      }
+
+    // otherwise, perform fraction modulus
+    } else {
+      // check for divide-by-zero
+      if (d == 0 || fraction.d == 0) {
+        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+        return(ESMF_FAILURE);
+      }
+
+      ESMF_KIND_I4 lcm = ESMC_FractionLCM(d, fraction.d);
+
+      // convert *this fraction and given fraction into improper form with a 
+      // common denominator and then compute remainder
+      remainder.d = (fraction.w * fraction.d + fraction.n) * (lcm/fraction.d);
+      if (remainder.d != 0) {
+        remainder.n = ((w*d + n) * (lcm/d)) % remainder.d;
+      } else {
+        ESMC_LogDefault.ESMC_LogFoundError(ESMC_RC_DIV_ZERO, ESMC_NULL_POINTER);
+        return(ESMF_FAILURE);
+      }
+    }
+
+    // normalize, but don't reduce; maintains denominators where possible.
+    //   eg. 1000 (milli), 1,000,000 (micro), 1,000,000,000 (nano).
+    remainder.ESMC_FractionNormalize();
+
+    return(remainder);
+
+}  // end ESMC_Fraction::operator%
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(\%=) - Computes the modulus of two fractions
+//
+// !INTERFACE:
+      ESMC_Fraction& ESMC_Fraction::operator%=(
+//
+// !RETURN VALUE:    ESMC_Fraction& result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) {  // in - ESMC_Fraction
+                                        //        to modulo by
+//// !DESCRIPTION:
+//    Returns this fraction modulo by given fraction
+//
+//EOP
+// !REQUIREMENTS:
+
+    // just reuse (%) operator defined above!
+    *this = *this % fraction;
+
+    return(*this);
+
+}  // end ESMC_Fraction::operator%=
 
 //-------------------------------------------------------------------------
 //BOP
