@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.1 2003/01/29 00:00:28 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,9 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
+      use ESMF_ArrayMod
+      use ESMF_FieldMod
+      use ESMF_BundleMod
       !use ESMF_ComponentMod
       implicit none
 
@@ -72,12 +75,12 @@
       end type
 
       type(ESMF_StateObjectType), parameter :: &
-                ESMF_BUNDLE = ESMF_StateObjectType(1), &
-                ESMF_FIELD = ESMF_StateObjectType(2), &
-                ESMF_ARRAY = ESMF_StateObjectType(3), &
-                ESMF_DATANAME = ESMF_StateObjectType(4), &
-                ESMF_LAST = ESMF_StateObjectType(5), &
-                ESMF_OBJTYPEUNKNOWN = ESMF_StateObjectType(6)
+                ESMF_STATEBUNDLE = ESMF_StateObjectType(1), &
+                ESMF_STATEFIELD = ESMF_StateObjectType(2), &
+                ESMF_STATEARRAY = ESMF_StateObjectType(3), &
+                ESMF_STATEDATANAME = ESMF_StateObjectType(4), &
+                ESMF_STATELAST = ESMF_StateObjectType(5), &
+                ESMF_STATEOBJTYPEUNKNOWN = ESMF_StateObjectType(6)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataNeeded
@@ -92,10 +95,10 @@
       end type
 
       type(ESMF_StateDataNeeded), parameter :: &
-                ESMF_NEEDED = ESMF_StateDataNeeded(1), &
-                ESMF_NOTNEEDED= ESMF_StateDataNeeded(2), &
-                ESMF_DONOTCARE = ESMF_StateDataNeeded(3), &
-                ESMF_NEEDUNKNOWN = ESMF_StateDataNeeded(4)
+                ESMF_STATEDATAISNEEDED = ESMF_StateDataNeeded(1), &
+                ESMF_STATEDATANOTNEEDED= ESMF_StateDataNeeded(2), &
+                ESMF_STATEDATADONOTCARE = ESMF_StateDataNeeded(3), &
+                ESMF_STATEDATANEEDUNKNOWN = ESMF_StateDataNeeded(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataReady
@@ -107,10 +110,9 @@
       end type
 
       type(ESMF_StateDataReady), parameter :: &
-                ESMF_READYTOWRITE = ESMF_StateDataReady(1), &
-                ESMF_READYTOREAD= ESMF_StateDataReady(2), &
-                ESMF_DONOTCARE = ESMF_StateDataReady(3), &
-                ESMF_READYUNKNOWN = ESMF_StateDataReady(4)
+                ESMF_STATEDATAREADYTOWRITE = ESMF_StateDataReady(1), &
+                ESMF_STATEDATAREADYTOREAD= ESMF_StateDataReady(2), &
+                ESMF_STATEDATAREADYUNKNOWN = ESMF_StateDataReady(3)
 
 
 !------------------------------------------------------------------------------
@@ -123,9 +125,9 @@
       type ESMF_DataHolder
       sequence
       private
-          type(ESMC_Bundle), pointer :: bp
-          type(ESMC_Field), pointer :: fp 
-          type(ESMC_Array), pointer :: ap
+          type(ESMF_Bundle), pointer :: bp
+          type(ESMF_Field), pointer :: fp 
+          type(ESMF_Array), pointer :: ap
       end type
 
 !------------------------------------------------------------------------------
@@ -153,15 +155,17 @@
       type ESMF_StateType
       sequence
       private
+        type(ESMF_Base) :: base
         type(ESMF_StateImpExpType) :: st
         character (len=ESMF_MAXSTR) :: compname
-        integer :: listlength
-        ! this will be either an allocatable array (simpler to random access
-        ! but harder to resize), or a linked list (slightly more overhead to
-        ! iterate (less memory contiguity) but easy to add and delete items from.
-        type(ESMF_StateData), pointer :: listhead
+        ! this will be either an allocatable array (simpler to random access but
+        ! harder to resize), or a linked list (slightly more overhead to iterate
+        ! (less memory contiguity) but easy to add and delete items from.
+        !integer :: listlength
+        !type(ESMF_StateData), pointer :: listhead
         ! or
-        type(ESMF_StateData), dimension(:), pointer :: states
+        integer :: datacount
+        type(ESMF_StateData), dimension(:), pointer :: data
       end type
 
 !------------------------------------------------------------------------------
@@ -178,6 +182,12 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_State
+      public ESMF_StateImpExpType, ESMF_STATEIMPORT, ESMF_STATEEXPORT
+      public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
+                                   ESMF_STATEDATANOTNEEDED
+      public ESMF_StateDataReady,  ESMF_STATEDATAREADYTOWRITE, &
+                                   ESMF_STATEDATAREADYTOREAD, &
+                                   ESMF_STATEDATAREADYUNKNOWN
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -185,7 +195,7 @@
       public ESMF_StateCreate           ! for import/for export
       public ESMF_StateDestroy
 
-      public ESMF_StateSetData          ! interface does Bundles/Fields/Arrays
+      public ESMF_StateAddData          ! interface does Bundles/Fields/Arrays
       public ESMF_StateGetData          ! interface does Bundles/Fields/Arrays
       public ESMF_StateGetInfo          ! comp name, type, data count
       public ESMF_StateAddNameOnly      ! placeholder name but no data
@@ -202,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.1 2003/01/29 00:00:28 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -239,10 +249,10 @@ end interface
 !
         module procedure ESMF_StateAddBundle
         module procedure ESMF_StateAddBundleList
-        module procedure ESMF_StateAddField
-        module procedure ESMF_StateAddFieldList
-        module procedure ESMF_StateAddArray
-        module procedure ESMF_StateAddArrayList
+        !module procedure ESMF_StateAddField
+        !module procedure ESMF_StateAddFieldList
+        !module procedure ESMF_StateAddArray
+        !module procedure ESMF_StateAddArrayList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -292,6 +302,18 @@ end interface
 end interface
 
 
+!------------------------------------------------------------------------------
+interface operator (.eq.)
+ module procedure ESMF_imexeq
+ module procedure ESMF_needeq
+ module procedure ESMF_redyeq
+end interface
+
+interface operator (.ne.)
+ module procedure ESMF_imexne
+ module procedure ESMF_needne
+ module procedure ESMF_redyne
+end interface
 
 
 !==============================================================================
@@ -299,6 +321,53 @@ end interface
       contains
 
 !==============================================================================
+
+! functions to compare two ESMF types to see if they're the same or not
+
+function ESMF_imexeq(s1, s2)
+ logical ESMF_imexeq
+ type(ESMF_StateImpExpType), intent(in) :: s1, s2
+
+ ESMF_imexeq = (s1%state .eq. s2%state)
+end function
+
+function ESMF_imexne(s1, s2)
+ logical ESMF_imexne
+ type(ESMF_StateImpExpType), intent(in) :: s1, s2
+
+ ESMF_imexne = (s1%state .ne. s2%state)
+end function
+
+
+function ESMF_needeq(s1, s2)
+ logical ESMF_needeq
+ type(ESMF_StateDataNeeded), intent(in) :: s1, s2
+
+ ESMF_needeq = (s1%needed .eq. s2%needed)
+end function
+
+function ESMF_needne(s1, s2)
+ logical ESMF_needne
+ type(ESMF_StateDataNeeded), intent(in) :: s1, s2
+
+ ESMF_needne = (s1%needed .ne. s2%needed)
+end function
+
+
+function ESMF_redyeq(s1, s2)
+ logical ESMF_redyeq
+ type(ESMF_StateDataReady), intent(in) :: s1, s2
+
+ ESMF_redyeq = (s1%ready .eq. s2%ready)
+end function
+
+function ESMF_redyne(s1, s2)
+ logical ESMF_redyne
+ type(ESMF_StateDataReady), intent(in) :: s1, s2
+
+ ESMF_redyne = (s1%ready .ne. s2%ready)
+end function
+
 
 
 !------------------------------------------------------------------------------
@@ -311,12 +380,16 @@ end interface
 ! !IROUTINE: ESMF_StateCreateNew -- Create a new State specifying all options.
 
 ! !INTERFACE:
-      function ESMF_StateCreateNew(rc)
+      function ESMF_StateCreateNew(compname, statetype, datacount, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreateNew
 !
 ! !ARGUMENTS:
+      character(len=*), intent(in) :: compname 
+      type(ESMF_StateImpExpType), intent(in) :: statetype
+      integer, intent(in) :: datacount
+      ! more to be added here
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -337,12 +410,12 @@ end interface
 
 
 !       local vars
-        type (ESMF_State), pointer :: ptr   ! opaque pointer to new C++ State
+        type (ESMF_StateType), target :: newstate 
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        nullify(ptr)
+        nullify(ESMF_StateCreateNew%statep)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -350,15 +423,15 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_StateCreate(status)
+!       TODO: add working code here
+        status = ESMF_SUCCESS
         if (status .ne. ESMF_SUCCESS) then
           print *, "State construction error"
           return
         endif
 
 !       set return values
-        ESMF_StateCreateNew%this => ptr 
+        ESMF_StateCreateNew%statep => newstate 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_StateCreateNew
@@ -369,14 +442,14 @@ end interface
 ! !IROUTINE: ESMF_StateCreateEmpty -- Create a new State specifying no data
 
 ! !INTERFACE:
-      function ESMF_StateCreateEmpty(compname, statetype, rc)
+      function ESMF_StateCreateEmpty(rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreateEmpty
 !
 ! !ARGUMENTS:
-      character(len=ESMF_MAXSTR), intent(in), optional :: compname 
-      type(ESMF_StateImpExpType), intent(in), optional :: statetype
+      !character(len=*), intent(in), optional :: compname 
+      !type(ESMF_StateImpExpType), intent(in), optional :: statetype
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -402,12 +475,12 @@ end interface
 
 
 !       local vars
-        type (ESMF_State), pointer :: ptr   ! opaque pointer to new C++ State
+        type (ESMF_StateType), target :: newstate 
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        nullify(ptr)
+        nullify(ESMF_StateCreateEmpty%statep)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -415,15 +488,15 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_StateCreate(status)
+!       TODO: add working code here
+        status = ESMF_SUCCESS
         if (status .ne. ESMF_SUCCESS) then
           print *, "State construction error"
           return
         endif
 
 !       set return values
-        ESMF_StateCreateEmpty%this => ptr 
+        ESMF_StateCreateEmpty%statep => newstate 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_StateCreateEmpty
@@ -465,9 +538,16 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       call Destroy to release resources on the C++ side
-        call c_ESMC_StateDestroy(state%this, status)
+!       call Destruct to release resources
+        call ESMF_StateDestruct(state%statep, status)
         if (status .ne. ESMF_SUCCESS) then
+          print *, "State contents destruction error"
+          return
+        endif
+
+!       Release space
+ 	deallocate(state%statep, stat=status)
+        if (status .ne. 0) then    ! F90 return code
           print *, "State contents destruction error"
           return
         endif
@@ -477,6 +557,50 @@ end interface
 
         end subroutine ESMF_StateDestroy
 
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateDestruct(statetype, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_StateType) :: statetype
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Releases all resources associated with this {\tt State}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item[statetype]
+!       Destroy contents of this {\tt State}.
+!
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       !TODO: add code here
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_StateDestruct
 
 
 !------------------------------------------------------------------------------
@@ -558,58 +682,58 @@ end interface
         rc = ESMF_FAILURE
       endif
 
-!     ! TODO: check for name collisions
-
-!     ! Add the bundles to the state, checking for name clashes
-      if(btype%field_count .eq. 0) then
-          allocate(btype%flist(fieldcount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
-            return
-          endif
-         
-!         now add the fields to the new list
-          do i=1, fieldcount
-            btype%flist(i) = fields(i)
-          enddo
-
-          btype%field_count = fieldcount
-      else
-!         make a list the right length
-          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
-            return
-          endif
-
-!         preserve old contents
-          do i = 1, btype%field_count
-            temp_flist(i) = btype%flist(i)
-          enddo
-
-!         and append the new fields to the list
-          do i=btype%field_count+1, btype%field_count + fieldcount
-            temp_flist(i) = fields(i)
-          enddo
-
-!         delete old list
-          deallocate(btype%flist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
-          endif
-
-!         and now make this the permanent list
-          btype%flist => temp_flist
-          btype%field_count = btype%field_count + fieldcount
-
-      endif
-
-!     If packed data buffer requested, create or update it here.
-      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then
-
-         call ESMF_BundleTypeRepackData(btype, rc=rc)
-
-      endif
+!!!     ! TODO: check for name collisions
+!!
+!!!     ! Add the bundles to the state, checking for name clashes
+!!      if(btype%field_count .eq. 0) then
+!!          allocate(btype%flist(fieldcount), stat=status)
+!!          if(status .NE. 0) then
+!!            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
+!!            return
+!!          endif
+!!         
+!!!         now add the fields to the new list
+!!          do i=1, fieldcount
+!!            btype%flist(i) = fields(i)
+!!          enddo
+!!
+!!          btype%field_count = fieldcount
+!!      else
+!!!         make a list the right length
+!!          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
+!!          if(status .NE. 0) then
+!!            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
+!!            return
+!!          endif
+!!
+!!!         preserve old contents
+!!          do i = 1, btype%field_count
+!!            temp_flist(i) = btype%flist(i)
+!!          enddo
+!!
+!!!         and append the new fields to the list
+!!          do i=btype%field_count+1, btype%field_count + fieldcount
+!!            temp_flist(i) = fields(i)
+!!          enddo
+!!
+!!!         delete old list
+!!          deallocate(btype%flist, stat=status)
+!!          if(status .NE. 0) then
+!!            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
+!!          endif
+!!
+!!!         and now make this the permanent list
+!!          btype%flist => temp_flist
+!!          btype%field_count = btype%field_count + fieldcount
+!!
+!!      endif
+!!
+!!!     If packed data buffer requested, create or update it here.
+!!      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then
+!!
+!!         call ESMF_BundleTypeRepackData(btype, rc=rc)
+!!
+!!      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -638,7 +762,7 @@ end interface
 !
 ! !REQUIREMENTS: 
 !EOP
-      character(len=*) :: temp_list(1)
+      character(len=ESMF_MAXSTR) :: temp_list(1)
       
       temp_list(1) = name
 
@@ -709,52 +833,52 @@ end interface
         rc = ESMF_FAILURE
       endif
 
-!     Add the names in the list, checking for collisions.
-      if(btype%field_count .eq. 0) then
-          allocate(btype%flist(fieldcount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
-            return
-          endif
-         
-!         now add the fields to the new list
-          do i=1, fieldcount
-            btype%flist(i) = fields(i)
-          enddo
-
-          btype%field_count = fieldcount
-      else
-!         make a list the right length
-          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
-            return
-          endif
-
-!         preserve old contents
-          do i = 1, btype%field_count
-            temp_flist(i) = btype%flist(i)
-          enddo
-
-!         and append the new fields to the list
-          do i=btype%field_count+1, btype%field_count + fieldcount
-            temp_flist(i) = fields(i)
-          enddo
-
-!         delete old list
-          deallocate(btype%flist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
-          endif
-
-!         and now make this the permanent list
-          btype%flist => temp_flist
-          btype%field_count = btype%field_count + fieldcount
-      endif 
-!     If packed data buffer requested, create or update it here.
-      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then 
-         call ESMF_BundleTypeRepackData(btype, rc=rc)
-      endif
+!!!     Add the names in the list, checking for collisions.
+!!      if(btype%field_count .eq. 0) then
+!!          allocate(btype%flist(fieldcount), stat=status)
+!!          if(status .NE. 0) then
+!!            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
+!!            return
+!!          endif
+!!         
+!!!         now add the fields to the new list
+!!          do i=1, fieldcount
+!!            btype%flist(i) = fields(i)
+!!          enddo
+!!
+!!          btype%field_count = fieldcount
+!!      else
+!!!         make a list the right length
+!!          allocate(temp_flist(btype%field_count + fieldcount), stat=status)
+!!          if(status .NE. 0) then
+!!            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
+!!            return
+!!          endif
+!!
+!!!         preserve old contents
+!!          do i = 1, btype%field_count
+!!            temp_flist(i) = btype%flist(i)
+!!          enddo
+!!
+!!!         and append the new fields to the list
+!!          do i=btype%field_count+1, btype%field_count + fieldcount
+!!            temp_flist(i) = fields(i)
+!!          enddo
+!!
+!!!         delete old list
+!!          deallocate(btype%flist, stat=status)
+!!          if(status .NE. 0) then
+!!            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
+!!          endif
+!!
+!!!         and now make this the permanent list
+!!          btype%flist => temp_flist
+!!          btype%field_count = btype%field_count + fieldcount
+!!      endif 
+!!!     If packed data buffer requested, create or update it here.
+!!      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then 
+!!         call ESMF_BundleTypeRepackData(btype, rc=rc)
+!!      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -774,6 +898,7 @@ end interface
       type(ESMF_State), intent(in) :: state
       character (len=*), intent(out), optional :: compname
       type(ESMF_StateImpExpType), intent(out), optional :: statetype
+      integer, intent(out), optional :: statecount
       integer, intent(out), optional :: rc             
 
 !
@@ -967,9 +1092,9 @@ end interface
         type (ESMF_State) :: a 
 
 !       this is just to shut the compiler up
-        type (ESMF_State), target :: b 
-        a%this => b
-        nullify(a%this)
+        type (ESMF_StateType), target :: b 
+        a%statep => b
+        nullify(a%statep)
 
 !
 ! TODO: add code here
@@ -1004,6 +1129,7 @@ end interface
 !
        character (len=6) :: defaultopts="brief"
        integer :: status=ESMF_FAILURE      ! local error status
+       type(ESMF_StateType), pointer :: sp
        logical :: rcpresent=.FALSE.
 
 !      Initialize return code; assume failure until success is certain
@@ -1012,17 +1138,16 @@ end interface
          rc = ESMF_FAILURE
        endif
 
-!      ! Interface to call the C++ print code
-       if(present(options)) then
-           call c_ESMC_StatePrint(state%this, options, status) 
-       else
-           call c_ESMC_StatePrint(state%this, defaultopts, status) 
-       endif
+!      ! TODO: Add code here
+       ! print num of states, state type, etc
+       sp => state%statep
+       print *, "StatePrint: "  
+       print *, "  Component ", trim(sp%compname)
+       print *, "  Number of members: ", sp%datacount
+       if (sp%st .eq. ESMF_STATEIMPORT) print *, "  Import State"
+       if (sp%st .eq. ESMF_STATEEXPORT) print *, "  Export State"
+       if (sp%st .eq. ESMF_STATEUNKNOWN) print *, "  Unknown State Type"
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "State print error"
-         return
-       endif
 
 !      set return values
        if (rcpresent) rc = ESMF_SUCCESS

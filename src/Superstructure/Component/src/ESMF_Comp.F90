@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.1 2003/01/29 00:00:22 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,19 +78,32 @@
                   ESMF_RIVER = ESMF_ModelType(5)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Comp
+!     ! ESMF_CompClass
 !
-!     ! Component class data.  All information is kept on the C++ side inside
-!     ! the class structure.
+!     ! Component class data. 
 
-      type ESMF_Comp
+      type ESMF_CompClass
       sequence
       private
          type(ESMF_State) :: importstate
          type(ESMF_State) :: exportstate
          type(ESMF_State), dimension(:), pointer :: statelist
          integer :: instance_id
+         ! these will be allocatable arrays of variable len
+         integer :: function_count
+         character(len=ESMF_MAXSTR), dimension(5) :: function_name
          type(ESMF_Pointer), dimension(5) :: function_list
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_Comp
+!
+!     ! Component wrapper
+
+      type ESMF_Comp
+      sequence
+      private
+         type(ESMF_CompClass), pointer :: compp
       end type
 
 !------------------------------------------------------------------------------
@@ -126,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.1 2003/01/29 00:00:22 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -230,12 +243,12 @@ end interface
 
 
 !       local vars
-        type (ESMF_Comp) :: comp       ! the new Component
+        type (ESMF_CompClass) :: comptype       ! the new Component
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        comp%this = ESMF_NULL_POINTER
+        nullify(ESMF_CompCreateNew%compp)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -244,15 +257,15 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_CompCreate(comp, name, layout, ctype, mtype, &
-                                    filepath, status)
+        !call ESMF_CompConstruct(comp, name, layout, ctype, mtype, &
+        !                            filepath, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
         endif
 
 !       set return values
-        ESMF_CompCreateNew = comp 
+        ESMF_CompCreateNew%compp = comptype
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_CompCreateNew
@@ -287,12 +300,12 @@ end interface
 
 
 !       ! Local variables
-        type (ESMF_Comp) :: comp       ! new Component
+        type (ESMF_CompClass) :: comptype       ! the new Component
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       ! Initialize pointer
-        comp%this = ESMF_NULL_POINTER
+        nullify(ESMF_CompCreateNoData%compp)
 
 !       ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -300,15 +313,15 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_CompCreateNoData(comp, arglist, status)
+!       ! construct routine
+        !call ESMF_CompConstructNoData(comp, arglist, status)
         !if (status .ne. ESMF_SUCCESS) then
         !  print *, "Component construction error"
         !  return
         !endif
 
 !       set return values
-        ESMF_CompCreateNoData = comp
+        ESMF_CompCreateNoData%compp = comptype
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_CompCreateNoData
@@ -642,7 +655,7 @@ end interface
         type (ESMF_Comp) :: a 
 
 !       this is just to shut the compiler up
-        a%this = ESMF_NULL_POINTER
+        nullify(a%compp)
 !
 ! TODO: add code here
 !
@@ -703,7 +716,7 @@ end interface
         type (ESMF_Comp) :: a
 
 !       this is just to shut the compiler up
-        a%this = ESMF_NULL_POINTER
+        nullify(a%compp)
 
 !
 ! TODO: add code here
