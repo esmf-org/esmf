@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.56 2004/07/29 22:12:07 nscollins Exp $
+% $Id: ESMF_refdoc.ctex,v 1.57 2004/08/03 22:29:10 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -39,6 +39,7 @@
 % suppress all the overfull box warnings but it seemed to have no effect  
 % so i took it back out.
 \hbadness = 10000
+\vbadness = 10000
 
 \begin{document}
 

@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.21 2004/06/23 22:21:29 cdeluca Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.22 2004/08/03 22:29:10 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -33,6 +33,13 @@
 \setlength{\textheight}{8.5truein}
 \setlength{\oddsidemargin}{0in}
 \setlength{\unitlength}{1truecm}
+
+% setting hbadness this high is supposed to suppress warnings about underfull
+% boxes, which seems to work.  setting tolerance to 10000 was supposed to
+% suppress all the overfull box warnings but it seemed to have no effect
+% so i took it back out.
+\hbadness = 10000
+\vbadness = 10000
 
 \begin{document}
 

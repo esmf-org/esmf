@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2004/08/03 19:33:53 nscollins Exp $ 
+# $Id: makefile,v 1.43 2004/08/03 22:29:10 nscollins Exp $ 
 
 #
 #  Note that the ref doc build rules are redefined here.
@@ -26,6 +26,7 @@ DVIFILES  =	ESMF_refdoc.dvi \
 
 PDFFILES  =	${ESMC_DOCDIR}/ESMF_refdoc.pdf \
 		${ESMC_DOCDIR}/ESMF_usrdoc.pdf \
+		${ESMC_DOCDIR}/ESMF_reqdoc.ps \
 		${ESMC_DOCDIR}/ESMF_reqdoc.pdf 
 
 
@@ -53,32 +54,54 @@ DIRS =
 CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILES)
 CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.out *.ORIG ESMF.bib \
 	      ESMF_reqdoc.tex ESMF_refdoc.tex ESMF_usrdoc.tex \
-	      ESMF_reqdoc.pdf ESMF_refdoc.pdf ESMF_usrdoc.pdf \
+	      ESMF_reqdoc.pdf ESMF_refdoc.pdf ESMF_usrdoc.pdf ESMF_reqdoc.ps \
 	      ESMF_reqdoc.bib ESMF_refdoc.bib ESMF_usrdoc.bib \
 	      $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
 
 #-------------------------------------------------------------------------------
-# Dvi files
+# dvi files
 #-------------------------------------------------------------------------------
+dvi:  tex $(DVIFILES)
+
 ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
-	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF usr
 
 ESMF_reqdoc.dvi: ESMF_reqdoc.ctex $(REQDOC_DEP_FILES)
-	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF req
 
 ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
-	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
 
-#-------------------------------------------------------------------------------
-# Html Files
-#-------------------------------------------------------------------------------
 
-${ESMC_DOCDIR}/ESMF_usrdoc: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
-	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
+#-------------------------------------------------------------------------------
+# pdf files postprocessed from the dvi files
+#-------------------------------------------------------------------------------
+pdf:  $(DVIFILES) $(PDFFILES)
+
+${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ESMF_usrdoc.dvi
+	dvipdf ESMF_usrdoc.dvi
+	mv -f ESMF_usrdoc.pdf ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/ESMF_refdoc.pdf: ESMF_refdoc.dvi
+	dvipdf ESMF_refdoc.dvi
+	mv -f ESMF_refdoc.pdf ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/ESMF_reqdoc.ps: ESMF_reqdoc.dvi
+	dvips -o ESMF_reqdoc.ps ESMF_reqdoc.dvi
+	mv -f ESMF_reqdoc.ps ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/ESMF_reqdoc.pdf: ESMF_reqdoc.dvi
+	dvipdf ESMF_reqdoc.dvi
+	mv -f ESMF_reqdoc.pdf ${ESMC_DOCDIR}
+
+
+#-------------------------------------------------------------------------------
+# Html Files directly from the latex source
+#-------------------------------------------------------------------------------
+html:  tex $(HTMLFILES)
+
+${ESMC_DOCDIR}/ESMF_usrdoc: ESMF_usrdoc.ctex
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
@@ -87,8 +110,7 @@ ${ESMC_DOCDIR}/ESMF_usrdoc: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
 	rm -f .latex2html-init
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/ESMF_reqdoc: ESMF_reqdoc.ctex $(REQDOC_DEP_FILES)
-	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
+${ESMC_DOCDIR}/ESMF_reqdoc: ESMF_reqdoc.ctex
 	-rm -rf $(ESMC_DOCDIR)/ESMF_reqdoc
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
@@ -97,8 +119,7 @@ ${ESMC_DOCDIR}/ESMF_reqdoc: ESMF_reqdoc.ctex $(REQDOC_DEP_FILES)
 	rm -f .latex2html-init
 	mv -f ESMF_reqdoc ${ESMC_DOCDIR}
 
-${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
-	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
+${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex
 	-rm -rf $(ESMC_DOCDIR)/ESMF_refdoc
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
@@ -106,14 +127,5 @@ ${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	${DO_L2H} ESMF ref
 	rm -f .latex2html-init
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
-
-
-
-
-
-
-
-
-
 
 
