@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.54 2004/04/21 21:39:54 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.55 2004/04/23 00:24:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.54 2004/04/21 21:39:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.55 2004/04/23 00:24:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -783,21 +783,7 @@
 //EOP
 // !REQUIREMENTS:  TMG 1.5.8
 
-    // initialize result to subject time interval
-    ESMC_TimeInterval absValue = *this;
-
-    // check individual components (should be all positive or all negative)
-    //   note: can't use abs() or labs() since these will be (long long)
-    //         (64-bit) on some platforms.  Could use ISO llabs() if
-    //         supported on all platforms
-    if (s  < 0) absValue.s  *= -1;
-    if (sN < 0) absValue.sN *= -1;
-    if (yy < 0) absValue.yy *= -1;
-    if (mm < 0) absValue.mm *= -1;
-//   TODO: use when Calendar Intervals implemented
-//    if (d  < 0) absValue.d  *= -1;
-
-    return(absValue);
+   return(ESMC_TimeIntervalAbsValue(ESMC_POSITIVE_ABS));
 
  }  // end ESMC_TimeIntervalAbsValue
 
@@ -821,23 +807,163 @@
 //EOP
 // !REQUIREMENTS:  TMG 1.5.8
 
-    // initialize result to subject time interval
-    ESMC_TimeInterval negAbsValue = *this;
-
-    // check individual components (should be all positive or all negative)
-    //   note: can't use abs() or labs() since these will be (long long)
-    //         (64-bit) on some platforms.  Could use ISO llabs() if
-    //         supported on all platforms
-    if (s  > 0) negAbsValue.s  *= -1;
-    if (sN > 0) negAbsValue.sN *= -1;
-    if (yy > 0) negAbsValue.yy *= -1;
-    if (mm > 0) negAbsValue.mm *= -1;
-//   TODO: use when Calendar Intervals implemented
-//    if (d  > 0) negAbsValue.d  *= -1;
-
-    return(negAbsValue);
+   return(ESMC_TimeIntervalAbsValue(ESMC_NEGATIVE_ABS));
 
  }  // end ESMC_TimeIntervalNegAbsValue
+
+//-------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_TimeIntervalAbsValue - TimeInterval absolute value common method
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::ESMC_TimeIntervalAbsValue(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      ESMC_AbsValueType absValueType) const { // in - positive or negative type
+//
+// !DESCRIPTION:
+//      Captures common logic for performing positive or negative
+//      absolute value on this time interval.
+//
+//EOPI
+// !REQUIREMENTS:  
+
+    // TODO: use function pointer table instead of if-else to perform abs
+    //       type?  or some other form of polymorphism ?
+    // TODO: fractions
+
+    // note: can't use abs() or labs() since values will be (long long)
+    //       (64-bit) on some platforms.  TODO: could use ISO llabs() if
+    //       supported on all platforms.
+
+    ESMC_TimeInterval errorResult;  // zero
+
+    // calendar must be defined
+    if (this->calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeInterval calendar undefined)
+      return(errorResult);
+    }
+
+    // initialize result to subject time interval
+    ESMC_TimeInterval absValue = *this;
+
+    // Reduce both time interval's units to the smallest and least number
+    // of units possible
+    absValue.calendar->ESMC_CalendarIntervalMagnitude(absValue);
+
+    // if absolute, simply perform absolute value on baseTime seconds and return
+    if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0) {
+      if (absValueType == ESMC_POSITIVE_ABS) {
+        if (absValue.s < 0) absValue.s *= -1;  // TODO: fractions
+      } else { // ESMC_NEGATIVE_ABS
+        if (absValue.s > 0) absValue.s *= -1;  // TODO: fractions
+      }
+      return(absValue);
+    }
+
+    // TODO:  fractional seconds
+    switch (absValue.calendar->calendarType)
+    {
+      case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_NOLEAP:
+        if (absValue.yy != 0 || absValue.d != 0) {
+          // shouldn't be here - yy and d already reduced in Magnitude call
+          // above TODO: write LogErr message (internal error)
+          return(errorResult);
+
+        } else if (absValue.mm == 0) {
+          // shouldn't be here - yy, mm and d all zero caught above
+          // above TODO: write LogErr message (internal error)
+          return(errorResult);
+
+        // all relative case (yy (reduced to mm), mm, no seconds)
+        } else if (absValue.s == 0) {
+          if (absValueType == ESMC_POSITIVE_ABS) {
+            if (absValue.mm < 0) absValue.mm *= -1;  // invert sign
+          } else { // ESMC_NEGATIVE_ABS
+            if (absValue.mm > 0) absValue.mm *= -1;  // invert sign
+          }
+          return(absValue);
+
+        // mixed absolute (mm) and relative (s) case
+        } else {
+          // mm & s must have same sign
+          if ( (absValueType == ESMC_POSITIVE_ABS && 
+                  absValue.mm < 0 && absValue.s < 0) ||
+               (absValueType == ESMC_NEGATIVE_ABS && 
+                  absValue.mm > 0 && absValue.s > 0) ) {
+              absValue.mm *= -1;  // invert sign
+              absValue.s  *= -1;
+              return(absValue);
+          } else if ( (absValueType == ESMC_POSITIVE_ABS &&
+                         absValue.mm >= 0 && absValue.s >= 0) ||
+                      (absValueType == ESMC_NEGATIVE_ABS &&
+                         absValue.mm <= 0 && absValue.s <= 0) ) {
+              return(absValue);   // return as is
+          } else {
+            // mixed signs
+            // TODO: write LogErr message (can't do: mixed mm and s signs)
+            return(errorResult);
+          }
+        }
+
+        break;
+      case ESMC_CAL_360DAY:
+        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // TODO: write LogErr message (internal error)
+        return(errorResult);
+        break;
+      case ESMC_CAL_JULIANDAY:
+        if (absValue.yy != 0 || absValue.mm != 0) {
+          // TODO: write LogErr message (years and months not defined!)
+          return(errorResult);
+        }
+        if (absValue.d != 0) {
+          // shouldn't be here - days already reduced in Magnitude call above
+          // TODO: write LogErr message (internal error)
+          return(errorResult);
+        }
+        break;
+      case ESMC_CAL_NOCALENDAR:
+        // all units must have same sign
+        if ( (absValueType == ESMC_POSITIVE_ABS &&
+                absValue.yy < 0 && absValue.mm < 0 &&
+                absValue.d  < 0 && absValue.s  < 0) ||
+             (absValueType == ESMC_NEGATIVE_ABS &&
+                absValue.yy > 0 && absValue.mm > 0 &&
+                absValue.d  > 0 && absValue.s  > 0) ) {
+          absValue.yy *= -1;   // invert sign
+          absValue.mm *= -1;
+          absValue.d  *= -1;
+          absValue.s  *= -1;
+          return(absValue);
+        } else if ( (absValueType == ESMC_POSITIVE_ABS &&
+                       absValue.yy >= 0 && absValue.mm >= 0 &&
+                       absValue.d  >= 0 && absValue.s  >= 0) ||
+                    (absValueType == ESMC_NEGATIVE_ABS &&
+                       absValue.yy <= 0 && absValue.mm <= 0 &&
+                       absValue.d  <= 0 && absValue.s  <= 0) ) {
+          return(absValue);    // return as is
+        } else {
+          // mixed signs
+          // TODO: write LogErr message (can't do: mixed unit signs)
+          return(errorResult);
+        }
+        break;
+      case ESMC_CAL_CUSTOM:
+        // TODO:
+        return(errorResult);
+        break;
+      default:
+        // TODO: write LogErr message (unknown calendar type)
+        return(errorResult);
+        break;
+    };
+
+}  // end ESMC_TimeIntervalAbsValue (common)
 
 //-------------------------------------------------------------------------
 //BOP
@@ -1116,6 +1242,7 @@
     ESMC_TimeInterval product;
 
     // TODO: fractional interval parts
+    // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // multiply relative yy, mm, d parts
     product.yy = this->yy * multiplier;
@@ -1124,6 +1251,9 @@
 
     // multiply absolute s part
     product.s = this->s * multiplier;
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(product);
 
@@ -1153,6 +1283,7 @@
     ESMC_TimeInterval product;
 
     // TODO: fractional interval parts
+    // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // multiply relative yy, mm, d parts
     product.yy = multiplier * ti.yy;
@@ -1161,6 +1292,9 @@
 
     // multiply absolute s part
     product.s = multiplier * ti.s;
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(product);
 
@@ -1186,6 +1320,7 @@
 // !REQUIREMENTS:  
 
     // TODO: fractional interval parts
+    // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // multiply relative yy, mm, d parts
     this->yy *= multiplier;
@@ -1194,6 +1329,9 @@
 
     // multiply absolute s part
     this->s *= multiplier;
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(*this);
 
@@ -1394,6 +1532,7 @@
     ESMC_TimeInterval sum;
 
     // TODO: fractional interval parts
+    // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // add relative yy, mm, d parts
     sum.yy = this->yy + timeInterval.yy;
@@ -1402,6 +1541,9 @@
 
     // add absolute seconds part using ESMC_BaseTime operator
     sum = ESMC_BaseTime::operator+(timeInterval);
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(sum);
 
@@ -1431,6 +1573,7 @@
     ESMC_TimeInterval diff;
 
     // TODO: fractional interval parts
+    // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // subtract relative yy, mm, d parts
     diff.yy = this->yy - timeInterval.yy;
@@ -1439,6 +1582,9 @@
 
     // subtract absolute seconds part using ESMC_BaseTime operator
     diff = ESMC_BaseTime::operator-(timeInterval);
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(diff);
 
@@ -1466,7 +1612,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_EQ));
+    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_EQ));
 
 }  // end ESMC_TimeInterval::operator==
 
@@ -1492,7 +1638,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_NE));
+    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_NE));
 
 }  // end ESMC_TimeInterval::operator!=
 
@@ -1518,7 +1664,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_LT));
+    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_LT));
 
 }  // end ESMC_TimeInterval::operator<
 
@@ -1544,7 +1690,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_GT));
+    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_GT));
 
 }  // end ESMC_TimeInterval::operator>
 
@@ -1570,7 +1716,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_LE));
+    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_LE));
 
 }  // end ESMC_TimeInterval::operator<=
 
@@ -1596,7 +1742,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    return(ESMC_TimeIntervalCompare(*this, timeInterval, ESMC_GE));
+    return(ESMC_TimeIntervalCompare(timeInterval, ESMC_GE));
 
 }  // end ESMC_TimeInterval::operator>=
 
@@ -1611,12 +1757,12 @@
 //    bool result
 //
 // !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval1,           // in - 1st to compare
-      const ESMC_TimeInterval &timeInterval2,           // in - 2nd to compare
+      const ESMC_TimeInterval &timeInterval,            // in - 2nd to compare
             ESMC_ComparisonType comparisonType) const { // in - operator type
 //
 // !DESCRIPTION:
-//      Captures common logic for comparing two time intervals
+//      Captures common logic for comparing two time intervals, *this and
+//      timeInterval.
 //
 //EOPI
 // !REQUIREMENTS:  
@@ -1625,15 +1771,15 @@
     //       type?  or some other form of polymorphism ?
 
     // calendars must be defined
-    if (timeInterval1.calendar == ESMC_NULL_POINTER ||
-        timeInterval2.calendar == ESMC_NULL_POINTER) {
+    if (this->calendar == ESMC_NULL_POINTER ||
+        timeInterval.calendar == ESMC_NULL_POINTER) {
       // TODO: write LogErr message (timeInterval calendar undefined)
       return(false);
     }
 
     // create local copies to manipulate and compare 
-    ESMC_TimeInterval ti1 = timeInterval1;
-    ESMC_TimeInterval ti2 = timeInterval2;
+    ESMC_TimeInterval ti1 = *this;
+    ESMC_TimeInterval ti2 = timeInterval;
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
@@ -1812,6 +1958,7 @@
         break;
       case ESMC_CAL_CUSTOM:
         // TODO:
+        return(false);
         break;
       default:
         // TODO: write LogErr message (unknown calendar type)
