@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.21 2002/06/01 12:13:50 cnh Exp $
+%$Id: PhysGrid_req.tex,v 1.22 2002/06/21 20:23:02 cnh Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -30,7 +30,7 @@ and degrees for the radius and angle in cylindrical coordinates.
 {\bf Verification:} Code inspection.\\
 {\bf Notes:}  This suggestion follows common practice, but is an explicit
 exception to the requirement that MKS units are used by ESMF codes wherever
-units must be assumed.
+units must be assumed. 
 \end{reqlist}
 
 \ssreq{Horizontal locations may be points}
@@ -168,7 +168,7 @@ a value actually pertains to a region.
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
 \end{reqlist}
 
-\ssreq{Vertical locations may have radii of influence}
+\ssreq{Vertical locations may have region of influence}
 
   A vertical location may be specified by adding a nominal radius of
 influence to the central point.  This may be the radius of a Gaussian
@@ -191,7 +191,8 @@ horizontal corners of a region.
 {\bf Priority:} 2. \\
 {\bf Source:} Required by MIT, NSIPP, POP, GFDL/MOM. \\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Unit test.
+{\bf Verification:} Unit test.\\
+{\bf Note:} MOVE TO LATER - CNH
 \end{reqlist}
 
 %===============================================================================
@@ -228,7 +229,7 @@ topology, covering a space, or of locations being exclusive.
 \end{reqlist}
 
 \sreq{Location streams may be copied}
-Given an existing location stream, a new stream may be generated with a new name and
+Given an existing location stream, a new stream may be generated with a and
 possibly a different length.
 \begin{reqlist}
 {\bf Priority:} 2. \\
@@ -242,7 +243,7 @@ Location streams may be read from files.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required by NCEP-SSI, MIT, GFDL. \\
-{\bf Status:} Approved-2. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} I no longer find this necessary. It is sufficient to have an IO requirement for fields (which can be defined on location streams) - Arlindo. - ditto CNH (but it is a requirement!).
 \end{reqlist}
@@ -252,7 +253,7 @@ Location streams may be written to files.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required NCEP-SSI, MIT, GFDL. \\
-{\bf Status:} Approved-2. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} See previous - Arlindo.
 \end{reqlist}
@@ -264,10 +265,11 @@ grid cell may contain multiple location stream elements.)
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Required by NCEP-SSI, PSAS, MIT, GFDL \\
-{\bf Status:} Approved-2. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. \\
 {\bf Notes:} This is necessary for such operations as halo updates on a location
-stream.
+stream. A background grid might be required because its hard to see how to
+decompose the locations tream otherwise.
 \end{reqlist}
 
 \sreq{Location stream attributes}
@@ -275,24 +277,25 @@ stream.
 \ssreq{Fixed length location streams}
 Location streams may be of fixed length, specified at the time of generation.
 \begin{reqlist}
-{\bf Priority:} 2. \\
+{\bf Priority:} 1. \\
 {\bf Source:} Required by PSAS, MIT, GFDL.\\
-{\bf Status:} Approved-2. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Extensible length location streams}
-Location streams may be of extensible length (e.g. a linked list),
+Location streams may be of extensible length
 with an initial length specified at the time of generation.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected (are we sure?? - CNH, RWH). \\
+{\bf Status:} Deferred \\
 {\bf Verification:} Unit test.\\
 {\bf Notes:} Are we sure we want to reject? Could they just be
 not as optimised. Imagine a location stream that is representing Lagrangian
 elements in a decomposed fluid simulation. It could be useful to
-be able to add particles as needed - CNH.
+be able to add particles as needed. It could be useful to delete
+from middle etc...
 \end{reqlist}
 
 \ssreq{Global attributes: location stream name}
@@ -302,7 +305,7 @@ Each location stream has a unique name by which it can be referred.
 {\bf Source:} \\
 {\bf Status:} Rejected. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:} I think this should be deferred - CNH.
+{\bf Notes:}
 \end{reqlist}
 
 \ssreq{Location stream registry}
@@ -313,7 +316,7 @@ registry.  A pointer to any location stream may be determined given its name.
 {\bf Source:} \\
 {\bf Status:} Rejected. \\
 {\bf Verification:} Unit test. \\
-{\bf Notes:} I think this should be deferred - CNH.
+{\bf Notes:} Not part of PhysGrid
 \end{reqlist}
 
 \ssreq{Global attributes: number of dimensions}
