@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.1 2004/01/06 21:13:44 pwjones Exp $
+! $Id: ESMF_GridTypes.F90,v 1.2 2004/01/07 22:27:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -52,68 +52,6 @@
       private
 
 !------------------------------------------------------------------------------
-!
-! !PUBLIC TYPES:
-
-      public ESMF_GridType, ESMF_GridKind, ESMF_GridStagger
-      public ESMF_CoordOrder, ESMF_CoordIndex
-
-!------------------------------------------------------------------------------
-!     !  ESMF_GridType
-!
-!     ! Definition for the Grid class.
-
-      type ESMF_GridType
-      sequence
-      private
-
-        type (ESMF_Base) :: base               ! base class object
-        type (ESMF_Status) :: gridstatus       ! uninitialized, init ok, etc
-        type (ESMF_GridKind) :: horzGridKind   ! enum for type of horizontal grid
-        type (ESMF_GridKind) :: vertGridKind   ! enum for type of vertical grid
-        type (ESMF_GridStagger) :: horzStagger ! enum for horizontal grid staggering
-        type (ESMF_GridStagger) :: vertStagger ! enum for vertical grid staggering
-        type (ESMF_CoordSystem) :: horzCoordSystem  
-                                               ! identifier for horizontal
-                                               ! physical coordinate system
-        type (ESMF_CoordSystem) :: vertCoordSystem  
-                                               ! identifier for vertical
-                                               ! physical coordinate system
-        type (ESMF_CoordOrder) :: coordOrder   ! enum for mapping of xyz to ijk
-        type (ESMF_CoordIndex) :: coordIndex   ! enum for global, local indexing
-        type (ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
-                                               ! logical identifier to indicate
-                                               ! periodic boundary conditions in
-                                               ! each direction
-        integer :: numPhysGrids                ! number of grid descriptors
-                                               ! necessary to support
-                                               ! staggering, vertical
-                                               ! grids, background grids
-        integer :: numPhysGridsAlloc           ! number of physgrids allocated
-        type (ESMF_PhysGrid), dimension(:), pointer :: physgrids
-                                               ! info for all grid descriptions
-                                               ! necessary to define horizontal, 
-                                               ! staggered and vertical grids
-        integer, dimension(:) :: distGridIndex ! for each physgrid, the index of
-                                               ! the corresponding DistGrid
-        integer :: numDistGrids                ! number of grid descriptors
-                                               ! necessary to support
-                                               ! staggering, vertical
-                                               ! grids, background grids
-        integer :: numDistGridsAlloc           ! number of DistGrids allocated
-        type (ESMF_DistGrid), dimension(:), pointer :: distgrids       
-                                               ! decomposition and other
-                                               ! logical space info for grid
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMinCoord
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMaxCoord
-        type (ESMF_LocalArray) :: boundingBoxes
-                                               ! array of bounding boxes on each
-                                               ! DE - used for search routines
-!       type (???) :: search_structure
-
-      end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_GridKind
 !
 !     ! Type to specify kind of grid for supported ESMF Grids.
@@ -164,6 +102,84 @@
       private
         integer :: index
       end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_GridType
+!
+!     ! Definition for the Grid class.
+
+      type ESMF_GridType
+      sequence
+      private
+
+        type (ESMF_Base) :: base               ! base class object
+        type (ESMF_Status) :: gridstatus       ! uninitialized, init ok, etc
+        type (ESMF_GridKind) :: horzGridKind   ! enum for type of horizontal grid
+        type (ESMF_GridKind) :: vertGridKind   ! enum for type of vertical grid
+        type (ESMF_GridStagger) :: horzStagger ! enum for horizontal grid staggering
+        type (ESMF_GridStagger) :: vertStagger ! enum for vertical grid staggering
+        type (ESMF_CoordSystem) :: horzCoordSystem  
+                                               ! identifier for horizontal
+                                               ! physical coordinate system
+        type (ESMF_CoordSystem) :: vertCoordSystem  
+                                               ! identifier for vertical
+                                               ! physical coordinate system
+        type (ESMF_CoordOrder) :: coordOrder   ! enum for mapping of xyz to ijk
+        type (ESMF_CoordIndex) :: coordIndex   ! enum for global, local indexing
+        type (ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+                                               ! logical identifier to indicate
+                                               ! periodic boundary conditions in
+                                               ! each direction
+        integer :: numPhysGrids                ! number of grid descriptors
+                                               ! necessary to support
+                                               ! staggering, vertical
+                                               ! grids, background grids
+        integer :: numPhysGridsAlloc           ! number of physgrids allocated
+        type (ESMF_PhysGrid), dimension(:), pointer :: physgrids
+                                               ! info for all grid descriptions
+                                               ! necessary to define horizontal, 
+                                               ! staggered and vertical grids
+        integer, dimension(:), pointer :: distGridIndex
+                                               ! for each physgrid, the index of
+                                               ! the corresponding DistGrid
+        integer :: numDistGrids                ! number of grid descriptors
+                                               ! necessary to support
+                                               ! staggering, vertical
+                                               ! grids, background grids
+        integer :: numDistGridsAlloc           ! number of DistGrids allocated
+        type (ESMF_DistGrid), dimension(:), pointer :: distgrids       
+                                               ! decomposition and other
+                                               ! logical space info for grid
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMinCoord
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMaxCoord
+        type (ESMF_LocalArray) :: boundingBoxes
+                                               ! array of bounding boxes on each
+                                               ! DE - used for search routines
+!       type (???) :: search_structure
+
+      end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_Grid
+!
+!     ! The Grid data structure that is passed between languages.
+
+      type ESMF_Grid
+      sequence
+      private
+#ifndef ESMF_NO_INITIALIZERS
+        type (ESMF_GridType), pointer :: ptr => NULL()
+#else
+        type (ESMF_GridType), pointer :: ptr
+#endif
+      end type
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC TYPES:
+
+      public ESMF_GridType, ESMF_GridKind, ESMF_GridStagger
+      public ESMF_CoordOrder, ESMF_CoordIndex, ESMF_Grid
 
 !------------------------------------------------------------------------------
 !
@@ -249,7 +265,7 @@
       ESMF_GridStagger_B_SE       = ESMF_GridStagger( 4), &
       ESMF_GridStagger_B_NW       = ESMF_GridStagger( 5), &
       ESMF_GridStagger_C_NE       = ESMF_GridStagger( 6), &
-      ESMF_GridStagger_C_SE       = ESMF_GridStagger( 7), &
+      ESMF_GridStagger_C_SW       = ESMF_GridStagger( 7), &
       ESMF_GridStagger_C_SE       = ESMF_GridStagger( 8), &
       ESMF_GridStagger_C_NW       = ESMF_GridStagger( 9), &
       ESMF_GridStagger_D_NE       = ESMF_GridStagger(10), &
@@ -295,7 +311,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.1 2004/01/06 21:13:44 pwjones Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.2 2004/01/07 22:27:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -645,7 +661,7 @@
       if (present(periodic)) then
          do i=1,ESMF_MAXGRIDDIM
             if (i > size(periodic)) exit
-            grid%periodic(i) = periodic(i)
+            grid%ptr%periodic(i) = periodic(i)
          enddo
       endif
 
@@ -803,7 +819,7 @@
       if (present(periodic)) then
          do i=1,ESMF_MAXGRIDDIM
             if (i > size(periodic)) exit
-            grid%periodic(i) = periodic(i)
+            grid%ptr%periodic(i) = periodic(i)
          enddo
       endif
 
@@ -916,9 +932,9 @@
 !          {\tt ESMF\_PhysGrid} to be retrieved.
 !     \item[grid]
 !          Grid structure from which PhysGrid is to be extracted.
-!     \item[[name]]
+!     \item[{[name]}]
 !          Optional name to identify which PhysGrid to retrieve.
-!     \item[[relloc]]
+!     \item[{[relloc]}]
 !          Relative location ({\tt ESMF_RelLoc}) to identify which
 !          PhysGrid to retrieve.
 !     \item[{[rc]}]
@@ -932,7 +948,8 @@
       integer :: status               ! Error status
       logical :: rcpresent            ! Return code present
       logical :: found                ! found flag for searches
-      character (len=ESMF_MAXSTR) :: name_tmp    ! temporary name variable
+      character (len=ESMF_MAXSTR) :: nameTmp    ! temporary name variable
+      type(ESMF_RelLoc) :: rellocTmp
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -946,12 +963,12 @@
       if (present(name)) then
          found = .false.
          name_search: do n=1,grid%numPhysGridsAlloc
-            call ESMF_GetName(grid%physgrids(n)%base, name_tmp, status)
+            call ESMF_PhysGridGet(grid%physgrids(n), name=nameTmp, rc=status)
             if(status /= ESMF_SUCCESS) then
                print *, "ERROR in ESMF_GridGetPhysGrid: error getting name"
                return
             endif
-            if (name == name_tmp) then
+            if (name == nameTmp) then
                physgrid = grid%physgrids(n)
                found = .true.
                exit name_search
@@ -965,7 +982,12 @@
       else if (present(relloc)) then
          found = .false.
          relloc_search: do n=1,grid%numPhysGridsAlloc
-            if (relloc == grid%physgrids(n)%relloc) then
+            call ESMF_PhysGridGet(grid%physgrids(n), relloc=rellocTmp, rc=status)
+            if(status /= ESMF_SUCCESS) then
+               print *, "ERROR in ESMF_GridGetPhysGrid: error getting relloc"
+               return
+            endif
+            if (relloc == rellocTmp) then
                physgrid = grid%physgrids(n)
                found = .true.
                exit relloc_search
@@ -1083,7 +1105,7 @@
       integer :: status               ! Error status
       logical :: rcpresent            ! Return code present
       logical :: found                ! found flag for searches
-      character (len=ESMF_MAXSTR) :: name_tmp    ! temporary name variable
+      character (len=ESMF_MAXSTR) :: nameTmp    ! temporary name variable
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1096,14 +1118,14 @@
 !     Search by name and return selected DistGrid
       found = .false.
       name_search: do n=1,grid%numDistGridsAlloc
-         call ESMF_GetName(grid%distgrids(n)%base, name_tmp, status)
+         call ESMF_DistGridGet(grid%distgrids(n), name=nameTmp, rc=status)
          if(status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_GridGetDistGrid: error getting name"
             return
          endif
-         if (name == name_tmp) then
+         if (name == nameTmp) then
             distgrid = grid%distgrids(n)
-            found = .true
+            found = .true.
             exit name_search
          endif
       end do name_search
@@ -1162,9 +1184,9 @@
       grid%vertStagger     = ESMF_GridStagger_Unknown
       grid%horzCoordSystem = ESMF_CoordSystem_Unknown
       grid%vertCoordSystem = ESMF_CoordSystem_Unknown
-      grid%coordOrder      = ESMF_CoordSystem_Unknown
-      grid%coordIndex      = ESMF_CoordSystem_Unknown
-      grid%periodic(:)     = .false.
+      grid%coordOrder      = ESMF_CoordOrder_Unknown
+      grid%coordIndex      = ESMF_CoordIndex_Unknown
+      grid%periodic        = ESMF_FALSE
       grid%numPhysGrids    = 0
       grid%numDistGrids    = 0
 
@@ -1181,7 +1203,7 @@
       
       deallocate(grid%distGridIndex)
       
-      do n=1,numDistGridsAlloc
+      do n=1,grid%numDistGridsAlloc
          call ESMF_DistGridDestroy(grid%distgrids(n), rc=status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_GridDestruct: distgrid destroy"
@@ -1233,7 +1255,7 @@
 !EOP
 
       character(len=ESMF_MAXSTR) :: name, str
-      type(ESMF_GridKind), pointer :: gp
+      type(ESMF_GridType), pointer :: gp
       integer :: i
       integer :: status
 
@@ -1274,9 +1296,10 @@
       enddo
 
       ! Print the DistGrid
-      print *, 'DistGrid associated with this Grid:'
-      call ESMF_DistGridPrint(gp%distgrid, 'noopt')
-
+      print *, 'DistGrids associated with this Grid:'
+      do i=1, gp%numDistGrids 
+        call ESMF_DistGridPrint(gp%distgrids(i), 'no-opt')
+      enddo
 
       print *, "*********End Grid Print"
 
@@ -1558,4 +1581,4 @@
 
 !------------------------------------------------------------------------------
 
-      end module ESMF_GridMod
+      end module ESMF_GridTypesMod
