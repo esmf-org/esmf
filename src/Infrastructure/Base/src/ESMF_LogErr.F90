@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.49 2004/12/03 22:35:02 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.50 2004/12/03 22:36:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@ end type ESMF_LOGENTRY
 type ESMF_LOGARRAY
     private
     sequence
-    character(len=64)                                   nameLogErrFile   
+    character(len=26)                                   nameLogErrFile   
     integer                              	    ::  findex
     integer                                         ::  unitNumber
     type(ESMF_Logical)			            ::  flushed 
@@ -605,7 +605,7 @@ end subroutine ESMF_LogGet
 ! !ARGUMENTS:
       character(len=*)                          :: filename
       integer, intent(in),optional		:: lognone  
-      type(ESMF_LogType), intent(in),optional  :: logtype  
+      type(ESMF_LogType), intent(in),optional   :: logtype  
       integer, intent(out),optional	        :: rc
 
 ! !DESCRIPTION:
@@ -617,7 +617,9 @@ end subroutine ESMF_LogGet
 !      \begin{description}
 ! 
 !      \item [{[filename]}]
-!            Name of file.
+!            Name of file.  Maximum length 26 characters to allow for
+!            the PET number to be added and keep the total file name
+!            length under 32 characters.
 !      \item [{[lognone]}]
 !            Turns off logging if equal to {\tt ESMF\_LOG\_NONE}
 !      \item [{[logtype]}]
