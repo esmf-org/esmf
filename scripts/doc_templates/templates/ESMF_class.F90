@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.4 2002/10/10 18:54:46 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.5 2002/10/10 20:19:26 nscollins Exp $
 !
 ! ESMF <Class> Module
 !
@@ -6,10 +6,9 @@
 !  This code developed by NASA/NCAR/ESMF whatever, and is covered by
 !  the terms of the GNU public license.  See license file for more details. >
 !
-!-------------------------------------------------------------------------
 ! (all lines below between the !BOP and !EOP markers will be included in 
 !  the automated document processing.)
-!
+!-------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
 ! put any constants or macros which apply to the whole component in this 
@@ -97,7 +96,7 @@
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.4 2002/10/10 18:54:46 nscollins Exp $
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.5 2002/10/10 20:19:26 nscollins Exp $
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
@@ -157,10 +156,18 @@
 
 !
 ! !DESCRIPTION:
-!      Create a new <Class> from ... Allocates memory for a new <Class>
-!      object and uses the internal routine ESMF_<Class>Contruct to
-!      initialize it.  Define for deep classes only, for shallow classes only
-!      define and use ESMF_<Class>Init
+!   Create a new <Class> from ... Allocates memory for a new <Class>
+!   object and uses the internal routine ESMF_<Class>Contruct to
+!   initialize it.  Define for deep classes only, for shallow classes only
+!   define and use ESMF_<Class>Init
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[arg1] The arg is  ...
+!   \item[arg2] The arg is  ...
+!   \item[arg3] The arg is  ...
+!   \item[rc] The optional return code.
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  AAAn.n.n
@@ -183,8 +190,14 @@
       integer, intent(out), optional :: rc        ! return code
 !
 ! !DESCRIPTION:
-!      ESMF routine which destroys a <Class> object previously allocated
-!      via an ESMF_<Class>Create routine.  Define for deep classes only.
+!   ESMF routine which destroys a <Class> object previously allocated
+!   via an ESMF_<Class>Create routine.  Define for deep classes only.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[<class>] The class to be destroyed.
+!   \item[rc] The optional return code.
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS: developer's guide for classes
