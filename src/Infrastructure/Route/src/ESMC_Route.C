@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.48 2003/08/01 22:21:21 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.49 2003/08/04 17:22:51 rjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.48 2003/08/01 22:21:21 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.49 2003/08/04 17:22:51 rjacob Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -414,8 +414,9 @@ static int maxroutes = 10;
 // !REQUIREMENTS:  
     
     int rc = ESMF_FAILURE;
-    int i, j, k, l;
-    int ccount, xscount, xrcount;
+    int i, j, k, l, m;
+    int ixs, ixr;
+    int ccount, xscount, xrcount, xmcount;
     int mydeid, theirdeid;
     int needed;
     ESMC_XPacket *sendxp, *recvxp;
@@ -443,105 +444,114 @@ static int maxroutes = 10;
         //   printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
         }
 
-        // look up the corresponding send/recv xpackets in the rtables
-        rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
-        if (xscount > 1) printf("WARNING! cannot handle multiple xps yet\n");
-        if (xscount > 0) {
-            rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length, sstride, srep_count);
-            //printf("RouteRun: sendxp\n");
-            //sendxp->ESMC_XPacketPrint();
-        } else {
-            sendxp = NULL;
-            srank = 0;
-            soffset=0; scontig_length=0;
-            for(j=0; j<ESMF_MAXDIM; j++) {
-                srep_count[j]=0;
-                sstride[j]=0;
-            }
-            //printf("nothing to send\n");
-        }
+        // find total number of xpackets
+	rc = recvRT->ESMC_RTableGetCount(theirdeid, &xrcount);
+	rc = sendRT->ESMC_RTableGetCount(theirdeid, &xscount);
 
-        rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
-        if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet\n");
-        if (xrcount > 0) {
-            rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length, rstride, rrep_count);
-            //printf("RouteRun: recvxp\n");
-            //recvxp->ESMC_XPacketPrint();
-        } else {
-            recvxp = NULL;
-            rrank = 0;
-            roffset=0; rcontig_length=0;
-            for(j=0; j<ESMF_MAXDIM; j++) {
-                rrep_count[j]=0;
-                rstride[j]=0;
+        xmcount = MAX(xrcount, xscount);
+        for (m=0, ixs=0, ixr=0; m < xmcount; m++, ixs++, ixr++){
+
+            // look up the corresponding send/recv xpackets in the rtables
+
+            //if (xscount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xscount);
+            if (ixs < xscount) {
+                rc = sendRT->ESMC_RTableGetEntry(theirdeid, ixs, &sendxp);
+                rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length, sstride, srep_count);
+                //printf("RouteRun: sendxp\n");
+                //sendxp->ESMC_XPacketPrint();
+            } else {
+                sendxp = NULL;
+                srank = 0;
+                soffset=0; scontig_length=0;
+                for(j=0; j<ESMF_MAXDIM; j++) {
+                    srep_count[j]=0;
+		    sstride[j]=0;
+                }
+                //printf("nothing to send\n");
             }
-            //printf("nothing to recv\n");
-        }
+
+            //if (xrcount > 1) printf("WARNING! cannot handle multiple xps yet %d\n",xrcount);
+            if (ixr < xrcount) {
+                rc = recvRT->ESMC_RTableGetEntry(theirdeid, ixr, &recvxp);
+                rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length, rstride, rrep_count);
+                //printf("RouteRun: recvxp\n");
+                //recvxp->ESMC_XPacketPrint();
+            } else {
+                recvxp = NULL;
+                rrank = 0;
+		roffset=0; rcontig_length=0;
+                for(j=0; j<ESMF_MAXDIM; j++) {
+                    rrep_count[j]=0;
+                    rstride[j]=0;
+                }
+                //printf("nothing to recv\n");
+            }
         
        
-        // ready to call the comm routines - multiple times, one for
-        //  each disjoint memory piece.
+            // ready to call the comm routines - multiple times, one for
+            //  each disjoint memory piece.
      
-        // if sendxp == NULL, nothing to send
-        // if recvxp == NULL, nothing to recv
+            // if sendxp == NULL, nothing to send
+            // if recvxp == NULL, nothing to recv
 
-        // TODO: for now, ranks must match.
-        mrank = MAX(srank, rrank);
-        //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
-        //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
-        //                     (long int)srcaddr, (long int)dstaddr);
-        for (j=0, srcbytes = soffset, rcvbytes = roffset; j<mrank-1; j++) {
-            //printf("j=%d, srep_count[j]=%d, rrep_count[j]=%d\n", j, srep_count[j], rrep_count[j]);
-            for (l=0; l<srep_count[j] || l<rrep_count[j]; l++, 
-                            srcbytes += sstride[j], rcvbytes += rstride[j]) {
+           // TODO: for now, ranks must match.
+           mrank = MAX(srank, rrank);
+           //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
+           //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
+           //                     (long int)srcaddr, (long int)dstaddr);
+           for (j=0, srcbytes = soffset, rcvbytes = roffset; j<mrank-1; j++) {
+               //printf("j=%d, srep_count[j]=%d, rrep_count[j]=%d\n", j, srep_count[j], rrep_count[j]);
+               for (l=0; l<srep_count[j] || l<rrep_count[j]; l++, 
+                               srcbytes += sstride[j], rcvbytes += rstride[j]) {
          
-                 // TODO!!!  we need to standardize on either byte counts
-                 // and void * from here down to the MPI level, or we need
-                 // to compute # of items and item type and pass it down.
-                 // this "sizeof(int)" is WRONG and just a hack to test the
-                 // code for now.
+                     // TODO!!!  we need to standardize on either byte counts
+                     // and void * from here down to the MPI level, or we need
+                     // to compute # of items and item type and pass it down.
+                     // this "sizeof(int)" is WRONG and just a hack to test the
+                     // code for now.
          
-                 srcmem = (void *)((char *)srcaddr+(srcbytes*sizeof(int))); 
-                 rcvmem = (void *)((char *)dstaddr+(rcvbytes*sizeof(int))); 
-           // jw   srccount = sendxp ? scontig_length-soffset+1 : 0;
-           // jw   rcvcount = recvxp ? rcontig_length-roffset+1 : 0;
-                 srccount = sendxp ? scontig_length : 0;
-                 rcvcount = recvxp ? rcontig_length : 0;
+                    srcmem = (void *)((char *)srcaddr+(srcbytes*sizeof(int))); 
+                    rcvmem = (void *)((char *)dstaddr+(rcvbytes*sizeof(int))); 
+              // jw   srccount = sendxp ? scontig_length-soffset+1 : 0;
+              // jw   rcvcount = recvxp ? rcontig_length-roffset+1 : 0;
+                    srccount = sendxp ? scontig_length : 0;
+                    rcvcount = recvxp ? rcontig_length : 0;
 
-                 // Debug:
-                 if ((srccount == 0) && (rcvcount == 0)) 
-                     printf("WARNING!! both send/recv counts = 0, myDE %d, theirDE %d\n", 
-                                        mydeid, theirdeid); 
-                 //printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
-                 //           srccount, (long int)srcmem, mydeid, theirdeid);
-                 //printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
-                 //           rcvcount, (long int)rcvmem, mydeid, theirdeid);
+                    // Debug:
+                    if ((srccount == 0) && (rcvcount == 0)) 
+                        printf("WARNING!! both send/recv counts = 0, myDE %d, theirDE %d\n", 
+                                           mydeid, theirdeid); 
+                    //printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
+                    //           srccount, (long int)srcmem, mydeid, theirdeid);
+                    //printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
+                    //           rcvcount, (long int)rcvmem, mydeid, theirdeid);
 
-                 //printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
-                 //                l, srcbytes, rcvbytes);
-                 //printf("soffset=%d, scontig_length=%d, roffset=%d, rcontig_length=%d)\n", 
-                 //                  soffset, scontig_length, roffset, rcontig_length);
-                 //printf(" (j=%d, sstride[j]=%d, rstride[j]=%d)\n", 
-                 //                   j, sstride[j], rstride[j]);
+                    //printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
+                    //                l, srcbytes, rcvbytes);
+                    //printf("soffset=%d, scontig_length=%d, roffset=%d, rcontig_length=%d)\n", 
+                    //                  soffset, scontig_length, roffset, rcontig_length);
+                    //printf(" (j=%d, sstride[j]=%d, rstride[j]=%d)\n", 
+                    //                   j, sstride[j], rstride[j]);
 
              
-                //  theirdeid  is the other processor de number
-                //  srcmem and rcvmem are the mem addresses 
-                //  srccount and rcvcount are the byte counts.  they are 0
-                //    if there is nothing to send or receive, respectively.
+                    //  theirdeid  is the other processor de number
+                    //  srcmem and rcvmem are the mem addresses 
+                    //  srccount and rcvcount are the byte counts.  they are 0
+                    //    if there is nothing to send or receive, respectively.
 
-                rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
-                                                   srccount, rcvcount, 
-                                                   theirdeid, theirdeid
+                    rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
+                                                       srccount, rcvcount, 
+                                                       theirdeid, theirdeid
 #if 1 
 // NEW_SEND_RECV_INTERFACE
                                                    , ESMF_KIND_R4);
 #else 
 // old interface
-                                                   );
+                                                       );
 #endif
+                }
             }
-        }
+	}
 
     }
 
@@ -745,6 +755,8 @@ static int maxroutes = 10;
     my_XP = NULL;
     delete their_XP; 
     their_XP = NULL;
+    delete intersect_XP; // contents have been copied in RTable
+    intersect_XP = NULL;
 
     // add to cache table here.
     if (routetable.rcep == NULL) {
@@ -911,6 +923,10 @@ static int maxroutes = 10;
       ct->ESMC_CommTableSetPartner(their_de);
     }
 
+    // free XP here to prevent memory leaks
+    delete intersect_XP;  // contents have been copied in RTable
+    intersect_XP = NULL;
+
     // Calculate the receiving table.
  
     // get "my" AI out of the AI_tot array
@@ -965,6 +981,8 @@ static int maxroutes = 10;
     my_XP = NULL;
     delete their_XP; 
     their_XP = NULL;
+    delete intersect_XP;  // contents have been copied in RTable
+    intersect_XP = NULL;
 
     // add to cache table here.
     if (routetable.rcep == NULL) {
