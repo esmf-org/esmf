@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.92 2005/02/07 17:17:51 nscollins Exp $
+#  $Id: common.mk,v 1.93 2005/02/07 17:22:45 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -697,7 +697,7 @@ config_tests:
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
 	-@echo "Exhaustive " ${MULTI} >> ${CONFIG_TESTS}
 else
-	-@echo "Non-exhaustive ${MULTI} >> ${CONFIG_TESTS}
+	-@echo "Non-exhaustive " ${MULTI} >> ${CONFIG_TESTS}
 endif
 
 #
