@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.76 2004/12/17 21:57:04 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.77 2005/01/07 00:16:14 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.76 2004/12/17 21:57:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.77 2005/01/07 00:16:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -384,6 +384,8 @@
 
     int rc = ESMF_SUCCESS;
 
+    ESMC_Time timeToConvert = *this;
+
     // convert base time to date according to calendar type
     if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
         mm != ESMC_NULL_POINTER || dd  != ESMC_NULL_POINTER ||
@@ -393,36 +395,16 @@
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                                  ", calendar required.", &rc); return(rc);
       }
-      rc = this->calendar->ESMC_CalendarConvertToDate(this, yy, yy_i8, mm, dd,
+      rc = this->calendar->ESMC_CalendarConvertToDate(&timeToConvert,
+                                                      yy, yy_i8, mm, dd,
                                                       d, d_i8, d_r8);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
     }
 
-    // get seconds based date (64-bit s_i8 or real s_r8) if requested;
-    //   base time get needs to convert entire base time.  Requirements: TMG2.1
-    rc = ESMC_BaseTimeGet(this, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                ESMC_NULL_POINTER, s_i8, ESMC_NULL_POINTER,
-                                ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                ESMC_NULL_POINTER, ESMC_NULL_POINTER, s_r8);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
-      return(rc);
-
-    // get number of seconds in a day
-    int secPerDay = 0;  // default if day not defined
-    if (this->calendar != ESMC_NULL_POINTER) {
-      secPerDay = this->calendar->secondsPerDay;
-    }
-
-    // seconds to convert within this day
-    ESMF_KIND_I8 secondsToConvert = (secPerDay != 0) ?
-                        ESMC_FractionGetw() % secPerDay : ESMC_FractionGetw();
-    ESMC_Time timeToConvert = *this;
-    timeToConvert.ESMC_FractionSetw(secondsToConvert);
-
-    // use base class to get all other sub-day values (within date's day)
-    rc = ESMC_BaseTimeGet(&timeToConvert, h, m, s, ESMC_NULL_POINTER,
-                          ms, us, ns, h_r8, m_r8, ESMC_NULL_POINTER, ms_r8,
+    // use base class to get all other non-calendar dependant units
+    rc = ESMC_BaseTimeGet(&timeToConvert, h, m, s, s_i8,
+                          ms, us, ns, h_r8, m_r8, s_r8, ms_r8,
                           us_r8, ns_r8, sN, sD);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
