@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.186 2004/07/30 20:43:07 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.187 2004/08/12 21:48:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.186 2004/07/30 20:43:07 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.187 2004/08/12 21:48:33 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1307,6 +1307,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       ! Call GridGet routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
@@ -1499,6 +1507,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       ! Call GridGet routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
@@ -1624,6 +1640,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I4, 1, &
                                     value, localrc)
@@ -1679,6 +1703,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       limit = size(valueList)
       if (count > limit) then
@@ -1738,6 +1770,13 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
                                     ESMF_DATA_INTEGER, ESMF_I8, 1, &
@@ -1795,6 +1834,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       limit = size(valueList)
       if (count > limit) then
@@ -1854,6 +1901,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
                                     ESMF_DATA_REAL, ESMF_R4, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1908,6 +1963,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       limit = size(valueList)
       if (count > limit) then
@@ -1967,6 +2030,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
                                     ESMF_DATA_REAL, ESMF_R8, 1, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2022,6 +2093,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       limit = size(valueList)
       if (count > limit) then
@@ -2081,6 +2160,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       call c_ESMC_AttributeGetValue(grid%ptr%base, name, &
                                     ESMF_DATA_LOGICAL, ESMF_NOKIND, 1, &
                                     value, localrc)
@@ -2136,6 +2223,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       limit = size(valueList)
       if (count > limit) then
@@ -2195,6 +2290,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       call c_ESMC_AttributeGetChar(grid%ptr%base, name, value, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2241,6 +2344,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       call c_ESMC_AttributeGetCount(grid%ptr%base, count, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2309,6 +2420,14 @@
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       call c_ESMC_AttributeGetAttrInfoName(grid%ptr%base, name, &
                                            localDt, localDk, localCount, localrc)
@@ -2387,6 +2506,14 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       call c_ESMC_AttributeGetAttrInfoNum(grid%ptr%base, attributeIndex, &
                                           localName, localDt, localDk, &
@@ -2470,6 +2597,14 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       ! Call GridGetCoord routines based on GridStructure
 
@@ -2596,6 +2731,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       ! Call GridGetDELocalInfo routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
@@ -2713,6 +2856,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       ! Call GridGlobalToDELocalIndex routines based on GridStructure
 
       select case(grid%ptr%gridStructure%gridStructure)
@@ -2826,6 +2977,14 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      ! check grid status
+      if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("trying to query an uninitialized grid", &
+                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 
       ! Call GridDELocalToGlobalIndex routines based on GridStructure
 
