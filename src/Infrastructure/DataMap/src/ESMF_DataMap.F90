@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.27 2004/04/29 17:33:45 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.28 2004/05/05 13:09:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.27 2004/04/29 17:33:45 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.28 2004/05/05 13:09:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -1109,7 +1109,7 @@ end function
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_RelLocString - Return a relloc as a string
 !
 ! !INTERFACE:
@@ -1135,7 +1135,7 @@ end function
 !       \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         if (relloc .eq. ESMF_CELL_UNDEFINED) string = "Undefined"
@@ -1156,7 +1156,7 @@ end function
         end subroutine ESMF_RelLocString
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_InterleaveString - Return a interleave as a string
 !
 ! !INTERFACE:
@@ -1182,7 +1182,7 @@ end function
 !       \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         if (interleave .eq. ESMF_IL_BLOCK) string = "Block Interleave"
@@ -1193,7 +1193,7 @@ end function
         end subroutine ESMF_InterleaveString
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_IndexOrderString - Return a indexorder as a string
 !
 ! !INTERFACE:
@@ -1218,7 +1218,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         if (indexorder.eq.ESMF_INDEX_I  ) string = "I"
