@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.11 2004/04/21 18:35:03 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.12 2004/04/21 22:57:47 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,18 +19,19 @@ Earth system research often requires that such components be {\bf coupled}
 together to create an application.  By coupling we mean the data 
 transformations and, on parallel computing systems, data transfers, 
 that are necessary to allow data from one component to be utilized by 
-another.  ESMF offers coupling services to simplify the organization and 
-execution of inter-component data exchanges.  
+another.  ESMF offers regridding methods and other tools to simplify 
+the organization and execution of inter-component data exchanges.  
 
 In addition to components defined at the level of major physical 
-domains and functions, components may be defined that represent 
-smaller functions within larger components, such as the transformation 
-of data between the physics and dynamics in a spectral atmosphere model, 
+domains and computational functions, components may be defined that 
+represent smaller computational functions within larger components, 
+such as the transformation of data between the physics and dynamics 
+in a spectral atmosphere model, 
 or the creation of nested higher resolution regions 
 within a coarser grid.  The objective is to couple components at varying 
 scales both flexibly and efficiently.  ESMF encourages a hierachical
 application structure, in which large components branch into 
-smaller sub-components.  It also makes it easier for the same 
+smaller sub-components.  ESMF also makes it easier for the same 
 component to be used in multiple contexts without changes to its 
 source code.
 
@@ -62,19 +63,19 @@ a physical domain in which data is associated with one or more
 grids - for example, a sea ice model.  A Coupler Component 
 arranges and executes data transformations and transfers between 
 one or more Gridded Components. Gridded Components and Coupler 
-Components have standard methods, which include Run, Initialize,
-and Finalize.  These methods can be multi-phase.
+Components have standard methods, which include initialize, run,
+and finalize.  These methods can be multi-phase.
 
 The second part of an ESMF Component is user code, such as a
-model or data assimilation system.  Users register their code with 
-the framework in order to make it part of an ESMF application.  
-In practice, registration means that within the user-written 
-software there are calls to ESMF methods that associate a 
-standard ESMF operation with the name of the corresponding 
-Fortran subroutine in their user code.  For example, a user-written
-initialization routine called {\tt popOceanInit} might be 
-associated with the standard Initialize routine of an ESMF 
-Gridded Component named ``POP'' that represents an ocean model.
+model or data assimilation system.  Users set entry points 
+within their code so that it is callable by the framework.  
+In practice, setting entry points means that within user code 
+there are calls to ESMF methods that associate the name of a 
+Fortran subroutine with a corresponding standard ESMF operation.  
+For example, a user-written initialization routine called 
+{\tt popOceanInit} might be associated with the standard 
+Initialize routine of an ESMF Gridded Component named ``POP'' 
+that represents an ocean model.
 
 \item {\bf State}  ESMF components exchange information with other 
 components only through States.  A State is an ESMF derived
@@ -105,18 +106,13 @@ methods in order to execute the application.  For each of these
 standard methods, the parent Gridded Component in turn calls the 
 corresponding methods in the child Gridded Components and the 
 Coupler Component.  For example, consider a simple coupled 
-ocean/atmosphere simulation.  When the Initialize method of the 
+ocean/atmosphere simulation.  When the initialize method of the 
 parent Gridded Component is called by the AppDriver, it in turn 
-calls the Initialize methods of its child atmosphere and ocean 
-Gridded Components, and the Initialize method of an 
+calls the initialize methods of its child atmosphere and ocean 
+Gridded Components, and the initialize method of an 
 ocean-to-atmosphere Coupler Component.  Figure \ref{fig:appunit}
 shows this schematically for a coupled hurricane model with ocean
 and atmosphere components.
-
-The framework supplies methods to do basic transformations which 
-may include regridding, interpolation, unit conversions, 
-accumulations, averaging, transformations which conserve specific 
-values.
 
 \begin{center}
 \begin{figure}
@@ -150,7 +146,7 @@ introduced without affecting the overall structure of the application.
 
 Since all data communication happens within a component, a Coupler 
 Component must be created on the union of the DEs of all
-the Gridded Components it couples.  
+the Gridded Components that it couples.  
 
 A Gridded Component may exist across all the DEs in an application.  
 A Gridded Component may also reside on a subset of DEs in an 
@@ -174,28 +170,26 @@ the application.
 \label{sec:performance}
 
 The ESMF design enables the user to configure ESMF
-applications so that data is transferred from one component to another, 
-without requiring that it be copied or sent to a different data
-buffers as interim steps.  This is likely to be the most efficient way 
-of performing inter-component coupling when the components are instantiated 
-on different DE sets.  However, if desired, an application can also be 
-configured so that data from a source component is sent to a distinct set of 
-Coupler Component DEs for processing before being sent to its 
-destination.
+applications so that data is transferred directly from one component 
+to another, without requiring that it be copied or sent to a different data
+buffer as an interim step.  This is likely to be the most efficient way 
+of performing inter-component coupling.  However, if desired, an 
+application can also be configured so that data from a source component 
+is sent to a distinct set of Coupler Component DEs for processing 
+before being sent to its destination.
 
 The ability to overlap computation with communication is essential for
 performance.  When running with ESMF the user can initiate data 
 sends during Gridded Component execution, as soon as the data is ready.
-The computation can then proceed simultaneously with the data transfer.
+Computations can then proceed simultaneously with the data transfer.
 
 \newpage
 \subsection{Object Model}
 
 The following is a simplified UML diagram showing the relationships among
-ESMF superstructure classes.  See Appendix A, {\it A Brief 
-Introduction to UML},
-for a translation table that lists the symbols in the diagram and their 
-meaning.
+ESMF superstructure classes.  See Appendix A, {\it A Brief Introduction 
+to UML}, for a translation table that lists the symbols in the diagram 
+and their meaning.
 
 \begin{center}
 \includegraphics{Comp_obj.eps}   

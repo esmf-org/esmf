@@ -284,9 +284,40 @@ These are:
 as a consistent way of setting configuration parameters.
 \end{itemize}
 
+\subsection{Allocation Rules}
 
+The basic rule of allocation and deallocation for the ESMF is:
+whoever allocates it is responsible for deallocating it.
 
+ESMF methods that allocate their own space for data will
+deallocate that space when the object is destroyed. 
+Methods which accept a user-allocated buffer, for example
+{\tt ESMF\_FieldCreate()} with the {\tt ESMF\_DATA\_REF} flag,
+will not deallocate that buffer at the time the object is
+destroyed.  The user must arrange for the buffer to be deallocated
+when all use of it is complete.
 
+Classes such as Fields, Bundles, and States may have Arrays, 
+Fields, Grids and Bundles created externally and associated with
+them.  These associated items are not destroyed along with the rest  
+of the data object since it is possible for the items to be added 
+to more than one data object at a time (e.g. the same Grid could 
+be part of many Fields).  It is the user's responsibility to delete 
+these items when the last use of them is done.
+
+\subsection{Attributes}
+
+Any deep ESMF object will eventually be able to get and set
+Attributes.  (The current release supports Attributes on Fields,
+Bundles, and States.)  Attributes are (name, value) pairs, where
+the name is a character string and the value can be either a single
+value or list of {\tt int}/{\tt I*4}, {\tt double}/{\tt R*8},
+logical ({\tt ESMF\_Logical}), or {\tt char *}/{\tt character} values.
+Mixed types are not allowed in a single Attribute, and all attribute
+names must be unique within a single object.    Attributes are set
+by name, and can be retrieved either directly by name or by querying
+for a count of attributes and retrieving attribute names and values
+by index number.
 
 
 

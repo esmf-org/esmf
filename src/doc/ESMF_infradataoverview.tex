@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.14 2004/04/20 21:26:33 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.15 2004/04/21 22:57:45 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Handling}
 
@@ -168,23 +168,6 @@ Computing a single data value, e.g. the data maximum, minimum, sum, etc
 from a group of decomposed data blocks across a set of DEs, where the
 result is delivered to all DEs in the set.
 \end{description}
-
-\subsection{Field and Bundle Attributes}
-
-There are routines for setting and getting single values and lists of
-int/I4, double/R8, and logical ({\tt ESMF\_Logical}) types, and 
-char */character strings.  (Arrays of character strings are not 
-supported.)
-
-Attributes can be retrieved by name.  A count of all Attributes 
-associated with a data object can also be returned, and
-then Attributes can also be queried and retrieved by number, 
-for iterating over an unknown Attribute list.  The arguments to 
-the {\tt <Class>\_GetAttribute} routines are typed and overloaded, 
-so the type of the Attribute must match the type of the argument 
-receiving it.
-
-Currently Attributes can be added to Fields and Bundles.
 
 \newpage
 \subsection{Object Model}
