@@ -179,12 +179,6 @@
 !  ESMF_ConfigGetString ( cf, string,        retutns next string (word) 
 !                         label, default, rc )
 !
-!  ESMF_ConfigStringtoFloat ( string, rc )  transfrorms ASCII string to
-!                                           float (function)
-!
-!  ESMF_ConfigStringtoInt ( string, rc )    transfrorms ASCII string to
-!                                           integer (function)
-!
 !  ESMF_ConfigGetLen ( cf, label, unique,   gets number of words in the line
 !                      rc)                  by counting disregarding type 
 !                                           (function)
@@ -229,7 +223,9 @@
 ! !USES:
 
       use ESMF_DELayoutMod
-
+      use ESMF_LogErrMod
+      use m_ioutil_Config 
+      use m_stdio_Config
       implicit none
       private
 !------------------------------------------------------------------------------
@@ -244,8 +240,6 @@
        public :: ESMF_ConfigGetInt   ! returns next integer number (function)
        public :: ESMF_ConfigGetChar  ! returns next char or char array
        public :: ESMF_ConfigGetString     ! retutns next string (word)
-       public :: ESMF_ConfigStringtoFloat ! ASCII string to float (function)
-       public :: ESMF_ConfigStringtoInt   ! ASCII string to integer (function)
        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
@@ -261,14 +255,8 @@
 ! Revised parameter table to fit Fortran 90 standard.
 
      integer,   parameter :: LSZ = 256
-#ifndef sysLinux
-     integer,   parameter :: NBUF_MAX = 400*(LSZ) ! max size of buffer
-#else
-!ams
-! On Linux with the Fujitsu compiler, I needed to reduce NBUF_MAX
-!ams 
-     integer,   parameter :: NBUF_MAX = 200*(LSZ) ! max size of buffer
-#endif
+     integer,   parameter :: MSZ = 200
+     integer,   parameter :: NBUF_MAX = MSZ*LSZ ! max size of buffer
 
      character, parameter :: BLK = achar(32)   ! blank (space)
      character, parameter :: TAB = achar(09)   ! TAB
@@ -276,30 +264,21 @@
      character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
      character, parameter :: NULL= achar(00)   ! what it says
 
-     integer,parameter :: MALLSIZE_=10	       ! just an estimation
-
-     integer,parameter :: ESMF_Config_MXDEP = 4
-     integer,save      :: ESMF_Config_depth = 0
+     logical :: DELayout_provided
 
      character(len=*), parameter :: myname='ESMF_ConfigMod'
 !-----------------------------------------------------------------------
 !------------------------------------------------------------------------------
-! !PUBLIC TYPES:
+! !OPEQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_Config
+          private
           integer :: nbuf                              ! actual size of buffer
           character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file?
           character(len=LSZ),     pointer :: this_line ! the current line
           integer :: next_line                         ! index_ for next line 
                                                        ! on buffer
-          type(ESMF_Config), pointer :: last
        end type ESMF_Config
-!------------------------------------------------------------------------------
-! !PRIVATE TYPES:
-!------------------------------------------------------------------------------
-       type(ESMF_Config),save,pointer :: ESMF_Config_now
-
-
 
       contains
 !-----------------------------------------------------------------------
@@ -321,17 +300,35 @@
       integer,intent(out), optional              :: rc       ! error code
       !
 ! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
+! 	7apr2003  Zaslavsky  initial interface/prolog
 !EOP -------------------------------------------------------------------
-
+      character(len=*),parameter :: myname_=myname//'::ESMF_ConfigCreate'
+      integer iret
       type(ESMF_Config) :: cf_local
-      
-      cf_local%next_line = 0
-      rc = 0
+
+      iret = 0
+ 
+      if ( present ( layout ) ) then 
+         DELayout_provided = .true.     
+      else
+         DELayout_provided = .false.
+      endif
+
+! Initialization
+
+      allocate(cf_local%buffer, cf_local%this_line, stat = iret)
+      if(iret /= 0) then
+         ! SUBSITUTE:   call perr(myname,'allocate(new%..)', iret)
+         print *, myname,'allocate(new%..)', iret
+      endif
+
       ESMF_ConfigCreate = cf_local
+      if (present( rc )) rc = iret
 
-  end function ESMF_ConfigCreate
+      return
 
+    end function ESMF_ConfigCreate
+    
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
@@ -351,11 +348,22 @@
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
 !EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'::ESMF_ConfigDestroy'
+      integer :: ier, iret
 
-      rc = 0
-    end subroutine ESMF_ConfigDestroy
+      iret = 0
+
+      deallocate(cf%buffer, cf%this_line, stat = iret)
+      if(rc /= 0) then
+! SUBSTITUTE:  call perr(myname_,'deallocate(new%..)', iret)
+         print *, myname_,'deallocate(new%..)', iret
+      endif
+
+      if (present( rc )) rc = iret
+      return
+
+     end subroutine ESMF_ConfigDestroy
 
 
 !-----------------------------------------------------------------------
@@ -375,16 +383,157 @@
 
       type(ESMF_Config), intent(in) :: cf        ! ESMF Configuration
       character(len=*), intent(in)  :: fname     ! file name
-      logical, intent(out), optional :: unique   ! if present, uniqueness
-                                                 ! of labels is checked
-                                                 ! and true/false returned
+      logical, intent(in), optional :: unique    ! if unique is present, 
+                                                 ! uniqueness of labels
+                                                 ! is checked and error
+                                                 ! code is set
+                                                 ! 
       integer, intent(out), optional :: rc       ! Error code
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !EOP -------------------------------------------------------------------
-      end subroutine
 
+      character(len=*),parameter :: myname_='ESMF_ConfigLoadFile'
+      integer :: myID,ier, iret
+
+      iret = 0
+
+
+      call ESMF_ConfigLoadFile_1proc_( cf, fname, unique, iret )
+      if(iret /= 0) then
+! SUBSITUTE call perr(myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret)
+         print *, myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret
+         return
+      endif
+
+      if ( DELayout_provided ) then
+         print *, myname, ' DELayout is not used yet '
+      endif
+
+      if (present( rc )) rc = iret
+      return
+
+    end subroutine ESMF_ConfigLoadFile
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigLoadFile - load resource file into memory
+!
+! !DESCRIPTION: Resource file fname is loaded is loaded into memory
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigLoadFile_1proc( cf, fname, unique, rc )
+
+
+      implicit none
+
+      type(ESMF_Config), intent(in) :: cf        ! ESMF Configuration
+      character(len=*), intent(in)  :: fname     ! file name
+      logical, intent(in), optional :: unique    ! if unique is present, 
+                                                 ! uniqueness of labels
+                                                 ! is checked and error
+                                                 ! code is set
+      integer, intent(out), optional :: rc       ! Error code
+                                                 !   0 no error
+                                                 ! -98 coult not get unit 
+                                                 !     number (strange!)
+                                                 ! -98 talk to a wizzard
+                                                 ! -99 out of memory: increase
+                                                 !     NBUF_MAX in 'i90.h'
+                                                 !     other iostat from open 
+                                                 !     statement.
+                                                 !
+! !REVISION HISTORY:
+! 	7anp2003  Zaslavsky  initial interface/prolog
+!EOP -------------------------------------------------------------------
+      integer         lu, ios, loop, ls, ptr, iret
+      character*256   line
+      character(len=*), parameter :: myname = 'ESMF_ConfigLoadFile_1proc'
+
+
+      if ( unique ) then
+         print *, myname, ' Uniqueness of labels is not checked yet '
+      endif
+
+!     Open file
+!     ---------     
+!      lu = ESMF_Config_lua()
+
+      lu = luavail()	! a more portable version
+      if ( lu .lt. 0 ) then
+         iret = -97
+         return
+      end if
+
+	! A open through an interface to avoid portability problems.
+	! (J.G.)
+
+      call opntext(lu,fname,'old',ios)
+      if ( ios .ne. 0 ) then
+	 write(*,'(2a,i5)') myname,': opntext() error, ios =',ios
+         iret = ios
+         if ( present (rc )) rc = iret
+         return
+      end if
+
+!     Read to end of file
+!     -------------------
+      cf%buffer(1:1) = EOL
+      ptr = 2                         ! next buffer position
+      do loop = 1, NBUF_MAX
+
+!        Read next line
+!        --------------
+         read(lu,'(a)', end=11) line  ! read next line
+         call ESMF_Config_trim ( line )      ! remove trailing blanks
+         call ESMF_Config_pad ( line )        ! Pad with # from end of line
+
+!        A non-empty line
+!        ----------------
+         ls = index_(line,'#' ) - 1    ! line length
+         if ( ls .gt. 0 ) then
+            if ( (ptr+ls) .gt. NBUF_MAX ) then
+               iret = -99
+               if ( present (rc )) rc = iret
+               return
+            end if
+            cf%buffer(ptr:ptr+ls) = line(1:ls) // EOL
+            ptr = ptr + ls + 1
+         end if
+
+      end do
+      
+      iret = -98 ! good chance ESMF_Config_now%buffer is not big enough 
+      if ( present (rc )) rc = iret
+      return
+      
+11    continue
+
+!     All done
+!     --------
+!      close(lu)
+      call clstext(lu,ios)
+      if(ios /= 0) then
+         iret = -99
+         if ( present (rc )) rc = iret
+         return
+      endif
+      ESMF_Config_now%buffer(ptr:ptr) = EOB
+      ESMF_Config_now%nbuf = ptr
+      ESMF_Config_now%this_line=' '
+      ESMF_Config_now%next_line=0
+
+      iret = 0
+      if ( present (rc )) rc = iret
+
+      return
+    end subroutine ESMF_ConfigLoadFile_1proc
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
@@ -392,6 +541,19 @@
 !
 ! !IROUTINE: ESMF_ConfigFindLabel - finds the label (key)
 !
+! !INTERFACE:
+
+    subroutine ESMF_ConfigFindLabel( cf, label, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(in)  :: cf       ! ESMF Configuration
+      character(len=*), intent(in)   :: label    ! label
+      integer, intent(out), optional  :: rc      ! Error code
+                                                 !   0  no error
+                                                 !  -1  buffer not loaded
+                                                 !  -2  could not find label   
+
 ! !DESCRIPTION: Finds the label (key) in the resource file. If "unique"
 !               is present, uniqueness of the label is verified.
 !
@@ -401,23 +563,49 @@
 !               in the resource files. The DAO convention is to finish 
 !               line labels by : and tabel labels by ::..
 !
-! !INTERFACE:
-
-    subroutine ESMF_ConfigFindLabel( cf, label, unique, rc )
-
-      implicit none
-
-      type(ESMF_Config), intent(in)  :: cf       ! ESMF Configuration
-      character(len=*), intent(in)   :: label    ! label
-      logical, intent(out), optional :: unique   ! if present, uniqueness
-                                                 ! of the label is checked
-                                                 ! and true/false returned
-      integer, intent(out), optional  :: rc      ! Error code
 !
 ! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
+!    7anp2003  Zaslavsky  initial interface/prolog
+!   21apr2003  Zaslavsky  Coded using DAO code written by da Silva   
 !EOP -------------------------------------------------------------------
+	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
 
+      integer i, j, iret
+
+      iret = 0
+
+!     Determine whether label exists
+!     ------------------------------    
+!      print *,'buffer= ',cf%buffer(1:ESMF_Config_now%nbuf)
+!      print *,'label= ',EOL//label 
+
+      i = index_ ( cf%buffer(1:cf_now%nbuf), &
+                   EOL//label ) + 1
+      if ( i .eq. 1 ) then
+           cf%this_line = BLK // EOL
+           iret = -2
+           if ( present (rc )) rc = iret
+           return
+        elseif(i.le.0) then
+! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
+           print *, myname_,'invalid index_() return',i
+       iret = 1000                                      ! Error code here ?
+       if ( present (rc )) rc = iret
+       return
+      end if
+
+!     Extract the line associated with this label
+!     -------------------------------------------
+      i = i + len ( label )
+      j = i + index_(cf%buffer(i:cf%nbuf),EOL) - 2
+      cf%this_line = cf%buffer(i:j) // BLK // EOL
+
+      cf%next_line = j + 2
+
+      iret = 0
+      if ( present (rc )) rc = iret
+
+      return
     end subroutine ESMF_ConfigFindLabel
 
 
@@ -446,9 +634,112 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !
 !EOP -------------------------------------------------------------------
-!
+      integer :: i, j, iret
+
+      iret = 0
+      end = .false.
+
+      if ( cf%next_line >= cf%nbuf ) then
+         iret = -1
+           if ( present (rc )) rc = iret
+         return
+      end if
+
+      i = cf%next_line
+      j = i + index_(cf%buffer(i:cf%nbuf),EOL) - 2
+      cf%this_line = cf%buffer(i:j) // BLK // EOL
+      
+      if ( cf%this_line(1:2) .eq. '::' ) then
+         iret = 0                    ! end of table. We set iret = 0
+         end = .true.                ! and end = .true. Used to be
+      ! iret = 1  
+         cf%next_line = cf%nbuf + 1
+         if ( present (rc )) rc = iret
+         return
+      end if
+
+      cf%next_line = j + 2
+      iret = 0
+      if ( present (rc )) rc = iret
+      return
+
     end subroutine ESMF_ConfigNextLine
 
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetToken - gets a token
+!
+! !DESCRIPTION: Gets a sequence of characters (token, word). It will be 
+!               terminated by the first white space.
+
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetToken( cf, token, label, default, rc )
+
+      implicit none
+      
+      type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
+      character(len=*), intent(out)          :: token    ! token (word)
+      
+      character(len=*), intent(in), optional :: label    ! label
+      
+      character(len=*), intent(in), optional :: default  ! default value
+      
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !REVISION HISTORY:
+! 	7anp2003  Zaslavsky  initial interface/prolog
+!
+!EOP -------------------------------------------------------------------
+      character*1   ch
+      integer       ib, ie, iret
+      
+      iret = 0
+      
+      call ESMF_Config_trim ( cf%this_line )
+      
+      ch = cf%this_line(1:1)
+      if ( ch .eq. '"' .or. ch .eq. "'" ) then
+         ib = 2
+         ie = index_ ( cf%this_line(ib:), ch ) 
+      else
+         ib = 1
+         ie = min(index_(cf%this_line,BLK),	&
+              index_(cf%this_line,EOL)) - 1
+      end if
+      
+      if ( ie .lt. ib ) then
+         token = BLK
+         if ( present ( default )) token = default
+         iret = -1
+         return
+      else
+         ! Get the token, and shift the rest of %this_line to
+         ! the left
+         
+         token = cf%this_line(ib:ie) 
+         cf%this_line = cf%this_line(ie+2:)
+         iret = 0
+      end if
+      
+      if ( iret /= 0 ) then
+ 
+      else
+
+      endif
+      if ( present (rc )) rc = iret
+      return
+      
+      
+    end subroutine ESMF_ConfigGetToken
+    
+    
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
@@ -461,14 +752,14 @@
 !
 ! !INTERFACE:
 
-    real function ESMF_ConfigGetFloat( cf, label, size, default, rc )
-
+!!    real function ESMF_ConfigGetFloat( cf, label, size, default, rc )
+    real function ESMF_ConfigGetFloat( cf, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in), optional          :: size     ! number of floating 
-                                                         ! point numbers
+!      integer, intent(in), optional          :: size     ! number of floating 
+!                                                         ! point numbers
       real, intent(in), optional             :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
@@ -478,8 +769,29 @@
 !
 !EOP -------------------------------------------------------------------
 !
-      rc = 0
-      ESMF_ConfigGetFloat = 0.0
+      integer:: iret
+      character*256 :: token
+      real ::     x
+      
+      iret = 0
+
+      call ESMF_ConfigGetToken( cf, token, label, default, iret )
+
+      if ( iret .eq. 0 ) then
+           read(token,*,iostat=iret) x
+           if ( iret .ne. 0 ) iret = -2
+      end if
+      if ( iret .ne. 0 ) then
+         if ( present ( default ) ) then
+            x = default
+         else
+            x = 0.
+         endif
+      endif
+      ESMF_ConfigGetFloat = x
+      if( present( rc )) rc = iret 
+      return
+
     end function ESMF_ConfigGetFloat
 
 
@@ -495,14 +807,14 @@
 !
 ! !INTERFACE:
 
-    integer function ESMF_ConfigGetInt( cf, label, size, default, rc )
-
+!!    integer function ESMF_ConfigGetInt( cf, label, size, default, rc )
+    integer function ESMF_ConfigGetInt( cf, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in), optional          :: size     ! number of floating 
-                                                         ! point numbers
+!      integer, intent(in), optional          :: size     ! number of floating 
+!                                                         ! point numbers
       integer, intent(in), optional          :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
@@ -511,8 +823,32 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !
 !EOP -------------------------------------------------------------------
-      rc = 0
-      ESMF_ConfigGetInt = 0
+      character*256 token
+      real*8        x
+      integer       n, iret
+
+      iret = 0
+
+      call ESMF_ConfigGetToken( cf, token, label, default, iret )
+
+      if ( iret == 0 ) then
+           read(token,*,iostat=iret) x
+           if ( iret .ne. 0 ) iret = -2
+      end if
+      if ( iret == 0 ) then
+         n = nint(x)
+      else
+         if( present( default )) then
+            n = default
+         else
+            n = 0
+         endif
+      endif
+
+      ESMF_ConfigGetInt = n
+      if( present( rc )) rc = iret
+
+      return
     end function ESMF_ConfigGetInt
 
 
@@ -529,24 +865,40 @@
 !
 ! !INTERFACE:
 
-    character function ESMF_ConfigGetChar( cf, label, size, default, rc )
-
+!    character function ESMF_ConfigGetChar( cf, label, size, default, rc )
+    character function ESMF_ConfigGetChar( cf, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(in)          :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in), optional          :: size     ! number of  
-                                                         ! characters
+!      integer, intent(in), optional          :: size     ! number of  
+!                                                         ! characters
       character, intent(in), optional        :: default  ! default value
-
       integer, intent(out), optional         :: rc       ! Error code
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !
 !EOP -------------------------------------------------------------------
-      rc = 0
-      ESMF_ConfigGetChar = 'y'
+      character ch
+      character*256 token
+      integer       iret
+
+      iret = 0
+
+      call ESMF_ConfigGetToken( cf, token, label, default, iret )
+
+     if ( iret .ne. 0 ) then
+        ch = default
+      else
+         ch = token(1:1)
+      end if
+
+      rc = iret
+      ESMF_ConfigGetChar = ch
+
+      return
+
     end function ESMF_ConfigGetChar
 
 
@@ -580,8 +932,13 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !
 !EOP -------------------------------------------------------------------
-      string ='GoodBye!'
-      rc = 0
+      integer iret
+
+      call ESMF_ConfigGetToken( cf, string, label, default, iret )
+
+      rc = iret
+
+      return
     end subroutine ESMF_ConfigGetString
 
 
@@ -595,19 +952,15 @@
 !
 ! !INTERFACE:
 
-    integer function ESMF_ConfigGetLen( cf, label, unique, rc )
+    integer function ESMF_ConfigGetLen( cf, label, rc )
 
       implicit none
 
       type(ESMF_Config), intent(in)          :: cf    ! ESMF Configuration
 
-      character(len=*), intent(in), optional :: label ! label (if presented)
+      character(len=*), intent(in), optional :: label ! label (if present)
                                                       ! otherwise, current
                                                       ! line
-
-      logical, intent(out), optional :: unique        ! if present, uniqueness
-                                                      ! of labels is checked
-                                                      ! and true/false returned
 
       integer, intent(out), optional :: rc            ! Error code
 !
@@ -615,8 +968,31 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !
 !EOP -------------------------------------------------------------------
-      ESMF_ConfigGetLen = 0
-      rc = 0
+      character*256 token
+      integer iret
+      integer count 
+
+      iret = 0
+      count = 0
+
+      call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
+      if ( iret == 0 ) then
+         do 
+            call ESMF_ConfigGetToken( cf, token, rc = iret )
+            if ( iret == 0 ) then
+               count = count + 1
+            else
+               iret = 0
+               exit
+            endif
+         enddo
+      else
+         rc = iret  ! case when label is not found
+      endif
+
+      ESMF_ConfigGetLen = count
+      if( present ( rc )) rc = iret
+      return
     end function ESMF_ConfigGetLen
 
 
@@ -631,7 +1007,7 @@
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetDim( cf, label, lines, columns, unique, rc )
+    subroutine ESMF_ConfigGetDim( cf, label, lines, columns, rc )
 
       implicit none
 
@@ -640,15 +1016,9 @@
      integer, intent(out)                    :: lines
      integer, intent(out)                    :: columns  
 
-      character(len=*), intent(in), optional :: label ! label (if presented)
+      character(len=*), intent(in), optional :: label ! label (if present)
                                                       ! otherwise, current
                                                       ! line
-
-
-
-      logical, intent(out), optional        :: unique ! if present, uniqueness
-                                                      ! of labels is checked
-                                                      ! and true/false returned
 
       integer, intent(out), optional        :: rc     ! Error code
 !
@@ -656,64 +1026,46 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !
 !EOP -------------------------------------------------------------------
+      integer n, iret
+
+      lines = 0
+      columns = 0
+      
+
+      call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
+      if ( iret /= 0 ) then
+         if ( present( rc )) rc = iret
+         return
+      endif
+
+      do 
+         call ESMF_ConfigNextLine( cf, end, rc = iret)
+         if (iret /=0 ) then
+            lines = 0
+            columns = 0
+            exit
+         endif
+         if ( end ) then
+            exit
+         else
+            lines = lines + 1
+            n = ESMF_ConfigGetLen( cf, rc = iret)
+            if ( iret /= 0 ) then
+               lines = 0
+               columns = 0
+               rc = iret
+               return
+            else
+               colunms = max(columns, n)
+            endif
+         endif 
+      enddo
+      
+      if ( present( rc )) rc = iret
+      return
 
     end subroutine ESMF_ConfigGetDim
     
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigStringtoFloat - transform string to float
-!
-! !DESCRIPTION: Transform a character string, presumably containing 
-!               a flaoating point number, to a floating point format.
-!
-! !INTERFACE:
-
-    real function ESMF_ConfigStringtoFloat( string, rc )
-
-      implicit none
-
-      character(len=*), intent(in)           :: string   ! ASCII string
-
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!
-!EOP -------------------------------------------------------------------
-      rc = 0
-      ESMF_ConfigStringtoFloat = 0.0
-    end function ESMF_ConfigStringtoFloat
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigStringtoInt - transform string to integer
-!
-! !DESCRIPTION: Transform a character string, presumably containing 
-!               an integer number, to an integer point format.
-!
-! !INTERFACE:
-
-    integer function ESMF_ConfigStringtoInt( string, rc )
-
-      implicit none
-
-      character(len=*), intent(in)           :: string   ! ASCII string
-
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!
-!EOP -------------------------------------------------------------------
-
-      rc = 0
-      ESMF_ConfigStringtoInt = 0
-    end function ESMF_ConfigStringtoInt
 
     
   end module ESMF_ConfigMod
