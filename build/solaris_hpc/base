@@ -1,4 +1,4 @@
-# $Id: base,v 1.1 2001/11/15 23:10:20 dneckels Exp $ 
+# $Id: base,v 1.2 2002/09/20 18:00:12 jwolfe Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
@@ -32,7 +32,7 @@ shared: chkopts_basic
 	${RM} -rf tmp
 
 #
-#  Generates a shared library from any .a library; not just the ALICE ones
+#  Generates a shared library from any .a library
 #  This is to allow any user to generate his or her own shared library
 #
 #  
