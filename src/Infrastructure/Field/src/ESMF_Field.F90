@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.50 2003/07/31 23:27:19 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.51 2003/08/04 20:20:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.50 2003/07/31 23:27:19 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.51 2003/08/04 20:20:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2491,6 +2491,7 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: global_stride
       integer, dimension(:,:), allocatable :: global_start
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
+      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_count
 
    
@@ -2533,7 +2534,8 @@
       allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(ftypep%grid, global_cell_dim=global_stride, &
-                        global_start=global_start, rc=status)
+                        global_start=global_start, &
+                        periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridGet returned failure"
          return
@@ -2548,8 +2550,8 @@
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
                                AI_count, layout, my_DE, src_AI, src_AI, &
-                               AI_count, layout, hascachedroute, route, &
-                               rc=status)
+                               AI_count, layout, periodic, &
+                               hascachedroute, route, status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
@@ -2558,7 +2560,7 @@
           call ESMF_RoutePrecomputeHalo(route, datarank, &
                                         my_DE, src_AI, dst_AI, &
                                         AI_count, global_start, global_stride, &
-                                        layout, rc=status)
+                                        layout, periodic, status)
 
       endif
 
@@ -2754,6 +2756,7 @@
       integer, dimension(:,:), allocatable :: src_global_start
       integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_stride
       integer, dimension(:,:), allocatable :: dst_global_start
+      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -2881,13 +2884,18 @@
           AI_rcv_count = 0
       endif
           
+      ! periodic only matters for halo operations
+      do i=1, ESMF_MAXGRIDDIM
+        periodic(i) = ESMF_TF_FALSE
+      enddo
+
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(datarank, &
                                my_dst_DE, dst_AI_exc, dst_AI_tot, &
                                AI_rcv_count, dstlayout, &
                                my_src_DE, src_AI_exc, src_AI_tot, &
-                               AI_snd_count, srclayout, &
+                               AI_snd_count, srclayout, periodic, &
                                hascachedroute, route, rc=status)
 
       if (.not. hascachedroute) then
@@ -2901,7 +2909,8 @@
                                     dst_global_stride, dstlayout,  &
                                     my_src_DE, src_AI_exc, src_AI_tot, &
                                     AI_snd_count, src_global_start, &
-                                    src_global_stride, srclayout, rc=status)
+                                    src_global_stride, srclayout, &
+                                    rc=status)
 
       endif
 
