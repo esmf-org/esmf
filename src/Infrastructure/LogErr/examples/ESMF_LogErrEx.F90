@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.14 2004/09/03 22:20:10 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.15 2004/11/29 18:13:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,11 +31,11 @@
     implicit none
     
     ! return variables
-    integer :: rc1,rc2
-    ! function return variables
-    logical :: ret
+    integer :: rc1,rc2,rcToTest,allocRcToTest
     ! a log object that is not the default log
     type(ESMF_LOG):: alog
+    type(ESMF_Time) :: time
+    integer, pointer :: intptr(:)
 !EOC
     integer :: finalrc
     finalrc = ESMF_SUCCESS
@@ -60,19 +60,27 @@
         finalrc = ESMF_FAILURE
     end if
 !BOC
+    ! LogMsgSetError
+    call ESMF_LogMsgSetError(ESMF_FAILURE,"Convergence failure",rcToReturn=rc2)
+
     ! LogMsgFoundError
-    ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
-!EOC
-    if (.NOT.ret) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
+    call ESMF_TimeSyncToRealTime(time, rcToTest)
+    if (ESMF_LogMsgFoundError(rcToTest, "getting wall clock time", &
+                              rcToReturn=rc2)) then
+        ! Error getting time. The previous call will have printed the error
+        ! already into the log file.  Add any additional error handling here.
+        ! (This call is expected to provoke an error from the Time Manager.)
+    endif
+
     ! LogMsgFoundAllocError
-    ret = ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
+    allocate(intptr(10), stat=allocRcToTest)
+    if (ESMF_LogMsgFoundAllocError(allocRcToTest,"integer array", rcToReturn=rc2)) then
+        ! Error during allocation.  The previous call will have logged already
+        ! an error message into the log.
+    endif
+
+    deallocate(intptr)
 !EOC
-    if (.NOT.ret) then
-        finalrc = ESMF_FAILURE
-    end if
 !BOE
 !\subsubsection{User Created Log}
 
@@ -98,21 +106,10 @@
         finalrc = ESMF_FAILURE
     end if
 !BOC
-    ! LogMsgFoundError
-    ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello", ESMF_CONTEXT, &
+    ! LogMsgSetError
+    call ESMF_LogMsgSetError(ESMF_FAILURE,"Interpolation Failure", ESMF_CONTEXT, &
           rcToReturn=rc2,log=alog)
-!EOC
-    if (.NOT.ret) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
-    ! LogMsgFoundAllocError
-    ret = ESMF_LogFoundAllocError(ESMF_FAILURE, ESMF_CONTEXT, rc2,alog)
-!EOC
-    if (.NOT.ret) then
-        finalrc = ESMF_FAILURE
-    end if
-!BOC
+
     ! Close the log.
     call ESMF_LogClose(alog,rc2)
 !EOC
