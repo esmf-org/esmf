@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.26 2004/02/10 23:48:06 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.27 2004/02/19 21:31:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.26 2004/02/10 23:48:06 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.27 2004/02/19 21:31:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -358,13 +358,13 @@
 ! !ARGUMENTS:
 
       integer, intent(in) :: numDims
-      type(ESMF_Grid), intent(inout) :: srcGrid
-      type(ESMF_Grid), intent(inout) :: dstGrid
+      type(ESMF_Grid), intent(in) :: srcGrid
+      type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DomainList), intent(inout) :: recvDomainList
-      type(ESMF_Array), intent(inout), optional :: srcArray
-      type(ESMF_DataMap), intent(inout), optional :: srcDatamap
-      type(ESMF_Array), intent(inout), optional :: dstArray
-      type(ESMF_DataMap), intent(inout), optional :: dstDatamap
+      type(ESMF_Array), intent(in), optional :: srcArray
+      type(ESMF_DataMap), intent(in), optional :: srcDatamap
+      type(ESMF_Array), intent(in), optional :: dstArray
+      type(ESMF_DataMap), intent(in), optional :: dstDatamap
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -473,9 +473,7 @@
         else
           call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=status)
         endif
-        ! translate myAI to local index
-        call ESMF_GridGlobalToLocalIndex(srcGrid, globalAI1D=myArrayAI, &
-                                         localAI1D=myArrayLocalAI, rc=status)
+ !       ! translate myAI to local index
         call ESMF_DataMapGet(srcDataMap, dimlist=dimOrder, rc=status)
         do i = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
@@ -489,12 +487,16 @@
               sendDomainList%domains(i)%ai(j) = myAI(2)
             elseif (dimOrder(j).eq.0) then
               sendDomainList%domains(i)%ai(j) = myArrayAI(j)
-              count = myArrayAI(j)%max - myArrayAI(j)%min + 1
-              sendDomainList%total_points = sendDomainList%total_points*count
             else
               !TODO: add error
             endif
           enddo
+        enddo
+        do j = 1,numDims
+          if (dimOrder(j).eq.0) then
+            count = myArrayAI(j)%max - myArrayAI(j)%min + 1
+            sendDomainList%total_points = sendDomainList%total_points*count
+          endif
         enddo
 
       ! recvDomainList next
@@ -502,18 +504,19 @@
         allocate(allAI(nDEs,numDims))
         allocate(allLocalAI(nDEs,numDims))
         if (totalUse) then
-          call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, totalindex=allAI, &
-                                           rc=status)
+          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                           totalindex=allAI, rc=status)
         else
-          call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, compindex=allAI, &
-                                           rc=status)
+          call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                           compindex=allAI, rc=status)
         endif
         ! translate myAI to local index
-        call ESMF_GridGlobalToLocalIndex(srcGrid, globalAI2D=allAI, &
-                                         localAI2D=allLocalAI, rc=status)
-        call ESMF_DataMapGet(dstDataMap, dimlist=dimOrder, rc=status)
+  !      call ESMF_DataMapGet(srcDataMap, dimlist=dimOrder, rc=status)
+  !      call ESMF_GridGlobalToLocalIndex(srcGrid, globalAI2D=allAI, &
+  !                                       localAI2D=allLocalAI, &
+  !                                       dimOrder=dimOrder, rc=status)
         do i = 1,recvDomainList%num_domains
-          theirDE = recvDomainList%domains(i)%DE
+          theirDE = recvDomainList%domains(i)%DE + 1
           do j = 1,recvDomainList%domains(i)%rank
             myAI(j) = recvDomainList%domains(i)%ai(j)
           enddo
@@ -524,13 +527,17 @@
             elseif (dimOrder(j).eq.2) then
               recvDomainList%domains(i)%ai(j) = myAI(2)
             elseif (dimOrder(j).eq.0) then
-              recvDomainList%domains(i)%ai(j) = allLocalAI(theirDE,j)
-              count = allLocalAI(theirDE,j)%max - allLocalAI(theirDE,j)%min + 1
-              recvDomainList%total_points = recvDomainList%total_points*count
+              recvDomainList%domains(i)%ai(j) = allAI(theirDE,j)
             else
               !TODO: add error
             endif
           enddo
+        enddo
+        do j = 1,numDims
+          if (dimOrder(j).eq.0) then
+            count = allAI(theirDE,j)%max - allAI(theirDE,j)%min + 1
+            recvDomainList%total_points = recvDomainList%total_points*count
+          endif
         enddo
 
         deallocate(dimOrder)
