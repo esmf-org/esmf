@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.9 2004/05/18 11:29:18 nscollins Exp $
+# $Id: build_rules.mk,v 1.10 2004/05/18 17:55:06 cpboulder Exp $
 #
 # Linux.intel.default.mk
 #
@@ -40,6 +40,7 @@ HDF_INCLUDE      =
 else
 BLAS_LIB       = -lscs ${FC_LIB}
 LAPACK_LIB     = -lscs
+#if 0
 ifeq ($(ESMF_PREC),32)
 NETCDF_LIB       = -L/usr/freeware/lib32 -lnetcdf
 NETCDF_INCLUDE   = -I/usr/freeware/include
@@ -53,6 +54,7 @@ NETCDF_INCLUDE   = -I/usr/freeware/include
 HDF_LIB          = -L /usr/freeware/lib64 -lmfhdf -ldf -ljpeg -lz
 HDF_INCLUDE      = -I /usr/freeware/include
 endif
+#endif
 # end 64 bit section
 endif
 # end of io bypass section

@@ -7,12 +7,12 @@ program test_log_2
 
     type(ESMF_Log) :: aLog1
     real :: real_num
-    integer :: rc
+    integer :: rc1,rc2
     logical :: ret
 
-    call ESMF_Initialize(rc=rc)
-    call ESMF_LogInitialize("aLog1.txt",rc=rc)
+    call ESMF_Initialize(rc=rc1)
+    call ESMF_LogInitialize("aLog1.txt",rc=rc1)
     call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
-    ret = ESMF_LogFoundError(ESMF_FAILURE,"Log Found Error 2",ESMF_LOG_INFO)
-    ret = ESMF_LogFoundAllocError(ESMF_FAILURE,"Some object")
+    ret = ESMF_LogFoundError(ESMF_FAILURE,rcToReturn=rc2)
+    ret = ESMF_LogFoundAllocError(ESMF_FAILURE)
 end program

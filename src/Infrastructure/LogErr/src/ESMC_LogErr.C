@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.53 2004/05/17 19:25:40 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.54 2004/05/18 17:55:08 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.53 2004/05/17 19:25:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.54 2004/05/18 17:55:08 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -183,39 +183,6 @@ int ESMC_LogFinalize(
 {
     return ESMF_SUCCESS;
 }   //end ESMC_LogInitialize
-
-void ESMC_TimeStamp(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    int *y,
-    int *mn,
-    int* d,
-    int *h,
-    int *m,
-    int *s,
-    int *ms
-      
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-    time_t tm;
-    struct tm ti;
-    struct timeval tv;	
-    gettimeofday(&tv,NULL);
-    ti=*localtime((const time_t*)&tv.tv_sec);
-    *y=ti.tm_year+1900;
-    *mn=ti.tm_mon+1;
-    *d=ti.tm_mday;
-    *h=ti.tm_hour;
-    *m=ti.tm_min;
-    *s=ti.tm_sec;
-    *ms=tv.tv_usec;
-}
 
 //----------------------------------------------------------------------------
 //BOP
@@ -369,6 +336,36 @@ bool ESMC_Log::ESMC_LogWrite(
     fclose(ESMC_LogFile);
     return true;
 }
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogFoundError - LogFoundError
+//
+// !INTERFACE:
+
+bool ESMC_Log::ESMC_LogFoundError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int rcToCheck,
+    int *rcToReturn
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+    int result=false;
+    *rcToReturn=rcToCheck;
+    if (rcToCheck!=ESMF_SUCCESS)
+    {
+         ESMC_LogWrite(ESMC_LogGetErrMsg(*rcToReturn),ESMC_LOG_ERROR);
+         result=true;
+    }
+    return result;
+}
+
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogFoundError - LogFoundError
@@ -382,21 +379,21 @@ bool ESMC_Log::ESMC_LogFoundError(
 //  none
 //
 // !ARGUMENTS:
-    int status,
+    int rcToCheck,
     int LINE,
     char FILE[],
     char method[],
-    int rc
+    int *rcToReturn
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 {
     int result=false;
-    rc=status;
-    if (status!=ESMF_SUCCESS)
+    *rcToReturn=rcToCheck;
+    if (rcToCheck!=ESMF_SUCCESS)
     {
-         ESMC_LogWrite(ESMC_LogGetErrMsg(status),ESMC_LOG_ERROR,LINE,FILE,method);
+         ESMC_LogWrite(ESMC_LogGetErrMsg(*rcToReturn),ESMC_LOG_ERROR,LINE,FILE,method);
          result=true;
     }
     return result;
@@ -414,17 +411,17 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //  none
 //
 // !ARGUMENTS:
-    int status,
+    int rcToCheck,
     char msg[],
-    int rc
+    int *rcToReturn
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 {
     int result=false;
-    rc=status;
-    if (status!=ESMF_SUCCESS)
+    rcToReturn=rcToCheck;
+    if (rcToCheck!=ESMF_SUCCESS)
     {
         ESMC_LogWrite(msg,ESMC_LOG_ERROR);
         result=true;
@@ -445,20 +442,20 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //  none
 //
 // !ARGUMENTS:
-    int status,
+    int rcToCheck,
     char msg[],
     int LINE,
     char FILE[],
     char method[],
-    int rc
+    int *rcToReturn
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 {
     int result=false;
-    rc=status;
-    if (status!=ESMF_SUCCESS)
+    rcToReturn=rcToCheck;
+    if (rcToCheck!=ESMF_SUCCESS)
     {
         ESMC_LogWrite(msg,ESMC_LOG_ERROR,LINE,FILE,method);
         result=true;
@@ -578,8 +575,40 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 //
 // !INTERFACE:
 
+void ESMC_TimeStamp(
 
-char *ESMC_Log::ESMC_LogGetErrMsg(
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int *y,
+    int *mn,
+    int *d,
+    int *h,
+    int *m,
+    int *s,
+    int *ms
+      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+    time_t tm;
+    struct tm ti;
+    struct timeval tv;	
+    gettimeofday(&tv,NULL);
+    ti=*localtime((const time_t*)&tv.tv_sec);
+    *y=ti.tm_year+1900;
+    *mn=ti.tm_mon+1;
+    *d=ti.tm_mday;
+    *h=ti.tm_hour;
+    *m=ti.tm_min;
+    *s=ti.tm_sec;
+    *ms=tv.tv_usec;
+}
+
+char *ESMC_LogGetErrMsg(
 
 // !RETURN VALUE:
 //  none

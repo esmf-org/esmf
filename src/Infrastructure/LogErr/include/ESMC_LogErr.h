@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.44 2004/05/17 19:25:40 eschwab Exp $
+// $Id: ESMC_LogErr.h,v 1.45 2004/05/18 17:55:07 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ private:
 
     ESMC_Logical flush;         // If true, all output is flushed
 
-    ESMC_Logical root_only;
+    ESMC_Logical rootOnly;
 
     int halt;
 
@@ -78,10 +78,10 @@ private:
     void ESMC_LogClose();
     bool ESMC_LogWrite(char msg[],int logtype);
     bool ESMC_LogWrite(char msg[],int logtype,int LINE,char FILE[],char method[]);    
-    bool ESMC_LogFoundError(int status,int rc);
-    bool ESMC_LogFoundError(int status,int LINE,char FILE[],char method[],int rc);
-    bool ESMC_LogMsgFoundError(int status,char msg[],int rc);
-    bool ESMC_LogMsgFoundError(int status,char msg[],int LINE,char FILE[],char method[],int rc);
+    bool ESMC_LogFoundError(int rcToCheck,int *rcToReturn);
+    bool ESMC_LogFoundError(int rcToCheck,int LINE,char FILE[],char method[],int *rcToReturn);
+    bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
+    bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],char method[],int *rcToReturn);
     bool ESMC_LogAllocError();
     bool ESMC_LogAllocError(int LINE,char FILE[],char method[]);
     bool ESMC_LogMsgAllocError(char msg[]);
