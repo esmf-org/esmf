@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.14 2004/12/23 04:34:58 theurich Exp $
+// $Id: ESMC_VM.h,v 1.15 2004/12/23 18:10:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,6 +49,8 @@ class ESMF_VMPlan;
 class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
   // This is the ESMF derived virtual machine class.
   public:
+    void *ESMC_VMStartup(class ESMC_VMPlan *vmp, void *(fctp)(void *, void *),
+      void *cargo);
     int ESMC_VMGet(
       // Get method that supports the F90 optional arguments interface
       int          *localPet,       // out - id of local PET
@@ -70,15 +72,14 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
       int *petMatchCount,           // out - number of matching PETs in vmMatch
       int *petMatchList,            // out - list of matching PETs in vmMatch
       int len_petMatchList);        // in  - size of petMatchList
-    void *ESMC_VMStartup(class ESMC_VMPlan *vmp, void *(fctp)(void *, void *),
-      void *cargo);
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
-ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
-void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global ESMC_VMK
 ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
 ESMC_VM *ESMC_VMGetCurrent(int *rc);  // Return pointer to VM of current context
+int      ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
+ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
+void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global ESMC_VMK
 
 // class definition
 class ESMC_VMPlan : public ESMC_VMKPlan {   // inherits from ESMC_VMKPlan class
