@@ -1,11 +1,30 @@
-% $Id: Grid_design.tex,v 1.1 2002/12/03 23:32:22 jwolfe Exp $
+% $Id: Grid_design.tex,v 1.2 2003/05/07 16:17:58 jwolfe Exp $
 
 %\subsection{Design}
 
 % <Describe strategy for overall class design.>
 
 
-%<Add more detail here>
-%
-%
-%
+The Grid class aggregates two internal classes: a DistGrid class
+and a PhysGrid class.  The separation allows the code to differentiate
+between functions which define the local decomposition of data and
+the local representation of the grid.  The Grid class itself maintains
+general information about the global grid (e.g. the grid type, staggering,
+and coordinate system).  The Grid class is relatively thin and
+otherwise presents a unified interface for DistGrid and PhysGrid
+functions.
+
+The Grid class contains all information about the computational grid
+for a Component, and must provide access to any necessary grid information
+to the rest of the ESMF.  A single Grid can have more than one related
+DistGrid and PhysGrid set, called a subGrid.  Each subGrid corresponds to
+a different representation of the Grid.  For example, a staggered Grid could
+have separate subGrids representing cell centers and cell vertices.  A
+vertical grid may also be represented as a subGrid.
+
+Some methods which have a Grid interface are actually implemented
+at the underlying DistGrid or PhysGrid level; they will be inherited
+by the Grid class.  This allows the user API (Application Programming
+Interface) to present functions at the level which is most consistent
+to the application without restricting where inside the ESMF the actual
+implementation is done.
