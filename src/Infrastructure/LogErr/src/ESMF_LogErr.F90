@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.7 2004/04/09 15:37:30 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.8 2004/04/21 03:31:13 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,6 +65,7 @@ type ESMF_Log
 	integer halt
 	integer filetype
 	integer stream 
+	integer max_elements
 	type(ESMF_LOGENTRY), dimension(1)::LOG_ENTRY
     character(len=32) nameLogErrFile      
 
@@ -79,8 +80,8 @@ type ESMF_Log
 end type ESMF_Log
 
 
-   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite, ESMF_LogInit, ESMF_LogFoundError
-
+   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite, ESMF_LogInit, ESMF_LogFoundError, ESMF_LogSet, ESMF_LogGet
+	
 !----------------------------------------------------------------------------
 
 contains
@@ -326,6 +327,142 @@ end subroutine ESMF_LogWrite
 	endif	
        
 end function ESMF_LogFoundError
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogSet - Sets Log Parameters
+
+! !INTERFACE: 
+	subroutine ESMF_LogSet(aLog,verbose,flush,root_only,halt,filetype,stream,max_elements,rc)
+!
+! !ARGUMENTS:
+!	
+	type(ESMF_Log)		 					:: aLog
+	type(ESMF_Logical), intent(in),optional					:: verbose
+	type(ESMF_Logical), intent(in),optional					:: flush
+	type(ESMF_Logical), intent(in),optional					:: root_only
+	integer, intent(in),optional					:: halt
+	integer, intent(in),optional					:: filetype
+	integer, intent(in),optional					:: stream  
+	integer, intent(in),optional					:: max_elements
+	integer, intent(out),optional					:: rc
+	
+
+!      \item [aLog]
+!            Log object.
+!      \item [verbose]
+!            Verbose flag.
+!      \item [root_only]
+!	     Root only flag
+!      \item [halt]
+!	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
+!      \item [filetype]
+!            The type of file (singlelog(0), multilog(1)).
+!      \item [stream]
+!            The type of stream (free(0), preordered(1))
+!      \item [max_elements]
+!            Maximum number of elements in the log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP 
+	if (present(rc)) then
+	  rc=ESMF_FAILURE
+	endif
+	if (present(verbose)) then
+	  aLog%verbose=verbose
+	endif
+	if (present(flush)) then
+	  aLog%flush=flush
+	endif
+	if (present(root_only)) then
+	  aLog%root_only=root_only
+	endif
+	if (present(halt)) then
+	  aLog%halt=halt
+	endif
+	if (present(filetype)) then
+	  aLog%filetype=filetype
+	endif
+	if (present(stream)) then
+	  aLog%stream=stream
+	endif
+	if (present(max_elements)) then
+	  aLog%max_elements=max_elements
+	endif	
+	if (present(rc)) then
+	  rc=ESMF_SUCCESS 
+	endif 
+end subroutine ESMF_LogSet
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogGet - Returns logical associated with finding an error
+
+! !INTERFACE: 
+	subroutine ESMF_LogGet(aLog,verbose,flush,root_only,halt,filetype,stream,max_elements,rc)
+!
+! !ARGUMENTS:
+!	
+	type(ESMF_Log), intent(in) 					:: aLog
+	type(ESMF_Logical), intent(out),optional					:: verbose
+	type(ESMF_Logical), intent(out),optional					:: flush
+	type(ESMF_Logical), intent(out),optional					:: root_only
+	integer, intent(out),optional					:: halt
+	integer, intent(out),optional					:: filetype
+	integer, intent(out),optional					:: stream  
+	integer, intent(out),optional					:: max_elements
+	integer, intent(out),optional					:: rc
+	
+
+!      \item [aLog]
+!            Log object.
+!      \item [verbose]
+!            Verbose flag.
+!      \item [root_only]
+!	     Root only flag
+!      \item [halt]
+!	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
+!      \item [filetype]
+!            The type of file (singlelog(0), multilog(1)).
+!      \item [stream]
+!            The type of stream (free(0), preordered(1))
+!      \item [max_elements]
+!            Maximum number of elements in the log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP 
+	if (present(rc)) then
+	  rc=ESMF_FAILURE
+	endif
+	if (present(verbose)) then
+	  verbose=aLog%verbose
+	endif
+	if (present(flush)) then
+	  flush=aLog%flush
+	endif
+	if (present(root_only)) then
+	  root_only=aLog%root_only
+	endif
+	if (present(halt)) then
+	  halt=aLog%halt
+	endif
+	if (present(filetype)) then
+	  filetype=aLog%filetype
+	endif
+	if (present(stream)) then
+	  stream=aLog%stream
+	endif
+	if (present(max_elements)) then
+	  max_elements=aLog%max_elements
+	endif	
+	if (present(rc)) then
+	  rc=ESMF_SUCCESS 
+	endif 
+end subroutine ESMF_LogGet
 
 subroutine ESMF_LogInit(aLog)
 	type(ESMF_Log) 						:: aLog
