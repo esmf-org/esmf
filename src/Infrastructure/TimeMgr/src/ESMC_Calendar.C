@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.50 2004/02/18 01:48:04 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.51 2004/03/05 00:51:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,13 +25,15 @@
  #include <string.h>
  #include <ctype.h>
 
+ #include <ESMC_Time.h>
+
  // associated class definition file
  #include <ESMC_Calendar.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.50 2004/02/18 01:48:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.51 2004/03/05 00:51:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -965,6 +967,258 @@ int ESMC_Calendar::count=0;
     return(rc);
 
 }  // end ESMC_CalendarConvertToDate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarIncrement - increment a Time by a TimeInterval
+//
+// !INTERFACE:
+      ESMC_Time ESMC_Calendar::ESMC_CalendarIncrement(
+//
+// !RETURN VALUE:
+//    ESMC_Time sum
+//
+// !ARGUMENTS:
+      const ESMC_Time *time,                            // in
+      const ESMC_TimeInterval &timeInterval) const {    // in
+
+//
+// !DESCRIPTION:
+//     Increments a given {\tt ESMC\_Time} by the given
+//     {\tt ESMC\_TimeInterval}, taking into account calendar intervals of
+//     years, months, and or days as defined on the given time's calendar.
+//
+//EOP
+// !REQUIREMENTS:   TMG 2.4.5
+
+    // intialize result to given time to prepare for the case of
+    //   only a non-calendar (h,m,s) increment
+    //    (copies calendar & timezone properties)
+    ESMC_Time sum = *time;
+
+    // prepare for increment with any non-calendar units (h,m,s)
+    ESMC_TimeInterval nonCalTi = timeInterval;
+
+    switch (calendarType)
+    {
+        case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_NOLEAP:
+        case ESMC_CAL_360DAY:
+        {
+            ESMF_KIND_I8 yy_i8;
+            int mm, dd, timeZone;
+            ESMF_KIND_I4 h, m, s;
+            ESMC_Calendar *cal;
+
+            // TODO:  This algorithm operates on yy, mm, dd units the way
+            //    a person would (easier to comprehend).  But could
+            //    also do by determining the absolute value of the relative
+            //    interval (convert to days, then seconds) and then adding it
+            //    to time.  Could be faster because it would eliminate the 
+            //    arithmetic-intensive steps of converting from basetime
+            //    to yy,mm,dd and back again (at least for Gregorian's
+            //    Fliegel algorithm)
+
+            // TODO: fractional seconds, fractional calendar interval units
+
+            // do calendar increment only if non-zero calendar interval units
+            //    years or months are specified
+            if (timeInterval.yy != 0 || timeInterval.mm != 0) {
+
+                // get calendar units from given time, while saving time-of-day
+                //   units and calendar & timezone properties
+                time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   &h, &m, &s,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, &cal, &timeZone);
+                                   // TODO: use native C++ interface when
+                                   //   ready
+            
+                // do the calendar increment!
+                mm += timeInterval.mm % monthsPerYear;  // months increment
+                if (mm > monthsPerYear) {  // check for years carryover
+                  mm -= monthsPerYear;
+                  yy_i8++;
+                } else if (mm < 1) {  // check for years carryunder (borrow)
+                  mm += monthsPerYear;
+                  yy_i8--;
+                }
+                yy_i8 += timeInterval.mm / monthsPerYear; 
+                                               // years part of months increment
+                yy_i8 += timeInterval.yy;      // years increment
+
+                // clip day-of-the-month if necessary
+                int daysInMonth = daysPerMonth[mm-1];
+                if (mm == 2 && calendarType == ESMC_CAL_GREGORIAN &&
+                    ESMC_IS_LEAP_YEAR(yy_i8)) daysInMonth++;  // Feb. 29 days
+                if (dd > daysInMonth) dd = daysInMonth;
+
+                // convert resulting calendar sum back to base time, while also
+                // restoring time-of-day units and properties from given time
+                sum.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 &h, &m, &s,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                 ESMC_NULL_POINTER, cal, &timeZone);
+                                 // TODO: use native C++ interface when
+                                 //   ready
+            }
+
+            // convert any relative days increment to absolute time based
+            //   on this calendar and add to non-calendar units increment
+            if (timeInterval.d != 0) {
+                ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
+                nonCalTi.ESMC_BaseTime::operator+=(daysTi);
+            }
+        }
+        default:
+            break;
+    }
+
+    // perform the remaining increment with the non-calendar and
+    //   any relative days parts
+    sum.ESMC_BaseTime::operator+=(nonCalTi);
+
+    return(sum);
+
+}  // end ESMC_CalendarIncrement
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarDecrement - decrement a Time by a TimeInterval
+//
+// !INTERFACE:
+      ESMC_Time ESMC_Calendar::ESMC_CalendarDecrement(
+//
+// !RETURN VALUE:
+//    ESMC_Time diff
+//
+// !ARGUMENTS:
+      const ESMC_Time *time,                            // in
+      const ESMC_TimeInterval &timeInterval) const {    // in
+
+//
+// !DESCRIPTION:
+//     Decrements a given {\tt ESMC\_Time} by the given
+//     {\tt ESMC\_TimeInterval}, taking into account calendar intervals of
+//     years, months, and or days as defined on the given time's calendar.
+//
+//EOP
+// !REQUIREMENTS:   TMG 2.4.5
+
+    // intialize result to given time to prepare for the case of
+    //   only a non-calendar (h,m,s) decrement
+    //    (copies calendar & timezone properties)
+    ESMC_Time diff = *time;
+
+    // prepare for decrement with any non-calendar units (h,m,s)
+    ESMC_TimeInterval nonCalTi = timeInterval;
+
+    switch (calendarType)
+    {
+        case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_NOLEAP:
+        case ESMC_CAL_360DAY:
+        {
+            ESMF_KIND_I8 yy_i8;
+            int mm, dd, timeZone;
+            ESMF_KIND_I4 h, m, s;
+            ESMC_Calendar *cal;
+
+            // TODO:  This algorithm operates on yy, mm, dd units the way
+            //    a person would (easier to comprehend).  But could
+            //    also do by determining the absolute value of the relative
+            //    interval (convert to days, then seconds) and then subtracting
+            //    it from time.  Could be faster because it would eliminate the 
+            //    arithmetic-intensive steps of converting from basetime
+            //    to yy,mm,dd and back again (at least for Gregorian's
+            //    Fliegel algorithm)
+
+            // TODO: fractional seconds, fractional calendar interval units
+
+            // do calendar decrement only if non-zero calendar interval units
+            //    years or months are specified
+            if (timeInterval.yy != 0 || timeInterval.mm != 0) {
+
+                // get calendar units from given time, while saving time-of-day
+                //   units and calendar & timezone properties
+                time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   &h, &m, &s,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, &cal, &timeZone);
+                                   // TODO: use native C++ interface when
+                                   //   ready
+
+                // do the calendar decrement!
+                mm -= timeInterval.mm % monthsPerYear;  // months decrement
+                if (mm < 1) {  // check for year carryunder (borrow)
+                  mm += monthsPerYear;
+                  yy_i8--;
+                } else if (mm > monthsPerYear) {  // check for year carryover
+                  mm -= monthsPerYear;
+                  yy_i8++;
+                }
+                yy_i8 -= timeInterval.mm / monthsPerYear; 
+                                               // years part of months decrement
+                yy_i8 -= timeInterval.yy;      // years decrement
+
+                // clip day-of-the-month if necessary
+                int daysInMonth = daysPerMonth[mm-1];
+                if (mm == 2 && calendarType == ESMC_CAL_GREGORIAN &&
+                    ESMC_IS_LEAP_YEAR(yy_i8)) daysInMonth++;  // Feb. 29 days
+                if (dd > daysInMonth) dd = daysInMonth;
+
+                // convert resulting calendar diff back to base time, while also
+                // restoring time-of-day units and properties from given time
+                diff.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  &h, &m, &s,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, cal, &timeZone);
+                                  // TODO: use native C++ interface when
+                                  //   ready
+            }
+
+            // convert any relative days increment to absolute time based
+            //   on this calendar and add to non-calendar units increment
+            if (timeInterval.d != 0) {
+                ESMC_TimeInterval daysTi(timeInterval.d * secondsPerDay);
+                nonCalTi.ESMC_BaseTime::operator+=(daysTi);
+            }
+        }
+        default:
+            break;
+    }
+
+    // perform the remaining decrement with the non-calendar and
+    //   any relative days parts
+    diff.ESMC_BaseTime::operator-=(nonCalTi);
+
+    return(diff);
+
+}  // end ESMC_CalendarDecrement
 
 //-------------------------------------------------------------------------
 //BOP

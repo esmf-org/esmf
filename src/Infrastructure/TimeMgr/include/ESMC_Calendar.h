@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.36 2004/02/18 01:47:10 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.37 2004/03/05 00:51:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,7 +68,10 @@
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMC_BaseTime.h>       // inherited BaseTime class
- #include <ESMC_Time.h>
+
+// forward reference to prevent #include recursion
+class ESMC_Time;
+class ESMC_TimeInterval;
 
 // TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
@@ -172,6 +175,14 @@ class ESMC_Calendar {
                              int *mm=0, int *dd=0,
                              ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
                              ESMF_KIND_R8 *d_r8=0) const;
+
+    ESMC_Time ESMC_CalendarIncrement(const ESMC_Time *time,
+                                     const ESMC_TimeInterval &timeInterval)
+                                     const;
+
+    ESMC_Time ESMC_CalendarDecrement(const ESMC_Time *time,
+                                     const ESMC_TimeInterval &timeInterval)
+                                     const;
 
     bool operator==(const ESMC_Calendar &) const;
     bool operator!=(const ESMC_Calendar &) const;
