@@ -1,4 +1,4 @@
- $Id: README,v 1.36 2003/09/25 21:22:20 flanigan Exp $
+ $Id: README,v 1.37 2003/09/26 21:19:28 flanigan Exp $
 ================================================================================
                                    README
 
@@ -93,7 +93,7 @@ ESMF_ARCH      Normally value of uname -s.
 ESMF_SITE      Build configure site name or the value default.
                If not set, then the value of default is assumed.
 
-ESMF_COMPILER  Set to the name of the compiler to use.  In not set 
+ESMF_COMPILER  Set to the name of the compiler to use.  If not set 
                then the default compiler is used.  Values can be 
                default,absoft,intel,lahey or nag.
 
@@ -193,8 +193,7 @@ To build documentation:
   gmake alldoc        ! Builds all the above documents.
 
 Final documentation files will be located in the ${ESMF_DIR}/doc
-directory.  If these doc build commands are used on a Linux machine,
-set the environment variable ESFM_COMPILER to the value of lahey.
+directory.  
 
 Usage
 -----
