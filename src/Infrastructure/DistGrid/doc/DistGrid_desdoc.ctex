@@ -1,4 +1,4 @@
-% $Id: DistGrid_desdoc.ctex,v 1.1 2002/11/01 20:17:39 jwolfe Exp $
+% $Id: DistGrid_desdoc.ctex,v 1.2 2003/01/15 23:19:57 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,8 +20,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{<Title>}
-\newcommand{\myauthors}{<Authors>}
+\newcommand{\mytitle}{\bf DistGrid Design}
+\newcommand{\myauthors}{\it Phil Jones and Jon Wolfe}
 #endif
 
 #ifdef STANDALONE
@@ -61,92 +61,92 @@
 \input{comppath/DistGrid_obj}
 #endif
 
-\section{Global Parameters and Definitions}
-#ifdef STANDALONE
-\input{DistGrid_param}
-#elif defined(CONSTITUENT)
-\input{comppath/DistGrid_param}
-#endif
+% \section{Global Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{DistGrid_param}
+% #elif defined(CONSTITUENT)
+% \input{comppath/DistGrid_param}
+% #endif
 
-\section{<Name1> Design}
+\section{DistGrid Design}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{class_desc}
+\input{DistGrid_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/class_desc}
+\input{comppath/DistGrid_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
-\input{class_design}
+\input{DistGrid_design}
 #elif defined(CONSTITUENT)
-\input{comppath/class_design}
+\input{comppath/DistGrid_design}
 #endif
 
-\subsubsection{Class Definition}
+\subsubsection{DistGrid Definition}
 #ifdef STANDALONE
-\input{class_def}
+\input{DistGrid_def}
 #elif defined(CONSTITUENT)
-\input{comppath/class_def}
+\input{comppath/DistGrid_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-\input{class_rest}
+\input{DistGrid_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/class_rest}
+\input{comppath/DistGrid_rest}
 #endif
 
-\section{<Name1> F90 Interface}
+\section{DistGrid F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{class_fex}
+\input{DistGrid_fex}
 #elif defined(CONSTITUENT)
-\input{comppath/class_fex}
+\input{comppath/DistGrid_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-\input{class_fparam}
+\input{DistGrid_fparam}
 #elif defined(CONSTITUENT)
-\input{comppath/class_fparam}
+\input{comppath/DistGrid_fparam}
 #endif
 
-%\subsection{Class API}
+%\subsection{DistGrid API}
 #ifdef STANDALONE
-\input{class_fapi}
+\input{DistGrid_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/class_fapi}
+\input{comppath/DistGrid_fapi}
 #endif
 
-\section{<Name1> C++ Interface}
+\section{DistGrid C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{class_ccex}
+\input{DistGrid_ccex}
 #elif defined(CONSTITUENT)
-\input{comppath/class_ccex}
+\input{comppath/DistGrid_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-\input{class_ccparam}
+\input{DistGrid_ccparam}
 #elif defined(CONSTITUENT)
-\input{comppath/class_ccparam}
+\input{comppath/DistGrid_ccparam}
 #endif
 
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{class_ccapi}
-#elif defined(CONSTITUENT)
-\input{comppath/class_ccapi}
-#endif
+% %\subsection{Class API}
+% #ifdef STANDALONE
+% \input{DistGrid_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{comppath/DistGrid_ccapi}
+% #endif
 
 \section{<Name2> Design}
 
-% Subsections same as <Name1> Design ...
+% Subsections same as DistGrid Design ...
 
 #ifdef STANDALONE
 \section{Review Status}

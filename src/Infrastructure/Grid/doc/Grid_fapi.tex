@@ -32,19 +32,20 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: ESMF\_Grid.F90,  Date: Tue Dec  3 16:36:07 MST 2002
+\markboth{Left}{Source File: ESMF\_Grid.F90,  Date: Wed Jan 15 15:07:53 MST 2003
 }
 
  
 %/////////////////////////////////////////////////////////////
-\subsection{Fortran:  Module Interface ESMF\_GridMod - One line general statement about this class (Source File: ESMF\_Grid.F90)}
+\subsection{Fortran:  Module Interface ESMF\_GridMod - Grid class (Source File: ESMF\_Grid.F90)}
 
 
   
   
-   The code in this file implements the {\tt Class> class ...
-  
-   < Insert a paragraph or two explaining the function of this class. >
+   The code in this file implements the {\tt Grid} class.  This class
+   provides a unified interface for both {\tt PhysGrid} and {\tt DistGrid}
+   information for model grids.  Functions for defining and computing {\tt Grid}
+   information are available through this class.
   
   ------------------------------------------------------------------------------
 \bigskip{\em USES:}
@@ -52,6 +53,7 @@
        use ESMF_BaseMod        ! ESMF base class
        use ESMF_DistGridMod    ! ESMF distributed grid class
        use ESMF_IOMod          ! ESMF I/O class
+       use ESMF_LayoutMod      ! ESMF layout class
        use ESMF_PhysGridMod    ! ESMF physical grid class
        implicit none
  
@@ -77,26 +79,27 @@
        sequence
        private
  
-         type (ESMF_Base) :: base                     ! base class object
-         type (ESMF_Status) :: gridstatus             ! uninitialized, init ok,
-                                                      ! etc
-         integer :: gridtype                          ! enum for type of grid
-         integer :: stagger                           ! enum for grid staggering
-         integer :: coord_system                      ! enum for physical
-                                                      ! coordinate system
-         integer :: coord_order                       ! enum for mapping of xyz 
-                                                      ! to ijk
-         integer :: num_subgrids                      ! number of grid descriptors
-                                                      ! necessary to support
-                                                      ! staggering
-         real :: global_min_x                         ! global extents
-         real :: global_max_x                         ! global extents
-         real :: global_min_y                         ! global extents
-         real :: global_max_y                         ! global extents
-         type (ESMF_PhysGridSpec), dimension(:), pointer :: subgrid  !
-         type (ESMF_PhysGrid), pointer :: physgrid  !
-  jw     type (ESMF_VertGrid), pointer :: vertgrid    !
-         type (ESMF_DistGrid), pointer :: distgrid    !
+         type (ESMF_Base) :: base            ! base class object
+         type (ESMF_Status) :: gridstatus    ! uninitialized, init ok, etc
+         integer :: horz_gridtype            ! enum for type of horizontal grid
+         integer :: vert_gridtype            ! enum for type of vertical grid
+         integer :: horz_stagger             ! enum for horizontal grid staggering
+         integer :: vert_stagger             ! enum for vertical grid staggering
+         integer :: horz_coord_system        ! enum for horizontal physical
+                                             ! coordinate system
+         integer :: vert_coord_system        ! enum for vertical physical
+                                             ! coordinate system
+         integer :: coord_order              ! enum for mapping of xyz 
+                                             ! to ijk
+         integer :: num_physgrids            ! number of grid descriptors
+                                             ! necessary to support
+                                             ! staggering, vertical
+                                             ! grids, background grids
+         type (ESMF_PhysGridType), dimension(:), pointer :: &
+            physgrids         ! grid info for all grid descriptions necessary
+                              ! to define horizontal, staggered and vertical grids
+         type (ESMF_DistGrid) :: distgrid    ! decomposition and other
+                                             ! logical space info for grid
  
        end type
  
@@ -111,32 +114,86 @@
        end type
  
   ------------------------------------------------------------------------------\end{verbatim}{\sf PUBLIC TYPES:}
-\begin{verbatim}       public ESMF_GridConfig
+\begin{verbatim} 
+       public ESMF_GridConfig
        public ESMF_Grid
+       public ESMF_GridType
+ 
   ------------------------------------------------------------------------------\end{verbatim}{\sf PUBLIC MEMBER FUNCTIONS:}
-\begin{verbatim}    Pick one or the other of the init/create sections depending on
-    whether this is a deep class (the class/derived type has pointers to
-    other memory which must be allocated/deallocated) or a shallow class
-    (the class/derived type is self-contained) and needs no destroy methods
-    other than deleting the memory for the object/derived type itself.
- 
-   the following routines apply to deep classes only
-     public ESMF_GridCreate                 ! interface only, deep class
-     public ESMF_GridDestroy                ! interface only, deep class
- 
+\begin{verbatim} 
+     public ESMF_GridCreate
+     public ESMF_GridDestroy
+     public ESMF_GridAddPhysGrid
      public ESMF_GridGetConfig
      public ESMF_GridSetConfig
-     public ESMF_GridGetValue               ! Get<Value>
-     public ESMF_GridSetCoordinate 
-     public ESMF_GridSetLMask     
-     public ESMF_GridSetMMask    
-     public ESMF_GridSetMetric  
+     !public ESMF_GridGetCoord
+     public ESMF_GridSetCoord
+     public ESMF_GridGetDE    ! temporary to access DistGrid from above
+     !public ESMF_GridGetInfo
+     public ESMF_GridSetInfo
+     !public ESMF_GridGetLMask
+     public ESMF_GridSetLMask
+     !public ESMF_GridGetMMask
+     public ESMF_GridSetMMask
+     !public ESMF_GridGetMetric
+     public ESMF_GridSetMetric
+     !public ESMF_GridGetRegionID
      public ESMF_GridSetRegionID
-  
      public ESMF_GridValidate
      public ESMF_GridPrint
-  
-   < list the rest of the public interfaces here >\end{verbatim}
+ 
+  ------------------------------------------------------------------------------\end{verbatim}{\sf PUBLIC DATA MEMBERS:}
+\begin{verbatim} 
+    integer, parameter, public ::            &! recognized grid types
+       ESMF_GridType_Unknown           =  0, &! unknown or undefined grid
+       ESMF_GridType_LatLon            =  1, &! equally-spaced lat/lon grid
+       ESMF_GridType_Mercator          =  2, &! Mercator lat/lon grid
+       ESMF_GridType_Dipole            =  3, &! Displaced-pole dipole grid
+       ESMF_GridType_Tripole           =  4, &! Tripolar grids
+       ESMF_GridType_XY                =  5, &! Cartesian equally-space x-y grid
+       ESMF_GridType_DataStream        =  6, &! Data stream
+       ESMF_GridType_PhysFourier       =  7, &! Mixed Fourier Space/Phys Space grid
+       ESMF_GridType_LatLonGauss       =  8, &! lat/lon grid with Gaussian latitudes
+       ESMF_GridType_SphericalSpectral =  9, &! spectral space for spherical harmonics
+       ESMF_GridType_Geodesic          = 10, &! spherical geodesic grid
+       ESMF_GridType_CubedSphere       = 11   ! cubed sphere grid
+ 
+    integer, parameter, public ::            &! recognized staggering types
+       ESMF_GridStagger_Unknown        =  0, &! unknown or undefined staggering
+       ESMF_GridStagger_A              =  1, &! Arakawa A (centered velocity)
+       ESMF_GridStagger_B              =  2, &! Arakawa B (velocities at grid corner)
+       ESMF_GridStagger_C              =  3, &! Arakawa C (velocities at cell faces)
+       ESMF_GridStagger_Z              =  4, &! C grid equiv for geodesic grid
+       ESMF_GridStagger_VertCenter     =  5, &! vert velocity at vertical midpoints
+       ESMF_GridStagger_VertFace       =  6   ! vert velocity/Pgrad at top(bottom)face
+ 
+    integer, parameter, public ::            &! recognized coordinate systems
+       ESMF_CoordSystem_Unknown        =  0, &! unknown or undefined coord system
+       ESMF_CoordSystem_Spherical      =  1, &! spherical coordinates (lat/lon)
+       ESMF_CoordSystem_Cartesian      =  2, &! Cartesian coordinates (x,y)
+       ESMF_CoordSystem_Cylindrical    =  3, &! cylindrical coordinates
+       ESMF_CoordSystem_LatFourier     =  4, &! mixed latitude/spectral space
+       ESMF_CoordSystem_Spectral       =  5, &! wavenumber space
+       ESMF_CoordSystem_Depth          =  6, &! vertical z coord. depth (0 at surface)
+       ESMF_CoordSystem_Height         =  7, &! vertical z coord. height (0 at bottom)
+       ESMF_CoordSystem_Pressure       =  8, &! vertical pressure coordinate
+       ESMF_CoordSystem_Sigma          =  9, &! vertical sigma coordinate
+       ESMF_CoordSystem_Theta          = 10, &! vertical theta coordinate
+       ESMF_CoordSystem_Eta            = 11, &! vertical eta coordinate
+       ESMF_CoordSystem_Isopycnal      = 12, &! vertical density coordinate
+       ESMF_CoordSystem_Hybrid         = 13, &! hybrid vertical coordinates
+       ESMF_CoordSystem_Lagrangian     = 14   ! Lagrangian coordinates
+       ! I'm sure there are more - I'm not sure
+       ! what the atmospheric ESMF models are using for vertical coords
+ 
+    integer, parameter, public ::            &! recognized coordinate orderings
+       ESMF_CoordOrder_Unknown         =  0, &! unknown or undefined coord ordering
+       ESMF_CoordOrder_XYZ             =  1, &! IJK maps to XYZ
+       ESMF_CoordOrder_XZY             =  2, &! IJK maps to XZY
+       ESMF_CoordOrder_YXZ             =  3, &! IJK maps to YXZ
+       ESMF_CoordOrder_YZX             =  4, &! IJK maps to YZX
+       ESMF_CoordOrder_ZXY             =  5, &! IJK maps to ZXY
+       ESMF_CoordOrder_ZYX             =  6   ! IJK maps to ZYX\end{verbatim}
  
 %/////////////////////////////////////////////////////////////
  
@@ -144,7 +201,7 @@
  
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       interface ESMF_GridCreate 
+\begin{verbatim}       interface ESMF_GridCreate
  \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
 \begin{verbatim}          module procedure ESMF_GridCreateEmpty
           module procedure ESMF_GridCreateInternal
@@ -157,7 +214,7 @@
 {\sf DESCRIPTION:\\ }
 
 
-       This interface provides a single entry point for Grid create
+       This interface provides a single entry point for {\tt Grid} create
        methods.
    
 %/////////////////////////////////////////////////////////////
@@ -169,6 +226,7 @@
 \begin{verbatim}       interface ESMF_GridConstruct
  \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
 \begin{verbatim}          module procedure ESMF_GridConstructNew
+          module procedure ESMF_GridConstructInternal
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -182,12 +240,12 @@
  
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       interface ESMF_GridSetCoordinate
+\begin{verbatim}       interface ESMF_GridSetCoord
  \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
-\begin{verbatim}          module procedure ESMF_GridSetCoordinateFromArray
-          module procedure ESMF_GridSetCoordinateFromBuffer
-          module procedure ESMF_GridSetCoordinateCompute
-          module procedure ESMF_GridSetCoordinateCopy
+\begin{verbatim}          module procedure ESMF_GridSetCoordFromArray
+          module procedure ESMF_GridSetCoordFromBuffer
+          module procedure ESMF_GridSetCoordCompute
+          module procedure ESMF_GridSetCoordCopy
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -205,7 +263,7 @@
  \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
 \begin{verbatim}          module procedure ESMF_GridSetLMaskFromArray
           module procedure ESMF_GridSetLMaskFromBuffer
-          module procedure ESMF_GridSetLMaskCompute
+          module procedure ESMF_GridSetLMaskFromMMask
           module procedure ESMF_GridSetLMaskCopy
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -224,7 +282,7 @@
  \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
 \begin{verbatim}          module procedure ESMF_GridSetMMaskFromArray
           module procedure ESMF_GridSetMMaskFromBuffer
-          module procedure ESMF_GridSetMMaskCompute
+          module procedure ESMF_GridSetMMaskFromLMask
           module procedure ESMF_GridSetMMaskCopy
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -262,7 +320,6 @@
  \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
 \begin{verbatim}          module procedure ESMF_GridSetRegionIDFromArray
           module procedure ESMF_GridSetRegionIDFromBuffer
-          module procedure ESMF_GridSetRegionIDCompute
           module procedure ESMF_GridSetRegionIDCopy
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
@@ -283,7 +340,7 @@
 \begin{verbatim}       function ESMF_GridCreateEmpty(name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateEmpty\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       character (len=*), intent(in), optional :: name
-       integer, intent(out), optional :: rc               \end{verbatim}
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -292,9 +349,9 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
+       \item[[name]]
             {\tt Grid} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -309,19 +366,29 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       function ESMF_GridCreateInternal(name, gridtype, coord_system, &
-                                        x_min, x_max, y_min, y_max, i_max, &
-                                        j_max, rc)\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       function ESMF_GridCreateInternal(i_max, j_max, &
+                                        nDE_i, nDE_j, layout, &
+                                        horz_gridtype, vert_gridtype, &
+                                        horz_stagger, vert_stagger, &
+                                        horz_coord_system, vert_coord_system, &
+                                        x_min, x_max, y_min, y_max, name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateInternal\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       character (len=*), intent(in) :: name
-       integer, intent(in), optional :: gridtype
-       integer, intent(in), optional :: coord_system
+\begin{verbatim}       integer, intent(in) :: i_max
+       integer, intent(in) :: j_max
+       integer, intent(in), optional :: nDE_i
+       integer, intent(in), optional :: nDE_j
+       type (ESMF_Layout), intent(in), optional :: layout
+       integer, intent(in), optional :: horz_gridtype
+       integer, intent(in), optional :: vert_gridtype
+       integer, intent(in), optional :: horz_stagger
+       integer, intent(in), optional :: vert_stagger
+       integer, intent(in), optional :: horz_coord_system
+       integer, intent(in), optional :: vert_coord_system
        real, intent(in), optional :: x_min
        real, intent(in), optional :: x_max
        real, intent(in), optional :: y_min
        real, intent(in), optional :: y_max
-       integer, intent(in) :: i_max
-       integer, intent(in) :: j_max
+       character (len=*), intent(in), optional :: name
        integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -332,17 +399,28 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
-            {\tt Grid} name.
-       \item[[gridtype]] 
-            Integer specifier to denote gridtype:
-               gridtype=1   lat-lon
-               TODO:  fill out
-       \item[[coord\_system]]
-            Integer specifier to denote coordinate system:
-               coord\_system=1   spherical
-               coord\_system=2   Cartesian
-               coord\_system=3   cylindrical
+       \item[[i\_max]]
+            Number of grid increments in the i-direction.
+       \item[[j\_max]]
+            Number of grid increments in the j-direction.
+       \item[[nDE\_i]]
+            Number of DE's in 1st dir.
+       \item[[nDE\_j]]
+            Number of DE's in 2nd dir.
+       \item[[layout]]
+            Layout of DE's.
+       \item[[horz\_gridtype]]
+            Integer specifier to denote horizontal gridtype.
+       \item[[vert\_gridtype]]
+            Integer specifier to denote vertical gridtype.
+       \item[[horz\_stagger]]
+            Integer specifier to denote horizontal grid stagger.
+       \item[[vert\_stagger]]
+            Integer specifier to denote vertical grid stagger.
+       \item[[horz\_coord\_system]]
+            Integer specifier to denote horizontal coordinate system.
+       \item[[vert\_coord\_system]]
+            Integer specifier to denote vertical coordinate system.
        \item[[x\_min]]
             Minimum physical coordinate in the x-direction.
        \item[[x\_max]]
@@ -351,11 +429,9 @@
             Minimum physical coordinate in the y-direction.
        \item[[y\_max]]
             Maximum physical coordinate in the y-direction.
-       \item[[i\_max]]
-            Number of even-spaced grid increments in the i-direction.
-       \item[[j\_max]]
-            Number of even-spaced grid increments in the j-direction.
-       \item[[rc]] 
+       \item[[name]]
+            {\tt Grid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -370,11 +446,11 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       function ESMF_GridCreateRead(name, iospec, rc)\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       function ESMF_GridCreateRead(iospec, name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateRead\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       character (len=*), intent(in) :: name
-       type(ESMF_IOSpec), intent(in) :: iospec   ! file specs
-       integer, intent(out), optional :: rc               \end{verbatim}
+\begin{verbatim}       type(ESMF_IOSpec), intent(in) :: iospec   ! file specs
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -384,11 +460,11 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
-            {\tt Grid} name.
-       \item[[iospec]] 
+       \item[[iospec]]
             File I/O specification.
-       \item[[rc]] 
+       \item[[name]]
+            {\tt Grid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -403,11 +479,11 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       function ESMF_GridCreateCopy(name, grid_in, rc)\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       function ESMF_GridCreateCopy(grid_in, name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateCopy\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       character (len=*), intent(in) :: name
-       type(ESMF_Grid), intent(in) :: grid_in
-       integer, intent(out), optional :: rc               \end{verbatim}
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid_in
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -417,11 +493,11 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
-            {\tt Grid} name.
-       \item[[grid\_in]] 
+       \item[[grid\_in]]
             {\tt Grid} to be copied.
-       \item[[rc]] 
+       \item[[name]]
+            {\tt Grid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -436,16 +512,16 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       function ESMF_GridCreateCutout(name, grid_in, i_min, i_max, j_min, &
-                                      j_max, rc)\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       function ESMF_GridCreateCutout(grid_in, i_min, i_max, j_min, j_max, &
+                                      name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateCutout\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       character (len=*), intent(in) :: name
-       type(ESMF_Grid), intent(in) :: grid_in
-       integer, intent(in) :: i_min                       
-       integer, intent(in) :: i_max                       
-       integer, intent(in) :: j_min                       
-       integer, intent(in) :: j_max                       
-       integer, intent(out), optional :: rc               \end{verbatim}
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid_in
+       integer, intent(in) :: i_min
+       integer, intent(in) :: i_max
+       integer, intent(in) :: j_min
+       integer, intent(in) :: j_max
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -455,19 +531,19 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
-            {\tt Grid} name.
-       \item[[grid\_in]] 
+       \item[[grid\_in]]
             {\tt Grid} to be partially copied.
-       \item[[i\_min]] 
+       \item[[i\_min]]
             Minimum global i-index for the region of the grid to be cutout.
-       \item[[i\_max]] 
+       \item[[i\_max]]
             Maximum global i-index for the region of the grid to be cutout.
-       \item[[j\_min]] 
+       \item[[j\_min]]
             Minimum global j-index for the region of the grid to be cutout.
-       \item[[j\_max]] 
+       \item[[j\_max]]
             Maximum global j-index for the region of the grid to be cutout.
-       \item[[rc]] 
+       \item[[name]]
+            {\tt Grid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -482,13 +558,13 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       function ESMF_GridCreateChangeResolution(name, grid_in, i_resolution, &
-                                                j_resolution, rc)\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       function ESMF_GridCreateChangeResolution(grid_in, i_resolution, &
+                                                j_resolution, name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateChangeResolution\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       character (len=*), intent(in) :: name
-       type(ESMF_Grid), intent(in) :: grid_in
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid_in
        integer, intent(in) :: i_resolution
        integer, intent(in) :: j_resolution
+       character (len=*), intent(in), optional :: name
        integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -499,21 +575,21 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
-            {\tt Grid} name.
-       \item[[grid\_in]] 
+       \item[[grid\_in]]
             Source {\tt Grid} to be coarsened or refined.
-       \item[[i\_resolution]] 
+       \item[[i\_resolution]]
             Integer resolution factor in the i-direction.
-       \item[[j\_resolution]] 
+       \item[[j\_resolution]]
             Integer resolution factor in the j-direction.
             Note:  The above arguments assume refinement by factor if positive
-            and coarsening by absolute value of the factor if negative.  For 
+            and coarsening by absolute value of the factor if negative.  For
             example, i\_resolution=4 indicates the new {\tt Grid} will be four
             times as resolved in the i-direction as the source {\tt Grid},
             whereas j\_resolution=-3 means the new {\tt Grid} will sample every
             third point in the j-direction.
-       \item[[rc]] 
+       \item[[name]]
+            {\tt Grid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -528,12 +604,12 @@
 
 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       function ESMF_GridCreateExchange(name, grid_in1, grid_in2, rc)\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       function ESMF_GridCreateExchange(grid_in1, grid_in2, name, rc)\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       type(ESMF_Grid) :: ESMF_GridCreateExchange\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       character (len=*), intent(in) :: name
-       type(ESMF_Grid), intent(in) :: grid_in1
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid_in1
        type(ESMF_Grid), intent(in) :: grid_in2
-       integer, intent(out), optional :: rc               \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -543,13 +619,13 @@
   
        The arguments are:
        \begin{description}
-       \item[[name]] 
-            New {\tt Grid} name.
-       \item[[grid\_in1]] 
+       \item[[grid\_in1]]
             First source {\tt Grid}.
-       \item[[grid\_in2]] 
+       \item[[grid\_in2]]
             Second source {\tt Grid}.
-       \item[[rc]] 
+       \item[[name]]
+            New {\tt Grid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
      \end{description}
   
@@ -565,8 +641,8 @@
 
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridDestroy(grid, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid   
-       integer, intent(out), optional :: rc        \end{verbatim}
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -575,9 +651,9 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             The class to be destroyed.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -585,14 +661,34 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridConstructNew - Construct the internals of an allocated Grid}
+\subsubsection{ESMF\_GridConstructInternal - Construct the internals of an allocated Grid}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridConstructNew(grid, name, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_GridType) :: grid 
-       character (len = *), intent(in), optional :: name  
+\begin{verbatim}       subroutine ESMF_GridConstructInternal(grid, i_max, j_max, &
+                                             nDE_i, nDE_j, layout, &
+                                             horz_gridtype, vert_gridtype, &
+                                             horz_stagger, vert_stagger, &
+                                             horz_coord_system, vert_coord_system, &
+                                             x_min, x_max, y_min, y_max, name, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_GridType) :: grid
+       integer, intent(in) :: i_max
+       integer, intent(in) :: j_max
+       integer, intent(in), optional :: nDE_i
+       integer, intent(in), optional :: nDE_j
+       type (ESMF_Layout), intent(in), optional :: layout
+       integer, intent(in), optional :: horz_gridtype
+       integer, intent(in), optional :: vert_gridtype
+       integer, intent(in), optional :: horz_stagger
+       integer, intent(in), optional :: vert_stagger
+       integer, intent(in), optional :: horz_coord_system
+       integer, intent(in), optional :: vert_coord_system
+       real, intent(in), optional :: x_min
+       real, intent(in), optional :: x_max
+       real, intent(in), optional :: y_min
+       real, intent(in), optional :: y_max
+       character (len = *), intent(in), optional :: name
        integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -602,19 +698,78 @@
        as needed.  Must call the corresponding ESMF\_GridDestruct
        routine to free the additional memory.  Intended for internal
        ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
-       {\tt ESMF\_GridConstruct}. 
+       {\tt ESMF\_GridConstruct}.
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid}
-       \item[arg1]
-            Argument 1.
-       \item[arg2]
-            Argument 2.         
-       \item[[name]] 
+       \item[[i\_max]]
+            Number of grid increments in the i-direction.
+       \item[[j\_max]]
+            Number of grid increments in the j-direction.
+       \item[[nDE\_i]]
+            Number of DE's in 1st dir.
+       \item[[nDE\_j]]
+            Number of DE's in 2nd dir.
+       \item[[layout]]
+           Layout of DE's.
+       \item[[horz\_gridtype]]
+            Integer specifier to denote horizontal gridtype.
+       \item[[vert\_gridtype]]
+            Integer specifier to denote vertical gridtype.
+       \item[[horz\_stagger]]
+            Integer specifier to denote horizontal grid stagger.
+       \item[[vert\_stagger]]
+            Integer specifier to denote vertical grid stagger.
+       \item[[horz\_coord\_system]]
+            Integer specifier to denote horizontal coordinate system.
+       \item[[vert\_coord\_system]]
+            Integer specifier to denote vertical coordinate system.
+       \item[[x\_min]]
+            Minimum physical coordinate in the x-direction.
+       \item[[x\_max]]
+            Maximum physical coordinate in the x-direction.
+       \item[[y\_min]]
+            Minimum physical coordinate in the y-direction.
+       \item[[y\_max]]
+            Maximum physical coordinate in the y-direction.
+       \item[[rc]]
+            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+       \end{description}
+  
+\bigskip{\sf REQUIREMENTS:}
+\begin{verbatim} \end{verbatim}
+ 
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMF\_GridConstructNew - Construct the internals of an allocated Grid}
+
+
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       subroutine ESMF_GridConstructNew(grid, name, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_GridType) :: grid
+       character (len = *), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       ESMF routine which fills in the contents of an already
+       allocated {\tt Grid} object.  May perform additional allocations
+       as needed.  Must call the corresponding ESMF\_GridDestruct
+       routine to free the additional memory.  Intended for internal
+       ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
+       {\tt ESMF\_GridConstruct}.
+  
+       The arguments are:
+       \begin{description}
+       \item[grid]
+            Pointer to a {\tt Grid}
+       \item[[name]]
             {\tt Grid} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
   
@@ -630,8 +785,8 @@
 
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridDestruct(grid, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid    
-       integer, intent(out), optional :: rc         \end{verbatim}
+\begin{verbatim}       type(ESMF_GridType), intent(in) :: grid
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -643,9 +798,60 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             The class to be destructed.
-       \item[[rc]] 
+       \item[[rc]]
+            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+       \end{description}
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMF\_GridAddPhysGrid - Add a PhysGrid to a Grid}
+
+
+ 
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       subroutine ESMF_GridAddPhysGrid(grid, i_max, j_max, physgrid_id, &
+                                       x_min, x_max, y_min, y_max, &
+                                       physgrid_name, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_GridType) :: grid
+       integer, intent(in) :: i_max
+       integer, intent(in) :: j_max
+       integer, intent(out) :: physgrid_id
+       real, intent(in), optional :: x_min
+       real, intent(in), optional :: x_max
+       real, intent(in), optional :: y_min
+       real, intent(in), optional :: y_max
+       character (len=*), intent(in), optional :: physgrid_name
+       integer, intent(out), optional :: rc\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       Adds a physgrid to a grid.
+  
+       The arguments are:
+       \begin{description}
+       \item[grid]
+            Class to be queried.
+       \item[[i\_max]]
+            Number of grid increments in the i-direction.
+       \item[[j\_max]]
+            Number of grid increments in the j-direction.
+       \item [[physgrid\_id]]
+            Integer identifier for {\tt PhysGrid}.
+       \item[[x\_min]]
+            Minimum physical coordinate in the x-direction.
+       \item[[x\_max]]
+            Maximum physical coordinate in the x-direction.
+       \item[[y\_min]]
+            Minimum physical coordinate in the y-direction.
+       \item[[y\_max]]
+            Maximum physical coordinate in the y-direction.
+       \item [[physgrid\_name]]
+            {\tt PhysGrid} name.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -660,8 +866,8 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridGetConfig(grid, config, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       integer, intent(out) :: config   
-       integer, intent(out), optional :: rc              \end{verbatim}
+       integer, intent(out) :: config
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -669,11 +875,11 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Class to be queried.
        \item[config]
-            Configuration information.         
-       \item[[rc]] 
+            Configuration information.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -688,8 +894,8 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridSetConfig(grid, config, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       integer, intent(in) :: config   
-       integer, intent(out), optional :: rc             
+       integer, intent(in) :: config
+       integer, intent(out), optional :: rc
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -698,11 +904,11 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Class to be configured.
        \item[config]
-            Configuration information.         
-       \item[[rc]] 
+            Configuration information.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -718,7 +924,7 @@
 \begin{verbatim}       subroutine ESMF_GridGetValue(grid, value, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        integer, intent(out) :: value
-       integer, intent(out), optional :: rc             
+       integer, intent(out), optional :: rc
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -728,11 +934,11 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Class to be queried.
        \item[value]
-            Value to be retrieved.         
-       \item[[rc]] 
+            Value to be retrieved.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -740,12 +946,12 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridSetCoordinateFromArray - Set the coordinates of a Grid from an existing ESMF array}
+\subsubsection{ESMF\_GridSetCoordFromArray - Set the coordinates of a Grid from an existing ESMF array}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetCoordinateFromArray(Grid, array, id, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetCoordFromArray(Grid, array, id, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        type(ESMF_Array), intent(in) :: array
        integer, intent(in) :: id
@@ -758,10 +964,10 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[array]
-            ESMF Array of data.         
+            ESMF Array of data.
        \item[[id]]
             Identifier for which set of coordinates are being set:
                1  center\_x
@@ -770,7 +976,7 @@
                4  corner\_y
                5  face\_x
                6  face\_y 
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -778,16 +984,106 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridSetCoordinateFromBuffer - Set the coordinates of a Grid from an existing data buffer}
+\subsubsection{}
+
+
+       ESMF_GridGetDE - Get DE information for a DistGrid
+ 
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       subroutine ESMF_GridGetDE(grid, MyDE, MyDEx, MyDEy, &
+                                 DE_E, DE_W, DE_N, DE_S, &
+                                 DE_NE, DE_NW, DE_SE, DE_SW, &
+                                 lsize, gstart, &
+                                 n_dir1_start, n_dir1_end, n_dir1_size, &
+                                 n_dir2_start, n_dir2_end, n_dir2_size, &
+                                 rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_Grid) :: grid
+       integer, intent(inout), optional :: MyDE
+       integer, intent(inout), optional :: MyDEx
+       integer, intent(inout), optional :: MyDEy
+       integer, intent(inout), optional :: DE_E
+       integer, intent(inout), optional :: DE_W
+       integer, intent(inout), optional :: DE_N
+       integer, intent(inout), optional :: DE_S
+       integer, intent(inout), optional :: DE_NE
+       integer, intent(inout), optional :: DE_NW
+       integer, intent(inout), optional :: DE_SE
+       integer, intent(inout), optional :: DE_SW
+       integer, intent(inout), optional :: lsize
+       integer, intent(inout), optional :: gstart
+       integer, intent(inout), optional :: n_dir1_start
+       integer, intent(inout), optional :: n_dir1_end
+       integer, intent(inout), optional :: n_dir1_size
+       integer, intent(inout), optional :: n_dir2_start
+       integer, intent(inout), optional :: n_dir2_end
+       integer, intent(inout), optional :: n_dir2_size
+       integer, intent(out), optional :: rc
+ \end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       Get a DistGrid attribute with the given value.
+  
+       The arguments are:
+       \begin{description}
+       \item[grid]
+            Class to be queried.
+       \item[[MyDE]]
+            Identifier for this DE.
+       \item[[MyDEx]]
+            Identifier for this DE's position in the 1st dir decomposition.
+       \item[[MyDEy]]
+            Identifier for this DE's position in the 2nd dir decomposition.
+       \item[[DE\_E]]
+            Identifier for the DE to the east of this DE.
+       \item[[DE\_W]]
+            Identifier for the DE to the west of this DE.
+       \item[[DE\_N]]
+            Identifier for the DE to the north of this DE.
+       \item[[DE\_S]]
+            Identifier for the DE to the south of this DE.
+       \item[[DE\_NE]]
+            Identifier for the DE to the northeast of this DE.
+       \item[[DE\_NW]]
+            Identifier for the DE to the northwest of this DE.
+       \item[[DE\_SE]]
+            Identifier for the DE to the southeast of this DE.
+       \item[[DE\_SW]]
+            Identifier for the DE to the southwest of this DE.
+       \item[[lsize]]
+            Local (on this DE) number of cells.
+       \item[[gstart]]
+            Global index of starting count.
+       \item[[n\_dir1\_start]]
+            Starting index of this DE in 1st dir decomposition.
+       \item[[n\_dir1\_end]]
+            Ending index of this DE in 1st dir decomposition.
+       \item[[n\_dir1\_size]]
+            Size of the 1st dir decomposition on this DE.
+       \item[[n\_dir2\_start]]
+            Starting index of this DE in 2nd dir decomposition.
+       \item[[n\_dir2\_end]]
+            Ending index of this DE in 2nd dir decomposition.
+       \item[[n\_dir2\_size]]
+            Size of the 2nd dir decomposition on this DE.
+       \item[[rc]]
+            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+       \end{description}
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMF\_GridSetCoordFromBuffer - Set the coordinates of a Grid from an existing data buffer}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetCoordinateFromBuffer(Grid, buffer, id, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetCoordFromBuffer(Grid, buffer, id, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        real, dimension (:), pointer :: buffer
-       integer, intent(in) :: id            
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(in) :: id
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -796,10 +1092,10 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[buffer]
-            Raw data buffer.         
+            Raw data buffer.
        \item[[id]]
             Identifier for which set of coordinates are being set:
                1  center\_x
@@ -808,7 +1104,7 @@
                4  corner\_y
                5  face\_x
                6  face\_y 
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -816,14 +1112,14 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridSetCoordinateCompute - Compute coordinates for a Grid}
+\subsubsection{ESMF\_GridSetCoordCompute - Compute coordinates for a Grid}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetCoordinateCompute(Grid, id, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       integer, intent(in) :: id
+\begin{verbatim}       subroutine ESMF_GridSetCoordCompute(grid, physgrid_id, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_GridType) :: grid
+       integer, intent(in) :: physgrid_id
        integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -833,32 +1129,26 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
-       \item[[id]]
-            Identifier for which set of coordinates are being set:
-               1  center\_x
-               2  center\_y
-               3  corner\_x
-               4  corner\_y
-               5  face\_x
-               6  face\_y 
-       \item[[rc]] 
+       \item[[physgrid\_id]]
+            Identifier of the {\tt PhysGrid} to be modified.
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
   
-  TODO: figure out the argument list necessary to completely describe the 
+  TODO: figure out the argument list necessary to completely describe the
         internal calculation of the coordinates of a simple grid. 
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridSetCoordinateCopy - Copies coordinates from one grid to another}
+\subsubsection{ESMF\_GridSetCoordCopy - Copies coordinates from one grid to another}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetCoordinateCopy(Grid, Grid_in, id, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetCoordCopy(Grid, Grid_in, id, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        type(ESMF_Grid), intent(in) :: grid_in
        integer, intent(in) :: id
@@ -870,9 +1160,9 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
-       \item[grid\_in] 
+       \item[grid\_in]
             Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item[[id]]
             Identifier for which set of coordinates are being set:
@@ -882,7 +1172,107 @@
                4  corner\_y
                5  face\_x
                6  face\_y 
-       \item[[rc]] 
+       \item[[rc]]
+            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+       \end{description}
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMF\_GridGetInfo - Gets a variety of information about the grid}
+
+
+ 
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       subroutine ESMF_GridGetInfo(grid, horz_gridtype, vert_gridtype, &
+                                   horz_stagger, vert_stagger, &
+                                   horz_coord_system, vert_coord_system, &
+                                   coord_order, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_GridType) :: grid
+       integer, intent(inout), optional :: horz_gridtype
+       integer, intent(inout), optional :: vert_gridtype
+       integer, intent(inout), optional :: horz_stagger
+       integer, intent(inout), optional :: vert_stagger
+       integer, intent(inout), optional :: horz_coord_system
+       integer, intent(inout), optional :: vert_coord_system
+       integer, intent(inout), optional :: coord_order
+       integer, intent(out), optional :: rc\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       This version sets a variety of information about a grid, depending
+       on a list of optional arguments.
+  
+       The arguments are:
+       \begin{description}
+       \item[grid]
+            Pointer to a {\tt Grid} to be modified.
+       \item[[horz\_gridtype]]
+            Integer specifier to denote horizontal gridtype
+       \item[[vert\_gridtype]]
+            Integer specifier to denote vertical gridtype
+       \item[[horz\_stagger]]
+            Integer specifier to denote horizontal grid stagger
+       \item[[vert\_stagger]]
+            Integer specifier to denote vertical grid stagger
+       \item[[horz\_coord\_system]]
+            Integer specifier to denote horizontal coordinate system
+       \item[[vert\_coord\_system]]
+            Integer specifier to denote vertical coordinate system
+       \item[[coord\_order]]
+            Integer specifier to denote coordinate ordering
+       \item[[rc]]
+            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+       \end{description}
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMF\_GridSetInfo - Sets a variety of information about the grid}
+
+
+ 
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       subroutine ESMF_GridSetInfo(grid, horz_gridtype, vert_gridtype, &
+                                   horz_stagger, vert_stagger, &
+                                   horz_coord_system, vert_coord_system, &
+                                   coord_order, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       type(ESMF_GridType) :: grid
+       integer, intent(in), optional :: horz_gridtype
+       integer, intent(in), optional :: vert_gridtype
+       integer, intent(in), optional :: horz_stagger
+       integer, intent(in), optional :: vert_stagger
+       integer, intent(in), optional :: horz_coord_system
+       integer, intent(in), optional :: vert_coord_system
+       integer, intent(in), optional :: coord_order
+       integer, intent(out), optional :: rc\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       This version sets a variety of information about a grid, depending
+       on a list of optional arguments.
+  
+       The arguments are:
+       \begin{description}
+       \item[grid]
+            Pointer to a {\tt Grid} to be modified.
+       \item[[horz\_gridtype]]
+            Integer specifier to denote horizontal gridtype
+       \item[[vert\_gridtype]]
+            Integer specifier to denote vertical gridtype
+       \item[[horz\_stagger]]
+            Integer specifier to denote horizontal grid stagger
+       \item[[vert\_stagger]]
+            Integer specifier to denote vertical grid stagger
+       \item[[horz\_coord\_system]]
+            Integer specifier to denote horizontal coordinate system
+       \item[[vert\_coord\_system]]
+            Integer specifier to denote vertical coordinate system
+       \item[[coord\_order]]
+            Integer specifier to denote coordinate ordering
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -898,8 +1288,8 @@
 \begin{verbatim}       subroutine ESMF_GridSetLMaskFromArray(Grid, array, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        type(ESMF_Array), intent(in) :: array
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -908,13 +1298,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[array]
             ESMF Array of data.
        \item [[name]]
              {\tt LMask} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -930,8 +1320,8 @@
 \begin{verbatim}       subroutine ESMF_GridSetLMaskFromBuffer(Grid, buffer, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        real, dimension (:), pointer :: buffer
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -940,13 +1330,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[buffer]
-            Raw data buffer.         
+            Raw data buffer.
        \item [[name]]
              {\tt LMask} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -954,33 +1344,34 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridSetLMaskCompute - Compute a logical mask for a Grid}
+\subsubsection{ESMF\_GridSetLMaskFromMMask - Set a logical mask in a Grid from an existing multiplicative mask}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetLMaskCompute(Grid, name, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetLMaskFromMMask(Grid, mmask, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(in) :: mmask        ! TODO: name?
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-       This version of set internally computes a logical mask for a Grid via a
-       prescribed method.
+       This version of set assumes the logical mask data will be
+       created from an existing multiplicative mask.
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
+       \item[[mmask]]
+            Multiplicative mask identifier.
        \item [[name]]
              {\tt LMask} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
-  
-  TODO: figure out the argument list necessary to completely describe the 
-        internal calculation of a logical mask for a simple grid. 
+   
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
@@ -990,12 +1381,12 @@
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetLMaskCopy(Grid, name, Grid_in, name_in, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetLMaskCopy(Grid, Grid_in, name, name_in, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       character (len=*), intent(in) :: name  ! TODO: optional?
        type(ESMF_Grid), intent(in) :: grid_in
-       character (len=*), intent(in) :: name_in  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       character (len=*), intent(in), optional :: name_in
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1003,15 +1394,15 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
+       \item[grid\_in]
+            Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item [[name]]
              {\tt LMask} name to be set.
-       \item[grid\_in] 
-            Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item [[name\_in]]
              {\tt LMask} name to be copied.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1027,8 +1418,8 @@
 \begin{verbatim}       subroutine ESMF_GridSetMMaskFromArray(Grid, array, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        type(ESMF_Array), intent(in) :: array
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1037,13 +1428,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[array]
             ESMF Array of data.
        \item [[name]]
              {\tt MMask} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1059,8 +1450,8 @@
 \begin{verbatim}       subroutine ESMF_GridSetMMaskFromBuffer(Grid, buffer, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        real, dimension (:), pointer :: buffer
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1069,13 +1460,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[buffer]
-            Raw data buffer.         
+            Raw data buffer.
        \item [[name]]
              {\tt MMask} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1083,33 +1474,34 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{ESMF\_GridSetMMaskCompute - Compute a multiplicative mask for a Grid}
+\subsubsection{ESMF\_GridSetMMaskFromLMask - Set a multiplicative mask in a Grid from an existing logical mask}
 
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetMMaskCompute(Grid, name, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetMMaskFromLMask(Grid, lmask, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(in) :: lmask
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-       This version of set internally computes a multiplicative mask for a
-       Grid via a prescribed method.
+       This version of set assumes the multiplicative mask data will be
+       created from an existing logical mask.
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
+       \item[lmask]
+            Logical mask identifier.
        \item [[name]]
              {\tt MMask} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
-  
-  TODO: figure out the argument list necessary to completely describe the 
-        internal calculation of a multiplicative mask for a simple grid. 
+   
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
@@ -1119,12 +1511,12 @@
 
  
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetMMaskCopy(Grid, name, Grid_in, name_in, rc)\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       subroutine ESMF_GridSetMMaskCopy(Grid, Grid_in, name, name_in, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       character (len=*), intent(in) :: name  ! TODO: optional?
        type(ESMF_Grid), intent(in) :: grid_in
-       character (len=*), intent(in) :: name_in  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       character (len=*), intent(in), optional :: name_in
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1133,15 +1525,15 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
+       \item[grid\_in]
+            Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item [[name]]
              {\tt MMask} name to be set.
-       \item[grid\_in] 
-            Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item [[name\_in]]
              {\tt MMask} name to be copied.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1157,8 +1549,8 @@
 \begin{verbatim}       subroutine ESMF_GridSetMetricFromArray(Grid, array, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        type(ESMF_Array), intent(in) :: array
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1167,13 +1559,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[array]
             ESMF Array of data.
        \item [[name]]
              {\tt Metric} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1189,8 +1581,8 @@
 \begin{verbatim}       subroutine ESMF_GridSetMetricFromBuffer(Grid, buffer, name, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        real, dimension (:), pointer :: buffer
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       character (len=*), intent(in), optional :: name
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1199,13 +1591,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[buffer]
-            Raw data buffer.         
+            Raw data buffer.
        \item [[name]]
              {\tt Metric} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1220,8 +1612,8 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridSetMetricCompute(Grid, name, id, rc)\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       character (len=*), intent(in) :: name  ! TODO: optional?
        integer, intent(in) :: id
+       character (len=*), intent(in), optional :: name
        integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -1231,13 +1623,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
+       \item[[id]]
+            Identifier for predescribed metrics.  TODO: make list
        \item [[name]]
              {\tt Metric} name.
-       \item[[id]] 
-            Identifier for predescribed metrics.  TODO: make list
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1255,7 +1647,7 @@
        character (len=*), intent(in) :: name  ! TODO: optional?
        type(ESMF_Grid), intent(in) :: grid_in
        character (len=*), intent(in) :: name_in  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1263,15 +1655,15 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item [[name]]
              {\tt Metric} name to be set.
-       \item[grid\_in] 
+       \item[grid\_in]
             Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item [[name\_in]]
              {\tt Metric} name to be copied.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1288,7 +1680,7 @@
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        type(ESMF_Array), intent(in) :: array
        character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1297,13 +1689,13 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[array]
             ESMF Array of data.
        \item [[name]]
              {\tt RegionID} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1320,7 +1712,7 @@
 \begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
        real, dimension (:), pointer :: buffer
        character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1329,47 +1721,16 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item[buffer]
-            Raw data buffer.         
+            Raw data buffer.
        \item [[name]]
              {\tt RegionID} name.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
-%/////////////////////////////////////////////////////////////
- 
-\mbox{}\hrulefill\ 
- 
-\subsubsection{ESMF\_GridSetRegionIDCompute - Compute a region identifier for a Grid}
-
-
- 
-\bigskip{\sf INTERFACE:}
-\begin{verbatim}       subroutine ESMF_GridSetRegionIDCompute(Grid, name, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
-       character (len=*), intent(in) :: name  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
-{\sf DESCRIPTION:\\ }
-
-
-       This version of set internally computes a region identifier for a
-       Grid via a prescribed method.
-  
-       The arguments are:
-       \begin{description}
-       \item[grid] 
-            Pointer to a {\tt Grid} to be modified.
-       \item [[name]]
-             {\tt RegionID} name.
-       \item[[rc]] 
-            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-       \end{description}
-  
-  TODO: figure out the argument list necessary to completely describe the 
-        internal calculation of a region identifier for a simple grid. 
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
@@ -1384,7 +1745,7 @@
        character (len=*), intent(in) :: name  ! TODO: optional?
        type(ESMF_Grid), intent(in) :: grid_in
        character (len=*), intent(in) :: name_in  ! TODO: optional?
-       integer, intent(out), optional :: rc            \end{verbatim}
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1393,15 +1754,15 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Pointer to a {\tt Grid} to be modified.
        \item [[name]]
              {\tt RegionID} name to be set.
-       \item[grid\_in] 
+       \item[grid\_in]
             Pointer to a {\tt Grid} whose coordinates are to be copied.
        \item [[name\_in]]
              {\tt RegionID} name to be copied.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1415,9 +1776,9 @@
  
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridValidate(grid, opt, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid       
-       character (len=*), intent(in), optional :: opt    
-       integer, intent(out), optional :: rc            \end{verbatim}
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
+       character (len=*), intent(in), optional :: opt
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -1425,11 +1786,11 @@
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Class to be queried.
        \item[[opt]]
             Validation options.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
    
@@ -1443,22 +1804,22 @@
  
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridPrint(grid, opt, rc)\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid      
-       character (len=*), intent(in) :: opt      
-       integer, intent(out), optional :: rc           \end{verbatim}
+\begin{verbatim}       type(ESMF_Grid), intent(in) :: grid
+       character (len=*), intent(in) :: opt
+       integer, intent(out), optional :: rc\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-        Print information about a Grid.  
+        Print information about a Grid.
   
        The arguments are:
        \begin{description}
-       \item[grid] 
+       \item[grid]
             Class to be queried.
        \item[[opt]]
-            Print ptions that control the type of information and level of 
+            Print options that control the type of information and level of
             detail.
-       \item[[rc]] 
+       \item[[rc]]
             Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
        \end{description}
   

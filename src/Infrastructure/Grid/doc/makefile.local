@@ -40,6 +40,7 @@ ccsrc: ${CSRC}
 
 fsrc:  ${FSRC}
 	do_fprotex Grid ../src/ESMF_Grid.F90
+	do_fprotex Gridex ../examples/ESMF_GridCreateEx.F90
 	touch fsrc
 
 clean:
