@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.81 2004/10/14 16:54:36 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.82 2004/10/14 18:54:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.81 2004/10/14 16:54:36 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.82 2004/10/14 18:54:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -779,8 +779,6 @@
       ! local variables
       integer :: idim
       integer :: localrc                             ! Error status
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -803,8 +801,8 @@
           endif
         enddo order_loop
         if (idim > physgrid%ptr%numDims) then
-          print logMsg, "too many coords defined"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "too many coords defined", &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -859,8 +857,6 @@
       integer :: localrc                             ! Error status
       integer :: idim, n
       character(len=ESMF_MAXSTR) :: nameTmp
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       logical :: found                               ! flag for name search
 
       ! Initialize return code; assume failure until success is certain
@@ -890,16 +886,16 @@
         if (found) then
           physCoord = physgrid%ptr%coords(idim)
         else
-          print logMsg, "no coordinate with that name"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "no coordinate with that name", &
                                       ESMF_CONTEXT, rc)
           return
         endif
 
       ! if neither supplied, return an error
       else
-        print logMsg, "name or dim must be supplied"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                 "name or dim must be supplied", &
                                     ESMF_CONTEXT, rc)
         return
       endif
@@ -1117,8 +1113,6 @@
       ! local variables
       integer :: localrc                             ! Error status
       character(len=ESMF_MAXSTR) :: name_tmp         ! temp for name creation 
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1149,8 +1143,8 @@
         physgrid%ptr%regions%ellipse = ellipseArray
 
       else
-        print logMsg, "unknown region type"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                 "unknown region type", &
                                     ESMF_CONTEXT, rc)
         return
 
@@ -1164,8 +1158,8 @@
         !TODO: define bounding box for elliptical region
 
       else
-        print logMsg, "unknown region type"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                 "unknown region type", &
                                     ESMF_CONTEXT, rc)
         return
 
@@ -1237,8 +1231,6 @@
 
       ! local variables
       integer :: localrc                             ! Error status
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1256,8 +1248,8 @@
         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
           numVertices = physgrid%ptr%regions%numVertices
         else
-          print logMsg, "invalid region type"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "invalid region type", &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1270,8 +1262,8 @@
           !TODO: return pointer or copy array?
           vertexArray = physgrid%ptr%regions%vertices
         else
-          print logMsg, "invalid region type"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "invalid region type", &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1284,8 +1276,8 @@
           !TODO: return pointer or copy array?
           ellipseArray = physgrid%ptr%regions%ellipse
         else
-          print logMsg, "invalid region type"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "invalid region type", &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1464,7 +1456,6 @@
       integer :: localrc                             ! Error status
       character(len=ESMF_MAXSTR) :: name_tmp         ! temp for name check 
       character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       logical :: found                               ! name search flag
 
       ! Initialize return code; assume failure until success is certain
@@ -1475,8 +1466,8 @@
 
         ! check for valid id
         if (id < 1 .or. id > physgrid%ptr%numMasks) then
-          print logMsg, "invalid mask id"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "invalid mask id", &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1503,8 +1494,8 @@
         end do name_loop
 
         if (.not. found) then
-          print logMsg, "no mask matches name.  Requested name: ", trim(name)
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          write(*,logMsg) "no mask matches name.  Requested name: ", trim(name)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, logMsg, &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1512,8 +1503,8 @@
       ! if we enter this else branch, neither id nor mask has been 
       ! supplied so return error
       else
-        print logMsg, "id or name must be supplied"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                 "id or name must be supplied", &
                                     ESMF_CONTEXT, rc)
         return
       endif
@@ -1670,7 +1661,6 @@
       integer :: n
       character(len=ESMF_MAXSTR) :: name_tmp        ! temp for name check 
       character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       logical :: found                               ! name search flag
 
       ! Initialize return code; assume failure until success is certain
@@ -1681,8 +1671,8 @@
 
         ! check for valid id
         if (id < 1 .or. id > physgrid%ptr%numMetrics) then
-          print logMsg, "invalid metric id"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                   "invalid metric id", &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1709,8 +1699,8 @@
         end do name_loop
 
         if (.not. found) then
-          print logMsg, "No metric matches name.  Requested name: ", trim(name)
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+          write(*, logMsg) "No metric matches name.  Requested name: ", trim(name)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, logMsg, &
                                       ESMF_CONTEXT, rc)
           return
         endif
@@ -1718,8 +1708,8 @@
       ! if we enter this else branch, neither id nor name has been 
       ! supplied so return error
       else
-        print logMsg, "id or name must be supplied"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                 "id or name must be supplied", &
                                     ESMF_CONTEXT, rc)
         return
       endif
@@ -1874,7 +1864,6 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !      character(len=ESMF_MAXSTR) :: logMsg
-!      logical :: dummy
 !!
 !!     broadcast the point to all DEs
 !!
@@ -1965,9 +1954,9 @@
 !!
 !      ncells = global_sum(found)
 !      if (ncells > 1) then
-!        print logMsg, "more than one cell contains this point"
-!        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-!                                    ESMF_CONTEXT, rc)
+!        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+!                                 "more than one cell contains this point", &
+!                                  ESMF_CONTEXT, rc)
 !        return
 !      endif
 !
@@ -2033,7 +2022,6 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !      character(len=ESMF_MAXSTR) :: logMsg
-!      logical :: dummy
 !!
 !!     broadcast the point to all DEs
 !!
@@ -2107,9 +2095,9 @@
 !!
 !      ncells = global_sum(found)
 !      if (ncells > 1) then
-!        print logMsg, "more than one cell contains this point"
-!        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-!                                    ESMF_CONTEXT, rc)
+!      call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+!                               "more than one cell contains this point", &
+!                                ESMF_CONTEXT, rc)
 !        return
 !      endif
 !
@@ -2174,7 +2162,6 @@
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !      character(len=ESMF_MAXSTR) :: logMsg
-!      logical :: dummy
 !!
 !!     broadcast the point to all DEs
 !!
@@ -2280,8 +2267,8 @@
 !!
 !      ncells = global_sum(found)
 !      if (ncells > 1) then
-!        print logMsg, "more than one cell contains this point"
-!        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+!        call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+!                                   "more than one cell contains this point", &
 !                                    ESMF_CONTEXT, rc)
 !        return
 !      endif
