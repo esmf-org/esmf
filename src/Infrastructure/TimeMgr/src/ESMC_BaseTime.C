@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.36 2004/10/27 18:46:16 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.37 2004/11/03 16:52:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.36 2004/10/27 18:46:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.37 2004/11/03 16:52:37 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -201,7 +201,7 @@
       return(ESMF_FAILURE);
     }
 
-    ESMC_Fraction(s, sN, sD);
+    ESMC_FractionSet(s, sN, sD);
 
     return(ESMF_SUCCESS);
 
