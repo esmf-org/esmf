@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/07/15 18:16:24 jwolfe Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.5 2003/07/15 21:10:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 ! < ignore blank lines below.  they are created by the files which
 !   define various macros. >
 #include "ESMF_LocalArrayMacros.h"
-#include "ESMF_AllocMacros.h"
+#include "ESMF_LocalAllocMacros.h"
 !------------------------------------------------------------------------------
 !BOP
 ! !MODULE: ESMF_LocalArrayMod - Manage data arrays uniformly between F90 and C++     
@@ -176,7 +176,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/07/15 18:16:24 jwolfe Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.5 2003/07/15 21:10:16 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -457,7 +457,7 @@ end function
           rc = ESMF_FAILURE
         endif
 
-        call ESMF_ArraySpecGet(spec, rank, type, kind, status)
+        call ESMF_LocalArraySpecGet(spec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
         
         ! Call the list function to make the array
