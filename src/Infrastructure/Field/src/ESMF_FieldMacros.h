@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldMacros.h,v 1.5 2004/03/16 18:04:07 nscollins Exp $
+! $Id: ESMF_FieldMacros.h,v 1.6 2004/03/18 18:38:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
           return @\
         endif @\
  @\
-        call ESMF_FieldGetData(field, array, rc=status) @\
+        call ESMF_FieldGetArray(field, array, rc=status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Error: FieldGetData failed" @\
           return @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.126 2004/03/18 16:37:34 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.127 2004/03/18 18:38:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,8 +99,7 @@
       !private
    
         type (ESMF_Array) :: localdata           ! local data for this DE
-        !type (ESMF_Status) :: gridstatus         ! is grid set yet?
-        !type (ESMF_Status) :: datastatus         ! is data set yet?
+        type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
         type (ESMF_Mask) :: mask                 ! may belong in Grid
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
@@ -168,11 +167,6 @@
    public ESMF_FieldCreateNoData       ! Create a new Field without data
    public ESMF_FieldDestroy            ! Destroy a Field
 
-   public ESMF_FieldAttachData         ! Associate data with a Field - 
-                                       !   reference (default) or copy 
-   public ESMF_FieldDetachData         ! Dissociate data from a Field and 
-                                       !   return its pointer
-
    public ESMF_FieldGet                ! Generic Get() routine, replaces others
 
    public ESMF_FieldGetName            ! Get Field name
@@ -181,16 +175,18 @@
    public ESMF_FieldGetGlobalGridInfo  ! Return global Grid info
    public ESMF_FieldGetLocalGridInfo   ! Return local Grid info
 
-   public ESMF_FieldGetData            ! Return a data pointer
+   public ESMF_FieldGetArray           ! Return the data Array
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
    public ESMF_FieldGetRelLoc          ! Return relative location
- 
+
    public ESMF_FieldGetDataMap         ! Return a pointer to DataMap object
 
    public ESMF_FieldSetGrid            ! Set a Grid (may regrid if different
                                        !   Grid is already present)
+   public ESMF_FieldSetArray           ! Set a data Array in a Field
    public ESMF_FieldSetDataValues      ! Set Field data values 
+
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
                                        !   DataMap is already present)
 
@@ -209,7 +205,7 @@
 
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
-   !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
+!  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
 !  !function ESMF_FieldRead(fname, gname, dnames, iospec, rc)
 !
 !
@@ -218,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.126 2004/03/18 16:37:34 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.127 2004/03/18 18:38:33 nscollins Exp $'
 
 !==============================================================================
 !
@@ -254,7 +250,7 @@
       interface ESMF_FieldCreateNoData
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldCreateNoBuffer
+        module procedure ESMF_FieldCreateNoDataPtr
         module procedure ESMF_FieldCreateNoArray
         module procedure ESMF_FieldCreateNoGridArray  
 
@@ -293,50 +289,13 @@
       interface ESMF_FieldConstructNoData
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldConstructNoBuffer
+        module procedure ESMF_FieldConstructNoDataPtr
         module procedure ESMF_FieldConstructNoArray
         module procedure ESMF_FieldConstructNoGridArray  
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for {\tt ESMF\_Field} construction 
 !     methods that do not allocate or reference any associated data.
- 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldAttachData - Associate data with a Field
-!
-! !INTERFACE:
-      interface ESMF_FieldAttachData 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldAttachBuffer
-        module procedure ESMF_FieldAttachArray
-        module procedure ESMF_FieldAttachGridArray
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that attach
-!     data to a {\tt ESMF\_Field}.
- 
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_FieldDetachData - Obtain direct data access from a Field
-!
-! !INTERFACE:
-      interface ESMF_FieldDetachData 
-   
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldDetachBuffer
-        module procedure ESMF_FieldDetachArray
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that detach
-!     data from a {\tt ESMF\_Field}.
  
 !EOPI
       end interface
@@ -834,123 +793,6 @@
       end subroutine ESMF_FieldAddCharAttr
 
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldAttachData - Associate an Array object with a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttachData()
-      subroutine ESMF_FieldAttachArray(field, array, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
-      type(ESMF_Array), intent(in) :: array            
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag      
-      integer, intent(out), optional :: rc             
-!
-! !DESCRIPTION:
-! Associates an {\tt ESMF\_Array} with a {\tt ESMF\_Field} and sets a 
-!  flag in the {\tt ESMF\_Field} indicating that data is present.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [array]
-!           Pointer to {\tt ESMF\_Array}.
-!     \item [{[copyflag]}]
-!           Indicates whether the array should be copied or referenced.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-!	BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-        end subroutine ESMF_FieldAttachArray
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldAttachData - Associate a data buffer with a field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAttachData()
-      subroutine ESMF_FieldAttachBuffer(field, buffer, copyflag, rc)
-!
-! !ARGUMENTS:
- 
-      type(ESMF_Field), intent(in) :: field            
-      real, dimension (:), pointer :: buffer           
-      type(ESMF_CopyFlag), intent(in), optional :: copyflag      
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Associates a data buffer with a {\tt ESMF\_Field} and sets a flag in 
-!     the {\tt ESMF\_Field} indicating that data is present.  
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [buffer]
-!           Pointer to data buffer.
-!     \item [{[copyflag]}]
-!           Indicates whether the buffer should be copied or referenced.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-        end subroutine ESMF_FieldAttachBuffer
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldAttachData - Associate a Grid and an Array with a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_AttachData()
-      subroutine ESMF_FieldAttachGridArray(field, grid, array, copyflag, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field            
-      type(ESMF_Grid) :: grid
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_CopyFlag), intent(in) :: copyflag      
-      integer, intent(out), optional :: rc             
-!
-! !DESCRIPTION:
-!     Associates an {\tt ESMF\_Array} and a {\tt ESMF\_Grid} with a 
-!     {\tt ESMF\_Field} and sets a flag in 
-!     the {\tt ESMF\_Field} indicating that data is present.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [grid]
-!           Pointer to {\tt ESMF\_Grid}.
-!     \item [array]
-!           Pointer to {\tt ESMF\_Array}.
-!     \item [copyflag]
-!           Indicates whether the array should be copied or referenced.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-!       BOP/EOP have been changed to BOPI/EOPI until the subroutine is implemented.
-
-        end subroutine ESMF_FieldAttachGridArray
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:   ESMF_FieldCreate - Create a new Field
 
@@ -1247,11 +1089,11 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoBuffer(grid, arrayspec, horzRelloc, vertRelloc, &
+      function ESMF_FieldCreateNoDataPtr(grid, arrayspec, horzRelloc, vertRelloc, &
                                         haloWidth, datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldCreateNoBuffer   
+      type(ESMF_Field) :: ESMF_FieldCreateNoDataPtr   
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
@@ -1304,7 +1146,7 @@
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       nullify(ftype)
-      nullify(ESMF_FieldCreateNoBuffer%ftypep)
+      nullify(ESMF_FieldCreateNoDataPtr%ftypep)
 
       ! Initialize return code   
       if(present(rc)) then
@@ -1316,24 +1158,24 @@
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if(status .NE. 0) then 
-        print *, "ERROR in FieldCreateNoBuffer: Allocate"
+        print *, "ERROR in FieldCreateNoDataPtr: Allocate"
         return
       endif 
 
       ! Call construction method to build field internals.
-      call ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, horzRelloc, &
+      call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldCreateNoBuffer: Field construct NoBuf"
+        print *, "ERROR in FieldCreateNoDataPtr: Field construct NoBuf"
         return
       endif 
 
       ! Set return values.
-      ESMF_FieldCreateNoBuffer%ftypep => ftype
+      ESMF_FieldCreateNoDataPtr%ftypep => ftype
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_FieldCreateNoBuffer
+      end function ESMF_FieldCreateNoDataPtr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1562,89 +1404,6 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldDestroy
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldDetachData - Disassociate a buffer from a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldDetachData()
-      subroutine ESMF_FieldDetachBuffer(field, buffer, access, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field             
-      integer, intent(out) :: buffer                    
-      type(ESMF_Access), intent(in), optional :: access 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     Returns a pointer to the {\tt ESMF\_Field}'s data buffer and marks the 
-!     {\tt ESMF\_Field} as not having any associated data.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [buffer]
-!           Buffer to disassociate.
-!     \item [{[access}]]
-!           {\tt ESMF\_Access} which may be ESMF\_READWRITE or ESMF\_READONLY.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!           
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-
-!
-! TODO: code goes here.   this routine BOPI for 2 reasons - one, it isn't
-!  implemented, and two - it may be removed and replaced by a GetData call
-!  with a flag to indicate exclusive access.
-!
-        end subroutine ESMF_FieldDetachBuffer
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FieldDetachData - Disassociate an Array from a Field
-
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldDetachData()
-      subroutine ESMF_FieldDetachArray(field, array, access, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
-      type(ESMF_Array), intent(out) :: array
-      type(ESMF_Access), intent(in), optional :: access
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Returns a pointer to the {\tt ESMF\_Field}'s {\tt ESMF\_Array} and marks the 
-!     {\tt ESMF\_Field} as not having any associated data.
-!
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
-!     \item [array]
-!           {\tt ESMF\_Array} to disassociate.
-!     \item [{[access}]]
-!           {\tt ESMF\_Access} which may be ESMF\_READWRITE or ESMF\_READONLY.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS: FLD1.6.5
-
-
-!
-! TODO: code goes here.  This code marked BOPI for the same reason as above;
-!  it may be replaced by a GetData call with a flag. 
-!
-        end subroutine ESMF_FieldDetachArray
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2605,21 +2364,20 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldGetData - Get Data associated with the Field
+! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetData(field, array, buffer, rc)
+      subroutine ESMF_FieldGetArray(field, array, rc)
 
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field      
-      type(ESMF_Array), intent(out), optional :: array
-      integer, intent(out), optional :: buffer
+      type(ESMF_Array), intent(out) :: array
       integer, intent(out), optional :: rc           
 
 !
 ! !DESCRIPTION:
-!     Get data either in {\tt ESMF\_Array} or buffer form.
+!     Get data in {\tt ESMF\_Array} form.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2627,10 +2385,6 @@
 !           A {\tt ESMF\_Field} object.
 !     \item [{[array]}]
 !           Field {\tt ESMF\_Array}.
-!     \item [{[buffer]}]
-!           Field buffer.
-!     \item [{[size]}]
-!           Size of grid.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2642,16 +2396,12 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      logical :: apresent                         ! Array present
-      logical :: bpresent                         ! Buffer present
       character(len=ESMF_MAXSTR) :: str
       type(ESMF_FieldType), pointer :: ftypep
 
       ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
-      apresent = .FALSE.
-      bpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -2659,44 +2409,30 @@
 
       ! Minimal error checking 
       if (.not.associated(field%ftypep)) then
-        print *, "ESMF_FieldGetData: Invalid or Destroyed Field"
+        print *, "ESMF_FieldGetArray: Invalid or Destroyed Field"
         return
       endif
 
       ftypep => field%ftypep
 
       if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "ESMF_FieldGetData: Field not ready"
+        print *, "ESMF_FieldGetArray: Field not ready"
         return
       endif
 
-      ! Set codes depending on what the caller specified
-      if(present(array)) apresent=.TRUE.
-      if(present(buffer)) bpresent=.TRUE.
+      if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+          print *, "ESMF_FieldGetArray: no data associated with field"
+          return
+      endif
 
-      if(apresent) then
-          if (ftypep%datastatus .ne. ESMF_STATE_READY) then
-              print *, "ESMF_FieldGetData: no data associated with field"
-              return
-          endif
-
-          !call ESMF_StatusString(ftypep%datastatus, str, rc)
-          !print *, "getting array data, status = ", trim(str)
-          array = ftypep%localfield%localdata
-      endif 
+      !call ESMF_StatusString(ftypep%datastatus, str, rc)
+      !print *, "getting array data, status = ", trim(str)
+      array = ftypep%localfield%localdata
    
-      if(bpresent) then
-          ! TODO: check that an array is associated with the field
-          !  if (field%ptr%localfield%datastatus .eq. ...)
-
-          ! TODO: and extract data also
-          ! array = field%ptr%localfield%localdata
-      endif 
-
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldGetData
+      end subroutine ESMF_FieldGetArray
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -3076,6 +2812,81 @@
 
         end function ESMF_FieldReadRestart
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldSetArray - Set data Array associated with the Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldSetArray(field, array, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field      
+      type(ESMF_Array), intent(in) :: array
+      integer, intent(out), optional :: rc           
+
+!
+! !DESCRIPTION:
+!     Set data in {\tt ESMF\_Array} form.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [{[array]}]
+!           {\tt ESMF\_Array} containing data.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
+
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      character(len=ESMF_MAXSTR) :: str
+      type(ESMF_FieldType), pointer :: ftypep
+
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Minimal error checking 
+      if (.not.associated(field%ftypep)) then
+        print *, "ESMF_FieldSetData: Invalid or Destroyed Field"
+        return
+      endif
+
+      ftypep => field%ftypep
+
+      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        print *, "ESMF_FieldSetData: Field not ready"
+        return
+      endif
+
+      ! TODO: do we allow this?  if so, do we just destroy the old array?
+      if (ftypep%datastatus .eq. ESMF_STATE_READY) then
+          print *, "ESMF_FieldSetData: data already associated with field"
+          return
+      endif
+
+      ftypep%localfield%localdata = array
+      ftypep%datastatus = ESMF_STATE_READY
+   
+      ! TODO: add some validation here to be sure the array is the right
+      ! size for the grid decomposition
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldSetArray
 
 !------------------------------------------------------------------------------
 
@@ -3676,10 +3487,10 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldConstructNoBuffer - Construct a Field with no associated buffer
+! !IROUTINE: ESMF_FieldConstructNoDataPtr - Construct a Field with no associated buffer
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, &
+      subroutine ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, &
                                            horzRelloc, vertRelloc, haloWidth, &
                                            datamap, name, iospec, rc)
 !
@@ -3744,7 +3555,7 @@
       ! Construct a default name if one is not given
       call ESMF_BaseCreate(ftype%base, "Field", name, 0, status)
       if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldConstructNoBuffer: BaseCreate"
+        print *, "ERROR in ESMF_FieldConstructNoDataPtr: BaseCreate"
         return
       endif 
 
@@ -3781,20 +3592,20 @@
         endif
       endif
 
-!     call ESMF_ArrayConstructNoBuffer(ftype%array)
+!     call ESMF_ArrayConstructNoDataPtr(ftype%array)
 
       ! If I/O spec is present, copy it into the field object; otherwise just 
       ! initialize the I/O spec in the field object.
       if(present(iospec)) then
 !       ESMF_IOSpecCopyInit(ftype%iospec, iospec, status)
         if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNoBuffer: IOSpec init"
+          print *, "ERROR in ESMF_FieldConstructNoDataPtr: IOSpec init"
           return
         endif 
       else 
 !       ESMF_IOSpecInit(ftype%iospec, status)
         if(status .NE. ESMF_SUCCESS) then 
-          print *, "ERROR in ESMF_FieldConstructNoBuffer: IOSpec init"
+          print *, "ERROR in ESMF_FieldConstructNoDataPtr: IOSpec init"
           return
         endif 
       endif
@@ -3803,7 +3614,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldConstructNoBuffer
+      end subroutine ESMF_FieldConstructNoDataPtr
 
 !------------------------------------------------------------------------------
 !BOPI
