@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.9 2004/12/08 22:56:19 nscollins Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.9.2.1 2005/03/01 22:57:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.9 2004/12/08 22:56:19 nscollins Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.9.2.1 2005/03/01 22:57:08 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -49,21 +49,18 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: i, x, y
-      type(ESMF_Grid) :: grid1, grid2, grid3, grid4
+      type(ESMF_Grid) :: grid1, grid2, grid3
       type(ESMF_Array) :: arr1, arr2
-      type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: g1_ai, g2_ai
       integer, dimension(ESMF_MAXDIM) :: g1_cells, g2_cells
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_FieldDataMap) :: dm
-      type(ESMF_RelLoc) :: rl
+      !type(ESMF_RelLoc) :: rl
       type(ESMF_DELayout) :: layout1, layout2
       type(ESMF_VM) :: vm
       type(ESMF_RouteHandle) :: rh
-      integer :: delist(64)
-      character (len = 20) :: fname, fname1, fname2, gname
       type(ESMF_IOSpec) :: ios
-      type(ESMF_Field) :: f1, f2, f3, f4, f5
+      character (len = 20) :: gname
+      type(ESMF_Field) :: f1, f2
       integer :: half, quart
       real (ESMF_KIND_R8):: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
@@ -188,7 +185,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest_Multi_Proc_Only
+      !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCESS"
       write(name, *) "Grid distribute Test "
       call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
@@ -294,7 +291,7 @@
       ! route test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Redist Store Test"
-      call ESMF_FieldRedistStore(f1, f2, layout1, rh, rc=rc)
+      call ESMF_FieldRedistStore(f1, f2, vm, routehandle=rh, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
