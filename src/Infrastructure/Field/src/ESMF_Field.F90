@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.24 2003/04/29 21:37:27 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.25 2003/05/02 16:18:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.24 2003/04/29 21:37:27 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.25 2003/05/02 16:18:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2363,9 +2363,11 @@
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, &
-                               AI_count, layout, my_DE, &
-                               src_AI, AI_count, layout, &
+      call ESMF_RouteGetCached(datarank, &
+                               my_DE, dst_AI, dst_AI, &
+                               AI_count, layout, &
+                               my_DE, src_AI, src_AI, &
+                               AI_count, layout, &
                                hascachedroute, route, rc=status)
 
       if (.not. hascachedroute) then
@@ -2385,6 +2387,11 @@
         print *, "ERROR in FieldHalo: RouteRun returned failure"
         return
       endif 
+
+      ! TODO: if cached, we shouldn't delete the Route.  But until
+      !   the caching code is working correctly, reclaim the route
+      !   memory each time.
+      !call ESMF_RouteDestroy(route, rc)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -2642,10 +2649,12 @@
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_dst_DE, dst_AI_exc, &
-                                  AI_rcv_count, dstlayout, my_src_DE, &
-                                  src_AI_exc, AI_snd_count, srclayout, &
-                                  hascachedroute, route, rc=status)
+      call ESMF_RouteGetCached(datarank, &
+                               my_dst_DE, dst_AI_exc, dst_AI_tot, &
+                               AI_rcv_count, dstlayout, &
+                               my_src_DE, src_AI_exc, src_AI_tot, &
+                               AI_snd_count, srclayout, &
+                               hascachedroute, route, rc=status)
 
       if (.not. hascachedroute) then
           ! Create the route object.  This needs to be the parent layout which
@@ -2680,6 +2689,12 @@
         print *, "ERROR in FieldRoute: RouteRun returned failure"
         return
       endif 
+
+      ! TODO: if cached, we shouldn't delete the Route.  But until
+      !   the caching code is working correctly, reclaim the route
+      !   memory each time.
+      !call ESMF_RouteDestroy(route, rc)
+
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
