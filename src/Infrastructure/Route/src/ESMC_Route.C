@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.22 2003/03/21 22:17:01 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.23 2003/03/21 22:39:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.22 2003/03/21 22:17:01 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.23 2003/03/21 22:39:01 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -357,16 +357,13 @@
     int mydeid, theirdeid;
     int needed;
     ESMC_XPacket *sendxp, *recvxp;
-    int srank, rrank;
+    int srank, rrank, mrank;
     int srcbytes, rcvbytes;
     int sleft, rleft;
     int sright, rright;
     int sstrides[ESMF_MAXDIM], rstrides[ESMF_MAXDIM];
     int snums[ESMF_MAXDIM], rnums[ESMF_MAXDIM];
 
-    printf("Start of RouteRun:\n");
-    this->ESMC_RoutePrint(""); 
-    
     rc = layout->ESMC_DELayoutGetDEid(&mydeid);
     rc = ct->ESMC_CommTableGetCount(&ccount);
 
@@ -375,30 +372,49 @@
 
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
-        if (!needed)
+        if (!needed) {
+            printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
 	    continue;
+        } else {
+           printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
+        }
 
         // look up the corresponding send/recv xpackets in the rtables
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
         if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
-        if (xscount > 0)
+        if (xscount > 0) {
             rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
-        else {
+            printf("RouteRun: sendxp\n");
+            sendxp->ESMC_XPacketPrint();
+        } else {
             sendxp = NULL;
             srank = 0;
             sleft=0; sright=0;
+            for(j=0; j<ESMF_MAXDIM; j++) {
+                snums[j]=0;
+                sstrides[j]=0;
+            }
+            printf("nothing to send\n");
         }
 
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
         if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
-        if (xrcount > 0)
+        if (xrcount > 0) {
             rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
-        else {
+            printf("RouteRun: recvxp\n");
+            recvxp->ESMC_XPacketPrint();
+        } else {
             recvxp = NULL;
             rrank = 0;
             rleft=0; rright=0;
+            for(j=0; j<ESMF_MAXDIM; j++) {
+                rnums[j]=0;
+                rstrides[j]=0;
+            }
+            printf("nothing to recv\n");
         }
         
+       
         // ready to call the comm routines - possibly multiple times, one for
         //  each disjoint memory piece?
      
@@ -416,21 +432,33 @@
 
         // how is this loop to be structured?  we've got to set up both
         // a send and receive each time.  ranks must match?
-        for (j=0, srcbytes = sleft, rcvbytes = rleft; j<srank; j++) {
-            printf("j=%d, srank=%d\n", j, srank);
-            printf("snums[j]=%d, rnums[j]=%d\n", snums[j], rnums[j]);
-            for (l=0; l<snums[j] && l<rnums[j]; l++, 
+        mrank = MAX(srank, rrank);
+        printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
+        printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
+                             (long int)srcaddr, (long int)dstaddr);
+        for (j=0, srcbytes = sleft, rcvbytes = rleft; j<mrank; j++) {
+            printf("j=%d, snums[j]=%d, rnums[j]=%d\n", j, snums[j], rnums[j]);
+            for (l=0; l<snums[j] || l<rnums[j]; l++, 
                             srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
          
-                 printf("sending %d bytes and receiving %d bytes with %d\n", 
-                                   sleft-sright, rleft-rright, theirdeid);
+                 printf("ready to call send/recv, l=%d:\n", l);
+                 printf(" next srcaddr=0x%08lx, dstaddr=0x%08lx, srcbytes=%d, rcvbytes=%d\n", 
+                            (long int)((char *)srcaddr+srcbytes), 
+                            (long int)((char *)dstaddr+rcvbytes), 
+                            srcbytes, rcvbytes);
+                 printf(" sleft=%d, sright=%d, rleft=%d, rright=%d\n", 
+                                   sleft, sright, rleft, rright);
+                 printf(" sending %d bytes and receiving %d bytes with %d\n", 
+                                   sright-sleft, rright-rleft, theirdeid);
+                 printf(" j=%d, sstrides[j]=%d, rstrides[j]=%d\n", 
+                                    j, sstrides[j], rstrides[j]);
 
                 //rc = layout->ESMC_DELayoutSendRecv(mydeid, 
                 //             (void *)((char *)srcaddr+srcbytes), 
-                //             sleft-sright,
+                //             sright-sleft,
                 //             theirdeid, 
                 //             (void *)((char *)dstaddr+rcvbytes), 
-                //             rleft-rright);
+                //             rright-rleft);
                 //
                 // and what do we call when we run out of sends but there's
                 // still stuff to receive?  can we use the same call?
@@ -484,7 +512,7 @@
     ESMC_AxisIndex my_AI[ESMF_MAXDIM], their_AI[ESMF_MAXDIM];
     ESMC_XPacket *my_XP = new ESMC_XPacket;
     ESMC_XPacket *their_XP = new ESMC_XPacket;
-    ESMC_XPacket *intersect_XP = new ESMC_XPacket;
+    ESMC_XPacket *intersect_XP = NULL;
     int i, j, k;
     int their_de, their_de_parent, their_decount;
     int nx, ny;
@@ -524,11 +552,15 @@
           their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
 
           // calculate the intersection
+          intersect_XP = new ESMC_XPacket;
           intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty())
+          if (intersect_XP->ESMC_XPacketEmpty()) {
+              delete intersect_XP;
+              intersect_XP = NULL;
               continue;
+          }
 
           // translate from global to local data space
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank, nx, ny);
@@ -572,11 +604,15 @@
           their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
 
           // calculate the intersection
+          intersect_XP = new ESMC_XPacket;
           intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty())
+          if (intersect_XP->ESMC_XPacketEmpty()) {
+              delete intersect_XP;
+              intersect_XP = NULL;
               continue;
+          }
 
           // translate from global to local
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank, nx, ny);
