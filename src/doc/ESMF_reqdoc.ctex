@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.16 2003/07/28 21:13:38 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.17 2003/07/28 21:46:46 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -44,6 +44,9 @@
 \newpage
 \tableofcontents
 
+\setcounter{section}{0}
+\renewcommand{\thesection}{\arabic{section}}
+
 \newpage
 %\section{Synopsis}
 \input{ESMF_syn}
@@ -54,6 +57,9 @@
 \end{htmlonly}
 \part{General Requirements}
 \label{part:General_Requirements}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\arabic{section}}
 
 \section{Target codes and review team}
 \input{ESMF_auth}
