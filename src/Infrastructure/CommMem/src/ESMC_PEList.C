@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.10 2003/04/04 21:08:06 nscollins Exp $
+// $Id: ESMC_PEList.C,v 1.11 2003/06/17 21:24:38 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ PEList methods declared
+// The code in this file implements the C++ {\tt ESMC\_PEList} methods declared
 // in the companion file ESMC_PEList.h
 //
 // 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.10 2003/04/04 21:08:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.11 2003/06/17 21:24:38 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -65,9 +65,9 @@
 //
 // !DESCRIPTION:
 //      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListContruct to
+//      object and uses the internal routine {\tt ESMC\_PEListContruct} to
 //      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC\_PEListInit.
+//      define and use {\tt ESMC\_PEListInit}.
 //      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
@@ -105,9 +105,9 @@
 //
 // !DESCRIPTION:
 //      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListContruct to
+//      object and uses the internal routine {\tt ESMC\_PEListContruct} to
 //      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC\_PEListInit.
+//      define and use {\tt ESMC\_PEListInit}.
 //      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
@@ -164,8 +164,8 @@
       ESMC_PEList *pelist) {    // PE list to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a PEList object previously allocated
-//      via an ESMC\_PEListCreate routine.  Define for deep classes only.
+//      ESMF routine which destroys a {\ttbPEList} object previously allocated
+//      via an {\tt ESMC\_PEListCreate} routine.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -197,10 +197,10 @@
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated PEList object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_PEListDestruct
+//      as needed.  Must call the corresponding {\tt ESMC\_PEListDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_PEListCreate, which calls
-//      ESMC\_PEListConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_PEListCreate}, which calls
+//      {\tt ESMC\_PEListConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -258,10 +258,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMC\_PEListConstruct, does any additional cleanup before the
-//      original PEList object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_PEListDestroy, which calls
-//      ESMC\_PEListDestruct.  Define for deep classes only.
+//      {\tt ESMC\_PEListConstruct}, does any additional cleanup before the
+//      original {\tt ESMC\_PEList} object is freed.  Intended for internal ESMF
+//      use only; end-users use {\tt ESMC\_PEListDestroy}, which calls
+//      {\tt ESMC\_PEListDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -292,7 +292,7 @@
       int nodeid) {         // in - machine node ID
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes PE values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_PE} values; it does not
 //      allocate any resources.
 //
 //EOP
@@ -322,7 +322,7 @@
       ESMC_PEListConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the PEList object was configured with.
+//    Returns the set of resources the {\tt ESMC\_PEList} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -347,7 +347,7 @@
       const ESMC_PEListConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the PEList object with set of resources given.
+//    Configures the {\tt ESMC\_PEList} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -372,7 +372,7 @@
       <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of PEList member <Value>.
+//     Returns the value of {\tt ESMC\_PEList} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -398,7 +398,7 @@
       <value type> value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the PEList member <Value> with the given value.
+//     Sets the {\tt ESMC\_PEList} member <Value> with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -426,7 +426,7 @@
       ESMC_PE **pe) const {     // out - pointer to ith PE
 //
 // !DESCRIPTION:
-//     Returns a pointer to the ith PE in the list.
+//     Returns a pointer to the ith {\tt ESMC\_PE} in the list.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -456,7 +456,7 @@
       ESMC_PE *pe) {     // in - pointer to ith PE
 //
 // !DESCRIPTION:
-//     Sets the ith PE in the list to the given PE.
+//     Sets the ith {\tt ESMC\_PE} in the list to the given {\tt ESMC\_PE}.
 //
 //EOP
 // !REQUIREMENTS:
@@ -484,7 +484,7 @@
       int *npes) const {    // in  - number of PEs in list
 //
 // !DESCRIPTION:
-//     Returns the number of PEs in the list
+//     Returns the number of {\tt ESMC\_PE}s in the list
 //
 //EOP
 // !REQUIREMENTS:  
@@ -512,8 +512,8 @@
       void) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a PEList is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Validates that a {\tt ESMC\_PEList} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -540,8 +540,8 @@
       void) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a PEList.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      Print information about a {\tt ESMC\_PEList}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -624,8 +624,8 @@
       void) {     //  in - none
 //
 // !DESCRIPTION:
-//      Sorts a PEList by node affinity; all PE's within same node
-//      will appear contiguously in the PEList  
+//      Sorts a {\tt ESMC\_PEList} by node affinity; all {\tt ESMC\_PE}s within same node
+//      will appear contiguously in the {\tt ESMC\_PEList}  
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -654,7 +654,7 @@
       const void *pe2) {     //  in - PE 2
 //
 // !DESCRIPTION:
-//      Compares 2 PEs by node affinity; used by qsort in ESMC\_PEListSort()
+//      Compares 2 {\tt ESMC\_PE}s by node affinity; used by qsort in {\tt ESMC\_PEListSort()}
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
