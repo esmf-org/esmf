@@ -1,4 +1,4 @@
-// $Id: ESMC_RouteEx.C,v 1.1 2003/03/05 20:59:09 nscollins Exp $
+// $Id: ESMC_RouteEx.C,v 1.2 2004/02/18 22:18:18 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -17,6 +17,7 @@
 //   // Example program showing various ways to create a Field object
 #include "ESMC.h"
 #include "ESMC_Field.h"
+#include "ESMC_Comp.h"
 
 #include <stdio.h>
     
@@ -40,6 +41,8 @@ main(int argc, char **argv) {
 //   //  associates the data with the Grid.  The data is referenced
 //   //  by default.  The DataMap is created with defaults.
  
+    rc = ESMC_Initialize();
+
     //grid = ESMF_GridCreate(name="atmgrid", rc=rc);
 
 //   // Not fully implemented.
@@ -85,7 +88,7 @@ main(int argc, char **argv) {
 //   //  data in later calls.
 
 //     field4 = ESMF_FieldCreateNoData("precip", rc=rc);
-     field4 = ESMC_FieldCreate(&rc);
+     //field4 = ESMC_FieldCreate(&rc);
 //
 //    // At some later time, associate a Grid with this Field
      //call ESMC_FieldSetGrid(field3, grid, rc);
@@ -107,8 +110,10 @@ main(int argc, char **argv) {
      //ESMC_FieldDestroy(field1);
      //ESMC_FieldDestroy(field2);
      //ESMC_FieldDestroy(field3);
-     ESMC_FieldDestroy(field4);
+     //ESMC_FieldDestroy(field4);
      //ESMC_FieldDestroy(field5);
+
+     rc = ESMC_Finalize();
 }
 
     
