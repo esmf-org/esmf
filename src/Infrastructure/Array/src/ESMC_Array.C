@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.34 2004/06/10 22:42:39 eschwab Exp $
+// $Id: ESMC_Array.C,v 1.35 2004/07/26 17:47:50 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.34 2004/06/10 22:42:39 eschwab Exp $";
+            "$Id: ESMC_Array.C,v 1.35 2004/07/26 17:47:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -595,6 +595,7 @@
             ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
             ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
+            hwidth[0][0] = 0;
         } else {
             total_stride *= counts[i];
             comp_stride *= counts[i] - 2*halo_width;
@@ -604,6 +605,7 @@
                               comp_stride);
             ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
                               counts[i]-2*halo_width-1, excl_stride);
+            hwidth[0][0] = halo_width;
         }
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
