@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.30 2004/07/22 21:28:33 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.31 2004/08/26 19:46:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,11 +36,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.30 2004/07/22 21:28:33 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.31 2004/08/26 19:46:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0, number
+      integer :: result = 0, number, npets
 !     ! Local variables
       integer :: i, x, y, rc, mycell, fieldcount, count, countlist(2)
       type(ESMF_Grid) :: grid, grid2
@@ -82,8 +82,10 @@
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_Initialize(rc=rc)
-      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
+      
 
       !NEX_UTest
       !  Verify that an empty Bundle can be created
