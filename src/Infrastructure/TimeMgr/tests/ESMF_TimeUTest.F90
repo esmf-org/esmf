@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.12 2004/11/30 22:04:48 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.13 2004/12/01 00:11:36 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.12 2004/11/30 22:04:48 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.13 2004/12/01 00:11:36 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -386,6 +386,7 @@
       write(name, *) "Set End Time Initialization Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
   ! ----------------------------------------------------------------------------
       
       !EX_UTest
@@ -405,6 +406,7 @@
       write(name, *) "Set End Time with mm=0 Initialization Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
@@ -414,6 +416,31 @@
       write(name, *) "Set End Time with dd=0 Initialization Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test driving No-Leap calendar with seconds only
+      !   From bug #1050260
+      write(failMsg, *) " Did not return S=0, D=8, and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, s=691200, calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, s=S, d=D, rc=rc)
+      write(name, *) "Test driving No-Leap calendar with seconds only"
+      call ESMF_Test((S.eq.0.and.D.eq.8.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test driving 360-Day calendar with seconds only
+      !   From bug #1050260
+      write(failMsg, *) " Did not return S=0, D=8, and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, s=691200, calendar=day360Calendar, rc=rc)
+      call ESMF_TimeGet(stopTime, s=S, d=D, rc=rc)
+      write(name, *) "Test driving 360-Day calendar with seconds only"
+      call ESMF_Test((S.eq.0.and.D.eq.8.and.rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Converting Gregorian date to Julian Day
