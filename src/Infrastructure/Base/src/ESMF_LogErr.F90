@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.19 2004/08/19 22:13:10 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.20 2004/08/25 21:44:33 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -143,6 +143,7 @@ end type ESMF_Log
    public ESMF_LogInitialize
    public ESMF_LogMsgFoundAllocError
    public ESMF_LogMsgFoundError
+   public ESMF_LogMsgSetError
    public ESMF_LogOpen
    public ESMF_LogSet
    public ESMF_LogWrite
@@ -606,6 +607,67 @@ end function ESMF_LogMsgFoundError
 
 !--------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_LogMsgSetError - Set ESMF return code for error and write msg
+
+! !INTERFACE: 
+	subroutine ESMF_LogMsgSetError(rcValue, msg, line, file, method, &
+                                       rcToReturn, log)
+
+! !ARGUMENTS:
+!	
+	integer, intent(in)                             :: rcValue
+	character(len=*), intent(in)                    :: msg
+	integer, intent(in), optional                   :: line
+	character(len=*), intent(in), optional          :: file
+	character(len=*), intent(in), optional	        :: method
+	integer, intent(out),optional                   :: rcToReturn
+	type(ESMF_LOG), intent(in), optional		:: log
+	
+
+! !DESCRIPTION:
+!      This function returns a logical true for ESMF return codes that indicate
+!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
+!      along with
+!      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
+!      Additionally, {\tt rcToReturn} will be set to {\tt rcToCheck}.
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [rcValue]
+!            rc value for set
+!      \item [msg]
+!            User-provided message string.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name. 
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, copy the {\tt rcToCheck} value to {\tt rc}.
+!            This is not the return code for this function; it allows
+!            the calling code to do an assignment of the error code
+!            at the same time it is testing the value.
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!	     of the default log.
+!      
+!      \end{description}
+! 
+!EOP
+    logical :: logrc
+	
+    if (present(rcToReturn)) rcToReturn = rcValue
+    if (rcValue .NE. ESMF_SUCCESS) then
+        call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+    endif	
+       
+end subroutine ESMF_LogMsgSetError
+
+!--------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
@@ -716,7 +778,7 @@ end subroutine ESMF_LogSet
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-	subroutine ESMF_LogWrite(msg,MsgType,line,file,method,log)
+	subroutine ESMF_LogWrite(msg,MsgType,line,file,method,log,rc)
 !
 !
 ! !ARGUMENTS:
@@ -726,6 +788,7 @@ end subroutine ESMF_LogSet
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
 	type(ESMF_LOG), intent(in), optional	:: log
+	integer, intent(out),optional		:: rc
 
 ! !DESCRIPTION:
 !      This function writes to the file associated with an {\tt ESMF\_Log}.
@@ -753,6 +816,8 @@ end subroutine ESMF_LogSet
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !	     of the default log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
 !EOP
@@ -767,6 +832,7 @@ end subroutine ESMF_LogSet
     integer	                    ::i
     integer                         ::h,m,s,ms,y,mn,dy
     
+    if (present(rc)) rc=ESMF_FAILURE
     if (present(method)) tmethod=adjustl(method)
     if (present(line)) tline=line 
     if (present(file)) then
@@ -831,7 +897,8 @@ end subroutine ESMF_LogSet
 132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
 133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
 
-!if ((ESMF_LogDefault%halttype .eq. 3) .and. (msgtype%mtype .eq. 3)) STOP
+if (present(rc)) rc=ESMF_SUCCESS
+if ((ESMF_LogDefault%halt%htype .eq. 3).and. (msgtype%mtype .eq. 3)) STOP
 
 end subroutine ESMF_LogWrite
 
