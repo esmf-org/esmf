@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2003/11/07 21:55:34 nscollins Exp $ 
+# $Id: makefile,v 1.16 2004/01/08 21:01:52 nscollins Exp $ 
 
 ALL:  examples
 
@@ -122,28 +122,28 @@ run_ESMC_GCompEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
 
 #
-# EMSF_AppMainEx
+# ESMF_AppMainEx
 #
-run_EMSF_AppMainEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_AppMainEx > $(ESMF_EXDIR)/EMSF_AppMainEx.stdout
+run_ESMF_AppMainEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_AppMainEx > $(ESMF_EXDIR)/ESMF_AppMainEx.stdout
 
-run_EMSF_AppMainEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_AppMainEx > $(ESMF_EXDIR)/EMSF_AppMainEx.stdout
-
-#
-# EMSF_CplEx
-#
-run_EMSF_CplEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_CplEx > $(ESMF_EXDIR)/EMSF_CplEx.stdout
-
-run_EMSF_CplEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_CplEx > $(ESMF_EXDIR)/EMSF_CplEx.stdout
+run_ESMF_AppMainEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_AppMainEx > $(ESMF_EXDIR)/ESMF_AppMainEx.stdout
 
 #
-# EMSF_GCompEx
+# ESMF_CplEx
 #
-run_EMSF_GCompEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_GCompEx > $(ESMF_EXDIR)/EMSF_GCompEx.stdout
+run_ESMF_CplEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_CplEx > $(ESMF_EXDIR)/ESMF_CplEx.stdout
 
-run_EMSF_GCompEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_GCompEx > $(ESMF_EXDIR)/EMSF_GCompEx.stdout
+run_ESMF_CplEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_CplEx > $(ESMF_EXDIR)/ESMF_CplEx.stdout
+
+#
+# ESMF_GCompEx
+#
+run_ESMF_GCompEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_GCompEx > $(ESMF_EXDIR)/ESMF_GCompEx.stdout
+
+run_ESMF_GCompEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_GCompEx > $(ESMF_EXDIR)/ESMF_GCompEx.stdout
