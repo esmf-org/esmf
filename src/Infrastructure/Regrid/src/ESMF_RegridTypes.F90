@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.41 2004/04/28 23:12:09 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.42 2004/04/30 22:03:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -133,6 +133,13 @@
          ESMF_RegridDistrb_Dest   =  2, &! redistribute destination field
          ESMF_RegridDistrb_Both   =  3   ! redistribute both 
 
+      integer, parameter, public ::      &! options for normalization
+         ESMF_RegridNormOptUnknown  = 0, &! unknown or undefined normalization
+         ESMF_RegridNormOptNone     = 1, &
+         ESMF_RegridNormOptDstArea  = 2, &
+         ESMF_RegridNormOptDstFrac  = 3, &
+         ESMF_RegridNormOptFrcArea  = 4
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_RegridType
@@ -154,7 +161,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.41 2004/04/28 23:12:09 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.42 2004/04/30 22:03:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -267,7 +274,7 @@
 ! !IROUTINE: ESMF_RegridAddLink2D - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, rc)
+      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, aggregate, rc)
 !
 ! !ARGUMENTS:
 
@@ -275,6 +282,7 @@
       integer, intent(in) :: srcAdd
       integer, dimension(2), intent(in) :: dstAdd
       real(kind=ESMF_KIND_R8), intent(in) :: weight
+      logical, intent(in), optional :: aggregate
       integer, intent(out), optional :: rc
 
 !
@@ -292,6 +300,11 @@
 !          Address in destination field array for this link.
 !     \item[weights]
 !          Regrid weight for this link.
+!     \item[{[aggregate]}]
+!          Logical flag to indicate whether the current list of links should
+!          be searched for an already occurring weight corresponding to the
+!          current address pair and the current weight added on instead of
+!          making a new link.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -302,7 +315,8 @@
       logical :: rcpresent
       integer :: status
       integer, dimension(:), pointer :: srcPtr, dstPtr
-      integer :: numList
+      integer :: numList, i, i1
+      logical :: aggregateUse, newLink
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
       type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
       type (ESMF_Array) :: &! temps for use when re-sizing arrays
@@ -316,23 +330,46 @@
         rc = ESMF_FAILURE
       endif
 
+      newLink = .true.
+      aggregateUse = .false.
+      if (present(aggregate)) aggregateUse=aggregate
+
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=rc)
       call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, rc)
 
-      ! increment number of links for this regrid
-      numList = numList + 1
+      ! if the aggregation flag is set, search through the already existing
+      ! links for the current address pair
+      if (aggregateUse .and. numList.ne.0) then
+        do i = 1,numList
+          i1 = 2*(i-1)
+          if ((dstPtr(i1+1) .eq. dstAdd(1)) .AND. &
+              (dstPtr(i1+2) .eq. dstAdd(2)) .AND. &
+              (srcPtr(i)    .eq. srcAdd   )) then
+            newLink = .false.
+            wgtPtr(i) = wgtPtr(i) + weight
+            go to 10
+          endif
+        enddo
+   10   continue
+      endif
 
-      !  if new number of links exceeds array sizes, re-size arrays
-      ! TODO: resize check
+      ! if this is a new link, increment number of links for this regrid
+      if (newLink) then
+        numList = numList + 1
 
-      ! Add addresses and weights to regrid arrays
-      dstPtr(2*(numList-1)+1) = dstAdd(1)
-      dstPtr(2*(numList-1)+2) = dstAdd(2)
-      srcPtr(numList) = srcAdd
-      wgtPtr(numList) = weight
+        !  if new number of links exceeds array sizes, re-size arrays
+        ! TODO: resize check
+
+        ! Add addresses and weights to regrid arrays
+        dstPtr(2*(numList-1)+1) = dstAdd(1)
+        dstPtr(2*(numList-1)+2) = dstAdd(2)
+        srcPtr(numList) = srcAdd
+        wgtPtr(numList) = weight
+      endif
+
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=rc)
 
