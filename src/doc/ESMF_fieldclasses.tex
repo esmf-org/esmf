@@ -119,8 +119,8 @@ reordering of that packed data, and detaching and attaching the data.
 vector field.  It is the basic data carrying object in the system.  It includes both
 the data and the grid on which the data are defined.  The main application interfaces
 for accessing data are here.
-\item [Function] The Field object is a composition of the Data Array object, an optional
-Mask object, an optional IOspec object, and it aggregates a Grid object.  It provides
+\item [Function] The Field object is a composition of the Data Array object,
+an optional IOspec object, and it aggregates a Grid object.  It provides
 methods for getting, setting, and querying the data array, the grid, the mask and
 the I/O spec.  It provides methods for detaching and attaching data from the field.
 While data are detached it is the responsibility of the application.  A Field object
@@ -132,10 +132,9 @@ provides methods for subsetting, regridding, and reordering memory layout of dat
 \begin{description}
 \item [Description] A Mask describes a subset of data items, for example to indicate
 the valid values which represent ocean points (and not land) in an ocean model.  
-It may be specified at the Grid object level, but it is stored below the Field level 
-for effiency of computation.
-\item [Function] The Mask class is an optional part of a Field class.  It provides methods
-for getting and setting valid values.
+It may be specified at the Field object level, but it is stored as part of the PhysGrid object.
+\item [Function] The Mask class is an optional part of a PhysGrid class.  
+It provides methods for getting and setting valid values.
 \end{description}
 
 \subsubsection{Data Array (ESMF\_Data)}
