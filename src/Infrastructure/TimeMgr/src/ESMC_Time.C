@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.69 2004/10/29 23:44:30 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.70 2004/11/24 00:31:12 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.69 2004/10/29 23:44:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.70 2004/11/24 00:31:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -318,13 +318,17 @@
       ESMF_KIND_I4 *sD,           // out - fractional seconds denominator
       ESMC_Calendar **calendar,   // out - associated calendar
       ESMC_CalendarType *calendarType, // out - associated calendar type
-      int           *timeZone,    // out - timezone (hours offset from UTC)
-      int            timeStringLen,     // in  - F90 time string size
-      int           *tempTimeStringLen, // out - temp F90 time string size
-      char          *tempTimeString,    // out - ISO 8601 format
-                                        //       YYYY-MM-DDThh:mm:ss
-      int           *dayOfWeek,   // out - day of the week (Mon = 1, Sun = 7)
-      ESMC_Time     *midMonth,    // out - middle of the month time instant
+      int     *timeZone,          // out - timezone (hours offset from UTC)
+      int      timeStringLen,     // in  - F90 time string size
+      int     *tempTimeStringLen, // out - temp F90 time string size
+      char    *tempTimeString,    // out - hybrid format
+                                  //       YYYY-MM-DDThh:mm:ss[:n/d]
+      int   timeStringLenISOFrac,     // in  - F90 ISO time string size
+      int  *tempTimeStringLenISOFrac, // out - temp F90 ISO time string size
+      char *tempTimeStringISOFrac,    // out - ISO 8601 format
+                                  //       YYYY-MM-DDThh:mm:ss[.f]
+      int          *dayOfWeek,    // out - day of the week (Mon = 1, Sun = 7)
+      ESMC_Time    *midMonth,     // out - middle of the month time instant
       ESMF_KIND_I4 *dayOfYear,    // out - day of the year as an integer
       ESMF_KIND_R8 *dayOfYear_r8, // out - day of the year as a floating point
       ESMC_TimeInterval *dayOfYear_intvl) const {  // out - day of the year
@@ -405,6 +409,13 @@
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
         return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
+    }
+    if (tempTimeStringISOFrac != ESMC_NULL_POINTER &&
+        timeStringLenISOFrac > 0) {
+      rc = ESMC_TimeGetString(tempTimeStringISOFrac, "isofrac");
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *tempTimeStringLenISOFrac = strlen(tempTimeStringISOFrac);
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
       rc = ESMC_TimeGetDayOfWeek(dayOfWeek);
@@ -1021,7 +1032,7 @@
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
         char timeString[ESMF_MAXSTR];
-        ESMC_TimeGetString(timeString);
+        ESMC_TimeGetString(timeString, &options[6]);
         cout << timeString << endl;
       }
     } else {
@@ -1151,11 +1162,14 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      char *timeString) const {    // out - time value in string format
+      char *timeString, const char *options) const {    // out - time value in
+                                                        //       string format
+                                                        // in  - format options
 //
 // !DESCRIPTION:
-//      Gets a {\tt Time}'s value in ISO 8601 character format
-//      YYYY-MM-DDThh:mm:ss
+//      Gets a {\tt time}'s value in ISO 8601 string format
+//      YYYY-MM-DDThh:mm:ss[:n/d]  (hybrid) (default, options == "")
+//      or YYYY-MM-DDThh:mm:ss[.f] (strict) (options == "isofrac")
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1199,20 +1213,36 @@
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
 
-    // ISO 8601 format YYYY-MM-DDThh:mm:ss[.f], where f is fractional seconds
-
     // format everything except seconds
     sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:\0", yy_i8, mm, dd, h, m);
 
-    // convert integer fractional seconds to decimal form
-    double fractionalSeconds = 0.0;
-    if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+    // format seconds according to specified options
+    bool isofrac = false;
+    if (options != ESMC_NULL_POINTER) {
+      if (strstr(options, "isofrac") != ESMC_NULL_POINTER) isofrac = true;
+    }
+    if (isofrac) {
+      // strict ISO 8601 format YYYY-MM-DDThh:mm:ss[.f]
 
-    // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
-    if (fabs(fractionalSeconds) >= 5e-10) {
-      sprintf(timeString, "%s%012.9f\0", timeString, (s + fractionalSeconds));
-    } else { // no fractional seconds, just append integer seconds
-      sprintf(timeString, "%s%02d\0", timeString, s);
+      // convert integer fractional seconds to decimal form
+      double fractionalSeconds = 0.0;
+      if (sD != 0) fractionalSeconds = (double) sN / (double) sD;
+
+      // if fractionalSeconds non-zero (>= 0.5 ns) append full fractional value
+      if (fabs(fractionalSeconds) >= 5e-10) {
+        sprintf(timeString, "%s%012.9f\0", timeString, (s + fractionalSeconds));
+      } else { // no fractional seconds, just append integer seconds
+        sprintf(timeString, "%s%02d\0", timeString, s);
+      }
+    } else { // not strict ISO fractional seconds format
+      // hybrid ISO 8601 format YYYY-MM-DDThh:mm:ss[:n/d]
+
+      // if fractionalSeconds non-zero (sN!=0) append full fractional value
+      if (sN != 0) {
+        sprintf(timeString, "%s%02d:%d/%d\0", timeString, s, sN, sD);
+      } else { // no fractional seconds, just append integer seconds
+        sprintf(timeString, "%s%02d\0", timeString, s);
+      }
     }
 
     return(rc);
