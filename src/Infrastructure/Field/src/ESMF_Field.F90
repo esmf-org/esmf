@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.154 2004/06/08 18:40:33 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.153 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -228,7 +228,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.154 2004/06/08 18:40:33 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.153 2004/06/08 18:39:15 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -810,6 +810,12 @@
 
       end subroutine ESMF_FieldAddCharAttr
 
+!------------------------------------------------------------------------------
+!BOC
+! \begin{verbatim}
+  \input{ESMF_FieldCreate_fapi}
+  \end{verbatim}
+!EOC
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
