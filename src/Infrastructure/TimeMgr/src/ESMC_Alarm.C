@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.36 2004/04/27 20:34:17 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.37 2004/04/27 21:30:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.36 2004/04/27 20:34:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.37 2004/04/27 21:30:59 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -838,7 +838,7 @@ int ESMC_Alarm::count=0;
       ESMC_TimeInterval cumulativeRinging;
       cumulativeRinging = clock->currTime - ringBegin;
       if (cumulativeRinging.ESMC_TimeIntervalAbsValue() >= ringDuration) {
-        ringing = false;
+        ringingOnCurrTimeStep = ringing = false;
       }
     }
 
