@@ -1,0 +1,33 @@
+# $Id:
+#!/bin/ksh
+find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest" -print | wc -l > stdoutfiles
+if grep " 0" stdoutfiles
+then
+	echo "There are no executable Unit test files, either the 'gmake BOPT=g/O build_tests' has "
+	echo "not been run or the 'build_tests' did not build successfully."
+	echo "" 
+fi # end of if grep " 0" stdoutfiles
+
+find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest*.stdout" -print | wc -l > stdoutfiles
+if grep " 0" stdoutfiles
+then
+	echo "There are no Unit Test stdout files." 
+	echo "" 
+else
+	echo "Unit Tests stdout files found: " 
+	ls -l $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout 
+	echo "" 
+	echo "Unit test stdout files of zero length indicate that the unit test" 
+	echo "did not run because it failed to compile or it failed to execute. " 
+	echo "" 
+	if grep FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout
+	then
+		echo "The following Unit Tests Failed: "  
+		echo "" 
+	else
+		echo "No Unit Test failures were found." 
+		echo "" 
+	fi #end of if grep FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout
+fi #end of if grep " 0" stdoutfiles
+rm stdoutfiles
+
