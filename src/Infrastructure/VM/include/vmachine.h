@@ -159,6 +159,8 @@ class vmachine{
     // newly written communication calls
     void vmachine_threadbarrier(void);
     void vmachine_allreduce(void *in, void *out, int len, vmType type, vmOp op);
+    void vmachine_allglobalreduce(void *in, void *out, int len, vmType type,
+      vmOp op);
     void vmachine_scatter(void *in, void *out, int len, int root);
     void vmachine_gather(void *in, void *out, int len, int root);
     

@@ -1906,14 +1906,67 @@ void vmachine::vmachine_allreduce(void *in, void *out, int len, vmType type,
       }
       break;
     case vmMIN:
-      printf("Reduce operation vmMIN is not yet implemented\n");
+      printf("vmachine: Reduce operation vmMIN is not yet implemented\n");
       break;
     case vmMAX:
-      printf("Reduce operation vmMAX is not yet implemented\n");
+      printf("vmachine: Reduce operation vmMAX is not yet implemented\n");
       break;
     }
     delete [] temparray;
   }  
+}
+
+
+void vmachine::vmachine_allglobalreduce(void *in, void *out, int len, 
+  vmType type, vmOp op){
+  
+  void *localresult;
+  int local_i4;
+  float local_r4;
+  double local_r8;
+  // first reduce the vector on each PET
+  switch (op){
+  case vmSUM:
+    switch (type){
+    case vmI4:
+      {
+        localresult = (void *)&local_i4;
+        local_i4 = 0;
+        int *tempdata = (int *)in;        // type cast for pointer arithmetic
+        for (int j=0; j<len; j++)
+          local_i4 += tempdata[j];
+      }
+      break;
+    case vmR4:
+      {
+        localresult = (void *)&local_r4;  // type cast for pointer arithmetic
+        local_r4 = 0.;
+        float *tempdata = (float *)in;
+        for (int j=0; j<len; j++)
+          local_r4 += tempdata[j];
+      }
+      break;
+    case vmR8:
+      {
+        localresult = (void *)&local_r8;  // type cast for pointer arithmetic
+        local_r8 = 0.;
+        double *tempdata = (double *)in;
+        for (int j=0; j<len; j++)
+          local_r8 += tempdata[j];
+      }
+      break;
+    }
+    break;
+  case vmMIN:
+    printf("vmachine: Reduce operation vmMIN is not yet implemented\n");
+    return;
+    break;
+  case vmMAX:
+    printf("vmachine: Reduce operation vmMAX is not yet implemented\n");
+    return;
+    break;
+  }
+  vmachine_allreduce(localresult, out, 1, type, op);
 }
 
 

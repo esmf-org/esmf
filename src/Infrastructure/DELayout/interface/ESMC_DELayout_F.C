@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.11 2004/04/30 20:24:11 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.12 2004/05/21 19:03:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@ extern "C" {
   
   void FTN(c_esmc_ndelayoutglobreduce)(ESMC_DELayout **ptr, 
     void ***datain, void *result, int *len, ESMC_DataKind *dtk,
-    ESMC_newOp *op, ESMC_Logical *oneToOneFlag, int *status){
+    ESMC_Operation *op, ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
       *status = (*ptr)->ESMC_DELayoutAllGlobalReduce((void **)datain, result,
         *len, *dtk, *op, *oneToOneFlag);

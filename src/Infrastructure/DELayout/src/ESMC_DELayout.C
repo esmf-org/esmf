@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.12 2004/04/30 20:24:12 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.13 2004/05/21 19:03:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.12 2004/04/30 20:24:12 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.13 2004/05/21 19:03:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1135,7 +1135,7 @@ int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
   void *result,       // result
   int len,            // number of elements in each DE
   ESMC_DataKind dtk,  // data type kind
-  ESMC_newOp op,      // reduction operation
+  ESMC_Operation op,  // reduction operation
   ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
@@ -1153,7 +1153,7 @@ int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
   double local_r8;
   // first reduce across all of this PET's DEs
   switch (op){
-  case ESMF_newSUM:
+  case ESMF_SUM:
     switch (dtk){
     case ESMF_I4:
       {
@@ -1223,11 +1223,11 @@ int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
       break;
     }
     break;
-  case ESMF_newMIN:
-    printf("Reduce operation ESMF_newMIN is not yet implemented\n");
+  case ESMF_MIN:
+    printf("Reduce operation ESMF_MIN is not yet implemented\n");
     break;
-  case ESMF_newMAX:
-    printf("Reduce operation ESMF_newMIN is not yet implemented\n");
+  case ESMF_MAX:
+    printf("Reduce operation ESMF_MIN is not yet implemented\n");
     break;
   }
   // now each PET holds the reduced result for all its DEs
