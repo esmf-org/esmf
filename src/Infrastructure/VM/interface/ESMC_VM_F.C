@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.33 2005/02/03 22:04:30 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.34 2005/02/12 00:22:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -300,6 +300,8 @@ extern "C" {
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
     else
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1);
+    // set the nothreadflag because this is the default for new VMs
+    (*ptr)->nothreadflag = 1;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
