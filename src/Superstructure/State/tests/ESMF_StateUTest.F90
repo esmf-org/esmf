@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.7 2004/05/07 22:56:16 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.8 2004/05/10 22:59:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,11 +34,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.7 2004/05/07 22:56:16 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.8 2004/05/10 22:59:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, y, rc
+      integer :: x, y, rc, num
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: statename, bundlename, dataname, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname
@@ -163,6 +163,15 @@
       !------------------------------------------------------------------------
 
       !NEX_UTest
+      ! Test getting an Array from a State
+      call ESMF_StateGetArray(state1, arrayname=aname, array=array3, rc=rc)
+      write(failMsg, *) "DId not return ESMF_SUCCESS"
+      write(name, *) "Getting an Array from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
       ! Test printing of State
       call  ESMF_StatePrint(state1, rc=rc)
       write(failMsg, *) ""
@@ -171,6 +180,25 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! Test adding an Attribute to a state
+      call  ESMF_StateAddAttribute(state1, name="newAttribute", value=12345, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an attribute to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test getting an Attribute from a state
+      call  ESMF_StateGetAttribute(state1, name="newAttribute", value=num, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or returned wrong value"
+      write(name, *) "Getting an attribute from a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(num.eq.12345), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "Attribute num =", num
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test getting Bundle from State
       call  ESMF_StateGetBundle(state1, bundlename, bundle2(1), rc=rc)
