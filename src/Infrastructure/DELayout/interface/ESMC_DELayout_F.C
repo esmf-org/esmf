@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.12 2004/05/21 19:03:31 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.13 2004/06/04 17:32:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,18 +37,18 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-  void FTN(c_esmc_ndelayoutcreate)(ESMC_DELayout **ptr, ESMC_VM **vm,
+  void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, ESMC_VM **vm,
     int *nDEs, int *ndim, int *DEtoPET, int *len, int *status){
     ESMC_Logical cyclic = ESMF_TRUE;
     *ptr = ESMC_DELayoutCreate(**vm, nDEs, *ndim, DEtoPET, *len, &cyclic,
       status);
   }
 
-  void FTN(c_esmc_ndelayoutdestroy)(ESMC_DELayout **ptr, int *status){
+  void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *status){
     *status = ESMC_DELayoutDestroy(*ptr);
   }
        
-  void FTN(c_esmc_ndelayoutget)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutget)(ESMC_DELayout **ptr,
     int *deCount, int *dimCount, int *localDeCount, int *localDeList,
     int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 
     ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
@@ -66,7 +66,7 @@ extern "C" {
       *status = rc;
   }
 
-  void FTN(c_esmc_ndelayoutgetde)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutgetde)(ESMC_DELayout **ptr,
     int *DEid, int *DEcoord, int *len_coord, int *DEcde, int *len_cde, 
     int *DEcw, int *len_cw, int *nDEc, int *status){
     int rc = (*ptr)->ESMC_DELayoutGetDE(*DEid, DEcoord, *len_coord, 
@@ -75,7 +75,7 @@ extern "C" {
       *status = rc;
   }
 
-  void FTN(c_esmc_ndelayoutgetdematch)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutgetdematch)(ESMC_DELayout **ptr,
     int *DEid, ESMC_DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
     int *len_deMatchList, int *status){
     int rc = (*ptr)->ESMC_DELayoutGetDEMatch(*DEid, **ptrMatch, 
@@ -85,39 +85,39 @@ extern "C" {
       *status = rc;
   }
 
-  void FTN(c_esmc_ndelayoutprint)(ESMC_DELayout **ptr, int *status){
+  void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, int *status){
     *status = (*ptr)->ESMC_DELayoutPrint();
   }
   
   // ~~~ Communications ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        
-  void FTN(c_esmc_ndelayoutsend)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutcopy)(ESMC_DELayout **ptr,
     void ***datain, void ***dataout, int *blen, int *src, int *dest,
     ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
-      *status = (*ptr)->ESMC_DELayoutSend((void **)datain, (void **)dataout,
+      *status = (*ptr)->ESMC_DELayoutCopy((void **)datain, (void **)dataout,
         *blen, *src, *dest, *oneToOneFlag);
     }else{
-      *status = (*ptr)->ESMC_DELayoutSend(*datain, *dataout, *blen,
+      *status = (*ptr)->ESMC_DELayoutCopy(*datain, *dataout, *blen,
         *src, *dest, *oneToOneFlag);
     }
   }
   
-  void FTN(c_esmc_ndelayoutsendrecv)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutexchange)(ESMC_DELayout **ptr,
     void ***datain1, void ***datain2, void ***dataout1, void ***dataout2, 
     int *blen1, int *blen2, int *de1, int *de2,
     ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
-      *status = (*ptr)->ESMC_DELayoutSendRecv((void **)datain1, 
+      *status = (*ptr)->ESMC_DELayoutExchange((void **)datain1, 
         (void **)datain2, (void **)dataout1, (void **)dataout2,
         *blen1, *blen2, *de1, *de2, *oneToOneFlag);
     }else{
-      *status = (*ptr)->ESMC_DELayoutSendRecv(*datain1, *datain2, *dataout1,
+      *status = (*ptr)->ESMC_DELayoutExchange(*datain1, *datain2, *dataout1,
         *dataout2, *blen1, *blen2, *de1, *de2, *oneToOneFlag);
     }
   }
   
-  void FTN(c_esmc_ndelayoutscatter)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutscatter)(ESMC_DELayout **ptr,
     void ***datain, void ***dataout, int *blen, int *root, 
     ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
@@ -129,7 +129,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_ndelayoutgather)(ESMC_DELayout **ptr,
+  void FTN(c_esmc_delayoutgather)(ESMC_DELayout **ptr,
     void ***datain, void ***dataout, int *blen, int *root, 
     ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
@@ -141,7 +141,7 @@ extern "C" {
     }
   }
   
-  void FTN(c_esmc_ndelayoutglobreduce)(ESMC_DELayout **ptr, 
+  void FTN(c_esmc_delayoutglobreduce)(ESMC_DELayout **ptr, 
     void ***datain, void *result, int *len, ESMC_DataKind *dtk,
     ESMC_Operation *op, ESMC_Logical *oneToOneFlag, int *status){
     if (*oneToOneFlag == ESMF_TRUE){
@@ -155,16 +155,16 @@ extern "C" {
 
   // ~~~ DELayoutData ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  void FTN(c_esmc_ndelayoutdatacreate)(void ***ptr, int *n, int *status){
+  void FTN(c_esmc_delayoutdatacreate)(void ***ptr, int *n, int *status){
     *ptr = ESMC_DELayoutDataCreate(*n, status);
   }
   
-  void FTN(c_esmc_ndelayoutdataadd)(void ***ptr, void *a, int *index, 
+  void FTN(c_esmc_delayoutdataadd)(void ***ptr, void *a, int *index, 
     int *status){
     *status = ESMC_DELayoutDataAdd(*ptr, a, *index-1);
   }
 
-  void FTN(c_esmc_ndelayoutdatadestroy)(void ***ptr, int *status){
+  void FTN(c_esmc_delayoutdatadestroy)(void ***ptr, int *status){
     *status = ESMC_DELayoutDataDestroy(*ptr);
   }
   
