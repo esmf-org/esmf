@@ -1,4 +1,4 @@
-% $Id: PerfProf_req.tex,v 1.9 2002/10/15 22:35:43 ekluz Exp $
+% $Id: PerfProf_req.tex,v 1.10 2002/12/06 19:02:45 vbalaji Exp $
 
 \req{Code section timing}
 
@@ -9,6 +9,19 @@ end of a passage of interest.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Synchronized timers}
+
+For load balance measurement, there must be a flag to synchronize
+timers across a PElist at the beginning of a code section.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} GFDL \\
 {\bf Status:} Approved-1 \\
 {\bf Verification:} Unit-test \\
 {\bf Notes:} 
@@ -97,6 +110,7 @@ provide a high level interface for accessing these registers.
 Collection of the following data will be supported, where available:
 \begin{itemize}
 \item{Floating Point Ops}
+\item{Memory Ops}
 \item{Cache Utilization}
 \item{Cache Misses}
 \item{Floating Point Unit Utilization}
@@ -150,10 +164,26 @@ identify and report which thread it was called from.
 {\bf Notes:} 
 \end{reqlist}
 
+\req{Communication profiling}
+
+The profiler shall be able to profile communication by maintaining
+statistics on inter-processor communication to assess utilization of
+memory. In particular, the statistics must include a profile of
+messages sizes and times between a pair of caliper points.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
+{\bf Notes:} 
+\end{reqlist}
+
 \req{Reporting}
 
-The profiler will provide a means to output the data collected.  This output may
-be called at any point of execution, as many times as desired.
+The profiler will provide a means to output the data collected.  This
+output may be called at any point of execution, as many times as
+desired.
 
 \sreq{Log output}
 
@@ -180,13 +210,14 @@ The profiler data will be accessible to the program by means of an API.
 
 \sreq{Statistics}
 
-The profiler will be able to perform a variety of statistical analysis on its call
-data and report.
+The profiler will be able to perform a variety of statistical analysis
+on its call data and report.
 
 \ssreq{Thread statistics}
 
 A named timer can perform analysis across threads and report the 
-minimum amount of time spent in any thread, the maximum, and the mean.
+minimum amount of time spent in any thread, the maximum, the standard
+deviation, and the mean.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
