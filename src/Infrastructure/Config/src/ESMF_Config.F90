@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.7 2004/04/14 20:05:09 jwolfe Exp $
+! $Id: ESMF_Config.F90,v 1.8 2004/04/19 22:22:52 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -351,7 +351,7 @@
 !
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigDestroy'
-      integer :: ier, iret
+      integer :: iret
 
       iret = 0
 
@@ -1065,7 +1065,7 @@
 !EOP -------------------------------------------------------------------
 
       character(len=*),parameter :: myname_='ESMF_ConfigLoadFile'
-      integer :: myID,ier, iret
+      integer :: iret
 
       iret = 0
 
@@ -1448,7 +1448,9 @@
 
 	integer lu,ios
 	logical inuse
+#ifdef _UNICOS
 	character*8 attr
+#endif
 
 	lu=-1
 	ios=0

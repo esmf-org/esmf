@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayGetMacros.h,v 1.1 2004/03/16 18:02:19 nscollins Exp $
+! $Id: ESMF_ArrayGetMacros.h,v 1.2 2004/04/19 22:19:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -83,7 +83,7 @@
         logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
+        integer :: lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\

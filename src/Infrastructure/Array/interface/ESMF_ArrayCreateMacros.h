@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.2 2004/03/17 18:10:35 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.3 2004/04/19 22:21:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -356,7 +356,6 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        integer :: i                        ! temp var @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\

@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.21 2004/03/18 16:37:34 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.22 2004/04/19 22:16:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.21 2004/03/18 16:37:34 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.22 2004/04/19 22:16:31 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -380,7 +380,6 @@ end function
 ! !REQUIREMENTS: internal
 
         ! local vars
-        integer :: rank, i
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
 
@@ -532,7 +531,6 @@ end function
 ! !REQUIREMENTS: internal
 
         ! local vars
-        integer :: rank, i
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
 
@@ -1017,7 +1015,6 @@ end function
         ! local vars
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
-        integer :: i, dimlength
 
         ! initialize return code
         status = ESMF_FAILURE
