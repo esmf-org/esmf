@@ -231,7 +231,7 @@
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/Log/doc/Log_reqdoc.ctex"
+#include "../Infrastructure/LogErr/doc/Log_reqdoc.ctex"
 
 \newpage
 \begin{htmlonly}
