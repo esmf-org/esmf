@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25 2005/02/07 22:38:53 nscollins Exp $
+# $Id: build_rules.mk,v 1.26 2005/02/08 20:23:05 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -252,7 +252,7 @@ endif
 endif
 
 C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lrt -ldl
-C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lifcoremt -lrt -ldl
+C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lifcoremt -lunwind -lrt -ldl
 ###############################################################################
 
 PARCH		   = linux_intel
