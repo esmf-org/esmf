@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.26 2004/03/18 22:38:43 nscollins Exp $
+// $Id: ESMC_Alarm.h,v 1.27 2004/12/04 01:41:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,6 +88,7 @@
 
 // !PUBLIC TYPES:
  class ESMC_Alarm;
+ typedef ESMC_Alarm* ESMC_AlarmPtr;
 
 // !PRIVATE TYPES:
  // class configuration type:  not needed for Alarm
