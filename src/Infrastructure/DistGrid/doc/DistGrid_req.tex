@@ -1,56 +1,608 @@
-% $Id: DistGrid_req.tex,v 1.1 2002/02/26 16:20:20 cnh Exp $
+% $Id: DistGrid_req.tex,v 1.2 2002/03/11 01:07:43 vbalaji Exp $
 
-%===============================================================================
-% Requirements may be itemized under a main topic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
-%-------------------------------------------------------------------------------
+This part covers all the requirements for defining, querying and
+relating grid distributions or domain decompositions. The PElist and
+the global domain are assumed retrievable (from Control and
+GriddedComponent respectively). Here we set down requirements that
+apply to all grids. The requirements specific to certain grid
+types follow in Part~\ref{DG:gridtypes}.
 
-<Description>
+\req{Grid definition}
 
-\sreq{<Subrequirement>}
+\sreq{Generation of PE layout}
 
-<Description>
+Given a global domain and a PElist, there will be methods to derive an
+appropriate layout of PEs in multiple dimensions.
 
-\begin{reqlist}
-{\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
-{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
-{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
-{\bf Notes:} <Background, comments on design, implementation, etc.> 
-\end{reqlist}
+\sreq{User-specified PE layout}
 
-%===============================================================================
-% Or requirements may be itemized under a subtopic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
-%-------------------------------------------------------------------------------
+It will be possible to override the internally generated PE layout above
+by direct user specification.
 
-<Description>
+\sreq{1D decomposition}
 
-\sreq{<Subrequirement>}
-
-<Description>
-
-\ssreq{Subsubrequirement} 
-
-<Description>
+ESMF permits 1D domain decomposition.
 
 \begin{reqlist}
-{\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
-{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
-{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
-{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] probably can be treated as a special case of 2D with no
+  loss of generality or performance.
 \end{reqlist}
 
+\ssreq{Index order}
 
+1D domain decomposition may apply to any of the three spatial
+dimensions, on data arrays specified in any index order (XYZ, XZY,
+etc).
 
+\begin{reqlist}
+\item[Priority]
+\item[Source] get detailed list of sources here for different index
+  orders: full generality is potentially a lot of work.
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
+\sreq{2D decomposition}
 
+ESMF permits 2D domain decomposition.
 
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] should NOT be treated as a special case of 3D!
+\end{reqlist}
 
+\ssreq{Index order}
 
+2D domain decomposition may apply to any two of the three spatial
+dimensions, on data arrays specified in any index order (XYZ, XZY,
+etc).
 
+\begin{reqlist}
+\item[Priority]
+\item[Source] get detailed list of sources here for different index
+  orders: full generality is potentially a lot of work.
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{3D decomposition}
+
+ESMF permits 3D domain decomposition.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] Anyone?
+\item[Status]
+\item[Verification]
+\item[Notes] and no 4D!
+\end{reqlist}
+
+\sreq{Generation of a computational domain decomposition}
+
+Given a global domain and a PE layout, there will be methods to assign
+each point in the domain to one PE for computation. 
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] Anyone?
+\item[Status]
+\item[Verification]
+\item[Notes] in multi-threaded applications, the PE assignment is done
+  only for each ``MPI process''. Additional threaded PEs work on
+  partitions within these computational domains.
+\end{reqlist}
+
+\sreq{User-specified computational domain decomposition}
+
+It will be possible to override the internally generated computational
+domain decomposition above by direct user specification of domain
+extents.
+
+\sreq{Computational domain masks}
+
+It shall be possible to mask domains from the computation: i.e
+generate a domain decomposition where one or more computational
+domains are assigned to no PE.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] possibly useful in an ocean model when a decomposition
+  of the sphere yields entire computational domains containing only
+  land points.
+\end{reqlist}
+
+\sreq{Generation of grid topology}
+
+Given the data dependencies of the numerics, ESMF will be capable of
+computing the connectivities required for data sharing and
+synchronization of computational domains across a distributed grid.
+
+\sreq{Validity of grid topology}
+
+Given a data dependency specification, ESMF will be capable of
+asserting whether or not a given distributed grid topology is
+conformant with that pattern.
+
+\sreq{Periodic boundary conditions}
+
+ESMF will treat periodic boundary conditions along any spatial axis as
+a particular kind of topological feature. It will be possible to
+specify this as input information for grid topology generation.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] it is natural to treat this as a DistGrid feature, rather
+  than having separate edge detection code in applications.
+\end{reqlist}
+
+\sreq{Data domain generation}
+
+ESMF will have methods to return the data domain information required
+for allocation of data arrays.
+
+\sreq{Globally conformant data domain generation}
+
+ESMF will have methods to return the data domain information required
+for allocation of data arrays such that the numeric values of the
+indices of a data point are independent of the decomposition.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] i.e if Madras is point (80,13) in the global grid, it
+  will be (80,13) on the data domain of any decomposition. This
+  involves setting appropriate lower bounds to the dimensions of an
+  array, and thus may be F90-specific... it can also conceivably be
+  done in C++ but array lower bounds are not naturally expressed
+  there.
+\end{reqlist}
+
+\req{Grid information retrieval}
+
+\sreq{PElist retrieval}
+
+ESMF methods will be provided to publish and retrieve the PElist
+associated with a distributed grid.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Computational domain retrieval}
+
+ESMF methods will be provided to publish and retrieve the list of
+computational domains associated with each PE of a distributed grid.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Data domain retrieval}
+
+ESMF methods will be provided to publish and retrieve the list of
+data domains associated with each PE of a distributed grid.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Global domain retrieval}
+
+ESMF methods will be provided to publish and retrieve the global
+domain of a distributed grid.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Grid topology retrieval}
+
+ESMF nethods will be provided to retrieve the network of
+connectivities established by the data dependency patterns of the
+distributed grid.
+
+\sreq{Which PE is a point on?}
+
+ESMF methods will be provided to query the PE associated with (i.e
+``owning'' the computational domain containing) any point in a
+distributed grid.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Cross-component queries}
+
+It shall be possible to retrieve the distributed grid associated with
+any component in an application in a form that permits all the query
+operations listed above.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\req{Grid relations}
+
+\sreq{Equality of global domains}
+
+It shall be possible to state if two distributed grids share the same
+global domain.
+
+\sreq{Equality of domain decomposition}
+
+It shall be possible to state if two distributed grids sharing a
+global domain are identically decomposed.
+
+\sreq{Equality of PE assignment}
+
+It shall be possible to state if two distributed grids with identical
+domain decompositions assign their computational domains to the
+identical sequence of PEs.
+
+\req{Halo update}
+
+\sreq{Unblocked halo update}
+
+ESMF shall provide an unblocked halo update: where the underlying
+data transfer may not be complete when the call returns.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] maybe we're pre-empting design issues, but I'd want
+  issues like wait-for-completion dealt with within DistGrid.
+\end{reqlist}
+
+\sreq{Blocked halo update}
+
+ESMF shall provide a blocked halo update: where the underlying
+data transfer is complete when the call returns.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] doesn't necessarily need separate call, same as unblocked
+  + wait-for-completion.
+\end{reqlist}
+
+\sreq{Wait for completion}
+
+ESMF shall provide a method to wait for the completion of a previously
+issued unblocked halo update.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Bundling}
+
+ESMF shall provide a method to bundle multiple data arrays on the same
+distribution for aggregate data transfer.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\req{Data transpose}
+
+\sreq{Unblocked data transpose}
+
+ESMF shall provide an unblocked data transpose: where the underlying
+data transfer may not be complete when the call returns.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] maybe we're pre-empting design issues, but I'd want
+  issues like wait-for-completion dealt with within DistGrid.
+\end{reqlist}
+
+\sreq{Blocked data transpose}
+
+ESMF shall provide a blocked data transpose: where the underlying
+data transfer is complete when the call returns.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] doesn't necessarily need separate call, same as unblocked
+  + wait-for-completion.
+\end{reqlist}
+
+\sreq{Wait for completion}
+
+ESMF shall provide a method to wait for the completion of a previously
+issued unblocked data transpose.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Bundling}
+
+ESMF shall provide a method to bundle multiple data arrays on the same
+distribution for aggregate data transfer.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\req{Create global array}
+
+It shall be possible to create a copy on any PE of the entire global
+array from a distributed array.
+
+\req{Global reduction operations}
+
+\sreq{Integer global sum}
+
+ESMF shall provide methods to compute the global sum of a distributed
+integer array.
+
+\sreq{FP global sum}
+
+ESMF shall provide methods to compute the global sum of a distributed
+floating-point array.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\ssreq{FP global sum along one axis}
+
+ESMF shall provide methods to compute the global sum of a 2D-decomposed
+floating-point array along either axis of decomposition.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] required for computing zonal means.
+\end{reqlist}
+
+\ssreq{FP bit-reproducible global sum}
+
+ESMF shall provide methods to compute the global sum of a
+2D-decomposed floating-point array where the result is bitwise
+identical on different decompositions.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] trace to GR.
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{FP global checksum}
+
+ESMF shall provide methods to compute the global checksum of a
+distributed floating-point array. 
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] A checksum is different from a sum in that there is no
+  data loss when the FP data has a dynamic range exceeding the FP
+  precision. It is done by casting all FP numbers as integers before
+  summing.
+\end{reqlist}
+
+\sreq{Complex global sum}
+
+ESMF shall provide methods to compute the global sum of a distributed
+complex array.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\ssreq{Complex global sum along one axis}
+
+ESMF shall provide methods to compute the global sum of a 2D-decomposed
+complex array along either axis of decomposition.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\ssreq{Complex bit-reproducible global sum}
+
+ESMF shall provide methods to compute the global sum of a
+2D-decomposed complex array where the result is bitwise identical on
+different decompositions.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] trace to GR.
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
+\sreq{Complex global checksum}
+
+ESMF shall provide methods to compute the global checksum of a
+distributed complex array. 
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] A checksum is different from a sum in that there is no
+  data loss when the FP data has a dynamic range exceeding the FP
+  precision. It is done by casting all FP numbers as integers before
+  summing.
+\end{reqlist}
+
+\sreq{Global maximum of integer or FP data}
+
+ESMF shall provide methods to compute the global maximum of a
+distributed integer or FP array.
+
+\ssreq{Location of global maximum}
+
+The location of this maximum on the distributed grid is also
+retrievable.
+
+\sreq{Global minimum of integer or FP data}
+
+ESMF shall provide methods to compute the global minimum of a
+distributed integer or FP array.
+
+\ssreq{Location of global minimum}
+
+The location of this minimum on the distributed grid is also
+retrievable.
+
+\req{Grid stencils}
+
+Many possible grid stencils exist to specify staggered grids.
+Currently grid stencils are only supported on logically rectilinear
+grids. We use the notation of \cite{ref:a1966} to specify staggering,
+together with a directional qualifier, e.g \texttt{NE} to specify a
+forward index offset in \texttt{X} and \texttt{Y}.
+
+\newcommand{\bgridne}{\texttt{BGRID\_NE} }
+\newcommand{\cgridne}{\texttt{CGRID\_NE} }
+\sreq{\bgridne}
+
+ESMF will support a \bgridne stencil: where the vector
+component array locations $u_{ij}$ and $v_{ij}$ are located at the NE
+cell corner $(i+\frac12,j+\frac12)$.
+
+\sreq{\cgridne}
+
+ESMF will support a \cgridne stencil: where the vector
+component array locations $u_{ij}$ and $v_{ij}$ are located on the N
+and E faces $(i+\frac12,j)$ and $(i,j+\frac12)$ respectively.
+
+\part{Requirements for specific grid types} \label{DG:gridtypes}
+
+\req{Logically rectilinear grids}
+
+\req{Tripolar grid}
+
+\cite{ref:m1996}
+
+\sreq{Vector component reversal}
+
+\sreq{Redundancy enforcement}
+
+Certain locations on a staggered grid have multiple index locations
+for a single physical location. While these points are redundant, the
+data there may diverge because of FP roundoff error. ESMF will provide
+methods to enforce exact redundancy.
+
+\sreq{Validity of stencil}
+
+It must be possible to check if the stencil and fold are conformant:
+for instance, a southern fold with a \bgridne stencil is
+invalid.
+
+\req{Cubed-sphere grid}
+
+\cite{ref:rpm1996}
+
+\sreq{Vector component interchange}
+
+ESMF will correctly treat vector components crossing faces of a cubed
+sphere to perform the appropriate component interchanges.
+
+\sreq{Redundancy enforcement}
+
+Certain locations on a staggered grid have multiple index locations
+for a single physical location. While these points are redundant, the
+data there may diverge because of FP roundoff error. ESMF will provide
+methods to enforce exact redundancy.
+
+\req{Spectral grid}
+
+\req{Icosahedral grid}
+
+\req{Reduced grids}
+
+\req{Nested grids}
+
+\req{Unstructured grids and ungridded data}

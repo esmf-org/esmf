@@ -1,6 +1,7 @@
-% $Id: DistGrid_reqdoc.tex,v 1.1 2002/02/26 16:20:20 cnh Exp $
+% $Id: DistGrid_reqdoc.tex,v 1.2 2002/03/11 01:07:43 vbalaji Exp $
 
 \documentclass[english]{article}
+% \usepackage{underscore}
 \usepackage{babel}
 \usepackage{supertabular}
 \usepackage{html}
@@ -11,19 +12,18 @@
 \newcommand{\req}[1]{\section{\hspace{.3in}#1}}
 \newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
 \newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~- Draft <Num>}
-\newenvironment
-{reqlist}
-{\begin{list} {} {} \rm \item[]}
-{\end{list}}
+\newcommand{\mytitle}{\longname \docmttype ~~- Draft 0}
+\newenvironment{reqlist}
+ {\begin{description}}
+ {\end{description}}
 
 %===============================================================================
 % User-defined commands
 %-------------------------------------------------------------------------------
-\newcommand{\longname}{<Class Name> }
-\newcommand{\funcname}{<ClassNm> }
-\newcommand{\shortname}{<CN>}
-\newcommand{\myauthors}{<Authors>}
+\newcommand{\longname}{Distributed Grid }
+\newcommand{\funcname}{DistGrid }
+\newcommand{\shortname}{DG}
+\newcommand{\myauthors}{V. Balaji, Will Sawyer, John Michalakes}
 %===============================================================================
 
 \begin{document}
@@ -104,7 +104,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
-\bibliography{comp} 
+\bibliography{cow} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{References}
 

@@ -1,10 +1,56 @@
-% $Id: DistGrid_terms.tex,v 1.1 2002/02/26 16:20:20 cnh Exp $
+% $Id: DistGrid_terms.tex,v 1.2 2002/03/11 01:07:43 vbalaji Exp $
 
 \begin{description}
+\item[PElist] a list of processor IDs associated with a component. (We
+  use PE as shorthand for processor, or ``processing element'').
+\item[Layout] distribution of a PElist across multiple dimensions for
+  the purpose of domain decomposition.
+\item[Scalar array] an array of scalar data (e.g temperature) on a
+  grid.
+\item[Vector array] vector data (e.g velocity components) on a
+  grid. These may be arrays where one of the dimensions represents the
+  vector component axis, or there may be separate data arrays for each
+  vector component.
+\item[Grid stencil] a descriptor of relative locations of scalar and
+  vector data on a structured grid. On different staggered grids,
+  vector data may lie at cell faces or vertices, while scalar data may
+  lie in the interior. The staggered locations are often written
+  in a notation like $(i+\frac12,j+\frac12)$ to describe the offset of
+  a corner with respect to the cell $(i,j)$.
+\item[Data dependency] the property of the numerics that expresses the
+  requirement of non-local data values in order to perform a
+  computation at a data point. For instance, a forward differencing
+  operation in X at $(i,j)$ has a dependency on $(i+1,j)$.
+\item[Distributed grid] Given the global range of indices associated
+  with a component, this entity associates index subsets with PEs, and
+  describes the the topology and connectivity of the layout.
+\item[Domain decomposition] the act of grid distribution: creating a
+  PE layout; and associating gridpoints with PEs.
+\item[Regular distribution] the distribution along any axis is
+  independent of position on any other axis. An irregular distribution
+  tiles the global domain with irregularly-sized domains.
+\item[Global domain] the global range of indices of data points.
+\item[Computational domain] the set of points whose data is
+  exclusively associated with a PE, and must be updated by it.
+\item[Data domain] This includes the computational domain, as well as the
+  points with whom the computational points have data dependencies.
+\item[Halo] the points in the allocated domain outside the
+  computational domain. Halo points are associated with other PEs'
+  computational domains, and the halo update operation involves
+  synchronization of halo points with other PEs. The data domain
+  extents typically specify the index range used to allocated data
+  arrays on a PE.
+\item[Transpose] Transfer of data arrays between two distributed grids
+  sharing the same global domain.
+\item[Global reduction] Reduction operations (sum, max, min, etc.) on
+  data on a distributed grid.
+\item[Partition] in a multi-threaded application, the subset of a
+  computational domain that is associated with a thread.
+\item[Node]
 
-\item [<item1>] \label<glos:item1> <Description item 1.>
+% \item [<item1>] \label<glos:item1> <Description item 1.>
 
-\item [<item2>] \label<glos:item2> <Description item 2.>
+% \item [<item2>] \label<glos:item2> <Description item 2.>
 
 \end{description}
 
