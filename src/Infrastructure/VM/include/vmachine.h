@@ -7,7 +7,8 @@
 #include <mpi.h>
 
 // reduction operations
-enum vmOp { vmSUM=1, vmMIN, vmMAX};
+enum vmOp   { vmSUM=1, vmMIN, vmMAX};
+enum vmType { vmI4=1, vmR4, vmR8};
 
 // define the communication preferences
 #define PREF_INTRA_PROCESS_SHMHACK    (0)       // default
@@ -154,7 +155,7 @@ class vmachine{
     
     // newly written communication calls
     void vmachine_threadbarrier(void);
-    void vmachine_allreduce(void *in, void *out, int len, vmOp op);
+    void vmachine_allreduce(void *in, void *out, int len, vmType type, vmOp op);
     void vmachine_scatter(void *in, void *out, int len, int root);
     void vmachine_gather(void *in, void *out, int len, int root);
     
