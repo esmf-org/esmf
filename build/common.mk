@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.33 2004/01/25 04:36:54 nscollins Exp $
+#  $Id: common.mk,v 1.34 2004/01/30 00:17:40 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -124,6 +124,7 @@ DO_LATEX	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_latex
 DO_L2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
 
 LIBNAME		= $(ESMF_LIBDIR)/${LIBBASE}.a
+
 SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
 
@@ -300,7 +301,7 @@ lib:: chk_dir ${SOURCE}
 	@if [ "${SOURCEF}" != "" ] ; then \
 	    $(MAKE) -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} libf; fi
 	@if [ "${OBJS}" != " " ] ; then \
-		${RANLIB}  ${LIBNAME}; \
+		${RANLIB} ${LIBNAME}; \
 		${RM} -f ${OBJS}; \
 	fi
 	@if [ "${QUICKSTART}" != "" ] ; then \
@@ -415,9 +416,9 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #
 #  Link rule for Fortran system tests.
 #
-$(ESMC_TESTDIR)/ESMF_%STest : $(SYSTEM_TESTS_OBJ) ESMF_%STest.o 
-	$(SL_F_LINKER) -o $@  $^ -lesmf  ${F90CXXLIBS} \
-	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+$(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(LIBNAME)
+	$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
+	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -483,9 +484,9 @@ build_tests: chkopts chkdir_tests
 
 tree_build_tests: $(TESTS_BUILD) 
 
-$(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o 
-	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $^ -lesmf  ${F90CXXLIBS} \
-	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+$(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(LIBNAME)
+	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
+	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -556,16 +557,16 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #
 #  Examples Link commands
 #
-$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o 
-	-$(SL_F_LINKER) -o $@ $^ -lesmf  ${F90CXXLIBS} \
+$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(LIBNAME)
+	-$(SL_F_LINKER) -o $@ $< -lesmf ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	rm -f  $^
 
 
-$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o  
-	-${SL_C_LINKER} -g -o $@ $^ \
-        -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
+$(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(LIBNAME)
+	-${SL_C_LINKER} -g -o $@ $< -lesmf \
+        ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
         $(SL_LINKOPTS)
 	rm -f $^
 
@@ -607,8 +608,8 @@ build_demo: chkopts chkdir_tests
 
 tree_build_demo: $(DEMO_BUILD) 
 
-$(ESMC_TESTDIR)/%App : $(DEMO_OBJ) %Demo.o 
-	$(SL_F_LINKER) -o $@  $^ -lesmf  ${F90CXXLIBS} \
+$(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(LIBNAME)
+	$(SL_F_LINKER) -o $@ $< -lesmf ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
@@ -775,17 +776,17 @@ build_shared:
 	@echo making shared libraries in $(LDIR) 
 	@cd $(LDIR) ;\
 	rm -rf tmp* *.so;\
-	for LIBNAME in $(SL_LIBS_TO_MAKE) foo ;\
+	for NEXTLIB in $(SL_LIBS_TO_MAKE) foo ;\
 	do \
-	if [ -f $$LIBNAME.a ] ; then \
-	    echo Converting $$LIBNAME.a to $$LIBNAME.$(SL_SUFFIX) ;\
-	    mkdir tmp_$$LIBNAME ;\
-	    cd tmp_$$LIBNAME  ;\
-            $(AR) $(AR_EXTRACT) ../$$LIBNAME.a ;\
-	    echo $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
-	    $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	if [ -f $$NEXTLIB.a ] ; then \
+	    echo Converting $$NEXTLIB.a to $$NEXTLIB.$(SL_SUFFIX) ;\
+	    mkdir tmp_$$NEXTLIB ;\
+	    cd tmp_$$NEXTLIB  ;\
+            $(AR) $(AR_EXTRACT) ../$$NEXTLIB.a ;\
+	    echo $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
+	    $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$NEXTLIB.$(SL_SUFFIX) *.o ;\
 	    cd .. ;\
-	    rm -rf tmp_$$LIBNAME ;\
+	    rm -rf tmp_$$NEXTLIB ;\
 	fi ;\
 	done 
 
@@ -951,55 +952,3 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
 
-
-#
-#  testexamples_X - Runs various test suites
-#    1 - basic C suite used in installation tests
-#    2 - additional C suite including graphics
-#    3 - basic Fortran .F suite
-#    4 - uniprocessor version of 1 and 2
-#    5 - C examples that require complex numbers
-#    6 - C examples that don't work with complex numbers 
-#    7 - C examples that require BlockSolve
-#    8 - Fortran .F examples that don't work with complex numbers
-#    9 - uniprocessor version of 3
-#   10 - Fortran examples that require complex
-#   11 - uniprocessor version of 5
-#   12 - basic f90 examples
-#   13 - Examples that should only be compiled.
-#
-testexamples_1: ${TESTEXAMPLES_1}
-vtestexamples_1:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
-testexamples_2: ${TESTEXAMPLES_2}
-testexamples_3: ${TESTEXAMPLES_3}
-vtestexamples_3:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
-testexamples_4: ${TESTEXAMPLES_4}
-vtestexamples_4:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
-testexamples_5: ${TESTEXAMPLES_5}
-testexamples_6: ${TESTEXAMPLES_6}
-testexamples_7: ${TESTEXAMPLES_7}
-testexamples_8: ${TESTEXAMPLES_8}
-testexamples_9: ${TESTEXAMPLES_9}
-vtestexamples_9:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
-testexamples_10: ${TESTEXAMPLES_10}
-testexamples_11: ${TESTEXAMPLES_11}
-testexamples_12: ${TESTEXAMPLES_12}
-testexamples_13: ${TESTEXAMPLES_13}
-
-buildexamples_1: ${BUILDEXAMPLES_1}
-buildexamples_2: ${BUILDEXAMPLES_2}
-buildexamples_3: ${BUILDEXAMPLES_3}
-buildexamples_4: ${BUILDEXAMPLES_4}
-buildexamples_5: ${BUILDEXAMPLES_5}
-buildexamples_6: ${BUILDEXAMPLES_6}
-buildexamples_7: ${BUILDEXAMPLES_7}
-buildexamples_8: ${BUILDEXAMPLES_8}
-buildexamples_9: ${BUILDEXAMPLES_9}
-buildexamples_10: ${BUILDEXAMPLES_10}
-buildexamples_11: ${BUILDEXAMPLES_11}
-buildexamples_12: ${BUILDEXAMPLES_12}
-buildexamples_13: ${TESTEXAMPLES_13}
