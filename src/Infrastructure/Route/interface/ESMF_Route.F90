@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.41 2004/03/01 18:53:05 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.42 2004/03/06 00:02:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.41 2004/03/01 18:53:05 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.42 2004/03/06 00:02:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1058,22 +1058,25 @@
 ! !IROUTINE: ESMF_RoutePrecomputeRedist - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeRedist(route, rank, dstMyDE, dstAI, &
-                                            dstGlobalStart, dstGlobalCount, &
-                                            dstLayout, srcMyDE, srcAI, &
-                                            srcGlobalStart, srcGlobalCount, &
-                                            srcLayout, rc)
+      subroutine ESMF_RoutePrecomputeRedist(route, rank, dstMyDE, dstCompAI, &
+                                            dstTotalAI, dstGlobalStart, &
+                                            dstGlobalCount, dstLayout, &
+                                            srcMyDE, srcCompAI, &
+                                            srcTotalAI, srcGlobalStart, &
+                                            srcGlobalCount, srcLayout, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
       integer, intent(in) :: dstMyDE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstTotalAI
       integer, dimension(:,:), intent(in) :: dstGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
       type(ESMF_DELayout), intent(in) :: dstLayout
       integer, intent(in) :: srcMyDE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcCompAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcTotalAI
       integer, dimension(:,:), intent(in) :: srcGlobalStart
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
       type(ESMF_DELayout), intent(in) :: srcLayout
@@ -1112,28 +1115,33 @@
         endif
 
         ! set some sizes to pass to C++ code
-        dstAICount = size(dstAI,2)
-        srcAICount = size(srcAI,2)
+        dstAICount = size(dstCompAI,1)
+        srcAICount = size(srcCompAI,1)
 
         ! Translate AxisIndices from F90 to C++
         do j   = 1,rank
           do i = 1,dstAICount
-            dstAI(i,j)%min = dstAI(i,j)%min - 1
-            dstAI(i,j)%max = dstAI(i,j)%max - 1
+            dstCompAI(i,j)%min  =  dstCompAI(i,j)%min - 1
+            dstCompAI(i,j)%max  =  dstCompAI(i,j)%max - 1
+            dstTotalAI(i,j)%min = dstTotalAI(i,j)%min - 1
+            dstTotalAI(i,j)%max = dstTotalAI(i,j)%max - 1
           enddo
           do i = 1,srcAICount
-            srcAI(i,j)%min = srcAI(i,j)%min - 1
-            srcAI(i,j)%max = srcAI(i,j)%max - 1
+            srcCompAI(i,j)%min  =  srcCompAI(i,j)%min - 1
+            srcCompAI(i,j)%max  =  srcCompAI(i,j)%max - 1
+            srcTotalAI(i,j)%min = srcTotalAI(i,j)%min - 1
+            srcTotalAI(i,j)%max = srcTotalAI(i,j)%max - 1
           enddo
         enddo
 
         ! Call C++  code
-        call c_ESMC_RoutePrecomputeRedist(route, rank, dstMyDE, dstAI, &
+        call c_ESMC_RoutePrecomputeRedist(route, rank, &
+                                          dstMyDE, dstCompAI, dstTotalAI, &
                                           dstAICount, dstGlobalStart, &
                                           dstGlobalCount, dstLayout, &
-                                          srcMyDE, srcAI, srcAICount, &
-                                          srcGlobalStart, srcGlobalCount, &
-                                          srcLayout, status)
+                                          srcMyDE, srcCompAI, srcTotalAI, &
+                                          srcAICount, srcGlobalStart, &
+                                          srcGlobalCount, srcLayout, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRedist error"
           ! don't return before adding 1 back to AIs
@@ -1142,12 +1150,16 @@
         ! Translate AxisIndices back to  F90 from C++
         do j   = 1,rank
           do i = 1,dstAICount
-            dstAI(i,j)%min = dstAI(i,j)%min + 1
-            dstAI(i,j)%max = dstAI(i,j)%max + 1
+            dstCompAI(i,j)%min  =  dstCompAI(i,j)%min + 1
+            dstCompAI(i,j)%max  =  dstCompAI(i,j)%max + 1
+            dstTotalAI(i,j)%min = dstTotalAI(i,j)%min + 1
+            dstTotalAI(i,j)%max = dstTotalAI(i,j)%max + 1
           enddo
           do i = 1,srcAICount
-            srcAI(i,j)%min = srcAI(i,j)%min + 1
-            srcAI(i,j)%max = srcAI(i,j)%max + 1
+            srcCompAI(i,j)%min  =  srcCompAI(i,j)%min + 1
+            srcCompAI(i,j)%max  =  srcCompAI(i,j)%max + 1
+            srcTotalAI(i,j)%min = srcTotalAI(i,j)%min + 1
+            srcTotalAI(i,j)%max = srcTotalAI(i,j)%max + 1
           enddo
         enddo
 
