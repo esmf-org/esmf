@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.48 2003/05/07 04:34:31 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.49 2003/05/07 16:01:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -207,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.48 2003/05/07 04:34:31 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.49 2003/05/07 16:01:02 nscollins Exp $'
 
 !==============================================================================
 !
@@ -388,9 +388,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -472,35 +472,35 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[i\_max]]
+!     \item[{[i\_max]}]
 !          Number of grid increments in the i-direction.
-!     \item[[j\_max]]
+!     \item[{[j\_max]}]
 !          Number of grid increments in the j-direction.
-!     \item[[x\_min]]
+!     \item[{[x\_min]}]
 !          Minimum physical coordinate in the x-direction.
-!     \item[[x\_max]]
+!     \item[{[x\_max]}]
 !          Maximum physical coordinate in the x-direction.
-!     \item[[y\_min]]
+!     \item[{[y\_min]}]
 !          Minimum physical coordinate in the y-direction.
-!     \item[[y\_max]]
+!     \item[{[y\_max]}]
 !          Maximum physical coordinate in the y-direction.
-!     \item[[layout]]
+!     \item[{[layout]}]
 !          DELayout of DE's.
-!     \item[[horz\_gridtype]]
+!     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
-!     \item[[vert\_gridtype]]
+!     \item[{[vert\_gridtype]}]
 !          Integer specifier to denote vertical gridtype.
-!     \item[[horz\_stagger]]
+!     \item[{[horz\_stagger]}]
 !          Integer specifier to denote horizontal grid stagger.
-!     \item[[vert\_stagger]]
+!     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger.
-!     \item[[horz\_coord\_system]]
+!     \item[{[horz\_coord\_system]}]
 !          Integer specifier to denote horizontal coordinate system.
-!     \item[[vert\_coord\_system]]
+!     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system.
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -569,11 +569,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[iospec]]
+!     \item[{[iospec]}]
 !          File I/O specification.
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -637,11 +637,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[grid\_in]]
+!     \item[{[grid\_in]}]
 !          {\tt Grid} to be copied.
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -710,19 +710,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[grid\_in]]
+!     \item[{[grid\_in]}]
 !          {\tt Grid} to be partially copied.
-!     \item[[i\_min]]
+!     \item[{[i\_min]}]
 !          Minimum global i-index for the region of the grid to be cutout.
-!     \item[[i\_max]]
+!     \item[{[i\_max]}]
 !          Maximum global i-index for the region of the grid to be cutout.
-!     \item[[j\_min]]
+!     \item[{[j\_min]}]
 !          Minimum global j-index for the region of the grid to be cutout.
-!     \item[[j\_max]]
+!     \item[{[j\_max]}]
 !          Maximum global j-index for the region of the grid to be cutout.
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -789,11 +789,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[grid\_in]]
+!     \item[{[grid\_in]}]
 !          Source {\tt Grid} to be coarsened or refined.
-!     \item[[i\_resolution]]
+!     \item[{[i\_resolution]}]
 !          Integer resolution factor in the i-direction.
-!     \item[[j\_resolution]]
+!     \item[{[j\_resolution]}]
 !          Integer resolution factor in the j-direction.
 !          Note:  The above arguments assume refinement by factor if positive
 !          and coarsening by absolute value of the factor if negative.  For
@@ -801,9 +801,9 @@
 !          times as resolved in the i-direction as the source {\tt Grid},
 !          whereas j\_resolution=-3 means the new {\tt Grid} will sample every
 !          third point in the j-direction.
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -868,13 +868,13 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[grid\_in1]]
+!     \item[{[grid\_in1]}]
 !          First source {\tt Grid}.
-!     \item[[grid\_in2]]
+!     \item[{[grid\_in2]}]
 !          Second source {\tt Grid}.
-!     \item[[name]]
+!     \item[{[name]}]
 !          New {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -935,7 +935,7 @@
 !     \begin{description}
 !     \item[grid]
 !          The class to be destroyed.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1021,33 +1021,33 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid}
-!     \item[[i\_max]]
+!     \item[{[i\_max]}]
 !          Number of grid increments in the i-direction.
-!     \item[[j\_max]]
+!     \item[{[j\_max]}]
 !          Number of grid increments in the j-direction.
-!     \item[[x\_min]]
+!     \item[{[x\_min]}]
 !          Minimum physical coordinate in the x-direction.
-!     \item[[x\_max]]
+!     \item[{[x\_max]}]
 !          Maximum physical coordinate in the x-direction.
-!     \item[[y\_min]]
+!     \item[{[y\_min]}]
 !          Minimum physical coordinate in the y-direction.
-!     \item[[y\_max]]
+!     \item[{[y\_max]}]
 !          Maximum physical coordinate in the y-direction.
-!     \item[[layout]]
+!     \item[{[layout]}]
 !         DELayout of DE's.
-!     \item[[horz\_gridtype]]
+!     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
-!     \item[[vert\_gridtype]]
+!     \item[{[vert\_gridtype]}]
 !          Integer specifier to denote vertical gridtype.
-!     \item[[horz\_stagger]]
+!     \item[{[horz\_stagger]}]
 !          Integer specifier to denote horizontal grid stagger.
-!     \item[[vert\_stagger]]
+!     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger.
-!     \item[[horz\_coord\_system]]
+!     \item[{[horz\_coord\_system]}]
 !          Integer specifier to denote horizontal coordinate system.
-!     \item[[vert\_coord\_system]]
+!     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1144,9 +1144,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid}
-!     \item[[name]]
+!     \item[{[name]}]
 !          {\tt Grid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1213,7 +1213,7 @@
 !     \begin{description}
 !     \item[grid]
 !          The class to be destructed.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1269,23 +1269,23 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[[i\_max]]
+!     \item[{[i\_max]}]
 !          Number of grid increments in the i-direction.
-!     \item[[j\_max]]
+!     \item[{[j\_max]}]
 !          Number of grid increments in the j-direction.
-!     \item [[physgrid\_id]]
+!     \item [{[physgrid\_id]}]
 !          Integer identifier for {\tt PhysGrid}.
-!     \item[[x\_min]]
+!     \item[{[x\_min]}]
 !          Minimum physical coordinate in the x-direction.
-!     \item[[x\_max]]
+!     \item[{[x\_max]}]
 !          Maximum physical coordinate in the x-direction.
-!     \item[[y\_min]]
+!     \item[{[y\_min]}]
 !          Minimum physical coordinate in the y-direction.
-!     \item[[y\_max]]
+!     \item[{[y\_max]}]
 !          Maximum physical coordinate in the y-direction.
-!     \item [[physgrid\_name]]
+!     \item [{[physgrid\_name]}]
 !          {\tt PhysGrid} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1392,7 +1392,7 @@
 !          Class to be queried.
 !     \item[config]
 !          Configuration information.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1426,7 +1426,7 @@
 !          Class to be configured.
 !     \item[config]
 !          Configuration information.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1461,7 +1461,7 @@
 !          Class to be queried.
 !     \item[value]
 !          Value to be retrieved.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1496,7 +1496,7 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
-!     \item[[id]]
+!     \item[{[id]}]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
 !             2  center\_y
@@ -1504,7 +1504,7 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1547,17 +1547,17 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[[MyDE]]
+!     \item[{[MyDE]}]
 !          Identifier for this DE.
-!     \item[[lcelltot\_count]]
+!     \item[{[lcelltot\_count]}]
 !          Local (on this DE) number of total cells.
-!     \item[[lcellexc\_count]]
+!     \item[{[lcellexc\_count]}]
 !          Local (on this DE) number of exclusive cells.
-!     \item[[gcelltot\_start]]
+!     \item[{[gcelltot\_start]}]
 !          Global index of starting count for total cells.
-!     \item[[gcellexc\_start]]
+!     \item[{[gcellexc\_start]}]
 !          Global index of starting count for exclusive cells.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1609,9 +1609,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[[AI]]
+!     \item[{[AI]}]
 !          Array of {\tt AxisIndices} corresponding to the {\tt Grid}.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1659,9 +1659,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[[layout]]
+!     \item[{[layout]}]
 !          Pointer to the {\tt DELayout} corresponding to the {\tt Grid}.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1713,19 +1713,19 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
-!     \item[[global1D]]
+!     \item[{[global1D]}]
 !          One-dimensional Array of global identifiers to be translated.
 !          Infers translating between positions in memory.
-!     \item[[local1D]]
+!     \item[{[local1D]}]
 !          One-dimensional Array of local identifiers corresponding to
 !          global identifiers.
-!     \item[[global2D]]
+!     \item[{[global2D]}]
 !          Two-dimensional Array of global identifiers to be translated.
 !          Infers translating between indices in ij space.
-!     \item[[local2D]]
+!     \item[{[local2D]}]
 !          Two-dimensional Array of local identifiers corresponding to
 !          global identifiers.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1779,19 +1779,19 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
-!     \item[[local1D]]
+!     \item[{[local1D]}]
 !          One-dimensional Array of local identifiers to be translated.
 !          Infers translating between positions in memory.
-!     \item[[global1D]]
+!     \item[{[global1D]}]
 !          One-dimensional Array of global identifiers corresponding to
 !          local identifiers.
-!     \item[[local2D]]
+!     \item[{[local2D]}]
 !          Two-dimensional Array of local identifiers to be translated.
 !          Infers translating between indices in ij space.
-!     \item[[global2D]]
+!     \item[{[global2D]}]
 !          Two-dimensional Array of global identifiers corresponding to
 !          local identifiers.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1844,7 +1844,7 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item[[id]]
+!     \item[{[id]}]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
 !             2  center\_y
@@ -1852,7 +1852,7 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1884,9 +1884,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[physgrid\_id]]
+!     \item[{[physgrid\_id]}]
 !          Identifier of the {\tt PhysGrid} to be modified.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1904,10 +1904,8 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_end
       real :: delta1
       real :: delta2
-      real :: global_min_coord1
-      real :: global_max_coord1
-      real :: global_min_coord2
-      real :: global_max_coord2
+      real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords
+      real, dimension(ESMF_MAXGRIDDIM) :: global_max_coords
       logical :: rcpresent=.FALSE.                ! Return code present
 
 !     Initialize return code
@@ -1942,10 +1940,8 @@
 
 !     Get physgrid info with global coordinate extents
       call ESMF_PhysGridGet(grid%physgrids(physgrid_id), &
-                            global_min_coord1=global_min_coord1, &
-                            global_max_coord1=global_max_coord1, &
-                            global_min_coord2=global_min_coord2, &
-                            global_max_coord2=global_max_coord2, rc=status)
+                            global_min_coords=global_min_coords, &
+                            global_max_coords=global_max_coords, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid get"
         return
@@ -1953,13 +1949,13 @@
 
 !     Calculate global cell sizes
       if (gcell_dim(1).ne.0) then
-        delta1 = (global_max_coord1 - global_min_coord1) / real(gcell_dim(1))
+        delta1 = (global_max_coords(1)-global_min_coords(1)) / real(gcell_dim(1))
       else
         print *, "ERROR in ESMF_GridSetCoordCompute: gcell_dim1=0"
         return
       endif
       if (gcell_dim(2).ne.0) then
-        delta2 = (global_max_coord2 - global_min_coord2) / real(gcell_dim(2))
+        delta2 = (global_max_coords(2)-global_min_coords(2)) / real(gcell_dim(2))
       else
         print *, "ERROR in ESMF_GridSetCoordCompute: gcell_dim2=0"
         return
@@ -2005,7 +2001,7 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item[[id]]
+!     \item[{[id]}]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
 !             2  center\_y
@@ -2013,7 +2009,7 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2033,17 +2029,21 @@
       subroutine ESMF_GridGet(grid, horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              coord_order, rc)
+                              coord_order, global_min_coords, &
+                              global_max_coords, global_nmax, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid
-      integer, intent(inout), optional :: horz_gridtype
-      integer, intent(inout), optional :: vert_gridtype
-      integer, intent(inout), optional :: horz_stagger
-      integer, intent(inout), optional :: vert_stagger
-      integer, intent(inout), optional :: horz_coord_system
-      integer, intent(inout), optional :: vert_coord_system
-      integer, intent(inout), optional :: coord_order
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(out), optional :: horz_gridtype
+      integer, intent(out), optional :: vert_gridtype
+      integer, intent(out), optional :: horz_stagger
+      integer, intent(out), optional :: vert_stagger
+      integer, intent(out), optional :: horz_coord_system
+      integer, intent(out), optional :: vert_coord_system
+      integer, intent(out), optional :: coord_order
+      real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
+      real, intent(out), dimension(ESMF_MAXGRIDDIM),  optional :: global_max_coords
+      integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_nmax
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2054,21 +2054,27 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[horz\_gridtype]]
+!     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype
-!     \item[[vert\_gridtype]]
+!     \item[{[vert\_gridtype]}]
 !          Integer specifier to denote vertical gridtype
-!     \item[[horz\_stagger]]
+!     \item[{[horz\_stagger]}]
 !          Integer specifier to denote horizontal grid stagger
-!     \item[[vert\_stagger]]
+!     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger
-!     \item[[horz\_coord\_system]]
+!     \item[{[horz\_coord\_system]}]
 !          Integer specifier to denote horizontal coordinate system
-!     \item[[vert\_coord\_system]]
+!     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system
-!     \item[[coord\_order]]
+!     \item[{[coord\_order]}]
 !          Integer specifier to denote coordinate ordering
-!     \item[[rc]]
+!     \item[{[global\_min\_coords]}]
+!          Minimum global physical coordinates.
+!     \item[{[global\_max\_coords]}]
+!          Maximum global physical coordinates.
+!     \item[{[global\_nmax]}]
+!          Numbers of global grid increments.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2077,21 +2083,52 @@
 
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: physgrid_id
+      type(ESMF_GridType), pointer :: gridp
 
 !     Initialize return code
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
+ 
+      if (.not.associated(grid%ptr)) then
+        print *, "ERROR: ESMF_GridGet called with invalid grid object"
+        return
+      endif
+
+      gridp => grid%ptr
 
 !     if present, gets information from the grid derived type
-      if(present(horz_gridtype)) horz_gridtype = grid%horz_gridtype
-      if(present(vert_gridtype)) vert_gridtype = grid%vert_gridtype
-      if(present(horz_stagger)) horz_stagger = grid%horz_stagger
-      if(present(vert_stagger)) vert_stagger = grid%vert_stagger
-      if(present(horz_coord_system)) horz_coord_system = grid%horz_coord_system
-      if(present(vert_coord_system)) vert_coord_system = grid%vert_coord_system
-      if(present(coord_order)) coord_order = grid%coord_order
+      if(present(horz_gridtype)) horz_gridtype = gridp%horz_gridtype
+      if(present(vert_gridtype)) vert_gridtype = gridp%vert_gridtype
+      if(present(horz_stagger)) horz_stagger = gridp%horz_stagger
+      if(present(vert_stagger)) vert_stagger = gridp%vert_stagger
+      if(present(horz_coord_system)) horz_coord_system = gridp%horz_coord_system
+      if(present(vert_coord_system)) vert_coord_system = gridp%vert_coord_system
+      if(present(coord_order)) coord_order = gridp%coord_order
+
+!     Get physgrid info with global coordinate extents
+      if(present(global_min_coords) .or. present(global_max_coords)) then
+        physgrid_id = gridp%num_physgrids  ! TODO: fix so passed in?
+        call ESMF_PhysGridGet(gridp%physgrids(physgrid_id), &
+                              global_min_coords=global_min_coords, &
+                              global_max_coords=global_max_coords, rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridGet: PhysGrid get"
+          return
+        endif
+      endif
+
+!     Get distgrid info with global coordinate counts
+      if(present(global_nmax)) then
+        call ESMF_DistGridGet(gridp%distgrid%ptr, gcell_dim=global_nmax, &
+                              rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridGet: DistGrid get"
+          return
+        endif
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -2126,21 +2163,21 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[horz\_gridtype]]
+!     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype
-!     \item[[vert\_gridtype]]
+!     \item[{[vert\_gridtype]}]
 !          Integer specifier to denote vertical gridtype
-!     \item[[horz\_stagger]]
+!     \item[{[horz\_stagger]}]
 !          Integer specifier to denote horizontal grid stagger
-!     \item[[vert\_stagger]]
+!     \item[{[vert\_stagger]}]
 !          Integer specifier to denote vertical grid stagger
-!     \item[[horz\_coord\_system]]
+!     \item[{[horz\_coord\_system]}]
 !          Integer specifier to denote horizontal coordinate system
-!     \item[[vert\_coord\_system]]
+!     \item[{[vert\_coord\_system]}]
 !          Integer specifier to denote vertical coordinate system
-!     \item[[coord\_order]]
+!     \item[{[coord\_order]}]
 !          Integer specifier to denote coordinate ordering
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2192,9 +2229,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt LMask} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2229,9 +2266,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt LMask} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2264,11 +2301,11 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[mmask]]
+!     \item[{[mmask]}]
 !          Multiplicative mask identifier.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt LMask} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2303,11 +2340,11 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt LMask} name to be set.
-!     \item [[name\_in]]
+!     \item [{[name\_in]}]
 !           {\tt LMask} name to be copied.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2342,9 +2379,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt MMask} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2379,9 +2416,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt MMask} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2416,9 +2453,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[lmask]
 !          Logical mask identifier.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt MMask} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2454,11 +2491,11 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt MMask} name to be set.
-!     \item [[name\_in]]
+!     \item [{[name\_in]}]
 !           {\tt MMask} name to be copied.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2493,9 +2530,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt Metric} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2530,9 +2567,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt Metric} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2565,11 +2602,11 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[id]]
+!     \item[{[id]}]
 !          Identifier for predescribed metrics.  TODO: make list
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt Metric} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2602,13 +2639,13 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt Metric} name to be set.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name\_in]]
+!     \item [{[name\_in]}]
 !           {\tt Metric} name to be copied.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2643,9 +2680,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt RegionID} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2680,9 +2717,9 @@
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
 !          Raw data buffer.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt RegionID} name.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2716,13 +2753,13 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
+!     \item [{[name]}]
 !           {\tt RegionID} name to be set.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
-!     \item [[name\_in]]
+!     \item [{[name\_in]}]
 !           {\tt RegionID} name to be copied.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3002,9 +3039,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Validation options.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3035,10 +3072,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Print options that control the type of information and level of
 !          detail.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3095,10 +3132,10 @@
 !!          id of DE that owns search point.
 !!     \item[search\_grid]
 !!          ESMF Grid to search for location.
-!!     \item[[phys\_grid\_id]]
+!!     \item[{[phys\_grid\_id]}]
 !!          If more than one PhysGrid is contained in Grid, choose which
 !!          grid to search (default is 1st PhysGrid?).
-!!     \item[[rc]]
+!!     \item[{[rc]}]
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
 !!
