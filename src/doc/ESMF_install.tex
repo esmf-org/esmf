@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.7 2001/12/13 16:44:18 dneckels Exp $
+% $Id: ESMF_install.tex,v 1.8 2001/12/13 18:10:20 dneckels Exp $
 
 \section{Installation}
 
@@ -107,5 +107,7 @@ where the source code resides.  To do this, build using:
 The {\tt ESMF\_BUILD} variable gives an alternate path in which to place the libraries,
 mod files and object files.  This variable defaults to {\tt ESMF\_DIR}.  If it is 
 assigned another value, the {\tt ESMF\_BUILD} variable will need to be passed as
-an additional argument to the the above make commands.
+an additional argument to the the above make commands.  (Alternatively the variable
+{\tt ESMF\_BUILD} can be set in the environment (using setenv or export) and then it 
+need not be passed to any make calls).
 

@@ -1,4 +1,4 @@
- $Id: README,v 1.7 2001/12/13 16:44:18 dneckels Exp $
+ $Id: README,v 1.8 2001/12/13 18:10:20 dneckels Exp $
 ================================================================================
                                    README
 
@@ -79,7 +79,9 @@ where the source code resides.  To do this, build using:
 The ESMF_BUILD variable gives an alternate path in which to place the libraries,
 mod files and object files.  This variable defaults to ESMF_DIR.  If it is 
 assigned another value, the ESMF_BUILD variable will need to be passed as
-an additional argument to the the above make commands.
+an additional argument to the the above make commands.  (Alternatively the variable
+ESMF_BUILD can be set in the environment (using setenv or export) and then it
+need not be passed to any make calls).
 
 
 --------------------------------------------------------------------------------
