@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2002/09/20 16:25:09 jwolfe Exp $ 
 
 #  This file contains site-specific information.  The definitions below
 #  should be changed to match the locations of libraries at your site.
@@ -14,8 +14,6 @@
 #
 BLAS_LIB       = -lblas ${FC_LIB}
 LAPACK_LIB     = -lcomplib.sgimath
-#BLAS_LIB     = /home/alice/software/blaslapack/blas_IRIX64.a ${FC_LIB}
-#LAPACK_LIB     = /home/alice/software/blaslapack/lapack_IRIX64.a
 
 # Location of MPI (Message Passing Interface) software  
 #
