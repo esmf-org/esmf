@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.27 2004/04/09 19:54:02 eschwab Exp $
+! $Id: ESMF_GridUTest.F90,v 1.28 2004/04/15 17:08:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.27 2004/04/09 19:54:02 eschwab Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.28 2004/04/15 17:08:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -75,7 +75,8 @@
       real(ESMF_KIND_R8) :: grid_min(2), grid_max(2)
       type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridClass) :: grid_class
-      type(ESMF_DELayout) :: layout, layout2
+      type(ESMF_newDELayout) :: layout, layout2
+      type(ESMF_VM) :: vm
 
 
 !--------------------------------------------------------------------------------
@@ -88,6 +89,7 @@
 !--------------------------------------------------------------------------------
 
       call ESMF_Initialize(rc=status)
+      call ESMF_VMGetGlobal(vm, status)
 
       !------------------------------------------------------------------------
       counts(1) = 10
@@ -108,14 +110,14 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      layout = ESMF_DELayoutCreate(rc=rc)
+      layout = ESMF_newDELayoutCreate(vm, rc=rc)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
-                              layout=layout, &
+                              delayout=layout, &
                               name=name, rc=status)
 
 
@@ -139,15 +141,15 @@
       ! object is left completely uninitialized.  this should be addressed.
       ! Bug report 796975 has been filed
       !NEX_UTest
-      layout2 = ESMF_DELayoutCreate(rc=rc)
-      call ESMF_DELayoutDestroy(layout2, status)
+      layout2 = ESMF_newDELayoutCreate(vm, rc=rc)
+      call ESMF_newDELayoutDestroy(layout2, status)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
-                              layout=layout2, &
+                              delayout=layout2, &
                               name=name, rc=status)
 
       write(failMsg, *) "Returned ESMF_SUCCESS"
@@ -168,7 +170,7 @@
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
-                              layout=layout, &
+                              delayout=layout, &
                               name=name, rc=status)
 
       !NEX_UTest
@@ -215,7 +217,7 @@
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
-                              layout=layout, &
+                              delayout=layout, &
                               name=name, rc=status)
 
         write(failMsg, *) "Did not return ESMF_SUCCESS"

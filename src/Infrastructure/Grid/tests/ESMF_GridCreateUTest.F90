@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.9 2004/04/09 19:54:01 eschwab Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.10 2004/04/15 17:08:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.9 2004/04/09 19:54:01 eschwab Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.10 2004/04/15 17:08:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -78,7 +78,8 @@
       real(ESMF_KIND_R8) :: Rgrid_min(3), Rgrid_max(3)
       type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridClass) :: grid_class
-      type(ESMF_DELayout) :: layout, layout2
+      type(ESMF_newDELayout) :: layout, layout2
+      type(ESMF_VM) :: vm
 
 
 !--------------------------------------------------------------------------------
@@ -93,6 +94,13 @@
       !NEX_UTest
       call ESMF_Initialize(rc=status)
       write(name, *) "ESMF_Initialize Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+      call ESMF_VMGetGlobal(vm, status)
+      write(name, *) "ESMF_VMGetGlobal Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -118,7 +126,7 @@
       gName = "test grid 1"
       !NEX_UTest
 
-      layout = ESMF_DELayoutCreate(rc=rc)
+      layout = ESMF_newDELayoutCreate(vm, rc=rc)
       write(name, *) "Creating a DELayout Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -136,7 +144,7 @@
                               vertGridType=horz_gridtype, &
                               vertStagger=vert_stagger, &
                               vertCoordSystem=horz_coord_system, &
-                              layout=layout, &
+                              delayout=layout, &
                               name=gName, rc=status)
 
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
