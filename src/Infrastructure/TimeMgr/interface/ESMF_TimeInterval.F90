@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.66 2004/10/27 18:52:25 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.67 2004/11/15 18:03:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.66 2004/10/27 18:52:25 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.67 2004/11/15 18:03:10 eschwab Exp $'
 
 !==============================================================================
 !
@@ -238,9 +238,7 @@
 !     TMG1.5.5, TMG7.2
 !
 !------------------------------------------------------------------------------
-!BOPI
-! TODO: when implemented, change to BOP/EOP
-!
+!BOP
 ! !IROUTINE:  ESMF_TimeIntervalOperator(/) - Divide a TimeInterval by an integer, return TimeInterval quotient 
 !
 ! !INTERFACE:
@@ -267,7 +265,7 @@
 !          Integer divisor.
 !     \end{description}
 !
-!EOPI
+!EOP
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalQuotI   ! internal implementation
 !
