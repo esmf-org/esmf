@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.109 2004/11/17 00:57:29 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.110 2004/11/22 17:00:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.109 2004/11/17 00:57:29 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.110 2004/11/22 17:00:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -329,17 +329,19 @@
 !          Array of physical coordinates in the second direction.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
-!          stagger.
+!          stagger.  If none is specified, the default is 
+!          ESMF_GRID_HORZ_STAGGER_A.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          ordering for the Grid and all related Fields (i.e. ZXY).  If none
+!          is specified, the default is ESMF_COORD_ORDER_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          axes.  The default is false for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -439,17 +441,19 @@
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
-!          stagger.
+!          stagger.  If none is specified, the default is 
+!          ESMF_GRID_HORZ_STAGGER_A.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          ordering for the Grid and all related Fields (i.e. ZXY).  If none
+!          is specified, the default is ESMF_COORD_ORDER_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          axes.  The default is false for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -563,17 +567,19 @@
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
-!          stagger.
+!          stagger.  If none is specified, the default is 
+!          ESMF_GRID_HORZ_STAGGER_A.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          ordering for the Grid and all related Fields (i.e. ZXY).  If none
+!          is specified, the default is ESMF_COORD_ORDER_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          axes.  The default is false for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -668,17 +674,19 @@
 !          Array of physical coordinates in the second direction.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
-!          stagger.
+!          stagger.  If none is specified, the default is 
+!          ESMF_GRID_HORZ_STAGGER_A.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          ordering for the Grid and all related Fields (i.e. ZXY).  If none
+!          is specified, the default is ESMF_COORD_ORDER_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          axes.  The default is false for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -778,17 +786,19 @@
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
-!          stagger.
+!          stagger.  If none is specified, the default is 
+!          ESMF_GRID_HORZ_STAGGER_A.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          ordering for the Grid and all related Fields (i.e. ZXY).  If none
+!          is specified, the default is ESMF_COORD_ORDER_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          axes.  The default is false for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -902,17 +912,19 @@
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
 !          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
-!          stagger.
+!          stagger.  If none is specified, the default is 
+!          ESMF_GRID_HORZ_STAGGER_A.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          ordering for the Grid and all related Fields (i.e. ZXY).  If none
+!          is specified, the default is ESMF_COORD_ORDER_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          axes.  The default is false for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
