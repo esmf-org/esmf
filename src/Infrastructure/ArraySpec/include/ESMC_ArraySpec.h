@@ -1,92 +1,97 @@
-// $Id: ESMC_ArraySpec.h,v 1.1 2004/03/17 04:56:31 cdeluca Exp $
+// $Id: ESMC_ArraySpec.h,v 1.2 2004/03/17 18:49:27 nscollins Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research,
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
-// Laboratory, University of Michigan, National Centers for Environmental
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
+
+// ESMF ArraySpec C++ declaration include file
 //
-// ESMF IO C++ definition include file
+//-----------------------------------------------------------------------------
 //
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//-------------------------------------------------------------------------
+
+ #ifndef ESMC_ArraySpec_H
+ #define ESMC_ArraySpec_H
+
+//-----------------------------------------------------------------------------
+
+#include <string.h>
+//#include <stdio.h>  // include for debug only
+
+//-----------------------------------------------------------------------------
+//BOP
+// !CLASS:  ESMC_ArraySpec - uniform access to arrays from F90 and C++
 //
- // these lines prevent this file from being read more than once if it
- // ends up being included multiple times
-
-#ifndef ESMC_IO_H
-#define ESMC_IO_H
-
-//-------------------------------------------------------------------------
-
- // put any constants or macros which apply to the whole component in this file.
- // anything public or esmf-wide should be up higher at the top level
- // include files.
-
- // Predefined file formats
- enum ESMC_IOFileFormat {ESMF_IO_FILEFORMAT_UNSPECIFIED = 0,
-                         ESMF_IO_FILEFORMAT_NETCDF,
-                         ESMF_IO_FILEFORMAT_HDF};
-
- // What type of I/O - Read only, write only, R/W, append with truncation
- enum ESMC_IORWType {ESMF_IO_RWTYPE_UNSPECIFIED = 0,
-                     ESMF_IO_RWTYPE_READONLY,
-                     ESMF_IO_RWTYPE_WRITEONLY,
-                     ESMF_IO_RWTYPE_READWRITE,
-                     ESMF_IO_RWTYPE_APPEND,
-                     ESMF_IO_RWTYPE_TRUNCATE};
+// !DESCRIPTION:
+//
+// The code in this file defines the C++ Array members and declares method 
+// signatures (prototypes).  The companion file ESMC\_ArraySpec.C contains
+// the definitions (full code bodies) for the Array methods.
+//
+// 
+//
+//-----------------------------------------------------------------------------
+// 
+// !USES:
+#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_IOSpec;
+ class ESMC_ArraySpec;
 
-// !PRIVATE TYPES:
+// THIS MUST MATCH F90 DECLARATION in ../interface file
+class ESMC_ArraySpec {   // NOT inherited from Base class
+ private:
+    int rank;
+    ESMC_DataType type;
+    ESMC_DataKind kind;    
 
- // class definition type
-class ESMC_IOSpec {
-//class ESMC_IOSpec : public ESMC_Base { // TODO: inherit from ESMC_Base class
-                                         // when fully aligned with F90 equiv
-
-  private:   // corresponds to F90 module 'type ESMF_IOSpec' members
-    ESMC_Status       iostatus;
-    ESMC_IOFileFormat iofileformat;
-    ESMC_IORWType     iorwtype;
-    char              filename[ESMF_MAXSTR];
-    bool              async_io;  // TODO:  should be class or enum
-
+// !PUBLIC MEMBER FUNCTIONS:
+//
   public:
+  
+ // get/set methods for internal data
+    int ESMC_ArraySpecSetRank(int rank) { this->rank = rank; return ESMF_SUCCESS;}
+    int ESMC_ArraySpecGetRank(void) { return this->rank; }
 
-    // TODO:  define methods equivalent to F90
+    int ESMC_ArraySpecSetType(ESMC_DataType type) { this->type = type; 
+                                                     return ESMF_SUCCESS;}
+    ESMC_DataType ESMC_ArraySpecGetType(void) { return this->type; }
 
-    // required methods inherited and overridden from the ESMC_Base class
+    int ESMC_ArraySpecSetKind(ESMC_DataKind kind) { this->kind = kind; 
+                                                     return ESMF_SUCCESS;}
+    ESMC_DataKind ESMC_ArraySpecGetKind(void) { return this->kind; }
 
-    // for persistence/checkpointing
-    // TODO:  ReadRestart()/WriteRestart() ?
-
-    // internal validation
-    int ESMC_IOSpecValidate(const char *options=0) const;
-
-    // for testing/debugging
-    int ESMC_IOSpecPrint(const char *options=0) const;
-
-    // native C++ constructors/destructors
-    ESMC_IOSpec(void);
-    ~ESMC_IOSpec(void);
-
- // < declare the rest of the public interface methods here >
+    int ESMC_ArraySpecSetRank(int rank, ESMC_DataType type, ESMC_DataKind kind)
+    { if ((rank >= 1) && (rank <= 7)) 
+          this->rank = rank; 
+      else {
+         printf("bad rank %d, must be between 1 and 7\n", rank);
+         return ESMF_FAILURE;
+      }
+      this->type = type, 
+      this->kind = kind;
+      return ESMF_SUCCESS; 
+    }
+    int ESMC_ArraySpecGetRank(int *rank, ESMC_DataType *type, ESMC_DataKind *kind)
+    { if (rank) *rank = this->rank;
+      if (type) *type = this->type;
+      if (kind) *kind = this->kind;
+      return ESMF_SUCCESS;  
+    }
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
-  private:
+  private: 
 //
  // < declare private interface methods here >
-
 //
 //EOP
-//-------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-};  // end class ESMC_IOSpec
+ };   // end class ESMC_ArraySpec
 
-#endif // ESMC_IO_H
+
+ #endif  // ESMC_ArraySpec_H
