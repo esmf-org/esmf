@@ -112,8 +112,8 @@ program ESMF_FieldWriteEx
   
   call ESMF_IOSpecSet(iospec, filename='foo.nc', &
                       iofileformat=ESMF_IO_FILEFORMAT_UNSPECIFIED, &
-                      rc=Status)
-  if (Status.NE.ESMF_SUCCESS) then
+                      rc=status)
+  if (status.NE.ESMF_SUCCESS) then
      print*, "'call ESMF_IOSpecSet' failed"
      finalrc = ESMF_FAILURE
   else
@@ -121,8 +121,8 @@ program ESMF_FieldWriteEx
   endif
 
   call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-       kind=ESMF_R4, rc=Status)
-  if (Status.NE.ESMF_SUCCESS) then
+       kind=ESMF_R4, rc=status)
+  if (status.NE.ESMF_SUCCESS) then
      print*, "' call ESMF_ArraySpecSet' failed"
      finalrc = ESMF_FAILURE
   else
@@ -132,7 +132,7 @@ program ESMF_FieldWriteEx
   field_u2  = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_DO_ALLOCATE, &
        horzRelloc=ESMF_CELL_CENTER, &
        haloWidth=0, name="u2", iospec=iospec, rc=status)
-  if (Status.NE.ESMF_SUCCESS) then
+  if (status.NE.ESMF_SUCCESS) then
      print*, "'field_u2  = ESMF_FieldCreate' failed"
   else
      print*, "'field_u2  = ESMF_FieldCreate' succeeded"
@@ -140,7 +140,7 @@ program ESMF_FieldWriteEx
 
 !!$  call ESMF_FieldGetDataPointer(field_u2, u2, rc=status)
   call ESMF_FieldGetArray( field_u2, array_temp, rc=status)
-  if (Status.NE.ESMF_SUCCESS) then
+  if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_FieldGetArray( field_u2, array_temp, rc=status)' failed"
   endif
@@ -148,7 +148,7 @@ program ESMF_FieldWriteEx
 call ESMF_ArrayPrint(array_temp)
 
   call ESMF_ArrayGetData(array_temp, u2, ESMF_DATA_REF, status)
-  if (Status.NE.ESMF_SUCCESS) then
+  if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_ArrayGetData(array_temp, u2, ESMF_DATA_REF, status)' failed"
   endif
@@ -172,7 +172,7 @@ call ESMF_ArrayPrint(array_temp)
   call ESMF_ArrayPrint(array_temp)
 
   call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, rc=status)
-  if (Status.NE.ESMF_SUCCESS) then
+  if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_TimeSet(timestamp, calendarType=ESMF_CAL_GREGORIAN, status)' failed"
   else
@@ -180,7 +180,7 @@ call ESMF_ArrayPrint(array_temp)
   endif
 
   call ESMF_TimeSyncToRealTime(timestamp, status)
-  if (Status.NE.ESMF_SUCCESS) then
+  if (status.NE.ESMF_SUCCESS) then
      finalrc = ESMF_FAILURE
      print*, "'call ESMF_TimeSyncToRealTime(timestamp, status)' failed"
   else
@@ -188,7 +188,7 @@ call ESMF_ArrayPrint(array_temp)
   endif
 
   call ESMF_FieldWrite( field_u2, iospec, timestamp, status)
-  if (Status.NE.ESMF_SUCCESS) then
+  if (status.NE.ESMF_SUCCESS) then
      print*, "'call ESMF_FieldWrite( field_u2, iospec, timestamp, status)' failed"
   else
      print*, "'call ESMF_FieldWrite( field_u2, iospec, timestamp, status)' succeeded"
