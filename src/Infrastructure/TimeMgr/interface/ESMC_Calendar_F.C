@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.36 2004/07/02 20:27:26 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.37 2005/04/02 00:15:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -275,6 +275,24 @@ extern "C" {
                      ESMC_NOT_PRESENT_FILTER(daysPerYearDn),
                      ESMC_NOT_PRESENT_FILTER(daysPerYearDd) );
            if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_calendarisleapyeari4)(ESMC_Calendar **ptr, 
+                                   ESMF_KIND_I4 *yy,
+                                   int *esmf_calendarIsLeapYear, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          *esmf_calendarIsLeapYear = (int) (*ptr)->ESMC_CalendarIsLeapYear(
+                                             (ESMF_KIND_I8) *yy,
+                                             ESMC_NOT_PRESENT_FILTER(status) );
+       }
+
+       void FTN(c_esmc_calendarisleapyeari8)(ESMC_Calendar **ptr, 
+                                   ESMF_KIND_I8 *yy_i8,
+                                   int *esmf_calendarIsLeapYear, int *status) {
+          ESMF_CHECK_POINTER(*ptr, status)
+          *esmf_calendarIsLeapYear = (int) (*ptr)->ESMC_CalendarIsLeapYear(
+                                             *yy_i8,
+                                             ESMC_NOT_PRESENT_FILTER(status) );
        }
 
        void FTN(c_esmc_calendareq)(ESMC_Calendar **calendar1,
