@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.8 2004/11/04 19:00:11 nscollins Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.9 2004/12/08 22:56:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.8 2004/11/04 19:00:11 nscollins Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.9 2004/12/08 22:56:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -79,18 +79,14 @@
 !------------------------------------------------------------------------------
 
 
-      print *, "*************FIELD ROUTE UNIT TESTS***************************"
-      print *
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-      call ESMF_Initialize(vm=vm, rc=rc)
+      ! this test *must* run at least 4-way
+      if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
+
+
+      call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      call ESMF_TestStart(npets, ESMF_SRCLINE)
-
-      ! exit early if we have less than 4 procs
-      if (npets .lt. 4) then
-        print *, "This test cannot run with less than 4 processors"
-        goto 10
-      endif
 
       half = npets / 2
       quart = npets / 4
@@ -388,6 +384,5 @@
 10    print *, "end of Field Route test"
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
 
       end program ESMF_FRouteUTest

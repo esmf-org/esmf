@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.77 2004/10/26 23:10:19 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.78 2004/12/08 22:56:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.77 2004/10/26 23:10:19 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.78 2004/12/08 22:56:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -81,16 +81,13 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
-      print *, "Starting job"
-
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      call ESMF_TestStart(npets, ESMF_SRCLINE)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
 
       !------------------------------------------------------------------------
       ! several calls to field need a valid grid.  these will be used in
       ! the grid create calls.
+      call ESMF_VMGetGlobal(vm, rc=rc)
       delayout = ESMF_DELayoutCreate(vm, rc=rc)
       minCoord(:) = (/ 0.0, 0.0 /)
 
@@ -785,8 +782,5 @@
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
-
-      print *, "******  End of FieldUTest  ******"
 
       end program ESMF_FieldUTest
