@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.44 2003/09/03 19:00:11 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.45 2003/09/03 19:29:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.44 2003/09/03 19:00:11 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.45 2003/09/03 19:29:34 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1009,7 +1009,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeWriteRestart - Save the attributes of a Time
+! !IROUTINE:  ESMF_TimeWriteRestart - Save the contents of a Time
 
 ! !INTERFACE:
       subroutine ESMF_TimeWriteRestart(time, s, sN, sD, calendar, timeZone, rc)

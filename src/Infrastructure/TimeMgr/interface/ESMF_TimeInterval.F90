@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.32 2003/09/03 18:41:03 cdeluca Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.33 2003/09/03 19:29:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.32 2003/09/03 18:41:03 cdeluca Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.33 2003/09/03 19:29:34 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -829,7 +829,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalProdI - Multiply a time interval by an integer
+! !IROUTINE:   ESMF_TimeIntervalProdI - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
       function ESMF_TimeIntervalProdI(timeInterval, multiplier)
@@ -864,7 +864,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalProdF - Multiply a time interval by a fraction
+! !IROUTINE:  ESMF_TimeIntervalProdF - Multiply a TimeInterval by a fraction
 
 ! !INTERFACE:
       function ESMF_TimeIntervalProdF(timeInterval, multiplier)
@@ -898,7 +898,7 @@
       end function ESMF_TimeIntervalProdF
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalProdR - Multiply a time interval by a double precision
+! !IROUTINE:   ESMF_TimeIntervalProdR - Multiply a TimeInterval by a double precision
 
 ! !INTERFACE:
       function ESMF_TimeIntervalProdR(timeInterval, multiplier)
@@ -937,7 +937,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalSum - Add two time intervals together
+! !IROUTINE:  ESMF_TimeIntervalSum - Add two TimeIntervals 
 
 ! !INTERFACE:
       function ESMF_TimeIntervalSum(timeInterval1, timeInterval2)
@@ -975,7 +975,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalDiff - Subtract one time interval from another
+! !IROUTINE:  ESMF_TimeIntervalDiff - Subtract one TimeInterval from another
    
 ! !INTERFACE:
       function ESMF_TimeIntervalDiff(timeInterval1, timeInterval2)
