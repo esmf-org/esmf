@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.77 2003/10/14 15:49:39 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.78 2003/10/15 17:06:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -141,7 +141,7 @@
         type (ESMF_Base) :: base      ! standard ESMF base object
         logical :: covers_domain      ! distgrid covers entire physical domain?
         integer :: grid_boundary_width          ! # of exterior cells/edge
-        type (ESMF_DELayout), pointer :: layout ! the layout for this grid
+        type (ESMF_DELayout) :: layout          ! the layout for this grid
 
         ! 1 per dimension of the Grid
         integer, dimension(ESMF_MAXGRIDDIM) :: decompids  ! currently unneeded
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.77 2003/10/14 15:49:39 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.78 2003/10/15 17:06:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -680,7 +680,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
-      type (ESMF_DELayout), intent(in), target :: layout
+      type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:) :: countsPerDE1
       integer, dimension(:) :: countsPerDE2
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
@@ -808,7 +808,7 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
         return
       endif
-      dgtype%layout => layout
+      dgtype%layout = layout
 
       ! Allocate resources based on number of DE's
       allocate(dgtype%global_total%local_cell_count(nDE), stat=status)
