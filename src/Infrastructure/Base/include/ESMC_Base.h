@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.32 2003/10/21 23:14:10 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.33 2003/10/22 03:27:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,6 +140,7 @@ class ESMC_DomainList {
     int num_domains;
     int current_size;
     int total_points;
+    int pad_for_64;
     struct ESMC_Domain *domains;
 
     int  ESMC_DomainListGetDE(int domainnum);

@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.66 2003/09/22 22:58:42 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.67 2003/10/22 03:28:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -190,6 +190,7 @@
           integer :: num_domains     ! number of domains stored
           integer :: current_size    ! size of buffer, used in linked list
           integer :: total_points    ! total size of domain (number of points)
+          integer :: pad_for_64bit   ! unused
           type(ESMF_Domain), dimension(:), pointer :: domains
       end type
 
@@ -353,7 +354,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.66 2003/09/22 22:58:42 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.67 2003/10/22 03:28:57 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
