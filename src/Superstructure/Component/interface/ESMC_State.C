@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.2 2003/02/03 17:10:47 nscollins Exp $
+// $Id: ESMC_State.C,v 1.3 2003/02/03 18:41:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.2 2003/02/03 17:10:47 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.3 2003/02/03 18:41:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -81,6 +81,7 @@
 //
 //  code goes here
 //
+    return new ESMC_State;
 
  } // end ESMC_StateCreate
 
@@ -110,6 +111,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateDestroy
 
@@ -140,6 +142,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateConstruct
 
@@ -169,6 +172,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateDestruct
 
@@ -197,6 +201,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateInit
 
@@ -222,6 +227,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateGetConfig
 
@@ -247,6 +253,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateSetConfig
 
@@ -273,6 +280,7 @@
 //
 //  code goes here
 //
+    //return ESMF_FAILURE;
 
  //} // end ESMC_StateGet<Value>
 
@@ -299,6 +307,7 @@
 //
 //  code goes here
 //
+    //return ESMF_FAILURE;
 
  //} // end ESMC_StateSet<Value>
 
@@ -325,6 +334,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StateValidate
 
@@ -352,6 +362,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_StatePrint
 
@@ -378,6 +389,7 @@
 //
 //  code goes here
 //
+    
 
  } // end ESMC_State
 
@@ -403,5 +415,6 @@
 //
 //  code goes here
 //
+    
 
  } // end ~ESMC_State

@@ -1,4 +1,4 @@
-// $Id: ESMC_Cpl.C,v 1.1 2003/01/29 00:01:09 nscollins Exp $
+// $Id: ESMC_Cpl.C,v 1.2 2003/02/03 18:41:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Cpl.C,v 1.1 2003/01/29 00:01:09 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Cpl.C,v 1.2 2003/02/03 18:41:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,6 +71,7 @@
 //
 //  code goes here
 //
+    return new ESMC_Cpl;
 
  } // end ESMC_CplCreate
 
@@ -100,6 +101,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplDestroy
 
@@ -130,6 +132,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplConstruct
 
@@ -159,6 +162,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplDestruct
 
@@ -187,6 +191,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplInit
 
@@ -212,6 +217,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplGetConfig
 
@@ -237,6 +243,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplSetConfig
 
@@ -263,6 +270,7 @@
 //
 //  code goes here
 //
+    //return ESMF_FAILURE;
 
  //} // end ESMC_CplGet<Value>
 
@@ -289,6 +297,7 @@
 //
 //  code goes here
 //
+    //return ESMF_FAILURE;
 
  //} // end ESMC_CplSet<Value>
 
@@ -315,6 +324,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplValidate
 
@@ -342,6 +352,7 @@
 //
 //  code goes here
 //
+    return ESMF_FAILURE;
 
  } // end ESMC_CplPrint
 
