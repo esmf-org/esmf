@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.78 2003/10/07 22:36:45 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.79 2003/10/09 22:06:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -235,7 +235,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.78 2003/10/07 22:36:45 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.79 2003/10/09 22:06:10 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1071,7 +1071,7 @@
         counts(i) = index(i)%max - index(i)%min + (2*hwidth) + 1
       enddo
 
-      array = ESMF_ArrayCreate(arrayspec, counts, hwidth, status) 
+      array = ESMF_ArrayCreate(arrayspec, counts, hwidth, rc=status) 
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Array create"
         return
