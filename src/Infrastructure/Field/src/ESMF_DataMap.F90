@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.1 2003/03/10 21:54:22 cdeluca Exp $
+! $Id: ESMF_DataMap.F90,v 1.2 2003/04/03 23:08:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.1 2003/03/10 21:54:22 cdeluca Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.2 2003/04/03 23:08:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -279,7 +279,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_IndexOrder), intent(in) :: iorder
-      type(ESMF_RelLoc), intent(in) :: relloc
+      type(ESMF_RelLoc), intent(in), optional :: relloc
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -506,7 +506,7 @@
 ! !ARGUMENTS:
       type(ESMF_DataMapType), pointer :: datamap
       type(ESMF_IndexOrder), intent(in) :: iorder
-      type(ESMF_RelLoc), intent(in) :: relloc
+      type(ESMF_RelLoc), intent(in), optional :: relloc
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -597,7 +597,11 @@
 !       in this interface assume scalar data and use the relloc the caller gave
         datamap%datarank = 0
         datamap%ranklength = 0
-        datamap%relloc = relloc
+        if (present(relloc)) then
+          datamap%relloc = relloc
+        else
+          datamap%relloc = ESMF_CELL_CENTER
+        endif
 
 !       if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
