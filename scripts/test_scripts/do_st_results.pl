@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_st_results.pl,v 1.6 2005/02/11 21:19:11 svasquez Exp $
+# $Id: do_st_results.pl,v 1.7 2005/02/15 20:36:00 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 
@@ -35,7 +35,7 @@ getopts("d:b:", \%options);
         find(\&allFiles, '.');
         sub allFiles {
                         # Put all files in a list
-                        push all_files, "$File::Find::name\n" if -e ;
+                        push all_files, "$File::Find::name\n" if -T ;
         }
         # Get all system tests files
         @st_files=grep (/STest/, @all_files);

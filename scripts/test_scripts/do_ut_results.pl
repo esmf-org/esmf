@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.12 2005/02/09 20:30:50 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.13 2005/02/15 20:37:15 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -71,7 +71,7 @@ getopts("d:b:", \%options);
         find(\&allFiles, '.');
         sub allFiles {
                         # Put all files in a list
-                        push all_files, "$File::Find::name\n" if -e ;
+                        push all_files, "$File::Find::name\n" if -T ;
         }
         # Get all unit tests files
         @ut_files=grep (/UTest/, @all_files);
