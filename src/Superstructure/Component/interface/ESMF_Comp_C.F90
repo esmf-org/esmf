@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.3 2003/04/28 17:37:35 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.4 2003/06/26 23:06:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.3 2003/04/28 17:37:35 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.4 2003/06/26 23:06:43 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -154,37 +154,43 @@
 
    subroutine f_esmf_cplcompinitialize(comp, rc)
        use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
+       type(ESMF_State) :: stat
        integer :: rc     
 
-       call ESMF_CplCompInitialize(comp, rc=rc)
+       call ESMF_CplCompInitialize(comp, stat, rc=rc)
 
    end subroutine f_esmf_cplcompinitialize
 
    subroutine f_esmf_cplcomprun(comp, rc)
        use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
+       type(ESMF_State) :: stat
        integer :: rc     
 
-       call ESMF_CplCompRun(comp, rc=rc)
+       call ESMF_CplCompRun(comp, stat, rc=rc)
 
    end subroutine f_esmf_cplcomprun
 
    subroutine f_esmf_cplcompfinalize(comp, rc)
        use ESMF_BaseMod    ! ESMF base class
+       use ESMF_StateMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
+       type(ESMF_State) :: stat
        integer :: rc     
 
-       call ESMF_CplCompFinalize(comp, rc=rc)
+       call ESMF_CplCompFinalize(comp, stat, rc=rc)
 
    end subroutine f_esmf_cplcompfinalize
 
