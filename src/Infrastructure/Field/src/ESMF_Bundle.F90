@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.16 2003/07/31 23:27:19 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.17 2003/07/31 23:35:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,12 +35,14 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
-      use ESMF_DataMapMod
       use ESMF_LocalArrayMod
+      use ESMF_DataMapMod
+      use ESMF_DELayoutMod
       use ESMF_GridMod
-      use ESMF_FieldMod
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
+      use ESMF_RouteMod
+      use ESMF_FieldMod
       implicit none
 !
 ! !PRIVATE TYPES:
@@ -2057,15 +2059,9 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: ftypep              ! bundle type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer, dimension(:), pointer :: decompids
-   
+
+      !TODO: add code  here
+
       ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -2074,73 +2070,8 @@ end function
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = bundle%ftypep
-
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                           dimlist=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleAllGather: DataMapGet returned failure"
-        return
-      endif 
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, rc=status)
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleAllGather: GridGet returned failure"
-        return
-      endif 
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localbundle%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleAllGather: ArrayGet returned failure"
-        return
-      endif 
-
-      allocate(decompids(datarank), stat=status)
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        global_dimlengths(i) = dimlengths(i)
-        if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
-          global_dimlengths(i) = global_cell_dim(dimorder(i))
-        endif
-      enddo
-
-      ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, gridrank
-          thisdim = dimorder(i)
-          if (thisdim .eq. 0) cycle
-     
-          thislength = dimlengths(thisdim)
-     
-          call ESMF_AxisIndexSet(axis(i), 1, thislength, thislength, rc=status)
-     
-      enddo
-
-      ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(ftypep%localbundle%localdata, totalindex=axis, &
-                                  rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleAllGather: ArraySetAxisIndex returned failure"
-        return
-      endif 
-
-      ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-      call ESMF_ArrayAllGather(ftypep%localbundle%localdata, layout, decompids, &
-                               global_dimlengths, array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleAllGather: Array AllGather returned failure"
-        return
-      endif 
-
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleAllGather
 
@@ -2192,15 +2123,10 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: ftypep              ! bundle type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer, dimension(:), pointer :: decompids
    
+
+      !TODO: add code  here
+
       ! Initialize return code   
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -2209,73 +2135,8 @@ end function
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = bundle%ftypep
-
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, dimlist=dimorder, &
-                           rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: DataMapGet returned failure"
-        return
-      endif 
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_cell_dim, rc=status)
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO: add decomps
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: GridGet returned failure"
-        return
-      endif 
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localbundle%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArrayGet returned failure"
-        return
-      endif 
-
-      allocate(decompids(datarank), stat=status)
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        global_dimlengths(i) = dimlengths(i)
-        if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
-          global_dimlengths(i) = global_cell_dim(dimorder(i))
-        endif
-      enddo
-
-      ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, gridrank
-          thisdim = dimorder(i)
-          if (thisdim .eq. 0) cycle
-
-          thislength = dimlengths(thisdim)
-     
-          call ESMF_AxisIndexSet(axis(i), 1, thislength, thislength, rc=status)
-     
-      enddo
-
-      ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(ftypep%localbundle%localdata, &
-                                       compindex=axis, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArraySetAxisIndex returned failure"
-        return
-      endif 
-
-      ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-      call ESMF_ArrayGather(ftypep%localbundle%localdata, layout, decompids, &
-                            global_dimlengths, destination_de, array, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: Array Gather returned failure"
-        return
-      endif 
-
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGather
 
@@ -2329,70 +2190,11 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: ftypep              ! bundle type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout               ! layout
-      type(ESMF_Array) :: dstarray                ! Destination array
-      integer :: i, gridrank, datarank, thisdim, thislength
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
-      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
-   
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE. 
-        rc = ESMF_FAILURE
-      endif     
 
-      ftypep = bundle%ftypep
-
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                           dimlist=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: DataMapGet returned failure"
-        return
-      endif 
-!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
-!     if(status .NE. ESMF_SUCCESS) then 
-!       print *, "ERROR in BundleScatter: GridGet returned failure"
-!       return
-!     endif 
-      decomps(1) = 1    ! TODO: remove this once the grid call is created
-      decomps(2) = 2
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localbundle%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleGather: ArrayGet returned failure"
-        return
-      endif 
-
-      do i=1, datarank
-        decompids(i) = dimorder(i)
-        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
-      enddo
-
-      ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-      call ESMF_ArrayScatter(array, layout, decompids, source_de, dstarray, &
-                             status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleScatter: Array Scatter returned failure"
-        return
-      endif 
-
-      ! TODO: do we need to set dimorder here?  should datamap be an input
-      !  to this routine, or specified at create time?   or should this be
-      !  a bundle create method?
-      ftypep%localbundle%localdata = dstarray
+      !TODO: add code  here
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleScatter
 
@@ -2434,22 +2236,6 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: ftypep              ! bundle type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid
-      integer :: i, j, gridrank, datarank, thisdim
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
-      type(ESMF_Route) :: route
-      logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: nDEs
-      integer :: my_DE
-      integer, dimension(ESMF_MAXGRIDDIM) :: global_stride
-      integer, dimension(:,:), allocatable :: global_start
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
-      integer :: AI_count
-
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2459,85 +2245,11 @@ end function
         rc = ESMF_FAILURE
       endif     
 
-      ! Get the Layout from the Bundle's Grid
-      ftypep = bundle%ftypep
-      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
 
-      ! Our DE number in the layout
-      call ESMF_DELayoutGetDEid(layout, my_DE, status)
-
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                           dimlist=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleHalo: DataMapGet returned failure"
-        return
-      endif 
-
-      ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localbundle%localdata, rank=datarank, &
-                         counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in BundleHalo: ArrayGet returned failure"
-         return
-      endif 
-
-      ! Get global starting counts and global strides
-      call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
-      AI_count = nDEs
-      allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      call ESMF_GridGet(ftypep%grid, global_cell_dim=global_stride, &
-                        global_start=global_start, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-         print *, "ERROR in BundleHalo: GridGet returned failure"
-         return
-      endif 
-
-      ! set up things we need to find a cached route or precompute one
-      call ESMF_ArrayGetAllAxisIndices(ftypep%localbundle%localdata, ftypep%grid, &
-                                       totalindex=dst_AI, compindex=src_AI, &
-                                       rc=status)       
-          
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
-                               AI_count, layout, my_DE, src_AI, src_AI, &
-                               AI_count, layout, hascachedroute, route, &
-                               rc=status)
-
-      if (.not. hascachedroute) then
-          ! Create the route object.
-          route = ESMF_RouteCreate(layout, rc) 
-
-          call ESMF_RoutePrecomputeHalo(route, datarank, &
-                                        my_DE, src_AI, dst_AI, &
-                                        AI_count, global_start, global_stride, &
-                                        layout, rc=status)
-
-      endif
-
-      ! Once table is full, execute the communications it represents.
-
-      call ESMF_RouteRun(route, ftypep%localbundle%localdata, &
-                         ftypep%localbundle%localdata, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleHalo: RouteRun returned failure"
-        return
-      endif 
-
-      ! TODO: we are caching the route so don't delete it.
-      !call ESMF_RouteDestroy(route, rc)
-
-      ! get rid of temporary arrays
-      if (allocated(global_start)) deallocate(global_start, stat=status)
-      if (associated(src_AI)) deallocate(src_AI, stat=status)
-      if (associated(dst_AI)) deallocate(dst_AI, stat=status)
+      !TODO: add code  here
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleHalo
 
@@ -2592,10 +2304,6 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: fp                  ! bundle type info
-      integer :: i, gridrank, datarank, thisdim
-      integer :: dimorder(ESMF_MAXDIM)   
-      integer :: dimlengths(ESMF_MAXDIM)   
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2605,38 +2313,12 @@ end function
         rc = ESMF_FAILURE
       endif     
 
-      fp = srcbundle%ftypep
 
-      ! Query the datamap and set info for grid so it knows how to
-      !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(fp%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRegrid: DataMapGet returned failure"
-        return
-      endif 
+      !TODO: add code  here
 
-      ! And get the Array sizes
-      call ESMF_ArrayGet(fp%localbundle%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRegrid: ArrayGet returned failure"
-        return
-      endif 
-
-      ! TODO: add code here to call Regrid correctly
-
-      ! Call Grid method to perform actual work
-      ! call ESMF_GridRegrid(fp%grid, fp%localbundle%localdata, status)
-      status = ESMF_FAILURE
-
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRegrid: Grid Regrid returned failure"
-        return
-      endif 
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRegrid
 
@@ -2692,27 +2374,6 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
-      type(ESMF_Route) :: route
-      type(ESMF_DELayout) :: srclayout, dstlayout
-      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: i, gridrank, datarank, thisdim
-      integer :: nx, ny
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_stride
-      integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_stride
-      integer, dimension(:,:), allocatable :: dst_global_start
-      integer :: AI_snd_count, AI_rcv_count
-
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2722,180 +2383,11 @@ end function
         rc = ESMF_FAILURE
       endif     
 
-      stypep = srcbundle%ftypep
-      dtypep = dstbundle%ftypep
 
-      ! Our DE number in the parent layout
-      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
-
-      ! TODO: we need not only to know if this DE has data in the bundle,
-      !   but also the de id for both src & dest bundles
-
-      ! This routine is called on every processor in the parent layout.
-      !  It is quite possible that the source and destination bundles do
-      !  not completely cover every processor on that layout.  Make sure
-      !  we do not go lower than this on the processors which are uninvolved
-      !  in this communication.
-
-      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
-      hassrcdata = .true.   ! temp for now
-      if (hassrcdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
-      endif
-
-      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
-      hasdstdata = .true.   ! temp for now
-      if (hasdstdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
-      endif
-
-      ! if neither are true this DE cannot be involved in the communication
-      !  and it can just return now.
-      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-      endif
-
-      ! if src bundle exists on this DE, query it for information
-      if (hassrcdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
-          call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in BundleRedist: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(stypep%localbundle%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in BundleRedist: ArrayGet returned failure"
-             return
-          endif 
-      endif 
-
-      ! if dst bundle exists on this DE, query it for information
-      if (hasdstdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
-          call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in BundleRedist: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(dtypep%localbundle%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in BundleRedist: ArrayGet returned failure"
-             return
-          endif 
-      endif
-
-      ! set up things we need to find a cached route or precompute one
-      if (hassrcdata) then
-          call ESMF_DELayoutGetSize(srclayout, nx, ny);
-          AI_snd_count = nx * ny
-
-          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_stride, &
-                            global_start=src_global_start, rc=status)
-
-          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(stypep%localbundle%localdata, &
-                                           stypep%grid, src_AI_tot, &
-                                           src_AI_exc, rc=rc)
-      else
-          AI_snd_count = 0
-      endif
-      if (hasdstdata) then
-          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
-          AI_rcv_count = nx * ny
-
-          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_stride, &
-                            global_start=dst_global_start, rc=status)
-
-          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(dtypep%localbundle%localdata, &
-                                           dtypep%grid, dst_AI_tot, &
-                                           dst_AI_exc, rc=rc)
-      else
-          AI_rcv_count = 0
-      endif
-          
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, &
-                               my_dst_DE, dst_AI_exc, dst_AI_tot, &
-                               AI_rcv_count, dstlayout, &
-                               my_src_DE, src_AI_exc, src_AI_tot, &
-                               AI_snd_count, srclayout, &
-                               hascachedroute, route, rc=status)
-
-      if (.not. hascachedroute) then
-          ! Create the route object.  This needs to be the parent layout which
-          ! includes the DEs from both bundles.
-          route = ESMF_RouteCreate(parentlayout, rc) 
-
-          call ESMF_RoutePrecompute(route, datarank, &
-                                    my_dst_DE, dst_AI_exc, dst_AI_tot, &
-                                    AI_rcv_count, dst_global_start, &
-                                    dst_global_stride, dstlayout,  &
-                                    my_src_DE, src_AI_exc, src_AI_tot, &
-                                    AI_snd_count, src_global_start, &
-                                    src_global_stride, srclayout, rc=status)
-
-      endif
-
-      ! Once table is full, execute the communications it represents.
-
-      ! There are 3 possible cases - src+dst, src only, dst only
-      !  (if both are false then we've already returned.)
-      if ((hassrcdata) .and. (.not. hasdstdata)) then
-          call ESMF_RouteRun(route, srcarray=stypep%localbundle%localdata, &
-                             rc=status) 
-
-      else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          call ESMF_RouteRun(route, dstarray=dtypep%localbundle%localdata, &
-                             rc=status)
-
-      else
-          call ESMF_RouteRun(route, stypep%localbundle%localdata, &
-                             dtypep%localbundle%localdata, status)
-      endif
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRedist: RouteRun returned failure"
-        return
-      endif 
-
-      ! TODO: do not delete the route because we are caching it.
-      !call ESMF_RouteDestroy(route, rc)
-
-      ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
-      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
+      !TODO: add code  here
 
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRedist
 
