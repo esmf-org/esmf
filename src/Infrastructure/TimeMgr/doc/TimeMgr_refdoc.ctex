@@ -215,11 +215,9 @@
 #ifdef STANDALONE
 \input{Clock_usage}
 \input{ESMF_ClockEx_fapi}
-\input{ESMF_ClockAdvEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Clock_usage}
 \input{../Infrastructure/TimeMgr/doc/ESMF_ClockEx_fapi}
-\input{../Infrastructure/TimeMgr/doc/ESMF_ClockAdvEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
