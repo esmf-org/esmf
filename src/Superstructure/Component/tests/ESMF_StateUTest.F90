@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.18 2003/06/05 15:57:14 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.19 2003/06/05 16:02:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.18 2003/06/05 15:57:14 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.19 2003/06/05 16:02:33 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -73,7 +73,7 @@
 !     always run. When the environment variable, EXHAUSTIVE, is set to ON then
 !     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 !     to OFF, then only the sanity unit tests.
-!     The strings !NEX and !EX (Non-exhaustive and exhaustive) have been
+!     Special strings (Non-exhaustive and exhaustive) have been
 !     added to allow a script to count the number and types of unit tests.
 !--------------------------------------------------------------------------------
 
