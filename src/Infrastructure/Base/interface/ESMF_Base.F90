@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.13 2002/12/13 02:18:05 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.14 2002/12/13 16:12:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -50,9 +50,11 @@
       end type
 
       type(ESMF_Status), parameter :: ESMF_STATE_UNINIT = ESMF_Status(1), &
-                                      ESMF_STATE_ALLOCATED = ESMF_Status(2), &
-                                      ESMF_STATE_BUSY = ESMF_Status(3), &
-                                      ESMF_STATE_INVALID = ESMF_Status(4)
+                                      ESMF_STATE_READY = ESMF_Status(2), &
+                                      ESMF_STATE_UNALLOCATED = ESMF_Status(3), &
+                                      ESMF_STATE_ALLOCATED = ESMF_Status(4), &
+                                      ESMF_STATE_BUSY = ESMF_Status(5), &
+                                      ESMF_STATE_INVALID = ESMF_Status(6)
  
       type ESMF_Pointer
       sequence
@@ -123,7 +125,8 @@
 
 ! !PUBLIC TYPES:
 
-      public ESMF_STATE_UNINIT, ESMF_STATE_ALLOCATED, &
+      public ESMF_STATE_UNINIT, ESMF_STATE_READY, &
+             ESMF_STATE_UNALLOCATED, ESMF_STATE_ALLOCATED, &
              ESMF_STATE_BUSY, ESMF_STATE_INVALID
 
       public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
@@ -195,7 +198,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.13 2002/12/13 02:18:05 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.14 2002/12/13 16:12:07 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
