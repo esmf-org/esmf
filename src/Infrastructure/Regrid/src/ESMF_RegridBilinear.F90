@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.38 2003/10/20 23:25:47 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.39 2003/11/07 00:00:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,6 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod        ! ESMF base   class
-      use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayBaseMod   ! ESMF array  class
       use ESMF_ArrayExpandMod ! ESMF array  class
@@ -60,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.38 2003/10/20 23:25:47 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.39 2003/11/07 00:00:08 jwolfe Exp $'
 
 !==============================================================================
 
@@ -127,32 +126,24 @@
       logical :: rcpresent                        ! Return code present
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: start, stop, startComp, stopComp, my_DE, indexMod(2)
+      integer :: start, stop, startComp, stopComp, indexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
-      integer, dimension(:,:), pointer :: foundCount, srcLocalMask
-      integer, dimension(:), pointer :: srcGatheredMask
-      real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, srcGatheredCoordY
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: srcLocalCoordX, srcLocalCoordY
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: dstLocalCoordX, dstLocalCoordY
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dstMin, dstMax
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: srcMin, srcMax
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI, myTotalAI
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
+      integer(ESMF_KIND_I4), dimension(:), pointer :: srcGatheredMask
+      real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, &
+                                                   srcGatheredCoordY
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: srcLocalCoordX, &
+                                                     srcLocalCoordY
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: dstLocalCoordX, &
+                                                     dstLocalCoordY
       type(ESMF_CoordSystem) :: coordSystem
-      type(ESMF_DataType) :: type
-      type(ESMF_DataKind) :: kind
-      type(ESMF_LocalArray) :: srcindex, dstindex, weights
-      type(ESMF_LocalArray) :: srcLocalCoordXArray, srcLocalCoordYArray
-      type(ESMF_LocalArray) :: srcGatheredCoordXArray, srcGatheredCoordYArray
       type(ESMF_Array) :: srcMaskArray
-      type(ESMF_LocalArray) :: srcLocalMaskArray, srcGatheredMaskArray
       type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray
       type(ESMF_Array), dimension(:), pointer :: srcLocalCoordArray
-      type(ESMF_DomainList) :: sendDomainList, recvDomainList
-      type(ESMF_DomainList) :: sendDomainListTot, recvDomainListTot
-      type(ESMF_DELayout) :: srcDELayout
+      type(ESMF_DomainList) :: recvDomainList, recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
@@ -177,43 +168,15 @@
       endif
 
       ! Set name and field pointers
-      call ESMF_RegridTypeSet(temp_regrid,                                   &
-                              name=name, srcArray = srcArray,                &
-                                         dstArray = dstArray,                &
-                                         method = ESMF_RegridMethod_Bilinear, &
-                                         rc=status)
+      call ESMF_RegridTypeSet(temp_regrid, name=name, srcArray = srcArray, &
+                              dstArray = dstArray, &
+                              method = ESMF_RegridMethod_Bilinear, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: RegridTypeSet ", &
                  "returned failure"
         return
       endif
       
-      ! Extract some layout information for use in this regrid.
-      call ESMF_GridGetDE(srcGrid, ai_global=myAI, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_GridGetDE(srcGrid, ai_global=myTotalAI, total=.true., rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_GridGetDELayout(srcGrid, srcDELayout, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridGetDELayout ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_DELayoutGetDEID(srcDELayout, my_DE, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: DELayoutGetDEID ", &
-                 "returned failure"
-        return
-      endif
-
       ! get destination grid info
       !TODO: Get grid masks?
       call ESMF_DataMapGet(dstDataMap, relloc=dstRelLoc, rc=status)
@@ -229,6 +192,7 @@
                  "returned failure"
         return
       endif
+
       allocate(dstLocalCoordArray(2))    ! TODO:
       call ESMF_GridGetCoord(dstGrid, relloc=dstRelLoc, &
                              centerCoord=dstLocalCoordArray, rc=status)
@@ -276,133 +240,48 @@
       call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                              status)
 
-      ! Calculate the intersections of this DE's bounding box with all others
       hassrcdata = .true.   ! temp for now
       hasdstdata = .true.   ! temp for now
 
    ! Calculate two separate Routes:
    !    the first will be used in the code to gather the data for running
-   !              the regrid
+   !              the regrid, saved in routehandle
    !    the second sends and receives total cell coordinate information and
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      ! From each grid get the bounding box information on this DE
-      call ESMF_GridGetPhysGrid(srcGrid, relloc=srcRelLoc, localMin=srcMin, &   
-                                localMax=srcMax, rc=status)
-      call ESMF_GridGetPhysGrid(dstGrid, relloc=dstRelLoc, localMin=dstMin, &
-                                localMax=dstMax, rc=status)
-
-   ! STORED ROUTE FOR MOVING DATA FOR REGRID RUN:
-      ! calculate intersections
-      call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                     myAI, sendDomainList, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridBoxIntersectSend ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainList, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridBoxIntersectRecv ", &
-                 "returned failure"
-        return
-      endif
-
-      ! Create Route
-      ! TODO: this must be either a parent layout, or the src and dst layouts
-      !  must be identical.
-      route = ESMF_RouteCreate(srcDELayout, status)
-      call ESMF_RoutePrecomputeDomList(route, 2, my_DE, sendDomainList, &
-                                       recvDomainList, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: ", &
-                 "RoutePrecomputeDomList returned failure"
-        return
-      endif
-      ! set size of recv items in Route
-      call ESMF_RouteSetRecvItems(route, recvDomainList%total_points, status)
-      ! Save route in the routehandle object
+      route = ESMF_RegridRouteConstruct(srcGrid, dstGrid, srcRelLoc, dstRelLoc, &
+                                        recvDomainList, total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
-   ! TEMPORARY INTERNAL ROUTE:
-      ! calculate intersections
-      call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                     myTotalAI, sendDomainListTot, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridBoxIntersectSend ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainListTot, .true., status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridBoxIntersectRecv ", &
-                 "returned failure"
-        return
-      endif
+      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, srcRelLoc, &
+                                            dstRelLoc, recvDomainListTot, &
+                                            total=.true., rc=status)
 
-      ! Create Route
-      ! TODO: this must be either a parent layout, or the src and dst layouts
-      !  must be identical.
-      tempRoute = ESMF_RouteCreate(srcDELayout, status)
-      call ESMF_RoutePrecomputeDomList(tempRoute, 2, my_DE, sendDomainListTot, &
-                                       recvDomainListTot, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: ", &
-                 "RoutePrecomputeDomList returned failure"
-        return
-      endif
-      ! set size of recv items in Route
-      call ESMF_RouteSetRecvItems(tempRoute, recvDomainListTot%total_points, status)
-
-  ! Now use temporary route to gather necessary coordinates
+      ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
       call ESMF_RouteGetRecvItems(tempRoute, size, status)
       allocate(srcGatheredCoordX(size))
       allocate(srcGatheredCoordY(size))
       allocate(srcGatheredMask(size))
-      srcGatheredCoordXArray = ESMF_LocalArrayCreate(srcGatheredCoordX, &
-                                                     ESMF_DATA_REF, status)
-      srcGatheredCoordYArray = ESMF_LocalArrayCreate(srcGatheredCoordY, &
-                                                     ESMF_DATA_REF, status)
-      srcGatheredMaskArray   = ESMF_LocalArrayCreate(srcGatheredMask, &
-                                                     ESMF_DATA_REF, status)
 
       ! Execute Route now to gather grid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
-      srcLocalCoordXArray = ESMF_LocalArrayCreate(srcLocalCoordX, &
-                                                  ESMF_DATA_COPY, status)
-      srcLocalCoordYArray = ESMF_LocalArrayCreate(srcLocalCoordY, &
-                                                  ESMF_DATA_COPY, status)
-      srcLocalMaskArray   = ESMF_LocalArrayCreate(srcLocalMask, &
-                                                  ESMF_DATA_COPY, status)
-      call ESMF_RouteRun(tempRoute, srcLocalCoordXArray, &
-                         srcGatheredCoordXArray, status)
-      call ESMF_RouteRun(tempRoute, srcLocalCoordYArray, &
-                         srcGatheredCoordYArray, status)
-      call ESMF_RouteRun(tempRoute, srcLocalMaskArray, &
-                         srcGatheredMaskArray, status)
+      call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCoordX, &
+                                    srcGatheredCoordX, status)
+      call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCoordY, &
+                                    srcGatheredCoordY, status)
+      call ESMF_RouteRunF90PtrI421D(tempRoute, srcLocalMask, &
+                                    srcGatheredMask, status)
 
       ! now all necessary data is local
-
-      ! Create a Transform Values object
-      tv = ESMF_TransformValuesCreate(rc)
 
       ! TODO: the *4 is to guarantee the max allocation possible is enough
       !  for bilinear interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
       size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
-      srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
-                                          size, status)
-      dstindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
-                                          size*2, status) 
-      weights  = ESMF_LocalArrayCreate(1, ESMF_DATA_REAL, ESMF_R8, size, status)
- 
-      ! set the values in the TV
-      call ESMF_TransformValuesSet(tv, 0, srcindex=srcindex, dstindex=dstindex, &
-                                   weights=weights, rc=status)
+      ! Create a Transform Values object
+      tv = ESMF_TransformValuesCreate(size, rc)
 
       ! set up user masks and logical found arrays for search
       allocate(found(dstCounts(1),dstCounts(2)))
@@ -419,7 +298,7 @@
       if(present(srcMask)) then
   !      srcUserMask = srcMask
       else
-        size = recvDomainListTot%total_points
+        call ESMF_RouteGetRecvItems(tempRoute, size, status)
         allocate(srcUserMask(size))
         srcUserMask = .TRUE.
       endif
@@ -442,8 +321,7 @@
                  - recvDomainListTot%domains(i)%ai(2)%min + 1
         stop  = start + srcSizeX*srcSizeY - 1
         call ESMF_RegridBilinearSearch(tv, recvDomainListTot%domains(i), &
-                                       coordSystem, &
-                                       srcSizeX, srcSizeY, &
+                                       coordSystem, srcSizeX, srcSizeY, &
                                        startComp-1, srcSizeXComp, &
                                        dstCounts(1), dstCounts(2), &
                                        indexMod, found, foundCount, &
@@ -460,12 +338,6 @@
 
       ! clean up
       call ESMF_RouteDestroy(tempRoute, status)
-      call ESMF_LocalArrayDestroy(srcGatheredCoordXArray, status)
-      call ESMF_LocalArrayDestroy(srcGatheredCoordYArray, status)
-      call ESMF_LocalArrayDestroy(srcGatheredMaskArray, status)
-      call ESMF_LocalArrayDestroy(srcLocalCoordXArray, status)
-      call ESMF_LocalArrayDestroy(srcLocalCoordYArray, status)
-      call ESMF_LocalArrayDestroy(srcLocalMaskArray, status)
       deallocate(dstLocalCoordArray)
       deallocate(srcLocalCoordArray)
       deallocate(found)
@@ -555,7 +427,7 @@
          jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest grid
          ibSrc, ieSrc,     &! beg, end of exclusive domain in i-dir of source grid
          jbSrc, jeSrc,     &! beg, end of exclusive domain in j-dir of source grid
-         my_DE, srcCount, srcValidCount
+         srcCount, srcValidCount
 
       integer :: srcAdd,   &! address in gathered source grid
                  dstAdd(2)  ! address in dest grid
