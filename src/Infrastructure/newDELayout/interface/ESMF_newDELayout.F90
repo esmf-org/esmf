@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.20 2004/04/13 16:01:58 nscollins Exp $
+! $Id: ESMF_newDELayout.F90,v 1.21 2004/04/14 20:08:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,27 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_newDELayout
 !
-!     ! F90 class type to hold pointer to C++ object
+!------------------------------------------------------------------------------
+!     ! ESMF_CommHandle
+!     
+!     ! Shallow sync/async communications type.  Mirrored on C++ side.
+!     ! Contains a place to hold
+!     ! the MPI handle in the case of nonblocking MPI calls.  The wait
+!     ! parameter controls whether the "IsComplete" call blocks/waits
+!     ! or simply tests and returns.
+      
+      type ESMF_CommHandle
+      sequence
+      private
+        integer :: mpi_handle  ! mpi returns this for async calls
+        integer :: wait        ! after an async call, does query block?
+      end type
+      
+      integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
+
+!------------------------------------------------------------------------------
+
+      ! F90 class type to hold pointer to C++ object
       type ESMF_newDELayout
       sequence
       private
@@ -99,6 +119,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_newDELayout
+      public ESMF_CommHandle
       public ESMF_I4_AP
       public ESMF_R4_AP
       public ESMF_R8_AP
@@ -109,6 +130,7 @@
 ! !PUBLIC PARAMETERS:
       
       public ESMF_CWGHT_NORMAL
+      public ESMF_TEST_COMPLETE, ESMF_WAIT_COMPLETE
 
 !------------------------------------------------------------------------------
 
@@ -141,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.20 2004/04/13 16:01:58 nscollins Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.21 2004/04/14 20:08:55 nscollins Exp $'
 
 !==============================================================================
 ! 
