@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.8 2003/04/15 18:05:53 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.9 2003/07/01 17:03:55 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -157,7 +157,7 @@
 #elif defined(PARCH_solaris)
       print *, "need to call flush() here"
 #elif defined(PARCH_alpha)
-      print *, "need to call flush() here"
+      call flush(unitNumber, status)
 #else
       print *, "unknown architecture in ESMF_IOFlush()"
 #endif
