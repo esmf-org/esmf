@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.16 2004/01/29 04:44:35 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.17 2004/02/11 21:52:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 !------------------------------------------------------------------------------
 !
 
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 !==============================================================================
 !BOP
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.16 2004/01/29 04:44:35 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.17 2004/02/11 21:52:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars

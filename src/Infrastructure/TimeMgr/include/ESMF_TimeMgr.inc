@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_TimeMgr.inc,v 1.4 2003/11/10 18:44:36 eschwab Exp $
+$Id: ESMF_TimeMgr.inc,v 1.5 2004/02/11 21:50:09 eschwab Exp $
  
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@ by both C++ and F90 compilers.
 !EOP
 #endif
 
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 #define SECONDS_PER_DAY 86400
 #define SECONDS_PER_HOUR 3600
