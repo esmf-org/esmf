@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.184 2004/08/28 14:14:40 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.185 2004/09/16 03:47:13 slswift Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -273,8 +273,8 @@
 !!$        private ESMF_FieldWriteFileNetCDF6DR4
 !!$        private ESMF_FieldWriteFileNetCDF7DR4
 !!$        private ESMF_FieldWriteFileNetCDF1DR8
-!!$        private ESMF_FieldWriteFileNetCDF2DR8
-!!$        private ESMF_FieldWriteFileNetCDF3DR8
+        private ESMF_FieldWriteFileNetCDF2DR8
+        private ESMF_FieldWriteFileNetCDF3DR8
 !!$        private ESMF_FieldWriteFileNetCDF4DR8
 !!$        private ESMF_FieldWriteFileNetCDF5DR8
 !!$        private ESMF_FieldWriteFileNetCDF6DR8
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.184 2004/08/28 14:14:40 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.185 2004/09/16 03:47:13 slswift Exp $'
 
 !==============================================================================
 !
@@ -3237,7 +3237,7 @@
 !     \item [{[iospec]}]
 !            I/O specification.
 !     \item [{[timestamp]}]
-!            {\tt ESMF\_Time}.
+!            A timestamp of type {\tt ESMF\_Time} for the data.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3285,6 +3285,11 @@
               return
            else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
               call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+              if(rcpresent) rc = ESMF_SUCCESS
+              return
            else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
 #if (ESMF_NO_IOCODE)
               print*, "netCDF support not configured in."
@@ -3303,6 +3308,12 @@
               return
            else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
            call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
+              if (ESMF_LogMsgFoundError(status, &
+                                        ESMF_ERR_PASSTHRU, &
+                                        ESMF_CONTEXT, rc)) return
+              if(rcpresent) rc = ESMF_SUCCESS
+
+              return
            else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
 #if (ESMF_NO_IOCODE)
               print*, "netCDF support not configured in."
@@ -3324,9 +3335,7 @@
         endif
         ! get the date from the timestamp.
         call ESMF_TimeGet(ts, timeString=Date, rc=status)
-        Date = Date(1:10)//'_'//Date(12:19)//'.0000'
-        !!print *, 'Date = ', Date
-!!$        Date = '2000-09-18_16:42:01'
+        Date = Date(1:10)//'_'//Date(12:19)
 
         ! Collect results on DE 0 and output to a file
         call ESMF_FieldGet(field, grid=grid, rc=status)
@@ -3353,7 +3362,6 @@
         out_type = arr_type%dtype
         out_kind = arr_kind%dkind
 
-        !! macros which are expanded by the preprocessor
         select case (out_type)
           case (ESMF_DATA_INTEGER%dtype)
             select case (out_rank)
@@ -3506,9 +3514,9 @@
                   case (ESMF_R4%dkind)
                     call ESMF_FieldWriteFileNetCDF2DR4(field, grid, out_array, out_counts, &
                                     out_lbounds, out_ubounds, date, iospec, rc=status)
-!!$                  case (ESMF_R8%dkind)
-!!$                    call ESMF_FieldWriteFileNetCDF2DR8(field, grid, out_array, out_counts, &
-!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_FieldWriteFileNetCDF2DR8(field, grid, out_array, out_counts, &
+                                    out_lbounds, out_ubounds, date, iospec, rc=status)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -3518,9 +3526,9 @@
                   case (ESMF_R4%dkind)
                     call ESMF_FieldWriteFileNetCDF3DR4(field, grid, out_array, out_counts, &
                                     out_lbounds, out_ubounds, date, iospec, rc=status)
-!!$                  case (ESMF_R8%dkind)
-!!$                    call ESMF_FieldWriteFileNetCDF3DR8(field, grid, out_array, out_counts, &
-!!$                                    out_lbounds, out_ubounds, date, iospec, rc=status)
+                  case (ESMF_R8%dkind)
+                    call ESMF_FieldWriteFileNetCDF3DR8(field, grid, out_array, out_counts, &
+                                    out_lbounds, out_ubounds, date, iospec, rc=status)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -3603,7 +3611,7 @@
         integer, dimension(:), intent(in) :: counts
         integer, dimension(:), intent(in) :: lbounds
         integer, dimension(:), intent(in) :: ubounds
-      character (19) date
+      character (19), intent(in) :: date
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc  
 !
@@ -3630,9 +3638,8 @@
 
         ! Local variables
         logical :: rcpresent
-      integer Comm
+      integer comm
       integer IOComm
-      type(ESMF_CoordOrder) :: order
         type(ESMF_VM) :: vm
         character (80) SysDepInfo
         integer     :: DataHandle
@@ -3667,14 +3674,11 @@
             call ESMF_FieldGet(field, name=filename, rc=status)
         endif
 
-! For now we set the communicator to be MPI_COMM_WORLD.  Eventually,
-! we will pull it from the DE.  
-! We are also not taking advantage of the ability to have a different
+! We are not taking advantage of the ability to have a different
 ! communicator just for IO.  So we set the IO communicator to that of
 ! the field DE.
         call ESMF_VMGetGlobal(vm, rc=Status)
         call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
-!!$        Comm = MPI_COMM_WORLD
         IOComm = Comm
   
         Stagger = ''
@@ -3692,101 +3696,48 @@
 ! For now it is set to 0 which is a null setting.
         DomDesc = 0
   
-! Possibly add this as an ESMF_IOSpec item.
-! Hardwire it for now.
-! The default should probably be based off of Grid coord_order
-        call ESMF_GridGet(grid, coordOrder=order)
-        if (order == ESMF_COORD_ORDER_XYZ) then
            MemOrd = "XY"
            DimNames(1) = 'X'
            DimNames(2) = 'Y'
         
-        elseif (order == ESMF_COORD_ORDER_XZY) then
-           MemOrd = "XZ"
-           DimNames(1) = 'X'
-           DimNames(2) = 'Z'
-        
-        elseif (order == ESMF_COORD_ORDER_YXZ) then
-           MemOrd = "YX"
-           DimNames(1) = 'Y'
-           DimNames(2) = 'X'
-        
-        elseif (order == ESMF_COORD_ORDER_YZX) then
-           MemOrd = "YZ"
-           DimNames(1) = 'Y'
-           DimNames(2) = 'Z'
-        
-        elseif (order == ESMF_COORD_ORDER_ZXY) then
-           MemOrd = "ZX"
-           DimNames(1) = 'Z'
-           DimNames(2) = 'X'
-        
-        elseif (order == ESMF_COORD_ORDER_ZYX) then
-           MemOrd = "ZY"
-           DimNames(1) = 'Z'
-           DimNames(2) = 'Y'
-        
-        elseif (order == ESMF_COORD_ORDER_UNKNOWN) then
-           print*, 'Assuming XY coordinate ordering.'
-           MemOrd = "XY"
-           DimNames(1) = 'X'
-           DimNames(2) = 'Y'
-
-        else
-           print*, "Error getting coordinate order for output."
-           return
-        endif
-
         call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
 
 ! Initialize the output stream.
-           call ext_ncd_ioinit(Status)
-           print *,'After call ext_ncd_ioinit, Status =',Status
-      
-           print*,'!!!!!!!!!!!!!!!!!!!!!!! ext_ncd_open_for_write_begin'
+           call ext_ncd_ioinit(sysdepinfo,status)
 
 ! To write multiple times into the same file, the I/O stream will
 ! probably need a separate initialize routine.  Upon initialization,
 ! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
 ! reaccess the file.
-           call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
-           print *, ' ext_ncd_open_for_write_begin Status = ',Status,DataHandle
+      call ext_ncd_open_for_write_begin( filename, comm, iocomm, sysdepinfo, datahandle, status)
            
-! There needs to be a block of code or function that converts the
-! ESMF variable types into the corresponding WRF types. 
-! i.e. ESMF_KIND_R4 => WRF_REAL
 ! This call 'trains' the output library but does not write out any data.
-           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
-                &'MemOrd',Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
-                &lbounds,ubounds,Status)
-           print *,'             dry run : ext_ncd_write_field Status = ',Status
+      call ext_ncd_write_field(datahandle,date,filename,data_ptr,wrf_type,comm,iocomm,domdesc,&
+                              &memord,stagger,dimnames,lbounds,ubounds,lbounds,ubounds,&
+                              &lbounds,ubounds,status)
   
-           call ext_ncd_open_for_write_commit(DataHandle, Status)
-           print *, '             ext_ncd_open_for_write_commit Status = ', Status,DataHandle
+      call ext_ncd_open_for_write_commit(datahandle, status)
   
 ! This call does output the data.
-           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
-                &'MemOrd',Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
-                &lbounds,ubounds,Status)
-           print *,'              first write: ext_ncd_write_field Status = ',Status
+      call ext_ncd_write_field(datahandle,date,filename,data_ptr,wrf_type,comm,iocomm,domdesc,&
+                              &memord,stagger,dimnames,lbounds,ubounds,lbounds,ubounds,&
+                              &lbounds,ubounds,status)
   
 ! For writing multiple times to the same file, these calls will have
 ! to be placed in a separate close routine to release the handle on
 ! the IO stream.
-           call ext_ncd_ioclose( DataHandle, Status)
-           print *, '             After ext_ncd_ioclose, Status = ',Status
-           call ext_ncd_ioexit(Status)
-           print *,'              After ext_ncd_ioexit, Status = ',Status
+      call ext_ncd_ioclose( datahandle, status)
+      call ext_ncd_ioexit(status)
 
          end subroutine ESMF_FieldWriteFileNetCDF2DR4
         
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldWriteFileNetCDF3DR4 - Write a Field to external storage
+! !IROUTINE: ESMF_FieldWriteFileNetCDF2DR8 - Write a Field to external storage
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldWriteFileNetCDF3DR4(field, grid, array, counts, & 
+      subroutine ESMF_FieldWriteFileNetCDF2DR8(field, grid, array, counts, & 
                                  lbounds, ubounds, date, iospec, rc)
 !
 ! !ARGUMENTS:
@@ -3796,7 +3747,7 @@
         integer, dimension(:), intent(in) :: counts
         integer, dimension(:), intent(in) :: lbounds
         integer, dimension(:), intent(in) :: ubounds
-      character (19) date
+      character (19), intent(in) :: date
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc  
 !
@@ -3825,7 +3776,142 @@
         logical :: rcpresent
       integer Comm
       integer IOComm
-      type(ESMF_CoordOrder) :: order
+        type(ESMF_VM) :: vm
+        character (80) SysDepInfo
+        integer     :: DataHandle
+        integer DomDesc
+        character*2 MemOrd
+        character*2 Stagger
+        character*31, dimension(2) :: DimNames
+        character(len=ESMF_MAXSTR) :: filename
+        real(kind=ESMF_KIND_R8), dimension(:,:), pointer :: data_ptr
+        integer wrf_type
+        integer status
+
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
+
+        wrf_type = WRF_DOUBLE
+
+        ! Initialize return code
+        if(present(rc)) then
+            rcpresent=.TRUE.
+            rc = ESMF_FAILURE      
+        endif
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+! We are not taking advantage of the ability to have a different
+! communicator just for IO.  So we set the IO communicator to that of
+! the field DE.
+        call ESMF_VMGetGlobal(vm, rc=Status)
+        call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
+        IOComm = Comm
+  
+        Stagger = ''
+
+! This is a WRF string used to pass additional control information to
+! the I/O interface.  Currently it's only setting is to describe if the
+! DATASET is a RESTART, HISTORY, BOUNDARY condition or INITIAL condition
+! field.
+! FieldWrite does not currently have a use for this feature and always
+! uses the same I/O stream.         
+        SysDepInfo = 'DATASET=HISTORY'
+
+! This is a required WRF variable to "that may be used to pass a
+! communication package specific domain."  
+! For now it is set to 0 which is a null setting.
+        DomDesc = 0
+  
+           MemOrd = "XY"
+           DimNames(1) = 'X'
+           DimNames(2) = 'Y'
+
+        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+
+! Initialize the output stream.
+           call ext_ncd_ioinit(SysDepInfo,Status)
+
+! To write multiple times into the same file, the I/O stream will
+! probably need a separate initialize routine.  Upon initialization,
+! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
+! reaccess the file.
+           call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
+           
+! This call 'trains' the output library but does not write out any data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+           call ext_ncd_open_for_write_commit(DataHandle, Status)
+  
+! This call does output the data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+! For writing multiple times to the same file, these calls will have
+! to be placed in a separate close routine to release the handle on
+! the IO stream.
+           call ext_ncd_ioclose( DataHandle, Status)
+           call ext_ncd_ioexit(Status)
+
+         end subroutine ESMF_FieldWriteFileNetCDF2DR8
+        
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileNetCDF3DR4 - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileNetCDF3DR4(field, grid, array, counts, & 
+                                 lbounds, ubounds, date, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+        integer, dimension(:), intent(in) :: counts
+        integer, dimension(:), intent(in) :: lbounds
+        integer, dimension(:), intent(in) :: ubounds
+      character (19), intent(in) :: date
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[subset]}]
+!            {\tt ESMF\_Subset}.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        ! Local variables
+        logical :: rcpresent
+      integer Comm
+      integer IOComm
         type(ESMF_VM) :: vm
         character (80) SysDepInfo
         integer     :: DataHandle
@@ -3860,14 +3946,152 @@
             call ESMF_FieldGet(field, name=filename, rc=status)
         endif
 
-! For now we set the communicator to be MPI_COMM_WORLD.  Eventually,
-! we will pull it from the DE.  
-! We are also not taking advantage of the ability to have a different
+! We are not taking advantage of the ability to have a different
 ! communicator just for IO.  So we set the IO communicator to that of
 ! the field DE.
         call ESMF_VMGetGlobal(vm, rc=Status)
         call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
-!!$        Comm = MPI_COMM_WORLD
+        IOComm = Comm
+  
+        Stagger = ''
+
+! This is a WRF string used to pass additional control information to
+! the I/O interface.  Currently it's only setting is to describe if the
+! DATASET is a RESTART, HISTORY, BOUNDARY condition or INITIAL condition
+! field.
+! FieldWrite does not currently have a use for this feature and always
+! uses the same I/O stream.         
+        SysDepInfo = 'DATASET=HISTORY'
+
+! This is a required WRF variable to "that may be used to pass a
+! communication package specific domain."  
+! For now it is set to 0 which is a null setting.
+        DomDesc = 0
+  
+! Possibly add this as an ESMF_IOSpec item.
+! I thought this could be related to COORD_ORDER, but that is not an a direct correlation.
+! Hardwire it for now.
+           MemOrd = "XYZ"
+           DimNames(1) = 'X'
+           DimNames(2) = 'Y'
+           DimNames(3) = 'Z'
+        
+
+        call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
+
+! Initialize the output stream.
+           call ext_ncd_ioinit(SysDepInfo,Status)
+
+! To write multiple times into the same file, the I/O stream will
+! probably need a separate initialize routine.  Upon initialization,
+! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
+! reaccess the file.
+           call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
+           
+! This call 'trains' the output library but does not write out any data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+           call ext_ncd_open_for_write_commit(DataHandle, Status)
+  
+! This call does output the data.
+           call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &lbounds,ubounds,Status)
+  
+! For writing multiple times to the same file, these calls will have
+! to be placed in a separate close routine to release the handle on
+! the IO stream.
+           call ext_ncd_ioclose( DataHandle, Status)
+           call ext_ncd_ioexit(Status)
+
+         end subroutine ESMF_FieldWriteFileNetCDF3DR4
+        
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_FieldWriteFileNetCDF3DR8 - Write a Field to external storage
+!
+! !INTERFACE:
+      subroutine ESMF_FieldWriteFileNetCDF3DR8(field, grid, array, counts, & 
+                                 lbounds, ubounds, date, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+        integer, dimension(:), intent(in) :: counts
+        integer, dimension(:), intent(in) :: lbounds
+        integer, dimension(:), intent(in) :: ubounds
+      character (19), intent(in) :: date
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      Used to write data to persistent storage in a variety of formats.  
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
+!      options specified in the IOSpec derived type. 
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [name]
+!           An {\tt ESMF\_Field} name.
+!     \item [{[subset]}]
+!            {\tt ESMF\_Subset}.
+!     \item [{[iospec]}]
+!            I/O specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+        ! Local variables
+        logical :: rcpresent
+      integer Comm
+      integer IOComm
+        type(ESMF_VM) :: vm
+        character (80) SysDepInfo
+        integer     :: DataHandle
+        integer DomDesc
+        character*3 MemOrd
+        character*3 Stagger
+        character*31, dimension(3) :: DimNames
+        character(len=ESMF_MAXSTR) :: filename
+        real(kind=ESMF_KIND_R8), dimension(:,:,:), pointer :: data_ptr
+        integer wrf_type
+        integer status
+
+        ! call ESMF_Log(?, 'entry into ESMF_FieldWrite');
+
+        ! Set initial values
+        status = ESMF_FAILURE 
+        rcpresent = .FALSE.
+
+        wrf_type = WRF_DOUBLE
+
+        ! Initialize return code
+        if(present(rc)) then
+            rcpresent=.TRUE.
+            rc = ESMF_FAILURE      
+        endif
+           
+        ! Get filename out of IOSpec, if specified.  Otherwise use the
+        ! name of the Field.
+        if (present(IOSpec)) then
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+        else
+            call ESMF_FieldGet(field, name=filename, rc=status)
+        endif
+
+! We are not taking advantage of the ability to have a different
+! communicator just for IO.  So we set the IO communicator to that of
+! the field DE.
+        call ESMF_VMGetGlobal(vm, rc=Status)
+        call ESMF_VMGet(vm, mpiCommunicator=comm, rc=rc)
         IOComm = Comm
   
         Stagger = ''
@@ -3887,98 +4111,41 @@
   
 ! Possibly add this as an ESMF_IOSpec item.
 ! Hardwire it for now.
-! The default should probably be based off of Grid coord_order
-        call ESMF_GridGet(grid, coordOrder=order)
-        if (order == ESMF_COORD_ORDER_XYZ) then
            MemOrd = "XYZ"
            DimNames(1) = 'X'
            DimNames(2) = 'Y'
            DimNames(3) = 'Z'
         
-        elseif (order == ESMF_COORD_ORDER_XZY) then
-           MemOrd = "XZY"
-           DimNames(1) = 'X'
-           DimNames(2) = 'Z'
-           DimNames(3) = 'Y'
-        
-        elseif (order == ESMF_COORD_ORDER_YXZ) then
-           MemOrd = "YXZ"
-           DimNames(1) = 'Y'
-           DimNames(2) = 'X'
-           DimNames(3) = 'Z'
-        
-        elseif (order == ESMF_COORD_ORDER_YZX) then
-           MemOrd = "YZX"
-           DimNames(1) = 'Y'
-           DimNames(2) = 'Z'
-           DimNames(3) = 'X'
-        
-        elseif (order == ESMF_COORD_ORDER_ZXY) then
-           MemOrd = "ZXY"
-           DimNames(1) = 'Z'
-           DimNames(2) = 'X'
-           DimNames(3) = 'Y'
-        
-        elseif (order == ESMF_COORD_ORDER_ZYX) then
-           MemOrd = "ZYX"
-           DimNames(1) = 'Z'
-           DimNames(2) = 'Y'
-           DimNames(3) = 'X'
-        
-        elseif (order == ESMF_COORD_ORDER_UNKNOWN) then
-           print*, 'Assuming XYZ coordinate ordering.'
-           MemOrd = "XYZ"
-           DimNames(1) = 'X'
-           DimNames(2) = 'Y'
-           DimNames(3) = 'Z'
-
-        else
-           print*, "Error getting coordinate order for output."
-           return
-        endif
-
         call ESMF_ArrayGetData( array, data_ptr, ESMF_DATA_REF, rc)
 
 ! Initialize the output stream.
-           call ext_ncd_ioinit(Status)
-           print *,'After call ext_ncd_ioinit, Status =',Status
-      
-           print*,'!!!!!!!!!!!!!!!!!!!!!!! ext_ncd_open_for_write_begin'
+           call ext_ncd_ioinit(SysDepInfo,Status)
 
 ! To write multiple times into the same file, the I/O stream will
 ! probably need a separate initialize routine.  Upon initialization,
 ! 'DataHandle' will be carried around, perhaps in ESMF_IOSpec, to
 ! reaccess the file.
            call ext_ncd_open_for_write_begin( FileName, Comm, IOComm, SysDepInfo, DataHandle, Status)
-           print *, ' ext_ncd_open_for_write_begin Status = ',Status,DataHandle
            
-! There needs to be a block of code or function that converts the
-! ESMF variable types into the corresponding WRF types. 
-! i.e. ESMF_KIND_R4 => WRF_REAL
 ! This call 'trains' the output library but does not write out any data.
            call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
-                &'MemOrd',Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
                 &lbounds,ubounds,Status)
-           print *,'             dry run : ext_ncd_write_field Status = ',Status
   
            call ext_ncd_open_for_write_commit(DataHandle, Status)
-           print *, '             ext_ncd_open_for_write_commit Status = ', Status,DataHandle
   
 ! This call does output the data.
            call ext_ncd_write_field(DataHandle,Date,filename,data_ptr,wrf_type,Comm,IOComm,DomDesc,&
-                &'MemOrd',Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
+                &MemOrd,Stagger,DimNames,lbounds,ubounds,lbounds,ubounds,&
                 &lbounds,ubounds,Status)
-           print *,'              first write: ext_ncd_write_field Status = ',Status
   
 ! For writing multiple times to the same file, these calls will have
 ! to be placed in a separate close routine to release the handle on
 ! the IO stream.
            call ext_ncd_ioclose( DataHandle, Status)
-           print *, '             After ext_ncd_ioclose, Status = ',Status
            call ext_ncd_ioexit(Status)
-           print *,'              After ext_ncd_ioexit, Status = ',Status
 
-         end subroutine ESMF_FieldWriteFileNetCDF3DR4
+         end subroutine ESMF_FieldWriteFileNetCDF3DR8
         
 
 !------------------------------------------------------------------------------
@@ -4023,6 +4190,7 @@
         type(ESMF_Grid) :: grid
         type(ESMF_DELayout) :: delayout
         character(len=ESMF_MAXSTR) :: filename
+        character(len=ESMF_MAXSTR) :: name
 
         ! TODO: revised code goes here
 
@@ -4046,21 +4214,48 @@
         else
             call ESMF_FieldGet(field, name=filename, rc=status)
         endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Collect results on DE 0 and output to a file
         call ESMF_FieldGet(field, grid=grid, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         call ESMF_GridGet(grid, delayout=delayout, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         call ESMF_DELayoutGet(delayout, localDE=de_id, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+        write(name,'(i1)') de_id
+        call ESMF_ArrayWrite(field%ftypep%localfield%localdata,&
+                             filename=trim(name), rc=status)
 
         ! Output to file, from de_id 0 only
         call ESMF_ArrayGather(field%ftypep%localfield%localdata, &
                               field%ftypep%grid, field%ftypep%mapping, &
                               0, outarray, rc=status)
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
         !call ESMF_FieldAllGather(field, outarray, rc=status)
         if (de_id .eq. 0) then       
             call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
             call ESMF_ArrayDestroy(outarray, status)
+            if (ESMF_LogMsgFoundError(status, &
+                                      ESMF_ERR_PASSTHRU, &
+                                      ESMF_CONTEXT, rc)) return
         endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldWriteFileASCII
         
