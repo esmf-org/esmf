@@ -1,4 +1,4 @@
-% $Id: VM_implnotes.tex,v 1.1 2004/05/17 17:39:51 theurich Exp $
+% $Id: VM_implnotes.tex,v 1.2 2004/05/17 18:55:25 theurich Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -8,11 +8,11 @@ The VM class provides an additional layer of abstraction on top of the POSIX mac
 
 \item Encapsulation of hardware and operating system details within the concept of Permanent Execution Threads (PETs).
 
-\item Resource management in terms of PETs with a guard against oversubscription.
+\item Resource management in terms of PETs with a guard against over-subscription.
 
 \item Topological description of the underlying configuration of the compute resources in terms of PETs.
 
-\item Transparent communication API for point-to-point and collective PET-based primiteves, hiding the many different communication channels and offering best possible performance.
+\item Transparent communication API for point-to-point and collective PET-based primitives, hiding the many different communication channels and offering best possible performance.
 
 \end{enumerate}
 
@@ -55,37 +55,24 @@ The VM class provides an additional layer of abstraction on top of the POSIX mac
 
 \end{itemize}
 
-The POSIX machine abstraction, while a very powerful concept, needs augmentation when applied to HPC applications. Key elements of the POSIX abstraction are processes, which provide virtually unlimited resources (memory, I/O, sockets, ...) to possibly multiple threads of execution. Similarily POSIX threads create the illusion that there are virtually unlimited processing elements present and available to each POSIX process. While the POSIX abstraction is very suitable for many multi-user/multi-tasking applications that need to share limited physical resources, it does not directly fit the HPC workload where oversubscription of resources is one of the most expensive modes of operation.
+The POSIX machine abstraction, while a very powerful concept, needs augmentation when applied to HPC applications. Key elements of the POSIX abstraction are processes, which provide virtually unlimited resources (memory, I/O, sockets, ...) to possibly multiple threads of execution. Similarly POSIX threads create the illusion that there is virtually unlimited processing power available to each POSIX process. While the POSIX abstraction is very suitable for many multi-user/multi-tasking applications that need to share limited physical resources, it does not directly fit the HPC workload where over-subscription of resources is one of the most expensive modes of operation.
 
-The VM holds information on the available physical processing units in terms of Cores, CPUs and SSIs, which make up the physical machine layout, and provides a flat view of the physical machine by intoducing the PE (processing element) concept. A PE is the smallest physical processing unit available on a particular machine.
+ESMF's virtual machine abstraction is based on the POSIX machine model but holds additional information about the available physical processing units in terms of Processing Elements (PEs). A PE is the smallest physical processing unit and encapsulates the hardware details (Cores, CPUs and SSIs).
 
-The key abstraction provided by the VM is the PET. All user code is executed by PETs while the OS details are hidden. The VM class contains a number of methods which allow the user to prescribe how the PETs of a desired virtual machine should be instantiated on the OS level and how they should map onto the hardware. This prescription is kept in a private virtual machine plan object which is being created at the same time the associated component is being created. Each time any component code is entered through the component's registered top--level methods (Initialize/Run/Finalize), the virtual machine plan along with a pointer to the respective user function is used to instantiate the user code on the PETs of the assiciated VM in form of single- or multi-threaded processes. 
+There is exactly one physical machine layout for each application, and all VM instances have access to this information. The PE is the smallest processing unit which, in today's microprocessor technology, corresponds to a single Core. Cores are arranged in CPUs which in turn are arranged in SSIs. The setup of the physical machine layout is part of the ESMF initialization process.
 
-The process of starting, entering, exiting and shutting down a VM is very transparent, all spawning and joining of threads is handled by VM methods "behind the scenes". Furthermore, fundamental synchronization and communication primitives are provided on the PET level through a uniform API, hiding details related to the actual PET OS-instantiation.
+On top of the PE concept the key abstraction provided by the VM is the PET. All user code is executed by PETs while OS and hardware details are hidden. The VM class contains a number of methods which allow the user to prescribe how the PETs of a desired virtual machine should be instantiated on the OS level and how they should map onto the hardware. This prescription is kept in a private virtual machine plan object which is created at the same time the associated component is being created. Each time component code is entered through one of the component's registered top--level methods (Initialize/Run/Finalize), the virtual machine plan along with a pointer to the respective user function is used to instantiate the user code on the PETs of the associated VM in form of single- or multi-threaded POSIX processes.
 
-There is only one unique physical machine layout for each application, and all instances of the VM have access to this information. The PE is the smallest processing unit, which in today's microporcessor technology, corresponds to a single Core. Cores are arranged in CPUs and SSIs. The setup of the physical machine layout is part of the initialization of the default virtual machine which subscribs one PET, instantiated as single-threaded process, to each core. Using the physical machine layout it is possible to provide very generic virtual machine plan methods as well as guard against oversubscription.
+The process of starting, entering, exiting and shutting down a VM is very transparent, all spawning and joining of threads is handled by VM methods "behind the scenes". Furthermore, fundamental synchronization and communication primitives are provided on the PET level through a uniform API, hiding details related to the actual instantiation of the participating PETs.
 
-Within one VM object each PE of the physical machine layout maps to 0 or 1 PETs. Allowing unassigned PEs provides a means to prevent oversubscription between multiple concurrently running virtual machines. Similarly a maximum of one PET per PE prevents oversubscription within a single VM instance. However, oversubscription is possible by subscribing PETs from different virtual machines to the same PE. This type of oversubscription can be desirable for PETs associated with IO work loads expected to be used infrequently and to block often on IO requests.
+Within a VM object each PE of the physical machine maps to 0 or 1 PETs. Allowing unassigned PEs provides a means to prevent over-subscription between multiple concurrently running virtual machines. Similarly a maximum of one PET per PE prevents over-subscription within a single VM instance. However, over-subscription is possible by subscribing PETs from different virtual machines to the same PE. This type of over-subscription can be desirable for PETs associated with IO work loads expected to be used infrequently and to block often on IO requests.
 
-Each PET of a VM object maps to at least 1 PE of the physical machine layout, thus ensuring its execution. Mapping a single PET to multiple PEs provides resources for user-level multi-threading. The user code executing on the PET inquires how many PEs are associated with its PET and if there are multiple PEs available the user code can spawn an equal number of threads (e.g. OpenMP) without risking oversubscription. Typically these user spawned threads are short-lived and used for fine-grained parallelization in form of TETs. All PEs mapped against a single PET must be part of a unique SSI!
+On the OS level each PET of a VM object is represented by a POSIX thread (Pthread) either belonging to a single-- or multi--threaded process and maps to at least 1 PE of the physical machine, ensuring its execution. Mapping a single PET to multiple PEs provides resources for user--level multi--threading, in which case the user code inquires how many PEs are associated with its PET and if there are multiple PEs available the user code can spawn an equal number of threads (e.g. OpenMP) without risking over-subscription. Typically these user spawned threads are short-lived and used for fine-grained parallelization in form of TETs. All PEs mapped against a single PET must be part of a unique SSI in order to allow user--level multi--threading!
 
-ESMF initialization sets up the default virtual machine with as many PETs, instantiated as single-threaded MPI processes, as there are PEs and uses a 1:1 mapping of PETs to PEs.
+In addition to discovering the physical machine the ESMF initialization process sets up the default global virtual machine. This VM object, which is the ultimate parent of all VMs created during the course of execution, contains as many PETs as there are PEs in the physical machine. All of its PETs are instantiated in form of single-threaded MPI processes and a 1:1 mapping of PETs to PEs is used for the default global VM.
 
-The user code executing during the registration call of a component may use an VMDef call to define its virtual machine. Internally this will create an VMPlan associated with this component. The default VMPlan defines an MPI-only VM.
+The VM design and implementation is based on the POSIX process and thread model as well as the MPI-1.2 standard. As a consequence of the latter standard the number of processes is static during the course of execution and is determined at start-up. The VM implementation further requires that the user starts up the ESMF application with as many MPI processes as there are PEs in the available physical machine using the platform dependent mechanism to ensure proper process placement. 
 
-Each time any component code is entered via Initialize, Run or Finalize ESMF will enter a virtual machine according to the assiociated plan and exit on return. Thus all component user code will be executed by the PETs of the prescribed virtual machine. The user code will be provided with a handle to the VM object. 
+All MPI processes participating in a VM are grouped together by means of an MPI\_Group object and their context is defined via an MPI\_Comm object (MPI intra-communicator). The PET local process id within each virtual machine is equal to the MPI\_Comm\_rank in the local MPI\_Comm context whereas the PET process id is equal to the MPI\_Comm\_rank in MPI\_COMM\_WORLD. The PET process id is used within the VM methods to determine the virtual memory space a PET is operating in. 
 
-On the OS level all PETs are instantiated as Pthreads, either belonging to a group of threads running withing a multi-threaded process or as a single thread within a single-threaded process.
-
-The number of processes is static during the course of execution and determined at start-up. The VM convention requires that the user starts up the ESMF application with as many MPI processes as there are PEs in the available physical machine. This is to mean that in case the user requested 8 dual-core CPUs from the system (e.g. via some queuing system), then the user should launch the ESMF application with 8 x 2 = 16 MPI processes.
-
-All MPI processes participating in the set of PETs of a virtual machine are grouped together by a MPI\_Group object and their context is accessible via a MPI\_Comm object (MPI intra-communicator).
-
-The PET local process id within each virtual machine is equal to the MPI\_Comm\_rank in the local MPI\_Comm object and the PET process id within each virtual machine is equal to the MPI\_Comm\_rank in the MPI\_COMM\_WORLD.
-Within a ESMF component the virtual machine is "static". However, 
-sub-components can define their own virtual machines within the
-resources of their parent's virtual machine.
-
-
-
-
+In order to provide a migration path for legacy MPI-applications the VM offers accessor functions to its MPI\_Comm object. Once obtained this object may be used in explicit user-code MPI calls within the same context.
