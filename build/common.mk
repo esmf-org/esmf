@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.83 2004/11/15 18:00:16 nscollins Exp $
+#  $Id: common.mk,v 1.84 2004/11/15 18:07:20 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -555,8 +555,8 @@ tree_build_system_tests:  $(SYSTEM_TESTS_BUILD)
 #  Link rule for Fortran system tests.
 #
 $(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf \
-	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
+	-$(SL_F_LINKER) -o $@ $(SYSTEM_TESTS_OBJ) $< -lesmf ${MPI_LIB} \
+        ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -632,8 +632,15 @@ tree_build_tests: $(TESTS_BUILD)
 
 
 $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
-	${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
+	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf ${MPI_LIB} \
+        ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} \
+	$(SL_LINKOPTS)
+	${RM} -f *.o *.mod
+
+
+$(ESMC_TESTDIR)/ESMC_%UTest : ESMC_%UTest.o $(ESMFLIB)
+	-$(SL_C_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf ${MPI_LIB} \
+        ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${CXXF90LIBS} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -712,16 +719,14 @@ tree_build_examples: $(EXAMPLES_BUILD)
 #  Examples Link commands
 #
 $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(ESMFLIB)
-	-$(SL_F_LINKER) -o $@ $< -lesmf ${F90CXXLIBS} \
-	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
-	$(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $@ $< -lesmf ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} \
+	${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
 	rm -f  $<
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
-	-${SL_C_LINKER} -g -o $@ $< -lesmf \
-        ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
-        $(SL_LINKOPTS)
+	-$(SL_C_LINKER) -o $@ $< -lesmf ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} \
+	${PCL_LIB} ${NETCDF_LIB} ${CXXF90LIBS} $(SL_LINKOPTS)
 	rm -f $<
 
 #
@@ -775,9 +780,8 @@ build_demo: chkopts chkdir_tests
 tree_build_demo: $(DEMO_BUILD) 
 
 $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
-	$(SL_F_LINKER) -o $@ $(DEMO_OBJ) $< -lesmf ${F90CXXLIBS} \
-	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} \
-	$(SL_LINKOPTS)
+	$(SL_F_LINKER) -o $@ $(DEMO_OBJ) $< -lesmf ${MPI_LIB} ${MP_LIB} \
+	${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
 
