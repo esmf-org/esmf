@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.1 2004/06/18 19:46:08 theurich Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.2 2004/06/21 19:37:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 ! components. Here a single component is created in the main program and the
 ! default VM gives all its resources to the child component. When the child
 ! component code is entered through the registered methods (Initialize, Run or 
-! Finalize) the user code will be executed in the childs VM.
+! Finalize) the user code will be executed in the child's VM.
 !
 !EOE
 !------------------------------------------------------------------------------
