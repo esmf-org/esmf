@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2003/09/18 23:01:54 flanigan Exp $ 
+# $Id: makefile,v 1.37 2003/09/22 17:25:41 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -41,11 +41,10 @@ HTMLFILES =	${ESMC_DOCDIR}/ESMF_reqdoc \
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = ESMF_syn.tex ESMF_auth.tex ESMF_buildreq.tex
+REQDOC_DEP_FILES = ESMF_syn.tex ESMF_auth.tex ESMF_buildreq.tex 
 DESDOC_DEP_FILES = 
 REFDOC_DEP_FILES = 
-
-USRDOC_DEP_FILES = ESMF_desc.tex ESMF_install.tex 
+USRDOC_DEP_FILES = ESMF_desc.tex ESMF_install.tex  ESMF_techoverview.tex
 
 include $(ESMF_DIR)/makefile
 
