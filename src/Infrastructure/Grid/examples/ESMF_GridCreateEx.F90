@@ -15,14 +15,9 @@
 
 !   ! Example program showing various ways to create a Grid object
     program ESMF_GridCreateEx
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! Other ESMF modules which are needed by Grids
-    use ESMF_IOMod
-    use ESMF_DataMapMod
-    use ESMF_GridMod
+    ! ESMF Framework module
+    use ESMF_Mod
     
     implicit none
     
