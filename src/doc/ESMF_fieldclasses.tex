@@ -156,17 +156,23 @@ data, returning a pointer to the start of the data
 array, and methods for reordering and subsetting the data.
 
 
-\subsection{Examples}
-
-<< to be written >>
+% \subsection{Examples}
+%
+%<< to be written >>
 
 \subsection{Class Details}
 
 Gridded Components encapsulate the computational data and the
 grid on which it is located.  A Gridded Component contains
-the following object hierarchy:
+the object hierarchy illustrated in Figure~\ref{fig:datahier}.
 
+\begin{figure}
+\caption[{Data Object Hierarchy}]{Relationships between major 
+Data handling objects.}
+\label{fig:datahier}
 \scalebox{0.70}{\includegraphics{ESMF_DataStructureHierarchy.eps}}
+\end{figure}
+
 
 
 \subsubsection{Bundle (ESMF\_Bundle)}
@@ -254,7 +260,7 @@ methods to query the current memory organization and methods to reorder the Data
 \end{description}
 
 \subsubsection{Grid (ESMF\_Grid)}
-\label{sec:ordering} 
+\label{sec:grid} 
 \begin{description}
 \item [Description] A Grid is the general representation of the coordinate information for
 the computation.  It contains both the logical presentation of the grid as well as the
