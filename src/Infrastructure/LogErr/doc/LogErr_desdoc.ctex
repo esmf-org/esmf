@@ -1,4 +1,4 @@
-% $Id: LogErr_desdoc.ctex,v 1.1 2003/03/28 21:33:08 shep_smith Exp $
+% $Id: LogErr_desdoc.ctex,v 1.2 2003/03/28 23:04:41 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,11 +109,11 @@
 \input{comppath/LogErr_fex}
 #endif
 
-#\subsection{Parameters and Definitions}
+%#\subsection{Parameters and Definitions}
 #ifdef STANDALONE
-#\input{class_fparam}
+%#\input{class_fparam}
 #elif defined(CONSTITUENT)
-#\input{comppath/class_fparam}
+%#\input{comppath/class_fparam}
 #endif
 
 %\subsection{Class API}
