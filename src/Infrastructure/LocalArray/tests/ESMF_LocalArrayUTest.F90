@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.10 2004/05/20 22:14:56 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.11 2004/05/21 17:04:01 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -518,7 +518,7 @@
     ! with do copy, the original can go now
     deallocate(real3dptr)
 
-    call ESMF_LocalArrayPrint(array4, "foo", rc)
+    !call ESMF_LocalArrayPrint(array4, "foo", rc)
     print *, "array 4 print returned"
 
     call ESMF_LocalArrayDestroy(array4)
@@ -541,12 +541,12 @@
 
     print *, "array 4 create returned"
 
-    call ESMF_LocalArrayPrint(array4, "foo", rc)
+    !call ESMF_LocalArrayPrint(array4, "foo", rc)
     print *, "array 4 print returned"
 
     ! this deletes the space
     call ESMF_LocalArrayDestroy(array4)
-    print *, "array 4 destroy returned"
+    !print *, "array 4 destroy returned"
 
 !   ! Allocate and free different sizes testing end of array printing code
     ni = 10 
@@ -592,12 +592,12 @@
 
     print *, "array 4 create returned"
 
-    call ESMF_LocalArrayPrint(array4, "foo", rc)
+    !call ESMF_LocalArrayPrint(array4, "foo", rc)
     print *, "array 4 print returned"
 
     ! this deletes the space
     call ESMF_LocalArrayDestroy(array4)
-    print *, "array 4 destroy returned"
+    !print *, "array 4 destroy returned"
 
 !   ! Allocate and free different sizes testing end of array printing code
     ni = 11 
@@ -612,11 +612,11 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 4 create returned"
 
-    call ESMF_LocalArrayPrint(array4, "foo", rc)
+    !call ESMF_LocalArrayPrint(array4, "foo", rc)
     print *, "array 4 print returned"
 
     ! this deletes the space
-    call ESMF_LocalArrayDestroy(array4)
+    !call ESMF_LocalArrayDestroy(array4)
     print *, "array 4 destroy returned"
 
 
@@ -736,8 +736,8 @@
     call ESMF_LocalArrayWrite(array1, filename="./foo", rc=rc)
     print *, "array 1 write returned"
 
-    call ESMF_LocalArrayDestroy(array1)
-    print *, "array 1 destroy returned"
+    !call ESMF_LocalArrayDestroy(array1)
+    !print *, "array 1 destroy returned"
 
 !-------------------------------------------------------------------------------
 
