@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.47 2003/04/30 14:14:41 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.48 2003/06/20 19:41:33 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -67,10 +67,10 @@
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This routine is the C++ entry point for creating an ESMF_Array
+//      This routine is the C++ entry point for creating an {\tt ESMF\_Array}
 //      object.  Unlike natural C++ arrays which can be as simple as the
 //      base address pointer and the number of bytes necessary to move to
-//      the next item, ESMF_Arrays are richer in the associated metadata
+//      the next item, {\tt ESMF\_Array}s are richer in the associated metadata
 //      which allows them to behave more like Fortran arrays.  They store
 //      the size of each dimension, allow non-contiguous strides per
 //      dimension, and allow whole-array or subsectional operations.
@@ -127,7 +127,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Array object previously allocated
-//      via an ESMC_ArrayCreate routine.  Define for deep classes only.
+//      via an {\tt ESMC\_ArrayCreate} routine.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -208,8 +208,8 @@
 //
 // !DESCRIPTION:
 //      This version of Create is only intended for internal use by
-//      the ESMF_ArrayCreate fortran routine.  This routine works in a
-//      similar manner as the regular ESMC_ArrayCreate routine, but the
+//      the {\tt ESMF\_ArrayCreate} fortran routine.  This routine works in a
+//      similar manner as the regular {\tt ESMC\_ArrayCreate} routine, but the
 //      differences include:  it gets a real fortran 90 array pointer as
 //      one of the arguments; instead of calling malloc to make space for
 //      the array contents, it passes the f90 pointer back to a fortran
@@ -291,11 +291,11 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
-//      allocated Array object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_ArrayDestruct
+//      allocated {\tt ESMF\_Array} object.  May need to do additional allocations
+//      as needed.  Must call the corresponding {\tt ESMC\_ArrayDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_ArrayCreate, which calls
-//      ESMC_ArrayConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_ArrayCreate}, which calls
+//      {\tt ESMC\_ArrayConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -359,10 +359,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF_ArrayConstruct, does any additional cleanup before the
-//      original Array object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_ArrayDestroy, which calls
-//      ESMC_ArrayDestruct.  Define for deep classes only.
+//      {\tt ESMF\_ArrayConstruct}, does any additional cleanup before the
+//      original {\tt ESMC\_Array} object is freed.  Intended for internal ESMF
+//      use only; end-users use {\tt ESMC\_ArrayDestroy, which calls
+//      {\tt ESMC\_ArrayDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -400,7 +400,7 @@
       ESMC_ArrayConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Array object was configured with.
+//    Returns the set of resources the {\tt ESMC\_Array} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -427,7 +427,7 @@
       const ESMC_ArrayConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the Array object with set of resources given.
+//    Configures the {\tt ESMC\_Array} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -455,7 +455,7 @@
       //<value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of Array member <Value>.
+//     Returns the value of {\tt ESMC\_Array} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -481,7 +481,7 @@
       //const <value type> *value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the value of Array member <Value>.
+//     Sets the value of {\tt ESMC\_Array} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -608,7 +608,7 @@
       const struct c_F90ptr *p) {     // in - f90 pointer block
 //
 // !DESCRIPTION:
-//     Sets the Array member F90ptr with the given value.
+//     Sets the {\tt ESMC\_Array} member F90ptr with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -643,7 +643,7 @@
       struct ESMC_AxisIndex *indexlist) {     // in - values to set
 //
 // !DESCRIPTION:
-//     Sets the Array member AxisIndex with the given value.
+//     Sets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1493,8 +1493,8 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Array is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Validates that a {\tt ESMC\_Array} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -1523,8 +1523,8 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a Array.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      Print information about a {\tt ESMC\_Array}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -1757,7 +1757,7 @@
       const char *filename) const {    // in - file name
 //
 // !DESCRIPTION:
-//      Write the contents of an Array to disk.
+//      Write the contents of an {\tt ESMC\_Array} to disk.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
