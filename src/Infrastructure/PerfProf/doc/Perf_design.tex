@@ -1,4 +1,4 @@
-% $Id: Perf_design.tex,v 1.4 2003/03/24 18:20:55 ekluz Exp $
+% $Id: Perf_design.tex,v 1.5 2003/08/14 21:59:05 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,9 +25,9 @@ allocated in PerfCreate.
 
 More information on PerfCreate. PerfCreate sets the maximum number of code-segments
 that can be used (which will be increased if exceeded) and does the initial
-allocates of the array of Segments. If a PE-list is sent to PerfCreate as a
+allocates of the array of Segments. If a DE-layout is sent to PerfCreate as a
 optional argument, every-time PerfStart is called a synchronization will be done
-across all PE's in the PE-list given to PerfCreate.
+across all DE's in the DE-Layout given to PerfCreate.
 
 More information on PerfStart. When called PerfStart figures out if the given
 code segment has been activated before or not. If it hasn't it increments
@@ -41,7 +41,7 @@ More information on PerfEnd. PerfEnd deactivates a code segment, and calls
 the SegmentEnd method to accumulate the relevant counters.
 
 More information on PerfPrint. PerfPrint figures out the maximum, minimum, standard-deviation
-and average times across both threads and distributed PE's. The results are then 
+and average times across both threads and distributed DE's. The results are then 
 printed to the Log file. Below we give an example printout for a case with
 no threads and no distributed tasks as well as a case with threads and distributed
 tasks.
@@ -87,13 +87,12 @@ physics          calls          992
 \end{verbatim}
 }
 
-Example 2, printout with threads and distributed tasks, and
-hardware monitor turned off. Also logging turned on so that
-all tasks send log to the same log file.
+Example 2, printout with user-threads and distributed tasks, and
+hardware monitor turned off.
 
 {\tt
 \begin{verbatim}
-Statistics over all PE's:
+Statistics over all DE's:
 
 Timer            Type            Max      Avg      Min     Std-dev  Units
 total            calls            1        -        -        -       #
@@ -104,7 +103,7 @@ physics          calls          992        -       -         -       #
                  threads          4        -       -         -       #
                  wall            60.103   45.48   30.363     3.234   sec
 
-Statistics over PE 0 over all threads
+Statistics over DE 0 over all user threads
 
 Timer            Type            Max      Avg      Min    Std-dev  Units
 total            calls            1        -        -        -       #
@@ -115,7 +114,7 @@ physics          calls          992        -        -        -       #
                  threads          4        -        -        -       #
                  wall            50.023   40.532   30.363    5.876   sec
 
-Statistics over PE 1 over all threads
+Statistics over DE 1 over all user threads
 
 Timer            Type            Max      Avg      Min      Std-dev  Units
 total            calls            1        -        -        -         #
@@ -128,3 +127,66 @@ physics          calls          992        -        -        -         #
 \end{verbatim}
 }
 
+
+Example 3, printout with no user-threads, some DE's threaded some distributed,
+hardware monitor turned off, and message information turned on.
+
+{\tt
+\begin{verbatim}
+Statistics over all DE's:
+
+Timer            Type            Max      Avg      Min     Std-dev  Units
+total            calls            1        -        -        -       #
+                 wall           121.235  111.41  101.592     5.673   sec
+                 msgs            21       21      21         0       #
+                 msgtime          4.567    5.789   3.2345    0.987   sec
+initialization   calls            1                          -       #
+                 wall             3.102    2.07    1.032     0.545   sec
+physics          calls          992        -       -         -       #
+                 wall            60.103   45.48   30.363     3.234   sec
+
+DE 0
+
+Timer            Type            Value    Units
+total            calls            1       #
+                 wall           101.592   sec
+                 msgs            21       #
+                 msgtime          4.567   sec
+initialization   calls            1       #
+                 wall             1.032   sec
+physics          calls          992       #
+                 wall            50.023   sec
+
+DE 1
+
+Timer            Type            Value    Units
+total            calls            1        #
+                 wall           121.235    sec
+                 msgs            21       #
+                 msgtime          4.567   sec
+initialization   calls            1        #
+                 wall             3.102    sec
+physics          calls          992        #
+                 wall            60.103    sec
+\end{verbatim}
+}
+
+DE 2
+
+Timer            Type            Time     Units
+total            calls            1       #
+                 wall           101.592   sec
+initialization   calls            1       #
+                 wall             1.032   sec
+physics          calls          992       #
+                 wall            50.023   sec
+
+DE 3
+
+Timer            Type            Time     Units
+total            calls            1        #
+                 wall           121.235    sec
+initialization   calls            1        #
+                 wall             3.102    sec
+physics          calls          992        #
+                 wall            60.103    sec
