@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.2 2002/10/08 21:16:15 jwolfe Exp $ 
+# $Id: makefile,v 1.3 2002/10/14 20:58:24 eschwab Exp $ 
 ALL: lib 
 
 CFLAGS    = 
 FFLAGS    =
-SOURCEC	  = c_ESMF_Time.cc c_ESMF_TimeInstant.cc
+SOURCEC	  = c_ESMF_Time.C c_ESMF_TimeInstant.C
 SOURCEF	  = ESMF_Alarm.F90 ESMF_Calendar.F90 ESMF_Clock.F90 ESMF_Fraction.F90 \
             ESMF_Time.F90 ESMF_TimeInstant.F90 ESMF_TimeInterval.F90 ESMF_Types.F90
 SOURCEH	  = 
