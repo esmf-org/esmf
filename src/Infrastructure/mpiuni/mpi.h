@@ -1,4 +1,4 @@
-/* $Id: mpi.h,v 1.3 2003/04/17 17:59:07 nscollins Exp $ */
+/* $Id: mpi.h,v 1.4 2003/07/23 16:50:47 eschwab Exp $ */
 
 /*
    This is a special set of bindings for uni-processor use of MPI by the PETSc library.
@@ -109,6 +109,7 @@ extern int MPIUNI_Memcpy(void*,void*,int);
 #define MPI_Datatype        int
 #define MPI_FLOAT           sizeof(float)
 #define MPI_DOUBLE          sizeof(double)
+#define MPI_LONG_DOUBLE     sizeof(long double)
 #define MPI_CHAR            sizeof(char)
 #define MPI_BYTE            sizeof(char)
 #define MPI_INT             sizeof(int)
@@ -122,6 +123,8 @@ extern int MPIUNI_Memcpy(void*,void*,int);
 typedef int MPI_Op;
 
 #define MPI_SUM           0
+#define MPI_MIN           1
+#define MPI_MAX           2
 #define MPI_ANY_TAG     (-1)
 
 /*
