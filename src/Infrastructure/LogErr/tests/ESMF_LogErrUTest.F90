@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.18 2005/03/29 21:11:29 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.19 2005/03/29 22:16:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.18 2005/03/29 21:11:29 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.19 2005/03/29 22:16:22 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -309,8 +309,16 @@
       print *, " rc = ", rc
 
       !------------------------------------------------------------------------
-      ! Generate a random string and write it to log file
-      !call random_seed(generator=2)
+      ! Get the local PET number
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
+      ! Loop according to Pet Number so each PET has a different time
+      do i=1, (((my_pet+1)*5) * 100000)
+         ! This call put here to waste time
+     	 call date_and_time(date=my_todays_date, time=my_time)
+      end do
+      ! Generate a random string using clock as seed and write it to log file
+      !call random_seed(generator=2) ! commented out because does not compile
       call random_seed(size=k)
       allocate(itime(k))
       call system_clock(count_max=itime(3), count=itime(1), count_rate=itime(2)) 
@@ -329,7 +337,7 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       ! Get date and time to compare later in the test
       call date_and_time(date=my_todays_date, time=my_time)
-      call ESMF_LogWrite(log=log2, msg=random_string,msgtype=ESMF_LOG_INFO)
+      call ESMF_LogWrite(log=log2, msg=random_string,msgtype=ESMF_LOG_INFO,rc=rc)
       write(name, *) "Write to log file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
@@ -392,9 +400,6 @@
       call ESMF_Test((msg_type.eq."INFO"), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      ! Get the local PET number
-      call ESMF_VMGetGlobal(vm, rc=rc)
-      call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
       ! Convert PET to character
       pet_char  = achar(my_pet + 48)
       ! Append to "PET"
