@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.79 2004/11/24 00:41:13 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.80 2004/12/03 01:01:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.79 2004/11/24 00:41:13 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.80 2004/12/03 01:01:21 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1585,6 +1585,7 @@
       	end do
       end if
 
+      call ESMF_ClockPrint(clock, rc=rc)
       call ESMF_ClockPrint(clock, "currtime string", rc=rc)
       call ESMF_ClockPrint(clock, "timestep", rc=rc)
       call ESMF_ClockPrint(clock, "timestep string", rc=rc)
