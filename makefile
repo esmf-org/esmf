@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.51 2004/10/07 19:20:16 svasquez Exp $
+# $Id: makefile,v 1.52 2004/10/08 15:40:46 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -52,7 +52,7 @@ script_info:
 	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; echo "" ; fi
 	-@if [ -f ${ESMF_DIR}/src/include/ESMC_Macros.h ] ; then \
-	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
+	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/Infrastructure/Base/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
 	-@echo "ESMF_DIR: ${ESMF_TOP_DIR}"
 	-@echo "ESMF_ARCH: ${ESMF_ARCH}"
 	-@echo "ESMF_COMPILER: ${ESMF_COMPILER}"
