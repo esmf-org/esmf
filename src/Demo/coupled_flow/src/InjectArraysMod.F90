@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.1 2003/05/07 06:58:54 cdeluca Exp $
+! $Id: InjectArraysMod.F90,v 1.2 2003/06/24 00:17:17 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -33,11 +33,12 @@
 !
 ! Fields
 !
-      public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-                field_rhov, field_p, field_q, field_flag
+      public :: field_sie, field_u, field_v, field_rho, field_rhoi, &
+                field_rhou, field_rhov, field_p, field_q, field_flag
 
-      type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                          field_rhou, field_rhov, field_p, field_q, field_flag
+      type(ESMF_Field), save :: field_sie, field_u, field_v, field_rho, &
+                                field_rhoi, field_rhou, field_rhov, &
+                                field_p, field_q, field_flag
 !
 ! scalars here
 !
