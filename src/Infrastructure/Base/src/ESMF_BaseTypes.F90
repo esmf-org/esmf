@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.4 2004/07/21 21:26:52 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.5 2004/07/21 21:35:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -311,7 +311,7 @@
              ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER, ESMF_DATA_COMPLEX
 
       public ESMF_I1, ESMF_I2, ESMF_I4, ESMF_I8, & 
-             ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16
+             ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16, ESMF_NOKIND
 
       public ESMF_KIND_I1, ESMF_KIND_I2, ESMF_KIND_I4, ESMF_KIND_I8, & 
              ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
