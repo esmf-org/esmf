@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.11 2004/03/04 18:21:26 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.12 2004/03/05 17:23:39 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -128,7 +128,8 @@
     do i=1,ni
        ldata(i) = i
     enddo
-    call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, rc=rc) 
+    call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, &
+                                     horzRelloc=ESMF_CELL_CENTER, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Delete local cell number array, not needed anymore.

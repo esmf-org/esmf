@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.3 2004/01/30 01:31:27 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.4 2004/03/05 17:23:46 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -412,7 +412,8 @@
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
             call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
-                                             local2d=local, rc=status)
+                                         local2d=local, &
+                                         horzRelloc=ESMF_CELL_CENTER, rc=status)
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
   ! TODO:  The above two lines are junk, making up for the halo width which is
@@ -432,7 +433,8 @@
           global(1,1) = i
           global(1,2) = j
           call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
-                                           local2d=local, rc=status)
+                                         local2d=local, &
+                                         horzRelloc=ESMF_CELL_CENTER, rc=status)
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
   ! TODO:  The above two lines are junk, making up for the halo width which is
