@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.16 2003/04/15 16:47:43 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.17 2003/04/16 17:26:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.16 2003/04/15 16:47:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.17 2003/04/16 17:26:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -324,16 +324,9 @@
 
     // convert date to base time according to calendar type
     // TODO: fractional, sub-seconds
-    // TODO: create two calendar conversion method entry points ?
-    if (YR != ESMC_NULL_POINTER && MM !=ESMC_NULL_POINTER &&
-        DD != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD,
-                                           ESMC_NULL_POINTER);
-    }
-    if (D != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarConvertToDate(this, ESMC_NULL_POINTER,
-                                                 ESMC_NULL_POINTER,
-                                                 ESMC_NULL_POINTER, D);
+    if (YR != ESMC_NULL_POINTER || MM != ESMC_NULL_POINTER ||
+        DD != ESMC_NULL_POINTER || D  != ESMC_NULL_POINTER) {
+      Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D);
     }
 
     // for sub-day units, start with number of seconds into the date
