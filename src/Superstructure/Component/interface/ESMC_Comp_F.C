@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.25 2004/08/24 22:36:08 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.26 2004/08/25 21:58:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,6 +13,7 @@
 //==============================================================================
 //
 // This file contains Fortran interface code to link F90 and C++.
+#define ESMF_FILENAME "ESMC_Comp_F.C"
 //
 //------------------------------------------------------------------------------
 // INCLUDES
@@ -21,6 +22,7 @@
 #include <string.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 
@@ -40,6 +42,8 @@
 //EOP
 
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetTypedEP"
 static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase, 
                         int nstate, enum ftype ftype, void *func, int *status) {
      char *name;
@@ -48,12 +52,16 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      void *f90comp = ptr;
      ESMC_FTable *tabptr;
 
-     if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
-        if (status) *status = ESMF_FAILURE;
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     if ((ptr == ESMC_NULL_POINTER) || ((*(int*)ptr) == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
         return;
      }
 
      tabptr = **(ESMC_FTable***)ptr;
+     //printf("tabptr = 0x%08x\n", (unsigned long)(tabptr));
      newtrim(tname, slen, phase, &nstate, &name);
          
      //printf("SetTypedEP: setting function name = '%s'\n", name);
@@ -67,13 +75,18 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      delete tablerc;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GetDP"
 static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype;
     int localrc;
 
-    if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
-       if (status) *status = ESMF_FAILURE;
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+    if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
        return;
     }
 
@@ -81,20 +94,27 @@ static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     if (status) *status = localrc;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetDP"
 static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
     char *name = "localdata";
     enum dtype dtype = DT_VOIDP;
     int localrc;
 
-    if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
-       if (status) *status = ESMF_FAILURE;
-       return;
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+    if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
+        return;
     }
 
     localrc = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
     if (status) *status = localrc;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SetServ"
 extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      int localrc, funcrc;
      int *tablerc = new int;
@@ -102,11 +122,16 @@ extern "C" void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
      ESMC_FTable *tabptr;
      
 
-     if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
-        if (status) *status = ESMF_FAILURE;
+     //printf("ptr = 0x%08x\n", (unsigned long)ptr);
+     //printf("*ptr = 0x%08x\n", (unsigned long)(*(int*)ptr));
+     //if ((ptr == ESMC_NULL_POINTER)) {
+     if ((ptr == ESMC_NULL_POINTER) || ((*(int*)ptr) == ESMC_NULL_POINTER)) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
         return;
      }
      tabptr = **(ESMC_FTable***)ptr;
+     //printf("tabptr = 0x%08x\n", (unsigned long)(tabptr));
 
      // TODO: shouldn't need to expand the table here - should be buried
      // inside ftable code.
@@ -199,14 +224,17 @@ extern "C" {
          ESMC_SetDP(ptr, datap, status);
      }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMF_UserCompSetInternalState"
      void FTN(esmf_usercompsetinternalstate)(ESMC_FTable ***ptr, char *name, 
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype = DT_VOIDP;
          int localrc;
 
-         if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
-            if (status) *status = ESMF_FAILURE;
+         if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
             return;
          }
 
@@ -229,14 +257,17 @@ extern "C" {
          ESMC_GetDP(ptr, datap, status);
      }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMF_UserCompGetInternalState"
      void FTN(esmf_usercompgetinternalstate)(ESMC_FTable ***ptr, char *name,
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype;
          int localrc;
 
-         if ((ptr == ESMC_NULL_POINTER) || (*(char*)ptr == ESMC_NULL_POINTER)) {
-            if (status) *status = ESMF_FAILURE;
+         if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)) {
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                              "null pointer found", status);
             return;
          }
 
