@@ -1,4 +1,5 @@
-! $Id: ESMF_FieldGet.F90,v 1.3 2004/03/11 16:21:59 nscollins Exp $
+#pragma GCC set_debug_pwd "/Users/nancy/esmf/esmf_cvs/src/Infrastructure/Field/src"
+! $Id: ESMF_FieldGet.F90,v 1.4 2004/03/15 21:53:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +48,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.F90,v 1.3 2004/03/11 16:21:59 nscollins Exp $'
+      '$Id: ESMF_FieldGet.F90,v 1.4 2004/03/15 21:53:10 nscollins Exp $'
 
 !==============================================================================
 !
@@ -69,31 +70,31 @@
       ! < declarations of interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
- module procedure ESMF_FieldGetDataPointerI21D 
- module procedure ESMF_FieldGetDataPointerI41D 
- module procedure ESMF_FieldGetDataPointerI81D 
- module procedure ESMF_FieldGetDataPointerI22D 
- module procedure ESMF_FieldGetDataPointerI42D 
- module procedure ESMF_FieldGetDataPointerI82D 
- module procedure ESMF_FieldGetDataPointerI23D 
- module procedure ESMF_FieldGetDataPointerI43D 
- module procedure ESMF_FieldGetDataPointerI83D 
- module procedure ESMF_FieldGetDataPointerI24D 
- module procedure ESMF_FieldGetDataPointerI44D 
- module procedure ESMF_FieldGetDataPointerI84D 
- module procedure ESMF_FieldGetDataPointerI25D 
- module procedure ESMF_FieldGetDataPointerI45D 
- module procedure ESMF_FieldGetDataPointerI85D 
- module procedure ESMF_FieldGetDataPointerR41D 
- module procedure ESMF_FieldGetDataPointerR81D 
- module procedure ESMF_FieldGetDataPointerR42D 
- module procedure ESMF_FieldGetDataPointerR82D 
- module procedure ESMF_FieldGetDataPointerR43D 
- module procedure ESMF_FieldGetDataPointerR83D 
- module procedure ESMF_FieldGetDataPointerR44D 
- module procedure ESMF_FieldGetDataPointerR84D 
- module procedure ESMF_FieldGetDataPointerR45D 
- module procedure ESMF_FieldGetDataPointerR85D 
+ module procedure ESMF_FieldGetDataPointer1DI2 
+ module procedure ESMF_FieldGetDataPointer1DI4 
+ module procedure ESMF_FieldGetDataPointer1DI8 
+ module procedure ESMF_FieldGetDataPointer2DI2 
+ module procedure ESMF_FieldGetDataPointer2DI4 
+ module procedure ESMF_FieldGetDataPointer2DI8 
+ module procedure ESMF_FieldGetDataPointer3DI2 
+ module procedure ESMF_FieldGetDataPointer3DI4 
+ module procedure ESMF_FieldGetDataPointer3DI8 
+ module procedure ESMF_FieldGetDataPointer4DI2 
+ module procedure ESMF_FieldGetDataPointer4DI4 
+ module procedure ESMF_FieldGetDataPointer4DI8 
+ module procedure ESMF_FieldGetDataPointer5DI2 
+ module procedure ESMF_FieldGetDataPointer5DI4 
+ module procedure ESMF_FieldGetDataPointer5DI8 
+ module procedure ESMF_FieldGetDataPointer1DR4 
+ module procedure ESMF_FieldGetDataPointer1DR8 
+ module procedure ESMF_FieldGetDataPointer2DR4 
+ module procedure ESMF_FieldGetDataPointer2DR8 
+ module procedure ESMF_FieldGetDataPointer3DR4 
+ module procedure ESMF_FieldGetDataPointer3DR8 
+ module procedure ESMF_FieldGetDataPointer4DR4 
+ module procedure ESMF_FieldGetDataPointer4DR8 
+ module procedure ESMF_FieldGetDataPointer5DR4 
+ module procedure ESMF_FieldGetDataPointer5DR8 
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
@@ -119,10 +120,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI21D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI21D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer1DI2(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -189,7 +191,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI21D 
+ end subroutine ESMF_FieldGetDataPointer1DI2 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -198,10 +200,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI41D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI41D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer1DI4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -268,7 +271,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI41D 
+ end subroutine ESMF_FieldGetDataPointer1DI4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -277,10 +280,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI81D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI81D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer1DI8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -347,7 +351,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI81D 
+ end subroutine ESMF_FieldGetDataPointer1DI8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -356,10 +360,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI22D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI22D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer2DI2(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -426,7 +431,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI22D 
+ end subroutine ESMF_FieldGetDataPointer2DI2 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -435,10 +440,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI42D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI42D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer2DI4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -505,7 +511,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI42D 
+ end subroutine ESMF_FieldGetDataPointer2DI4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -514,10 +520,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI82D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI82D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer2DI8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -584,7 +591,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI82D 
+ end subroutine ESMF_FieldGetDataPointer2DI8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -593,10 +600,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI23D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI23D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer3DI2(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -663,7 +671,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI23D 
+ end subroutine ESMF_FieldGetDataPointer3DI2 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -672,10 +680,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI43D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI43D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer3DI4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -742,7 +751,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI43D 
+ end subroutine ESMF_FieldGetDataPointer3DI4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -751,10 +760,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI83D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI83D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer3DI8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -821,7 +831,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI83D 
+ end subroutine ESMF_FieldGetDataPointer3DI8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -830,10 +840,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI24D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI24D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer4DI2(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -900,7 +911,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI24D 
+ end subroutine ESMF_FieldGetDataPointer4DI2 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -909,10 +920,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI44D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI44D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer4DI4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -979,7 +991,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI44D 
+ end subroutine ESMF_FieldGetDataPointer4DI4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -988,10 +1000,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI84D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI84D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer4DI8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1058,7 +1071,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI84D 
+ end subroutine ESMF_FieldGetDataPointer4DI8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1067,10 +1080,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI25D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI25D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer5DI2(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1137,7 +1151,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI25D 
+ end subroutine ESMF_FieldGetDataPointer5DI2 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1146,10 +1160,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI45D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI45D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer5DI4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1216,7 +1231,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI45D 
+ end subroutine ESMF_FieldGetDataPointer5DI4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1225,10 +1240,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerI85D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerI85D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer5DI8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1295,7 +1311,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerI85D 
+ end subroutine ESMF_FieldGetDataPointer5DI8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1304,10 +1320,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR41D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR41D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer1DR4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1374,7 +1391,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR41D 
+ end subroutine ESMF_FieldGetDataPointer1DR4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1383,10 +1400,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR81D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR81D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer1DR8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1453,7 +1471,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR81D 
+ end subroutine ESMF_FieldGetDataPointer1DR8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1462,10 +1480,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR42D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR42D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer2DR4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1532,7 +1551,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR42D 
+ end subroutine ESMF_FieldGetDataPointer2DR4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1541,10 +1560,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR82D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR82D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer2DR8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1611,7 +1631,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR82D 
+ end subroutine ESMF_FieldGetDataPointer2DR8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1620,10 +1640,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR43D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR43D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer3DR4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1690,7 +1711,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR43D 
+ end subroutine ESMF_FieldGetDataPointer3DR4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1699,10 +1720,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR83D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR83D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer3DR8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1769,7 +1791,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR83D 
+ end subroutine ESMF_FieldGetDataPointer3DR8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1778,10 +1800,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR44D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR44D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer4DR4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1848,7 +1871,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR44D 
+ end subroutine ESMF_FieldGetDataPointer4DR4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1857,10 +1880,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR84D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR84D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer4DR8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -1927,7 +1951,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR84D 
+ end subroutine ESMF_FieldGetDataPointer4DR8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -1936,10 +1960,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR45D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR45D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer5DR4(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -2006,7 +2031,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR45D 
+ end subroutine ESMF_FieldGetDataPointer5DR4 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
@@ -2015,10 +2040,11 @@ end interface
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
-! !IROUTINE: ESMF_FieldGetDataPointerR85D - Retrieve F90 pointer directly from a Field 
+! !IROUTINE: ESMF_FieldGetDataPointer - Retrieve F90 pointer directly from a Field 
  
 ! !INTERFACE: 
- subroutine ESMF_FieldGetDataPointerR85D(field, f90ptr, copyflag, rc) 
+ ! Private name; call using ESMF_FieldGetDataPointer() 
+ subroutine ESMF_FieldGetDataPointer5DR8(field, f90ptr, copyflag, rc) 
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Field), intent(in) :: field 
@@ -2085,7 +2111,7 @@ end interface
  
  if (rcpresent) rc = status 
  
- end subroutine ESMF_FieldGetDataPointerR85D 
+ end subroutine ESMF_FieldGetDataPointer5DR8 
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
