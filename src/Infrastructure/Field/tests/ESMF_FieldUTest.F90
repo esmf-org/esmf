@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.19 2003/06/19 16:55:45 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.20 2003/06/19 19:25:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.19 2003/06/19 16:55:45 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.20 2003/06/19 19:25:05 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -131,21 +131,19 @@
 
      ! Verifing that printing an uninitialized Field is handled properly.
      ! This code is commented out until bug 747699 is fixed.
-     ! call ESMF_FieldPrint(f2, rc=rc)
-     ! write(failMsg, *) ""
-     ! write(name, *) "Printing an uninitialized Field Test"
-     ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
+     call ESMF_FieldPrint(f2, rc=rc)
+     write(failMsg, *) ""
+     write(name, *) "Printing an uninitialized Field Test"
+     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     !------------------------------------------------------------------------
 
-      !EX_UTest
-       ! verify that querying the name of a destroyed Field is handled properly.
-       ! The following code is commented out because it crashes the program.
-       ! It will be uncommented when the bug is fixed.
-       call ESMF_FieldGetName(f1, fname, rc=rc)
-       write(failMsg, *) ""
-       write(name, *) "Getting name of a destroyed Field Test"
-       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
+     !EX_UTest
+     ! verify that querying the name of a destroyed Field is handled properly.
+     call ESMF_FieldGetName(f1, fname, rc=rc)
+     write(failMsg, *) ""
+     write(name, *) "Getting name of a destroyed Field Test"
+     call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+     !------------------------------------------------------------------------
 
       !EX_UTest
       ! Verifing that printing a destroyed Field is handled properly.
@@ -317,7 +315,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
-      ! Verifing that destroying a Grid in a Field is not allowe
+      ! Verifing that destroying a Grid in a Field is not allowed
       ! call ESMF_GridDestroy(grid, rc=rc)
       ! write(failMsg, *) ""
       ! write(name, *) "Destroying a Grid in a Field Test"
@@ -334,7 +332,7 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Verifing that a Field cannot` be created with an uninitialized Grid and Array
+      ! Verifing that a Field cannot be created with an uninitialized Grid and Array
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
       write(failMsg, *) ""
