@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.41 2003/04/17 21:29:54 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.42 2003/04/17 21:40:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.41 2003/04/17 21:29:54 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.42 2003/04/17 21:40:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -875,7 +875,7 @@
     switch (this->type) {
       case ESMF_DATA_REAL:
         // create array with global data buffer
-        Array_out->ESMC_ArrayCreate(this->rank, this->type, this->kind);
+        Array_out = ESMC_ArrayCreate(this->rank, this->type, this->kind);
         // allocate global array from this size
         fp = (float *)Array_out->base_addr;
 
@@ -888,7 +888,7 @@
 
       case ESMF_DATA_INTEGER:
         // create array with global data
-        Array_out->ESMC_ArrayCreate(this->rank, this->type, this->kind);
+        Array_out = ESMC_ArrayCreate(this->rank, this->type, this->kind);
         // allocate global array from this size
         ip = (int *)Array_out->base_addr;
 
