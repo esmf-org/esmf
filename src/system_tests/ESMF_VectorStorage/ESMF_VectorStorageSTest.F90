@@ -1,4 +1,4 @@
-! $Id: ESMF_VectorStorageSTest.F90,v 1.1 2004/12/17 19:42:54 jwolfe Exp $
+! $Id: ESMF_VectorStorageSTest.F90,v 1.2 2005/01/05 20:03:15 jwolfe Exp $
 !
 ! System test VectorStorage
 !  Description on Sourceforge under System Test #XXXXX
@@ -140,7 +140,7 @@
      j1  = 1 + myDE
      add = 0
      do i = 1,counts(1)
-       do j = j1,counts(2),6
+       do j = j1,counts(2),npets
          add = add + 1
          myIndices(add,1) = i
          myIndices(add,2) = j
