@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.93 2004/01/16 23:45:11 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.94 2004/01/20 23:11:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -237,7 +237,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.93 2004/01/16 23:45:11 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.94 2004/01/20 23:11:16 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1045,7 +1045,6 @@
       type(ESMF_Array) :: array                   ! New array
       type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: index
       integer, dimension(ESMF_MAXDIM) :: counts
-      type(ESMF_Relloc) :: localRelloc
       integer :: hwidth
       integer :: i, rank, gridRank
 
@@ -1231,7 +1230,6 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: gridRank
-      type(ESMF_Relloc) :: localRelloc
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -1258,10 +1256,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
-      localRelloc = ESMF_CELL_CENTER
-      if (present(relloc)) localRelloc = relloc
-      call ESMF_GridGetPhysGrid(grid, relloc=localRelloc, numDims=gridRank, &
-                                rc=status)
+      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
       else
@@ -1347,7 +1342,6 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: gridRank
-      type(ESMF_Relloc) :: localRelloc
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -1373,10 +1367,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATE_READY
 
-      localRelloc = ESMF_CELL_CENTER
-      if (present(relloc)) localRelloc = relloc
-      call ESMF_GridGetPhysGrid(grid, relloc=localRelloc, numDims=gridRank, &
-                                rc=status)
+      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be deleted by user afterwards
       else
@@ -4013,7 +4004,6 @@
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Grid) :: src_grid, dst_grid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      type(ESMF_RelLoc) :: src_relloc, dst_relloc
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -4081,15 +4071,9 @@
           print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
           return
         endif
-        ! And get the relative location
-        call ESMF_FieldGetRelloc(src_field, src_relloc, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGetRelloc returned failure"
-          return
-        endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGetPhysGrid(src_grid, src_relloc, localMin=src_min, &
-                                  localMax=src_max, rc=status)
+        call ESMF_GridGet(src_grid, minLocalCoordPerDim=src_min, &
+                         maxLocalCoordPerDim=src_max, rc=status)
         call ESMF_GridBoxIntersectSend(dst_grid, src_grid, src_min, src_max, &
                                        myAI, sendDomainList, status)
       endif
@@ -4103,15 +4087,9 @@
           print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
           return
         endif
-        ! Retrieve the relative location
-        call ESMF_FieldGetRelloc(dst_field, dst_relloc, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in FieldBoxIntersect: FieldGetRelloc returned failure"
-          return
-        endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGetPhysGrid(dst_grid, dst_relloc, localMin=dst_min, &
-                                  localMax=dst_max, rc=status)
+        call ESMF_GridGet(dst_grid, minLocalCoordPerDim=dst_min, &
+                          maxLocalCoordPerDim=dst_max, rc=status)
         call ESMF_GridBoxIntersectRecv(src_grid, dst_min, dst_max, &
                                        recvDomainList, rc=status)
       endif
