@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.3 2004/03/02 23:49:17 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.4 2004/03/03 00:18:46 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -195,8 +195,8 @@
        public :: ESMF_ConfigLoadFile   ! loads resource file into memory
        public :: ESMF_ConfigFindLabel  ! selects a label (key)
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
-       public :: ESMF_ConfigGetValue   ! returns next float number (function)
-        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
+       public :: ESMF_ConfigGetAttribute ! returns next number 
+       public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
 !                                  ! counting disregarding type (function)
@@ -212,19 +212,15 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_ConfigGet - Get an item from a Config
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an Attribute from a Config
 !
 ! !INTERFACE:
-      interface ESMF_ConfigGetValue
+      interface ESMF_ConfigGetAttribute
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ConfigGetString
-        module procedure ESMF_ConfigGetFloat
         module procedure ESMF_ConfigGetFloats
-        module procedure ESMF_ConfigGetInt
         module procedure ESMF_ConfigGetInts
-        module procedure ESMF_ConfigGetChar        
-
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for getting
@@ -433,15 +429,15 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetValue - Get a character string
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a character string
 !
 ! !DESCRIPTION: Gets a sequence of characters (string, word). It will be 
 !               terminated by the first white space.
 
 !
 ! !INTERFACE:
-
-    subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
 
       implicit none
       
@@ -515,12 +511,12 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetValue - Get a real number
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a real number
 
 !
 ! !INTERFACE:
-
-    real function ESMF_ConfigGetFloat( cf, label, default, rc )
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      real function ESMF_ConfigGetFloat( cf, label, default, rc )
 
       implicit none
 
@@ -574,12 +570,12 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetValue - Get a list of real numbers
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of real numbers
 
 !
 ! !INTERFACE:
-
-    subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
                                     default, rc )
       
       implicit none
@@ -643,12 +639,13 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetValue - Get an integer number
+! !IROUTINE: ESMF_ConfigGetAttribute - Get an integer number
 
 !
 ! !INTERFACE:
-
-    integer function ESMF_ConfigGetInt( cf, label, default, rc )
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      integer function ESMF_ConfigGetInt( cf, label, default, rc )
+      
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
@@ -709,11 +706,11 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetValue - Get a list of integers
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a list of integers
 !
 ! !INTERFACE:
-
-    subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
                                    default, rc )
       
       implicit none
@@ -777,12 +774,12 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetValue - Get a character
+! !IROUTINE: ESMF_ConfigGetAttribute - Get a character
 !
 ! !INTERFACE:
-!
-!!    character function ESMF_ConfigGetChar( cf, label, nsize, default, rc )
-    function ESMF_ConfigGetChar( cf, label, default, rc )
+      ! Private name; call using ESMF_ConfigGetAttribute()
+      function ESMF_ConfigGetChar( cf, label, default, rc )
+
       implicit none
       character ESMF_ConfigGetChar
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
