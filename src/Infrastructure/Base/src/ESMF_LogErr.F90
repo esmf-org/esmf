@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.55 2004/12/09 18:09:22 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.56 2004/12/14 15:38:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,10 +45,19 @@
 ! !USES:
     ! inherit from ESMF base class
     use ESMF_BaseTypesMod
-    use ESMF_VMTypesMod
-    use ESMF_VMBaseMod
+!    use ESMF_VMTypesMod
+!    use ESMF_VMBaseMod
 
 implicit none
+
+    interface 
+      subroutine f_ESMF_VMGlobalGet(localPet, petCount)
+        integer, intent(out), optional  :: localPet
+        integer, intent(out), optional  :: petCount
+      end subroutine f_ESMF_VMGlobalGet
+    end interface
+
+
 !
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -127,7 +136,7 @@ type ESMF_Log
     type(ESMF_LOGENTRY), dimension(:,:),pointer       ::  LOG_ENTRY
     type(ESMF_LOGARRAY), dimension(:),pointer       ::  LOG_ARRAY
 #endif                                        
-    type(ESMF_VM)                                   ::  vm  
+!    type(ESMF_VM)                                   ::  vm  
     type(ESMF_HaltType)                             ::  halt
     type(ESMF_LogType)			            ::  logtype       
     integer                                             maxElements
@@ -640,8 +649,9 @@ end subroutine ESMF_LogGet
     ESMF_LogDefault%maxElements = 10
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
     ESMF_LogDefault%flushImmediately = ESMF_TRUE
-    call ESMF_VMGetGlobal(ESMF_LogDefault%vm,rc3)
-    call ESMF_VMGet(ESMF_LogDefault%vm,petCount=ESMF_LogDefault%petCount)
+!    call ESMF_VMGetGlobal(ESMF_LogDefault%vm,rc3)
+!    call ESMF_VMGet(ESMF_LogDefault%vm,petCount=ESMF_LogDefault%petCount)
+    call f_ESMF_VMGlobalGet(petCount=ESMF_LogDefault%petCount)
     if (present(lognone)) then
       if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
       ESMF_LogDefault%petCount = 1
@@ -969,8 +979,9 @@ end subroutine ESMF_LogMsgSetError
     log%maxElements = 10
     log%halt=ESMF_LOG_HALTNEVER
     log%flushImmediately = ESMF_TRUE
-    call ESMF_VMGetGlobal(log%vm,rc3)
-    call ESMF_VMGet(log%vm,petCount=log%petCount)
+!    call ESMF_VMGetGlobal(log%vm,rc3)
+!    call ESMF_VMGet(log%vm,petCount=log%petCount)
+    call f_ESMF_VMGlobalGet(petCount=log%petCount)
     if (present(lognone)) then
       if (lognone .eq. ESMF_LOG_NONE) log%logNone = ESMF_TRUE 
       log%petCount = 1
@@ -1162,7 +1173,8 @@ end subroutine ESMF_LogSet
     integer			    ::rc2
     integer                         ::petid,petnum
     
-    call ESMF_VMGet(ESMF_LogDefault%vm,localpet=petnum)
+    !call ESMF_VMGet(ESMF_LogDefault%vm,localpet=petnum)
+    call f_ESMF_VMGlobalGet(localPet=petnum)    
     if (ESMF_LogDefault%LogType .eq. ESMF_LOG_SINGLE) then
         petid=1
     else        

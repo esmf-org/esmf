@@ -1,4 +1,4 @@
-! $Id: ESMF_VMTypes.F90,v 1.1 2004/12/03 20:47:45 nscollins Exp $
+! $Id: ESMF_VMTypes.F90,v 1.1 2004/12/14 15:38:19 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
