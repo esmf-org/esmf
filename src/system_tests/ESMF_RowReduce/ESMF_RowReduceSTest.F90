@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.8 2004/02/13 20:35:53 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.9 2004/03/04 18:08:44 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -116,7 +116,7 @@
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDE(grid1, localCellCount=ni, rc=rc)
+    call ESMF_GridGetDE(grid1, localCellCount=ni, horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "allocating", ni, " cells on DE", de_id
     allocate(idata(ni))
