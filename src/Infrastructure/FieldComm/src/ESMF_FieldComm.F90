@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.33 2004/05/18 16:13:32 theurich Exp $
+! $Id: ESMF_FieldComm.F90,v 1.34 2004/05/24 22:57:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.33 2004/05/18 16:13:32 theurich Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.34 2004/05/24 22:57:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1062,7 +1062,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegridStore(srcfield, dstfield, parentDElayout, &
-                                       routehandle, regridtype, &
+                                       routehandle, regridmethod, regridnorm, &
                                        srcmask, dstmask, rc)
 !
 !
@@ -1071,7 +1071,8 @@
       type(ESMF_Field), intent(inout) :: dstfield                 
       type(ESMF_DELayout), intent(in) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in), optional :: regridtype 
+      integer, intent(in) :: regridmethod
+      integer, intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcmask                 
       type(ESMF_Mask), intent(in), optional :: dstmask                 
       integer, intent(out), optional :: rc               
@@ -1100,9 +1101,11 @@
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
 !           will be executed when {\tt ESMF\_FieldRegrid} is called.
-!     \item [{[regridtype]}]
-!           Type of regridding to do.  A set of predefined types are
+!     \item [regridmethod]
+!           Type of regridding to do.  A set of predefined methods are
 !           supplied.
+!     \item [{[regridnorm]}]
+!           Normalization option, only for specific regrid types.
 !     \item [{[srcmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
@@ -1181,7 +1184,7 @@
 
       call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
                                  dst_grid, dst_datamap, parentDElayout, &
-                                 routehandle, regridtype, &    
+                                 routehandle, regridmethod, regridnorm, &    
                                  srcmask, dstmask, status)
 
 
