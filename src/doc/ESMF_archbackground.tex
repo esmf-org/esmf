@@ -1,0 +1,39 @@
+\section{Evolution of Earth Science Frameworks}
+\label{sec:background}
+
+The ESMF represents a next step in the evolution of Earth Science
+frameworks.  The ideas and the experience that inform its design
+are drawn from widely used existing efforts developed by our collaborators 
+such as the Flexible Modeling System from NOAA GFDL, the Goddard 
+Earth Modeling System (GEMS), the
+modular NCAR Flux Coupler, and the Weather Research and Forecast Model
+Advanced Software Framework.  Each of these frameworks is a modular,
+portable, high-performance system for creating multi-component applications
+on parallel computing platforms.  Each also represents a productive
+collaboration between scientists, computational scientists and software
+engineers that has continued into ESMF.
+
+In these frameworks, object-oriented design concepts are used extensively.  
+For example, in GEMS encapsulation 
+via derived types and modules increases portability, hides details of the 
+computing platform from the user, and results in a very simple and natural
+interface for creating coupling applications.  
+In FMS and other codes, polymorphism and operator overloading are 
+employed throughout to simplify interfaces.  Coupling systems such 
+as the NCAR Flux Coupler use the concept of generic components to
+increase interoperability.  The WRF system is one of the few 
+examples anywhere of an operational code with a programming model 
+that effectively and simply allows users to create data structures 
+for a dual-tiered architecture, and that is designed for high performance
+on both vector supercomputers and microprocessor-based platforms.
+
+In ESMF, we intend to retain the scientist-friendly 
+aspect of these frameworks as well as the strong features 
+of their design.  At the interface, they present coupling and
+communication in terms that scientists can easily understand, and they 
+offer a language interface, F90, that scientists are already familiar 
+with.  
+
+
+
+
