@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.7 2004/11/03 20:50:25 jwolfe Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.8 2004/11/03 22:32:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
     ! allow for a halo width of 3
     halo = 3
     field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              haloWidth=3, name="src pressure", rc=rc)
+                              haloWidth=halo, name="src pressure", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -114,7 +114,7 @@
 
 
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                              name="dst pressure", rc=rc)
+                              haloWidth=halo, name="dst pressure", rc=rc)
 
  
     ! fields all ready to go
