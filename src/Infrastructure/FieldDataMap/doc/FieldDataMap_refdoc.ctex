@@ -1,4 +1,4 @@
-% $Id: FieldDataMap_refdoc.ctex,v 1.3 2004/05/11 16:29:44 nscollins Exp $
+% $Id: FieldDataMap_refdoc.ctex,v 1.4 2004/05/27 22:55:15 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -67,7 +67,7 @@
 % %\input{../Infrastructure/Field/doc/Field_param}
 % #endif
 
-\section{Field DataMap Class}
+\section{FieldDataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE
