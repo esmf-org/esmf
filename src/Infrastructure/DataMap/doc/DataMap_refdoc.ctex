@@ -1,4 +1,4 @@
-% $Id: DataMap_refdoc.ctex,v 1.1 2003/09/18 13:34:38 cdeluca Exp $
+% $Id: DataMap_refdoc.ctex,v 1.2 2003/09/18 16:58:51 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Field Design}
+\newcommand{\mytitle}{DataMap Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -67,50 +67,6 @@
 % %\input{../Infrastructure/Field/doc/Field_param}
 % #endif
 
-\section{Field Class}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{Field_desc}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_desc}
-#endif
-
-\subsection{Usage}
-#ifdef STANDALONE
-\input{Field_usage}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_usage}
-#endif
-
-%\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{Field_rest}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/Field_rest}
-#endif
-
-%\subsection{Use and Examples}
-% #ifdef STANDALONE
-% \input{fieldex_fapi}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/fieldex_fapi}
-% #endif
-
-% \subsection{Parameters and Definitions}
-% #ifdef STANDALONE
-% \input{Field_fparam}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/Field_fparam}
-% #endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_Field_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_Field_fapi}
-#endif
-
 \section{DataMap Class}
 
 \subsection{Description}
@@ -145,27 +101,27 @@
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE
-%\input{../../Data/doc/DataMap_fex}
+%\input{../../DataMap/doc/DataMap_fex}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Data/doc/DataMap_fex}
+%\input{../Infrastructure/DataMap/doc/DataMap_fex}
 %#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{../../Data/doc/ESMF_DataMap_fapi}
+\input{../../DataMap/doc/ESMF_DataMap_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Data/doc/ESMF_DataMap_fapi}
+\input{../Infrastructure/DataMap/doc/ESMF_DataMap_fapi}
 #endif
 
-#ifdef STANDALONE
-\section{Review Status}
-\input{Field_desrev}
-#endif
+%#ifdef STANDALONE
+%\section{Review Status}
+%\input{Field_desrev}
+%#endif
 
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\section{Glossary}
-\input{Field_glos}
-#endif
+%\input{Field_glos}
+%#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}

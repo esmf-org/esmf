@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 13:34:38 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/18 16:58:51 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -13,17 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/DataMap/doc
 
-DVIFILES  = 	DataMap_reqdoc.dvi \
-		DataMap_desdoc.dvi \
-		DataMap_refdoc.dvi
+DVIFILES  = 	DataMap_refdoc.dvi
 
-PDFFILES  =     ${ESMC_DOCDIR}/DataMap_reqdoc.pdf \
-		${ESMC_DOCDIR}/DataMap_desdoc.pdf \
-		${ESMC_DOCDIR}/DataMap_refdoc.pdf
+PDFFILES  =     ${ESMC_DOCDIR}/DataMap_refdoc.pdf
 
-HTMLFILES = 	${ESMC_DOCDIR}/DataMap_reqdoc \
-		${ESMC_DOCDIR}/DataMap_desdoc \
-		${ESMC_DOCDIR}/DataMap_refdoc
+HTMLFILES = 	${ESMC_DOCDIR}/DataMap_refdoc
 
 #
 # Tex Files to make
@@ -48,11 +42,6 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpful.
 #
-REQDOC_DEP_FILES = DataMap_auth.tex DataMap_background.tex DataMap_terms.tex \
-      DataMap_abbr.tex DataMap_req.tex DataMap_desdoc.ctex
-
-
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
@@ -61,9 +50,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = DataMap_desdoc DataMap_reqdoc DataMap_refdoc $(HTMLFILES)
+CLEANDIRS   = DataMap_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              *.ORIG DataMap_desdoc.tex DataMap_reqdoc.tex DataMap_refdoc.tex \
+              *.ORIG DataMap_refdoc.tex \
               $(PDFFILES)
 CLOBBERDIRS =
 
