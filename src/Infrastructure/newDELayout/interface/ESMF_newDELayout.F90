@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.11 2004/03/24 16:38:28 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.12 2004/03/24 18:24:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.11 2004/03/24 16:38:28 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.12 2004/03/24 18:24:43 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -138,7 +138,7 @@
 !==============================================================================
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_newDELayoutCreate -- Generic interface
 
 ! !INTERFACE:
@@ -151,13 +151,13 @@
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutCreate} functions.   
-!EOP 
+!EOPI 
       end interface
 
 !==============================================================================
       
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_newDELayoutAllGlobalReduce -- Generic interface
 
 ! !INTERFACE:
@@ -172,13 +172,13 @@
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutAllGlobalReduce} functions.   
-!EOP 
+!EOPI 
       end interface
 
 !==============================================================================
       
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_newDELayoutDataCreate -- Generic interface
 
 ! !INTERFACE:
@@ -193,7 +193,7 @@
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutDataCreate} functions.   
-!EOP 
+!EOPI 
       end interface
 
 !==============================================================================
@@ -204,9 +204,10 @@ contains
         
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCreateND - Create N-dimensional DELayout
+! !IROUTINE: ESMF_newDELayoutCreate - Create N-dimensional DELayout
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutCreate()
   function ESMF_newDELayoutCreateND(vm, nDEs, DEtoPET, cyclic, rc)
 !
 ! !ARGUMENTS:
@@ -772,9 +773,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutAllGlobalReduceI4 - Reduce to a single value
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduce - Reduce I4 data to a single value
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
   subroutine ESMF_newDELayoutAllGlobalReduceI4(layout, datain, dataout, &
     len, op, rc)
 !
@@ -788,12 +790,20 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Reduce to a single value
+!     Reduce I4 data to a single value
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
+!     \item[datain] 
+!          Input data
+!     \item[dataout] 
+!          Output data
+!     \item[len] 
+!          Number of elements per DE
+!     \item[op] 
+!          Reduction operation
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -829,9 +839,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutAllGlobalReduceR4 - Reduce to a single value
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduce - Reduce R4 data to a single value
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
   subroutine ESMF_newDELayoutAllGlobalReduceR4(layout, datain, dataout, &
     len, op, rc)
 !
@@ -845,12 +856,20 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Reduce to a single value
+!     Reduce R4 data to a single value
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
+!     \item[datain] 
+!          Input data
+!     \item[dataout] 
+!          Output data
+!     \item[len] 
+!          Number of elements per DE
+!     \item[op] 
+!          Reduction operation
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -886,9 +905,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutAllGlobalReduceR8 - Reduce to a single value
+! !IROUTINE: ESMF_newDELayoutAllGlobalReduce - Reduce R8 data to a single value
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
   subroutine ESMF_newDELayoutAllGlobalReduceR8(layout, datain, dataout, &
     len, op, rc)
 !
@@ -902,12 +922,20 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Reduce to a single value
+!     Reduce R8 data to a single value
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[layout] 
 !          DELayout
+!     \item[datain] 
+!          Input data
+!     \item[dataout] 
+!          Output data
+!     \item[len] 
+!          Number of elements per DE
+!     \item[op] 
+!          Reduction operation
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -943,9 +971,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutDataCreateI4 - Create I4 DELayoutData
+! !IROUTINE: ESMF_newDELayoutDataCreate - Create I4 DELayoutData
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutDataCreate()
   function ESMF_newDELayoutDataCreateI4(array, rc)
 !
 ! !ARGUMENTS:
@@ -1017,9 +1046,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutDataCreateR4 - Create R4 DELayoutData
+! !IROUTINE: ESMF_newDELayoutDataCreate - Create R4 DELayoutData
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutDataCreate()
   function ESMF_newDELayoutDataCreateR4(array, rc)
 !
 ! !ARGUMENTS:
@@ -1091,9 +1121,10 @@ contains
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutDataCreateR8 - Create R8 DELayoutData
+! !IROUTINE: ESMF_newDELayoutDataCreate - Create R8 DELayoutData
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_newDELayoutDataCreate()
   function ESMF_newDELayoutDataCreateR8(array, rc)
 !
 ! !ARGUMENTS:
