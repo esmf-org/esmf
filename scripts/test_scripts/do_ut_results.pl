@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.11 2005/02/09 18:41:11 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.12 2005/02/09 20:30:50 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -187,13 +187,13 @@ getopts("d:b:", \%options);
 						$pet_count = 1;
 					}
                         		$pass_count=grep( /PASS/, @file_lines);
-					$pass_count = $pass_count/$pet_count;
+					$pass_count = int $pass_count/$pet_count;
 					if ($pass_count == $test_count){
 						push(pass_list, $file);
 					}
 					else {
                         			$fail_count=grep( /FAIL/, @file_lines);
-						$fail_count = $fail_count/$pet_count;
+						$fail_count = int $fail_count/$pet_count;
 						if ($fail_count !=0 ) {
 							push @fail_test_list, grep (/FAIL/, @file_lines);
 						}
