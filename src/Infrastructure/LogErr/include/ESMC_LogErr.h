@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.4 2003/04/02 17:34:06 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.5 2003/04/03 17:04:16 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -147,12 +147,13 @@ inline void ESMC_Log::ESMC_LogFlush(
 
 // !DESCRIPTION: 
 // Causes output to be flushed.
-
+// 
+//EOP
 {
       flush=ESMF_LOG_TRUE;
 }
 
-//EOP
+
 
 //---------------------------------------------------------------------------
 //BOP                
@@ -190,7 +191,7 @@ inline void ESMC_Log::ESMC_LogVerbose(
   )
 
 // !DESCRIPTION:
-// If theVerbosity is set to ESMF_LOG_TRUE, messages are printed out. 
+// If theVerbosity is set to ESMF\_LOG\_TRUE, messages are printed out. 
 // 
 //EOP
 {
@@ -212,7 +213,7 @@ inline void ESMC_Log::ESMC_LogNotVerbose(
   )
 
 // !DESCRIPTION:
-// If theVerbosity is set to ESMC_LOG_FALSE, no messages are printed out. 
+// If theVerbosity is set to ESMC\_LOG\_FALSE, no messages are printed out. 
 // 
 //EOP
 {
@@ -235,7 +236,7 @@ inline void ESMC_Log::ESMC_LogHaltOnErr(
   )
 
 // !DESCRIPTION:
-// If haltOnErr is set to ESMC_LOG_TRUE, code will stop executing when
+// If haltOnErr is set to ESMC\_LOG\_TRUE, code will stop executing when
 // encountering an error.
 // 
 //EOP
@@ -258,7 +259,7 @@ inline void ESMC_Log::ESMC_LogNotHaltOnErr(
   )
 
 // !DESCRIPTION:
-// If haltOnErr is set to ESMC_LOG_FALSE, code will not stop executing when
+// If haltOnErr is set to ESMC\_LOG\_FALSE, code will not stop executing when
 // encountering an error.
 // 
 //EOP
@@ -281,7 +282,7 @@ inline void ESMC_Log::ESMC_LogHaltOnWarn(
   )
 
 // !DESCRIPTION:
-// If haltOnWarn is set to ESMC_LOG_TRUE, code will stop executing when
+// If haltOnWarn is set to ESMC\_LOG\_TRUE, code will stop executing when
 // encountering an error.
 // 
 //EOP
@@ -304,7 +305,7 @@ inline void ESMC_Log::ESMC_LogNotHaltOnWarn(
   )
 
 // !DESCRIPTION:
-// If haltOnWarn is set to ESMC_LOG_FALSE, code will not stop executing when
+// If haltOnWarn is set to ESMC\_LOG\_FALSE, code will not stop executing when
 // encountering an error.
 // 
 //EOP

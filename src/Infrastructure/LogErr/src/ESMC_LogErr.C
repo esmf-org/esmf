@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.4 2003/04/02 17:33:05 shep_smith Exp $
+// $Id: ESMC_LogErr.C,v 1.5 2003/04/03 17:04:17 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.4 2003/04/02 17:33:05 shep_smith Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.5 2003/04/03 17:04:17 flanigan Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -69,7 +69,7 @@ void ESMC_Log::ESMC_LogOpenFile(
 //
 // !DESCRIPTION
 // ESMC\_LogErrOpenFile takes two
-// arguments.  The first should be set to ESMF_SINGLE_LOG_FILE or
+// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
 // ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
 // ESMF\_LogConstants.h, set whether one file should be written for all 
 // processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
@@ -198,7 +198,7 @@ bool ESMC_Log::ESMC_LogNameValid(
 // !DESCRIPTION
 //    Checks to see if a file of the name name has been opened by Log.
 //    If it has the function returns a false value.  Note: this function
-//    use a global array that all ESMC_Log objects have access to.
+//    use a global array that all ESMC\_Log objects have access to.
 {
   for(int i=0; i< numFileGlobal+numFileFortGlobal; i++)
     if (strcmp(name,listOfFileNames[i])  == 0) 

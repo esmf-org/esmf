@@ -226,19 +226,19 @@
 #include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
 %====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Log}
-%\label{part:Infrastructure_Utilities:_Log}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
+\end{htmlonly}
+\part{Infrastructure Utilities: Log}
+\label{part:Infrastructure_Utilities:_Log}
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%#include "../Infrastructure/LogErr/doc/Log_desdoc.ctex"
+#include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
 
 %====================================================================================================
 %\newpage

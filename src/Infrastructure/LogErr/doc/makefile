@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/03/28 23:04:17 nscollins Exp $
+# $Id: makefile,v 1.2 2003/04/03 17:04:16 flanigan Exp $
 ALL: lib 
 
 CFLAGS    =
@@ -13,16 +13,16 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/LogErr/doc
 
 DVIFILES  = \
-		${ESMC_DOCDIR}/LogErr_desdoc.dvi 
-#		${ESMC_DOCDIR}/LogErr_reqdoc.dvi \
-#		${ESMC_DOCDIR}/LogErr_refdoc.dvi
+		${ESMC_DOCDIR}/LogErr_desdoc.dvi \
+		${ESMC_DOCDIR}/LogErr_refdoc.dvi 
+#		${ESMC_DOCDIR}/LogErr_reqdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
-		${ESMC_DOCDIR}/LogErr_desdoc 
-#		${ESMC_DOCDIR}/LogErr_reqdoc \
-#		${ESMC_DOCDIR}/LogErr_refdoc
+		${ESMC_DOCDIR}/LogErr_desdoc \
+		${ESMC_DOCDIR}/LogErr_refdoc 
+#		${ESMC_DOCDIR}/LogErr_reqdoc
 
 
 #
