@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.40 2004/06/21 23:32:56 jwolfe Exp $
+! $Id: ESMF_GridUTest.F90,v 1.40.2.1 2004/07/22 22:44:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.40 2004/06/21 23:32:56 jwolfe Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.40.2.1 2004/07/22 22:44:56 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -254,7 +254,7 @@
 
       !EX_UTest
       ! Test adding a name to an empty Grid
-      call ESMF_GridAddAttribute(grid1, name="GRID_ONE", rc=rc)
+      call ESMF_GridSet(grid1, name="GRID_ONE", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding a name to a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -265,7 +265,7 @@
 
       !EX_UTest
       ! Test getting the name from an empty Grid
-      call ESMF_GridGetAttributes(grid1, name=gname, rc=rc)
+      call ESMF_GridGet(grid1, name=gname, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a name from a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
