@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.13 2004/04/14 21:52:19 nscollins Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.14 2004/04/15 19:35:04 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -81,7 +81,7 @@
     call ESMF_newDELayoutPrint(layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_newDELayoutGet(layout1, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
@@ -93,8 +93,8 @@
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     !delist = (/ 0, 1, 2, 3 /)
-    layout2 = ESMF_newDELayoutCreate(vm, /( 4, 1 /), rc=rc)
     !layout2 = ESMF_newDELayoutCreate(delist, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
+    layout2 = ESMF_newDELayoutCreate(vm, (/ 4, 1 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -103,8 +103,8 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname2 = "user model 2"
-    layout3 = ESMF_newDELayoutCreate(vm, rc=rc)
     !layout3 = ESMF_newDELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+    layout3 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -237,7 +237,7 @@
 
 
       ! Figure out our local processor id for message below.
-      call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
+      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
 

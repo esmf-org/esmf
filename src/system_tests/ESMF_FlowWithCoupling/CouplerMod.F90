@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.8 2004/03/24 14:55:04 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.9 2004/04/15 19:34:54 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -67,7 +67,7 @@
       ! Local variables
       character (len=ESMF_MAXSTR) :: statename
       type(ESMF_Field) :: srcfield, dstfield
-      type(ESMF_DELayout) :: cpllayout
+      type(ESMF_newDELayout) :: cpllayout
 
       print *, "Coupler Init starting"
 
@@ -133,7 +133,7 @@
       type(ESMF_Field) :: srcfield, dstfield
       type(ESMF_Array) :: srcarray, dstarray
       real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
-      type(ESMF_DELayout) :: cpllayout
+      type(ESMF_newDELayout) :: cpllayout
     
       character(len=ESMF_MAXSTR) :: statename
      

@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2004/03/18 23:21:06 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2004/04/15 19:35:04 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -66,7 +66,7 @@
 
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2, humidity3
-        type(ESMF_DELayout) :: cpllayout
+        type(ESMF_newDELayout) :: cpllayout
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_DataMap) :: datamap1

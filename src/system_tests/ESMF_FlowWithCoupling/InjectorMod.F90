@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.10 2004/03/20 03:55:04 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.11 2004/04/15 19:35:04 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -96,7 +96,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! Local variables
       !
       integer :: i, j
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
@@ -420,7 +420,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       integer :: ni, nj, i, j, de_id
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       character(len=ESMF_MAXSTR) :: filename
       !
       ! Set initial values
@@ -438,7 +438,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! Get our layout from the component, and our de number
       !
       call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
-      call ESMF_DELayoutGetDEID(layout, de_id, rc=status)
+      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file
       !

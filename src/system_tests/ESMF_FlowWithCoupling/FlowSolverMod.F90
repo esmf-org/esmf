@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.7 2004/03/20 03:55:04 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.8 2004/04/15 19:35:04 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -108,7 +108,8 @@
 !
       integer :: status
       integer :: i, j
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
+      type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
@@ -250,7 +251,7 @@
       integer, dimension(1,2) :: local, global
       double precision :: s_
       type(ESMF_Grid) :: grid
-      type(ESMF_DElayout) :: layout
+      type(ESMF_newDElayout) :: layout
 !
 ! Set initial values
 !
@@ -1337,7 +1338,7 @@
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
+      type(ESMF_newDELayout) :: layout
       type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
 !
@@ -1356,7 +1357,7 @@
 ! Collect results on DE 0 and output to a file
 !
       call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
-      call ESMF_DELayoutGetDEID(layout, de_id, status)
+      call ESMF_newDELayoutGetDE(layout, de=de_id, status)
 !
 ! Frame number from computation
 !

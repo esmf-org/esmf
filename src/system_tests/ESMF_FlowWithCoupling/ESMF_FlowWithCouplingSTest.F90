@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.12 2004/04/14 21:52:19 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.13 2004/04/15 19:34:56 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -88,11 +88,11 @@
     layoutDef = ESMF_newDELayoutCreate(vm, rc=rc)
 
     ! Get our DE number for later
-    call ESMF_newDELayoutGetDEId(layoutDef, de_id, rc)
+    call ESMF_newDELayoutGetDE(layoutDef, de=de_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Sanity check the number of DEs we were started on.
-    call ESMF_newDELayoutGetNumDEs(layoutDef, ndes, rc)
+    call ESMF_newDELayoutGet(layoutDef, deCount=ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
         print *, "This test needs to run at least 4-way and no more than 16-way."
@@ -117,13 +117,13 @@
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
     !  The coupler will run on the original default 1 x N layout.
     cnameIN = "Injector model"
-    layoutIN = ESMF_newDELayoutCreate(delist, (/ mid, 2 /), rc=rc)
+    layoutIN = ESMF_newDELayoutCreate(vm, (/ mid, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_newDELayoutCreate(delist, (/ quart, 4 /), rc=rc)
+    layoutFS = ESMF_newDELayoutCreate(vm, (/ quart, 4 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
