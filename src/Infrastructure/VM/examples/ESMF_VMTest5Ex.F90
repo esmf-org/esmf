@@ -1,12 +1,13 @@
 ! Simple ESMF application demonstrating VM features
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+! \subsubsection{VMAllFullReduce Example}
+!
 ! This example demonstrates how to use the VMAllFullReduce method to 
 ! find the VM-wide global sum of a data set.
 !
-!EOP
+!EOE
 !
 
 program ESMF_VMTest5Ex

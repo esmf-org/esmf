@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/05/22 04:18:14 theurich Exp $
+# $Id: makefile,v 1.7 2004/06/17 16:20:03 theurich Exp $
 
 ALL: build_examples
 
@@ -58,7 +58,7 @@ LOCDIR	  = src/Infrastructure/VM/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMTest1Ex \
+EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMTest2Ex \
                     $(ESMF_EXDIR)/ESMF_VMTest3Ex \
                     $(ESMF_EXDIR)/ESMF_VMTest4Ex \
@@ -71,7 +71,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMTest1Ex \
 # in this makefile.
 #
 
-EXAMPLES_RUN      = run_ESMF_VMTest1Ex
+EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMTest1Ex_uni
 
@@ -86,11 +86,11 @@ CLOBBERDIRS =
 #
 #  ESMF_VMTest1
 #
-run_ESMF_VMTest1Ex:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMTest1Ex > $(ESMF_EXDIR)/ESMF_VMTest1Ex.stdout
+run_ESMF_VMDefaultBasicsEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx > $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx.stdout
 
 run_ESMF_VMTest1Ex_uni:
-	echo "ESMF_VMTest1Ex not set up to run on one processor."
+	echo "ESMF_VMDefaultBasicsEx not set up to run on one processor."
 
 
 

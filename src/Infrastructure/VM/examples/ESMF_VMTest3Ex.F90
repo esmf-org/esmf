@@ -1,13 +1,14 @@
 ! Simple ESMF application demonstrating VM features
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+! \subsubsection{VMSend/VMRecv Example}
+!
 ! The VM layer provides MPI-like point-to-point communication. Use send and
 ! receive to communicate between two PETs. The following code sends data from
 ! the first to the last PET in the VM.
 !
-!EOP
+!EOE
 !
 
 program ESMF_VMTest3Ex

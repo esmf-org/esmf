@@ -2,7 +2,7 @@
 !
 !BOE
 !
-! \subsubsection{VM\_Get MPI Communicator Example}
+! \subsubsection{VMGet MPI Communicator Example}
 !
 ! The following example code shows how to obtain the MPI intra-communicator
 ! out of a VM object. In order not to interfer with ESMF communication a

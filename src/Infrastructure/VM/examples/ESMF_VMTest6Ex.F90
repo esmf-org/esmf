@@ -1,15 +1,16 @@
 ! Simple ESMF application demonstrating VM features
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+! \subsubsection{VM Component Example}
+!
 ! The following example shows the role that VMs play in connetion with ESMF 
 ! components. Here a single component is created in the main program and the
 ! default VM gives all its resources to the child component. When the child
 ! component code is entered through the registered methods (Initialize, Run or 
 ! Finalize) the user code is executed in the childs VM.
 !
-!EOP
+!EOE
 !
 
 !BOC

@@ -1,12 +1,13 @@
 ! Simple ESMF application demonstrating VM features
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+! \subsubsection{VMScatter/VMGather Example}
+!
 ! The VM layer provides MPI-like collective communication. This example 
 ! demonstrates the use of VM-wide scatter and gather.
 !
-!EOP
+!EOE
 !
 
 program ESMF_VMTest4Ex
