@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.ctex,v 1.8 2003/01/28 18:18:29 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.9 2003/01/29 19:21:25 cnh Exp $
 
 %
 \documentclass[]{article}
@@ -18,7 +18,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{ARCH}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Carlos Cruz, Nancy Collins, Tony Craig, Arlindo da Silva, Cecelia DeLuca, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Erik Kluzek, Jay Larson, John Michalakes, David Neckels, Will Sawyer, Earl Schwab, Max Suarez, Shepard Smithline, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Carlos Cruz, Nancy Collins, Tony Craig, Arlindo da Silva, Cecelia DeLuca, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Erik Kluzek, Jay Larson, John Michalakes, David Neckels, Will Sawyer, Earl Schwab, Max Suarez, Shepard Smithline, Brice Womack, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 
 \textwidth 6.5in
@@ -53,9 +53,6 @@
 
 %\section{Scope of the ESMF}
 \input{ESMF_shortscope}
-
-%\section{Evolution of Earth Science Frameworks}
-\input{ESMF_archbackground}
 
 %\section{Software Design Paradigms}
 \input{ESMF_strategies}
