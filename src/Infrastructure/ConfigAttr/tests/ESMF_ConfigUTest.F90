@@ -66,12 +66,12 @@
 ! Retrieval of single parameters
 !--------------------------------
 
-      nDE = ESMF_ConfigGetInt ( cf, label ='Number_of_DEs:', default=7, &
+      call ESMF_ConfigGetInt ( cf, nDE, label ='Number_of_DEs:', default=7, &
            rc = rc )
       print *,'ESMF_ConfigGetInt got nDE =', nDE,' rc =', rc
 
 
-      tau = ESMF_ConfigGetFloat ( cf, &
+      call ESMF_ConfigGetFloat ( cf, tau, &
            label ='Relaxation_time_scale_in_days:', rc = rc)
       answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', &
                                     rc = rc )
@@ -88,13 +88,13 @@
 
       call ESMF_ConfigFindLabel ( cf, 'u-wind-error:', rc ) ! identifies label
       call ESMF_ConfigGetString ( cf, u_dataType, rc =rc )  ! first token
-      nu = ESMF_ConfigGetInt ( cf, rc = rc )                ! seconf token
+      call ESMF_ConfigGetInt ( cf, nu, rc = rc )                ! seconf token
       call ESMF_ConfigGetFloat ( cf,  array=sigU, nsize=nu,  rc=rc )  
                                                             ! tokens 3 thru 8 
 
       call ESMF_ConfigFindLabel ( cf, 'v-wind-error:', rc )
       call ESMF_ConfigGetString ( cf, v_dataType, rc = rc )
-      nv = ESMF_ConfigGetInt ( cf, rc = rc )
+      call ESMF_ConfigGetInt ( cf, nv, rc = rc )
       call ESMF_ConfigGetFloat ( cf, sigV, nsize=nv, rc=rc )
   
 ! NOTE: Order is not relevant; first label found is returned
@@ -108,14 +108,14 @@
 
       call ESMF_ConfigNextLine ( cf, rc=rc )               ! move down 1 line
       call ESMF_ConfigGetString ( cf, u_dataType, rc=rc )  ! first token
-      nu = ESMF_ConfigGetInt ( cf, rc=rc )                 ! second token
+      call ESMF_ConfigGetInt ( cf, nu, rc=rc )                 ! second token
       call ESMF_ConfigGetFloat ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8 
 
 !      Similarly for v
 
       call ESMF_ConfigNextLine ( cf, rc=rc )
       call ESMF_ConfigGetString ( cf, v_dataType, rc=rc )
-      nv = ESMF_ConfigGetInt ( cf, rc=rc )
+      call ESMF_ConfigGetInt ( cf, nv, rc=rc )
       call ESMF_ConfigGetFloat ( cf, sigV, nsize=6,rc=rc )
 
 
@@ -139,14 +139,14 @@
 
 !               Retrieve pressure level
 !               -----------------------
-           plev(line) = ESMF_ConfigGetFloat ( cf, rc=rc )
+           call ESMF_ConfigGetFloat ( cf, plev(line), rc=rc )
            if (rc /= 0) exit
            
 !               Looping over columns
 !               --------------------
            column = 0
            do while ((column < MAXLEV) .and. ( rc == 0) )
-              temp = ESMF_ConfigGetFloat ( cf, rc=rc)
+              call ESMF_ConfigGetFloat ( cf, temp, rc=rc)
               if (rc == 0) then 
                  column = column + 1
                  vCorr(line,column) = temp 

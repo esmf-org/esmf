@@ -762,10 +762,11 @@
 !
 ! !INTERFACE:
 
-    real function ESMF_ConfigGetFloat_one( cf, label, default, rc )
+    subroutine ESMF_ConfigGetFloat_one( cf, rvalue, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      real, intent(out)                      :: rvalue   ! return value
       character(len=*), intent(in), optional :: label    ! label 
       real, intent(in), optional             :: default  ! default value
 
@@ -801,11 +802,11 @@
             x = 0.
          endif
       endif
-      ESMF_ConfigGetFloat_one = x
+      rvalue = x
       if( present( rc )) rc = iret 
       return
 
-    end function ESMF_ConfigGetFloat_one
+    end subroutine ESMF_ConfigGetFloat_one
 
 
 
@@ -853,18 +854,18 @@
          
          if (present( label )) then
             if(present( default )) then
-              array(i)  =  ESMF_ConfigGetFloat_one( cf, label, &
+              call ESMF_ConfigGetFloat_one( cf, array(i), label, &
                     default, iret)
             else
-               array(i) =  ESMF_ConfigGetFloat_one( cf, label, &
+               call ESMF_ConfigGetFloat_one( cf, array(i), label, &
                     rc = iret)
             endif
          else
             if(present( default )) then
-               array(i) =  ESMF_ConfigGetFloat_one( cf, &
+               call ESMF_ConfigGetFloat_one( cf, array(i), &
                     default = default, rc = iret)
             else
-               array(i) =  ESMF_ConfigGetFloat_one( cf, rc = iret)
+               call ESMF_ConfigGetFloat_one( cf, array(i), rc = iret)
             endif
          endif
       enddo
@@ -882,13 +883,12 @@
 !
 ! !INTERFACE:
 
-    integer function ESMF_ConfigGetInt_one( cf, label, default, rc )
+    subroutine ESMF_ConfigGetInt_one( cf, ivalue, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      integer, intent(out)                   :: ivalue   ! return value
       character(len=*), intent(in), optional :: label    ! label
-!      integer, intent(in), optional          :: size     ! number of floating 
-!                                                         ! point numbers
       integer, intent(in), optional          :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
@@ -926,11 +926,11 @@
          endif
       endif
 
-      ESMF_ConfigGetInt_one = n
+      ivalue = n
       if( present( rc )) rc = iret
       
       return
-    end function ESMF_ConfigGetInt_one
+    end subroutine ESMF_ConfigGetInt_one
 
 
 !-----------------------------------------------------------------------
@@ -976,18 +976,18 @@
          
          if (present( label )) then
             if(present( default )) then
-              array(i)  =  ESMF_ConfigGetInt_one( cf, label, &
+              call ESMF_ConfigGetInt_one( cf, array(i), label, &
                     default, iret)
             else
-               array(i) =  ESMF_ConfigGetInt_one( cf, label, &
+               call ESMF_ConfigGetInt_one( cf, array(i), label, &
                     rc = iret)
             endif
          else
             if(present( default )) then
-               array(i) =  ESMF_ConfigGetInt_one( cf, &
+               call ESMF_ConfigGetInt_one( cf, array(i), &
                     default = default, rc = iret)
             else
-               array(i) =  ESMF_ConfigGetInt_one( cf, rc = iret)
+               call ESMF_ConfigGetInt_one( cf, array(i), rc = iret)
             endif
          endif
       enddo
