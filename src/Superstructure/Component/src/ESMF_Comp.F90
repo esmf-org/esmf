@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.69 2004/03/05 17:42:11 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.70 2004/03/05 17:51:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.69 2004/03/05 17:42:11 svasquez Exp $'
+      '$Id: ESMF_Comp.F90,v 1.70 2004/03/05 17:51:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -636,7 +636,7 @@ end function
           isdel = .TRUE.
         endif
 
-        if (present(importstate)) then
+        if (present(exportstate)) then
           es = exportstate
           esdel = .FALSE.
         else
