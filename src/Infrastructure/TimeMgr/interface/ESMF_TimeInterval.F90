@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.67 2004/11/15 18:03:10 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.68 2004/11/24 00:39:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.67 2004/11/15 18:03:10 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.68 2004/11/24 00:39:34 eschwab Exp $'
 
 !==============================================================================
 !
@@ -953,7 +953,7 @@
                                          ms_r8, us_r8, ns_r8, &
                                          sN, sD, &
                                          startTime, calendar, calendarType, &
-                                         timeString, rc)
+                                         timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
@@ -983,6 +983,7 @@
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       character (len=*),       intent(out), optional :: timeString
+      character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1004,8 +1005,11 @@
 !     See {\tt ../include/ESMC\_BaseTime.h} and
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
-!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
-!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
+!
+!     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1063,7 +1067,14 @@
 !     \item[{[calendarType]}]
 !          Associated {\tt CalendarType}, if any.
 !     \item[{[timeString]}]
-!          The string to return.
+!          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
+!          where n/d is numerator/denominator of any fractional seconds and
+!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
+!     \item[{[timeStringISOFrac]}]
+!          Convert time interval value to strict ISO 8601 format string
+!          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
+!          seconds.  See ~\cite{ISO}.
+
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1073,17 +1084,22 @@
 !     TMG1.1
 
       ! temp time string for C++ to fill
-      character (len=ESMF_MAXSTR) :: tempTimeString
+      character (len=ESMF_MAXSTR) :: tempTimeString, tempTimeStringISOFrac
 
       ! initialize time string lengths to zero for non-existent time string
-      integer :: timeStringLen
-      integer :: tempTimeStringLen
+      integer :: timeStringLen, timeStringLenISOFrac
+      integer :: tempTimeStringLen, tempTimeStringLenISOFrac
       timeStringLen = 0     
+      timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
+      tempTimeStringLenISOFrac = 0
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
         timeStringLen = len(timeString)
+      end if
+      if (present(timeStringISOFrac)) then
+        timeStringLenISOFrac = len(timeStringISOFrac)
       end if
 
       ! use optional args for any subset
@@ -1093,12 +1109,18 @@
                                      us_r8, ns_r8, sN, sD, &
                                      startTime, calendar, calendarType, &
                                      timeStringLen, tempTimeStringLen, &
-                                     tempTimeString, rc)
+                                     tempTimeString, &
+                                     timeStringLenISOFrac, &
+                                     tempTimeStringLenISOFrac, &
+                                     tempTimeStringISOFrac, rc)
 
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
         timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+      if (present(timeStringISOFrac)) then
+        timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
       end subroutine ESMF_TimeIntervalGetDur
@@ -1122,7 +1144,7 @@
                                               startTime, &
                                               calendar, calendarType, &
                                               startTimeIn, &
-                                              timeString, rc)
+                                              timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
@@ -1153,6 +1175,7 @@
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       type(ESMF_Time),         intent(in)            :: startTimeIn    ! Input
       character (len=*),       intent(out), optional :: timeString
+      character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1174,8 +1197,11 @@
 !     See {\tt ../include/ESMC\_BaseTime.h} and
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
-!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
-!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
+!
+!     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1238,7 +1264,13 @@
 !          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
 !          previously set.  Mutually exclusive with endTimeIn and calendarIn.
 !     \item[{[timeString]}]
-!          The string to return.
+!          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
+!          where n/d is numerator/denominator of any fractional seconds and
+!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
+!     \item[{[timeStringISOFrac]}]
+!          Convert time interval value to strict ISO 8601 format string
+!          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
+!          seconds.  See ~\cite{ISO}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1248,17 +1280,22 @@
 !     TMG1.1
 
       ! temp time string for C++ to fill
-      character (len=ESMF_MAXSTR) :: tempTimeString
+      character (len=ESMF_MAXSTR) :: tempTimeString, tempTimeStringISOFrac
 
       ! initialize time string lengths to zero for non-existent time string
-      integer :: timeStringLen
-      integer :: tempTimeStringLen
-      timeStringLen = 0     
+      integer :: timeStringLen, timeStringLenISOFrac
+      integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      timeStringLen = 0
+      timeStringLenISOFrac = 0
       tempTimeStringLen = 0
+      tempTimeStringLenISOFrac = 0
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
         timeStringLen = len(timeString)
+      end if
+      if (present(timeStringISOFrac)) then
+        timeStringLenISOFrac = len(timeStringISOFrac)
       end if
 
       ! use optional args for any subset
@@ -1270,12 +1307,18 @@
                                        calendar, calendarType, &
                                        startTimeIn, &
                                        timeStringLen, tempTimeStringLen, &
-                                       tempTimeString, rc)
+                                       tempTimeString, &
+                                       timeStringLenISOFrac, &
+                                       tempTimeStringLenISOFrac, &
+                                       tempTimeStringISOFrac, rc)
 
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
         timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+      if (present(timeStringISOFrac)) then
+        timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
       end subroutine ESMF_TimeIntervalGetDurStart
@@ -1299,7 +1342,7 @@
                                             startTime, &
                                             calendar, calendarType, &
                                             calendarIn, &
-                                            timeString, rc)
+                                            timeString, timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
@@ -1330,6 +1373,7 @@
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       type(ESMF_Calendar),     intent(in)            :: calendarIn     ! Input
       character (len=*),       intent(out), optional :: timeString
+      character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1351,8 +1395,11 @@
 !     See {\tt ../include/ESMC\_BaseTime.h} and
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
-!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
-!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
+!
+!     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1417,7 +1464,13 @@
 !          mutually exclusive with, calendarTypeIn below.  Primarily for
 !          specifying a custom calendar type.
 !     \item[[{timeString]}]
-!          The string to return.
+!          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
+!          where n/d is numerator/denominator of any fractional seconds and
+!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
+!     \item[{[timeStringISOFrac]}]
+!          Convert time interval value to strict ISO 8601 format string
+!          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
+!          seconds.  See ~\cite{ISO}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1427,17 +1480,22 @@
 !     TMG1.1
 
       ! temp time string for C++ to fill
-      character (len=ESMF_MAXSTR) :: tempTimeString
+      character (len=ESMF_MAXSTR) :: tempTimeString, tempTimeStringISOFrac
 
       ! initialize time string lengths to zero for non-existent time string
-      integer :: timeStringLen
-      integer :: tempTimeStringLen
+      integer :: timeStringLen, timeStringLenISOFrac
+      integer :: tempTimeStringLen, tempTimeStringLenISOFrac
       timeStringLen = 0     
+      timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
+      tempTimeStringLenISOFrac = 0
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
         timeStringLen = len(timeString)
+      end if
+      if (present(timeStringISOFrac)) then
+        timeStringLenISOFrac = len(timeStringISOFrac)
       end if
 
       ! use optional args for any subset
@@ -1448,12 +1506,18 @@
                                   startTime, calendar, calendarType, &
                                   calendarIn, &
                                   timeStringLen, tempTimeStringLen, &
-                                  tempTimeString, rc)
+                                  tempTimeString, &
+                                  timeStringLenISOFrac, &
+                                  tempTimeStringLenISOFrac, &
+                                  tempTimeStringISOFrac, rc)
 
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
         timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+      if (present(timeStringISOFrac)) then
+        timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
       end subroutine ESMF_TimeIntervalGetDurCal
@@ -1477,7 +1541,8 @@
                                                startTime, &
                                                calendar, calendarType, &
                                                calendarTypeIn, &
-                                               timeString, rc)
+                                               timeString, &
+                                               timeStringISOFrac, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
@@ -1508,6 +1573,7 @@
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       type(ESMF_CalendarType), intent(in)            :: calendarTypeIn ! Input
       character (len=*),       intent(out), optional :: timeString
+      character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1529,8 +1595,11 @@
 !     See {\tt ../include/ESMC\_BaseTime.h} and
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
-!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
-!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into
+!     partial ISO 8601 format PyYmMdDThHmMs[:n/d]S.  See ~\cite{ISO}.
+!
+!     For timeStringISOFrac, converts {\tt ESMF\_TimeInterval}'s value into
+!     full ISO 8601 format PyYmMdDThHmMs[.f]S.  See ~\cite{ISO}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1592,7 +1661,13 @@
 !          calendarIn above.  More convenient way of specifying a built-in
 !          calendar type.
 !     \item[[{timeString]}]
-!          The string to return.
+!          Convert time interval value to format string PyYmMdDThHmMs[:n/d]S,
+!          where n/d is numerator/denominator of any fractional seconds and
+!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
+!     \item[{[timeStringISOFrac]}]
+!          Convert time interval value to strict ISO 8601 format string
+!          PyYmMdDThHmMs[.f], where f is decimal form of any fractional
+!          seconds.  See ~\cite{ISO}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1602,17 +1677,22 @@
 !     TMG1.1
 
       ! temp time string for C++ to fill
-      character (len=ESMF_MAXSTR) :: tempTimeString
+      character (len=ESMF_MAXSTR) :: tempTimeString, tempTimeStringISOFrac
 
       ! initialize time string lengths to zero for non-existent time string
-      integer :: timeStringLen
-      integer :: tempTimeStringLen
-      timeStringLen = 0     
+      integer :: timeStringLen, timeStringLenISOFrac
+      integer :: tempTimeStringLen, tempTimeStringLenISOFrac
+      timeStringLen = 0
+      timeStringLenISOFrac = 0
       tempTimeStringLen = 0
+      tempTimeStringLenISOFrac = 0
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
         timeStringLen = len(timeString)
+      end if
+      if (present(timeStringISOFrac)) then
+        timeStringLenISOFrac = len(timeStringISOFrac)
       end if
 
       ! use optional args for any subset
@@ -1623,12 +1703,18 @@
                                   startTime, calendar, calendarType, &
                                   calendarTypeIn, &
                                   timeStringLen, tempTimeStringLen, &
-                                  tempTimeString, rc)
+                                  tempTimeString, &
+                                  timeStringLenISOFrac, &
+                                  tempTimeStringLenISOFrac, &
+                                  tempTimeStringISOFrac, rc)
 
       ! copy temp time string back to given time string to restore
       !   native Fortran storage style
       if (present(timeString)) then
         timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+      if (present(timeStringISOFrac)) then
+        timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
     
       end subroutine ESMF_TimeIntervalGetDurCalTyp
@@ -1690,7 +1776,17 @@
 !          Print options.  If none specified, prints all {\tt timeinterval}
 !          property values. \\
 !          "string" - prints {\tt timeinterval}'s value in ISO 8601 format
-!                     PyYmMdDThHmMsS.  See ~\cite{ISO}. \\
+!                     for all units through seconds.  For any non-zero
+!                     fractional seconds, prints in integer rational
+!                     fraction form n/d.  Format is PyYmMdDThHmMs[:n/d]S,
+!                     where [:n/d] is the integer numerator and denominator
+!                     of the fractional seconds value, if present.
+!                     See ~\cite{ISO}. \\
+!          "string isofrac" - prints {\tt timeinterval}'s value in strict
+!                     ISO 8601 format for all units, including any fractional
+!                     seconds part.  Format is PyYmMdDThHmMs[.f]S, where [.f]
+!                     represents fractional seconds in decimal form,
+!                     if present.  See ~\cite{ISO}. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
