@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.31 2003/09/11 18:53:45 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.32 2003/09/11 19:01:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,9 +71,6 @@
         integer                 :: nRingDurationTimeSteps
         integer                 :: nTimeStepsRinging
         integer                 :: id
-        logical                 :: ringing
-        logical                 :: enabled
-        logical                 :: sticky
         logical                 :: ringing
         logical                 :: enabled
         logical                 :: sticky
@@ -164,7 +161,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.31 2003/09/11 18:53:45 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.32 2003/09/11 19:01:37 eschwab Exp $'
 
 !==============================================================================
 !
