@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.56 2004/11/01 23:38:45 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.57 2004/11/17 18:59:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -335,7 +335,7 @@ extern "C" {
   void FTN(c_esmc_attributegetattrinfoname)(ESMC_Base **base, char *name, 
                                            ESMC_DataType *dt, ESMC_DataKind *dk,
                                            int *count, int *rc, int nlen);
-  void FTN(c_esmc_attributegetattrinfonum)(ESMC_Base **base, int num, 
+  void FTN(c_esmc_attributegetattrinfonum)(ESMC_Base **base, int *num, 
                                            char *name, ESMC_DataType *dt, 
                                            ESMC_DataKind *dk, int *count, 
                                            int *rc, int nlen);
