@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.9 2004/03/17 21:06:29 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.10 2004/11/30 21:06:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,10 +101,10 @@ extern "C" {
 class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
    protected:
-    int rank;                      // dimensionality
+    int rank;                      // dimensionality (1, 2, ..., 7)
     ESMC_DataType type;            // int, real, etc.
-    ESMC_DataKind kind;            // short, long
-    ESMC_ArrayOrigin origin;       // was the create called from F90 or C++
+    ESMC_DataKind kind;            // short, long (*4, *8)
+    ESMC_ArrayOrigin origin;       // was the create called from F90 or C++?
     ESMC_Logical needs_dealloc;    // is array responsible for deallocation?
     ESMC_Logical iscontig;         // optimization possible if all contig
     void *base_addr;               // real start of memory
@@ -114,8 +114,9 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     int counts[ESMF_MAXDIM];       // number of elements/dim
     int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
-                                   // potentially these could be needed... 
-    
+                                   // this is memcpy'd to save and restore 
+                                   // contents are not interpreted by esmf
+
 // !PUBLIC MEMBER FUNCTIONS:
 //
 // pick one or the other of the init/create sections depending on
