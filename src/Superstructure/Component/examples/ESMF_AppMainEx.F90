@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.5 2003/02/20 17:31:25 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.6 2003/02/20 21:52:00 nscollins Exp $
 !
 ! Example code for a main program Application.  See ESMF_AppCompEx.F90
 !   for an example of an embeddable Application.
@@ -10,8 +10,8 @@
 !
 ! !DESCRIPTION:
 ! Example of a main program Application.  See also the following example
-!  for an Application which can be nested in a higher-level Application.
-!  Also see the Programming Model section of this document.
+!  for a Component which can either be an Application or can be nested
+!  in a higher level Component.
 !
 !
 !\begin{verbatim}
@@ -57,7 +57,7 @@
     !  a Clock to pass in.  
 
     delistall = (/ (i, i=0,17) /)
-    layoutall = ESMF_LayoutCreate(1, 20, delistall, rc)
+    layoutall = ESMF_LayoutCreate(1, 18, delistall, rc)
 
     ! See the TimeMgr document for the details on this.
     clock = ESMF_ClockInit()
@@ -74,17 +74,11 @@
                              clock, "/home/myname/model1/setup", rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point,
-    !  and unique amongst all components in this application.
-    call PHYS_Register(comp1, rc=rc)
+    !  and must be either a unique name among all components, or be 
+    !  renamed with the 'use localname => modulename' syntax.
+    call ESMF_CompRegister(comp1, PHYS_Register, rc=rc)
 
-    ! The setup routine will make the following 3 calls internally
-    ! (so PHYS_Init(), etc can be private methods inside the module).
-    ! The arguments are: the component, the type of routine, the index
-    !  number (to support multiple entry points of the same type), and
-    !  the name of the internal subroutine which contains the user code.
-    !! call ESMF_CompSetRoutine(comp1, "init", 1, PHYS_Init)
-    !! call ESMF_CompSetRoutine(comp1, "run", 1, PHYS_Run)
-    !! call ESMF_CompSetRoutine(comp1, "final", 1, PHYS_Final)
+    ! (see below for what the Register routine will need to do.)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -95,14 +89,8 @@
     comp2 = ESMF_CompCreate(cname, layout2, ESMF_GRIDCOMP, ESMF_ATM, &
                              clock, "/home/myname/model1/setup", rc=rc)  
 
-    ! This single user-supplied subroutine must be a public entry point,
-    !  and unique amongst all components in this application.
-    call DYNM_Register(comp2, rc=rc)
-
-    ! The setup routine will make the following 3 calls internally:
-    !! call ESMF_CompSetRoutine(comp2, "init", 1, DYNM_Init)
-    !! call ESMF_CompSetRoutine(comp2, "run", 1, DYNM_Run)
-    !! call ESMF_CompSetRoutine(comp2, "final", 1, DYNM_Final)
+    ! This single user-supplied subroutine must be a public entry point.
+    call ESMF_CompRegister(comp1, DYNM_Register, rc=rc)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -115,14 +103,8 @@
     cpl = ESMF_CompCreate(cname, layout3, ESMF_CPLCOMP, comps, &
                            filepath="/home/myname/model1/setup", rc=rc)  
 
-    ! This single user-supplied subroutine must be a public entry point,
-    !  and unique amongst all components in this application.
-    call CPLR_Register(cpl, rc=rc)
-
-    ! The setup routine will make the following 3 calls internally:
-    !! call ESMF_CompSetRoutine(cpl, "init", 1, CPLR_Init)
-    !! call ESMF_CompSetRoutine(cpl, "run", 1, CPLR_Run)
-    !! call ESMF_CompSetRoutine(cpl, "final", 1, CPLR_Final)
+    ! This single user-supplied subroutine must be a public entry point.
+    call ESMF_CompRegister(comp1, CPLR_Register, rc=rc)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -140,19 +122,23 @@
     print *, "Comp Init returned"
 
 
+    ! Main run loop.
     finished = .false.
-    timestep = 1
-    endtime = 10
+    timesteps = 5
     do while (.not. finished)
-        call ESMF_CompRun(comp1, timestep, rc)
-        call ESMF_CompRun(comp2, timestep, rc)
-        call ESMF_CompRun(cpl, timestep, rc)
-        print *, "Comp Run returned"
+
+        call ESMF_CompRun(comp1, clock, timesteps, rc)
+        call ESMF_CompRun(comp2, clock, timesteps, rc)
+        call ESMF_CompRun(cpl, clock, rc)
    
-        if (timestep .gt. endtime) finished = .true.
+        call ESMF_ClockAdvance(clock, timesteps)
+
+        ! query clock for current time
+        if (currenttime .gt. endtime) finished = .true.
     enddo
 
 
+    !
     call ESMF_CompFinalize(comp1, rc)
     call ESMF_CompFinalize(comp2, rc)
     call ESMF_CompFinalize(cpl, rc)
@@ -170,5 +156,17 @@
 
     end program ESMF_AppMainEx
     
+
+    ! Each Component must supply a Register routine which makes the
+    !  following calls:
+    !! call ESMF_CompSetRoutine(comp1, "init", 1, PHYS_Init)
+    !! call ESMF_CompSetRoutine(comp1, "init", 2, PHYS_InitPhase2)
+    !! call ESMF_CompSetRoutine(comp1, "run", 1, PHYS_Run)
+    !! call ESMF_CompSetRoutine(comp1, "final", 1, PHYS_Final)
+    ! (so PHYS_Init(), etc can be private methods inside the module).
+    ! The arguments are: the component, the type of routine, the index
+    !  number (to support multiple entry points of the same type), and
+    !  the name of the internal subroutine which contains the user code.
+
 !\end{verbatim}
     

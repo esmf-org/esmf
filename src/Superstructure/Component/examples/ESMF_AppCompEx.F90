@@ -1,7 +1,9 @@
-! $Id: ESMF_AppCompEx.F90,v 1.5 2003/02/20 17:31:25 nscollins Exp $
+! $Id: ESMF_AppCompEx.F90,v 1.6 2003/02/20 21:52:00 nscollins Exp $
 !
-! Example code for an embeddable Application.  See ESMF_AppMainEx.F90
-!   for an example of a main program Application.
+! Example code for a Component which can be either the Application 
+!   Component, or can be embedded in a higher level Component.
+!   See {\tt ESMF\_AppMainEx.F90} for an example of a main program 
+!   Application Component.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -9,16 +11,15 @@
 !BOP
 !
 ! !DESCRIPTION:
-! This is an Application which calls Components, but is also a Component
-!   in a higher level Application.
-!  Also see the Programming Model section of this document.
+! This is a Component which can be either the top level Application
+!   Component, or be nested in a higher level Component.
 !
 !
 !\begin{verbatim}
 
-!   ! Example program showing an Application which is also a Component
-!   !  in a higher level Application.   Note this is a module, and requires
-!   !  the Driver program below to run standalone.
+!   ! Example program showing a Component which can be either the top 
+!   ! level Application Component, or be nested in a higher level Component.
+!   ! It can use the generic Driver program which follows to run standalone.
 
     module ESMF_AppCompEx
     
@@ -143,31 +144,33 @@
 !   !  The Run routine runs the internal time loop and returns at the
 !   !   end of the timestep it was given.
  
-    subroutine NATM_Run(comp, clock, timestep, rc)
+    subroutine NATM_Run(comp, clock, timesteps, rc)
         type(ESMF_Comp) :: comp
         type(ESMF_Clock) :: clock
-        integer :: timestep
+        integer :: timesteps
         integer :: rc
 
         logical :: finished
-        integer :: internaltimestep, internalendtime, starttime
+        integer :: internaltimestep
+        type(ESMF_TimeInstant) :: internalendtime
         type(ESMF_Comp) :: comp1, comp2, cpl
 
         print *, "Nested Comp Run starting"
 
         finished = .false.
-        starttime = 0
-    
-        internaltimestep = 1
-        internalendtime = starttime + timestep
+        internaltimestep = 3
+
+        ! query clock for end time
+        call ESMF_ClockGet(clock, endtime=internalendtime)
         do while (.not. finished) 
-            call ESMF_CompRun(comp1, internaltimestep, rc)
-            call ESMF_CompRun(comp2, internaltimestep, rc)
-            call ESMF_CompRun(cpl, internaltimestep, rc)
+            call ESMF_CompRun(comp1, clock, internaltimestep, rc)
+            call ESMF_CompRun(comp2, clock, internaltimestep, rc)
+            call ESMF_CompRun(cpl, clock, internaltimestep, rc)
             print *, "Nested Comp Run returned"
         
-            internaltimestep = internaltimestep + 1
-            if (internaltimestep .gt. internalendtime) finished = .true.
+            call ESMF_ClockAdvance(clock, timesteps)
+            ! Query clock for current time
+            if (internaltime .gt. internalendtime) finished = .true.
         enddo
     
         print *, "Nested Comp Run returning"
@@ -185,9 +188,9 @@
         type(ESMF_Comp) :: comp1, comp2, cpl
 
         print *, "Nested Comp Finalize starting"
-        call ESMF_CompFinal(cpl, rc)
-        call ESMF_CompFinal(comp1, rc)
-        call ESMF_CompFinal(comp2, rc)
+        call ESMF_CompFinal(cpl, clock, rc)
+        call ESMF_CompFinal(comp1, clock, rc)
+        call ESMF_CompFinal(comp2, clock, rc)
  
         call ESMF_CompDestroy(comp1, rc)
         call ESMF_CompDestroy(comp2, rc)
@@ -215,6 +218,8 @@
     use ESMF_LayoutMod
     use ESMF_CompMod
     
+    use NATM_Mod, only: NATM_Register
+
     implicit none
     
 !   ! Local variables
@@ -225,7 +230,7 @@
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout
     type(ESMF_Clock) :: clock
-    type(ESMF_Comp) :: comp1, comp2, comp3, comp4
+    type(ESMF_Comp) :: comp1
         
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -248,7 +253,7 @@
 
     ! This registers the Init, Run, and Final routines.
     ! It must be a public method.
-    call NATM_Register(comp1)
+    call ESMF_CompRegister(comp, NATM_Register, rc)
      
 
     ! Call the Nested Init routine, which will in turn call the other
@@ -257,14 +262,17 @@
     print *, "Driver Comp Init returned"
 
     finished = .false.
-    timestep = 1
-    endtime = 10
+    timesteps = 1
+    ! query clock for end time
+    call ESMF_ClockGet(clock, endtime=endtime)
     do while (.not. finished)
-        call ESMF_CompRun(comp1, timestep, rc)
+        call ESMF_CompRun(comp1, clock, timesteps, rc)
         print *, "Driver Comp Run returned"
     
-        timestep = timestep + 1
-        if (timestep .gt. endtime) finished = .true.
+        call ESMF_ClockAdvance(clock, timesteps)
+
+        call ESMF_ClockGet(clock, currenttime)
+        if (currenttime .gt. endtime) finished = .true.
     enddo
 
 

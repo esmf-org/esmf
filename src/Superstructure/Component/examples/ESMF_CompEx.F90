@@ -1,4 +1,4 @@
-! $Id: ESMF_CompEx.F90,v 1.4 2003/02/20 17:31:25 nscollins Exp $
+! $Id: ESMF_CompEx.F90,v 1.5 2003/02/20 21:52:02 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -35,7 +35,8 @@
     integer, dimension(8) :: delist
     character(ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout
-    type(ESMF_Comp) :: comp1, comp2, comp3, comp4
+    type(ESMF_Clock) :: clock
+    type(ESMF_Comp) :: comp1
         
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -47,36 +48,41 @@
     delist = (/ (i, i=0,7) /)
     layout = ESMF_LayoutCreate(4, 2, delist, ESMF_XFAST, rc)
 
+    call ESMF_ClockInit()
+
     cname = "Atmosphere"
     comp1 = ESMF_CompCreate(cname, layout, ESMF_GRIDCOMP, &
-                                       ESMF_ATM, "/usr/local", rc=rc)  
+                                ESMF_ATM, clock, "/usr/local", rc=rc)  
 
     print *, "Comp Create returned, name = ", trim(cname)
 
     ! This sets which internal subroutines will be called
     !  for Init, Run, and Finalize.
-    call ATM_Register(comp1, rc)
+    call ESMF_CompRegister(comp1, ATM_Register, rc)
 
 
-    call ESMF_CompInit(comp1, rc)
+    call ESMF_CompInit(comp1, clock, rc)
     print *, "Comp Init returned"
 
 
     finished = .false.
-    timestep = 1
-    endtime = 10
+    timesteps = 1
+    ! Query clock for end time
+    call ESMF_ClockGet(clock, endtime=endtime)
+
     do while (.not. finished) 
-        call ESMF_CompRun(comp1, timestep, rc)
+        call ESMF_CompRun(comp1, clock, timesteps, rc)
         print *, "Comp Run returned"
    
-        timestep = timestep + 1
-        if (timestep .gt. endtime) finished = .true.
+        call ESMF_ClockAdvance(clock, timesteps)
+        call ESMF_ClockGet(clock, time=currenttime)
+        if (currenttime .gt. endtime) finished = .true.
     enddo
     print *, "Comp Run finished"
 
 
 
-    call ESMF_CompFinalize(comp1, rc)
+    call ESMF_CompFinalize(comp1, clock, rc)
     print *, "Comp Finalize returned"
 
 

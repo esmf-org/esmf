@@ -1,4 +1,4 @@
-% $Id: comp_rest.tex,v 1.2 2003/01/30 23:42:35 nscollins Exp $
+% $Id: comp_rest.tex,v 1.3 2003/02/20 21:51:59 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,9 +16,12 @@ its Import State is ready, and to return at the end of the requested
 time interval with a finished Export State.  A concurrent Component
 is expected to have an internal time advance loop, and to make 
 Transform calls when data is ready to be Imported or Exported.
-It is not expected that a single Application will be able to 
+It is not intended that an Application be able to 
 transparently replace sequential Components with concurrent ones
 or visa versa.
-It is also not expected that a single Component should be able 
-to function in both modes.  
+It is also not expected that a single Component must be able 
+to function in both modes, although Components of different
+types can be nested, for example a sequentially called 
+Component can contain multiple nested concurrent components
+or visa versa.
 
