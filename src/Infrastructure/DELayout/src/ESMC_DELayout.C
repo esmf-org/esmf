@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.29 2004/12/15 18:23:45 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.30 2004/12/17 18:19:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.29 2004/12/15 18:23:45 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.30 2004/12/17 18:19:45 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -604,8 +604,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatchPET(
   int DEid,                     // in  - DE id of DE to be matched
   ESMC_VM &vmMatch,             // in  - vm to match against
   int *petMatchCount,           // out - number of matching PETs in vmMatch
-  int *petMatchList,            // out - list of matching DEs in layoutMatch
-  int len_petMatchList          // in  - size of deMatchList
+  int *petMatchList,            // out - list of matching PETs in vmMatch
+  int len_petMatchList          // in  - size of petMatchList
   ){              
 //
 // !DESCRIPTION:
