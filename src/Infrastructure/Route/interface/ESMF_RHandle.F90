@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.10 2003/09/23 16:29:42 jwolfe Exp $
+! $Id: ESMF_RHandle.F90,v 1.11 2003/09/23 17:53:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,18 +47,12 @@
 !------------------------------------------------------------------------------
 !     !  ESMF_TransformValues
 !
-!     ! Description of ESMF_TransformValues      
-!     !  Could be a src x dst sparse matrix, but instead
-!     !   this stores explicitly the source index, destination
-!     !   index, and weighting factor.  
+!     !  Defined on the C++ side, this holds the indices and weights needed to
+!     !  compute the data transformation from source to destination in a regrid.
 
       type ESMF_TransformValues      
       sequence
-        integer :: numlinks
-        type (ESMF_DomainList) :: domainlist
-        type (ESMF_LocalArray) :: srcindex             
-        type (ESMF_LocalArray) :: dstindex        
-        type (ESMF_LocalArray) :: weights
+        type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
       end type
 
 !------------------------------------------------------------------------------
@@ -70,7 +64,8 @@
 !------------------------------------------------------------------------------
 !     !  ESMF_RouteHandle
 !
-!     ! Description of ESMF_RouteHandle. 
+!     ! Defined on the C++ side, this structure holds one or more routes and
+!     ! the required transform values to perform a regrid.
 
       type ESMF_RouteHandle
       sequence
@@ -88,13 +83,17 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-!  Pick one or the other of the init/create sections depending on
-!  whether this is a deep class (the class/derived type has pointers to
-!  other memory which must be allocated/deallocated) or a shallow class
-!  (the class/derived type is self-contained) and needs no destroy methods
-!  other than deleting the memory for the object/derived type itself.
 
 ! the following routines apply to deep classes only
+      public ESMF_TransformValuesCreate             ! interface only, deep class
+      public ESMF_TransformValuesDestroy            ! interface only, deep class
+
+      public ESMF_TransformValuesGet                ! get and set values
+      public ESMF_TransformValuesSet
+ 
+      public ESMF_TransformValuesValidate
+      public ESMF_TransformValuesPrint
+ 
       public ESMF_RouteHandleCreate                 ! interface only, deep class
       public ESMF_RouteHandleDestroy                ! interface only, deep class
 
@@ -104,15 +103,12 @@
       public ESMF_RouteHandleValidate
       public ESMF_RouteHandlePrint
  
-! < list the rest of the public interfaces here >
-!
-!
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.10 2003/09/23 16:29:42 jwolfe Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.11 2003/09/23 17:53:52 nscollins Exp $'
 
 !==============================================================================
 
@@ -120,7 +116,442 @@
 
 !==============================================================================
 !
-! This section includes the RouteHandle Create and Destroy methods.
+! This section includes the TransformValues methods.
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TransformValuesCreate - Create a new TransformValues obj
+
+! !INTERFACE:
+      function ESMF_TransformValuesCreate(rc)
+!
+! !RETURN VALUE:
+      type(ESMF_TransformValues) :: ESMF_TransformValuesCreate
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt TransformValues} object and constructs its
+!     internals.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+        ! local variables
+        type (ESMF_TransformValues) :: tv     ! new C++ TransformValues
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+        tv%this = ESMF_NULL_POINTER
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++ create code
+        call c_ESMC_TransformValuesCreate(tv, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "TransformValues create error"
+          return  
+        endif
+
+        ! Set return values
+        ESMF_TransformValuesCreate = tv
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_TransformValuesCreate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TransformValuesDestroy - Free resources associated with a TransformValues 
+
+! !INTERFACE:
+      subroutine ESMF_TransformValuesDestroy(tv, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(inout) :: tv   
+      integer, intent(out), optional :: rc        
+!
+! !DESCRIPTION:
+!     Destroys a {\tt TransformValues} object previously allocated
+!     via an {\tt ESMF_TransformValuesCreate} routine.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv] 
+!          The class to be destroyed.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++ destroy code
+        call c_ESMC_TransformValuesDestroy(tv, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "TransformValues create error"
+          return  
+        endif
+
+        ! nullify pointer
+        tv%this = ESMF_NULL_POINTER
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_TransformValuesDestroy
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TransformValuesGet - Get values from a TransformValues
+
+! !INTERFACE:
+      subroutine ESMF_TransformValuesGet(tv, numlist, domainlist, &
+                                         srcindex, dstindex, weights, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(in) :: tv
+      integer, intent(out), optional :: numlist
+      type(ESMF_DomainList), intent(out), optional :: domainlist
+      type(ESMF_LocalArray), intent(out), optional :: srcindex
+      type(ESMF_LocalArray), intent(out), optional :: dstindex
+      type(ESMF_LocalArray), intent(out), optional :: weights
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!     Returns the requested parts of a {\tt TransformValues} type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv] 
+!          Class to be queried.
+!     \item[{[numlist]}]
+!          Value to be retrieved.         
+!     \item[{[domainlist]}]
+!          Value to be retrieved.         
+!     \item[{[srcindex]}]
+!          Value to be retrieved.         
+!     \item[{[dstindex]}]
+!          Value to be retrieved.         
+!     \item[{[weights]}]
+!          Value to be retrieved.         
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+        integer :: curnumlist
+        type(ESMF_DomainList) :: curdl
+        type(ESMF_LocalArray) :: cursrc
+        type(ESMF_LocalArray) :: curdst
+        type(ESMF_LocalArray) :: curweights
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code to get all current values
+        call c_ESMC_TransformValuesGet(tv, curnumlist, curdl, cursrc, &
+                                       curdst, curweights, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "TransformValues Get error"
+          return  
+        endif
+
+        if (present(numlist)) then
+            numlist = curnumlist    
+        endif
+
+        if (present(domainlist)) then
+            domainlist = curdl    
+        endif
+
+        if (present(srcindex)) then
+            srcindex = cursrc    
+        endif
+
+        if (present(dstindex)) then
+            dstindex = curdst    
+        endif
+
+        if (present(weights)) then
+            weights = curweights    
+        endif
+
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_TransformValuesGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TransformValuesSet - Set values in a TransformValues
+
+! !INTERFACE:
+      subroutine ESMF_TransformValuesSet(tv, numlist, domainlist, &
+                                         srcindex, dstindex, weights, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(in) :: tv
+      integer, intent(in), optional :: numlist
+      type(ESMF_DomainList), intent(in), optional :: domainlist
+      type(ESMF_LocalArray), intent(in), optional :: srcindex
+      type(ESMF_LocalArray), intent(in), optional :: dstindex
+      type(ESMF_LocalArray), intent(in), optional :: weights
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!     Sets the requested parts of a {\tt TransformValues} type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv] 
+!          Class to be changed.
+!     \item[{[numlist]}]
+!          Value to be set.         
+!     \item[{[domainlist]}]
+!          Value to be set.         
+!     \item[{[srcindex]}]
+!          Value to be set.         
+!     \item[{[dstindex]}]
+!          Value to be set.         
+!     \item[{[weights]}]
+!          Value to be set.         
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+        logical :: changed
+        integer :: curnumlist
+        type(ESMF_DomainList) :: curdl
+        type(ESMF_LocalArray) :: cursrc
+        type(ESMF_LocalArray) :: curdst
+        type(ESMF_LocalArray) :: curweights
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Get old values and only replace the ones specified.
+        call c_ESMC_TransformValuesGet(tv, curnumlist, curdl, cursrc, &
+                                       curdst, curweights, status)
+        changed = .false.
+
+        if (present(numlist)) then
+          changed = .true.
+          curnumlist = numlist    
+        endif
+
+        if (present(domainlist)) then
+          changed = .true.
+          curdl = domainlist    
+        endif
+
+        if (present(srcindex)) then
+          changed = .true.
+          cursrc = srcindex    
+        endif
+
+        if (present(dstindex)) then
+          changed = .true.
+          curdst = dstindex    
+        endif
+
+        if (present(weights)) then
+          changed = .true.
+          curweights = weights    
+        endif
+
+        ! Overwrite the changed values
+        if (changed) then
+            ! Call C++  code
+            call c_ESMC_TransformValuesSet(tv, curnumlist, curdl, cursrc, &
+                                           curdst, curweights, status)
+            if (status .ne. ESMF_SUCCESS) then  
+              print *, "TransformValues Set error"
+              return  
+            endif
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_TransformValuesSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TransformValuesValidate - Check internal consistency of a TransformValues
+
+! !INTERFACE:
+      subroutine ESMF_TransformValuesValidate(tv, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(in) :: tv       
+      character (len=*), intent(in), optional :: options    
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     Validates that a TransformValues is internally consistent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv] 
+!          Class to be queried.
+!     \item[{[options]}]
+!          Validation options.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+!
+       character (len=6) :: defaultopts      ! default validate options
+       integer :: status                     ! local error status
+       logical :: rcpresent
+
+       ! Initialize return code; assume failure until success is certain       
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
+       if (present(rc)) then
+         rcpresent = .TRUE.  
+         rc = ESMF_FAILURE
+       endif
+
+       defaultopts = "quick"
+
+       if(present(options)) then
+           call c_ESMC_TransformValuesValidate(tv, options, status)   
+       else
+           call c_ESMC_TransformValuesValidate(tv, defaultopts, status)
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "TransformValues validate error"
+         return
+       endif
+
+       ! Set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_TransformValuesValidate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TransformValuesPrint - Print the contents of a TransformValues
+
+! !INTERFACE:
+      subroutine ESMF_TransformValuesPrint(tv, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_TransformValues), intent(in) :: tv      
+      character (len=*), intent(in), optional :: options      
+      integer, intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!      Print information about a TransformValues.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv] 
+!          Class to be queried.
+!     \item[{[options]}]
+!          Print options that control the type of information and level of 
+!          detail.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+       character (len=6) :: defaultopts      ! default print options
+       integer :: status                     ! local error status
+       logical :: rcpresent
+
+       ! Initialize return code; assume failure until success is certain       
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
+       if (present(rc)) then
+         rcpresent = .TRUE.  
+         rc = ESMF_FAILURE
+       endif
+
+       defaultopts = "brief"
+
+       if(present(options)) then
+           call c_ESMC_TransformValuesPrint(tv, options, status)   
+       else
+           call c_ESMC_TransformValuesPrint(tv, defaultopts, status)
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "TransformValues print error"
+         return
+       endif
+
+       ! Set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+ 
+       end subroutine ESMF_TransformValuesPrint
+
+!------------------------------------------------------------------------------
+
+!==============================================================================
+!
+! This section includes the RouteHandle methods.
 !
 !------------------------------------------------------------------------------
 !BOP

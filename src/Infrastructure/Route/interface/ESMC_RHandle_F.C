@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.4 2003/09/02 18:56:16 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.5 2003/09/23 17:53:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,6 +34,69 @@
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
+
+//------------------------------------------------------------------------------
+//  TransformValues interfaces
+
+       void FTN(c_esmc_transformvaluescreate)(ESMC_TransformValues **ptr, int *status) {
+           *ptr = ESMC_TransformValuesCreate(status);
+       }
+
+       void FTN(c_esmc_transformvaluesdestroy)(ESMC_TransformValues **ptr, int *status) {
+           *status = ESMC_TransformValuesDestroy(*ptr);
+       }
+
+       // the int needs to be an enum, the label needs to be added and handled
+       void FTN(c_esmc_transformvaluesget)(ESMC_TransformValues **ptr, 
+                                       int *numlist, 
+                                       ESMC_DomainList **dl, 
+                                       ESMC_LocalArray **src, 
+                                       ESMC_LocalArray **dst, 
+                                       ESMC_LocalArray **w, 
+                                       int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_TransformValuesGet(numlist, dl, src, dst, w);
+       }
+
+       void FTN(c_esmc_transformvaluesset)(ESMC_TransformValues **ptr, 
+                                       int *numlist, 
+                                       ESMC_DomainList **dl, 
+                                       ESMC_LocalArray **src, 
+                                       ESMC_LocalArray **dst, 
+                                       ESMC_LocalArray **w, 
+                                       int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_TransformValuesSet(*numlist, *dl, *src, *dst, *w);
+       }
+
+       void FTN(c_esmc_transformvaluesvalidate)(ESMC_TransformValues **ptr, 
+                                                char *opts, int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           // TODO: opts needs null term
+           *status = (*ptr)->ESMC_TransformValuesValidate(opts);
+       }
+
+       void FTN(c_esmc_transformvaluesprint)(ESMC_TransformValues **ptr, 
+                                             char *opts, int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           // TODO: opts needs null term
+           *status = (*ptr)->ESMC_TransformValuesPrint(opts);
+       }
+
+//------------------------------------------------------------------------------
+//  RouteHandle interfaces
 
        void FTN(c_esmc_routehandlecreate)(ESMC_RouteHandle **ptr, int *status) {
            *ptr = ESMC_RouteHandleCreate(status);
@@ -76,6 +139,7 @@ extern "C" {
               *status = ESMF_FAILURE;
               return;
            }
+           // TODO: opts needs null term
            *status = (*ptr)->ESMC_RouteHandleValidate(opts);
        }
 
@@ -85,6 +149,7 @@ extern "C" {
               *status = ESMF_FAILURE;
               return;
            }
+           // TODO: opts needs null term
            *status = (*ptr)->ESMC_RouteHandlePrint(opts);
        }
 

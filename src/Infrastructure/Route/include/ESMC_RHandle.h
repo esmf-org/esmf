@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.3 2003/09/23 16:29:05 jwolfe Exp $
+// $Id: ESMC_RHandle.h,v 1.4 2003/09/23 17:53:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,10 +46,10 @@
  #include <ESMC_LocalArray.h>
  #include <ESMC_XPacket.h> 
  #include <ESMC_Route.h>
+ #include "ESMC_TValues.h"
 
 // !PUBLIC TYPES:
  class ESMC_RouteHandle;
- class ESMC_TransformValues;
 
 typedef enum { 
     ESMC_HALOHANDLE=1, ESMC_REDISTHANDLE, ESMC_REGRIDHANDLE, 
@@ -57,34 +57,6 @@ typedef enum {
 } ESMC_HandleType;
 
 // !PRIVATE TYPES:
-
- // class declaration type
- class ESMC_TransformValues {   // does NOT inherit from Base class
-     //  Could be a src x dst sparse matrix, but instead
-     //   this stores explicitly the source index, destination
-     //   index, and weighting factor.  
-
-   private:
-        // TODO:  needs a transform type enum
-        // TODO:  needs option for single large sparse matrix, etc.
-
-        int numlist;
-        ESMC_DomainList *domainlist;
-        ESMC_LocalArray *srcindex;
-        ESMC_LocalArray *dstindex;
-        ESMC_LocalArray *weights;
-
-   public:
- // accessor methods for class members
-    int ESMC_TransformValuesGet(int *nnumlist, ESMC_DomainList **dl,
-                                ESMC_LocalArray **si, ESMC_LocalArray **di,
-                                ESMC_LocalArray **w) const;
-    int ESMC_TransformValuesSet(int nnumlist, ESMC_DomainList *dl,
-                                ESMC_LocalArray *si, ESMC_LocalArray *di,
-                                ESMC_LocalArray *w);
-
- };   // end class ESMC_TransformValues
-
 
  // class declaration type
  class ESMC_RouteHandle {   // does NOT inherit from Base class
