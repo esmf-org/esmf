@@ -19,10 +19,14 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF.h"
+!! this should be including ESMF.h, but since it also includes the cover
+!! log macros, it can't be included here.  so just include each file 
+!! individually.  if we add files to ESMF.h they also need to be added here.
 #include "ESMF_Macros.inc"
-#include "ESMF_LogConstants.inc"
+#include "ESMF_Conf.inc"
+#include "ESMF_Version.inc"
 #include "ESMF_ErrReturnCodes.inc"
+#include "ESMF_LogConstants.inc"
 
 !BOPI
 !============================================================================
@@ -675,78 +679,83 @@ end subroutine ESMF_LogSet
 !      \end{description}
 ! 
 !EOP
-	
-   	character(len=10)               :: t
-	character(len=8)                :: d
-	character(len=7)                :: lt
-	character(len=32)               :: f
-	character(len=32)               ::tmethod,tfile
-	integer			      	        ::status,tline
-	integer                         ::ok
-	integer	                        ::i
-	integer                         ::h,m,s,ms,y,mn,dy
-	
-	ESMF_LogWrite=.FALSE.
-	if (present(method)) tmethod=adjustl(method)
-	if (present(line)) tline=line 
-	if (present(file)) then
-	    tfile=adjustl(file)
-	else
-	    tfile=""
-	endif
-	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
-	
-		if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
-			call DATE_AND_TIME(d,t)	
-			select case (logtype%ftype)
-				case (1)
-					lt="INFO"
-				case (2)
-					lt="WARNING"
-				case default
-					lt="ERROR"
-			end select				
-			ok=0
-			do i=1, 100000
-				OPEN(UNIT=ESMF_LogDefault%unitnumber,File=ESMF_LogDefault%nameLogErrFile,POSITION="APPEND", &
-				ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
-				if (status.eq.0) then
-					if (present(line)) then								
-						if (present(method)) then
-							WRITE(ESMF_LogDefault%unitnumber,122) d," ",h,m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
-							tline," ",trim(tmethod)," ",trim(msg)
-							122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ",tfile,tline,"  ",tmethod,msg
-						else
-							WRITE(ESMF_LogDefault%unitnumber,123) d," ",h,m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
-							tline," ",trim(msg)
-							123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ",tfile,tline,"  ",msg
-						endif	
-					else
-						if (present(method)) then
-							WRITE(ESMF_LogDefault%unitnumber,132) d," ",h,m,s,".",ms," ",trim(lt)," ",&
-							" ",trim(tmethod)," ",trim(msg)
-							132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ","  ",tmethod,msg
-						else
-							WRITE(ESMF_LogDefault%unitnumber,133) d," ",h,m,s,".",ms," ",trim(lt)," ",&
-							" ",trim(msg)
-							133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ","  ",msg
-						endif	
-					endif
-					CLOSE(UNIT=ESMF_LogDefault%stdOutUnitNumber)
-					ESMF_LogWrite=.TRUE.
-					ok=1
-				endif	
-				if (ok.eq.1) exit
-			enddo
-		endif
+    
+    character(len=10)               :: t
+    character(len=8)                :: d
+    character(len=7)                :: lt
+    character(len=32)               :: f
+    character(len=32)               ::tmethod,tfile
+    integer			      	        ::status,tline
+    integer                         ::ok
+    integer	                        ::i
+    integer                         ::h,m,s,ms,y,mn,dy
+    
+    ESMF_LogWrite=.FALSE.
+    if (present(method)) tmethod=adjustl(method)
+    if (present(line)) tline=line 
+    if (present(file)) then
+        tfile=adjustl(file)
+    else
+        tfile=""
+    endif
+    call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
+    
+    if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
+    	call DATE_AND_TIME(d,t)	
+    	select case (logtype%ftype)
+          case (1)
+    	    lt="INFO"
+          case (2)
+    	    lt="WARNING"
+   	  case default
+    	    lt="ERROR"
+   	end select				
+    	ok=0
+    	do i=1, 100000
+    	    OPEN(UNIT=ESMF_LogDefault%unitnumber, &
+                File=ESMF_LogDefault%nameLogErrFile, POSITION="APPEND", &
+    		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+            if (status.eq.0) then
+    		if (present(line)) then								
+    		    if (present(method)) then
+    			WRITE(ESMF_LogDefault%unitnumber,122) d," ",h,&
+                                m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
+    				tline," ",trim(tmethod)," ",trim(msg)
+			!if (aLog%verbose .eq. ESMF_TRUE) print *, &
+                        ! d,"  ",t,"  ", lt,"    ",tfile,tline,"  ",tmethod,msg
+    		    else
+    			WRITE(ESMF_LogDefault%unitnumber,123) d," ",h,&
+                                m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
+    				tline," ",trim(msg)
+			!if (aLog%verbose .eq. ESMF_TRUE) print *, &
+                        ! d,"  ",t,"  ", lt,"    ",tfile,tline,"  ",msg
+    		    endif	
+            else
+    		if (present(method)) then
+    		    WRITE(ESMF_LogDefault%unitnumber,132) d," ",h,&
+                        m,s,".",ms," ",trim(lt)," ",&
+    			" ",trim(tmethod)," ",trim(msg)
+		    !if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+    		    !lt,"    ","  ",tmethod,msg
+    		else
+    		    WRITE(ESMF_LogDefault%unitnumber,133) d," ",h,&
+                        m,s,".",ms," ",trim(lt)," "," ",trim(msg)
+		    !if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+    		    !lt,"    ","  ",msg
+    		endif	
+    	    endif
+    	    CLOSE(UNIT=ESMF_LogDefault%stdOutUnitNumber)
+    	    ESMF_LogWrite=.TRUE.
+    	    ok=1
+    	endif	
+    	if (ok.eq.1) exit    
+   enddo
+   endif
+122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
+123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
+132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
+133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
+
 end function ESMF_LogWrite
 
 end module ESMF_LogErrMod
