@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.32 2003/10/23 15:10:15 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.33 2003/10/23 15:40:55 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -105,7 +105,7 @@
 
 %#include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
-#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
 
 %====================================================================================================
