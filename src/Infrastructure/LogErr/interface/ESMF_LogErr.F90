@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.23 2003/10/10 16:27:27 shep_smith Exp $
+! $Id: ESMF_LogErr.F90,v 1.24 2003/10/14 22:36:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,13 +92,13 @@ type ESMF_Log
     character(len=32) nameLogErrFile      !Name of an ESMF_Log objects's
                                           !output file 
 
-    type(ESMF_Logical) :: fileIO=ESMF_FALSE !File written to standard out
-                                               
 !If standardout not unit 6, must be changed here.
 #ifndef ESMF_NO_INITIALIZERS
-    integer :: stdOutUnitNumber
+    integer :: stdOutUnitNumber=6
+    type(ESMF_Logical) :: fileIO=ESMF_FALSE !File written to standard out
 #else
-    integer :: stdOutUnitNumber=6        
+    integer :: stdOutUnitNumber
+    type(ESMF_Logical) :: fileIO
 #endif
 end type ESMF_Log
 
