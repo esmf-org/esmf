@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.4 2004/05/17 11:30:10 theurich Exp $ 
+% $Id: VM_refdoc.ctex,v 1.5 2004/05/17 17:41:36 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,19 +71,19 @@
 %\input{../Infrastructure/VM/doc/ESMF_VMCreateEx_fapi}
 #endif
 
-%\subsection{Restrictions and Future Work}
-%#ifdef STANDALONE
-%\input{VM_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/VM/doc/VM_rest}
-%#endif
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{VM_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/VM/doc/VM_rest}
+#endif
 
-%\subsection{Design and Implementation Notes}
-%#ifdef STANDALONE
-%\input{VM_implnotes}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/VM/doc/VM_implnotes}
-%#endif
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{VM_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/VM/doc/VM_implnotes}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE

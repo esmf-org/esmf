@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/05/17 11:30:10 theurich Exp $
+# $Id: makefile,v 1.3 2004/05/17 17:41:36 theurich Exp $
 
 All: alldoc
 
@@ -34,7 +34,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 #
 REQDOC_DEP_FILES = 
 DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) VM_desc.tex VM_options.tex VM_usage.tex
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) VM_desc.tex VM_options.tex VM_usage.tex VM_rest.tex VM_implnotes.tex
 
 
 include $(ESMF_DIR)/makefile
