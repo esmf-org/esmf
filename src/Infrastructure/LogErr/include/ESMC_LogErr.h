@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.3 2003/03/31 18:23:30 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.4 2003/04/02 17:34:06 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,9 +27,9 @@
 // inlined are defined in the companion file ESMC\_LogErr.C
 //
 // !USES:
-#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMC.h"
+//#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMC.h"
 // commenting out the above and including the one below makes the code compile
-// #include "ftn.h"
+#include "ftn.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -60,7 +60,7 @@ class ESMC_Log {
 			    // ESMC_OpenFile can override
 			    // this value
 
-    int standardOut;        // if log data written to standard out, this variable
+    int standardOut;        //if log data written to standard out, this variable
                             // is set to true. Otherwise set to false.
 			    // ESMC_OpenFile
 			    // can over-ride this value.
@@ -106,7 +106,7 @@ class ESMC_Log {
     void ESMC_LogOpenFile(int numLogFile,char name[]);
     void ESMC_LogOpenFileForWrite(int numLogFile, char name[]);
     void ESMC_LogInit(int verbosity=ESMF_LOG_TRUE, int flush=ESMF_LOG_FALSE,
-	 int haltOnError=ESMF_LOG_TRUE, int haltOnWarning=ESMF_LOG_TRUE);
+	 int haltOnError=ESMF_LOG_TRUE, int haltOnWarning=ESMF_LOG_FALSE);
     int ESMC_LogWrite();
     void ESMC_LogCloseFile();
     void ESMC_LogCloseFileForWrite();
@@ -118,18 +118,16 @@ class ESMC_Log {
     void ESMC_LogNotHaltOnErr();
     void ESMC_LogHaltOnWarn();
     void ESMC_LogNotHaltOnWarn();
-    void ESMC_LogWarningMsg(int errCode, int line, char file[],
+    void ESMC_LogWarnMsg_(int errCode, int line, char file[],
                      char dir[], char msg[]);
-    void ESMC_LogWarning(int errCode, int line, char file[],
+    void ESMC_LogWarn_(int errCode, int line, char file[],
                      char dir[]);
-    void ESMC_LogWarningFortran(int errCode, int line, char file[],
+    void ESMC_LogWarnFortran(int errCode, int line, char file[],
          char dir[], char msg[]);
-    void ESMC_LogErr(int errCode, int line, char file[], char dir[]);
-    void ESMC_LogErrMsg(int errCode, int line, char file[],
+    void ESMC_LogErr_(int errCode, int line, char file[], char dir[]);
+    void ESMC_LogErrMsg_(int errCode, int line, char file[],
                      char dir[], char msg[]);
     void ESMC_LogErrFortran(int errCode,int line,char file[],char dir[],char msg[]);
-//         char dir[], char fmt[],char charData[],char strData[][32],
-//         int intData[], double floatData[]);
     void ESMC_LogExit();
     ESMC_Log();
 };
