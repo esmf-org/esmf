@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable_F.C,v 1.2 2003/03/11 22:57:20 nscollins Exp $
+// $Id: ESMC_RTable_F.C,v 1.3 2003/03/25 17:39:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,15 +45,17 @@ extern "C" {
            *status = ESMC_RTableDestroy(*ptr);
        }
 
-       //void FTN(c_esmc_rtableget)(ESMC_RTable **ptr, 
-       //                                  <value> *value, int *status) {
+       void FTN(c_esmc_rtableget)(ESMC_RTable **ptr, 
+                                         int *value, int *status) {
        //    *status = (*ptr)->ESMC_RTableGet(&value);
-       //}
+             *status = ESMF_FAILURE;
+       }
 
-       //void FTN(c_esmc_rtableset)(ESMC_RTable **ptr, 
-       //                                  <value> *value, int *status) {
+       void FTN(c_esmc_rtableset)(ESMC_RTable **ptr, 
+                                         int *value, int *status) {
        //    *status = (*ptr)->ESMC_RTableSet(value);
-       //}
+             *status = ESMF_FAILURE;
+       }
 
        void FTN(c_esmc_rtablevalidate)(ESMC_RTable **ptr, char *opts, int *status) {
            *status = (*ptr)->ESMC_RTableValidate(opts);
