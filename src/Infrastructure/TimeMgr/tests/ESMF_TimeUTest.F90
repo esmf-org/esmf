@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.15.2.1 2005/02/08 23:46:10 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.15.2.2 2005/03/01 23:12:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.15.2.1 2005/02/08 23:46:10 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.15.2.2 2005/03/01 23:12:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -570,7 +570,7 @@
       ! Fractional times tests
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting a Millisecond Time 
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(time1, yy=2004, mm=10, dd=14, h=15, m=52, s=58, &
@@ -581,7 +581,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting a Microsecond Time 
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(time2, yy=2004, mm=10, dd=14, h=15, m=52, s=58, &
@@ -592,7 +592,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting a Rational Fraction Time 1
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(time4, yy=2004, mm=10, dd=22, h=13, m=45, &
@@ -603,7 +603,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting a Rational Fraction Time 2
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeSet(time5, yy=2004, mm=10, dd=21, h=13, m=45, &
@@ -614,7 +614,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting a Millisecond Time Interval
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeInterval2, s=1, ms=40, rc=rc)
@@ -624,7 +624,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting a Rational Fraction Time Interval
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeInterval4, sN=3, sD=4, rc=rc)
