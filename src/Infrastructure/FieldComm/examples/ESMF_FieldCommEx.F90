@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.6 2004/11/03 16:32:21 jwolfe Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.7 2004/11/03 20:50:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
     implicit none
     
     ! Local variables
-    integer :: x, y, rc, mycell, finalrc, numdes
+    integer :: x, y, rc, mycell, finalrc, npets
     integer :: i, j
     integer :: lb(2), ub(2), halo
     type(ESMF_Grid) :: srcgrid, dstgrid
@@ -63,9 +63,12 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    layout1 = ESMF_DELayoutCreate(vm, rc=rc)
-    call ESMF_DELayoutGet(layout1, deCount=numdes, rc=rc)
-    layout2 = ESMF_DELayoutCreate(vm, (/ numdes, 1 /), rc=rc)
+    ! Get number of PETs we are running with
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
+    layout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
 
     mincoords = (/  0.0,  0.0 /)
     maxcoords = (/ 20.0, 30.0 /)
@@ -91,7 +94,7 @@
     ! allow for a halo width of 3
     halo = 3
     field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                haloWidth=3, name="src pressure", rc=rc)
+                              haloWidth=3, name="src pressure", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -111,7 +114,7 @@
 
 
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                                   name="dst pressure", rc=rc)
+                              name="dst pressure", rc=rc)
 
  
     ! fields all ready to go
@@ -178,8 +181,8 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_FieldRedistStore(field1, field2, layout1, &
-                                                routehandle=redist_rh, rc=rc)
+    call ESMF_FieldRedistStore(field1, field2, layout2, &
+                               routehandle=redist_rh, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
