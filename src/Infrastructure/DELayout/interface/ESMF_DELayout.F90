@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.16 2004/03/18 16:37:33 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.17 2004/04/02 18:36:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,23 +54,21 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_Async
+!     ! ESMF_CommHandle
 !
 !     ! Shallow sync/async communications type.  Mirrored on C++ side.
-!     ! Contains both the setting for sync/async and a place to hold
+!     ! Contains a place to hold
 !     ! the MPI handle in the case of nonblocking MPI calls.  The wait
 !     ! parameter controls whether the "IsComplete" call blocks/waits
 !     ! or simply tests and returns.
 
-      type ESMF_Async
+      type ESMF_CommHandle
       sequence
       private
-        integer :: async       ! does this request block until complete?
         integer :: mpi_handle  ! mpi returns this for async calls
         integer :: wait        ! after an async call, does query block?
       end type
 
-      integer, parameter :: ESMF_ASYNCHRONOUS = 1, ESMF_SYNCHRONOUS = 2
       integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
 
 !------------------------------------------------------------------------------
@@ -87,8 +85,7 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_DELayout, ESMF_Async
-      public ESMF_ASYNCHRONOUS, ESMF_SYNCHRONOUS
+      public ESMF_DELayout, ESMF_CommHandle
       public ESMF_TEST_COMPLETE, ESMF_WAIT_COMPLETE
       public ESMF_NOHINT, ESMF_XFAST, ESMF_YFAST, ESMF_ZFAST
       public ESMF_COMMTYPE_MP, ESMF_COMMTYPE_SHR
@@ -134,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.16 2004/03/18 16:37:33 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.17 2004/04/02 18:36:34 nscollins Exp $'
 
 !==============================================================================
 ! 

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.12 2004/03/24 16:05:58 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.13 2004/04/02 18:36:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.12 2004/03/24 16:05:58 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.13 2004/04/02 18:36:35 nscollins Exp $'
 
 !==============================================================================
 
@@ -76,7 +76,7 @@
 ! !INTERFACE:
       function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, &
                                           dstArray, dstGrid, dstDataMap, &
-                                          srcMask, dstMask, blocking, rc)
+                                          srcMask, dstMask, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructLinear
@@ -90,7 +90,6 @@
       type(ESMF_DataMap), intent(in) :: dstDataMap
       type(ESMF_Mask), intent(in), optional :: srcMask
       type(ESMF_Mask), intent(in), optional :: dstMask
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:

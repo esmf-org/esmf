@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.61 2004/03/24 14:54:39 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.62 2004/04/02 18:36:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.61 2004/03/24 14:54:39 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.62 2004/04/02 18:36:35 nscollins Exp $'
 
 !==============================================================================
 
@@ -133,8 +133,7 @@
       subroutine ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &
                                    dstarray, dstgrid, dstdatamap, &
                                    routehandle, regridmethod, &
-                                   srcmask, dstmask, &
-                                   blocking, rc)
+                                   srcmask, dstmask, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
@@ -147,7 +146,6 @@
       integer, intent(in), optional :: regridmethod
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -192,11 +190,6 @@
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -895,7 +888,8 @@
       type(ESMF_Bundle), intent(in) :: srcbundle                 
       type(ESMF_Bundle), intent(inout) :: dstbundle                 
       type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -962,7 +956,8 @@
       type(ESMF_Bundle), intent(in) :: srcbundle                 
       type(ESMF_Bundle), intent(inout) :: dstbundle                 
       type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1054,7 +1049,7 @@
 ! !INTERFACE:
       subroutine ESMF_FieldRegridStore(srcfield, dstfield, parentlayout, &
                                        routehandle, regridtype, &
-                                       srcmask, dstmask, blocking, rc)
+                                       srcmask, dstmask, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1065,7 +1060,6 @@
       integer, intent(in), optional :: regridtype 
       type(ESMF_Mask), intent(in), optional :: srcmask                 
       type(ESMF_Mask), intent(in), optional :: dstmask                 
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1098,11 +1092,6 @@
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1184,11 +1173,11 @@
  !     call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
  !                                dst_grid, dst_datamap, parentlayout, &
  !                                routehandle, regridtype, &    
- !                                srcmask, dstmask, blocking, status)
+ !                                srcmask, dstmask, status)
       call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
                                  dst_grid, dst_datamap, srclayout, &
                                  routehandle, regridtype, &    
-                                 srcmask, dstmask, blocking, status)
+                                 srcmask, dstmask, status)
 
 
       ! Set return values.
@@ -1202,7 +1191,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcfield, dstfield, routehandle, &
-                                  srcmask, dstmask, blocking, rc)
+                                  srcmask, dstmask, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1211,7 +1200,8 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcmask                 
       type(ESMF_Mask), intent(in), optional :: dstmask                 
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1240,6 +1230,13 @@
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1320,15 +1317,15 @@
       if ((hassrcdata) .and. (.not. hasdstdata)) then
           !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
           !                      dst_datamap, routehandle, &       
-          !                        srcmask, dstmask, blocking, rc)
+          !                        srcmask, dstmask, blocking, commhandle, rc)
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
           !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
           !                      dst_datamap, routehandle, &       
-          !                        srcmask, dstmask, blocking, rc)
+          !                        srcmask, dstmask, blocking, commhandle, rc)
       else
           call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
                                 dst_datamap, routehandle, &       
-                                srcmask, dstmask, blocking, rc)
+                                srcmask, dstmask, blocking, commhandle, rc)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: RouteRun returned failure"
@@ -1379,7 +1376,7 @@
       subroutine ESMF_ArrayRegridStore(srcarray, srcgrid, srcdatamap, &
                                        dstgrid, dstdatamap, parentlayout, &
                                        routehandle, regridtype, &
-                                       srcmask, dstmask, blocking, rc) 
+                                       srcmask, dstmask, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
@@ -1392,7 +1389,6 @@
       integer, intent(in), optional :: regridtype
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1429,11 +1425,6 @@
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1467,8 +1458,7 @@
         call ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &   
                                dstarray, dstgrid, dstdatamap, &
                                routehandle, regridtype, &
-                               srcmask, dstmask, &
-                               blocking, status)
+                               srcmask, dstmask, status)
 
         ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -1480,7 +1470,7 @@
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArrayRegrid(srcarray, dstarray, srcDataMap, dstDataMap, &
-                                  routehandle, srcmask, dstmask, blocking, rc)
+                                  routehandle, srcmask, dstmask, blocking, commhandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: srcarray
@@ -1490,7 +1480,8 @@
       type(ESMF_RouteHandle), intent(in) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1515,6 +1506,13 @@
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.13 2004/03/19 23:29:10 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.14 2004/04/02 18:36:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.13 2004/03/19 23:29:10 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.14 2004/04/02 18:36:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -121,13 +121,14 @@
 ! !IROUTINE: ESMF_BundleAllGather - Data AllGather operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleAllGather(bundle, array, async, rc)
+      subroutine ESMF_BundleAllGather(bundle, array, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle                 
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -143,11 +144,18 @@
 !     \item [array] 
 !           Newly created array containing the collected data.
 !           It is the size of the entire undecomposed grid.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -189,14 +197,16 @@
 ! !IROUTINE: ESMF_BundleGather - Data Gather operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleGather(bundle, destinationDE, array, async, rc)
+      subroutine ESMF_BundleGather(bundle, destinationDE, array, blocking, &
+                                    commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle                 
       integer, intent(in) :: destinationDE
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -217,11 +227,18 @@
 !           Newly created array containing the collected data on the
 !           specified {\tt ESMF\_DE}.  It is the size of the entire undecomposed grid.
 !           On all other {\tt ESMF\_DE}s this return is an invalid object.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -330,14 +347,15 @@
 ! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleReduce(bundle, rtype, result, async, rc)
+      subroutine ESMF_BundleReduce(bundle, rtype, result, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle) :: bundle                 
       integer :: rtype
       integer :: result
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -351,11 +369,18 @@
 !           Type of reduction operation to perform.  Options include: ...
 !     \item [result] 
 !           Numeric result (may be single number, may be array)
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -394,14 +419,15 @@
 ! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleScatter(array, sourceDE, bundle, async, rc)
+      subroutine ESMF_BundleScatter(array, sourceDE, bundle, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       integer, intent(in) :: sourceDE
       type(ESMF_Bundle), intent(inout) :: bundle                 
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -424,11 +450,18 @@
 !           in the array which will be scattered.  When this routine returns
 !           each {\tt ESMF\_Bundle} will contain a valid data array containing the 
 !           subset of the decomposed data.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -511,13 +544,14 @@
 ! !IROUTINE: ESMF_BundleHalo - Execute a Data Halo operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleHalo(bundle, routehandle, blocking, rc)
+      subroutine ESMF_BundleHalo(bundle, routehandle, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in) , optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -561,7 +595,7 @@
       btypep = bundle%btypep
 
       call ESMF_ArrayHalo(btypep%flist(1)%ftypep%localfield%localdata, routehandle, &
-                             blocking, rc=status)
+                             blocking, commhandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleHalo: ArrayHalo returned failure"
         return
@@ -606,15 +640,13 @@
 ! !IROUTINE: ESMF_BundleHaloStore - Precompute a Data Halo operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleHaloStore(bundle, routehandle, halodirection, & 
-                                     blocking, rc)
+      subroutine ESMF_BundleHaloStore(bundle, routehandle, halodirection, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -634,10 +666,6 @@
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
 !           along all boundaries.
-!     \item [{blocking]}]
-!           Specify that the communications will be blocking, nonblocking,
-!           or that the option will be specified at run time.  If not 
-!           specified, the default is blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -676,7 +704,7 @@
 
       call ESMF_ArrayHaloStore(btypep%flist(1)%ftypep%localfield%localdata, btypep%grid, &
                                btypep%flist(1)%ftypep%mapping, routehandle, &
-                               halodirection, blocking, rc=status)
+                               halodirection, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleHaloStore: ArrayHaloStore returned failure"
         return
@@ -692,7 +720,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_BundleRedist(srcBundle, dstBundle, parentLayout, &
-                                   routehandle, blocking, rc)
+                                   routehandle, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -700,7 +728,8 @@
       type(ESMF_Bundle), intent(inout) :: dstBundle
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in) , optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -731,6 +760,13 @@
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communication.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -755,7 +791,7 @@
 
       call ESMF_ArrayRedist(stypep%flist(1)%ftypep%localfield%localdata, &
                             dtypep%flist(1)%ftypep%localfield%localdata, &
-                            routehandle, blocking, status)
+                            routehandle, blocking, commhandle, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in BundleRedist: ArrayRedist returned failure"
         return
@@ -803,7 +839,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentLayout, &
-                                        routehandle, blocking, rc)
+                                        routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -811,7 +847,6 @@
       type(ESMF_Bundle), intent(inout) :: dstBundle                 
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -840,11 +875,6 @@
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_BundleRedist} is called.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -894,7 +924,7 @@
                                  dtypep%grid, &
                                  dtypep%flist(1)%ftypep%mapping, &
                                  parentLayout, &
-                                 routehandle, blocking, status)
+                                 routehandle, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
         return
@@ -910,14 +940,16 @@
 ! !IROUTINE: ESMF_BundleRegrid - Execute a Regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, parentlayout, async, rc)
+      subroutine ESMF_BundleRegrid(srcbundle, dstbundle, parentlayout, &
+                                   blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle                 
       type(ESMF_Bundle), intent(inout) :: dstbundle                 
       type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -940,11 +972,18 @@
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 
 !           regridding is intra-component.  
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1009,14 +1048,13 @@
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentlayout, async, rc)
+      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentlayout, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle                 
       type(ESMF_Bundle), intent(inout) :: dstbundle                 
       type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1039,11 +1077,6 @@
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 
 !           regridding is intra-component.  
-!     \item [{[async]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

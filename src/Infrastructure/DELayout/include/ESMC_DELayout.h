@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.5 2004/03/03 18:20:34 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.6 2004/04/02 18:36:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,11 +71,9 @@
 enum ESMC_CommHint {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
 // parameters for asynchronous/sync communication
-enum ESMC_AsyncFlag {ESMC_ASYNCHRONOUS=1, ESMC_SYNCHRONOUS};
 enum ESMC_Complete {ESMC_TEST_COMPLETE=1, ESMC_WAIT_COMPLETE};
 
-class ESMC_Async {
-  enum ESMC_AsyncFlag aflag;
+class ESMC_CommHandle {
   int mpi_handle;
   enum ESMC_Complete cflag;
 };

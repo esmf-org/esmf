@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.19 2004/03/24 14:54:37 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.20 2004/04/02 18:36:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.19 2004/03/24 14:54:37 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.20 2004/04/02 18:36:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -138,13 +138,14 @@
 ! !IROUTINE: ESMF_FieldAllGather - Data allgather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldAllGather(field, array, async, rc)
+      subroutine ESMF_FieldAllGather(field, array, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -160,11 +161,18 @@
 !     \item [array] 
 !           Newly created array containing the collected data.
 !           It is the size of the entire undecomposed grid.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -205,14 +213,16 @@
 ! !IROUTINE: ESMF_FieldGather - Data gather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldGather(field, destinationDE, array, async, rc)
+      subroutine ESMF_FieldGather(field, destinationDE, array, blocking, &
+                                  commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
       integer, intent(in) :: destinationDE
       type(ESMF_Array), intent(out) :: array
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -233,11 +243,18 @@
 !           Newly created array containing the collected data on the
 !           specified {\tt ESMF\_DE}.  It is the size of the entire undecomposed grid.
 !           On all other {\tt ESMF\_DE}s this return is an invalid object.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -364,13 +381,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldHalo()
-      subroutine ESMF_FieldHaloRun(field, routehandle, blocking, rc)
+      subroutine ESMF_FieldHaloRun(field, routehandle, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -392,6 +410,13 @@
 !           If not present, default is what was specified at Store time.
 !           If {\tt both} was specified at Store time, this defaults to  
 !           blocking.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -414,7 +439,7 @@
       ftypep = field%ftypep
 
       call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
-                             blocking, rc=status)
+                             blocking, commhandle, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHalo: ArrayHalo returned failure"
         return
@@ -459,15 +484,13 @@
 ! !IROUTINE: ESMF_FieldHaloStore - Precompute a Data Halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHaloStore(field, routehandle, halodirection, & 
-                                     blocking, rc)
+      subroutine ESMF_FieldHaloStore(field, routehandle, halodirection, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_HaloDirection), intent(in), optional :: halodirection
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -487,10 +510,6 @@
 !           Optional argument to restrict halo direction to a subset of the
 !           possible halo directions.  If not specified, the halo is executed
 !           along all boundaries.
-!     \item [{[blocking]}]
-!           Specify that the communications will be blocking, nonblocking,
-!           or that the option will be specified at run time.  If not 
-!           specified, the default is blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -529,7 +548,7 @@
 
       call ESMF_ArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
                                ftypep%mapping, routehandle, &
-                               halodirection, blocking, rc=status)
+                               halodirection, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHaloStore: ArrayHaloStore returned failure"
         return
@@ -544,14 +563,16 @@
 ! !IROUTINE: ESMF_FieldReduce - Reduction operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldReduce(field, rtype, result, async, rc)
+      subroutine ESMF_FieldReduce(field, rtype, result, blocking, &
+                                  commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field) :: field                 
       integer :: rtype
       integer :: result
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -565,11 +586,18 @@
 !           Type of reduction operation to perform.  Options include: ...
 !     \item [result] 
 !           Numeric result (may be single number, may be array)
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -608,13 +636,15 @@
 ! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blocking, rc)
+      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blocking, &
+                                  commhandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -639,6 +669,13 @@
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communication.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -663,7 +700,7 @@
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
-                            routehandle, blocking, status)
+                            routehandle, blocking, commhandle, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FieldRedist: ArrayRedist returned failure"
         return
@@ -711,7 +748,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStore(srcField, dstField, parentLayout, &
-                                       routehandle, blocking, rc)
+                                       routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -719,7 +756,6 @@
       type(ESMF_Field), intent(inout) :: dstField
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(out) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -748,11 +784,6 @@
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_FieldRedist} is called.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -802,7 +833,7 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentLayout, &
-                                 routehandle, blocking, status)
+                                 routehandle, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedistStore: ArrayRedistStore returned failure"
         return
@@ -820,8 +851,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStoreNew(srcField, decompIds, dstField, &
-                                          parentLayout, routehandle, blocking, &
-                                          rc)
+                                          parentLayout, routehandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -830,7 +860,8 @@
       type(ESMF_Field), intent(out) :: dstField
       type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -859,11 +890,6 @@
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_FieldRedist} is called.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -916,7 +942,7 @@
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
                                  parentLayout, &
-                                 routehandle, blocking, status)
+                                 routehandle, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRedistStoreNew: ArrayRedistStore returned failure"
         return
@@ -933,7 +959,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcfield, dstfield, routehandle, &
-                                  srcmask, dstmask, blocking, rc)
+                                  srcmask, dstmask, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
@@ -942,7 +968,8 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Mask), intent(in), optional :: srcmask                 
       type(ESMF_Mask), intent(in), optional :: dstmask                 
-      type(ESMF_Async), intent(inout), optional :: blocking
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -972,6 +999,13 @@
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1052,15 +1086,15 @@
       if ((hassrcdata) .and. (.not. hasdstdata)) then
           !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
           !                      dst_datamap, routehandle, &       
-          !                        srcmask, dstmask, blocking, rc)
+          !                        srcmask, dstmask, blocking, commhandle, rc)
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
           !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
           !                      dst_datamap, routehandle, &       
-          !                        srcmask, dstmask, blocking, rc)
+          !                        srcmask, dstmask, blocking, commhandle, rc)
       else
           call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
                                 dst_datamap, routehandle, &       
-                                srcmask, dstmask, blocking, rc)
+                                srcmask, dstmask, blocking, commhandle, rc)
       endif
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: RouteRun returned failure"
@@ -1111,7 +1145,7 @@
 ! !INTERFACE:
       subroutine ESMF_FieldRegridStore(srcfield, dstfield, parentlayout, &
                                        routehandle, regridtype, &
-                                       srcmask, dstmask, blocking, rc)
+                                       srcmask, dstmask, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1122,7 +1156,6 @@
       integer, intent(in), optional :: regridtype 
       type(ESMF_Mask), intent(in), optional :: srcmask                 
       type(ESMF_Mask), intent(in), optional :: dstmask                 
-      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1156,11 +1189,6 @@
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1243,11 +1271,11 @@
  !     call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
  !                                dst_grid, dst_datamap, parentlayout, &
  !                                routehandle, regridtype, &    
- !                                srcmask, dstmask, blocking, status)
+ !                                srcmask, dstmask, status)
       call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
                                  dst_grid, dst_datamap, srclayout, &
                                  routehandle, regridtype, &    
-                                 srcmask, dstmask, blocking, status)
+                                 srcmask, dstmask, status)
 
 
       ! Set return values.
@@ -1260,14 +1288,16 @@
 ! !IROUTINE: ESMF_FieldScatter - Data Scatter operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldScatter(array, sourceDE, field, async, rc)
+      subroutine ESMF_FieldScatter(array, sourceDE, field, &
+                                   blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       integer, intent(in) :: sourceDE
       type(ESMF_Field), intent(inout) :: field                 
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1291,11 +1321,18 @@
 !      data in the array which will be scattered.  When this routine returns
 !      each {\tt ESMF\_Field} will contain a valid data array containing the 
 !      subset of the decomposed data.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !      Optional argument which specifies whether the operation should
 !      wait until complete before returning or return as soon
 !      as the communication between {\tt DE}s has been scheduled.
 !      If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1380,12 +1417,13 @@
 ! !IROUTINE: ESMF_FieldHaloDeprecated - Data Halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHaloDeprecated(field, async, rc)
+      subroutine ESMF_FieldHaloDeprecated(field, blocking, commhandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_BlockingFlag), intent(in), optional :: blocking
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1403,11 +1441,18 @@
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be halo'd.
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
+!           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
+!           {\tt ESMF\_NONBLOCKING}.
+!     \item [{[commhandle]}]
+!           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
+!           argument is required.  Information about the pending operation
+!           will be stored in the {\tt ESMF\_CommHandle} and can be queried
+!           or waited for later.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.24 2004/02/11 19:03:47 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.25 2004/04/02 18:36:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,6 +64,7 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     struct ESMC_AxisIndex ai_total[ESMF_MAXDIM]; // limits for whole array
     struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
     struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
+//  int hwidth[ESMF_MAXGRIDDIM][2];              // lower and upper halo widths
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
