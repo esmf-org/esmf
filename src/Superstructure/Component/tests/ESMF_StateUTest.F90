@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.16 2003/04/22 21:50:27 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.17 2003/04/24 16:42:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.16 2003/04/22 21:50:27 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.17 2003/04/24 16:42:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -140,7 +140,7 @@
 
       ! Test adding an Array to a State
       allocate(f90ptr1(10,20))
-      array1 = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -388,7 +388,7 @@
       statename = "Export State"
       x  = 1
       allocate(f90ptr1(10,20))
-      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)
+      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
 			               arrays=array2(1:1), itemcount=x, rc=rc)
       write(failMsg, *) ""
@@ -403,8 +403,8 @@
       statename = "Export State"
       x  = 2
       allocate(f90ptr1(10,20))
-      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DO_COPY, rc=rc)
-      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DO_COPY, rc=rc)
+      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
 			                    arrays=array2, itemcount=x, rc=rc)
       write(failMsg, *) ""
@@ -429,8 +429,8 @@
       statename = "Export State"
       x  = 2
       allocate(f90ptr1(10,20))
-      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DO_COPY, rc=rc)
-      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DO_COPY, rc=rc)
+      array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+      array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
 			                    arrays=array2, itemcount=x, rc=rc)
       write(failMsg, *) ""
