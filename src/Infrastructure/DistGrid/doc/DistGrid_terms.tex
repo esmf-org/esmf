@@ -1,22 +1,24 @@
-% $Id: DistGrid_terms.tex,v 1.3 2002/03/18 10:07:54 wsawyer Exp $
+% $Id: DistGrid_terms.tex,v 1.4 2002/03/26 06:28:11 vbalaji Exp $
 
 \begin{description}
 \item[PElist] a list of processor IDs associated with a component. (We
   use PE as shorthand for processor, or ``processing element'').
-\item[Layout] distribution of a PElist across multiple dimensions for
-  the purpose of domain decomposition.
+\item[Layout] distribution of elements of a PElist across multiple
+  dimensions for the purpose of domain decomposition. All members of
+  the PElist may not necessarily be assigned to the PE layout, but me
+  set aside for the pool of PEs available for multi-threading.
 \item[Scalar array] an array of scalar data (e.g temperature) on a
   grid.
 \item[Vector array] vector data (e.g velocity components) on a
   grid. These may be arrays where one of the dimensions represents the
   vector component axis, or there may be separate data arrays for each
   vector component.
-\item[Grid staggering] a descriptor of relative locations of scalar and
-  vector data on a structured grid. On different staggered grids,
-  vector data may lie at cell faces or vertices, while scalar data may
-  lie in the interior. The staggered locations are often written
-  in a notation like $(i+\frac12,j+\frac12)$ to describe the offset of
-  a corner with respect to the cell $(i,j)$.
+\item[Grid staggering, grid offsets] a descriptor of relative locations
+  of scalar and vector data on a structured grid. On different
+  staggered grids, vector data may lie at cell faces or vertices,
+  while scalar data may lie in the interior. The staggered locations
+  are often written in a notation like $(i+\frac12,j+\frac12)$ to
+  describe the offset of a corner with respect to the cell $(i,j)$.
 \item[Data dependency] the property of the numerics that expresses the
   requirement of data values in order to perform a
   computation at a data point. For instance, a forward differencing
@@ -25,7 +27,9 @@
   with a component, this entity associates index subsets with PEs, and
   describes the the topology and connectivity of the layout.
 \item[Domain decomposition] the act of grid distribution: creating a
-  PE layout; and associating gridpoints with PEs.
+  PE layout; and associating gridpoints with PEs. The dimensionality
+  of the domain decomposition is the dimensionality of the associated
+  PE layout.
 \item[Regular distribution] the distribution along any axis is
   independent of position on any other axis. An irregular distribution
   tiles the global domain with irregularly-sized domains.
@@ -40,15 +44,29 @@
   synchronization of halo points with other PEs. The data domain
   extents typically specify the index range used to allocated data
   arrays on a PE.
-\item[Communication pattern] data connectivities on the pelist for
-scheduling communication.
-\item[Transpose] Transfer of data arrays between two distributed grids
-  sharing the same global domain.
+\item[Grid topology] data connectivities on the pelist for scheduling
+  communication.
+\item[Data transpose] Transfer of data arrays between two distributed
+  grids sharing the same global domain.
 \item[Global reduction] Reduction operations (sum, max, min, etc.) on
   data on a distributed grid.
 \item[Partition] in a multi-threaded application, the subset of a
   computational domain that is associated with a thread.
-\item[Node]
+\item[Node] ESMF recognizes a machine model based on a 3-level node
+  hierarchy. An \emph{mnode} or memory node, is a set of processors
+  sharing equal flat access to a block of physical memory. An
+  \emph{anode}, or addressable node, is a set of processors that are
+  capable of addressing the same set of blocks of physical memory. A
+  \emph{pnode}, or processing node, is a set of processors to which an
+  operating system scheduler is capable of assigning to a single job.
+
+  An anode is at least the size of an mnode, and a pnode is at least
+  the size of an anode.
+  
+  Examples: SGI Origin: the mnode is a ``C-brick'' of 4p, the anode is
+  the full processor set operating as a single system image, the pnode
+  is the cluster of anodes across which a single job may be
+  submitted. Add examples on other hardware.
 
 % \item [<item1>] \label<glos:item1> <Description item 1.>
 
