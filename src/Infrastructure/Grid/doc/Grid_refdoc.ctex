@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.3 2003/04/30 21:36:42 cdeluca Exp $
+% $Id: Grid_refdoc.ctex,v 1.4 2003/05/07 04:42:05 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,26 +40,26 @@
 \newpage
 #endif
 
-\section{Synopsis}
-#ifdef STANDALONE
-\input{Grid_syn}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_syn}
-#endif
+%\section{Synopsis}
+%#ifdef STANDALONE
+%\input{Grid_syn}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_syn}
+%#endif
 
 %\section{Algorithmic Description}
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\input{Grid_alg}
-#elif defined(CONSTITUENT)
+%#elif defined(CONSTITUENT)
 %\input{../Infrastructure/Grid/doc/Grid_alg}
-#endif
+%#endif
 
-\section{Object Model}
-#ifdef STANDALONE
-\input{Grid_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_obj}
-#endif
+%\section{Object Model}
+%#ifdef STANDALONE
+%\input{Grid_obj}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_obj}
+%#endif
 
 % \section{Global Parameters and Definitions}
 % #ifdef STANDALONE
@@ -68,7 +68,7 @@
 % \input{../Infrastructure/Grid/doc/Grid_param}
 % #endif
 
-\section{Grid Design}
+\section{Grid Class}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -77,72 +77,48 @@
 \input{../Infrastructure/Grid/doc/Grid_desc}
 #endif
 
-\subsection{Design}
+\subsection{Usage}
 #ifdef STANDALONE
-\input{Grid_design}
+\input{Grid_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_design}
+\input{../Infrastructure/Grid/doc/Grid_usage}
 #endif
 
-\subsubsection{Class Definition}
-#ifdef STANDALONE
-\input{Grid_def}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_def}
-#endif
+%\subsubsection{Class Definition}
+%#ifdef STANDALONE
+%\input{Grid_def}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_def}
+%#endif
 
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{Grid_rest}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_rest}
-#endif
+%\subsubsection{Restrictions}
+%#ifdef STANDALONE
+%\input{Grid_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Grid/doc/Grid_rest}
+%#endif
 
-%\section{Grid F90 Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{Gridex_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_fex}
-#endif
-
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-\input{Grid_fparam}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_fparam}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{Grid_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Grid/doc/Grid_fapi}
-#endif
-
-%\section{Grid C++ Interface}
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE
-%\input{Grid_ccex}
+%\input{Gridex_fapi}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_ccex}
+%\input{../Infrastructure/Grid/doc/Grid_fex}
 %#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE
-%\input{Grid_ccparam}
+%\input{Grid_fparam}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_ccparam}
+%\input{../Infrastructure/Grid/doc/Grid_fparam}
 %#endif
 
-% %\subsection{Class API}
-% #ifdef STANDALONE
-% \input{Grid_ccapi}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Grid/doc/Grid_ccapi}
-% #endif
+\subsection{Class API}
+#ifdef STANDALONE
+\input{Grid_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Grid/doc/ESMF_Grid_fapi}
+#endif
 
 #ifdef STANDALONE
 \section{Review Status}
