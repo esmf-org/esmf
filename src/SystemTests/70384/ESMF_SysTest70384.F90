@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.2 2003/02/13 23:22:36 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.3 2003/02/15 00:10:52 jwolfe Exp $
 !
 ! System test code #70384
 
@@ -29,21 +29,22 @@
     implicit none
     
     ! Local variables
-    integer :: nx, ny, i, j, ni, nj, rc
+    integer :: nx, ny, nz, i, j, k, ni, nj, nk, nj2, nk2, rc, ii, jj, kk
     integer, dimension(6) :: delist
     integer :: result, len, base, de_id
-    integer :: i_max, j_max
+    integer :: i_max, j_max, k_max
     integer :: status
-    integer :: nDE_i, nDE_j
+    integer :: ndex, ndey
     logical :: match
-    integer(ESMF_IKIND_I4), dimension(:,:), pointer :: srcdata, dstdata, resdata
-    integer(ESMF_IKIND_I4), dimension(:,:), pointer :: srcptr, dstptr, resptr
+    integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
+    integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
+    integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
     type(ESMF_Clock) :: clock1
     integer :: timestep
     type(ESMF_Layout) :: layout1 
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
-    type(ESMF_AxisIndex) :: indexlist1(2), indexlist2(2), indexlist3(2)
+    type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
     type(ESMF_State) :: state1
         
 !-------------------------------------------------------------------------
@@ -62,7 +63,9 @@
 
     ! Create a Layout
     delist = (/ 0, 1, 2, 3, 4, 5 /)
-    layout1 = ESMF_LayoutCreate(2, 3, delist, ESMF_XFAST, rc)
+    ndex = 2
+    ndey = 3
+    layout1 = ESMF_LayoutCreate(ndex, ndey, delist, ESMF_XFAST, rc)
     print *, "Layout Create finished, rc =", rc
 
     ! Create the State
@@ -90,14 +93,17 @@
     !  Create the arrays and set the data.
 
     !  Create Array based on an existing, allocated F90 pointer.
-    !  Data is type Integer, 2D.
+    !  Data is type Integer, 3D.
 
     ! Allocate and set initial data values.  These are different on each DE.
-    ni = 40
-    nj = 20
-    allocate(srcdata(ni, nj))
-    allocate(dstdata(ni, nj))
-    allocate(resdata(ni, nj))
+    ni = 10
+    nj = 06
+    nk = 12
+    allocate(srcdata(ni, nj, nk))
+    allocate(resdata(ni, nj, nk))
+    nj2 = 18
+    nk2 = 04
+    allocate(dstdata(ni, nj2, nk2))
 
     ! Get our local DE id
     call ESMF_LayoutGetDEId(layout1, de_id, rc)
@@ -110,6 +116,25 @@
     array3 = ESMF_ArrayCreate(resdata, ESMF_NO_COPY, rc)
     print *, "Array Creates returned"
 
+    ! Create axis indices  TODO:  move to an array method - ArrayDist?
+    global_counts(1) = ni*ndex
+    global_counts(2) = nj*ndey
+    global_counts(3) = nk
+    decompids1(1) = 1
+    decompids1(2) = 2
+    decompids1(3) = 0
+    call ESMF_LayoutSetAxisIndex(layout1, global_counts, decompids1, &
+                                 indexlist1, rc)
+    call ESMF_LayoutSetAxisIndex(layout1, global_counts, decompids1, &
+                                 indexlist3, rc)
+    global_counts(1) = ni*ndex
+    global_counts(2) = nj*ndey
+    global_counts(3) = nk
+    decompids2(1) = 1
+    decompids2(2) = 0
+    decompids2(3) = 2
+    call ESMF_LayoutSetAxisIndex(layout1, global_counts, decompids2, &
+                                 indexlist2, rc)
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
     call ESMF_ArraySetAxisIndex(array1, indexlist1, rc)
@@ -118,10 +143,16 @@
 
     ! Generate global cell numbers, each DE has a contiguous 
     ! chunk of numbers.
-    base = de_id * ni* nj
-    do i=1, ni
-      do j=1, nj
-       srcdata(i, j) = i + (j*ni) + base   !! TODO: see if this is right
+    i_max = indexlist1(1).max
+    j_max = indexlist1(2).max
+    do k=1,indexlist1(3).r-indexlist1(3).l+1
+      kk = k+indexlist1(3).l
+      do j=1,indexlist1(2).r-indexlist1(2).l+1
+        jj = j+indexlist1(2).l
+        do i=1,indexlist1(1).r-indexlist1(1).l+1
+          ii = i+indexlist1(1).l
+          srcdata(i, j, k) = i_max*j_max*(kk-1) + i_max*(jj-1) + ii
+        enddo
       enddo
     enddo
 
@@ -151,13 +182,23 @@
     timestep = 1
     !! TODO: fool with clocks here
 
-    !! TODO: call transpose method here, output ends up in array2
+    !! call transpose method here, output ends up in array2
+    rank_trans(1) = 1
+    rank_trans(2) = 2
+    rank_trans(3) = 3
+    call ESMF_ArrayRedist(array1, layout1, rank_trans, decompids1, &
+                          decompids2, array2, rc)
 
     print *, "Array contents after Transpose:"
     call ESMF_ArrayPrint(array2, "", rc)
 
     !! Transpose back so we can compare contents
     !! TODO: call transpose method again here, output ends up in array3
+    rank_trans(1) = 1
+    rank_trans(2) = 2
+    rank_trans(3) = 3
+    call ESMF_ArrayRedist(array2, layout1, rank_trans, decompids2, &
+                          decompids1, array3, rc)
 
     print *, "Array contents after second Transpose, should match original:"
     call ESMF_ArrayPrint(array3, "", rc)
@@ -186,14 +227,19 @@
     match = .true.
     do i=1, ni
       do j=1, nj
-        if (srcptr(i,j) .ne. resptr(i,j)) then
-          print *, "array contents do not match: ", &
-                     srcptr(i,j), ".ne.", resptr(i,j), "at", i,j
-          match = .false.
-        endif
+        do k=1, nk
+!          if (srcptr(i,j,k) .ne. resptr(i,j,k)) then
+          write(*,*) i,j,k,de_id,srcdata(i,j,k),resdata(i,j,k)
+          if (srcdata(i,j,k) .ne. resdata(i,j,k)) then
+            print *, "array contents do not match: ", &
+!                       srcptr(i,j,k), ".ne.", resptr(i,j,k), "at", i,j,k,de_id
+                       srcdata(i,j,k), ".ne.", resdata(i,j,k), "at", i,j,k,de_id
+            match = .false.
+          endif
+        enddo
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!!"
+    if (match) print *, "Array contents matched correctly!! DE_id = ",de_id
 
     print *, "Finalize section finished"
 
