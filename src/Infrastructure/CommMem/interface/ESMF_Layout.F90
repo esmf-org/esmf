@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout.F90,v 1.5 2003/02/11 16:41:34 jwolfe Exp $
+! $Id: ESMF_Layout.F90,v 1.6 2003/02/13 22:13:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Layout.F90,v 1.5 2003/02/11 16:41:34 jwolfe Exp $'
+      '$Id: ESMF_Layout.F90,v 1.6 2003/02/13 22:13:23 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -782,6 +782,8 @@ end interface
 ! !INTERFACE:
       subroutine ESMF_LayoutAllReduce(layout, dataArray, result, arrayLen, &
                                       op, rc)
+
+! TODO: rename to ESMF_LayoutAllReduceI for "integer" version ?
 !
 !
 ! !ARGUMENTS:
@@ -791,6 +793,7 @@ end interface
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
+!     Performs an MPI-like Allreduce for an integer array
 !
 !EOP
 ! !REQUIREMENTS:
@@ -816,6 +819,52 @@ end interface
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
        end subroutine ESMF_LayoutAllReduce
+
+!------------------------------------------------------------------------------
+!BOP
+!
+!
+! !INTERFACE:
+      subroutine ESMF_LayoutAllGatherVI(layout, sndArray, sndLen, &
+                                        rcvArray, rcvLen, rcvDispls, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Layout) :: layout
+      integer, intent(in) :: sndArray(:)
+      integer, intent(in) :: sndLen
+      integer, intent(out) :: rcvArray(:)
+      integer, intent(in) :: rcvLen
+      integer, intent(in) :: rcvDispls(:)
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Perform an MPI-like Allgatherv for integer arrays across a layout
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ routine.
+        call c_ESMC_LayoutAllGatherVI(layout, sndArray, sndLen, &
+                                      rcvArray, rcvLen, rcvDispls, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LayoutAllGatherVI error"
+          return
+        endif
+
+!       set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+       end subroutine ESMF_LayoutAllGatherVI
 
        end module ESMF_LayoutMod
 
