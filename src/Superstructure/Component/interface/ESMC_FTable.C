@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.1 2003/02/26 01:17:31 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.2 2003/02/26 02:32:23 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "ESMC.h"
 
 //-----------------------------------------------------------------------------
@@ -44,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.1 2003/02/26 01:17:31 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.2 2003/02/26 02:32:23 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -76,6 +77,14 @@
 // !REQUIREMENTS:  developer's guide for classes
 
     // TODO: allocate space for N items, rounded up?
+    if (nfuncp > this->funcalloc) {
+        this->funcs = (struct funcinfo *)realloc((void *)this->funcs, nfuncp * sizeof(funcinfo));
+        this->funcalloc = nfuncp; 
+    }
+    if (ndatap > this->dataalloc) {
+        this->data = (struct datainfo *)realloc((void *)this->data, ndatap * sizeof(datainfo));
+        this->dataalloc = ndatap;
+    }
 
     printf("TableExtend method called \n");
     return ESMF_FAILURE;
@@ -132,11 +141,21 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    int i;
+    int funccount = this->funccount;
 
- // TODO: add code here
+ // TODO: test this code
+    if (funccount >= this->funcalloc) {
+ 	this->funcs = (struct funcinfo *)realloc((void *)this->funcs, (funccount+1) * sizeof(struct funcinfo));
+        this->funcalloc = funccount+1;
+    }
+    this->funcs[funccount].funcptr = func;
+    this->funcs[funccount].funcname = new char[sizeof(name)+1];
+    strcpy(this->funcs[funccount].funcname, name);
+    this->funcs[funccount].ftype = ftype;
+   
+    this->funccount++;
 
-    return ESMF_FAILURE;
+    return ESMF_SUCCESS;
 
  } // end ESMC_FTableSetFuncPtr
 
@@ -161,11 +180,21 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    int i;
+    int datacount = this->datacount;
 
- // TODO: add code here
+ // TODO: test this code
+    if (datacount >= this->dataalloc) {
+ 	this->data = (struct datainfo *)realloc((void *)this->data, (datacount+1) * sizeof(struct datainfo));
+        this->dataalloc = datacount+1;
+    }
+    this->data[datacount].dataptr = data;
+    this->data[datacount].dataname = new char[sizeof(name)+1];
+    strcpy(this->data[datacount].dataname, name);
+    this->data[datacount].dtype = dtype;
+   
+    this->datacount++;
 
-    return ESMF_FAILURE;
+    return ESMF_SUCCESS;
 
  } // end ESMC_FTableSetDataPtr
 
