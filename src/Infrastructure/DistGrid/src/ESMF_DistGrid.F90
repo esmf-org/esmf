@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.90 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.91 2004/02/03 21:20:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -527,26 +527,24 @@
         rc = ESMF_FAILURE
       endif
 
-      ! If already destroyed or never created, return ok
-      if (.not. associated(distgrid%ptr)) then
-        print *, "DistGridDestroy called on uninitialized or destroyed DistGrid"
-        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
-        return
-      endif
+!      ! If already destroyed or never created, return ok
+!      if (.not. associated(distgrid%ptr)) then
+!        print *, "DistGridDestroy called on uninitialized or destroyed DistGrid"
+!        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
+!        return
+!      endif
 
       ! Destruct all distgrid internals and then free field memory.
-      call ESMF_DistGridDestruct(distgrid, status)
-      ! If error write message and return.
-      if(status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridDestroy from ESMF_DistGridDestruct"
-        return
+      if (associated(distgrid%ptr)) then
+        call ESMF_DistGridDestruct(distgrid, status)
+        ! If error write message and return.
+        if(status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_DistGridDestroy from ESMF_DistGridDestruct"
+          return
+        endif
       endif
 
-      deallocate(distgrid%ptr, stat=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridDestroy: DistGrid deallocate"
-        return
-      endif
+      nullify(distgrid%ptr)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -737,7 +735,7 @@
       endif
 
 !     Error checking for required input   TODO: complete
-!     call ESMF_LayoutValidate(layout, rc=status)
+!     call ESMF_DELayoutValidate(layout, rc=status)
 !     if (status .ne. ESMF_SUCCESS) then
 !       print *, "ERROR in ESMF_DistGridConstructInternal: unassociated layout"
 !       return
@@ -782,16 +780,6 @@
           return
         endif
       endif
-!      call ESMF_DistGridSet(dgtype, numDims=numDims, &
-!                            coversDomain=coversDomain, &
-!                            decompIDs=decompIDs, &
-!                            gridBoundaryWidth=gridBoundaryWidth, &
-!                            name=name, &
-!                            rc=status)
-!      if(status .NE. ESMF_SUCCESS) then
-!        print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set"
-!        return
-!      endif
 
       ! Calculate values for computational cells
       glob => dgtype%globalComp
@@ -806,34 +794,22 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: globalCellCount le 0"
         return
       endif
-
-      glob%globalCellCount = globalCellCount 
-!     glob%maxLocalCellCount = ?????
-      do j = 1,numDims
-!       glob%globalCellCountPerDim(j)   =
-!       glob%maxLocalCellCountPerDim(j) =
-      enddo
-      call ESMF_DistGridSet(dgtype, globalCellCount=globalCellCount, &
-                            globalCellCountPerDim=globalCellCountPerDim, &
-                            rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set"
-        return
-      endif
+      ! call internal routine to set counts per DE
       call ESMF_DistGridSetCounts(dgtype, numDims, nDEs, &
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic, total=.FALSE., rc=status)
-
-
-
+      glob%globalCellCount   = globalCellCount 
+      glob%maxLocalCellCount = maxval(glob%cellCountPerDE)
+      do j = 1,numDims
+        glob%globalCellCountPerDim(j)   = globalCellCountPerDim(j)
+        glob%maxLocalCellCountPerDim(j) = maxval(glob%cellCountPerDEPerDim(:,j))
+      enddo
 
       ! now repeat the process, accounting for boundary cells
       bnd = dgtype%gridBoundaryWidth
       globalCellCount = 1
       do i = 1,numDims
         globalCellCountPerDim(i) = counts(i) + 2*bnd  ! TODO: fix for reordering
-      enddo
-      do i = 1,numDims
         if (globalCellCountPerDim(i).ne.0) &
             globalCellCount = globalCellCount * globalCellCountPerDim(i)
       enddo
@@ -841,57 +817,21 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: globalCellCount le 0"
         return
       endif
-
-      do i = 1,ESMF_MAXDECOMPDIM
-        decompCount(i) = 0
-      enddo
-      do i = 1,size(countsPerDEDim1)
-        decompCount(1) = decompCount(1) + countsPerDEDim1(i) + 2*bnd
-      enddo
-      do i = 1,size(countsPerDEDim2)
-        decompCount(2) = decompCount(2) + countsPerDEDim2(i) + 2*bnd
-      enddo
-      do i = 1,ESMF_MAXDECOMPDIM
-        globalCellCountPerDim(i) = decompCount(i)  ! TODO: fix for reordering
-      enddo
-
-      call ESMF_DistGridSet(dgtype, globalCellCount=globalCellCount, &
-                            globalCellCountPerDim=globalCellCountPerDim, &
-                            total=.TRUE., rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set"
-        return
-      endif
-
-      ! Parse problem size, first with and then without boundary cells
-      call ESMF_DistGridSetCounts(dgtype, numDims, nDEs, &
-                                  countsPerDEDim1, countsPerDEDim2, &
-                                  periodic, total=.FALSE., rc=status)
+      ! call internal routine to set counts per DE
       call ESMF_DistGridSetCounts(dgtype, numDims, nDEs, &
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic, total=.TRUE., rc=status)
-        
+      glob%globalCellCount   = globalCellCount 
+      glob%maxLocalCellCount = maxval(glob%cellCountPerDE)
+      do j = 1,numDims
+        glob%globalCellCountPerDim(j)   = globalCellCountPerDim(j)
+        glob%maxLocalCellCountPerDim(j) = maxval(glob%cellCountPerDEPerDim(:,j))
+      enddo
+
       ! Fill in DE derived type
       call ESMF_DistGridSetDE(dgtype, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
-        return
-      endif
-
-      ! Calculate other distgrid values from DE information
-      do i = 1,numDims
-        dgtype%globalComp%maxLocalCellCountPerDim(1) = maxval(countsPerDEDim1)
-        dgtype%globalComp%maxLocalCellCountPerDim(2) = maxval(countsPerDEDim2)
-        dgtype%globalTotal%maxLocalCellCountPerDim(1) = maxval(countsPerDEDim1) + 2*bnd
-        dgtype%globalTotal%maxLocalCellCountPerDim(2) = maxval(countsPerDEDim2) + 2*bnd
-      enddo
-      dgtype%globalComp%maxLocalCellCount = dgtype%globalComp%maxLocalCellCountPerDim(1) &
-                                          * dgtype%globalComp%maxLocalCellCountPerDim(2)
-      dgtype%globalTotal%maxLocalCellCount = dgtype%globalTotal%maxLocalCellCountPerDim(1) &
-                                           * dgtype%globalTotal%maxLocalCellCountPerDim(2)
-
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
         return
       endif
 
@@ -1620,7 +1560,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
-      integer :: i
+      integer :: i, i2
       type(ESMF_DistGridLocal), pointer :: me
 
       ! Initialize return code
@@ -1645,14 +1585,28 @@
                  localCellCount = me%localCellCount
 
       if(present(localCellCountPerDim)) then
-        do i = 1,size(localCellCountPerDim)
+        i2 = size(localCellCountPerDim)
+        if (size(localCellCountPerDim).gt.dgtype%numDims) then
+          i2 = dgtype%numDims
+          print *, "WARNING in ESMF_DistGridGetDE: size of array gt numDims"
+        endif
+        do i = 1,i2
           localCellCountPerDim(i) = me%localCellCountPerDim(i)
         enddo
       endif
 
 !jw   if(present(globalStartPerDim)) globalStartPerDim = me%globalAIPerDim%min
 
-      if(present(globalAIPerDim)) globalAIPerDim = me%globalAIPerDim
+      if(present(globalAIPerDim)) then
+        i2 = size(globalAIPerDim)
+        if (size(globalAIPerDim).gt.dgtype%numDims) then
+          i2 = dgtype%numDims
+          print *, "WARNING in ESMF_DistGridGetDE: size of array gt numDims"
+        endif
+        do i = 1,i2
+          globalAIPerDim(i) = me%globalAIPerDim(i)
+        enddo
+      endif
 ! TODO:  how to query for parts of an Index type
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1689,7 +1643,7 @@
       logical :: rcpresent                          ! Return code present
       integer :: DEID, localCellCount, localCellCountForDim
       integer :: compCellCount, compCellCountForDim
-      integer :: i
+      integer :: i, myDEx, myDEy, nDEx, nDEy
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1699,12 +1653,23 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_DELayoutGetDEid(dgtype%layout, DEID, status)
-      if((status .NE. ESMF_SUCCESS) .or. (DEID .lt. 0)) then
-        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
+!      call ESMF_DELayoutGetDEid(dgtype%layout, DEID, status)
+!      if((status .NE. ESMF_SUCCESS) .or. (DEID .lt. 0)) then
+!        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
+!        return
+!      endif
+!      DEID = DEID + 1    ! TODO:  have to add one to go from C
+      call ESMF_DELayoutGetSize(dgtype%layout, nDEx, nDEy, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get size"
         return
       endif
-      DEID = DEID + 1    ! TODO:  have to add one to go from C
+      call ESMF_DELayoutGetDEPosition(dgtype%layout, myDEx, myDEy, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DE position"
+        return
+      endif
+      DEID = (myDEy-1)*nDEx + myDEx
 
       dgtype%myDEComp%MyDE  = DEID
       dgtype%myDETotal%MyDE = DEID
@@ -2350,7 +2315,7 @@
       type(ESMF_DistGridGlobal), pointer :: glob
 
       ! Initialize return code
-      status    = ESMF_FAILURE
+      status    = ESMF_SUCCESS
       tmpStatus = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -2413,7 +2378,7 @@
       if(tmpStatus .NE. 0) status = tmpStatus
 
 !     check error status
-      if(status .NE. 0) then
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
