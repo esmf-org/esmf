@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:55:12 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/02/27 23:28:17 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -31,7 +31,7 @@ $(ESMC_TESTDIR)/ESMF_SysTest70384: ESMF_SysTest70384.o  chkopts
 
 RUN_ESMF_SysTest70384:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest70384.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest70384 > $(ESMC_TESTDIR)/ESMF_SysTest70384.stdout
+	${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_SysTest70384 > $(ESMC_TESTDIR)/ESMF_SysTest70384.stdout
 	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_SysTest70384.tmp
 	#@if (diff ESMF_SysTest70384.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_SysTest70384.out) then \
 	#echo "PASS SysTest70384 test" > ${ESMC_TESTDIR}/ESMF_SysTest70384.log; else \
