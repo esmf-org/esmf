@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.20 2004/02/14 00:28:07 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.21 2004/02/18 20:36:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.20 2004/02/14 00:28:07 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.21 2004/02/18 20:36:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1125,6 +1125,10 @@
       allocate(grid%gridSpecific%logRectGrid, stat=status)  ! todo: check ec
       lrgrid => grid%gridSpecific%logRectGrid
       call ESMF_LRGridConstructSpecificNew(lrgrid, status)
+      if (status .ne. ESMF_SUCCESS) then
+         print *, "error from LRGridConstructSpecificNew"
+         return
+      endif
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
         lrgrid%deltaPerDim(i) = useDeltas(i) 
@@ -1335,6 +1339,10 @@
       allocate(grid%gridSpecific%logRectGrid, stat=status) 
       lrgrid => grid%gridSpecific%logRectGrid
       call ESMF_LRGridConstructSpecificNew(lrgrid, status)
+      if (status .ne. ESMF_SUCCESS) then
+         print *, "error from LRGridConstructSpecificNew"
+         return
+      endif
       allocate(grid%gridSpecific%logRectGrid%coords(numDims), stat=status)
    
       coords => grid%gridSpecific%logRectGrid%coords
@@ -1563,7 +1571,13 @@
         rc = ESMF_FAILURE
       endif
 
-!     Set 
+      ! validate the layout before going any furthe
+      call ESMF_DELayoutValidate(layout, rc=status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_LogRectGridDistribute: bad layout, cannot distribute grid"
+          return
+      endif
+      
 !     Extract some information from the Grid
       numDims = grid%numDims
       allocate(counts(numDims))
