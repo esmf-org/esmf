@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.2 2003/12/08 18:55:27 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.3 2003/12/08 23:12:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.2 2003/12/08 18:55:27 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.3 2003/12/08 23:12:20 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1896,6 +1896,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the array
       int size_decomp,           // in  - size of decomp arrays
+      int localDimCounts[],      // in  -
+      int localMaxDimCount[],    // in  -
       ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
                                  //       structures for exclusive data
       ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
@@ -1962,21 +1964,34 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k, j_tot;
+        int k, j_tot, jMax, displs0;
         int *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (int j=0; j<rsize[rbreak[0]]; j++) {
+        jMax = localMaxDimCount[rbreak[0]];
+        if (localMaxDimCount[rbreak[0]] == NULL) {
+          jMax = rsize[rbreak[0]];
+        }
+        for (int j=0; j<jMax; j++) {
           j_tot = j + AIPtr[ranky].min;
           sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].min];
           sendcount = rsize[rankx];
+          if (j > rsize[rbreak[0]]) {
+            sendcount = 0;
+          }
           recvbuf = &GlobalArray[j*rmax[rankx]];
+          displs0 = 0;
           for (int kx=0; kx<nx; kx++) {
             for (int ky=0; ky<ny; ky++) {
               k = ky*nx + kx;
-              recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-              displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+              recvcounts[k] = localDimCounts[rankx*nde + k];
+              if (localDimCounts == NULL) {
+                recvcounts[k] = rsize[rankx];
+              }
+        //      displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+              displs[k] = displs0 + recvcounts[k];
+              displs0   = displs[k];
             }
           }
           // call layout gather routine
@@ -2019,23 +2034,37 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k;
+        int k, iMax, jMax, displs0;
         int *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (i=0; i<rsize[rbreak[1]]; i++) {
-          for (int j=0; j<rsize[rbreak[0]]; j++) {
+        iMax = localMaxDimCount[rbreak[1]];
+        if (localMaxDimCount[rbreak[1]] == NULL) {
+          iMax = rsize[rbreak[1]];
+        }
+        jMax = localMaxDimCount[rbreak[0]];
+        if (localMaxDimCount[rbreak[0]] == NULL) {
+          jMax = rsize[rbreak[0]];
+        }
+        for (i=0; i<iMax; i++) {
+          for (int j=0; j<jMax; j++) {
             sendbuf = &DistArray[j*rsize[rankx]
                     + i*rsize[rankx]*rsize[rbreak[0]]];
             sendcount = rsize[rankx];
             recvbuf = &GlobalArray[j*rmax[rankx]
                     + i*rmax[rankx]*rmax[rbreak[0]]];
+            displs0 = 0;
             for (int kx=0; kx<nx; kx++) {
               for (int ky=0; ky<ny; ky++) {
                 k = ky*nx + kx;
-                recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-                displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+                recvcounts[k] = localDimCounts[rankx*nde + k];
+                if (localDimCounts == NULL) {
+                  recvcounts[k] = rsize[rankx];
+                }
+          //      displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+                displs[k] = displs0 + recvcounts[k];
+                displs0   = displs[k];
               }
             }
           // call layout gather routine
@@ -2078,6 +2107,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the array
       int size_decomp,           // in  - size of decomp arrays
+      int localDimCounts[],      // in  -
+      int localMaxDimCount[],    // in  -
       ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
                                  //       structures for exclusive data
       ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
@@ -2141,21 +2172,33 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k, j_tot;
+        int k, j_tot, jMax, displs0;
         float *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (int j=0; j<rsize[rbreak[0]]; j++) {
+        jMax = localMaxDimCount[rbreak[0]];
+        if (localMaxDimCount[rbreak[0]] == NULL) {
+          jMax = rsize[rbreak[0]];
+        }
+        for (int j=0; j<jMax; j++) {
           j_tot = j + AIPtr[ranky].min;
           sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].min];
           sendcount = rsize[rankx];
+          if (j > rsize[rbreak[0]]) {
+            sendcount = 0;
+          }
           recvbuf = &GlobalArray[j*rmax[rankx]];
+          displs0 = 0;
           for (int kx=0; kx<nx; kx++) {
             for (int ky=0; ky<ny; ky++) {
               k = ky*nx + kx;
-              recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-              displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+              recvcounts[k] = localDimCounts[rankx*nde + k];
+              if (localDimCounts == NULL) {
+                recvcounts[k] = rsize[rankx];
+              }
+              displs[k] = displs0 + recvcounts[k];
+              displs0   = displs[k];
             }
           }
           // call layout gather routine
@@ -2198,23 +2241,39 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k;
+        int k, iMax, jMax, displs0;
         float *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (i=0; i<rsize[rbreak[1]]; i++) {
-          for (int j=0; j<rsize[rbreak[0]]; j++) {
+        iMax = localMaxDimCount[rbreak[1]];
+        if (localMaxDimCount[rbreak[1]] == NULL) {
+          iMax = rsize[rbreak[1]];
+        }
+        jMax = localMaxDimCount[rbreak[0]];
+        if (localMaxDimCount[rbreak[0]] == NULL) {
+          jMax = rsize[rbreak[0]];
+        }
+        for (i=0; i<iMax; i++) {
+          for (int j=0; j<jMax; j++) {
             sendbuf = &DistArray[j*rsize[rankx]
                     + i*rsize[rankx]*rsize[rbreak[0]]];
             sendcount = rsize[rankx];
+            if (i > rsize[rbreak[1]] || j > rsize[rbreak[0]]) {
+              sendcount = 0;
+            }
             recvbuf = &GlobalArray[j*rmax[rankx]
                     + i*rmax[rankx]*rmax[rbreak[0]]];
+            displs0 = 0;
             for (int kx=0; kx<nx; kx++) {
               for (int ky=0; ky<ny; ky++) {
                 k = ky*nx + kx;
-                recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-                displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+                recvcounts[k] = localDimCounts[rankx*nde + k];
+                if (localDimCounts == NULL) {
+                  recvcounts[k] = rsize[rankx];
+                }
+                displs[k] = displs0 + recvcounts[k];
+                displs0   = displs[k];
               }
             }
           // call layout gather routine
@@ -2257,6 +2316,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the array
       int size_decomp,           // in  - size of decomp arrays
+      int localDimCounts[],      // in  -
+      int localMaxDimCount[],    // in  -
       ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
                                  //       structures for exclusive data
       ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
@@ -2320,21 +2381,33 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k, j_tot;
+        int k, j_tot, jMax, displs0;
         double *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (int j=0; j<rsize[rbreak[0]]; j++) {
+        jMax = localMaxDimCount[rbreak[0]];
+        if (localMaxDimCount[rbreak[0]] == NULL) {
+          jMax = rsize[rbreak[0]];
+        }
+        for (int j=0; j<jMax; j++) {
           j_tot = j + AIPtr[ranky].min;
           sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].min];
           sendcount = rsize[rankx];
+          if (j > rsize[rbreak[0]]) {
+            sendcount = 0;
+          }
           recvbuf = &GlobalArray[j*rmax[rankx]];
+          displs0 = 0;
           for (int kx=0; kx<nx; kx++) {
             for (int ky=0; ky<ny; ky++) {
               k = ky*nx + kx;
-              recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-              displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+              recvcounts[k] = localDimCounts[rankx*nde + k];
+              if (localDimCounts == NULL) {
+                recvcounts[k] = rsize[rankx];
+              }
+              displs[k] = displs0 + recvcounts[k];
+              displs0   = displs[k];
             }
           }
           // call layout gather routine
@@ -2377,23 +2450,39 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         }
         // loop over ranks, skipping the first decomposed one, loading
         // up chunks of data to gather
-        int k;
+        int k, iMax, jMax, displs0;
         double *sendbuf, *recvbuf;
         int sendcount;
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
-        for (i=0; i<rsize[rbreak[1]]; i++) {
-          for (int j=0; j<rsize[rbreak[0]]; j++) {
+        iMax = localMaxDimCount[rbreak[1]];
+        if (localMaxDimCount[rbreak[1]] == NULL) {
+          iMax = rsize[rbreak[1]];
+        }
+        jMax = localMaxDimCount[rbreak[0]];
+        if (localMaxDimCount[rbreak[0]] == NULL) {
+          jMax = rsize[rbreak[0]];
+        }
+        for (i=0; i<iMax; i++) {
+          for (int j=0; j<jMax; j++) {
             sendbuf = &DistArray[j*rsize[rankx]
                     + i*rsize[rankx]*rsize[rbreak[0]]];
             sendcount = rsize[rankx];
+            if (i > rsize[rbreak[1]] || j > rsize[rbreak[0]]) {
+              sendcount = 0;
+            }
             recvbuf = &GlobalArray[j*rmax[rankx]
                     + i*rmax[rankx]*rmax[rbreak[0]]];
+            displs0 = 0;
             for (int kx=0; kx<nx; kx++) {
               for (int ky=0; ky<ny; ky++) {
                 k = ky*nx + kx;
-                recvcounts[k] = rsize[rankx]; // TODO: fix so variable
-                displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+                recvcounts[k] = localDimCounts[rankx*nde + k];
+                if (localDimCounts == NULL) {
+                  recvcounts[k] = rsize[rankx];
+                }
+                displs[k] = displs0 + recvcounts[k];
+                displs0   = displs[k];
               }
             }
           // call layout gather routine

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.4 2003/12/08 18:55:07 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.5 2003/12/08 23:12:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.4 2003/12/08 18:55:07 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.5 2003/12/08 23:12:20 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1098,13 +1098,15 @@
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutGatherArrayI(layout, DistArray, global_dimlengths, &
-                                           decompids, AIPtr, AIPtr2, GlobalArray,&
-                                           rc)
+                                           decompids, localDimCounts, localMaxDimCount, &
+                                           AIPtr, AIPtr2, GlobalArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: DistArray
       integer, dimension(:), intent(in) :: global_dimlengths
+      integer, dimension(:,:), intent(in) :: localDimCounts
+      integer, dimension(:), intent(in) :: localMaxDimCount
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
       type(ESMF_AxisIndex), dimension(:) :: AIPtr2
@@ -1145,7 +1147,9 @@
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
         call c_ESMC_DELayoutGatherArrayI(layout, DistArray, global_dimlengths, &
-                                         decompids, size_decomp, AIPtr, AIPtr2, &
+                                         decompids, size_decomp, &
+                                         localDimCounts, localMaxDimCount, &
+                                         AIPtr, AIPtr2, &
                                          GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutGatherArrayI error"
@@ -1171,14 +1175,16 @@
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutGatherArrayR(layout, DistArray, global_dimlengths, &
-                                           decompids, AIPtr, AIPtr2, GlobalArray,&
-                                           rc)
+                                           decompids, localDimCounts, localMaxDimCount, &
+                                           AIPtr, AIPtr2, GlobalArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
       real(ESMF_KIND_R4), dimension(:), intent(in) :: DistArray
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: decompids
+      integer, dimension(:,:), intent(in) :: localDimCounts
+      integer, dimension(:), intent(in) :: localMaxDimCount
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
       type(ESMF_AxisIndex), dimension(:) :: AIPtr2
       real(ESMF_KIND_R4), dimension(:), intent(out) :: GlobalArray
@@ -1219,7 +1225,9 @@
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
         call c_ESMC_DELayoutGatherArrayR(layout, DistArray, global_dimlengths, &
-                                         decompids, size_decomp, AIPtr, AIPtr2, &
+                                         decompids, size_decomp, &
+                                         localDimCounts, localMaxDimCount, &
+                                         AIPtr, AIPtr2, &
                                          GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutGatherArrayR error"
@@ -1245,14 +1253,16 @@
 !
 ! !INTERFACE:
       subroutine ESMF_DELayoutGatherArrayR8(layout, DistArray, global_dimlengths, &
-                                            decompids, AIPtr, AIPtr2, GlobalArray,&
-                                            rc)
+                                           decompids, localDimCounts, localMaxDimCount, &
+                                           AIPtr, AIPtr2, GlobalArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
       real(ESMF_KIND_R8), dimension(:), intent(in) :: DistArray
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: decompids
+      integer, dimension(:,:), intent(in) :: localDimCounts
+      integer, dimension(:), intent(in) :: localMaxDimCount
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
       type(ESMF_AxisIndex), dimension(:) :: AIPtr2
       real(ESMF_KIND_R8), dimension(:), intent(out) :: GlobalArray
@@ -1293,7 +1303,9 @@
 !       Routine which interfaces to the C++ routine.
         size_decomp = size(decompids)
         call c_ESMC_DELayoutGatherArrayR(layout, DistArray, global_dimlengths, &
-                                         decompids, size_decomp, AIPtr, AIPtr2, &
+                                         decompids, size_decomp, &
+                                         localDimCounts, localMaxDimCount, &
+                                         AIPtr, AIPtr2, &
                                          GlobalArray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutGatherArrayR8 error"
