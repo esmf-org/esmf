@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.27 2003/05/27 17:35:09 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.28 2003/05/27 22:42:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -61,7 +61,7 @@
            dim_names,             &! dimension names
            dim_units               ! dimension units
 
-        real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM) :: &
+        real, dimension(ESMF_MAXGRIDDIM) :: &   ! TODO: originally real*8
            global_min,            &! global coordinate minimums
            global_max,            &! global coordinate maximums
            local_min,             &! local  coordinate minimums
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.27 2003/05/27 17:35:09 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.28 2003/05/27 22:42:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -399,7 +399,7 @@
          local_nmax,    &! local number of grid increments in each direction
          global_nmax     ! global number of grid increments in each direction
 
-      real(kind=ESMF_IKIND_R8), dimension(dim_num), intent(in) :: &
+      real, dimension(dim_num), intent(in) :: &
          local_min,     &! local coordinate minimum in each direction
          local_max,     &! local coordinate maximum in each direction
          global_min,    &! global coordinate minimum in each direction
@@ -630,7 +630,7 @@
          local_nmax,    &! local number of grid increments in each direction
          global_nmax     ! global number of grid increments in each direction
 
-      real(kind=ESMF_IKIND_R8), dimension(dim_num), intent(in) :: &
+      real, dimension(dim_num), intent(in) :: &
          local_min,     &! local coordinate minimum in each direction
          local_max,     &! local coordinate maximum in each direction
          global_min,    &! global coordinate minimum in each direction
@@ -694,12 +694,11 @@
       endif
 
 !TODO: compute all grid coordinates and stuff
-!     Fill in physgrid derived type with function arguments
-!      call ESMF_PhysGridSet(physgrid, local_min_coord1, local_max_coord1, &
-!                            local_nmax1, local_min_coord2, local_max_coord2, &
-!                            local_nmax2, global_min_coord1, global_max_coord1, &
-!                            global_nmax1, global_min_coord2, global_max_coord2, &
-!                            global_nmax2, status)
+!      Fill in physgrid derived type with function arguments
+       call ESMF_PhysGridSet(physgrid, dim_num=dim_num, &
+                             local_min=local_min, local_max=local_max, &
+                             global_min=global_min, global_max=global_max, &
+                             rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridConstructInternal: PhysGrid set"
@@ -814,7 +813,7 @@
          dim_names,              &! names for each dimension
          dim_units                ! units for each dimension
 
-      real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM), &
+      real, dimension(ESMF_MAXGRIDDIM), &
          intent(inout), optional :: &
          local_min,              &! local minimum in each coord direction
          local_max,              &! local maximum in each coord direction
@@ -932,7 +931,7 @@
          dim_names,              &! names for each dimension
          dim_units                ! units for each dimension
 
-      real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM), &
+      real, dimension(ESMF_MAXGRIDDIM), &
          intent(in), optional :: &
          local_min,              &! local minimum in each coord direction
          local_max,              &! local maximum in each coord direction
@@ -1255,8 +1254,8 @@
       integer, intent(in) :: global_nmax1
       integer, intent(in) :: global_nmin2
       integer, intent(in) :: global_nmax2
-      real(kind=ESMF_IKIND_R8), intent(in) :: delta1
-      real(kind=ESMF_IKIND_R8), intent(in) :: delta2
+      real, intent(in) :: delta1
+      real, intent(in) :: delta2
       integer, intent(out), optional :: rc            
 
 !

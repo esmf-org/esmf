@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.52 2003/05/27 17:34:42 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.53 2003/05/27 22:41:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.52 2003/05/27 17:34:42 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.53 2003/05/27 22:41:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1295,12 +1295,12 @@
 
       integer :: status=ESMF_SUCCESS          ! Error status
       logical :: rcpresent=.FALSE.            ! Return code present
-      real(kind=ESMF_IKIND_R8) :: delta(2)
-      real(kind=ESMF_IKIND_R8) :: local_min_coord(2)
-      real(kind=ESMF_IKIND_R8) :: local_max_coord(2)
+      real :: delta(2)
+      real :: local_min_coord(2)
+      real :: local_max_coord(2)
       integer :: local_nmax(2)
-      real(kind=ESMF_IKIND_R8) :: global_min_coord(2)
-      real(kind=ESMF_IKIND_R8) :: global_max_coord(2)
+      real :: global_min_coord(2)
+      real :: global_max_coord(2)
       integer :: global_nmax(2)
       integer :: i
       type(ESMF_PhysGrid), dimension(:), allocatable, target :: temp_pgrids
@@ -1315,11 +1315,11 @@
 !     Increment the number of physgrids in the grid and allocate memory
       grid%num_physgrids = grid%num_physgrids + 1
       if(grid%num_physgrids .eq. 1) then
-        allocate(grid%physgrids(1), stat=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
-          return
-        endif
+!       allocate(grid%physgrids(1), stat=status)
+!       if(status .NE. ESMF_SUCCESS) then
+!         print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
+!         return
+!       endif
         allocate(temp_pgrids(grid%num_physgrids), stat=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
@@ -1903,10 +1903,10 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: gcell_dim
       integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_start
       integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_end
-      real(kind=ESMF_IKIND_R8) :: delta1
-      real(kind=ESMF_IKIND_R8) :: delta2
-      real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coords
-      real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coords
+      real :: delta1
+      real :: delta2
+      real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords
+      real, dimension(ESMF_MAXGRIDDIM) :: global_max_coords
       logical :: rcpresent=.FALSE.                ! Return code present
 
 !     Initialize return code
@@ -2042,10 +2042,8 @@
       integer, intent(out), optional :: horz_coord_system
       integer, intent(out), optional :: vert_coord_system
       integer, intent(out), optional :: coord_order
-      real(kind=ESMF_IKIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
-         optional :: global_min_coords
-      real(kind=ESMF_IKIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
-         optional :: global_max_coords
+      real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
+      real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_max_coords
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_nmax
       integer, intent(out), optional :: rc
 !
