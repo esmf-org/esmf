@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.1 2003/06/20 22:45:50 jwolfe Exp $ 
+# $Id: base_variables,v 1.2 2003/06/30 20:26:29 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -47,10 +47,10 @@ CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 # C_F90CXXLD         = mpif90 -echo
 C_F90CXXLD         = f95
-C_F90CXXLIBS       = -L/usr/local/lib/NAGWare -lf96 -lstdc++
+C_F90CXXLIBS       = -L/usr/local/lib/NAGWare -lf96 -lstdc++ -lgcc
 # C_CXXF90LD         = mpif90 -echo
-C_CXXF90LD         = f95
-C_CXXF90LIBS       = -lstdc++
+C_CXXF90LD         = g++
+C_CXXF90LIBS       = -lstdc++ -L/usr/local/lib/NAGWare -lf96
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
