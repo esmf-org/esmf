@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.22 2004/06/19 05:09:23 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.23 2004/06/21 21:50:36 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -87,6 +87,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1b create returned"
 
+    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a Local Array with Integer 1D Data Test"
     call ESMF_LocalArrayPrint(array1, "", rc)
