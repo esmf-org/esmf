@@ -1,4 +1,4 @@
-! $Id: ESMF_DateMod.f90,v 1.1 2002/12/11 21:59:12 nscollins Exp $
+! $Id: ESMF_DateMod.F90,v 1.1 2003/11/24 18:39:59 jwolfe Exp $
 	module ESMF_DateMod
 !===============================================================================
 !BOP
