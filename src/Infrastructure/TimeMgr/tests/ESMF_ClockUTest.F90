@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.18 2003/04/30 15:56:59 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.19 2003/05/07 16:55:17 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.18 2003/04/30 15:56:59 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.19 2003/05/07 16:55:17 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -197,7 +197,7 @@
       ! Set time to lower bound of Fliegel algoritm
       write(name, *) "Test lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_SUCCESS."
-      YR=-4900
+      YR=-4800
       call ESMF_TimeInit(stopTime, YR=YR, MM=3, DD=1, &
                                    cal=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -208,34 +208,13 @@
       ! Set time beyond lower bound of Fliegel algoritm
       write(name, *) "Test beyond lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      YR=-4900
+      YR=-4800
       call ESMF_TimeInit(stopTime, YR=YR, MM=2, DD=28, &
                                    cal=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-
-      ! Set time to upper bound of Fliegel algoritm
-      write(name, *) "Test upper bound of Fliegel algorithm Test"
-      write(failMsg, *) " Should return ESMF_SUCCESS."
-      YR=1465002
-      call ESMF_TimeInit(stopTime, YR=YR, MM=10, DD=17, &
-                                   cal=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-
-      ! Set time beyond upper bound of Fliegel algoritm
-      write(name, *) "Test beyond upper bound of Fliegel algorithm Test"
-      write(failMsg, *) " Should return ESMF_FAILURE."
-      YR=1465002
-      call ESMF_TimeInit(stopTime, YR=YR, MM=10, DD=18, &
-                                   cal=gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
 #endif
 
       ! ----------------------------------------------------------------------------
