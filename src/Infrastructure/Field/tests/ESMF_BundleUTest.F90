@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.6 2003/03/20 20:04:58 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.7 2003/04/03 15:21:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.6 2003/03/20 20:04:58 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.7 2003/04/03 15:21:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -127,7 +127,7 @@
       !------------------------------------------------------------------------
 
       !  Verify that a Field can be added to a Bundle
-      simplefield = ESMF_FieldCreate(grid, arrayspec, ESMF_CELL_CENTER, &
+      simplefield = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                                     name="rh", rc=rc)
 
       !  Verify that an empty Bundle can be created

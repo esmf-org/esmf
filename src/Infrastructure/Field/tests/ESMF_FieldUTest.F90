@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.6 2003/03/28 00:01:50 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.7 2003/04/03 15:21:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.6 2003/03/28 00:01:50 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.7 2003/04/03 15:21:20 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -234,13 +234,13 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-       ! Test requirement FLD1.1.1
-       ! Fields may be created by specifying attributes, a grid, data array dimensions 
-       ! and descriptors, optional masks (e.g. for active cells), and an optional I/O 
-       ! specification. In this case a field will allocate its own data. The grid passed 
-       ! into the argument list is referenced and not copied.
-       ! arrayspec = ESMF_ArraySpecCreate()
-       f2 = ESMF_FieldCreate(grid, arrayspec, ESMF_CELL_CENTER, &
+      ! Test requirement FLD1.1.1
+      ! Fields may be created by specifying attributes, a grid, data array dimensions 
+      ! and descriptors, optional masks (e.g. for active cells), and an optional I/O 
+      ! specification. In this case a field will allocate its own data. The grid passed 
+      ! into the argument list is referenced and not copied.
+      call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_KIND_R4)
+      f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
       write(failMsg, *) "ArraySpec has not been created"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
