@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2004/06/07 17:06:54 slswift Exp $
+# $Id: build_rules.mk,v 1.13 2004/08/19 22:13:10 cpboulder Exp $
 #
 # Linux.intel.default.mk
 #
@@ -87,7 +87,7 @@ MPIRUN         =  mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-MPI_HOME       = 
+MPI_HOME       =  /home/chuck/mpich-1.2.5.2/
 MPI_LIB        = -lmpich 
 MPI_INCLUDE    = -DESMF_MPICH=1
 MPIRUN         =  mpirun $(ESMF_NODES)

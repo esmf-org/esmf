@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.18 2004/07/22 14:45:51 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.19 2004/08/19 22:13:10 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,6 +51,7 @@ implicit none
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !------------------------------------------------------------------------------
+
 !     ! ESMF_MsgType
 type ESMF_MsgType
     sequence
@@ -63,6 +64,18 @@ type(ESMF_MsgType), parameter           :: &
     ESMF_LOG_WARNING = ESMF_MsgType(2), &
     ESMF_LOG_ERROR = ESMF_MsgType(3)
 
+!     ! ESMF_Halt
+type ESMF_HaltType
+    sequence
+    integer      :: htype
+end type
+
+!     ! Halt Types
+type(ESMF_HaltType), parameter           :: &
+    ESMF_LOG_HALTNEVER  = ESMF_HaltType(1), &
+    ESMF_LOG_HALTWARNING = ESMF_HaltType(2), &
+    ESMF_LOG_HALTERROR = ESMF_HaltType(3)
+    
 !     ! ESMF_LogType
 type ESMF_LogType
     sequence
@@ -93,7 +106,7 @@ type ESMF_Log
                                             
     type(ESMF_Logical)                      ::  FileIsOpen
     type(ESMF_Logical)                      ::  flush
-    integer                                     halt
+    type(ESMF_HaltType)                     ::  halt
     type(ESMF_LOGENTRY), dimension(1)       ::  LOG_ENTRY
     integer                                     maxElements
     character(len=32)                           nameLogErrFile 
@@ -279,12 +292,7 @@ end subroutine ESMF_LogFinalize
         if (present(rcToReturn)) rcToReturn=ESMF_RC_MEM
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
-	logrc = ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
-	if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-        endif
+	call ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method,log)
 	ESMF_LogFoundAllocError=.TRUE.
     else
         if (present(rcToReturn)) rcToReturn=ESMF_SUCCESS
@@ -346,14 +354,9 @@ end function ESMF_LogFoundAllocError
     ESMF_LogFoundError = .FALSE.
     if (present(rcToReturn)) rcToReturn = rcToCheck
     if (rcToCheck .NE. ESMF_SUCCESS) then
-        logrc = ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method,&
+        call ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method,&
 	log)
-        if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-       endif
-       ESMF_LogFoundError = .TRUE.
+        ESMF_LogFoundError = .TRUE.
     endif	
        
 end function ESMF_LogFoundError
@@ -372,7 +375,7 @@ end function ESMF_LogFoundError
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
-	integer, intent(out),optional		                :: halt
+	type(ESMF_HaltType), intent(out),optional               :: halt
 	type(ESMF_LogType), intent(out),optional	                :: logtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
@@ -392,7 +395,7 @@ end function ESMF_LogFoundError
 !      \item [{[rootOnly]}]
 !	     Root only flag
 !      \item [{[halt]}]
-!	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
+!	     Halt definitions 
 !      \item [{[logtype]}]
 !            Defines either single or multilog
 !      \item [{[stream]}]
@@ -447,6 +450,8 @@ end subroutine ESMF_LogGet
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
+    ESMF_LogDefault%halt=ESMF_LOG_HALTERROR
+
     ESMF_LogDefault%unitnumber=ESMF_LOG_FORT_STDOUT   
     do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
         inquire(unit=i,iostat=status)
@@ -526,12 +531,7 @@ end subroutine ESMF_LogInitialize
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
 	if (present(rcToReturn)) rcToReturn=ESMF_RC_MEM
         allocmsg=tempmsg(1:msglen)
-	logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method,log)
-	if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-        endif
+	call ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method,log)	
 	ESMF_LogMsgFoundAllocError=.TRUE.
     else
         if (present(rcToReturn)) rcToReturn=ESMF_SUCCESS
@@ -598,13 +598,8 @@ end function ESMF_LogMsgFoundAllocError
     ESMF_LogMsgFoundError=.FALSE.
 	if (present(rcToReturn)) rcToReturn = rcToCheck
 	if (rcToCheck .NE. ESMF_SUCCESS) then
-	    logrc = ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
-        if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-       endif
-	   ESMF_LogMsgFoundError=.TRUE.
+	    call ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method,log)
+	    ESMF_LogMsgFoundError=.TRUE.
 	endif	
        
 end function ESMF_LogMsgFoundError
@@ -674,7 +669,7 @@ end subroutine ESMF_LogOpen
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
-	integer, intent(in),optional			        :: halt
+	type(ESMF_HaltType), intent(in),optional                :: halt
 	type(ESMF_LogType), intent(in),optional                 :: logtype
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
@@ -693,7 +688,7 @@ end subroutine ESMF_LogOpen
 !      \item [{[rootOnly]}]
 !	     Root only flag
 !      \item [{[halt]}]
-!	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
+!	     Halt definitions (halterr(1), haltwarn(2),haltnever(3))
 !      \item [{[logtype]}]
 !            Defines either single or multilog
 !      \item [{[stream]}]
@@ -721,11 +716,9 @@ end subroutine ESMF_LogSet
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-	function ESMF_LogWrite(msg,MsgType,line,file,method,log)
+	subroutine ESMF_LogWrite(msg,MsgType,line,file,method,log)
 !
 !
-! !RETURN VALUE:
-	logical                                 ::ESMF_LogWrite
 ! !ARGUMENTS:
 	character(len=*), intent(in)            :: msg
 	type(ESMF_MsgType), intent(in)          :: msgtype
@@ -774,7 +767,6 @@ end subroutine ESMF_LogSet
     integer	                    ::i
     integer                         ::h,m,s,ms,y,mn,dy
     
-    ESMF_LogWrite=.FALSE.
     if (present(method)) tmethod=adjustl(method)
     if (present(line)) tline=line 
     if (present(file)) then
@@ -829,7 +821,6 @@ end subroutine ESMF_LogSet
     		endif	
     	    endif
     	    CLOSE(UNIT=ESMF_LogDefault%unitnumber)
-    	    ESMF_LogWrite=.TRUE.
     	    ok=1
     	endif	
     	if (ok.eq.1) exit    
@@ -840,7 +831,9 @@ end subroutine ESMF_LogSet
 132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
 133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
 
-end function ESMF_LogWrite
+!if ((ESMF_LogDefault%halttype .eq. 3) .and. (msgtype%mtype .eq. 3)) STOP
+
+end subroutine ESMF_LogWrite
 
 end module ESMF_LogErrMod
 
