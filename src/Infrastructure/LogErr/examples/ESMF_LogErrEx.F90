@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.2 2004/06/09 05:32:02 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.3 2004/06/11 22:37:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,8 @@
     program ESMF_LogErrEx
 
 !------------------------------------------------------------------------------
-!EXAMPLE	Writing messages to log with different methods.
+!	Writing messages to log with different methods.
+!	Add example string when put being built
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_LogErrEx - Log Error examples
