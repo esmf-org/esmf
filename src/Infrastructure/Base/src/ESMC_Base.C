@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.10 2003/09/04 22:24:20 cdeluca Exp $
+// $Id: ESMC_Base.C,v 1.11 2003/09/11 22:42:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.10 2003/09/04 22:24:20 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.11 2003/09/11 22:42:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -420,6 +420,41 @@ static int globalCount = 0;
      return ESMF_TRUE;
 };
 
+//-----------------------------------------------------------------------------
+// General utility methods
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DataKindSize - Return number of bytes in a DataKind
+//
+// !INTERFACE:
+    int ESMC_DataKindSize(
+//
+// !RETURN VALUE:
+//  int number of bytes (negative for error)
+// 
+// !ARGUMENTS:
+    ESMC_DataKind dk) {       // in - a data kind 
+
+    switch (dk) {
+      case ESMF_I1:  return  1;
+      case ESMF_I2:  return  2;
+      case ESMF_I4:  return  4;
+      case ESMF_I8:  return  8;
+      case ESMF_R4:  return  4;
+      case ESMF_R8:  return  8;
+      case ESMF_C8:  return  8;
+      case ESMF_C16: return 16;
+      default:
+         fprintf(stderr, "Unknown DataKind in ESMC_DataKindSize()\n");
+         return -1;
+    }
+
+    /* not reached */
+}
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 // Attribute methods
 //-----------------------------------------------------------------------------

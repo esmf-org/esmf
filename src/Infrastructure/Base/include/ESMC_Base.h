@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.30 2003/09/05 20:56:15 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.31 2003/09/11 22:42:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -234,5 +234,8 @@ int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
 int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
+
+// return byte counts for DataKinds
+int ESMC_DataKindSize(ESMC_DataKind dk);
 
 #endif  // ESMC_BASE_H
