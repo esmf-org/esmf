@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.28 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.29 2005/02/28 16:36:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,6 +76,8 @@
     //int ESMC_XPacketSet(<value type>  value);
 
  // get/set methods for internal data
+    int ESMC_XPacketSetEmpty(void);
+
     int ESMC_XPacketSetOffset(int offset) { this->offset = offset;
                                             return ESMF_SUCCESS; }
 
@@ -100,6 +102,19 @@
                                          int size_axisindex, int *global_count,
                                          ESMC_Logical (*boundary)[2],
                                          ESMC_XPacket **xp_list, int *xp_count);
+    friend int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
+                                      int VMType, int nbytes, char **buffer,
+                                      int *bufferSize);
+    friend int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
+                                      int VMType, int nbytes, void *dataAddr,
+                                      char *buffer);
+    friend int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
+                                      int VMType, int nbytes, char *buffer,
+                                      void *dataAddr);
+
+    friend int ESMC_XPacketGetEmpty(int *nrank, int *noffset, 
+                                    int *ncontig_length, 
+                                    int *nstride, int *nrep_count);
 
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -111,10 +126,22 @@
 
  };   // end class ESMC_XPacket
 
-// non-class method - creates a list of xp's to return
-int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
-                              int size_axisindex, int *global_count,
-                              ESMC_Logical (*boundary)[2],
-                              ESMC_XPacket **xp_list, int *xp_count);
+ // non-class method - creates a list of xp's to return
+    int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
+                                  int size_axisindex, int *global_count,
+                                  ESMC_Logical (*boundary)[2],
+                                  ESMC_XPacket **xp_list, int *xp_count);
+
+    int ESMC_XPacketMakeBuffer(int xpCount, ESMC_XPacket **xpList,
+                               int VMType, int nbytes, char **buffer,
+                               int *bufferSize);
+    int ESMC_XPacketPackBuffer(int xpCount, ESMC_XPacket **xpList,
+                               int VMType, int nbytes, void *dataAddr,
+                               char *buffer);
+    int ESMC_XPacketUnpackBuffer(int xpCount, ESMC_XPacket **xpList,
+                               int VMType, int nbytes, char *buffer,
+                               void *dataAddr);
+    int ESMC_XPacketGetEmpty(int *nrank, int *noffset, int *ncontig_length, 
+                             int *nstride, int *nrep_count);
 
  #endif  // ESMC_XPacket_H
