@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.4 2004/03/24 20:07:33 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.5 2004/04/08 06:30:59 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@ type ESMF_Log
 end type ESMF_Log
 
 
-   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite, ESMF_LogInit
+   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite, ESMF_LogInit, ESMF_LogFoundError
 
 !----------------------------------------------------------------------------
 
@@ -183,12 +183,14 @@ end subroutine ESMF_LogOpen
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-	subroutine ESMF_LogWrite(aLog, logtype, context, rc)
+	subroutine ESMF_LogWrite(aLog, string,logtype,module, method, rc)
 !
 ! !ARGUMENTS:
 	type(ESMF_Log), intent(in) 		:: aLog
+	character(len=*), intent(in)		:: string
 	integer, intent(in)			:: logtype
-	character(len=*), intent(in)		:: context
+	character(len=*), intent(in), optional  :: module
+	character(len=*), intent(in), optional	:: method
 	integer, intent(out),optional		:: rc
 
 ! !DESCRIPTION:
@@ -199,10 +201,14 @@ end subroutine ESMF_LogOpen
 ! 
 !      \item [aLog]
 !            Log object.
+!      \item [string]
+!            User-provided context string.
 !      \item [logtype]
 !            The type of message (info(0), warning(1), error(2)).
-!      \item [context]
-!            User-provided context string.
+!      \item [module]
+!            User-provided module string.
+!      \item [method]
+!            User-provided method string.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -213,8 +219,20 @@ end subroutine ESMF_LogOpen
 	character(len=8) 					:: d
 	character(len=7)					:: lt
 	character(len=32)					:: f
+	character(len=32)					::tmodule
+	character(len=32)					::tmethod
 	
-	rc=1
+	rc=ESMF_FAILURE
+	if (present(method)) then
+		tmethod=adjustl(method)
+	else
+		tmethod=""
+	endif
+	if (present(module)) then
+		tmodule=adjustl(module)
+	else
+		tmodule=""
+	endif	  
 	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
 		call DATE_AND_TIME(d,t)	
 		select case (logtype)
@@ -226,14 +244,84 @@ end subroutine ESMF_LogOpen
 				lt="ERROR"
 		end select				
 		f=adjustl(__FILE__)
-		WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,context
-		100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
+		WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
+		100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a32,a32,a)
 		if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-		lt,"    ",f,__LINE__,"  ",context
-		rc=0
+		lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string
+		rc=ESMF_SUCCESS
 	endif	
        
 end subroutine ESMF_LogWrite
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogFoundError - Returns logical associated with finding an error
+
+! !INTERFACE: 
+	function ESMF_LogFoundError(aLog,rc,string,logtype,module,method)
+!
+! !RETURN VALUE:
+	logical									::ESMF_LogFoundError
+! !ARGUMENTS:
+!	
+	type(ESMF_Log), intent(in) 				:: aLog
+	integer, intent(in)						:: rc
+	character(len=*), intent(in),optional	:: string
+	integer, intent(in),optional			:: logtype
+	character(len=*), intent(in), optional  :: module
+	character(len=*), intent(in), optional	:: method
+	
+
+! !DESCRIPTION:
+!      This function returns a logical true for return codes that indicate an error
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [aLog]
+!            Log object.
+!      \item [rc]
+!            Return code to check.
+!      \item [string]
+!            User-provided context string.
+!      \item [logtype]
+!            The type of message (info(0), warning(1), error(2)).
+!      \item [module]
+!            User-provided module string.
+!      \item [method]
+!            User-provided method string.
+!      
+!      \end{description}
+! 
+!EOP
+	character(len=32)					::tstring
+	character(len=32)					::tmodule
+	character(len=32)					::tmethod
+	integer								::trc
+	integer								::tlogtype
+	
+	ESMF_LogFoundError=ESMF_FALSE
+	if (rc .NE. ESMF_SUCCESS) then
+		if (present(method)) then
+			tmethod=adjustl(method)
+		else
+			tmethod=""
+		endif
+		if (present(module)) then
+			tmodule=adjustl(module)
+		else
+			tmodule=""
+		endif	  
+		if (present(module)) then
+			tmodule=adjustl(module)
+		else
+			tmodule=""
+		endif	  
+		call ESMF_LogWrite(aLog,tstring,logtype,tmodule,tmethod,trc)
+		ESMF_LogFoundError=ESMF_TRUE
+	endif	
+       
+end function ESMF_LogFoundError
 
 subroutine ESMF_LogInit(aLog)
 	type(ESMF_Log) 						:: aLog
