@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.88 2005/02/02 20:18:33 svasquez Exp $
+#  $Id: common.mk,v 1.89 2005/02/02 20:43:11 jwolfe Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -777,26 +777,26 @@ check_examples:
 # Targets for building and running demos.
 #-------------------------------------------------------------------------------
 
-demo: chkopts build_libs chkdir_tests
+demos: chkopts build_libs chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ACTION=tree_demo tree
+	$(MAKE) ACTION=tree_demos tree
 
-tree_demo: tree_build_demo tree_run_demo
+tree_demos: tree_build_demos tree_run_demos
 
-demo_uni: chkopts build_libs chkdir_tests
+demos_uni: chkopts build_libs chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ACTION=tree_demo_uni tree
+	$(MAKE) ACTION=tree_demos_uni tree
 
-tree_demo_uni: tree_build_demo tree_run_demo_uni
+tree_demos_uni: tree_build_demos tree_run_demos_uni
 
 #
-# build_demo
+# build_demos
 #
-build_demo: chkopts chkdir_tests
+build_demos: chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ACTION=tree_build_demo tree
+	$(MAKE) ACTION=tree_build_demos tree
 
-tree_build_demo: $(DEMO_BUILD) 
+tree_build_demos: $(DEMO_BUILD) 
 
 $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
 	$(SL_F_LINKER) -o $@ $(DEMO_OBJ) $< -lesmf ${MPI_LIB} ${MP_LIB} \
@@ -805,19 +805,19 @@ $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
 
 
 #
-# run_demo
+# run_demos
 #
-run_demo:  chkopts chkdir_tests
+run_demos:  chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ACTION=tree_run_demo tree
+	$(MAKE) ACTION=tree_run_demos tree
 
-tree_run_demo: $(DEMO_RUN) 
+tree_run_demos: $(DEMO_RUN) 
 
-run_demo_uni:  chkopts chkdir_tests
+run_demos_uni:  chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
-	$(MAKE) ACTION=tree_run_demo_uni tree
+	$(MAKE) ACTION=tree_run_demos_uni tree
 
-tree_run_demo_uni: $(DEMO_RUN_UNI) 
+tree_run_demos_uni: $(DEMO_RUN_UNI) 
 
 
 #-------------------------------------------------------------------------------
