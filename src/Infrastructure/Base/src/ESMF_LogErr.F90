@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.33 2004/10/14 19:54:19 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.34 2004/10/14 20:14:08 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -118,6 +118,7 @@ type ESMF_Log
     type(ESMF_Logical)			    ::  flushed     
     type(ESMF_Logical)                      ::  rootOnly    
     type(ESMF_Logical)                      ::  verbose  
+    type(ESMF_Logical)                      ::  dirty  
     integer                                     maxElements
     integer                                     stream 
     integer                                     unitNumber
@@ -305,7 +306,9 @@ end subroutine ESMF_LogFinalize
 
     if (present(rc)) rc=ESMF_FAILURE
     
-    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. (log%flushed .eq. ESMF_FALSE)) then	
+    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. &
+        (log%flushed .eq. ESMF_FALSE) .AND. &
+	(log%dirty .eq. ESMF_TRUE))  then	
     	ok=0
     	do i=1, ESMF_LOG_MAXTRYOPEN
     	    OPEN(UNIT=log%unitnumber, File=log%nameLogErrFile, POSITION="APPEND", &
@@ -358,6 +361,7 @@ end subroutine ESMF_LogFinalize
    133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
    
    log%flushed = ESMF_TRUE
+   log%dirty = ESMF_FALSE
    rc=ESMF_SUCCESS	
       
 end subroutine ESMF_LogFlush
@@ -581,7 +585,8 @@ end subroutine ESMF_LogGet
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
     ESMF_LogDefault%flushImmediately = ESMF_TRUE
-    ESMF_LogDefault%flushed = ESMF_TRUE
+    ESMF_LogDefault%flushed = ESMF_FALSE
+    ESMF_LogDefault%dirty = ESMF_FALSE
     ESMF_LogDefault%fIndex = 1
     ESMF_LogDefault%maxElements = 1
     allocate(ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%maxElements),stat=status)
@@ -1016,6 +1021,7 @@ end subroutine ESMF_LogSet
         ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
     ESMF_LogDefault%flushed = ESMF_FALSE
+    ESMF_LogDefault%dirty = ESMF_TRUE
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
