@@ -1,0 +1,45 @@
+
+\begin{center}
+\begin{tabular}{|p{1in}|p{3.5in}|}
+\hline
+Unit & Meaning \\
+\hline\hline
+{\bf yr\_<i4|i8>} & Year. \\
+\hline
+{\bf mm\_i4} & Month (1-12). \\
+\hline
+{\bf dd\_<i4|r8>} & Day. \\
+\hline
+{\bf d\_<i4|i8>} & Integer Julian day. \\
+\hline
+{\bf h\_<i4|r8>} & Hour. \\
+\hline
+{\bf m\_<i4|r8>} & Minute. \\
+\hline
+{\bf s\_<i4|i8|r8>} & Second. \\
+\hline
+{\bf ms\_<i4|r8>} & Millisecond. \\
+\hline
+{\bf us\_<i4|r8>} & Microsecond. \\
+\hline
+{\bf ns\_<i4|r8>} & Nanosecond. \\
+\hline
+{\bf O} & Time zone offset in integer number of hours and minutes. \\
+\hline
+{\bf <unit>N} & Numerator where times are of the form {\bf $ {\rm <unit>} + 
+\frac{<unit>N}{<unit>D}$}, where $<unit>$s are integers. For example, 
+{\bf s\_i4N} is an integer second numerator.  This format provides 
+a mechanism for supporting exact behavior.
+\\
+\hline
+\end{tabular}
+\begin{table}
+\caption{\label{table:timeOpts}Specifiers for Times and TimeIntervals}
+\end{table}
+\end{center}
+
+
+
+
+
+

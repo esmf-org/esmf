@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.9 2003/08/14 21:57:05 cdeluca Exp $
+% $Id: TimeMgr_desc.tex,v 1.10 2003/08/15 17:37:26 cdeluca Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -51,7 +51,7 @@ year when leaves start falling from the trees in a climate model.
 \end{itemize}
 
 \begin{center}
-\includegraphics*{TimeMgr_desc.eps}
+\includegraphics{TimeMgr_desc.eps}
 \end{center}
 
 In the remainder of this section, we briefly summarize the 
@@ -99,9 +99,9 @@ different sorts of calendars, Times and TimeIntervals must support
 a wide range of time specifiers, spanning nanoseconds to years.  The
 interfaces to these classes are defined so that you can specify a time
 using as a combination of time units selected from the list shown in 
-Figure~\ref{fig:timeOpts}.  
+Table~\ref{table:timeOpts}.  
 
-\input{TimeMgr_abbr}
+\input{TimeMgr_specs}
 
 \subsection{Clocks and Alarms}
 Although it is possible to repeatedly step a Time forward by a 

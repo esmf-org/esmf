@@ -1,4 +1,4 @@
-% $Id: TimeMgr_implnotes.tex,v 1.3 2003/08/12 18:17:33 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.4 2003/08/15 17:37:26 cdeluca Exp $
 
 \subsection{Implementation Notes}
 \begin{enumerate}
@@ -9,7 +9,7 @@ inherit from a single class, BaseTime.  In C++, this can be
 implemented by using inheritance.  In F90, it can be implemented
 by having the derived types TimeIntervals and Times
 contain a derived type BaseTime.  In both cases, the 
-{\tt BaseTime} class can be made private and invisible to the user.
+BaseTime class can be made private and invisible to the user.
 
 The result of this strategy is that Time Intervals and 
 Times gain a consistent core representation of time as well a set
@@ -45,17 +45,17 @@ time interval calculations between time instants.  It is done here rather
 than in the Calendar class because it can be done with simple 
 day-based arithmetic that is Calendar independent.  
 
-Comparison methods can also be defined in the {\tt BaseTime} class.  These
+Comparison methods can also be defined in the BaseTime class.  These
 perform equality/inequality, less than, and greater than comparisons
-between any two {\tt TimeIntervals} or {\tt Times}.  These methods capture
-the common comparison logic between {\tt TimeIntervals} and {\tt Times} and
+between any two TimeIntervals or Times.  These methods capture
+the common comparison logic between TimeIntervals and Times and
 hence are defined here for sharing.
 
-\item {\bf Time and TimeInterval depend on a calendar.} The TimeInterval 
-and Time classes contain an internal Calendar class.  
+\item {\bf The Time class depends on a calendar.} The Time class contains 
+an internal Calendar class.  
 Upon demand by a user, the results of an increment or decrement operation are 
 converted to user units, which may be calendar-dependent, via methods 
-obtained from their internal {\tt Calendar}.
+obtained from their internal Calendar.
 
 \end{enumerate}
 
