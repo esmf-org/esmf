@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/02/05 21:56:13 nscollins Exp $
+# $Id: makefile,v 1.6 2004/02/18 18:24:47 nscollins Exp $
 
 ALL: demo
 
@@ -26,6 +26,8 @@ DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
 
 DEMO_RUN      = RUN_CoupledFlowApp  
 
+DEMO_RUN_UNI  = RUN_CoupledFlowAppUNI
+
 DEMO_RM       = ESMF_CoupledFlowApp.rm
 
 FlowSolverMod.o:: FlowArraysMod.o
@@ -48,6 +50,14 @@ RUN_CoupledFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
 	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
+	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/CoupledFlowApp.stdout " for status results."
+	@echo "Look in " `pwd` " for output data files."
+
+
+RUN_CoupledFlowAppUNI:
+	-@rm -f testlog stdlog.* logfile.* 
+	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
 	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/CoupledFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
