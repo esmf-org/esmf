@@ -1,4 +1,4 @@
-# $Id: common,v 1.40 2003/04/18 17:18:32 flanigan Exp $ 
+# $Id: common,v 1.41 2003/04/21 22:17:33 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -206,7 +206,7 @@ build_system_tests: chkopts chkdir_tests
 tree_build_system_tests:  $(SYSTEM_TESTS_BUILD) 
 
 $(ESMC_TESTDIR)/ESMF_SysTest% : $(SYSTEM_TESTS_OBJ) ESMF_SysTest%.o 
-	$(SL_F_LINKER) -o $@  $^ -lesmf ${F90CXXLIBS} \
+	$(SL_F_LINKER) -o $@  $^ -lesmf  ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
@@ -372,8 +372,8 @@ build_shared:
 	    mkdir tmp_$$LIBNAME ;\
 	    cd tmp_$$LIBNAME  ;\
             ar x ../$$LIBNAME.a ;\
-	    echo $(SL_C_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
-	    $(SL_C_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	    echo $(SL_F_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	    $(SL_F_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
 	    cd .. ;\
 	fi ;\
 	done 

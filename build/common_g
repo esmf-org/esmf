@@ -1,4 +1,4 @@
-# $Id: common_g,v 1.8 2003/04/07 21:36:46 flanigan Exp $ 
+# $Id: common_g,v 1.9 2003/04/21 22:17:34 flanigan Exp $ 
 
 CC	       = ${C_CC}
 CXX	       = ${CXX_CC}
@@ -10,6 +10,7 @@ FLINKER	       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
 SYS_LIB	       = ${C_SYS_LIB}
 
 # C++ <=> F90 
+#F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
 F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
 F90CXXLIBS     = ${C_F90CXXLIBS}
 

@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.16 2003/04/14 14:58:12 nscollins Exp $ 
+# $Id: base_variables,v 1.17 2003/04/21 22:17:36 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -24,12 +24,12 @@ FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # ######################### C and Fortran compiler ########################
 #
-C_CC			= mpcc_r -qsmp=omp -qcheck -qheapdebug
+C_CC			= mpcc_r -qsmp=omp -qcheck 
 C_FC			= mpxlf90_r -qcheck 
 C_FC_MOD		= -I
 C_CLINKER_SLFLAG	= -L
 C_FLINKER_SLFLAG	= -L
-C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000  -qcheck -qheapdebug
+C_CLINKER		= mpcc_r -qsmp=omp -bmaxdata:0x70000000  -qcheck 
 # you may need to add -bI:/usr/lpp/xlf/lib/lowsys.exp to C_LINKER
 C_FLINKER		= mpxlf90_r -bmaxdata:0x70000000 -lC -qcheck 
 C_CCV			= unknown
@@ -37,13 +37,13 @@ C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS		= -g  -qfullpath 
-G_FOPTFLAGS		= -g  -qfullpath
+G_FOPTFLAGS		= -g  -qfullpath 
 # ----------------------------- BOPT - O options -----------------------------
 #O_COPTFLAGS	   = -O3 -qarch=pwr2  -qmaxmem=4000 -w -qspill=3000
 #O_FOPTFLAGS	   = -O3  -qarch=pwr2 -w
 
-O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000
-O_FOPTFLAGS		= -O3 -w
+O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000 
+O_FOPTFLAGS		= -O3 -w 
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 # ########################## C++ compiler ##################################
 #
@@ -58,54 +58,60 @@ FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 ###  the user support problems i know this is going to cause.   nsc 4/2/2003
 ###
 ###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003
-CXX_CC			= mpCC_r -qcheck -qheapdebug
+CXX_CC			= mpCC_r -qcheck 
 CXX_FC			= mpxlf_r -qcheck 
 CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
-CXX_CLINKER		= mpCC_r -qcheck -qheapdebug
-CXX_FLINKER		= mpCC_r -brtl -qcheck -qheapdebug
+CXX_CLINKER		= mpCC_r -qcheck 
+CXX_FLINKER		= mpCC_r -brtl -qcheck 
 CXX_CCV			= unknown
 CXX_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
 CXX_SYS_LIBS		= -lC
 C_CXXF90LD		= ${CXX_CC}
 C_F90CXXLD		= ${CXX_CC}
+
 C_CXXF90LIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
+			  -L/usr/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc \
-			  /usr/lpp/ppe.poe/lib/libc.a
+			  -lpthreads -lm_r -lm -lc_r -lc 
+
 C_F90CXXLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc \
-			  /usr/lpp/ppe.poe/lib/libc.a
+			  -lpthreads -lm_r -lm -lc_r -lc  \
+			  /usr/lpp/ppe.poe/lib/libc.a 
+
+
 C_CXXSO			= cc_r -G
 C_CXXSOLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc -lC
+			  -lpthreads -lm_r -lm -lc_r -lc -lC 
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS		= -g  -qfullpath
+GCXX_COPTFLAGS		= -g  -qfullpath 
 GCXX_FOPTFLAGS		= -g  -qfullpath 
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
-OCXX_FOPTFLAGS		= -O3
+OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000 
+OCXX_FOPTFLAGS		= -O3  
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS		= -g  -qfullpath
-GCOMP_FOPTFLAGS		= -g  -qfullpath
+GCOMP_COPTFLAGS		= -g  -qfullpath 
+GCOMP_FOPTFLAGS		= -g  -qfullpath 
 # --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
-OCOMP_FOPTFLAGS		= -O3
+OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000 
+OCOMP_FOPTFLAGS		= -O3 
 #
 PARCH			= rs6000
 
-SL_SUFFIX   = 
-SL_LIBOPTS  = 
-SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD)
-SL_C_LINKER = $(CXXF90LD)
+SL_SUFFIX   = so
+SL_LIBOPTS  = -G 
+SL_LINKOPTS = -lC -brtl
+SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 
+SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 
 
 include $(ESMF_BUILD_DIR)/common_variables
+
+
