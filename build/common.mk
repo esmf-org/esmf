@@ -1,11 +1,23 @@
-#  $Id: common.mk,v 1.69 2004/08/04 20:49:31 svasquez Exp $
+#  $Id: common.mk,v 1.70 2004/08/04 21:05:06 nscollins Exp $
 #===============================================================================
-#   common.mk
 #
-#  GNU make makefile - cannot be used with standard unix make!!
+#  GNUmake makefile - cannot be used with standard unix make!!
 #
-#  This file contains variables and rules that are common across all
-#  platforms.
+#  This file is included by all platforms and all builds, where all builds
+#  include the ESMF Framework, the ESMF Implementation Report, and the
+#  ESMF EVA codes.  Each of those builds has a separate ../makefile, so
+#  any targets or rules which are specific to only a single build should
+#  be in the top level makefile and not here.
+#
+#  If you have changes which only apply to a single platform, look in
+#  ../build_config/<platform>/build_rules.mk  for the flags and libraries
+#  which are included on a per-platform/compiler/specific-site basis. 
+# 
+#  Be very careful in making changes here; it is hard to make sure you
+#  have not broken anything without testing all three build systems.
+#  If you must, please look below for the comment section with the
+#  label "HOWTO" before you dive in.
+#
 #===============================================================================
 
 #-------------------------------------------------------------------------------
@@ -22,7 +34,7 @@ ifeq ($(ESMF_ARCH),default)
 export ESMF_ARCH := $(shell uname -s)
 endif
 
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Set defaults.
 #
 # Default value for ESMF_COMPILER is default 
@@ -35,8 +47,15 @@ endif
 #
 # When ESMF_ARCH is Linux, then default value 
 # for ESMF_COMPILER is lahey.
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
+# name of directory containing the generated files from the build
+# defaults to the top dir, but can be set to be something different.
+ifndef ESMF_BUILD
+export ESMF_BUILD := $(ESMF_TOP_DIR)
+endif
+
+# name of default compiler
 ifndef ESMF_COMPILER
 export ESMF_COMPILER = default
 endif
@@ -53,6 +72,10 @@ endif
 
 endif
 
+# if PREC not already set, default to 64.  architectures which
+# have only one word size set this variable in their compiler/platform
+# dependent files, so this only applies to platforms which support
+# more than one wordsize (e.g. ibm, irix).
 ifndef ESMF_PREC
 export ESMF_PREC = 64
 endif
@@ -69,6 +92,7 @@ endif
 #  ESMF_COMM set in site files.
 #
 
+# default compiler flag is optimized.
 ifndef ESMF_BOPT
 export ESMF_BOPT = O
 endif
@@ -104,10 +128,6 @@ CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
 CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
 
-ifndef ESMF_BUILD
-export ESMF_BUILD := $(ESMF_TOP_DIR)
-endif
-
 
 LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
 
@@ -118,19 +138,20 @@ ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_ARCH).$(ESM
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
-# in after the fact.
+# in after the fact.  (why are there both ESMC_ and ESMF_ files here??)
 ESMC_OBJDIR	= ${ESMF_MODDIR}
-ESMC_TESTDIR	= $(ESMF_BUILD)/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
+ESMC_TESTDIR    = ${ESMF_TESTDIR}
 ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
-ESMF_BUILD_DOCDIR = $(ESMF_BUILD_DIR)/build/doc
+ESMF_BUILD_DOCDIR = $(ESMF_BUILD)/build/doc
+ESMF_STDIR      = $(ESMF_TOP_DIR)/src/system_tests
 
-PROTEX		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/protex 
-CC_PROTEX       = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_ccprotex 
-CH_PROTEX       = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_chprotex 
-F_PROTEX        = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_fprotex 
-
-DO_LATEX	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_latex
-DO_L2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
+ESMF_TEMPLATES	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates
+PROTEX		= ${ESMF_TEMPLATES}/protex 
+CC_PROTEX       = ${ESMF_TEMPLATES}/scripts/do_ccprotex 
+CH_PROTEX       = ${ESMF_TEMPLATES}/scripts/do_chprotex 
+F_PROTEX        = ${ESMF_TEMPLATES}/scripts/do_fprotex 
+DO_LATEX	= ${ESMF_TEMPLATES}/scripts/do_latex
+DO_L2H		= ${ESMF_TEMPLATES}/scripts/do_l2h
 
 LIBNAME		= $(ESMF_LIBDIR)/${LIBBASE}.a
 ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
@@ -138,17 +159,18 @@ ESMFLIB		= $(ESMF_LIBDIR)/libesmf.a
 SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
 
-DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results.pl -d $(ESMF_TESTDIR) 
-DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.pl -d $(ESMF_EXDIR)
-DO_EX_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.bash
-DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results.pl -d $(ESMF_TESTDIR)
-DO_SUM_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary
-DO_SUM_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary.bash
+ESMF_TESTSCRIPTS    = ${ESMF_TOP_DIR}/scripts/test_scripts
+DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -d $(ESMF_TESTDIR) 
+DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR)
+DO_EX_RESULTS.BASH  = ${ESMF_TESTSCRIPTS}/do_ex_results.bash
+DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -d $(ESMF_TESTDIR)
+DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary
+DO_SUM_RESULTS.BASH = ${ESMF_TESTSCRIPTS}/do_summary.bash
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
-		  -I${ESMF_BUILD_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
+		  -I${ESMF_TOP_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
 		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE) \
                   ${NETCDF_INCLUDE}
 
@@ -238,66 +260,137 @@ BBOPT	       = ${O_BBOPT}
 endif
 
 #-------------------------------------------------------------------------------
-# Checks that ESMF_DIR variable is set and creates library directory
-# if it does not exist
+# HOWTO:  Warning: Here there be dragons.
+# 
+# There are 3 separate top level makefiles: for the ESMF Framework, for the
+# ESMF Implementation Report, and for the ESMF EVA (Validation) codes.
+# There is this file (build/common.mk), there are platform-dependent makefiles
+# (build_config/<platform+compiler>/build_rules.mk), and there are
+# makefiles in each subdir.  Needless to say, this makes things confusing
+# when trying to decide where to make changes.  
+# 
+# Here are a few things to know about targets in this file:
+# 
+# If you need to make a new target which should be called in each
+# of the possible source subdirectories, you will typically have to
+# add at least two targets:  "fred:" and "tree_fred:".  The plain
+# target is the one you invoke, and it should look like this:
+# 
+# fred:
+# 	cd $(ESMF_TOP_DIR) ;\
+# 	$(MAKE) ACTION=tree_fred tree
+# 
+# "tree" is a preexisting target in this file which recursively descends 
+# the build tree (using the DIR= settings in each individual makefile 
+# to know which subdirs to descend into), and it calls 'make $ACTION' 
+# in each of the subdirs.   Since you do not want to replicate the target
+# in each of the 100s of individual makefiles, typically you put the
+# tree_target here in this file as well, and it feeds off variables
+# which are set in the individual makefiles (e.g. SOURCEF, CLEANDIRS, etc).
+# Look at some of the existing tree_<xxx> rules for ideas on how to
+# add new targets.
+# 
+# If you need to make a target which does not work on every subdirectory
+# you can still put the target here, but do not change to the top level
+# dir before executing the rule.
+# 
+# Since the "clean" and "clobber" targets remove directories that are needed
+# the next time you build, there are chkdir_<fred> targets which ensure the 
+# directories are created first, so the individual rules which follow can 
+# just assume that those directories succeed.  Notice that the rules use
+# the -p option on mkdir which ensures intermediate directories are created
+# if they do not exist.
+# 
+# Some of the library rules below are complicated by the fact that some
+# compilers will not let you control where .mod fortran module files are
+# created; they are created in the current directory.  Rather than try to
+# copy them into the target directory (which can be complicated by some
+# systems making .MOD files and some making .mod files), we instead cd into
+# the mod directory and then compile from there using full pathnames.
+# This also ensures that if multiple builds are running for different
+# target compilers they do not interfere with each other since each mod
+# directory is separate based on the platform and compiler.
+# 
+# Another complication: we have to support the ability to build in a
+# different tree than the source files.  This might be used if the user
+# has a shared copy of the source checked out and does not have write
+# permission in those directories, or if the output has to appear in a
+# different set of directories, for example to merge with a larger build
+# system.  Users can set ESMF_BUILD to another location.  Any files which
+# are created should use variables which feed off ESMF_BUILD for output,
+# and use ESMF_TOP_DIR for files which were checked out of CVS and only
+# used as input.  ESMF_TOP_DIR is set to be ESMF_DIR for the framework
+# and EVA builds, and to ESMF_IMPL_DIR for the Implementation Report.
+# ESMF_BUILD always defaults to the same location as ESMF_TOP_DIR.
+#
+# good luck.
+#
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# Create various directories where files expect to be copied into.
 #-------------------------------------------------------------------------------
 chk_dir:
-	@if [ ${ESMF_BOPT}foo = foo ] ; then \
-	  echo "You must use the make variable ESMF_BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
-	  echo "For example, use: make ESMF_BOPT=g ex1"; \
-          echo "Remove all .o files and rerun make with appropriate ESMF_BOPT"; false; fi
 	-@if [ ! -d $(ESMF_LIBDIR) ]; then \
-	  echo Making directory $(ESMF_LIBDIR) for library; mkdir -p $(ESMF_LIBDIR) ; fi
+	  echo Making directory $(ESMF_LIBDIR) for library; \
+	  mkdir -p $(ESMF_LIBDIR) ; fi
 	-@if [ ! -d ${ESMF_MODDIR} ]; then \
-	  echo Making directory ${ESMF_MODDIR} for *.mod files; mkdir -p ${ESMF_MODDIR} ; fi
+	  echo Making directory ${ESMF_MODDIR} for *.mod files; \
+	  mkdir -p ${ESMF_MODDIR} ; fi
 
 chkdir_doc:
 	-@if [ ! -d ${ESMC_DOCDIR} ]; then \
-	  echo Making directory ${ESMC_DOCDIR} for documents; mkdir -p ${ESMC_DOCDIR} ; fi
+	  echo Making directory ${ESMC_DOCDIR} for documents; \
+	  mkdir -p ${ESMC_DOCDIR} ; fi
 
 chkdir_tests:
-	-@if [ ! -d ${ESMC_TESTDIR} ]; then \
-	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
+	-@if [ ! -d ${ESMF_TESTDIR} ]; then \
+	  echo Making directory ${ESMF_TESTDIR} for test output; \
+	  mkdir -p ${ESMF_TESTDIR} ; fi
 
 chkdir_include:
 	-@if [ ! -d $(ESMF_INCDIR) ]; then \
-	  echo Making directory $(ESMF_INCDIR) for include files; mkdir -p $(ESMF_INCDIR) ; fi
+	  echo Making directory $(ESMF_INCDIR) for include files; \
+	  mkdir -p $(ESMF_INCDIR) ; fi
 
 chkdir_examples:
 	-@if [ ! -d ${ESMF_EXDIR} ]; then \
-	  echo Making directory ${ESMF_EXDIR} for examples output; mkdir -p ${ESMF_EXDIR} ; fi
+	  echo Making directory ${ESMF_EXDIR} for examples output; \
+	  mkdir -p ${ESMF_EXDIR} ; fi
 
 
 #-------------------------------------------------------------------------------
-# 1. Checks that user has set ESMF_BOPT variable
-# 2. Check if the ${LDIR} exists
-#-------------------------------------------------------------------------------
+# This target used to check that variables which had to have settings
+# were indeed set.  All have been removed now, but this target is still
+# here keep from breaking other dependency rules.  At some point it can
+# go away.
 chkopts:
-	@if [ ${ESMF_BOPT}foo = foo ] ; then \
-	  echo "You must set the variable ESMF_BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
-	  echo "For example, use: make ESMF_BOPT=g ex1"; \
-          echo "Remove all .o files and rerun make with appropriate ESMF_BOPT"; false; fi
+	@echo ""
 
 # Does nothing; needed for some rules that require actions.
 foo:
 
+#-------------------------------------------------------------------------------
+# Builds ESMF recursively.
+#-------------------------------------------------------------------------------
+
+# this is a magic gnumake variable which helps it find files.
 VPATH = ${ESMF_TOP_DIR}/${LOCDIR}:${ESMF_TOP_DIR}/include
 
 libc:${LIBNAME}(${OBJSC})
 libf:${LIBNAME}(${OBJSF})
 
-#-------------------------------------------------------------------------------
-# Builds ESMF recursively.
-#-------------------------------------------------------------------------------
+# Build all of ESMF from the top.  This target can be called from any
+# subdir and it will go up to the top dir and build from there.
 build_libs: chk_dir include
 	cd $(ESMF_TOP_DIR) ;\
 	${MAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
 
-# Build only stuff below the current dir.
+# Build only stuff in and below the current dir.
 build_here: chk_dir
-	${MAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
+	${MAKE} ACTION=vpathlib tree shared
 
-# Builds library
+# Builds library - action for the 'tree' target.
 vpathlib:
 	dir=`pwd`; cd ${ESMC_OBJDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile lib
 
@@ -325,10 +418,12 @@ libfast: chk_dir ${SOURCEC} ${SOURCEF}
 	  ${RM} -f ${OBJSC} ${SOBJS}; \
 	fi
 
+# copy private include files into src/include directory.
 include: chkdir_include
 	cd $(ESMF_TOP_DIR) ;\
 	$(MAKE) ACTION=tree_include tree
 
+# action for 'tree' target.
 tree_include:
 	-@for hfile in ${STOREH} foo ; do \
 	  if [ $$hfile != "foo" ]; then \
@@ -336,10 +431,12 @@ tree_include:
 	  fi ; \
 	done
 
+# create .F90 source files from .cpp files.
 cppfiles: chkdir_include include
 	cd $(ESMF_TOP_DIR) ;\
 	$(MAKE) ACTION=tree_cppfiles tree
 
+# action for 'tree' target.
 tree_cppfiles:  $(CPPFILES)
 
 #-------------------------------------------------------------------------------
@@ -375,6 +472,7 @@ clobber: clean
 	done
 
 
+# action for 'tree' target.
 tree_clean:
 	@for DIR in $(CLEANDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
@@ -389,7 +487,7 @@ tree_clean:
 #-------------------------------------------------------------------------------
 
 system_tests: chkopts build_libs chkdir_tests
-	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
+	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -407,7 +505,7 @@ tree_system_tests: tree_build_system_tests tree_run_system_tests
 # system_tests_uni, build and run uni versions of the system tests
 #
 system_tests_uni: chkopts chkdir_tests
-	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
+	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR); fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -425,7 +523,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 # build_system_tests
 #
 build_system_tests: chkopts chkdir_tests
-	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
+	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -451,7 +549,7 @@ $(ESMC_TESTDIR)/ESMF_%STest : ESMF_%STest.o $(SYSTEM_TESTS_OBJ) $(ESMFLIB)
 # run_system_tests
 #
 run_system_tests:  chkopts chkdir_tests
-	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
+	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -469,7 +567,7 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 # run_system_tests_uni
 #
 run_system_tests_uni:  chkopts chkdir_tests
-	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
+	@if [ -d $(ESMF_STDIR) ] ; then cd $(ESMF_STDIR) ; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -504,7 +602,7 @@ tree_tests: tree_build_tests tree_run_tests
 # tests_uni
 #
 tests_uni: chkopts chkdir_tests
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_tests_uni tree
+	-$(MAKE) ACTION=tree_tests_uni tree
 	$(DO_UT_RESULTS) ;\
 
 tree_tests_uni: tree_build_tests tree_run_tests_uni
@@ -513,9 +611,10 @@ tree_tests_uni: tree_build_tests tree_run_tests_uni
 # build_tests
 #
 build_tests: chkopts chkdir_tests
-	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_tests tree
+	-$(MAKE) ACTION=tree_build_tests tree
 
-tree_build_tests: $(TESTS_BUILD) 
+tree_build_tests: $(TESTS_BUILD)
+
 
 $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o $(ESMFLIB)
 	-$(SL_F_LINKER) -o $@  $(UTEST_$(*)_OBJS) $< -lesmf \
@@ -1133,54 +1232,5 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #-------------------------------------------------------------------------------
 #  Include site specific makefile fragment.
 #-------------------------------------------------------------------------------
-include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
-
-#  DO NOT REMOVE These examples are used by the implementation report.
-#
-#  testexamples_X - Runs various test suites
-#    1 - basic C suite used in installation tests
-#    2 - additional C suite including graphics
-#    3 - basic Fortran .F suite
-#    4 - uniprocessor version of 1 and 2
-#    5 - C examples that require complex numbers
-#    6 - C examples that don't work with complex numbers
-#    7 - C examples that require BlockSolve
-#    8 - Fortran .F examples that don't work with complex numbers
-#    9 - uniprocessor version of 3
-#   10 - Fortran examples that require complex
-#   11 - uniprocessor version of 5
-#   12 - basic f90 examples
-#   13 - Examples that should only be compiled.
-#
-testexamples_1: ${TESTEXAMPLES_1}
-vtestexamples_1:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
-testexamples_2: ${TESTEXAMPLES_2}
-testexamples_3: ${TESTEXAMPLES_3}
-vtestexamples_3:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
-testexamples_4: ${TESTEXAMPLES_4}
-vtestexamples_4:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
-testexamples_5: ${TESTEXAMPLES_5}
-testexamples_6: ${TESTEXAMPLES_6}
-testexamples_7: ${TESTEXAMPLES_7}
-testexamples_8: ${TESTEXAMPLES_8}
-testexamples_9: ${TESTEXAMPLES_9}
-vtestexamples_9:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
-testexamples_10: ${TESTEXAMPLES_10}
-testexamples_11: ${TESTEXAMPLES_11}
-testexamples_12: ${TESTEXAMPLES_12}
-testexamples_13: ${TESTEXAMPLES_13}
-
-buildexamples_1: ${BUILDEXAMPLES_1}
-buildexamples_2: ${BUILDEXAMPLES_2}
-buildexamples_3: ${BUILDEXAMPLES_3}
-buildexamples_4: ${BUILDEXAMPLES_4}
-buildexamples_5: ${BUILDEXAMPLES_5}
-buildexamples_6: ${BUILDEXAMPLES_6}
-buildexamples_7: ${BUILDEXAMPLES_7}
-buildexamples_8: ${BUILDEXAMPLES_8}
-buildexamples_9: ${BUILDEXAMPLES_9}
+include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
