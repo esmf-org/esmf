@@ -1,0 +1,79 @@
+
+================================================================================
+                                   README
+
+        How to get and install the Earth System Modeling Framework (ESMF)
+
+================================================================================
+
+The ESMF library source code is available for download at:
+
+  http://sourceforge.net/cvs/?group_id=13142
+
+Follow the directions on that webpage to access the ESMF CVS repository.
+
+--------------------------------------------------------------------------------
+
+The following platforms are supported: Alpha, IRIX64, IBM, Linux, Sun
+
+Currently the following environment variables must be set:
+ESMF_ARCH     alpha, IRIX, IRIX64, rs6000_sp, linux_pgi, linux_gnupgi, linux_lf95, solaris, solaris_hpc
+ESMF_DIR      top-level ESMF directory
+
+Build the library with the command:
+ 
+  gmake BOPT=g 
+
+for a debug version or
+
+  gmake BOPT=O
+
+for an optimized version.
+
+To build and run C tests:
+
+  gmake BOPT=g test_c
+
+To build and run F90 tests:
+
+  gmake BOPT=g test_f90
+
+To build and run C tests (on a non-mpi machine):
+
+  gmake BOPT=g test_cuni
+
+To build and run F90 tests (on a non-mpi machine):
+
+  gmake BOPT=g test_f90uni
+
+Output files from the tests are directed to files in $ESMF_DIR/test/${ESMF_ARCH}
+directories.
+
+To build documentation:
+
+  gmake dvi           ! Makes the dvi files
+  gmake pdf           ! Makes the pdf files
+  gmake html          ! Creates the html directory.
+  gmake alldoc        ! Builds all the above documents.
+
+To use the library from C/C++, link with the appropriate library executable 
+under $ESMF_DIR/lib and include the "ESMC.h" file.
+
+
+To use the library from F90, link with the appropriate library executable under
+$ESMF_DIR/lib.  Create links to the modules mfm_timemgmt.mod and 
+mfm_timemgmt_types.mod in your application build directory.  Modules are 
+in the $MF_DIR/mod directory.  To include the library in application modules, 
+USE the module MFM_TimeMgmt.
+
+--------------------------------------------------------------------------------
+
+Additional documentation is available at:
+
+http://www.esmf.ucar.edu -> User Documentation and Links
+
+Please contact esmf@ucar.edu with any questions or problems.
+
+================================================================================
+
+
