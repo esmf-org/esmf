@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.6 2003/08/21 19:58:43 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.7 2003/08/28 17:32:04 nscollins Exp $
 !
 ! System test code #79497
 
@@ -79,8 +79,8 @@
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc=rc)
-    if (ndes .lt. 8) then
-      print *, "This system test needs to run at least 8-way, current np = ", ndes
+    if (ndes .lt. 4) then
+      print *, "This system test needs to run at least 4-way, current np = ", ndes
       goto 10
     endif
 
@@ -88,7 +88,7 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    delist = (/ (i, i=0, mid-1) /)
+    delist = (/ (i, i=0, ndes-1) /)
     layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, ndes/4 /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
@@ -97,7 +97,7 @@
 
 
     cname2 = "user model 2"
-    delist = (/ (i, i=mid, ndes-1) /)
+    delist = (/ (i, i=0, ndes-1) /)
     layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes/2 /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
 
