@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.17 2004/03/08 16:03:25 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.18 2004/03/10 23:00:46 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -145,17 +145,13 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_GridCompCreate} call.
-//   
 //   \item[subroutineName]
 //    The public name of the Component's {\tt SetServices} call.  
 //    A component writer must provide this information.
-//   
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
@@ -184,17 +180,13 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_CplCompCreate} call.
-//   
 //   \item[subroutineName]
 //    The public name of the Component's {\tt SetServices} call.  
 //    A component writer must provide this information.
-//   
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
@@ -225,19 +217,15 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_GridCompCreate} call.
-//   
 //   \item[subroutineType]
 //    One of a set of predefined subroutine types - e.g. {\tt ESMF\_SETINIT}, 
 //    {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}.
-//
 //   \item[subroutineName]
 //    The name of the Component's subroutine to be associated with the
 //    subroutineType (e.g. Initialize).   This subroutine does not have to be
 //    public to the module.
-//   
 //   \item[{[phase]}] 
 //    For Components which need to initialize or run or finalize in mutiple
 //    phases, the phase number which corresponds to this subroutine name.
@@ -245,10 +233,8 @@ extern "C" {
 //    parameter {\tt ESMF\_SINGLEPHASE}.   The Component writer must document
 //    the requirements of the Component for how and when the multiple phases
 //    are expected to be called.
-//
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
@@ -278,19 +264,15 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_CplCompCreate} call.
-//   
 //   \item[subroutineType]
 //    One of a set of predefined subroutine types - e.g. {\tt ESMF\_SETINIT}, 
 //    {\tt ESMF\_SETRUN}, {\tt ESMF\_SETFINAL}.
-//
 //   \item[subroutineName]
 //    The name of the Component's subroutine to be associated with the
 //    subroutineType (e.g. Initialize).   This subroutine does not have to be
 //    public to the module.
-//   
 //   \item[{[phase]}] 
 //    For Components which need to initialize or run or finalize in mutiple
 //    phases, the phase number which corresponds to this subroutine name.
@@ -298,12 +280,8 @@ extern "C" {
 //    parameter {\tt ESMF\_SINGLEPHASE}.   The Component writer must document
 //    the requirements of the Component for how and when the multiple phases
 //    are expected to be called.
-//
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
-//   \end{description}
-//
 //EOP
 
 //BOP
@@ -331,19 +309,15 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_GridCompCreate} call.
-//   
 //   \item[dataPointer]
 //    A pointer to the private data block, wrapped in a derived type which
 //    contains only a pointer to the block.  This level of indirection is
 //    needed to reliably set and retrieve the data block no matter which
 //    architecture or compiler is used.  
-//
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
@@ -372,19 +346,15 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_CplCompCreate} call.
-//   
 //   \item[dataPointer]
 //    A pointer to the private data block, wrapped in a derived type which
 //    contains only a pointer to the block.  This level of indirection is
 //    needed to reliably set and retrieve the data block no matter which
 //    architecture or compiler is used.  
-//
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
@@ -418,7 +388,6 @@ extern "C" {
 //   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_GridCompCreate} call.
-//   
 //   \item[dataPointer]
 //    A derived type, containing only a pointer to the private data block.
 //    The framework will fill in the block and when this call returns the
@@ -426,10 +395,8 @@ extern "C" {
 //    {\tt ESMF\_GridSetInternalState}.
 //    This level of indirection is needed to reliably set and retrieve 
 //    the data block no matter which architecture or compiler is used.  
-//
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
@@ -459,10 +426,8 @@ extern "C" {
 //    
 //  The arguments are:
 //  \begin{description}
-//   
 //   \item[component]
 //    Component object returned from a {\tt ESMF\_CplCompCreate} call.
-//   
 //   \item[dataPointer]
 //    A derived type, containing only a pointer to the private data block.
 //    The framework will fill in the block and when this call returns the
@@ -470,10 +435,8 @@ extern "C" {
 //    {\tt ESMF\_CplSetInternalState}.
 //    This level of indirection is needed to reliably set and retrieve 
 //    the data block no matter which architecture or compiler is used.  
-//
 //   \item[{[rc]}] 
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//   
 //   \end{description}
 //
 //EOP
