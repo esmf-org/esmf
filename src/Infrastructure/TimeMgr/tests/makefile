@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2004/05/14 22:34:26 slswift Exp $
+# $Id: makefile,v 1.19 2004/05/21 22:34:27 svasquez Exp $
 
 ALL:  build_tests
 
@@ -25,18 +25,18 @@ TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_AlarmUTest \
 
 TESTS_RUN     = RUN_ESMF_AlarmUTest \
 		RUN_ESMF_ClockUTest \
-		RUN_ESMF_CalendarUTest \
 		RUN_ESMF_CalRangeUTest \
 		RUN_ESMF_TimeIntervalUTest \
 		RUN_ESMF_TimeUTest
+#		RUN_ESMF_CalendarUTest \
 #		RUN_ESMC_ClockUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_AlarmUTestUNI \
 		RUN_ESMF_ClockUTestUNI \
-		RUN_ESMF_CalendarUTestUNI \
 		RUN_ESMF_CalRangeUTestUNI \
 		RUN_ESMF_TimeIntervalUTestUNI \
 		RUN_ESMF_TimeUTestUNI
+#		RUN_ESMF_CalendarUTestUNI \
 #		RUN_ESMC_ClockUTestUNI 
 
 TESTS_RM      = ESMF_AlarmUTest.rm \
