@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldCreateEx.C,v 1.3 2003/10/20 20:13:55 cdeluca Exp $
+// $Id: ESMC_FieldCreateEx.C,v 1.4 2004/02/19 22:57:15 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -89,7 +89,7 @@ main(int argc, char **argv) {
 //   //  data in later calls.
 
 //     field4 = ESMF_FieldCreateNoData("precip", rc=rc);
-     field4 = ESMC_FieldCreate(&rc);
+     //field4 = ESMC_FieldCreate(&rc);
 //
 //    // At some later time, associate a Grid with this Field
      //call ESMC_FieldSetGrid(field3, grid, rc);
