@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.8 2004/08/26 22:48:56 svasquez Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.9 2004/09/14 22:30:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.8 2004/08/26 22:48:56 svasquez Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.9 2004/09/14 22:30:26 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, YY, D, npets
+      integer :: rc, H, M, S, MM, DD, YY, D, npets, dayOfYear, dayOfWeek
       logical :: bool
 
       type(ESMF_VM):: vm
@@ -59,7 +59,7 @@
       character(ESMF_MAXSTR) :: timeString
 
       ! instantiate timestep, start and stop times
-      type(ESMF_Time) :: startTime, stopTime, startTime2
+      type(ESMF_Time) :: startTime, stopTime, startTime2, midMonth
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
                              noLeapCalendar, day360Calendar
 
@@ -118,7 +118,6 @@
 
 #ifdef ESMF_EXHAUSTIVE
       ! ----------------------------------------------------------------------------
-
       !EX_UTest
       ! Test Setting Stop Time 
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -137,6 +136,38 @@
       write(name, *) "Time Is Same CalendarTest"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Time day of the year
+      write(failMsg, *) " Did not return dayOfYear = 29 and ESMF_SUCCESS"
+      call ESMF_TimeGet(stopTime, dayOfYear=dayOfYear, rc=rc)
+      write(name, *) "Time Get day of the year test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfYear.eq.29), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test day of the week
+      write(failMsg, *) " Did not return dayOfWeek = 4 and ESMF_SUCCESS"
+      call ESMF_TimeGet(stopTime, dayOfWeek=dayOfWeek, rc=rc)
+      write(name, *) "Time Get day of the week test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(dayOfWeek.eq.4), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test middle of the month
+      write(failMsg, *) " Did not return midMonth = 1/16/2004 12:00:00 and ESMF_SUCCESS"
+      call ESMF_TimeGet(stopTime, midMonth=midMonth, rc=rc)
+      call ESMF_TimeGet(midMonth, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      write(name, *) "Time Get middle of the month test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2004).and.(MM.eq.1) &
+                    .and.(DD.eq.16).and.(H.eq.12).and.(M.eq.0).and.(S.eq.0), &
+                    name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
