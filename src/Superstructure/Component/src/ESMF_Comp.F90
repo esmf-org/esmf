@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.23 2003/02/25 18:42:39 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.24 2003/02/25 21:50:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,9 +56,10 @@
 
       ! these values need to be composable
       type(ESMF_CompType), parameter :: &
-                  ESMF_APPCOMP  = ESMF_CompType(1), &   ! binary 001
-                  ESMF_GRIDCOMP = ESMF_CompType(2), &   ! binary 010
-                  ESMF_CPLCOMP  = ESMF_CompType(4)      ! binary 100
+                  ESMF_APPCOMP       = ESMF_CompType(1), &   ! binary 0001
+                  ESMF_GRIDCOMP      = ESMF_CompType(2), &   ! binary 0010
+                  ESMF_CPLCOMP       = ESMF_CompType(4), &   ! binary 0100
+                  ESMF_GENERALCOMP   = ESMF_CompType(8)      ! binary 1000
 
 !------------------------------------------------------------------------------
 !     ! ESMF_ModelType
@@ -149,7 +150,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.23 2003/02/25 18:42:39 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.24 2003/02/25 21:50:20 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -203,8 +204,8 @@ end interface
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_Layout), intent(in) :: layout
-      type(ESMF_CompType), intent(in) :: ctype
+      type(ESMF_Layout), intent(in), optional :: layout
+      type(ESMF_CompType), intent(in), optional :: ctype
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
@@ -221,10 +222,10 @@ end interface
 !   \item[name]
 !    Component name.
 !
-!   \item[layout]
+!   \item[{[layout]}]
 !    Component layout.
 !
-!   \item[ctype]
+!   \item[{[ctype]}]
 !    Component type, where valid types include ESMF\_APPCOMP, ESMF\_GRIDCOMP, 
 !    and ESMF\_CPLCOMP for Applications, Gridded Components, and Couplers,
 !    respectively.
@@ -359,9 +360,9 @@ end interface
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in) :: name
-      type(ESMF_Layout), intent(in) :: layout
-      type(ESMF_CompType), intent(in) :: ctype
-      type(ESMF_ModelType), intent(in) :: mtype 
+      type(ESMF_Layout), intent(in), optional :: layout
+      type(ESMF_CompType), intent(in), optional :: ctype
+      type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
       integer, intent(out), optional :: rc 
@@ -378,15 +379,15 @@ end interface
 !   \item[name]
 !    Component name.
 !
-!   \item[layout]
+!   \item[{[layout]}]
 !    Component layout.
 !
-!   \item[ctype]
+!   \item[{[ctype]}]
 !    Component type, where valid types include ESMF\_APPCOMP, ESMF\_GRIDCOMP, 
 !    and ESMF\_CPLCOMP for Applications, Gridded Components, and Couplers,
 !    respectively.
 !
-!   \item[mtype]
+!   \item[{[mtype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !
@@ -397,8 +398,8 @@ end interface
 !    Directory where component-specfic configuration or data files
 !    are located.
 !
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \item[{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
 !
@@ -420,15 +421,36 @@ end interface
 
         ! TODO: fill in values here.
         call ESMF_SetName(compp%base, name, "Component", status)
-	compp%ctype = ctype
-	compp%mtype = mtype
+        if (present(ctype)) then
+	  compp%ctype = ctype
+        else
+	  compp%ctype = ESMF_GENERALCOMP
+        endif
+
+        if (present(mtype)) then
+	  compp%mtype = mtype
+        else
+	  compp%mtype = ESMF_OTHER
+        endif
+
         if (present(clock)) then
           compp%clock = clock   
         else
           !compp%clock = ESMF_ClockInit()
         endif
-        compp%layout = layout
-        compp%filepath = filepath
+
+        if (present(layout)) then
+          compp%layout = layout
+        else
+          ! query for # processors and create a layout
+          ! compp%layout = ESMF_LayoutCreate()
+        endif 
+
+        if (present(filepath)) then
+          compp%filepath = filepath
+        else
+          compp%filepath = "."
+        endif
 
         compp%importstate = ESMF_StateCreate(name, ESMF_STATEIMPORT, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -613,8 +635,8 @@ end interface
 !
 ! !ARGUMENTS:
       type (ESMF_Comp) :: component 
-      type (ESMF_Clock) :: clock
-      integer, intent(in) :: timesteps
+      type (ESMF_Clock), optional :: clock
+      integer, intent(in), optional :: timesteps
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
