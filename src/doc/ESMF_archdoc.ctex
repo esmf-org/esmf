@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.tex,v 1.14 2002/08/29 14:22:31 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.1 2002/09/05 18:35:20 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -17,9 +17,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{ARCH}
-\newcommand{\myauthors}{Cecelia DeLuca, V. Balaji, Chris Hill, Max Suarez, Nancy Collins,
-Bob Hallberg, Arlindo da Silva, Mark Iredell, Mike Young, Brian Kauffman, Byron Boville, Tony Craig, Phil Jones, Brian Kauffman, Jay Larson, Rob Jacob, John Michalakes, David Neckels, Earl Schwab, Shepard Smithline, Leonid Zaslavsky,
-Weiyu Yang, Carlos Cruz}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  Cecelia DeLuca, V. Balaji, Chris Hill, Max Suarez, Nancy Collins, Bob Hallberg, Arlindo da Silva, Mark Iredell, Mike Young, Brian Kauffman, Byron Boville, Tony Craig, Phil Jones, Brian Kauffman, Jay Larson, Rob Jacob, John Michalakes, David Neckels, Erik Kluzek, Will Sawyer, Jeff Anderson, Earl Schwab, Shepard Smithline, Leonid Zaslavsky, Weiyu Yang, Carlos Cruz}
 %===============================================================================
 
 \textwidth 6.5in
@@ -79,14 +77,8 @@ Weiyu Yang, Carlos Cruz}
 
 \section{Review Status}
 
-\noindent{\bf Architecture Review} \\
-
-\begin{tabular}{r p{1.3in} p{2in}}
-{\bf Review Date:} & <Date> \\ \\
-{\bf Reviewers:}   & <Reviewer>          & <Institution> \\
-                   & <Reviewer>          & <Institution> \\
-                   & <Reviewer>          & <Institution>
-\end{tabular}
+\noindent{\bf Architecture Review}
+\input{ESMF_auth}
 
 %\section{Bibliography}
 %\bibliography{comp} 
