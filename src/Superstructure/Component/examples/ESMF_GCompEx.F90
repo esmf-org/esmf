@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.11 2004/02/11 17:21:12 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.12 2004/03/11 18:20:12 jwolfe Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -50,6 +50,7 @@
         type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
         integer :: rc
+
         print *, "Gridded Comp Init starting"
 
         ! This is where the model specific setup code goes.  
@@ -66,10 +67,11 @@
 !   !
  
     subroutine GComp_Run(comp, importstate, exportstate, clock, rc)
-        type(ESMF_GridComp) :: comp(:)
+        type(ESMF_GridComp) :: comp
         type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
         integer :: rc
+
         print *, "Gridded Comp Run starting"
         ! call ESMF_StateGetData() to get fields, bundles, arrays
         !  from import state.
