@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.1 2004/07/27 23:03:21 jwolfe Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.2 2004/08/16 21:24:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,6 +23,8 @@
 ! This program shows an example of Field creation using global indexing.
 ! At some point global indexing may be an option for FieldCreate routines,
 ! but in the meantime this is an example of one way to accomplish it.
+! This example will show how to create a 3D Field and set its relationship to
+! a corresponding 2D Grid.
 !-----------------------------------------------------------------------------
 
     ! ESMF Framework module
@@ -30,17 +32,18 @@
     implicit none
     
     ! Local variables
-    integer :: rc, haloWidth, finalrc, myDE
-    integer :: localCount(2), lbounds(2), ubounds(2)
+    integer :: finalrc, haloWidth, i, rc
+    integer :: gridCount(2), gridStart(2)
+    integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
     character (len = ESMF_MAXSTR) :: fname
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
+    real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
-    type(ESMF_Grid) :: grid
-    type(ESMF_Array) :: array1
-    type(ESMF_DELayout) :: layout
-    type(ESMF_VM) :: vm
-    type(ESMF_Field) :: field1
-    type(ESMF_RouteHandle) :: routehandle
+    type(ESMF_Array)        :: array1
+    type(ESMF_DELayout)     :: layout
+    type(ESMF_Field)        :: field1
+    type(ESMF_FieldDataMap) :: datamap
+    type(ESMF_Grid)         :: grid
+    type(ESMF_VM)           :: vm
 !EOC
 
 !   !Set finalrc to success
@@ -54,7 +57,7 @@
 !   !  The user has already created a Grid and has Field data
 !   !  stored in an Array object.  This version of create simply
 !   !  associates the data with the Grid.  The data is referenced
-!   !  by default.  The DataMap is created with defaults.
+!   !  by default.
  
     call ESMF_VMGetGlobal(vm, rc)
     layout = ESMF_DELayoutCreate(vm, (/ 3, 2 /), rc=rc)
@@ -67,63 +70,77 @@
 
     ! get grid information used to calculate global indices
     call ESMF_GridGetDELocalInfo(grid, horzrelloc=ESMF_CELL_CENTER, &
-                                 myDE=myDE, localCellCountPerDim=localCount, &
-                                 globalStartPerDim=lbounds, rc=rc)
+                                 localCellCountPerDim=gridCount, &
+                                 globalStartPerDim=gridStart, rc=rc)
 
-    write(*,*) 'lbounds1',lbounds
-    write(*,*) 'ubounds1',ubounds
+    ! globalStartPerDim really should be called something more descriptive like
+    ! globalOffsetPerDim because it refers to the amount that must be added to a
+    ! local index to translate it to a global index.  So the globalStart referring
+    ! to an index instead of an offset should be this value plus one
+    gridStart(1) = gridStart(1) + 1
+    gridStart(2) = gridStart(2) + 1
 
-    ! globalStartPerDim really should be globalOffsetPerDim, so the lower
-    ! bounds should be the offset plus one
-    lbounds(1) = lbounds(1) + 1
-    lbounds(2) = lbounds(2) + 1
+    ! set local counts for the Field.  For this example, the second dimension of the
+    ! data will correspond to the first Grid dimension and the third data dimension
+    ! will correspond to the second Grid dimension
+    dataIndexList(1) = 0
+    dataIndexList(2) = 1
+    dataIndexList(3) = 2
+    lbounds(2)    = gridStart(1)
+    localCount(2) = gridCount(1)
+    lbounds(3)    = gridStart(2)
+    localCount(3) = gridCount(2)
+
+    ! the first data dimension is unrelated to the grid, so it has a user-specified
+    ! count and its local index is assumed to start at one, although that is not
+    ! necessarily true
+    lbounds(1)    = 1
+    localCount(1) = 32
 
     ! calculate upper bounds from lower bounds and counts
-    ubounds(1) = lbounds(1) + localCount(1) - 1
-    ubounds(2) = lbounds(2) + localCount(2) - 1
-
-    write(*,*) 'lbounds2',lbounds
-    write(*,*) 'ubounds2',ubounds
+    do i = 1,3
+      ubounds(i) = lbounds(i) + localCount(i) - 1
+    enddo
 
     ! set the haloWidth of the Array
     haloWidth = 3
 
     ! modify the lower and upper bounds by the haloWidth
-    lbounds(1) = lbounds(1) - haloWidth
-    lbounds(2) = lbounds(2) - haloWidth
-    ubounds(1) = ubounds(1) + haloWidth
-    ubounds(2) = ubounds(2) + haloWidth
+    ! Currently ESMF requires that all dimensions include the halo width, even if
+    ! they are not related to the grid.  Hopefully that will no longer be
+    ! required soon.
+    do i = 1,3
+      lbounds(i) = lbounds(i) - haloWidth
+      ubounds(i) = ubounds(i) + haloWidth
+    enddo
 
-    write(*,*) 'lbounds3',lbounds
-    write(*,*) 'ubounds3',ubounds
+    ! allocate the F90 pointer with the calculated bounds
+    allocate(f90ptr1(lbounds(1):ubounds(1), &
+                     lbounds(2):ubounds(2), &
+                     lbounds(3):ubounds(3)))
 
-    allocate(f90ptr1(lbounds(1):ubounds(1),lbounds(2):ubounds(2)))
-    f90ptr1 = myDE
-
-    array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=haloWidth, rc=rc)  
+    ! create the array from the F90 pointer and haloWidth
+    array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=haloWidth, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArrayPrint(array1, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOE
-!\subsubsection{Field Create with Grid and Array}
-      
+!\subsubsection{Field Create with Grid, DataMap and Array}
+
 !  The user has already created an {\tt ESMF\_Grid} and an
-!  {\tt ESMF\_Array} with data.  This create associates the
-!  two objects.  An {\tt ESMF\_FieldDataMap} is created with all defaults.
+!  {\tt ESMF\_Array} with data.  The user creates a FieldDataMap, and then this
+!  create associates the two objects.
 !EOE
-      
+
 !BOC
-    field1 = ESMF_FieldCreate(grid, array1, &
-                         horzRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
+    call ESMF_FieldDataMapSetDefault(datamap, dataRank=3, &
+                                     dataIndexList=dataIndexList, &
+                                     counts=localCount(1:1), rc=rc)
+    field1 = ESMF_FieldCreate(grid, array1, horzRelloc=ESMF_CELL_CENTER, &
+                              datamap=datamap, name="pressure", rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldHaloStore(field1, routehandle, rc=rc)
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_FieldHalo(field1, routehandle, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldPrint(field1, "", rc)
