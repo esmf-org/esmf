@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.11 2004/05/27 22:46:38 jwolfe Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.12 2004/06/04 08:47:06 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -145,26 +145,23 @@
       global_counts(i) = counts1(i)
       if (decompids1(i).ne.0) global_counts(i) = counts1(i)*nde(decompids1(i))
     enddo
-!jw    call ESMF_DELayoutSetAxisIndex(delayout1, global_counts, decompids1, &
-!jw                                   indexlist1, rc)
+    call ESMF_ArrayComputeAxisIndex(array1, delayout1, decompids1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-!jw    call ESMF_DELayoutSetAxisIndex(delayout1, global_counts, decompids1, &
-!jw                                   indexlist3, rc)
+    call ESMF_ArrayComputeAxisIndex(array3, delayout1, decompids1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     decompids2(1) = 1
     decompids2(2) = 0
     decompids2(3) = 2
-!jw    call ESMF_DELayoutSetAxisIndex(delayout1, global_counts, decompids2, &
-!jw                                   indexlist2, rc)
+    call ESMF_ArrayComputeAxisIndex(array2, delayout1, decompids2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    !! TODO: set & get the axis info here.  These need to be
-    !!  different on each DE.
-    call ESMF_ArraySetAxisIndex(array1, compindex=indexlist1, rc=rc)
+
+    call ESMF_ArrayGetAxisIndex(array1, compindex=indexlist1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array2, compindex=indexlist2, rc=rc)
+    call ESMF_ArrayGetAxisIndex(array2, compindex=indexlist2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array3, compindex=indexlist3, rc=rc)
+    call ESMF_ArrayGetAxisIndex(array3, compindex=indexlist3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
+
 
     ! Generate global cell numbers, where cell numbering scheme goes
     ! across the global mesh, rows first
