@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.8 2004/02/27 20:48:37 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.9 2004/02/28 00:13:18 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ maximum portability and reconfigurability.\\[.03in] \hline
 There are a small number of classes in the ESMF superstructure:
 
 \begin{itemize}
-\item [Component]  An ESMF component has two parts, one that is 
+\item {\bf Component}  An ESMF component has two parts, one that is 
 supplied by the ESMF and one that is supplied by the user.  The
 part that is supplied by the framework is an ESMF derived type that
 is either a Gridded Component {\bf GridComp} or a Coupler 
@@ -66,7 +66,7 @@ software there are calls to ESMF methods that associate a
 standard ESMF operation, such as Initialize, with the name of 
 the corresponding Fortran subroutine in user code.  
 
-\item [State]  ESMF components exchange information with other 
+\item {\bf State}  ESMF components exchange information with other 
 components only through States.  A State is an ESMF derived
 type that may contains Fields, Bundles, Arrays, and nested
 States.  A Gridded Component  is associated with two States, an 
@@ -75,7 +75,7 @@ holds the data that it receives from other Gridded Components.
 Its Export State contains data that it can make available to 
 other Gridded Components. 
 
-\item [Application Driver] The Application Driver ({\bf AppDriver}) 
+\item {\bf Application Driver} The Application Driver ({\bf AppDriver}) 
 is a small, generic driver program that contains the ``main'' 
 routine for an ESMF application.
 
