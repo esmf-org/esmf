@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.64 2004/05/25 21:11:37 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.65 2004/05/26 01:43:16 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.64 2004/05/25 21:11:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.65 2004/05/26 01:43:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -553,6 +553,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeSet(direct)"
+
     int rc = ESMF_SUCCESS;
 
     // use base class Set()
@@ -604,6 +607,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeIsSameCalendar()"
+
     if (this->calendar != ESMC_NULL_POINTER &&
         time->calendar != ESMC_NULL_POINTER)
     {
@@ -636,6 +642,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeSyncToRealTime()"
 
     int rc = ESMF_SUCCESS;
 
@@ -916,6 +925,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeValidate()"
+
     int rc = ESMF_SUCCESS;
 
     // parse options
@@ -1135,6 +1147,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeGetString()"
+
     int rc = ESMF_SUCCESS;
 
     // validate inputs
@@ -1192,6 +1207,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeGetDayOfWeek()"
 
     int rc = ESMF_SUCCESS;
 
@@ -1304,6 +1322,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeGetMidMonth()"
+
     int rc = ESMF_SUCCESS;
 
     // validate inputs
@@ -1415,6 +1436,9 @@
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeGetDayOfYear(integer)"
+
     int rc = ESMF_SUCCESS;
 
     // validate inputs
@@ -1480,6 +1504,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeGetDayOfYear(double)"
 
     int rc = ESMF_SUCCESS;
 
@@ -1547,6 +1574,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeGetDayOfYear(timeinterval)"
 
     int rc = ESMF_SUCCESS;
 

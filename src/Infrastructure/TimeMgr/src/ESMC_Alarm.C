@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.45 2004/05/25 21:11:35 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.46 2004/05/26 01:43:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.45 2004/05/25 21:11:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.46 2004/05/26 01:43:15 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -91,7 +91,7 @@ int ESMC_Alarm::count=0;
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
 
 // ============================================================================
-#if 1
+#if 0
     ESMC_LogDefault.ESMC_LogWrite("Test message number 1", ESMC_LOG_INFO);
     ESMC_LogDefault.ESMC_LogWrite("Test message number 2", ESMC_LOG_WARN);
     char logMsg[ESMF_MAXSTR];
@@ -227,7 +227,7 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_ClockCreate(copy)"
+ #define ESMC_METHOD "ESMC_AlarmCreate(copy)"
 
     ESMC_Alarm *alarmCopy;
     int returnCode;
