@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.9 2002/12/10 22:54:24 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.10 2002/12/12 22:00:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.9 2002/12/10 22:54:24 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.10 2002/12/12 22:00:02 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -834,7 +834,7 @@ end function
 !
         type (ESMF_Array) :: a
 
-        !! call ESMF_SetNullPointer(a%this)
+        nullify(a%this)
 
         ESMF_ArrayRestore = a 
  
@@ -891,7 +891,8 @@ end function
 !
         type (ESMF_Array) :: a
 
-        !!call ESMF_SetNullPointer(a%this)
+        nullify(a%this)
+
         ESMF_ArrayRead = a 
  
         end function ESMF_ArrayRead
