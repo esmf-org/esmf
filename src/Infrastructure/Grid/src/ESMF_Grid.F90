@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.215 2005/01/12 22:06:57 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.215.2.1 2005/03/02 16:07:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.215 2005/01/12 22:06:57 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.215.2.1 2005/03/02 16:07:00 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5996,15 +5996,19 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! query the old delayout and allocate arrays based on its information
+      ! Query the old delayout and allocate arrays based on its information
+      ! For now, allocate everything as 2 regardless of the rank of the layout.
+      ! If the layout is rank 1, it does not change anything if the second
+      ! dimension is length 1 by default.
       call ESMF_DELayoutGet(oldDELayout, dimCount=oldDimCount, rc=localrc)
-      allocate(decompIDs(oldDimCount), &
-                 newNDEs(oldDimCount), &
-                 oldNDEs(oldDimCount), stat=localrc)
+      allocate(decompIDs(2), &
+                 newNDEs(2), &
+                 oldNDEs(2), stat=localrc)
       oldNDEs = 1
-      call ESMF_DELayoutGet(oldDELayout, deCountPerDim=oldNDEs, rc=localrc)
+      call ESMF_DELayoutGet(oldDELayout, deCountPerDim=oldNDEs(1:oldDimCount), &
+                            rc=localrc)
       allocate(oldCountPerDE1(oldNDEs(1)))
-      if (oldDimCount.gt.1) allocate(oldCountPerDE2(oldNDEs(2)))
+      allocate(oldCountPerDE2(oldNDEs(2)))
 
       ! deserialize the decomposition information
       call ESMF_DistGridDeserialize(buffer, offset, decompIDs, oldCountPerDE1, &
@@ -6118,11 +6122,9 @@
       deallocate(oldCountPerDE1, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
-      if (oldDimCount.gt.1) then
-        deallocate(oldCountPerDE2, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
-                                       ESMF_CONTEXT, rc)) return
-      endif
+      deallocate(oldCountPerDE2, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                     ESMF_CONTEXT, rc)) return
       deallocate(       petlist, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
