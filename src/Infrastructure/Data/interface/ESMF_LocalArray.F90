@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.12 2003/08/27 22:46:11 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.13 2003/08/28 22:26:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -299,6 +299,9 @@
       public ESMF_LocalArrayF90Deallocate
       public ESMF_LocalArrConstrF90Ptr ! needed for C++ callback only
 
+      public ESMF_LocalArraySlice
+      !public ESMF_LocalArrayReshape
+
       public ESMF_LocalArrayWriteRestart
       public ESMF_LocalArrayReadRestart
       public ESMF_LocalArrayWrite
@@ -312,7 +315,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.12 2003/08/27 22:46:11 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.13 2003/08/28 22:26:23 nscollins Exp $'
 
 !==============================================================================
 !
@@ -17979,6 +17982,107 @@ end function
      end subroutine ESMF_LocalArrayF90Deallocate
 
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+! This section is for higher level LocalArray funcs
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      function ESMF_LocalArraySlice(array, slicedim, sliceloc, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_LocalArray) :: ESMF_LocalArraySlice
+!
+! !ARGUMENTS:
+      type(ESMF_LocalArray), intent(in) :: array
+      integer, intent(in) :: slicedim
+      integer, intent(in) :: sliceloc
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Extract an (N-1)D array from an N-D array. The dimension to be
+! dropped is the {\tt slicedim} argument, and the location along
+! the dropped dimension is the {\tt sliceloc} argument. This routine
+! allocates new space and copies the data, leaving the original array
+! unchanged.
+!
+!EOP
+        ! Local vars
+        type (ESMF_LocalArray) :: newarray ! new C++ LocalArray
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
+        integer :: rank
+        type (ESMF_DataKind) :: kind
+        type (ESMF_DataType) :: type
+        integer :: i, counts(ESMF_MAXDIM)
+
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        newarray%this = ESMF_NULL_POINTER
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Get info from the existing array
+        call c_ESMC_LocalArrayGetRank(array, rank, status)
+        call c_ESMC_LocalArrayGetType(array, type, status)
+        call c_ESMC_LocalArrayGetKind(array, kind, status)
+        call c_ESMC_LocalArrayGetLengths(array, rank, counts, status)
+
+        ! Basic sanity checks - slice dim is ok, sliced location exists, etc.
+        if ((slicedim .lt. 1) .or. (slicedim .gt. rank)) then
+            print *, "ESMF_LocalArraySlice: slicedim value ", slicedim, &
+                                               " must be between 1 and ", rank
+            return
+        endif
+        if ((sliceloc .lt. 1) .or. (sliceloc .gt. counts(rank))) then
+            print *, "ESMF_LocalArraySlice: sliceloc value ", sliceloc, &
+                                        " must be between 1 and ", counts(rank)
+            return
+        endif
+
+        ! This slice will be rank < 1. Remove the counts corresponding
+        ! to the sliced dim (save for later error checking).
+        ! TODO: add error checks
+        do i=sliceloc, rank-1
+           counts(i) = counts(i+1)
+        enddo
+        rank = rank - 1
+
+        call c_ESMC_LocalArrayCreateNoData(newarray, rank, type, kind, &
+                                           ESMF_FROM_FORTRAN, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "LocalArray construction error"
+          return
+        endif
+
+        call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, type, kind, status)
+
+        ! At this point the new array exists, and has space allocated, but it
+        ! does not contain data from the old array. Now we have a T/K/R prob.
+
+        ! put old F90 ptr into wrap
+        ! call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status)
+
+        ! put new F90 ptr into wrap
+        ! call c_ESMC_LocalArrayGetF90Ptr(newarray, wrap, status)
+
+        ! there must be something like this we can do here...
+        ! newarray = RESHAPE(array(sliceloc, :, :), counts)
+
+
+        ! Set return values
+        ESMF_LocalArraySlice = newarray
+        if (rcpresent) rc = status
+
+        end function ESMF_LocalArraySlice
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
