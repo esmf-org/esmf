@@ -312,7 +312,13 @@ type (ESMF\_INIT, ESMF\_BRANCH, etc.).
 A {\tt Coupler} is a user-customized type of {\tt Component} that 
 encompasses all the functionality needed to communicate data between two or 
 more {\tt Component}s.  A {\tt Coupler} has a coupling initiation method that 
-defines and returns a set of {\tt Transform}s.
+defines and returns a set of {\tt Transform}s. In general, a {\tt Coupler Component} does not instantiate, schedule or run components whose purpose is unrelated 
+to coupling, although it may mediate data exchanges among such components.
+However, any component may instantiate subcomponents. It is possibel
+for a {\tt Coupler Component} to instantiate a subcomponent to handle a
+specific part of the coupling functionality, such as calculating fluxes
+or interpolation weights.
+
 
 \subsubsection{Gridded Component }
 \label{sec:griddedcomponent} 
