@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.C,v 1.1 2003/10/22 21:00:54 cdeluca Exp $
+// $Id: ESMC_Xform.C,v 1.2 2004/02/11 23:20:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Xform.C,v 1.1 2003/10/22 21:00:54 cdeluca Exp $";
+               "$Id: ESMC_Xform.C,v 1.2 2004/02/11 23:20:52 nscollins Exp $";
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -62,8 +62,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      char *name,          // in - xform name
-      void *funcp) {       // in - xform function to execute
+      char *name,              // in - xform name
+      void (*funcp)()) {       // in - xform function to execute
 //
 // !DESCRIPTION:
 //      Initialize a new Xform object.   This is a shallow class.
