@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.30 2003/06/19 17:12:44 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.31 2003/06/19 19:51:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,10 +125,10 @@
         type (ESMF_Base) :: base                 ! base class object
         type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
         type (ESMF_Grid) :: grid                 ! save to satisfy query routines
-        type (ESMF_GridType), pointer :: gridp => NULL()
+        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster acces
         type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
         type (ESMF_LocalField) :: localfield     ! this differs per DE
-        type (ESMF_Status) :: datastatus         ! uninit, array ok, etc
+        type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
         type (ESMF_DataMap) :: mapping           ! mapping of array indicies to grid
         type (ESMF_IOSpec) :: iospec             ! iospec values
         type (ESMF_Status) :: iostatus           ! if unset, inherit from gcomp
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.30 2003/06/19 17:12:44 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.31 2003/06/19 19:51:53 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1674,25 +1674,25 @@
 ! !REQUIREMENTS: FLD1.6.2
 !EOP
 
+        ! assume failure
+        if (present(rc)) rc = ESMF_FAILURE
+
         ! Minimal error checking
         if (.not.associated(field%ftypep)) then
-          print *, "Invalid or Destroyed Field"
-          if (present(rc)) rc = ESMF_FAILURE
+          print *, "ERROR: Invalid or Destroyed Field"
+          return
         endif
  
         if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-          print *, "Field not ready"
-          if (present(rc)) rc = ESMF_FAILURE
+          print *, "ERROR: Field not ready"
           return
         endif
 
         if (field%ftypep%gridstatus .ne. ESMF_STATE_READY) then
-          print *, "No grid attached to Field"
-          if (present(rc)) rc = ESMF_FAILURE
+          print *, "ERROR: No grid attached to Field"
           return
         endif
 
-        print *, "FieldGetGrid(), gridstatus is ready, returning success"
         grid = field%ftypep%grid
 
         if (present(rc)) rc = ESMF_SUCCESS
@@ -1913,9 +1913,30 @@
 ! !REQUIREMENTS: FLD1.2, FLD1.6.3 (pri 2?)
 !EOP
 
-!
-! TODO: code goes here
-!
+
+        ! assume failure
+        if (present(rc)) rc = ESMF_FAILURE
+
+        ! Minimal error checking
+        if (.not.associated(field%ftypep)) then
+          print *, "ERROR: Invalid or Destroyed Field"
+          return
+        endif
+ 
+        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+          print *, "ERROR: Field not ready"
+          return
+        endif
+
+        if (field%ftypep%datastatus .ne. ESMF_STATE_READY) then
+          print *, "ERROR: No data attached to Field"
+          return
+        endif
+
+        datamap = field%ftypep%mapping
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
         end subroutine ESMF_FieldGetDataMap
 
 !------------------------------------------------------------------------------
