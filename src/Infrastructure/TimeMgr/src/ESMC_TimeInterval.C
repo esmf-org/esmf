@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.16 2003/04/21 23:41:53 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.17 2003/04/25 09:05:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,8 @@
 
  // higher level, 3rd party or system includes
  #include <iostream.h>
+ #include <math.h>
+ #include <float.h>
 
  // associated class definition file
  #include <ESMC_TimeInterval.h>
@@ -28,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.16 2003/04/21 23:41:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.17 2003/04/25 09:05:47 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -55,11 +57,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,      // in - integer seconds
-      int Sn,               // in - fractional seconds, numerator
-      int Sd,               // in - fractional seconds, denominator
-      ESMC_Calendar *Cal) { // in - optional associated calendar for
-                            //      calendar intervals
+      ESMF_IKIND_I8 S,     // in - integer seconds
+      int Sn,              // in - fractional seconds, numerator
+      int Sd,              // in - fractional seconds, denominator
+      ESMF_IKIND_I8 YY,    // in - calendar interval number of years
+      ESMF_IKIND_I8 MO) {  // in - calendar interval number of months
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt TimeInterval} with given values
@@ -69,10 +71,39 @@
 
     ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd);
 
+    this->YY = YY;
+    this->MO = MO;
+
     return(ESMF_SUCCESS);
 
 }  // end ESMC_TimeIntervalInit
 #endif
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalInit - initializer for native C++ use
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalInit(
+//
+// !RETURN VALUE:
+//    int error return code
+// 
+// !ARGUMENTS:
+      const char *timeList,    // in - initializer specifier string
+      ...) {                   // in - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Initialzes a {\tt TimeInterval} with values given in variable arg list.
+//      Supports native C++ use.
+//
+//EOP
+// !REQUIREMENTS:
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalInit
 
 //-------------------------------------------------------------------------
 //BOP
@@ -102,8 +133,7 @@
       double *us_,              // in - floating point microseconds
       double *ns_,              // in - floating point nanoseconds
       int *Sn,                  // in - fractional seconds numerator
-      int *Sd,                  // in - fractional seconds denominator
-      ESMC_Calendar *cal) {     // in - associated calendar
+      int *Sd) {                // in - fractional seconds denominator
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt TimeInterval} with values given in F90
@@ -118,20 +148,23 @@
     this->S  = 0;
     this->Sn = 0;
     this->Sd = 1;
-    Calendar = ESMC_NULL_POINTER;
+    this->YY = 0;
+    this->MO = 0;
     
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // TODO: calendar intervals
-
     // TODO: fractional, sub-seconds
 
-    // TODO: share code from here down with ESMC_TimeIntervalSet ?
-
-    if (cal != ESMC_NULL_POINTER) {
-      Calendar = cal;
+    // calendar interval
+    if (YY != ESMC_NULL_POINTER) {
+      this->YY = *YY;
     }
+    if (MO != ESMC_NULL_POINTER) {
+      this->MO = *MO;
+    }
+
+    // TODO: share code from here down with ESMC_TimeIntervalSet ?
 
     //
     // integer units
@@ -260,9 +293,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: calendar intervals
-
     // TODO: fractional, sub-seconds
+
+    // calendar interval
+    if (YY != ESMC_NULL_POINTER) {
+      *YY = this->YY;
+    }
+    if (MO != ESMC_NULL_POINTER) {
+      *MO = this->MO;
+    }
 
     //
     // integer units
@@ -352,11 +391,17 @@
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // TODO: calendar intervals
-
     // TODO: fractional, sub-seconds
 
     // TODO: share code with ESMC_TimeIntervalInit ?
+
+    // calendar interval
+    if (YY != ESMC_NULL_POINTER) {
+      this->YY = *YY;
+    }
+    if (MO != ESMC_NULL_POINTER) {
+      this->MO = *MO;
+    }
 
     //
     // integer units
@@ -397,6 +442,444 @@
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_TimeIntervalGetString - Get a Time Interval value in string format
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalGetString(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      char *timeString) const {    // out - time interval value in string format
+//
+// !DESCRIPTION:
+//      Gets a {\tt TimeInterval}'s value in character format
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalGetString
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalAbsValue - Get a Time Interval's absolute value
+//
+// !INTERFACE:
+      ESMC_TimeInterval
+                     ESMC_TimeInterval::ESMC_TimeIntervalAbsValue(void) const{
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Gets a {\tt TimeInterval}'s absolute value
+//
+//EOP
+// !REQUIREMENTS:  TMG 1.5.8
+
+    // initialize result to subject time interval
+    ESMC_TimeInterval absValue = *this;
+
+    // check individual components (should be all positive or all negative)
+    //   note: can't use abs() or labs() since these will be (long long)
+    //         (64-bit) on some platforms
+    if (S  < 0) absValue.S  *= -1;
+    if (Sn < 0) absValue.Sn *= -1;
+    if (YY < 0) absValue.YY *= -1;
+    if (MO < 0) absValue.MO *= -1;
+
+    return(absValue);
+
+ }  // end ESMC_TimeIntervalAbsValue
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalNegAbsVal - Get a Time Interval's negative absolute value
+//
+// !INTERFACE:
+      ESMC_TimeInterval
+                     ESMC_TimeInterval::ESMC_TimeIntervalNegAbsVal(void) const{
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Gets a {\tt TimeInterval}'s negative absolute value
+//
+//EOP
+// !REQUIREMENTS:  TMG 1.5.8
+
+    // initialize result to subject time interval
+    ESMC_TimeInterval negAbsVal = *this;
+
+    // check individual components (should be all positive or all negative)
+    //   note: can't use abs() or labs() since these will be (long long)
+    //         (64-bit) on some platforms
+    if (S  > 0) negAbsVal.S  *= -1;
+    if (Sn > 0) negAbsVal.Sn *= -1;
+    if (YY > 0) negAbsVal.YY *= -1;
+    if (MO > 0) negAbsVal.MO *= -1;
+
+    return(negAbsVal);
+
+ }  // end ESMC_TimeIntervalNegAbsVal
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalDiv - Divide two time intervals, return fraction result
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_TimeInterval::ESMC_TimeIntervalDiv(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //        to divide by
+//
+// !DESCRIPTION:
+//    Returns this time interval divided by given time interval as a fractional
+//    quotient.
+//
+// !REQUIREMENTS:  
+
+    ESMC_Fraction quotient;
+
+    // TODO:
+
+    return(quotient);
+
+}  // end ESMC_TimeInterval::ESMC_TimeIntervalDiv
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(/) - Divide two time intervals, return double precision result
+//
+// !INTERFACE:
+      double ESMC_TimeInterval::operator/(
+//
+// !RETURN VALUE:
+//    double result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //        to divide by
+//
+// !DESCRIPTION:
+//    Returns this time interval divided by given time interval as a double
+//    precision quotient.
+//
+// !REQUIREMENTS:  
+
+    double quotient;
+
+    // TODO: fractional & calendar interval parts
+
+    if (timeInterval.S != 0) {
+      quotient = (double) this->S / (double) timeInterval.S;
+    }
+    // TODO:  else throw exception ?
+
+    return(quotient);
+
+}  // end ESMC_TimeInterval::operator/
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(/) - Divide time interval by an integer, return time interval result
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator/(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const int &divisor) const {   // in - integer divisor
+//
+// !DESCRIPTION:
+//    Divides a {\tt TimeInterval} by an integer divisor, returns quotient as a
+//    {\tt TimeInterval}
+//
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval quotient;
+
+    // TODO: fractional & calendar interval parts
+
+    if (divisor != 0) {
+      quotient.S = this->S / divisor;
+    }
+    // TODO:  else throw exception ?
+
+    return(quotient);
+
+}  // end ESMC_TimeInterval::operator/
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(/=) - Divide time interval by an integer
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator/=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const int &divisor) {   // in - integer divisor
+//
+// !DESCRIPTION:
+//    Divides a {\tt TimeInterval} by an integer divisor
+//
+// !REQUIREMENTS:  
+
+    // TODO: fractional & calendar interval parts
+
+    if (divisor != 0) {
+      this->S /= divisor;
+    }
+    // TODO:  else throw exception ?
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator/=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(/) - Divide time interval by a double precision, return time interval result
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator/(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const double &divisor) const {   // in - double precision divisor
+//
+// !DESCRIPTION:
+//    Divides a {\tt TimeInterval} by an double divisor, returns quotient as a
+//    {\tt TimeInterval}
+//
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval quotient;
+
+    // TODO: fractional & calendar interval parts
+
+    if (fabs(divisor) > FLT_EPSILON) {
+      quotient.S = (ESMF_IKIND_I8) ((double) this->S / divisor);
+    }
+    // TODO:  else throw exception ?
+
+    return(quotient);
+
+}  // end ESMC_TimeInterval::operator/
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(/=) - Divide time interval by a double precision
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator/=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const double &divisor) {   // in - double precision divisor
+//
+// !DESCRIPTION:
+//    Divides a {\tt TimeInterval} by a double precision divisor
+//
+// !REQUIREMENTS:  
+
+    // TODO: fractional & calendar interval parts
+
+    if (fabs(divisor) > FLT_EPSILON) {
+      this->S = (ESMF_IKIND_I8) ((double) this->S / divisor);
+    }
+    // TODO:  else throw exception ?
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator/=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an integer
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator*(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const int &multiplier) const {   // in - integer multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt TimeInterval} by an integer, return product as a
+//    {\tt TimeInterval}
+//
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval product;
+
+    // TODO: fractional & calendar interval parts
+
+    product.S = this->S * multiplier;
+
+    return(product);
+
+}  // end ESMC_TimeInterval::operator*
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by an integer
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator*=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const int &multiplier) {   // in - integer multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt TimeInterval} by an integer
+//
+// !REQUIREMENTS:  
+
+    // TODO: fractional & calendar interval parts
+
+    this->S *= multiplier;
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator*=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by an fraction
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator*(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &multiplier) const {   // in - fraction multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt TimeInterval} by an fraction, return product as a
+//    {\tt TimeInterval}
+//
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval product;
+
+    // TODO: whole, fractional & calendar interval parts
+
+    return(product);
+
+}  // end ESMC_TimeInterval::operator*
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by an fraction
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator*=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &multiplier) {   // in - fraction multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt TimeInterval} by a fraction
+//
+// !REQUIREMENTS:  
+
+    // TODO: whole, fractional & calendar interval parts
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator*=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*) - Multiply a time interval by a double precision
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator*(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const double &multiplier) const {   // in - double precision multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt TimeInterval} by an double precision,
+//     return product as a {\tt TimeInterval}
+//
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval product;
+
+    // TODO: fractional & calendar interval parts
+
+    product.S = (ESMF_IKIND_I8) ((double) this->S * multiplier);
+
+    return(product);
+
+}  // end ESMC_TimeInterval::operator*
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(*=) - Multiply a time interval by a double precision
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator*=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const double &multiplier) {   // in - double precision multiplier
+//
+// !DESCRIPTION:
+//     Multiply a {\tt TimeInterval} by a double precision
+//
+// !REQUIREMENTS:  
+
+    // TODO: fractional & calendar interval parts
+
+    this->S = (ESMF_IKIND_I8) ((double) this->S * multiplier);
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator*=
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_TimeInterval(=) - copy or assign from BaseTime expression
 //
 // !INTERFACE:
@@ -433,10 +916,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,       // in - integer seconds
-      int Sn,                // in - fractional seconds, numerator
-      int Sd,                // in - fractional seconds, denominator
-      ESMC_Calendar *cal) {  // in - associated calendar
+      ESMF_IKIND_I8 S,     // in - integer seconds
+      int Sn,              // in - fractional seconds, numerator
+      int Sd,              // in - fractional seconds, denominator
+      ESMF_IKIND_I8 YY,    // in - calendar interval number of years
+      ESMF_IKIND_I8 MO) {  // in - calendar interval number of months
 //
 // !DESCRIPTION:
 //      restore {\tt TimeInterval} state for persistence/checkpointing
@@ -446,18 +930,13 @@
 
     int rc;
 
-    if (cal == ESMC_NULL_POINTER) {
-      cout << "ESMC_TimeInterval::ESMC_TimeIntervalRead(): null pointer "
-           << "passed in" << endl;
-      return(ESMF_FAILURE);
-    }
-
     // use base class Read() first
     rc = ESMC_BaseTime::ESMC_BaseTimeRead(S, Sn, Sd);
 
-    Calendar = cal;  // TODO?: this only restores calendar pointer; component
-                     // must be sure to restore corresponding calendar first
-  
+    // restore exclusive Time Interval properties
+    this->YY = YY;
+    this->MO = MO;
+
     return(rc);
 
  }  // end ESMC_TimeIntervalRead
@@ -473,10 +952,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 *S,            // out - integer seconds
-      int *Sn,                     // out - fractional seconds, numerator
-      int *Sd,                     // out - fractional seconds, denominator
-      ESMC_Calendar *cal) const {  // out - associated calendar
+      ESMF_IKIND_I8 *S,           // out - integer seconds
+      int *Sn,                    // out - fractional seconds, numerator
+      int *Sd,                    // out - fractional seconds, denominator
+      ESMF_IKIND_I8 *YY,          // out - calendar interval number of years
+      ESMF_IKIND_I8 *MO) const {  // out - calendar interval number of months
 //
 // !DESCRIPTION:
 //      return {\tt TimeInterval} state for persistence/checkpointing
@@ -486,8 +966,9 @@
 
     int rc;
 
-    if (S  == ESMC_NULL_POINTER || Sn  == ESMC_NULL_POINTER ||
-        Sd == ESMC_NULL_POINTER || cal == ESMC_NULL_POINTER) {
+    if (S  == ESMC_NULL_POINTER || Sn == ESMC_NULL_POINTER ||
+        Sd == ESMC_NULL_POINTER || YY == ESMC_NULL_POINTER ||
+        MO == ESMC_NULL_POINTER) {
       cout << "ESMC_TimeInterval::ESMC_TimeIntervalWrite(): null pointer(s) "
            << "passed in" << endl;
       return(ESMF_FAILURE);
@@ -496,9 +977,10 @@
     // use base class Write() first
     rc = ESMC_BaseTime::ESMC_BaseTimeWrite(S, Sn, Sd);
 
-    cal = Calendar;  // TODO?: this only saves calendar pointer; component
-                     // must be sure to save corresponding calendar
-  
+    //  return exclusive Time Interval properties
+    *YY = this->YY;
+    *MO = this->MO;
+
     return(rc);
 
  }  // end ESMC_TimeIntervalWrite
@@ -548,9 +1030,8 @@
 
     cout << "TimeInterval ---------------------------" << endl;
     ESMC_BaseTime::ESMC_BaseTimePrint(options);
-    if (Calendar != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarPrint(options);
-    }
+    cout << "YY = " << YY << endl;
+    cout << "MO = " << MO << endl;
     cout << "end TimeInterval -----------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
@@ -581,7 +1062,8 @@
    S  = 0;
    Sn = 0;
    Sd = 0;
-   Calendar = ESMC_NULL_POINTER;
+   YY = 0;
+   MO = 0;
 
 } // end ESMC_TimeInterval
 
@@ -596,10 +1078,11 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,       // in - integer seconds
-      int Sn,                // in - fractional seconds, numerator
-      int Sd,                // in - fractional seconds, denominator
-      ESMC_Calendar *Cal) :  // in - optional calendar
+      ESMF_IKIND_I8 S,     // in - integer seconds
+      int Sn,              // in - fractional seconds, numerator
+      int Sd,              // in - fractional seconds, denominator
+      ESMF_IKIND_I8 YY,    // in - calendar interval number of years
+      ESMF_IKIND_I8 MO) :  // in - calendar interval number of months
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInterval} via {\tt ESMC\_BaseTime}
@@ -609,7 +1092,9 @@
 // !REQUIREMENTS:
 
     ESMC_BaseTime(S, Sn, Sd) {  // pass to base class constructor
-    Calendar = Cal;
+
+    this->YY = YY;
+    this->MO = MO;
 
 } // end ESMC_TimeInterval
 
