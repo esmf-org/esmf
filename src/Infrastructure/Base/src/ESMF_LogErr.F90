@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.52 2004/12/03 23:57:02 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.53 2004/12/07 22:12:07 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -253,10 +253,9 @@ end function
 	!character(len=8) 					:: d
 	integer  :: i
 	
-	if (present(rc)) then
-	  	rc=ESMF_FAILURE
-	endif
-	do i=1, ESMF_LogDefault%petCount
+	if (present(rc)) rc=ESMF_FAILURE
+	
+	do i=1, log%petCount
 	    if (log%LOG_ARRAY(i)%FileIsOpen .eq. ESMF_TRUE) then
 		!call DATE_AND_TIME(d,t)
 		!WRITE(log%unitnumber,100) d,t,"INFO     Log Close"
@@ -633,6 +632,7 @@ end subroutine ESMF_LogGet
     integer 				       :: status, i, j, rc2,rc3,un	
     type(ESMF_LOGENTRY), dimension(:,:), pointer :: localbuf
     type(ESMF_LOGARRAY), dimension(:), pointer  :: localbuf2
+    character(len=32)                                 :: fname, fnum
 	
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%logNone = ESMF_FALSE !default is to log
@@ -670,8 +670,9 @@ end subroutine ESMF_LogGet
 	if (ESMF_LogDefault%petCount .eq. 1) then
 	    ESMF_LogDefault%LOG_ARRAY(1)%nameLogErrFile=trim(filename)
         else
-	    filename = "pet" // char(i) // "." // trim(filename)
-	    ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile=filename
+	    write(fnum,*) i
+	    fname = "pet" // trim(fnum) // "." // trim(filename)
+	    ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile=fname
 	endif
     if (len(ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile) .gt. 32) then
         print *, "filename exceeded 32 characters"
