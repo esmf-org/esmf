@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/02/27 17:54:54 flanigan Exp $ 
+# $Id: makefile,v 1.10 2003/03/11 03:17:51 cdeluca Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -9,6 +9,8 @@ SOURCEC	  = \
 		ESMC_Calendar.c \
 		ESMC_Date.c \
 		ESMC_DateF.c \
+		ESMC_Error.c \
+		ESMC_ErrorF.c \
 		ESMC_TOD.c \
 		ESMC_Time.c \
 		ESMC_TimeF.c \
@@ -16,6 +18,7 @@ SOURCEC	  = \
 		ESMC_TimeMgrF.c 
 
 SOURCEF	  = \
+		ESMF_ErrorMod.f \
 		ESMF_TODMod.f \
 		ESMF_CalendarMod.f \
 		ESMF_TimeMod.F90 \
@@ -25,8 +28,12 @@ SOURCEF	  = \
 		ESMF_TimeMgmtMod.F90 
 SOURCEH	  = \
 		ESMO_Alarm.h \
+		ESMO_BasicUtil.h \
 		ESMO_Calendar.h \
+		ESMO_Constants.h \
 		ESMO_Date.h \
+		ESMO_Error.h \
+		ESMO_Log.h \
 		ESMO_TOD.h \
 		ESMO_Time.h \
 		ESMO_TimeMgr.h                
