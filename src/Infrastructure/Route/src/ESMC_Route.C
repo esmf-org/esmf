@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.76 2003/11/08 00:33:37 rjacob Exp $
+// $Id: ESMC_Route.C,v 1.77 2004/02/19 23:10:11 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.76 2003/11/08 00:33:37 rjacob Exp $";
+               "$Id: ESMC_Route.C,v 1.77 2004/02/19 23:10:11 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -755,14 +755,11 @@ static int maxroutes = 10;
            //                     (long int)srcaddr, (long int)dstaddr);
 
 	   // Count the total number of points to send/recv
-	   srctcount=0;
-	   rcvtcount=0;
+	   srctcount=scontig_length;
+	   rcvtcount=rcontig_length;
            for (j=0; j<mrank-1; j++) {
-               for (l=0; l<srep_count[j] || l<rrep_count[j]; l++){ 
-
-                    if (l<srep_count[j] && sendxp) srctcount += scontig_length;
-                    if (l<rrep_count[j] && recvxp) rcvtcount += rcontig_length;
-               }
+               if (sendxp) srctcount *= srep_count[j];
+               if (recvxp) rcvtcount *= rrep_count[j];
            }
 
            nbytes = ESMC_DataKindSize(dk);
