@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.7 2004/03/23 00:36:39 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.8 2004/04/28 18:05:43 slswift Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -134,12 +134,65 @@
 !
 !     subroutine ESMF_IOSpecxxx
 !
-
+      public operator(.eq.), operator(.ne.)
+      
 !EOPI
 
 !-------------------------------------------------------------------------
 
+interface operator (.eq.)
+ module procedure ESMF_iospeq
+end interface
+
+interface operator (.ne.)
+ module procedure ESMF_iospne
+end interface
+
+interface operator (.eq.)
+ module procedure ESMF_iorweq
+end interface
+
+interface operator (.ne.)
+ module procedure ESMF_iorwne
+end interface
+
+!------------------------------------------------------------------------------
+
       contains
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_IOFileFormats to see if they're the same or not
+
+function ESMF_iospeq(iosp1, iosp2)
+ logical ESMF_iospeq
+ type(ESMF_IOFileFormat), intent(in) :: iosp1, iosp2
+
+ ESMF_iospeq = (iosp1%iofileformat .eq. iosp2%iofileformat)
+end function
+
+function ESMF_iospne(iosp1, iosp2)
+ logical ESMF_iospne
+ type(ESMF_IOFileFormat), intent(in) :: iosp1, iosp2
+
+ ESMF_iospne = (iosp1%iofileformat .ne. iosp2%iofileformat)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_IORWTypes to see if they're the same or not
+
+function ESMF_iorweq(iorw1, iorw2)
+ logical ESMF_iorweq
+ type(ESMF_IORWType), intent(in) :: iorw1, iorw2
+
+ ESMF_iorweq = (iorw1%iorwtype .eq. iorw2%iorwtype)
+end function
+
+function ESMF_iorwne(iorw1, iorw2)
+ logical ESMF_iorwne
+ type(ESMF_IORWType), intent(in) :: iorw1, iorw2
+
+ ESMF_iorwne = (iorw1%iorwtype .ne. iorw2%iorwtype)
+end function
 
 !-------------------------------------------------------------------------
 !BOPI
