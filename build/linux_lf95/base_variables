@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2002/12/09 23:53:50 nscollins Exp $ 
+# $Id: base_variables,v 1.6 2003/01/10 21:38:39 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -43,7 +43,8 @@ CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = lf95 -verbose 
-C_F90CXXLIBS       = /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/libgcc.a
+C_F90CXXLIBS       = /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/libgcc.a \
+                     /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/libstdc++.a
 C_CXXF90LD         = g++  -L/usr/local/lf9560/bin/../lib -lfj9i6 -lfj9f6 -lfj9e6 -lfccx86_6a
 C_CXXF90LIBS       = 
 # ------------------------- BOPT - g_c++ options ------------------------------
