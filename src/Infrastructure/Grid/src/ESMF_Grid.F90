@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.132 2004/01/29 18:36:50 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.133 2004/01/29 19:05:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.132 2004/01/29 18:36:50 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.133 2004/01/29 19:05:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -848,9 +848,12 @@
       !-------------
       ! ESMF_GridStructure_Unknown
       case(0)
-        print *, "ERROR in ESMF_GridDestroy: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+        ! TODO: decide if it's ok to create an empty grid and then delete 
+        !   it without being created further. (allow it for now)
+        !print *, "ERROR in ESMF_GridDestroy: ", &
+        !         "GridStructureUnknown not supported"
+        !status = ESMF_FAILURE
+        status = ESMF_SUCCESS
 
       !-------------
       ! ESMF_GridStructure_LogRect
@@ -890,12 +893,21 @@
         return
       endif
 
+      ! delete the base class
+      call ESMF_BaseDestroy(grid%ptr%base, status)
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridDestroy from BaseDestroy"
+        return
+      endif
+
       ! free field memory.
       deallocate(grid%ptr, stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_GridDestroy: Grid deallocate"
         return
       endif
+      ! so we can detect reuse of a deleted grid object
+      nullify(grid%ptr)
 
       if(rcpresent) rc = ESMF_SUCCESS
 

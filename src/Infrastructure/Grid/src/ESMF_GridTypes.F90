@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.10 2004/01/29 18:37:24 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.11 2004/01/29 19:05:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -412,7 +412,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.10 2004/01/29 18:37:24 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.11 2004/01/29 19:05:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -511,16 +511,15 @@
       endif
 
 !     Set the Grid name if present, otherwise construct a default one
-      if (present(name)) then
-        call ESMF_SetName(grid%base, name, "Grid", status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridConstructNew: Setname"
-          return
-        endif
+      call ESMF_BaseCreate(grid%base, "Grid", name, 0, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructNew: BaseCreate"
+        return
       endif
 
 !     Initialize grid contents
       grid%gridStatus      = ESMF_GridStatus_Ready
+      grid%gridStructure   = ESMF_GridStructure_Unknown
       grid%horzGridKind    = ESMF_GridKind_Unknown
       grid%vertGridKind    = ESMF_GridKind_Unknown
       grid%horzStagger     = ESMF_GridStagger_Unknown
