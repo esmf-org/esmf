@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridOptionsUTest.F90,v 1.2 2005/03/10 22:16:57 nscollins Exp $
+! $Id: ESMF_RegridOptionsUTest.F90,v 1.3 2005/03/14 18:15:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2005, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id: ESMF_RegridOptionsUTest.F90,v 1.2 2005/03/10 22:16:57 nscollins Exp $'
+      '$Id: ESMF_RegridOptionsUTest.F90,v 1.3 2005/03/14 18:15:32 nscollins Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -121,14 +121,14 @@
     !NEX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -155,14 +155,14 @@
     !EX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -183,14 +183,14 @@
     !EX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -211,14 +211,14 @@
     !EX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -239,14 +239,14 @@
     !EX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -267,14 +267,14 @@
     !EX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -295,14 +295,14 @@
     !EX_UTest
     call verifyResults(humidity2, maxerror, result, rc)
     write(failMsg, *) "Percentage error in data result is too large"
-    write(name, *) "Regrid result percentage error less than 2%"
+    write(name, *) "Regrid percentage error less than 2%"
     call ESMF_Test((maxerror .lt. 2.0), name, failMsg, result, ESMF_SRCLINE)
     if (maxerror .ge. 2.0) goto 10
 
     !------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Validating the regridding results"
+    write(name, *) "Regrid returned ESMF_SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
