@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.9 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.10 2003/09/12 01:58:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,6 +25,9 @@
 //
 // The code in this file implements the inter-language code which
 //  allows F90 to call C++ for supporting {\tt ESMC\_Fraction} class functions.
+//  For missing F90 optional arguments, normalize on passing
+//  ESMC_NULL_POINTER to C++ regardless of whether the F90 compiler
+//  passes ESMC_BAD_POINTER or ESMC_NULL_POINTER.
 //
 //EOP
 
@@ -37,44 +40,53 @@ extern "C" {
        void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, int *arg1, int *arg2,
                                                   int *arg3, int *status) {
           int rc = (ptr)->ESMC_FractionSet(*arg1, *arg2, *arg3);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionget)(ESMC_Fraction *ptr, 
                                          <value> *value, int *status} {
           int rc = (ptr)->ESMC_FractionGet(&value);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, 
                                          <value> *value, int *status} {
           int rc = (ptr)->ESMC_FractionSet(value);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionreadrestart)(ESMC_Fraction *ptr, int *arg1,
                                             int *arg2, int *arg3, int *status) {
           int rc = (ptr)->ESMC_Fraction::ESMC_ReadRestart(*arg1, *arg2, *arg3);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionwriterestart)(ESMC_Fraction *ptr, int *arg1,
                                             int *arg2, int *arg3, int *status) {
           int rc = (ptr)->ESMC_Fraction::ESMC_WriteRestart(arg1, arg2, arg3);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr,
                                          const char *options,
                                          int *status) {
-          int rc = (ptr)->ESMC_Fraction::ESMC_Validate(options);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          int rc = (ptr)->ESMC_Fraction::ESMC_Validate(
+            ((int) options == ESMC_BAD_POINTER ? ESMC_NULL_POINTER : options) );
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, const char *options,
                                       int *status) {
-          int rc = (ptr)->ESMC_Fraction::ESMC_Print(options);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          int rc = (ptr)->ESMC_Fraction::ESMC_Print(
+            ((int) options == ESMC_BAD_POINTER ? ESMC_NULL_POINTER : options) );
+          if (status != ESMC_NULL_POINTER &&
+              (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 #endif
 };

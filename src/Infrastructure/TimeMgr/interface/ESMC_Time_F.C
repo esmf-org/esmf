@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.19 2003/09/04 18:57:56 cdeluca Exp $
+// $Id: ESMC_Time_F.C,v 1.20 2003/09/12 01:58:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,6 +26,9 @@
 //
 // The code in this file implements the inter-language code which
 //  allows F90 to call C++ for supporting {\tt ESMC\_Time} class functions.
+//  For missing F90 optional arguments, normalize on passing
+//  ESMC_NULL_POINTER to C++ regardless of whether the F90 compiler
+//  passes ESMC_BAD_POINTER or ESMC_NULL_POINTER.
 //
 //EOP
 
@@ -48,11 +51,58 @@ extern "C" {
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                                 ESMC_Calendar *calendar, int *timeZone,
                                 int *status) {
-          int rc = (ptr)->ESMC_TimeSet(yr, yr_i8, mm, dd, d, d_i8, h, m,
-                                         s, s_i8, ms, us, ns, d_r8, h_r8, m_r8,
-                                         s_r8, ms_r8, us_r8, ns_r8,
-                                         sN, sD, calendar, timeZone);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          int rc = (ptr)->ESMC_TimeSet(
+                    ((void*)yr       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : yr),
+                    ((void*)yr_i8    == (void*)ESMC_BAD_POINTER ? 
+                                               ESMC_NULL_POINTER : yr_i8),
+                    ((void*)mm       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : mm),
+                    ((void*)dd       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : dd),
+                    ((void*)d        == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : d),
+                    ((void*)d_i8     == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : d_i8),
+                    ((void*)h        == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : h),
+                    ((void*)m        == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : m),
+                    ((void*)s        == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : s),
+                    ((void*)s_i8     == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : s_i8),
+                    ((void*)ms       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : ms),
+                    ((void*)us       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : us),
+                    ((void*)ns       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : ns),
+                    ((void*)d_r8     == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : d_r8),
+                    ((void*)h_r8     == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : h_r8),
+                    ((void*)m_r8     == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : m_r8),
+                    ((void*)s_r8     == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : s_r8),
+                    ((void*)ms_r8    == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : ms_r8),
+                    ((void*)us_r8    == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : us_r8),
+                    ((void*)ns_r8    == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : ns_r8),
+                    ((void*)sN       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : sN),
+                    ((void*)sD       == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : sD),
+                    ((void*)calendar == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : calendar),
+                    ((void*)timeZone == (void*)ESMC_BAD_POINTER ?
+                                               ESMC_NULL_POINTER : timeZone) );
+
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timeget)(ESMC_Time *ptr,
@@ -75,27 +125,89 @@ extern "C" {
                                 ESMF_KIND_R8 *dayOfYear_r8,
                                 ESMC_TimeInterval *dayOfYear_intvl,
                                 int *status) {
-          int rc = (ptr)->ESMC_TimeGet(yr, yr_i8, mm, dd, d, d_i8, h, m,
-                                         s, s_i8, ms, us, ns, d_r8, h_r8, m_r8,
-                                         s_r8, ms_r8, us_r8, ns_r8,
-                                         sN, sD, calendar, timeZone,
-                                         timeString, dayOfWeek, dayOfMonth,
-                                         midMonth, dayOfYear, dayOfYear_r8,
-                                         dayOfYear_intvl);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+
+          int rc = (ptr)->ESMC_TimeGet(
+                 ((void*)yr    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : yr),
+                 ((void*)yr_i8 == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : yr_i8),
+                 ((void*)mm    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : mm),
+                 ((void*)dd    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : dd),
+                 ((void*)d     == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : d),
+                 ((void*)d_i8  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : d_i8),
+                 ((void*)h     == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : h),
+                 ((void*)m     == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : m),
+                 ((void*)s     == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : s),
+                 ((void*)s_i8  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : s_i8),
+                 ((void*)ms    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : ms),
+                 ((void*)us    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : us),
+                 ((void*)ns    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : ns),
+                 ((void*)d_r8  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : d_r8),
+                 ((void*)h_r8  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : h_r8),
+                 ((void*)m_r8  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : m_r8),
+                 ((void*)s_r8  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : s_r8),
+                 ((void*)ms_r8 == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : ms_r8),
+                 ((void*)us_r8 == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : us_r8),
+                 ((void*)ns_r8 == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : ns_r8),
+                 ((void*)sN    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : sN),
+                 ((void*)sD    == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : sD),
+                 ((void*)calendar   == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : calendar),
+                 ((void*)timeZone   == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : timeZone),
+                 ((void*)timeString == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : timeString),
+                 ((void*)dayOfWeek  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : dayOfWeek),
+                 ((void*)dayOfMonth == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : dayOfMonth),
+                 ((void*)midMonth   == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : midMonth),
+                 ((void*)dayOfYear  == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : dayOfYear),
+                 ((void*)dayOfYear_r8 == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : dayOfYear_r8),
+                 ((void*)dayOfYear_intvl == (void*)ESMC_BAD_POINTER ?
+                                         ESMC_NULL_POINTER : dayOfYear_intvl) );
+
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timeissamecalendar)(ESMC_Time *ptr, ESMC_Time *time,
                                            int *esmf_timeIsSameCalendar,
                                            int *status) {
            *esmf_timeIsSameCalendar =
-                                   (ptr)->ESMC_TimeIsSameCalendar(time, status);
+                 (int) (ptr)->ESMC_TimeIsSameCalendar(time, 
+                         ((void*)status == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : status));
        }
 
        void FTN(c_esmc_timesynctorealtime)(ESMC_Time *ptr,
                                            int *status) {                 
           int rc = (ptr)->ESMC_TimeSyncToRealTime();      
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, ESMF_KIND_I8 *s,
@@ -104,7 +216,8 @@ extern "C" {
                                         int *status) {
           int rc = (ptr)->ESMC_TimeReadRestart(*s, *sN, *sD, calendar,
                                                *timeZone);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, ESMF_KIND_I8 *s,
@@ -112,18 +225,25 @@ extern "C" {
                                          ESMC_Calendar *calendar, int *timeZone,
                                          int *status) {
           int rc = (ptr)->ESMC_TimeWriteRestart(s, sN, sD, calendar, timeZone);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timevalidate)(ESMC_Time *ptr, const char *options,
                                      int *status) {
-          int rc = (ptr)->ESMC_TimeValidate(options);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          int rc = (ptr)->ESMC_TimeValidate(
+                      ((void*)options == (void*)ESMC_BAD_POINTER ?
+                                                ESMC_NULL_POINTER : options) );
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timeprint)(ESMC_Time *ptr, const char *options,
                                   int *status) {
-          int rc = (ptr)->ESMC_TimePrint(options);
-          if (status != ESMC_NULL_POINTER) *status = rc;
+          int rc = (ptr)->ESMC_TimePrint(
+                      ((void*)options == (void*)ESMC_BAD_POINTER ?
+                                                ESMC_NULL_POINTER : options) );
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 };
