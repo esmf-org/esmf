@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.12 2004/03/15 22:36:41 svasquez Exp $
+! $Id: ESMF_DELayout.F90,v 1.13 2004/03/16 17:44:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.12 2004/03/15 22:36:41 svasquez Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.13 2004/03/16 17:44:03 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1109,7 +1109,7 @@
 !     \begin{description}
 !     \item[layout]
 !        The {\tt ESMF\_DELayout}.
-!     \item[global_counts]
+!     \item[global\_counts]
 !	Total (global) number of elements per axis (array).
 !     \item[decompids]
 !	Decomposition identifier for each axis (aaray).
