@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.2 2004/10/28 15:36:03 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.3 2004/10/28 17:10:23 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,8 +57,13 @@
 // macros used within this source file
 #define VERBOSITY             (1)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
+#ifdef SIGRTMIN
 #define VM_SIG1               (SIGRTMIN)
 #define VM_SIG2               (SIGRTMIN+1)
+#else
+#define VM_SIG1               (SIGUSR1)
+#define VM_SIG2               (SIGUSR2)
+#endif
 // - communication identifiers
 #define VM_COMM_TYPE_MPI1     (0)
 #define VM_COMM_TYPE_PTHREAD  (1)
