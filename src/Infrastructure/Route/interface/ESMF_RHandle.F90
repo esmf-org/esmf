@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.1 2003/08/21 19:57:11 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.2 2003/08/25 22:48:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,9 +45,26 @@
       private
 
 !------------------------------------------------------------------------------
+!     !  ESMF_TransformValues
+!
+!     ! Description of ESMF_TransformValues      
+!     !  Could be a src x dst sparse matrix, but instead
+!     !   this stores explicitly the source index, destination
+!     !   index, and weighting factor.  
+
+      type ESMF_TransformValues      
+      sequence
+      private
+        type (ESMF_LocalArray) :: srcindex             
+        type (ESMF_LocalArray) :: dstindex        
+        type (ESMF_LocalArray) :: weights
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_RouteHandleType
 !
-      integer, parameter :: ESMF_HALO=1, ESMF_REDIST=2, ESMF_REGRID=3
+      integer, parameter :: ESMF_HALOHANDLE=1, ESMF_REDISTHANDLE=2, &
+                            ESMF_REGRIDHANDLE=3
 
 !------------------------------------------------------------------------------
 !     !  ESMF_RouteHandle
@@ -62,7 +79,9 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_RouteHandle, ESMF_HALO, ESMF_REDIST, ESMF_REGRID
+      public ESMF_TransformValues
+      public ESMF_RouteHandle
+      public ESMF_HALOHANDLE, ESMF_REDISTHANDLE, ESMF_REGRIDHANDLE
 
 !------------------------------------------------------------------------------
 !
@@ -92,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.1 2003/08/21 19:57:11 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.2 2003/08/25 22:48:34 nscollins Exp $'
 
 !==============================================================================
 
@@ -219,14 +238,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_RouteHandleGet(rhandle, htype, route1, route2, &
-                                     localdata, label, rc)
+                                     tdata, label, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(in) :: rhandle
       integer, intent(out), optional :: htype
       type(ESMF_Route), intent(out), optional :: route1
       type(ESMF_Route), intent(out), optional :: route2
-      type(ESMF_LocalArray), intent(out), optional :: localdata
+      type(ESMF_TransformValues), intent(out), optional :: tdata
       character(len=*), intent(out), optional :: label
       integer, intent(out), optional :: rc             
 
@@ -244,7 +263,7 @@
 !          Value to be retrieved.         
 !     \item[{[route2]}]
 !          Value to be retrieved.         
-!     \item[{[localdata]}]
+!     \item[{[tdata]}]
 !          Value to be retrieved.         
 !     \item[{[label]}]
 !          Value to be retrieved.         
@@ -281,7 +300,7 @@
           ! code to be added here
         endif
 
-        if (present(localdata)) then
+        if (present(tdata)) then
           ! code to be added here
         endif
 
@@ -293,7 +312,7 @@
         ! Call C++  code
         ! TODO: handle label string going through the interface
         call c_ESMC_RouteHandleGet(rhandle, htype, route1, route2, &
-                                   localdata, status)
+                                   tdata, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "RouteHandle Get error"
           return  
@@ -309,14 +328,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_RouteHandleSet(rhandle, htype, route1, route2, &
-                                     localdata, label, rc)
+                                     tdata, label, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(in) :: rhandle
       integer, intent(in), optional :: htype
       type(ESMF_Route), intent(in), optional :: route1
       type(ESMF_Route), intent(in), optional :: route2
-      type(ESMF_LocalArray), intent(in), optional :: localdata
+      type(ESMF_TransformValues), intent(in), optional :: tdata
       character(len=*), intent(in), optional :: label
       integer, intent(out), optional :: rc            
 
@@ -335,7 +354,7 @@
 !          Value to be set.         
 !     \item[{[route2]}]
 !          Value to be set.         
-!     \item[{[localdata]}]
+!     \item[{[tdata]}]
 !          Value to be set.         
 !     \item[{[label]}]
 !          Value to be set.         
@@ -372,7 +391,7 @@
           ! code to be added here
         endif
 
-        if (present(localdata)) then
+        if (present(tdata)) then
           ! code to be added here
         endif
 
@@ -383,7 +402,7 @@
         ! Call C++  code
         ! TODO: handle label string going through the interface
         call c_ESMC_RouteHandleSet(rhandle, htype, route1, route2, &
-                                   localdata, status)
+                                   tdata, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "RouteHandle Set error"
           return  

@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.1 2003/08/21 19:57:11 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.2 2003/08/25 22:48:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RHandle.C,v 1.1 2003/08/21 19:57:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RHandle.C,v 1.2 2003/08/25 22:48:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -127,10 +127,10 @@
 //
 //EOP
 
-    htype = ESMC_UNINITIALIZED;
+    htype = ESMC_UNINITIALIZEDHANDLE;
     rhandle1 = NULL;
     rhandle2 = NULL;
-    localdata = NULL;
+    tvalues = NULL;
     label = NULL;
 
     return ESMF_SUCCESS;
@@ -159,7 +159,7 @@
 //
 //EOP
 
-    if (localdata != NULL) delete [] localdata;
+    if (tvalues != NULL) delete [] tvalues;
 
     return ESMF_SUCCESS;
 
@@ -180,7 +180,7 @@
       ESMC_HandleType *h,            // out - handle type
       ESMC_Route **rh1,              // out - first route table
       ESMC_Route **rh2,              // out - optional second route table
-      ESMC_LocalArray **ldata,       // out - weights, whatever
+      ESMC_TransformValues **td,     // out - weights, whatever
       char **l) const {              // out - additional name/label
 
 //
@@ -193,7 +193,7 @@
     if (h) *h = htype;
     if (rh1) *rh1 = rhandle1;
     if (rh2) *rh2 = rhandle2;
-    if (ldata) *ldata = localdata;
+    if (td) *td = tvalues;
     if (l) *l = label;
 
     return ESMF_SUCCESS;
@@ -214,7 +214,7 @@
       ESMC_HandleType h,            // in - handle type
       ESMC_Route *rh1,              // in - first route table
       ESMC_Route *rh2,              // in - optional second route table
-      ESMC_LocalArray *ldata,       // in - weights, whatever
+      ESMC_TransformValues *td,     // in - weights, whatever
       char *l) {                    // in - additional name/label
 
 //
@@ -228,7 +228,7 @@
     if (h) htype = h;
     if (rh1) rhandle1 = rh1;
     if (rh2) rhandle2 = rh2;
-    if (ldata) localdata = ldata;
+    if (td) tvalues = td;
     if (l) {
         len = strlen(l) + 1; 
         if (label) delete [] label;

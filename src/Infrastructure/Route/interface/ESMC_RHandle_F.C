@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.1 2003/08/21 19:57:11 nscollins Exp $
+// $Id: ESMC_RHandle_F.C,v 1.2 2003/08/25 22:48:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,19 +47,19 @@ extern "C" {
        void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, 
                                        ESMC_HandleType **htype, 
                                        ESMC_Route **r1, ESMC_Route **r2, 
-                                       ESMC_LocalArray **ar,
+                                       ESMC_TransformValues **tv,
                                        // char **label,   not null terminated
                                        int *status) {
-           *status = (*ptr)->ESMC_RouteHandleGet(*htype, r1, r2, ar, (char **)(NULL));
+           *status = (*ptr)->ESMC_RouteHandleGet(*htype, r1, r2, tv, (char **)(NULL));
        }
 
        void FTN(c_esmc_routehandleset)(ESMC_RouteHandle **ptr, 
                                        ESMC_HandleType *htype, 
                                        ESMC_Route **r1, ESMC_Route **r2, 
-                                       ESMC_LocalArray **ar,
+                                       ESMC_TransformValues **tv,
                                        // char **label,   not null terminated
                                        int *status) {
-           *status = (*ptr)->ESMC_RouteHandleSet(*htype, *r1, *r2, *ar, (char*)(NULL));
+           *status = (*ptr)->ESMC_RouteHandleSet(*htype, *r1, *r2, *tv, (char*)(NULL));
        }
 
        void FTN(c_esmc_routehandlevalidate)(ESMC_RouteHandle **ptr, char *opts,

@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.1 2003/08/21 19:57:11 nscollins Exp $
+// $Id: ESMC_RHandle.h,v 1.2 2003/08/25 22:48:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,11 +49,37 @@
 
 // !PUBLIC TYPES:
  class ESMC_RouteHandle;
+ class ESMC_TransformValues;
 
-typedef enum { ESMC_HALO=1, ESMC_REDIST, ESMC_REGRID, ESMC_UNINITIALIZED } 
-ESMC_HandleType;
+typedef enum { 
+    ESMC_HALOHANDLE=1, ESMC_REDISTHANDLE, ESMC_REGRIDHANDLE, 
+    ESMC_UNINITIALIZEDHANDLE
+} ESMC_HandleType;
 
 // !PRIVATE TYPES:
+
+ // class declaration type
+ class ESMC_TransformValues {   // does NOT inherit from Base class
+     //  Could be a src x dst sparse matrix, but instead
+     //   this stores explicitly the source index, destination
+     //   index, and weighting factor.  
+
+   private:
+        // TODO:  needs a transform type enum
+        // TODO:  needs option for single large sparse matrix, etc.
+
+        ESMC_LocalArray *srcindex;
+        ESMC_LocalArray *dstindex;
+        ESMC_LocalArray *weights;
+
+   public:
+ // accessor methods for class members
+    int ESMC_TransformValuesGet(ESMC_LocalArray **si, ESMC_LocalArray **di,
+                                ESMC_LocalArray **w) const;
+    int ESMC_TransformValuesSet(ESMC_LocalArray *si, ESMC_LocalArray *di,
+                                ESMC_LocalArray *w);
+
+ };   // end class ESMC_TransformValues
 
 
  // class declaration type
@@ -63,7 +89,7 @@ ESMC_HandleType;
      ESMC_HandleType htype;
      ESMC_Route *rhandle1;
      ESMC_Route *rhandle2;
-     ESMC_LocalArray *localdata;
+     ESMC_TransformValues *tvalues;
      char *label;  // for debug
  
 // !PUBLIC MEMBER FUNCTIONS:
@@ -75,10 +101,10 @@ ESMC_HandleType;
 
  // accessor methods for class members
     int ESMC_RouteHandleGet(ESMC_HandleType *h, ESMC_Route **rh1,
-                            ESMC_Route **rh2, ESMC_LocalArray **ldata, 
+                            ESMC_Route **rh2, ESMC_TransformValues **tdata, 
                             char **l) const;
     int ESMC_RouteHandleSet(ESMC_HandleType h, ESMC_Route *rh1,
-                            ESMC_Route *rh2, ESMC_LocalArray *ldata,
+                            ESMC_Route *rh2, ESMC_TransformValues *tdata,
                             char *l);
 
     ESMC_HandleType ESMC_RouteHandleGetType(void) const { return htype; }
@@ -87,7 +113,7 @@ ESMC_HandleType;
        if (count == 1) return rhandle1;
        if (count == 2) return rhandle2;
        return NULL; }
-    ESMC_LocalArray *ESMC_RouteHandleGetLocalData(void) const { return localdata; }
+    ESMC_TransformValues *ESMC_RouteHandleGetTransformValues(void) const { return tvalues; }
     char *ESMC_RouteHandleGetLabel(void) { return label; }
     
     int ESMC_RouteHandleSetType(ESMC_HandleType h) { 
@@ -100,8 +126,8 @@ ESMC_HandleType;
        if (count == 1) rhandle1 = rh;
        if (count == 2) rhandle2 = rh; 
        return ESMF_SUCCESS; }
-    int ESMC_RouteHandleSetLocalData(ESMC_LocalArray *ldata) {
-        localdata = ldata; return ESMF_SUCCESS; }
+    int ESMC_RouteHandleSetTransformValues(ESMC_TransformValues *tdata) {
+        tvalues = tdata; return ESMF_SUCCESS; }
     int ESMC_RouteHandleSetLabel(char *l) {
         int len = strlen(l) + 1;
         if (label != NULL) delete [] label;
