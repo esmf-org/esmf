@@ -22,7 +22,7 @@
       implicit none
     
 !     ! Local variables
-      integer :: status, rc
+      integer :: status, rc, finalrc
       integer :: delist(4)
       integer :: horz_gridtype, horz_stagger
       integer, dimension(2) :: counts
@@ -31,8 +31,14 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       character (len = ESMF_MAXSTR) :: name
+      finalrc = ESMF_SUCCESS
         
       call ESMF_Initialize(rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
@@ -53,20 +59,45 @@
       ! Create a 2 x 2 layout for the Grid
       delist = (/ 0, 1, 2, 3 /)
       layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
+ 
+      if (status.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
 
       grid = ESMF_GridCreate(numDims=2, counts=counts, min=min, max=max, &
                              layout=layout, horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &
                              horz_coord_system=horz_coord_system, &
                              name=name, rc=status)
+ 
+      if (status.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       print *, "Grid example 1 returned"
 
       call ESMF_GridDestroy(grid, status)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+
       print *, "Grid example 1 destroyed"
 
       call ESMF_Finalize(rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+     if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_GridCreateEx.F90"
+     else
+        print *, "FAIL: ESMF_GridCreateEx.F90"
+     end if
+
 
       end program ESMF_GridCreateEx
     
