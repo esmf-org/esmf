@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.2 2003/10/20 22:39:56 nscollins Exp $
+#  $Id: build_rules.mk,v 1.3 2004/02/19 20:45:05 nscollins Exp $
 #
 #  Linus.nag.default.mk
 #
@@ -73,34 +73,45 @@ THREAD_LIB      =
 
 ############################################################
 #
-#  File base_variables
-#
-#
-
-#
-#     See the file build/base_variables.defs for a complete explanation of all these fields
-#
 AR		   = ar
 AR_FLAGS	   = cr
 RM		   = rm -f
 OMAKE		   = ${MAKE}
 RANLIB		   = ranlib
 SHELL		   = /bin/sh
-SED		   = /usr/bin/sed
+SED		   = /bin/sed
 SH_LD		   = cc
-# ######################### C and Fortran compiler ########################
-#
+# ######################### All compilers ########################
+ifeq ($(ESMF_COMM),mpich)
+C_CC		   = mpicc
+C_FC		   = mpif90
+C_CLINKER	   = mpicc
+C_FLINKER	   = mpif90
+CXX_CC		   = mpiCC -fPIC
+CXX_FC		   = mpif90
+CXX_CLINKER	   = mpiCC
+CXX_FLINKER	   = mpiCC
+C_F90CXXLD         = mpiCC
+C_CXXF90LD         = mpiCC
+else
 C_CC		   = cc
-C_FC		   = f95 
-C_FC_MOD           = -p
+C_FC		   = f90
+C_CLINKER	   = cc
+C_FLINKER	   = f90
+CXX_CC		   = CC -fPIC
+CXX_FC		   = f90
+CXX_CLINKER	   = CC
+CXX_FLINKER	   = CC
+C_F90CXXLD         = g++
+C_CXXF90LD         = g++
+endif
+# ######################### C and Fortran compiler options ################
+C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = cc
-C_FLINKER	   = f95
 C_CCV		   = ${C_CC} --version
-C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
+C_FCV              = ${C_FC} -V
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-#C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g 
@@ -109,30 +120,20 @@ O_COPTFLAGS	   = -O
 O_FOPTFLAGS	   = -O
 # ########################## Fortran compiler ##############################
 #
-FFLAGS          = -YEXT_NAMES=LCS -s 
-F_FREECPP       = -ffree
-F_FIXCPP        = -ffixed
-F_FREENOCPP     = -ffree
-F_FIXNOCPP      = -ffixed
+#FFLAGS          = -w=x77 -kind=byte -dusty -mismatch_all-gline
+FFLAGS          = -kind=byte -dusty
+F_FREECPP       = -free -fpp
+F_FIXCPP        = -fixed -fpp
+F_FREENOCPP     = -free
+F_FIXNOCPP      = -fixed
 # ########################## C++ compiler ##################################
 #
-CXX_CC		   = g++ -fPIC
-CXX_FC		   = f95 -YEXT_NAMES=LCS -s 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = g++
-CXX_FLINKER	   = g++
 CXX_CCV		   = ${CXX_CC} --version
-#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
-#C_F90CXXLD         = f95 
-C_F90CXXLD         = g++
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
-#C_CXXF90LD         = f95
-C_CXXF90LD         = g++
-#C_CXXF90LIBS       = ${MPI_LIB}  
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
+C_F90CXXLIBS       = ${MPI_LIB} -L/soft/com/packages/nag-f95-4.2/lib -lf96 -lnag
+C_CXXF90LIBS       = ${MPI_LIB} -L/soft/com/packages/nag-f95-4.2/lib -lf96 -lnag
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
@@ -147,7 +148,7 @@ OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
 ##################################################################################
 
-PARCH		   = mac_osx
+PARCH		   = linux
 
 SL_SUFFIX   = 
 SL_LIBOPTS  = 
