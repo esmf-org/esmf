@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.87 2004/04/19 23:16:07 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.88 2004/04/20 14:59:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      use ESMF_MachineMod
+      !use ESMF_MachineMod
       use ESMF_VMMod
       use ESMF_ConfigMod
       use ESMF_newDELayoutMod
@@ -178,6 +178,11 @@
 
 
 !------------------------------------------------------------------------------
+!     ! Main program source
+!     !   ESMF_Initialize is called from what language?
+      integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
+
+!------------------------------------------------------------------------------
 !     ! Private global variables
 
       ! Has framework init routine been run?
@@ -202,6 +207,7 @@
       public ESMF_CompType
       public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
       public ESMF_CplComp, ESMF_GridComp
+      public ESMF_MAIN_C, ESMF_MAIN_F90
 
 !------------------------------------------------------------------------------
 
@@ -232,7 +238,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.87 2004/04/19 23:16:07 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.88 2004/04/20 14:59:31 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
