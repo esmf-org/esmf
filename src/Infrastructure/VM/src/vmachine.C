@@ -90,7 +90,7 @@ void vmachine::vmachine_init(void){
     // MPI_Init(NULL, NULL);
     // MPICH fix for broken MPI_Init():
     int fix_argc=0;
-    char *fix_v;
+    char *fix_v=NULL;
     char **fix_argv=&fix_v;
     MPI_Init(&fix_argc, &fix_argv);
   } 
