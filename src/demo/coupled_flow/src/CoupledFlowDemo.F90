@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.3 2003/10/13 19:31:55 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.4 2003/10/23 21:55:41 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -236,8 +236,8 @@
     ! Create and attach subgrids to the subcomponents.
     !
     call ESMF_GridGet(gridTop, global_cell_dim=counts, &
-                               global_min_coords=mincoords, &
-                               global_max_coords=maxcoords, &
+                               global_min_coord=mincoords, &
+                               global_max_coord=maxcoords, &
                                horz_gridtype=horz_gridtype, &
                                vert_gridtype=vert_gridtype, &       
                                horz_stagger=horz_stagger, &      
