@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.15 2004/02/19 21:22:43 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.16 2004/02/25 23:08:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.15 2004/02/19 21:22:43 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.16 2004/02/25 23:08:19 svasquez Exp $'
 !
 !==============================================================================
 !
@@ -267,6 +267,8 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayRedistStore - Release the information stored about this Halo operation
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcarray, srcgrid, srcdatamap, &
                                        dstgrid, dstdatamap, parentlayout, &
@@ -305,6 +307,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayRedistNew - redistribute an Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistNew(srcarray, dstarray, srcgrid, srcdatamap, &
                                   dstgrid, dstdatamap, parentlayout, async, rc) 
@@ -392,6 +396,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayRedistRelease - Release the information stored about this Redist operation
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistRelease(routehandle, rc)
 !
@@ -421,6 +427,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayRedistDeprecated - redistribute an Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistDeprecated(array, layout, globalStart, &
                                   global_dimlengths, rank_trans, olddecompids, &
@@ -476,6 +484,8 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayHaloStore - perform a halo operation
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloStore(array, grid, datamap, routehandle, &
                                      halodirection, blocking, rc)
@@ -651,6 +661,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayHaloNew - perform a halo operation
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, rc)
 !
@@ -714,6 +726,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayHaloRelease - release the information stored about this Halo operation
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloRelease(routehandle, rc)
 !
@@ -743,6 +757,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayHaloDeprecated - halo an Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloDeprecated(array, layout, &
                                           AI_global, global_dimlens, &
@@ -791,6 +807,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayAllGatherGrid - gather a distributed Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayAllGatherGrid(array, grid, datamap, array_out, rc)
 !
@@ -905,6 +923,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayAllGatherList - gather a distributed Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayAllGatherList(array, layout, decompids, &
                                          localAxisLengths, globalDimLengths, &
@@ -958,6 +978,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayGather - gather a distributed Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayGather(array, layout, decompids, &
                                   global_dimlengths, local_maxlengths, deid, &
@@ -1010,6 +1032,8 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ArrayScatter - scatter a single Array
+!
 ! !INTERFACE:
       subroutine ESMF_ArrayScatter(array, layout, decompids, deid, array_out, rc)
 !
