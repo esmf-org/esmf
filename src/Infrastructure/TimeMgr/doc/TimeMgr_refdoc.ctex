@@ -33,35 +33,6 @@
 \newpage
 #endif
 
-%\section{Synopsis}
-%#ifdef STANDALONE
-%\input{TimeMgr_syn}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeMgr_syn}
-%#endif
-
-% \section{Object Model}
-% #ifdef STANDALONE
-% \input{TimeMgr_obj1}
-% \input{TimeMgr_obj2}
-% \input{TimeMgr_obj3}
-% \input{TimeMgr_obj4}
-% \input{TimeMgr_obj5}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj1}
-% \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj2}
-% \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj3}
-% \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj4}
-% \input{../Infrastructure/TimeMgr/doc/TimeMgr_obj5}
-% #endif
-
-%\section{Global Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{TimeMgr_param}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeMgr_param}
-%#endif
-
 % -------------------------
 % Time Manager Introduction
 % -------------------------
@@ -79,6 +50,13 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_specs}
 #endif
+
+%\section{Global Parameters and Definitions}
+%#ifdef STANDALONE
+%\input{TimeMgr_param}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/TimeMgr/doc/TimeMgr_param}
+%#endif
 
 %\subsection{Implementation Notes}
 #ifdef STANDALONE

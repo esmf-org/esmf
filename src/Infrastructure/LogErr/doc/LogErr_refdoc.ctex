@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.6 2003/10/14 20:45:36 cdeluca Exp $
+% $Id: LogErr_refdoc.ctex,v 1.7 2003/10/14 23:44:34 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,8 +20,8 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{LogErr design}
-\newcommand{\myauthors}{Shep Smithline and Erik Kluzek}
+\newcommand{\mytitle}{\Large {\bf LogErr Reference}}
+\newcommand{\myauthors}{\large Shep Smithline and Erik Kluzek}
 #endif
 
 #ifdef STANDALONE
@@ -40,30 +40,7 @@
 \newpage
 #endif
 
-\section{Synopsis}
-#ifdef STANDALONE
-\input{LogErr_syn}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_syn}
-#endif
-
-\section{Object Model}
-#ifdef STANDALONE
-\input{LogErr_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_obj}
-#endif
-
-\section{Global Parameters and Definitions}
-#ifdef STANDALONE
-\input{Log_param}
-\input{Err_param}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/Log_param}
-\input{../Infrastructure/LogErr/doc/Err_param}
-#endif
-
-\section{LogErr Design}
+\section{LogErr Class}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -77,13 +54,6 @@
 \input{LogErr_fex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/LogErr/doc/LogErr_fex}
-#endif
-
-\subsubsection{Class Definition}
-#ifdef STANDALONE
-\input{LogErr_def}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_def}
 #endif
 
 %\subsubsection{Restrictions}
@@ -100,16 +70,16 @@
 \input{../Infrastructure/LogErr/doc/LogErr_implnotes}
 #endif
 
-\section{LogErr Fortran Interface}
-
-%#\subsection{Parameters and Definitions}
+\subsection{Global Parameters and Definitions}
 #ifdef STANDALONE
-%#\input{class_fparam}
+\input{Log_param}
+\input{Err_param}
 #elif defined(CONSTITUENT)
-%#\input{../Infrastructure/LogErr/doc/class_fparam}
+\input{../Infrastructure/LogErr/doc/Log_param}
+\input{../Infrastructure/LogErr/doc/Err_param}
 #endif
 
-%\subsection{Class API}
+\subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_LogErr_fapi}
 #elif defined(CONSTITUENT)

@@ -1,4 +1,4 @@
-% $Id: LogErr_implnotes.tex,v 1.1 2003/10/14 20:40:04 cdeluca Exp $
+% $Id: LogErr_implnotes.tex,v 1.2 2003/10/14 23:44:34 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\subsection{Implementation Notes}
+\subsection{Implementation Notes}
 
 \begin{enumerate}
 
@@ -19,6 +19,20 @@ utility functions that are written in Fortran, but callable from Log's C++ metho
 These utility functions call the standard Fortran write, open and close functions.
 If you call the Log methods from C/C++ code, you bypass the utility functions
 and all I/O is done with the C I/O libraries.
+
+\item There are a few restrictions to keep in mind.  First, the error handling and
+warning routines, {\tt ESMF\_LogErr}, {\tt ESMF\_LogErrMsg}, {\tt ESMF\_LogWarn},
+and {\tt ESMF\_LogWarnErr},
+are expanded using a macro that adds the
+predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ to the argument list of the above
+error handling routines. Using these constants, we can determine the line number and file that ther
+error occurred in.  If
+your preprocessor is not working properly, this expansion will not be done properly and
+the line and file names will not appear correctly when writing out error and warning
+information. We also rely on the C and the Fortran preprocessor
+to set a variety of symbolic constants (defined in ESMF\_LogConstants.inc and 
+ESMF\_ErrConstants.inc).  Again, if your preprocessor is not working properly, these
+constants will not be set properly. 
 
 \end{enumerate}
 
