@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.5 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.6 2004/03/18 23:21:24 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -119,7 +119,7 @@
     print *, "Coupler Init starting"
 
     ! Get layout from coupler component
-    call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+    call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
 
     call ESMF_StateGetName(importState, statename, rc=rc)
     call ESMF_StateGetField(importState, "SIE", src_field, rc=rc)

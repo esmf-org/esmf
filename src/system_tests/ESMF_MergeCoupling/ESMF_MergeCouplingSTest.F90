@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.2 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.3 2004/03/18 23:21:05 nscollins Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -92,7 +92,7 @@
     delist = (/ 0, 1, 2, 3 /)
     layout2 = ESMF_DELayoutCreate(delist, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
+    comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
     call ESMF_DELayoutPrint(layout2, rc=rc)
@@ -101,7 +101,7 @@
     cname2 = "user model 2"
     layout3 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
+    comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
     call ESMF_DELayoutPrint(layout3, rc=rc)
@@ -110,14 +110,14 @@
     cname3 = "user model 3"
     layout3 = ESMF_DELayoutCreate(delist, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    comp3 = ESMF_GridCompCreate(cname3, layout=layout3, rc=rc)
+    comp3 = ESMF_GridCompCreate(cname3, delayout=layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname3), "rc =", rc
     call ESMF_DELayoutPrint(layout3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layout1, rc=rc)
+    cpl = ESMF_CplCompCreate(cplname, delayout=layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cplname), ", rc =", rc
 

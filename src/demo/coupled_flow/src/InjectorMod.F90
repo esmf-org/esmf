@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.5 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.6 2004/03/18 23:21:24 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -238,7 +238,7 @@
       !
       ! Query component for information.
       !
-      call ESMF_GridCompGet(gcomp, layout=layout, grid=grid, rc=rc)
+      call ESMF_GridCompGet(gcomp, delayout=layout, grid=grid, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
          print *, "ERROR in injector_init: getting info from component"
          return

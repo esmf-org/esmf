@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_model2.F90,v 1.5 2004/03/18 23:21:06 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -109,7 +109,7 @@
         print *, "User Comp Init starting"
 
         ! query comp for layout
-        call ESMF_GridCompGet(comp, layout=layout, rc=status)
+        call ESMF_GridCompGet(comp, delayout=layout, rc=status)
 
         ! Add a "humidity" field to the export state.
         counts(1) = 40

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.7 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.8 2004/03/18 23:22:53 nscollins Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -85,7 +85,7 @@
     delist = (/ (i, i=0, ndes-1) /)
     layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
+    comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc 
 

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.8 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.9 2004/03/18 23:21:24 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -143,7 +143,7 @@
 
 
     ! Get our layout and grid from the component
-    call ESMF_GridCompGet(gcomp, layout=layoutTop, grid=gridTop, rc=rc)
+    call ESMF_GridCompGet(gcomp, delayout=layoutTop, grid=gridTop, rc=rc)
 
     ! Sanity check the number of DEs we were started on.
     call ESMF_DELayoutGetNumDEs(layoutTop, ndes, rc)
@@ -190,16 +190,16 @@
 !\begin{verbatim}
     cnameIN = "Injector model"
     layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, by2 /), (/ 0, 0 /), rc)
-    INcomp = ESMF_GridCompCreate(cnameIN, layout=layoutIN, rc=rc)
+    INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
 !\end{verbatim}
 !EOP
 
     cnameFS = "Flow Solver model"
     layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, by4 /), (/ 0, 0 /), rc)
-    FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
+    FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layoutTop, rc=rc)
+    cpl = ESMF_CplCompCreate(cplname, delayout=layoutTop, rc=rc)
 
 
     print *, "Comp Creates finished"

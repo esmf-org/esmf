@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.4 2004/01/30 00:39:19 nscollins Exp $
+! $Id: FlowMod.F90,v 1.5 2004/03/18 23:22:53 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@
 !
 ! Query component for information.
 !
-        call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+        call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
 !
 ! Create the Grid
 !
@@ -195,7 +195,7 @@
 ! note: since we're operating on a five-point stencil, we don't
 !       really care out how the corners get set
 !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
         return
@@ -918,7 +918,7 @@
       ! call ESMF_StateGetData(import_state, "U", field_u, rc)
 
       ! Collect results on DE 0 and output to a file
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
       call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
       ! Frame number from computation

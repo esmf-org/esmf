@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.9 2004/01/30 04:40:59 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.10 2004/03/18 23:21:24 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -132,7 +132,7 @@
 
    
     ! Create the Gridded component, passing in the default layout.
-    compGridded = ESMF_GridCompCreate("Coupled Flow Demo", layout=layoutTop, rc=rc)
+    compGridded = ESMF_GridCompCreate("Coupled Flow Demo", delayout=layoutTop, rc=rc)
 
 
     print *, "Comp Creates finished"
