@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.9 2003/04/01 23:47:56 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.10 2003/04/02 20:47:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,61 @@ static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase,
      else
          *status = (tabptr)->ESMC_FTableSetFuncPtr(name, func, ftype);
 
-     //delete[] name;
+     delete[] name;
+}
+
+static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
+    char *name = "localdata";
+    enum dtype *dtype;
+
+    *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, dtype);
+}
+
+static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
+    char *name = "localdata";
+    enum dtype dtype = DT_VOIDP;
+
+    *status = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
+}
+
+static void ESMC_SetServ(void *ptr, int (*func)(), int *status) {
+     int rc, funcrc;
+     int *tablerc = new int;
+     void *f90comp = ptr;
+     ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
+     
+     // TODO: shouldn't need to expand the table here - should be buried
+     // inside ftable code.
+     rc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
+     if (rc != ESMF_SUCCESS) {
+         *status = rc;
+         return;
+     }
+
+     rc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
+                                                           f90comp, tablerc);
+     if (rc != ESMF_SUCCESS) {
+         *status = rc;
+         return;
+     }
+
+     rc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
+     if (rc != ESMF_SUCCESS) {
+         *status = rc;
+         return;
+     }
+
+     if (funcrc != ESMF_SUCCESS) {
+         *status = funcrc;
+         return;
+     }
+     *status = ESMF_SUCCESS;
+     return;
+  
+     // TODO:  see if it is possible to make this simpler and call directly:
+     // rc = (*func)(comp, func_rc);
+     // *status = ESMF_SUCCESS;
+     // return; 
 }
 
 
@@ -111,49 +165,15 @@ extern "C" {
      // be the first entry in the comp derived type.
 
      // ---------- Set Services ---------------
-     void FTN(esmf_compsetservices)(void *ptr, int (*func)(), int *status) {
-         int rc, funcrc;
-         int *tablerc = new int;
-         void *f90comp = ptr;
-         ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
-         
-         rc = (tabptr)->ESMC_FTableExtend(8, 2); // room for 8 funcs, 2 data
-         if (rc != ESMF_SUCCESS) {
-             *status = rc;
-             return;
-         }
-
-         rc = (tabptr)->ESMC_FTableSetFuncPtr("register", (void *)func, 
-                                                        f90comp, tablerc);
-         if (rc != ESMF_SUCCESS) {
-             *status = rc;
-             return;
-         }
-
-         rc = (tabptr)->ESMC_FTableCallVFuncPtr("register", &funcrc);
-         if (rc != ESMF_SUCCESS) {
-             *status = rc;
-             return;
-         }
-
-         if (funcrc != ESMF_SUCCESS) {
-             *status = funcrc;
-             return;
-         }
-         *status = ESMF_SUCCESS;
-         return;
-      
-         // TODO:  is it possible to make this simpler and call it directly:
-         // rc = (*func)(comp, func_rc);
-         // *status = ESMF_SUCCESS;
-         // return; 
-     }
-
      void FTN(esmf_gridcompsetservices)(void *ptr, int (*func)(), int *status) {
-         esmf_compsetservices(ptr, func, status);
+         ESMC_SetServ(ptr, func, status);
      }
      void FTN(esmf_cplcompsetservices)(void *ptr, int (*func)(), int *status) {
-         esmf_compsetservices(ptr, func, status);
+         ESMC_SetServ(ptr, func, status);
+     }
+
+     void FTN(esmf_usercompsetservices)(void *ptr, int (*func)(), int *status) {
+         ESMC_SetServ(ptr, func, status);
      }
 
      // ---------- Set Entry Point ---------------
@@ -165,20 +185,14 @@ extern "C" {
                                void *func, int *phase, int *status, int slen) {
          ESMC_SetTypedEP(ptr, tname, slen, phase, FT_CPL, func, status);
      }
-     void FTN(esmf_compsetentrypoint)(void *ptr, char *tname,
+
+     void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname,
                              void *func, int *phase, int *status, int slen) {
          ESMC_SetTypedEP(ptr, tname, slen, phase, FT_VOIDPINTP, func,  status);
      }
 
 
      // ---------- Set Internal State ---------------
-     static void ESMC_SetDP(ESMC_FTable ***ptr, void **datap, int *status) {
-         char *name = "localdata";
-         enum dtype dtype = DT_VOIDP;
-
-         *status = (**ptr)->ESMC_FTableSetDataPtr(name, *datap, dtype);
-     }
-
      void FTN(esmf_gridcompsetinternalstate)(ESMC_FTable ***ptr, 
                                                  void **datap, int *status) {
          ESMC_SetDP(ptr, datap, status);
@@ -188,7 +202,7 @@ extern "C" {
          ESMC_SetDP(ptr, datap, status);
      }
 
-     void FTN(esmf_compsetinternalstate)(ESMC_FTable ***ptr, char *name, 
+     void FTN(esmf_usercompsetinternalstate)(ESMC_FTable ***ptr, char *name, 
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype dtype = DT_VOIDP;
@@ -202,14 +216,6 @@ extern "C" {
      }
 
      // ---------- Get Internal State ---------------
-     static void ESMC_GetDP(ESMC_FTable ***ptr, void **datap, int *status) {
-         char *name = "localdata";
-         enum dtype *dtype;
-
-         *status = (**ptr)->ESMC_FTableGetDataPtr(name, datap, dtype);
- 
-     }
-
      void FTN(esmf_gridcompgetinternalstate)(ESMC_FTable ***ptr, 
                                                  void **datap, int *status) {
          ESMC_GetDP(ptr, datap, status);
@@ -219,7 +225,7 @@ extern "C" {
          ESMC_GetDP(ptr, datap, status);
      }
 
-     void FTN(esmf_compgetinternalstate)(ESMC_FTable ***ptr, char *name,
+     void FTN(esmf_usercompgetinternalstate)(ESMC_FTable ***ptr, char *name,
                                          void **datap, int *status, int slen) {
          char *tbuf; 
          enum dtype *dtype;
@@ -232,7 +238,6 @@ extern "C" {
          delete[] tbuf;
      }
 
-
-};
+}
 
 
