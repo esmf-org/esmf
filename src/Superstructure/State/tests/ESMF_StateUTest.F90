@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.27 2004/10/05 15:16:30 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.28 2004/10/08 14:38:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,18 +34,18 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.27 2004/10/05 15:16:30 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.28 2004/10/08 14:38:32 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, y, rc, num, number, npets
+      integer :: x, rc, num, number, npets
       logical :: IsNeeded
-      character(ESMF_MAXSTR) :: statename, bundlename, dataname, bname
+      character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
       type(ESMF_Field) :: field1, field2, field3(3), field4
-      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5, bundle6
-      type(ESMF_State) :: state1, state2, state3, state4
-      type(ESMF_Array) :: array1, array2(2), array3, array3a, array4
+      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle5
+      type(ESMF_State) :: state1, state2
+      type(ESMF_Array) :: array1, array2(2), array3, array3a
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
       type(ESMF_VM):: vm
@@ -58,11 +58,8 @@
       character(ESMF_MAXSTR) :: name
 
       ! local variables needed to pass into function/subroutine calls
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
-
-      ! instantiate a State 
-      type(ESMF_State) :: state
+      !character(ESMF_MAXSTR) :: validate_options
+      !character(ESMF_MAXSTR) :: print_options
 
 !-------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -504,14 +501,12 @@
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "IsNeeded = ", IsNeeded
       !------------------------------------------------------------------------
-
-      !Commented out because it crashes
-      ! Bug report 969116 has been opened
-      ! Test adding an uninitialized Bundle to a State
-      !call ESMF_StateAddBundle(state1, bundle5, rc=rc)
-      !write(name, *) "Adding an uninitialized  Bundle to a State Test"
-      !call ESMF_Test((rc.ne.ESMF_SUCCESS), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+ 
+      !EX_UTest
+      call ESMF_StateAddBundle(state1, bundle5, rc=rc)
+      write(name, *) "Adding an uninitialized  Bundle to a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
