@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.31 2005/03/02 00:36:11 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.32 2005/03/02 00:47:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -205,9 +205,9 @@ void ESMC_VMK::vmk_obtain_args(void){
     ++argc;
   }
   // now argc and argv are valid
-  printf("argc=%d\n", argc);
-  for (i=0; i<argc; i++)
-    printf("%s\n", argv[i]);
+  //printf("argc=%d\n", argc);
+  //for (i=0; i<argc; i++)
+  //  printf("%s\n", argv[i]);
 }
 
 
