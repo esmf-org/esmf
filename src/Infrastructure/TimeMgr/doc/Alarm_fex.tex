@@ -1,4 +1,4 @@
-% $Id: Alarm_fex.tex,v 1.4 2003/08/15 20:23:21 cdeluca Exp $
+% $Id: Alarm_fex.tex,v 1.5 2003/08/18 15:10:26 cdeluca Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -20,10 +20,10 @@ call ESMF_AlarmInit(alarm2, ringInterval=alarmInterval)
 call ESMF_ClockAddAlarm(modelTime, alarm1)
 call ESMF_ClockAddAlarm(modelTime, alarm2)
 
-! time step, clock reports active alarms in RingingAlarms list
+! Time step, clock reports active alarms in RingingAlarms list
 call ESMF_ClockAdvance(modelTime, ringingAlarms, numActiveAlarms)
 
-! process any active alarms
+! Process any active alarms
 do i=1,numActiveAlarms
   if (ringingAlarms(i) == alarm(i)) then
     ! process alarm(i)
