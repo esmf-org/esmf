@@ -1,10 +1,14 @@
-// $Id: ESMC_TimeInstant.h,v 1.4 2002/10/14 16:18:59 eschwab Exp $
+// $Id: ESMC_TimeInstant.h,v 1.5 2002/10/15 03:27:37 eschwab Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
 //
 // ESMF TimeInstant C++ definition include file
-//
-// < Something here from legal about the status of the code, like:
-//  This code developed by NASA/NCAR/ESMF whatever, and is covered by
-//  the terms of the GNU public license.  See license file for more details. >
 //
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
@@ -27,8 +31,6 @@
 //-------------------------------------------------------------------------
 //BOP
 // !CLASS: ESMC_TimeInstant - represents a specific point in time
-
-//-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
@@ -53,7 +55,10 @@
 // to the Julian date of zero UTC.  This will ease conversions 
 // between Julian and Gregorian calendars.
 //
+//-------------------------------------------------------------------------
+//
 // !USES:
+//#include <ESMC_Base.h>           // inherited Base class ??
  #include <ESMC_Time.h>           // inherited Time class
  #include <ESMC_Calendar.h>       // associated Calendar class
 
@@ -64,10 +69,8 @@
  // class configuration type:  not needed for TimeInstant
 
  // class definition type
- class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
- {
-	friend class ESMC_Calendar;
-
+ class ESMC_TimeInstant : public ESMC_Time { // inherits ESMC_Time & Base
+                                             // classes ??
   private:   // corresponds to F90 module 'type ESMF_TimeInstant' members 
     ESMC_Calendar *Calendar;    // associated calendar
 	int Timezone;				// Offset from GMT
@@ -108,7 +111,7 @@
     // generic interface -- via variable argument lists
     //   can map to F90 named-optional-arguments interface
 	// (TMG 2.1, 2.5.1)
-    int ESMC_TimeInstGet(const char *TimeList, ...);
+    int ESMC_TimeInstGet(const char *TimeList, ...) const;
     // e.g. ESMC_TimeInstGet("YR:MM:DD", (int *)YR,(int *)MM, (int *)DD);
 
     int ESMC_TimeInstSet(const char *TimeList, ...);
@@ -145,15 +148,19 @@
 					 int Timezone);
     ~ESMC_TimeInstant(void);
 
- // < list the rest of the public interface methods here >
+ // < declare the rest of the public interface methods here >
 
+	friend class ESMC_Calendar;
+
+// !PRIVATE MEMBER FUNCTIONS:
+//
+  private:
+//
+ // < declare private interface methods here >
+//
 //EOP
 //-------------------------------------------------------------------------
 
-  private:
-//
- // < list private interface methods here >
-//
 
  };   // end class ESMC_TimeInstant
 
