@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.5 2004/04/21 20:02:03 nscollins Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.6 2004/06/02 08:02:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_ArraySpec.F90"
 !
 ! ESMF ArraySpec module
       module ESMF_ArraySpecMod
@@ -78,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.5 2004/04/21 20:02:03 nscollins Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.6 2004/06/02 08:02:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -111,6 +113,8 @@
 
 !==============================================================================
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecGet"
 !BOP
 ! !IROUTINE: ESMF_ArraySpecGet - Get values from an ArraySpec
 !
@@ -125,25 +129,25 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Return information about the contents of a {\tt ESMF\_ArraySpec} type.
+! Return information about the contents of an {\tt ESMF\_ArraySpec}.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[arrayspec]
-! An {\tt ESMF\_ArraySpec} object.
+!   The {\tt ESMF\_ArraySpec} to query.
 ! \item[rank]
-! {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc). Maximum
-! allowed is 7D.
+!   {\tt ESMF\_Array} rank (dimensionality -- 1D, 2D, etc). Maximum
+!    possible is 7D.
 ! \item[type]
-! {\tt ESMF\_Array} type. Valid types include {\tt ESMF\_DATA\_INTEGER},
-! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
-! {\tt ESMF\_DATA\_CHARACTER}.
+!  {\tt ESMF\_Array} type. Valid types include {\tt ESMF\_DATA\_INTEGER},
+!  {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
+!  {\tt ESMF\_DATA\_CHARACTER}.
 ! \item[kind]
-! {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
+!  {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
+!  {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
 ! \item[[rc]]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
@@ -171,6 +175,8 @@
         end subroutine ESMF_ArraySpecGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecSetThree"
 !BOP
 ! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
 !
@@ -194,19 +200,19 @@
 ! The arguments are:
 ! \begin{description}
 ! \item[arrayspec]
-! Uninitialized array spec.
+!  The {\tt ESMF\_ArraySpec} to set.
 ! \item[rank]
-! Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 7D.
+!  Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
 ! \item[type]
-! {\tt ESMF\_Array} type. Valid types include {\tt ESMF\_DATA\_INTEGER},
-! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
-! {\tt ESMF\_DATA\_CHARACTER}.
+!  {\tt ESMF\_Array} type. Valid types include {\tt ESMF\_DATA\_INTEGER},
+!  {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
+!  {\tt ESMF\_DATA\_CHARACTER}.
 ! \item[kind]
-! {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!  {\tt ESMF\_Array} kind. Valid kinds include {\tt ESMF\_KIND\_I4},
+!  {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
+!  {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
 ! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
@@ -245,6 +251,8 @@
         end subroutine ESMF_ArraySpecSetThree
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArraySpecSetTwo"
 !BOPI
 ! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
 !
@@ -260,22 +268,22 @@
 !
 ! !DESCRIPTION:
 ! Creates a description of the data -- the type, the dimensionality, etc.
-! This specification can be used in an {\tt ESMF\_ArrayCreate} call with
-! data to create a full {\tt ESMF\_Array}.
+! This internal version allows the type and kind to be specified as a single
+! argument, which eases the depth of the nesting of case statements in
+! handling all possible combination of arguments.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[arrayspec]
-! Uninitialized array spec.
+!   The {\tt ESMF\_ArraySpec} to set.
 ! \item[rank]
-! Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 7D.
+!   Array rank (dimensionality -- 1D, 2D, etc). Maximum allowed is 7D.
 ! \item[typekind]
-! {\tt ESMF\_Array} kind. Valid kinds include 
-! {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4}, {\tt ESMF\_I8}, 
-! {\tt ESMF\_R4}, {\tt ESMF\_R8},
-! {\tt ESMF\_C8}, {\tt ESMF\_C16}.
+!  {\tt ESMF\_Array} kind. Valid kinds include 
+!  {\tt ESMF\_I1}, {\tt ESMF\_I2}, {\tt ESMF\_I4}, {\tt ESMF\_I8}, 
+!  {\tt ESMF\_R4}, {\tt ESMF\_R8}, {\tt ESMF\_C8}, {\tt ESMF\_C16}.
 ! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOPI
