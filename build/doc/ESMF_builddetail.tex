@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.7 2003/09/25 21:22:05 flanigan Exp $
+%  $Id: ESMF_builddetail.tex,v 1.8 2003/09/26 22:02:46 flanigan Exp $
 
 
 \subsection{Make System}
@@ -148,7 +148,7 @@ level makefile include the top level makefile. The top level makefile
 includes build/common.mk and then build/common.mk includes a
 configuration file from the build\_config directory.  The configuration
 files in the build\_config directory contain the architecture and site
-specific build settings.  The architecture and site that a file
+specific build settings.  The architecture, compiler and site that a file
 configures is determined by its name.  The configuration makefile
 fragments follow this naming convention:
 
@@ -159,9 +159,10 @@ fragments follow this naming convention:
 Where ESMF\_ARCH, ESMF\_COPMILER, and ESMF\_SITE are environment
 variables either set by the user or given default values by the build
 system. ESMF\_ARCH is the current architecture and will have the value
-returned by the command uname -s.  ESMF\_SITE is the current machine
-or compiler name. If there are no site specific files for a particular
-architecture, then ESMF\_SITE will be set to default.  Examples:
+returned by the command uname -s.  ESMF\_COMPILER is the compiler
+name.  ESMF\_SITE is the current machine name. If there are no site
+specific files for a particular architecture, then ESMF\_COMPILER and
+ESMF\_SITE will be set to default.  Examples:
 
 \begin{verbatim}
     AIX.default.default.mk      ! Default configuation for RS6000.
