@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2002/10/04 15:44:04 jwolfe Exp $ 
+# $Id: base_variables,v 1.6 2002/11/26 21:03:24 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -11,9 +11,13 @@ SHELL			= /bin/sh
 SED			= /bin/sed
 # ######################### Fortran compiler options ######################
 #
+AR32_64			= ar -X 32_64
 C_64BIT			= -q64
+DARCH			= -DAIX
+DsysARCH                = -DsysAIX
 NO_AUTO_PARALLEL	= -qsmp=noauto
 NO_INLINING		= -Q
+NO_LINE_DIRECTIVES	= -P
 REAL8			= -qrealsize=8
 STRICT			= -qstrict
 FPP_PREFIX		= -WF,

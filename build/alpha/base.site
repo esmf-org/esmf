@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2002/11/26 21:00:55 jwolfe Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -7,51 +7,29 @@
 #     XXX_LIB - location of library XXX
 #     XXX_INCLUDE - directory for include files needed for library XXX
 #
-# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/installation.html 
+# Location of BLAS and LAPACK.  See ${ESMF_DIR}/docs/instllation.html
 # for information on retrieving them.
 #
-# If you are lucky, you may have the DEC Alpha math library installed on 
-# your machine. The library name is dxml, and it contains both BLAS and Lapack.
+# Important: If you use the IBM version of lapack you must include 
+#  -lessl at the end of the line defining the BLAS libraries.
 #
-# Using prun:
-MPI_LIB         = -lmpiuni
-MPI_INCLUDE     = -I${ESMF_DIR}/src/Infrastructure/mpiuni
-#MPIRUN          = ${ESMF_DIR}/scripts/mpirun.alpha
-MPIRUN          = ${ESMF_DIR}/src/Infrastructure/mpiuni/mpirun
-
-
-
-SOFT_HOME = /usr
-#BLAS_LIB        = -ldxml 
-#LAPACK_LIB      = 
-#BLAS_LIB       = ${SOFT_HOME}/blaslapack/alpha/blas.a ${FC_LIB}
-#LAPACK_LIB     = ${SOFT_HOME}/blaslapack/alpha/lapack.a
+#  If you list -lessl or -lesslp2 below you must have -DESMC_HAVE_ESSL listed in the 
+# PCONF line at the bottom of this file.
+#
+BLAS_LIB       = 
+LAPACK_LIB     = -L/usr/lib -lcxml
+NETCDF_LIB     = -L/usr/ulocal/netcdf-3.5.0/lib -lnetcdf
+NETCDF_INCLUDE = -I/usr/ulocal/netcdf-3.5.0/include
+NETCDF64_LIB   = 
+HDF_LIB	       = /usr/ulocal/HDF4.1r5/lib/libmfhdf.a \
+                 /usr/ulocal/HDF4.1r5/lib/libdf.a \
+                 /usr/ulocal/HDF4.1r5/lib/libjpeg.a \
+                 /usr/ulocal/HDF4.1r5/lib/libz.a
+HDF_INCLUDE    = -I/usr/ulocal/HDF4.1r5/include
 #
 # Location of MPI (Message Passing Interface) software
 #
-# If you are using the MPICH 1.1 (or higher) implementation of MPI, 
-# or if you are using MPIUNI for MPI, add -DESMC_HAVE_INT_MPI_COMM 
-# to the line MPI_INCLUDE below.
-#
-#MPI_HOME       = $(SOFT_HOME)/mpich-1.1.2
-#MPI_BUILD_HOME = ${MPI_HOME}/build/alpha/ch_p4
-#MPI_LIB        = -L${MPI_BUILD_HOME}/lib -lpmpich -lmpich
-#MPI_INCLUDE    = -I${MPI_HOME}/include -I${MPI_BUILD_HOME}/include -DESMC_HAVE_INT_MPI_COMM
-#MPIRUN         = ${MPI_BUILD_HOME}/bin/mpirun
-#
-# The following lines can be used with MPIUNI
-#
-#MPI_LIB         = ${LDIR}/libmpiuni.a
-#MPI_INCLUDE     = -I${ESMF_DIR}/src/sys/src/mpiuni -DESMC_HAVE_INT_MPI_COMM
-#MPIRUN          = ${ESMF_DIR}/src/sys/src/mpiuni/mpirun
-#
-# If you are using the Compaq/DEC implementation of MPI you can use the following
-# If the machine has prun instead of mpirun or dmpirun you can use 
-# ${ESMF_DIR}/bin/mpirun.prun below for MPIRUN
-#
-#ESMC_MPIRUN      = prun -B 2 -N 2
-# jobs on compaq must be qsub'ed
-#ESMC_MPIRUN      = 
-#MPI_LIB        = -lmpi -lelan
-#MPI_INCLUDE    = -DESMC_HAVE_INT_MPI_COMM
-#MPIRUN         =  ${ESMC_MPIRUN}
+MPI_LIB        = -L/usr/opt/mpi/lib -lmpi
+MPI_INCLUDE    = -I/usr/opt/mpi/include
+MPIRUN         = 
+MPI64_LIB      = 

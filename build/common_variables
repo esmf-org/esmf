@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.11 2002/11/26 19:06:17 jwolfe Exp $ 
+# $Id: common_variables,v 1.12 2002/11/26 20:59:03 jwolfe Exp $ 
 #
 # LDIR (defined from $ESMF_DIR) determines the libraries that are linked.
 # PDIR (defined from $ESMF_DIR) determines where the libraries are built.
@@ -46,16 +46,11 @@ ESMC_INCLUDE	= -I${ESMF_DIR}/${LOCDIR} \
 		  -I${ESMF_DIR}/build/${ESMF_ARCH} \
 		  -I${ESMF_DIR}/include \
 		  -I${ESMC_MODDIR} \
-		  ${MPE_INCLUDE} \
-		  ${AMS_INCLUDE} \
-		  ${MPI_INCLUDE} \
-		  ${MP_INCLUDE} \
-		  ${PCL_INCLUDE} \
 		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_DIR}/timing
-CCPPFLAGS	= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
+CCPPFLAGS	= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
-FCPPFLAGS	= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
+FCPPFLAGS	= ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
 F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
 #
