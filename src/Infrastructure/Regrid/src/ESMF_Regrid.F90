@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.56 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.57 2004/03/09 23:16:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.56 2004/03/08 16:03:24 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.57 2004/03/09 23:16:14 svasquez Exp $'
 
 !==============================================================================
 
@@ -168,49 +168,37 @@
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item [srcarray]
 !           {\tt ESMF\_Array} containing source data.
-!
 !     \item [srcgrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.
-!
 !     \item [srcdatamap]
 !           {\tt ESMF\_DataMap} which describes how the array maps to
 !           the specified source grid.
-!
 !     \item [dstgrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           destination array should be decomposed.
-!
 !     \item [dstdatamap]
 !           {\tt ESMF\_DataMap} which describes how the array should map to
 !           the specified destination grid.
-!
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
-!
 !     \item [{[regridtype]}]
 !           Type of regridding to do.  A set of predefined types are
 !           supplied.
-!
 !     \item [{[srcmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
-!
 !     \item [{[dstmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid destination data.
-!
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
 !           If not present, default is to do synchronous communications.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -936,7 +924,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1004,7 +991,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1052,7 +1038,6 @@
 !           {\tt ESMF\_RouteHandle} associated with this Bundle Regridding.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1120,7 +1105,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1258,7 +1242,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1379,7 +1362,6 @@
 !           {\tt ESMF\_RouteHandle} associated with this Field Regridding.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1454,7 +1436,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 
@@ -1536,7 +1517,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
@@ -1584,7 +1564,6 @@
 !           needed.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !
