@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.49 2004/04/13 22:55:37 jwolfe Exp $
+// $Id: ESMC_Base.h,v 1.50 2004/04/23 17:31:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
  // include files.
 
 #include "stdio.h"
-#include <ESMC.h>
+#include <ESMC_Start.h>
 
 //-----------------------------------------------------------------------------
 //BOP
