@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.1 2004/02/24 22:07:27 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.2 2004/02/26 20:45:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt ESMC_VM} and {\tt ESMC_VMPlan} 
+//  allows F90 to call C++ for supporting {\tt ESMC\_VM} and {\tt ESMC\_VMPlan} 
 //  class functions.
 //
 //EOP
