@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.39 2003/09/23 19:24:33 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.40 2003/09/24 22:58:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.39 2003/09/23 19:24:33 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.40 2003/09/24 22:58:50 jwolfe Exp $'
 
 !==============================================================================
 
@@ -368,16 +368,16 @@
 !EOP
       integer :: status
       logical :: rcpresent
-      integer :: n, rank, size
+      integer :: n, n1, n2, size
       integer(ESMF_KIND_I4), dimension(:), pointer :: dstIndex, srcIndex
       real(ESMF_KIND_R8) :: zero
       real(ESMF_KIND_R8), dimension(:), pointer :: weights
-      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData, dstData  ! TODO
+      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData  ! TODO
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData  ! TODO
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_Route) :: rh
       type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
-      type(ESMF_DomainList) :: domainlist
       integer :: numlinks
       type(ESMF_LocalArray) :: gatheredArray, srcLocalArray
       type(ESMF_TransformValues) :: tv
@@ -403,9 +403,8 @@
      ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
      ! gatheredData and dstData can be whatever the user wants - so this code
      ! might need to move into another file and be macroized heavily for TKR.
-     call ESMF_TransformValuesGet(tv, numlist=numlinks, domainlist=domainlist, &
-                                  srcindex=srcindexarr, dstindex=dstindexarr, &
-                                  weights=weightsarr, rc=rc)
+     call ESMF_TransformValuesGet(tv, numlist=numlinks, srcindex=srcindexarr, &
+                                  dstindex=dstindexarr, weights=weightsarr, rc=rc)
 
      call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
      call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
@@ -419,12 +418,13 @@
      ! the dstarray argument to this function.  and what about halo widths?
 
      !size = tv%domainlist%total_points
-     size = domainlist%total_points
+     !size = domainlist%total_points
+     size = 2000
 
      ! TODO: fix to allow for rank > gridrank
 
-     call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, rc=status)
-     gatheredArray = ESMF_LocalArrayCreate(rank, type, kind, size, rc)
+     call ESMF_ArrayGet(srcarray, type=type, kind=kind, rc=status)
+     gatheredArray = ESMF_LocalArrayCreate(1, type, kind, size, rc)
      srcLocalArray = srcarray
      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, status)
 
@@ -447,8 +447,9 @@
      !*** do the regrid
 
      do n=1,numlinks
-       dstData(dstIndex(n)) = dstData(dstIndex(n)) &
-                            + (gatheredData(srcIndex(n)) * weights(n))
+       n1 = dstIndex((n-1)*2 + 1)
+       n2 = dstIndex((n-1)*2 + 2)
+       dstData(n1,n2) = dstData(n1,n2) + (gatheredData(srcIndex(n)) * weights(n))
      end do
 
      ! set return codes

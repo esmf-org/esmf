@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.16 2003/09/23 19:20:34 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.17 2003/09/24 22:59:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.16 2003/09/23 19:20:34 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.17 2003/09/24 22:59:13 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -181,7 +181,7 @@
 
       type(ESMF_TransformValues), intent(inout) :: tv
       integer, intent(in) :: src_add
-      integer, intent(in) :: dst_add
+      integer, dimension(2), intent(in) :: dst_add
       real(kind=ESMF_KIND_R8), intent(in) :: weight
       integer, intent(out), optional :: rc
 
@@ -229,21 +229,20 @@
       call ESMF_LocalArrayGetData(srcindex, src_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(dstindex, dst_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(weights, wgt_ptr, ESMF_DATA_REF, rc)
-      !
+
       ! increment number of links for this regrid
-      !
       numlist = numlist + 1
-      !
+
       !  if new number of links exceeds array sizes, re-size arrays
-      !
       ! TODO: resize check
-      !
+
       ! Add addresses and weights to regrid arrays
-      !
-      call ESMF_TransformValuesSet(tv, numlist=numlist, rc=rc);
-      !src_ptr(tv%numlist) = src_add
-      !dst_ptr(tv%numlist) = dst_add
-      !wgt_ptr(tv%numlist) = weight
+      src_ptr(numlist) = src_add
+      dst_ptr(2*(numlist-1)+1) = dst_add(1)
+      dst_ptr(2*(numlist-1)+2) = dst_add(2)
+      wgt_ptr(numlist) = weight
+      call ESMF_TransformValuesSet(tv, numlist=numlist, srcindex=srcindex, &
+                                   dstindex=dstindex, weights=weights, rc=rc)
 
       rc = ESMF_SUCCESS
 
