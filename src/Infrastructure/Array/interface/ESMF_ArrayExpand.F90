@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.1 2003/07/17 20:02:46 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.2 2003/07/17 21:16:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -193,7 +193,7 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_ArrayCreate
+      public ESMF_ArrayCreate, ESMF_ArrayDestroy
       public ESMF_ArraySetData
       public ESMF_ArrayGetData
       public ESMF_ArrayF90Allocate
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.1 2003/07/17 20:02:46 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.2 2003/07/17 21:16:53 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -17409,6 +17409,80 @@ end interface
 !! < end of automatically generated function >
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayDestroy(array, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Releases all resources associated with this {\tt Array}.
+!
+! The arguments are:
+! \begin{description}
+!
+! \item[array]
+! Destroy contents of this {\tt Array}.
+!
+! \item[[rc]]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+! \end{description}
+!
+! To reduce the depth of crossings of the F90/C++ boundary we first
+! query to see if we are responsible for deleting the data space. If so,
+! first deallocate the space and then call the C++ code to release
+! the object space. When it returns we are done and can return to the user.
+! Otherwise we would need to make a nested call back into F90 from C++ to do
+! the deallocate() during the object delete.
+!
+!EOP
+! !REQUIREMENTS:
+        ! Local vars
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
+        logical :: needsdealloc ! do we need to free space?
+        integer :: rank
+        type(ESMF_DataType) :: type
+        type(ESMF_DataKind) :: kind
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+        needsdealloc = .FALSE.
+        ! TODO: document the current rule - if we do the allocate in
+        ! the case of ESMF_DATA_COPY at create time then we delete the
+        ! space. otherwise, the user needs to destroy the array
+        ! (we will ignore the data) and call deallocate themselves.
+        ! Call Destruct first, then free this memory
+        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
+        if (needsdealloc) then
+          call c_ESMC_ArrayGetRank(array, rank, status)
+          call c_ESMC_ArrayGetType(array, type, status)
+          call c_ESMC_ArrayGetKind(array, kind, status)
+          call ESMF_ArrayF90Deallocate(array, rank, type, kind, status)
+          if (status .ne. ESMF_SUCCESS) then
+            print *, "Array contents destruction error"
+            return
+          endif
+          call c_ESMC_ArraySetNoDealloc(array, status)
+        endif
+        ! Calling deallocate first means this will not return back to F90
+        ! before returning for good.
+        call c_ESMC_ArrayDestroy(array, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array destruction error"
+          return
+        endif
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+        end subroutine ESMF_ArrayDestroy
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !

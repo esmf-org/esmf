@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.4 2003/07/17 20:02:46 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.5 2003/07/17 21:16:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -284,6 +284,7 @@
     int *ubounds,              // upper index number per dim
     int *strides,              // number of bytes between successive items/dim
     int *offsets,              // number of bytes to start of data/dim
+    int halo_widths,           // width of halo region
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
@@ -328,13 +329,15 @@
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_DO_ALLOCATE,
                                      ESMC_DATA_NONE, ESMF_TF_TRUE, 
-                                     lbounds, ubounds, strides, offsets, 0); 
+                                     lbounds, ubounds, strides, 
+                                     offsets, halo_widths); 
      else
          status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_NO_ALLOCATE, 
                                      docopy, ESMF_TF_FALSE, 
-                                     lbounds, ubounds, strides, offsets, 0); 
+                                     lbounds, ubounds, strides, 
+                                     offsets, halo_widths); 
 
      if (rc != NULL)
          *rc = status;
