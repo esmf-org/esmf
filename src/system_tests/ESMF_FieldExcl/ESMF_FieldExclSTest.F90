@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.3 2004/10/07 16:31:22 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.4 2004/10/07 16:55:54 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -98,16 +98,16 @@
 !!!! If running w/ PTHREADS, set both true.
 !!!! If not, set one true and one false.
     ! with PThreads
-    !!i_am_comp1 = .TRUE.
-    !!i_am_comp2 = .TRUE.
+    i_am_comp1 = .TRUE.
+    i_am_comp2 = .TRUE.
     ! without
-    if (pet_id .lt. splitnum) then
-        i_am_comp1 = .TRUE.
-        i_am_comp2 = .FALSE.
-    else
-        i_am_comp1 = .FALSE.
-        i_am_comp2 = .TRUE.
-    endif
+    !!if (pet_id .lt. splitnum) then
+    !!    i_am_comp1 = .TRUE.
+    !!    i_am_comp2 = .FALSE.
+    !!else
+    !!    i_am_comp1 = .FALSE.
+    !!    i_am_comp2 = .TRUE.
+    !!endif
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
