@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.20 2004/05/26 18:31:31 nscollins Exp $
+! $Id: user_model1.F90,v 1.21 2004/05/26 22:11:10 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -128,7 +128,7 @@
         max(2) = 50.0
         horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
-        grid1 = ESMF_GridCreateHorz_XYUni(counts=counts(2:3), &
+        grid1 = ESMF_GridCreateHorzXYUni(counts=counts(2:3), &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
                                 horzStagger=horz_stagger, &

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.13 2004/05/26 18:32:21 nscollins Exp $
+! $Id: user_model2.F90,v 1.14 2004/05/26 22:13:09 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -134,11 +134,11 @@
       call ESMF_FieldDataMapSetDefault(datamap, ESMF_INDEX_IJ, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      grid1 = ESMF_GridCreateHorz_XY( minGlobalCoordPerDim=min, &
-                                     delta1=delta1, delta2=delta2, &
-                                     horzStagger=horzStagger, &
-                                     coordOrder=coordOrder, &
-                                     name="source grid", rc=status)
+      grid1 = ESMF_GridCreateHorzXY( minGlobalCoordPerDim=min, &
+                                    delta1=delta1, delta2=delta2, &
+                                    horzStagger=horzStagger, &
+                                    coordOrder=coordOrder, &
+                                    name="source grid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridDistribute(grid1, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1, &

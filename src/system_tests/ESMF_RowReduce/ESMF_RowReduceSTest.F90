@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.25 2004/05/24 23:09:55 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.26 2004/05/26 22:03:29 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -99,7 +99,7 @@
       horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &

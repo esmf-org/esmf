@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.21 2004/05/26 18:31:32 nscollins Exp $
+! $Id: user_model2.F90,v 1.22 2004/05/26 22:11:33 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -130,10 +130,10 @@
 
       horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
 
-      grid1 = ESMF_GridCreateHorz_XY(minGlobalCoordPerDim=min, &
-                                     delta1=delta1, delta2=delta2, &
-                                     horzStagger=horz_stagger, &
-                                     name="source grid", rc=status)
+      grid1 = ESMF_GridCreateHorzXY(minGlobalCoordPerDim=min, &
+                                    delta1=delta1, delta2=delta2, &
+                                    horzStagger=horz_stagger, &
+                                    name="source grid", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridDistribute(grid1, delayout=delayout, &
                                countsPerDEDim1=countsPerDE1, &

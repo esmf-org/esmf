@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.12 2004/05/24 23:09:01 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.13 2004/05/26 22:14:21 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -96,7 +96,7 @@
       horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
       halo_width = 1
 
-      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
                              horzStagger=horz_stagger, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.23 2004/05/24 23:05:43 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.24 2004/05/26 22:06:43 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -114,11 +114,11 @@
 
     decompids1(1) = 1
     decompids1(2) = 2
-    grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                      minGlobalCoordPerDim=min, &
-                                      maxGlobalCoordPerDim=max, &
-                                      horzStagger=horzStagger, &
-                                      name="source grid", rc=rc)
+    grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                     minGlobalCoordPerDim=min, &
+                                     maxGlobalCoordPerDim=max, &
+                                     horzStagger=horzStagger, &
+                                     name="source grid", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_GridDistribute(grid1, delayout=delayout1, &
                              decompIds=decompids1, rc=rc)
@@ -132,11 +132,11 @@
 
     decompids2(1) = 2
     decompids2(2) = 1
-    grid2 = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                      minGlobalCoordPerDim=min, &
-                                      maxGlobalCoordPerDim=max, &
-                                      horzStagger=horzStagger, &
-                                      name="destination grid", rc=rc)
+    grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                     minGlobalCoordPerDim=min, &
+                                     maxGlobalCoordPerDim=max, &
+                                     horzStagger=horzStagger, &
+                                     name="destination grid", rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_GridDistribute(grid2, delayout=delayout1, &
                              decompIds=decompids2, rc=rc)

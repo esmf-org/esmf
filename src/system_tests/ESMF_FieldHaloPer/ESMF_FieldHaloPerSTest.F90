@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.25 2004/05/24 23:05:22 jwolfe Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.26 2004/05/26 22:05:56 jwolfe Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -301,12 +301,12 @@
 
       gname = "test grid 1"
 
-      grid(1) = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          horzStagger=horz_stagger, &
-                                          periodic=periodic, &
-                                          name=gname, rc=rc)
+      grid(1) = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                         minGlobalCoordPerDim=min, &
+                                         maxGlobalCoordPerDim=max, &
+                                         horzStagger=horz_stagger, &
+                                         periodic=periodic, &
+                                         name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_GridDistribute(grid(1), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
@@ -319,12 +319,12 @@
 
       gname = "test grid 2"
 
-      grid(2) = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          horzStagger=horz_stagger, &
-                                          periodic=periodic, &
-                                          name=gname, rc=rc)
+      grid(2) = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                         minGlobalCoordPerDim=min, &
+                                         maxGlobalCoordPerDim=max, &
+                                         horzStagger=horz_stagger, &
+                                         periodic=periodic, &
+                                         name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_GridDistribute(grid(2), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
@@ -337,12 +337,12 @@
 
       gname = "test grid 3"
 
-      grid(3) = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          horzStagger=horz_stagger, &
-                                          periodic=periodic, &
-                                          name=gname, rc=rc)
+      grid(3) = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                         minGlobalCoordPerDim=min, &
+                                         maxGlobalCoordPerDim=max, &
+                                         horzStagger=horz_stagger, &
+                                         periodic=periodic, &
+                                         name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_GridDistribute(grid(3), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
@@ -355,12 +355,12 @@
 
       gname = "test grid 4"
 
-      grid(4) = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          horzStagger=horz_stagger, &
-                                          periodic=periodic, &
-                                          name=gname, rc=rc)
+      grid(4) = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                         minGlobalCoordPerDim=min, &
+                                         maxGlobalCoordPerDim=max, &
+                                         horzStagger=horz_stagger, &
+                                         periodic=periodic, &
+                                         name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_GridDistribute(grid(4), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
