@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.37 2004/08/28 00:11:24 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.38 2004/09/20 23:05:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -155,6 +155,19 @@
       end type
 
 !------------------------------------------------------------------------------
+!     ! ESMF_GridStorage
+!
+!     ! Type to specify type of grid storage schemes for supported
+!     !  ESMF Grids.  See the public parameters declared below for the possible
+!     !  valid values for this.
+
+      type ESMF_GridStorage
+      sequence
+!      private
+        integer :: storage
+      end type
+
+!------------------------------------------------------------------------------
 !     ! ESMF_CoordOrder
 !
 !     ! Type to specify logical ordering of coordinate in ESMF Grids.
@@ -202,6 +215,8 @@
                                               ! enum for horizontal grid staggering
         type (ESMF_GridVertStagger) :: vertStagger
                                               ! enum for vertical grid staggering
+        type (ESMF_GridStorage) :: gridStorage
+                                              ! enum for grid storage scheme
         type (ESMF_CoordSystem) :: horzCoordSystem  
                                               ! identifier for horizontal
                                               ! physical coordinate system
@@ -268,7 +283,8 @@
       public ESMF_LogRectGrid,   ESMF_GridSpecific,    ESMF_GridStatus
       public ESMF_GridStructure, ESMF_GridHorzStagger, ESMF_GridVertStagger
       public ESMF_GridClass,     ESMF_GridType,        ESMF_GridVertType
-      public ESMF_CoordOrder,    ESMF_CoordIndex,      ESMF_Grid
+      public ESMF_CoordOrder,    ESMF_CoordIndex,      ESMF_GridStorage
+      public ESMF_Grid
 
 !------------------------------------------------------------------------------
 !
@@ -439,6 +455,20 @@
       ESMF_GRID_VERT_STAGGER_TOP      = ESMF_GridVertStagger( 2), &
       ESMF_GRID_VERT_STAGGER_BOTTOM   = ESMF_GridVertStagger( 3)
 
+  ! Recognized grid storage schemes
+  !   ESMF_GRID_STORAGE_UNKNOWN  ! unknown or undefined grid storage
+  !   ESMF_GRID_STORAGE_LOGRECT  ! uses logically rectangular storage, one block per DE
+  !   ESMF_GRID_STORAGE_BLOCK    ! uses logically rectangular storage, multiple blocks per DE
+  !   ESMF_GRID_STORAGE_VECTOR   ! uses vector storage, which infers a scattering of grid
+  !                              ! cell locations and limits available communication and query
+  !                              ! functions
+
+   type (ESMF_GridStorage), parameter, public ::       &
+      ESMF_GRID_STORAGE_UNKNOWN = ESMF_GridStorage(0), &
+      ESMF_GRID_STORAGE_LOGRECT = ESMF_GridStorage(1), &
+      ESMF_GRID_STORAGE_BLOCK   = ESMF_GridStorage(2), &
+      ESMF_GRID_STORAGE_VECTOR  = ESMF_GridStorage(3)
+
   ! Recognized coordinate orderings
   !   ESMF_COORD_ORDER_UNKNOWN  ! unknown or undefined coord ordering
   !   ESMF_COORD_ORDER_XYZ      ! IJK maps to XYZ
@@ -492,7 +522,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.37 2004/08/28 00:11:24 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.38 2004/09/20 23:05:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -511,6 +541,7 @@
          module procedure ESMF_GridVertTypeEqual
          module procedure ESMF_GridHorzStaggerEqual
          module procedure ESMF_GridVertStaggerEqual
+         module procedure ESMF_GridStorageEqual
          module procedure ESMF_CoordOrderEqual
          module procedure ESMF_CoordIndexEqual
 
@@ -535,6 +566,7 @@
          module procedure ESMF_GridVertTypeNotEqual
          module procedure ESMF_GridHorzStaggerNotEqual
          module procedure ESMF_GridVertStaggerNotEqual
+         module procedure ESMF_GridStorageNotEqual
          module procedure ESMF_CoordOrderNotEqual
          module procedure ESMF_CoordIndexNotEqual
 
@@ -605,6 +637,7 @@
       grid%vertGridType    = ESMF_GRID_VERT_TYPE_UNKNOWN
       grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_UNKNOWN
       grid%vertStagger     = ESMF_GRID_VERT_STAGGER_UNKNOWN
+      grid%gridStorage     = ESMF_GRID_STORAGE_UNKNOWN
       grid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
       grid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
       grid%coordOrder      = ESMF_COORD_ORDER_XYZ
@@ -1537,6 +1570,42 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStorageEqual"
+!BOPI
+! !IROUTINE: ESMF_GridStorageEqual - equality of Grid storage schemes
+!
+! !INTERFACE:
+      function ESMF_GridStorageEqual(GridStorage1, GridStorage2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStorageEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStorage), intent(in) :: &
+         GridStorage1,      &! Two grid storage schemes to compare for
+         GridStorage2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Grid storage schemes to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStorage1, GridStorage2]
+!          Two grid storage schemes to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_GridStorageEqual = (GridStorage1%storage == &
+                               GridStorage2%storage)
+
+      end function ESMF_GridStorageEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CoordOrderEqual"
 !BOPI
 ! !IROUTINE: ESMF_CoordOrderEqual - equality of Grid coordinate orders
@@ -1858,6 +1927,42 @@
                                       GridVertStagger2%stagger)
 
       end function ESMF_GridVertStaggerNotEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStorageNotEqual"
+!BOPI
+! !IROUTINE: ESMF_GridStorageNotEqual - inequality of Grid storage schemes
+!
+! !INTERFACE:
+      function ESMF_GridStorageNotEqual(GridStorage1, GridStorage2)
+
+! !RETURN VALUE:
+      logical :: ESMF_GridStorageNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_GridStorage), intent(in) :: &
+         GridStorage1,      &! Two grid storage schemes to compare for
+         GridStorage2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Grid storage schemes to see if
+!     they are not equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[GridStorage1, GridStorage2]
+!          Two grid storage schemes to compare for inequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_GridStorageNotEqual = (GridStorage1%storage /= &
+                                  GridStorage2%storage)
+
+      end function ESMF_GridStorageNotEqual
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
