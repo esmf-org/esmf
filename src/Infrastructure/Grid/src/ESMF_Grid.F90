@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.27 2003/01/15 23:19:15 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.28 2003/01/16 16:24:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -196,7 +196,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.27 2003/01/15 23:19:15 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.28 2003/01/16 16:24:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1454,8 +1454,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:
-!     ESMF_GridGetDE - Get DE information for a DistGrid
+! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetDE(grid, MyDE, MyDEx, MyDEy, &
