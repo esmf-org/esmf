@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.4 2004/01/30 00:19:02 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.5 2004/02/09 17:53:51 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -387,25 +387,25 @@
       ! Create 4 Fields using the Grids and ArraySpec created above
       fname = "Periodic in X"
       thisgrid = grid(1)
-      field(1) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+      field(1) = ESMF_FieldCreate(thisgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Periodic in Y"
       thisgrid = grid(2)
-      field(2) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+      field(2) = ESMF_FieldCreate(thisgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Periodic in both X and Y"
       thisgrid = grid(3)
-      field(3) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+      field(3) = ESMF_FieldCreate(thisgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Not Periodic"
       thisgrid = grid(4)
-      field(4) = ESMF_FieldCreate(thisgrid, arrayspec, relloc=ESMF_CELL_CENTER, &
+      field(4) = ESMF_FieldCreate(thisgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.26 2004/01/28 22:49:11 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.27 2004/02/09 17:51:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.26 2004/01/28 22:49:11 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.27 2004/02/09 17:51:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -186,7 +186,7 @@
       !NEX_UTest
       ! Verifing that a Field can be created with a Grid and Array
       f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   1, dm, "Field 0", ios, rc)
+                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -195,7 +195,7 @@
       !NEX_UTest
       ! second field
       f2 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   1, dm, "Field 1", ios, rc)
+                            ESMF_CELL_CELL, 1, dm, "Field 1", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.2 2003/09/19 22:13:44 cdeluca Exp $
+# $Id: makefile,v 1.3 2004/02/09 17:52:06 nscollins Exp $
 
 # leave alone.
-ALL: lib 
+ALL: build_here 
 
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  =  

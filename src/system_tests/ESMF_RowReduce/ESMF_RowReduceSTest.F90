@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.6 2004/02/03 21:40:18 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.7 2004/02/09 17:51:14 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -150,7 +150,7 @@
 
     ! Create a Field using the Grid and Arrays created above
     fname = "relative humidity"
-    field1 = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(grid1, array1, horizRelloc=ESMF_CELL_CENTER, &
                                     name=fname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_FieldPrint(field1, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.44 2004/02/06 23:23:39 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.45 2004/02/09 17:52:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.44 2004/02/06 23:23:39 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.45 2004/02/09 17:52:25 nscollins Exp $'
 
 !==============================================================================
 
@@ -179,7 +179,7 @@
       
       ! get destination grid info
       !TODO: Get grid masks?
-      call ESMF_DataMapGet(dstDataMap, relloc=dstRelLoc, rc=status)
+      call ESMF_DataMapGet(dstDataMap, horizRelloc=dstRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: DataMapGetRelloc ", &
                  "returned failure"
@@ -208,7 +208,7 @@
                              ESMF_DATA_REF, status)
 
       ! get source grid info
-      call ESMF_DataMapGet(srcDataMap, relloc=srcRelLoc, rc=status)
+      call ESMF_DataMapGet(srcDataMap, horizRelloc=srcRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: DataMapGetRelloc ", &
                  "returned failure"

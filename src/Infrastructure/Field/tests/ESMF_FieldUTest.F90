@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.36 2004/02/06 17:46:48 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.37 2004/02/09 17:51:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.36 2004/02/06 17:46:48 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.37 2004/02/09 17:51:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -62,9 +62,9 @@
       type(ESMF_IOSpec) :: ios
       type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, f2, f3, f4, f5, f6
-      integer :: intattr, intattr2
-      integer :: intattrlist(6)
-      real :: rattr, rattrlist(2), diff
+      integer(ESMF_KIND_I4) :: intattr, intattr2
+      integer(ESMF_KIND_I4) :: intattrlist(6)
+      real(ESMF_KIND_R8) :: rattr, rattrlist(2), diff
       character (len=32) :: lattrstr
       type(ESMF_Logical) :: lattr, lattrlist(6)
       character (len=512) :: cattr, cattr2
@@ -88,7 +88,7 @@
       ! Fields may be created as in FLD1.1.1 without allocating data or specifying 
       ! an associated data array. In this case specifying the grid parameters and 
       ! data array dimensions may be deferred until data is attached.
-      f1 = ESMF_FieldCreateNoData(rc=rc)
+      f1 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -314,7 +314,7 @@
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
@@ -328,7 +328,7 @@
       ! Verifing that a Field can be created with a Grid and Array
       dm = ESMF_DataMapCreate(ESMF_IO_IJ)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   2, dm, "Field 0", ios, rc)
+                            ESMF_CELL_CELL, 2, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -356,7 +356,7 @@
       !EX_UTest
       ! Verifing that a Field cannot be created with an uninitialized Grid and Array
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   3, dm, "Field 0", ios, rc)
+                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -393,7 +393,7 @@
       grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   1, dm, "Field 0", ios, rc)
+                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldGetGrid(f3, grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
@@ -410,7 +410,7 @@
       grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   1, dm, "Field 0", ios, rc)
+                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldGetDataPointer(f3, f90ptr2, rc=rc)
       print *, "data = ", f90ptr2(1,1)
       write(failMsg, *) ""
@@ -423,7 +423,7 @@
       grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   1, dm, "Field 0", ios, rc)
+                            ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
       !call ESMF_FieldPrint(f3, rc=rc)
       intattr = 0
@@ -464,7 +464,8 @@
  
       !NEX_UTest
       ! test setting a real attribute
-      call ESMF_FieldSetAttribute(f3, "Pi", 3.14159, rc)
+      rattr = 3.14159
+      call ESMF_FieldSetAttribute(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
       !call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       call ESMF_FieldGetAttribute(f3, "Pi", rattr, rc)
@@ -475,7 +476,8 @@
 
       !NEX_UTest
       ! test setting a real list
-      call ESMF_FieldSetAttribute(f3, "Vertices", 2, (/1.1, 2.2/), rc)
+      rattrlist = (/ 1.1, 2.2 /)
+      call ESMF_FieldSetAttribute(f3, "Vertices", 2, rattrlist, rc)
       !call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       count = 2   ! expected count

@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.5 2004/01/07 18:41:57 jwolfe Exp $
+! $Id: ESMF_DataMap.F90,v 1.6 2004/02/09 17:52:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,8 @@
         ! individual data item information
         integer :: datarank                             ! scalar, vector, etc.
         integer, dimension (ESMF_MAXDIM) :: ranklength  ! len if > scalar
-        type(ESMF_RelLoc) :: relloc                     ! data item loc/cell
+        type(ESMF_RelLoc) :: horizRelloc                ! data item loc/cell
+        type(ESMF_RelLoc) :: vertRelloc                 ! data item loc/cell
         type(ESMF_Interleave) :: interleave             ! if > scalar
       end type
 
@@ -222,7 +223,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.5 2004/01/07 18:41:57 jwolfe Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.6 2004/02/09 17:52:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -336,7 +337,7 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_DataMapCreateNew(iorder, relloc, gridrank, rc)
+      function ESMF_DataMapCreateNew(iorder, horizRelloc, vertRelloc, gridrank, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DataMap) :: ESMF_DataMapCreateNew
@@ -344,7 +345,8 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_IndexOrder), intent(in) :: iorder
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: gridrank
       integer, intent(out), optional :: rc
 !
@@ -356,18 +358,22 @@ end function
 !    suitable for a {\tt ESMF\_Field} and not for a Packed Array associated with
 !    a Bundle.
 !
-!      \begin{description}
-!      \item[iorder]
-!          One of 8 predefined index orderings.
-!      \item[{[relloc]}]
-!          Relative location of data per cell/vertex.
-!      \item[{[gridrank]}]
-!          Number of dimensions in the Grid.  Default is the same as the 
-!          number of dimensions implied by the iorder input.
-!      \item[{[rc]}] 
-!          Return code equals {\tt ESMF\_SUCCESS} if the method
-!          executes without errors.
-!      \end{description}
+!    \begin{description}
+!    \item[iorder]
+!        One of 8 predefined index orderings.
+!    \item [{[horizRelloc]}] 
+!       Relative location of data per grid cell/vertex in the horizontal grid.
+!    \item [{[vertRelloc]}] 
+!       Relative location of data per grid cell/vertex in the vertical grid.
+!    \item[{[relloc]}]
+!       Relative location of data per cell/vertex.
+!    \item[{[gridrank]}]
+!       Number of dimensions in the Grid.  Default is the same as the 
+!       number of dimensions implied by the iorder input.
+!    \item[{[rc]}] 
+!       Return code equals {\tt ESMF\_SUCCESS} if the method
+!       executes without errors.
+!    \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -397,7 +403,8 @@ end function
           return
         endif
     
-        call ESMF_DataMapConstructNew(dmp, iorder, relloc, gridrank, status)
+        call ESMF_DataMapConstructNew(dmp, iorder, horizRelloc, vertRelloc, &
+                                      gridrank, status)
         if (status .ne. ESMF_SUCCESS) then
            print *, "DataMap construction error"
            return
@@ -496,12 +503,14 @@ end function
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_DataMapConstructNew(datamap, iorder, relloc, gridrank, rc)
+      subroutine ESMF_DataMapConstructNew(datamap, iorder, horizRelloc, &
+                                          vertRelloc, gridrank, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMapType), pointer :: datamap
       type(ESMF_IndexOrder), intent(in) :: iorder
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: gridrank
       integer, intent(out), optional :: rc  
 !
@@ -596,10 +605,16 @@ end function
 !       in this interface assume scalar data and use the relloc the caller gave
         datamap%datarank = 0
         datamap%ranklength = 0
-        if (present(relloc)) then
-          datamap%relloc = relloc
+        if (present(horizRelloc)) then
+          datamap%horizRelloc = horizRelloc
         else
-          datamap%relloc = ESMF_CELL_CENTER
+          datamap%horizRelloc = ESMF_CELL_CENTER
+        endif
+
+        if (present(vertRelloc)) then
+          datamap%vertRelloc = vertRelloc
+        else
+          datamap%vertRelloc = ESMF_CELL_CELL
         endif
 
 !       if user asked for it, return error code
@@ -701,17 +716,18 @@ end function
 !BOP
 ! !INTERFACE:
       subroutine ESMF_DataMapGet(datamap, gridrank, dimlist, &
-                                 relloc, rc)
+                                 horizRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap  
       integer, intent(out), optional :: gridrank    
       integer, dimension (:), intent(out), optional :: dimlist 
-      type(ESMF_RelLoc), optional :: relloc
+      type(ESMF_RelLoc), intent(out), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Return info about the current {\tt ESMF\_DataMap} described by this object.
+!   Return info about the current {\tt ESMF\_DataMap} described by this object.
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -737,8 +753,12 @@ end function
            gridrank = dmp%gridrank
         endif
 
-        if (present(relloc)) then
-           relloc = dmp%relloc
+        if (present(horizRelloc)) then
+           horizRelloc = dmp%horizRelloc
+        endif
+
+        if (present(vertRelloc)) then
+           vertRelloc = dmp%vertRelloc
         endif
 
         if (present(dimlist)) then
@@ -974,7 +994,10 @@ end function
           enddo
         endif
 
-        call ESMF_RelLocString(dmp%relloc, str, rc)
+        print *, "  Horizontal Relative location = "
+        call ESMF_RelLocString(dmp%horizRelloc, str, rc)
+        print *, "  Vertical Relative location = "
+        call ESMF_RelLocString(dmp%vertRelloc, str, rc)
         print *, "  Data relative location = ", trim(str)
         call ESMF_InterleaveString(dmp%interleave%il_type, str, rc)
         print *, "  Interleave type = ", trim(str), ".  Start,end,stride = ",  &

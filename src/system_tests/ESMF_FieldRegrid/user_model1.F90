@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2004/02/05 18:56:58 jwolfe Exp $
+! $Id: user_model1.F90,v 1.9 2004/02/09 17:56:01 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -139,7 +139,8 @@
                                 kind=ESMF_R8)
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
+        humidity = ESMF_FieldCreate(grid1, arrayspec, &
+                                    horizRelloc=ESMF_CELL_CENTER, &
                                     haloWidth=0, name="humidity", rc=rc)
 
         ! Get the allocated array back and get an F90 array pointer
@@ -205,7 +206,7 @@
       
         ! get the grid and coordinates
         allocate(coordArray(2))
-        call ESMF_FieldGetRelLoc(humidity, relloc, status)
+        call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
         call ESMF_FieldGetGrid(humidity, grid, rc=status)
         call ESMF_GridGetDE(grid, localCellCountPerDim=counts, rc=status)
         call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
