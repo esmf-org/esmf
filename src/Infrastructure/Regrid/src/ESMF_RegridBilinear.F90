@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.64 2004/05/10 15:47:11 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.65 2004/05/14 20:03:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.64 2004/05/10 15:47:11 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.65 2004/05/14 20:03:15 jwolfe Exp $'
 
 !==============================================================================
 
@@ -148,7 +148,7 @@
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
-      type(ESMF_RegridType) :: tempRegrid
+      type(ESMF_Regrid) :: tempRegrid
       type(ESMF_TransformValues) :: tv
 
       ! Initialize return code
@@ -168,8 +168,8 @@
       endif
 
       ! Set name and field pointers
-      call ESMF_RegridTypeSet(tempRegrid, srcArray=srcArray, dstArray=dstArray, &
-                              method = ESMF_RegridMethod_Bilinear, rc=status)
+      call ESMF_RegridSet(tempRegrid, srcArray=srcArray, dstArray=dstArray, &
+                          method = ESMF_RegridMethod_Bilinear, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: RegridTypeSet ", &
                  "returned failure"

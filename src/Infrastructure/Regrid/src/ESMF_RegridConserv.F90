@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.27 2004/05/10 17:24:38 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.28 2004/05/14 20:04:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.27 2004/05/10 17:24:38 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.28 2004/05/14 20:04:10 jwolfe Exp $'
 
 !==============================================================================
 
@@ -214,7 +214,7 @@
            coordSystem             !
       type(ESMF_DomainList) :: &
            recvDomainList          !
-      type(ESMF_RegridType) :: &
+      type(ESMF_Regrid) :: &
            tempRegrid              !
       type(ESMF_RelLoc) :: &
            srcRelLoc, dstRelLoc    !
@@ -253,13 +253,13 @@
 
       ! Set regrid method and array pointers       TODO: add name
       if (orderUse.eq.1) then
-        call ESMF_RegridTypeSet(tempRegrid, &
-                                srcArray=srcArray, dstArray=dstArray, &
-                                method = ESMF_RegridMethod_Conserv1, rc=status)
+        call ESMF_RegridSet(tempRegrid, &
+                            srcArray=srcArray, dstArray=dstArray, &
+                            method = ESMF_RegridMethod_Conserv1, rc=status)
       else
-        call ESMF_RegridTypeSet(tempRegrid, &
-                                srcArray=srcArray, dstArray=dstArray, &
-                                method = ESMF_RegridMethod_Conserv2, rc=status)
+        call ESMF_RegridSet(tempRegrid, &
+                            srcArray=srcArray, dstArray=dstArray, &
+                            method = ESMF_RegridMethod_Conserv2, rc=status)
       endif
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructConserv: RegridTypeSet ", &
