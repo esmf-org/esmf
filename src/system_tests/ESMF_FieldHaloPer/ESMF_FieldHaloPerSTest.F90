@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.21 2004/04/27 14:04:34 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.22 2004/04/27 14:19:09 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -245,9 +245,9 @@
       call ESMF_VMGet(vm, petCount=npets, localPet=pe_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
   
-  !   Create a DELayout for the Component
-      ! assign default DE numbers and only use as many as we get procs
-      select case (ndes)
+      ! Create a DELayout for the Component, basing the shape on
+      ! the number of PETs we are given.
+      select case (npets)
          case (4)
              shape(1) = 2
              shape(2) = 2
