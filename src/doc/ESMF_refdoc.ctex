@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.17 2003/04/11 05:01:21 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.18 2003/04/14 16:38:33 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -46,6 +46,9 @@
 \newpage
 %\section{Introduction}
 \input{ESMF_refintro}
+
+%\section{Support}
+\input{ESMF_refsupport}
 
 \newpage
 \begin{htmlonly}
