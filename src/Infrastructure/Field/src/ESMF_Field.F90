@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.171 2004/06/21 22:52:01 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.172 2004/06/21 23:28:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.171 2004/06/21 22:52:01 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.172 2004/06/21 23:28:13 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3199,7 +3199,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldWriteFileNetCDF2DR4 - Write a Field to external storage
 !
 ! !INTERFACE:
@@ -3236,7 +3236,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
         ! Local variables
         logical :: rcpresent
@@ -3392,7 +3392,7 @@
         
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldWriteFileNetCDF3DR4 - Write a Field to external storage
 !
 ! !INTERFACE:
@@ -3429,7 +3429,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
         ! Local variables
         logical :: rcpresent
@@ -3592,7 +3592,7 @@
         
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldWriteFileASCII - Write a Field to external storage
 !
 ! !INTERFACE:
@@ -3624,7 +3624,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 
         ! Local variables
         integer :: status, de_id
