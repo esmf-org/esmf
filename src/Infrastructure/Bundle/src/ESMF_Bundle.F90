@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.50 2004/06/10 04:32:23 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.51 2004/06/10 06:03:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -738,7 +738,7 @@ end function
 !
 ! !DESCRIPTION:
 !     Attaches a logical list attribute to the {\tt bundle}.
-!     The attribute has a single {\tt name} and a {\tt value}.
+!     The attribute has a {\tt name} and a {\tt value}.
 !     The number of logical items in the {\tt value} list is given 
 !     by {\tt count}.
 !
@@ -751,7 +751,7 @@ end function
 !     \item [count]
 !           The number of logicals in the {\tt value} list.
 !     \item [value]
-!           The logical values of the attribute.
+!           The logical values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -807,7 +807,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to an {\tt ESMF\_Bundle}.
+!      Attaches a character attribute to the {\tt bundle}.
 !      The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
@@ -997,8 +997,8 @@ end function
 ! !DESCRIPTION:
 !   Creates an {\tt ESMF\_Bundle} from a list of existing
 !   {\tt ESMF\_Fields} stored in a {\tt fieldList}.  All items in 
-!   the {\tt fieldList} must share a common {\tt ESMF\_Grid}.  
-!   Returns a new {\tt ESMF\_Bundle}.
+!   the {\tt fieldList} must be associated with the same 
+!   {\tt ESMF\_Grid}.  Returns a new {\tt ESMF\_Bundle}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -1015,7 +1015,7 @@ end function
 !      anticipated values.  The current implementation corresponds to the
 !      value {\tt ESMF\_NO\_PACKED\_DATA}, which means that every {\tt ESMF\_Field}
 !      is referenced separately rather than being copied into a single contiguous
-!      buffer.  This is the case no matter what, if anything, is passed in for
+!      buffer.  This is the case no matter what value, if any, is passed in for
 !      this argument.
 !   \item [{[bundleinterleave]}]
 !      The interleave option is not yet implemented.  See Section~\ref{sec:bundlerest}
@@ -1093,7 +1093,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Create an empty {\tt ESMF\_Bundle}.
+!     Creates an {\tt ESMF\_Bundle} with no associated {\tt ESMF\_Fields}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1178,7 +1178,11 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with the {\tt bundle}.
+!     Releases resources associated with the {\tt bundle}.  This
+!     method does not destroy the {\tt ESMF\_Field}s that the
+!     {\tt bundle} contains.  The
+!     {\tt bundle} should be destroyed before the {\tt ESMF\_Field}s
+!     within it are.
 !
 !     \begin{description}
 !     \item [bundle]
@@ -1344,7 +1348,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Return pointers to all {\tt ESMF\_Field}s in an {\tt ESMF\_Bundle}.
+!     Returns pointers to all {\tt ESMF\_Field}s in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1693,7 +1697,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a logical list attribute from an {\tt ESMF\_Bundle}.
+!      Returns a logical list attribute from the {\tt bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1871,7 +1875,8 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the named attribute, 
+!      including {\tt datatype} and {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1925,7 +1930,8 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
-      subroutine ESMF_BundleGetAttrInfoByNum(bundle, attributeIndex, name, datatype, count, rc)
+      subroutine ESMF_BundleGetAttrInfoByNum(bundle, attributeIndex, name, &
+                                             datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
@@ -1937,7 +1943,8 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the indexed attribute, including 
+!      {\tt name}, {\tt datatype}, and {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2153,7 +2160,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns an {\tt ESMF\_Field} from an {\tt ESMF\_Bundle} by index number.
+!      Returns a {\tt field} from a {\tt bundle} by index number.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2242,7 +2249,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Return an array of {\tt ESMF\_Field} names in an {\tt ESMF\_Bundle}.
+!      Returns an array of {\tt ESMF\_Field} names in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2555,16 +2562,20 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print diagnostic information about an {\tt ESMF\_Bundle}
-!      to {\tt stdout}.  The options control the
-!      type of information and level of detail.
+!      Prints diagnostic information about the {\tt bundle}
+!      to {\tt stdout}.  The {\tt options} control the type of 
+!      information and level of detail; the "brief" option is
+!      the only one implemented and is executed by default.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
 !           An {\tt ESMF\_Bundle} object.
 !     \item [{[options]}]
-!           The print options.
+!           Print options.  See Section~\ref{sec:printoptions} for a list
+!           of standard options.  The "brief" option is the only one 
+!           currently implemented, and is executed no matter what value
+!           (if any) is passed in for this argument.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2704,7 +2715,7 @@ end function
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRemoveField"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRemoveField - Remove a Field from a Bundle
 !
 ! !INTERFACE:
@@ -2717,7 +2728,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Delete an {\tt ESMF\_Field} reference from an existing {\tt bundle}
+!      Deletes an {\tt ESMF\_Field} reference from an existing {\tt bundle}
 !      by {\tt name}.  
 !
 !     The arguments are:
@@ -2725,13 +2736,13 @@ end function
 !     \item [bundle]
 !           The {\tt ESMF\_Bundle} to remove the {\tt ESMF\_Field} from.
 !     \item [name]
-!           The name of {\tt ESMF\_Field} to remove.
+!           The name of the {\tt ESMF\_Field} to remove.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  FLD2.5.2
 
 
@@ -2941,7 +2952,8 @@ end function
 !     \item [{[options]}]
 !           Validation options.  See Section \ref{sec:validateoptions} for 
 !           standard option strings.  Please note that only the "brief" option 
-!           is currently supported; other values will be ignored.
+!           is currently supported and will be executed no matter what value
+!           (if any) is passed in for this argument.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundle}
 !           is valid.
@@ -3473,6 +3485,9 @@ end function
 
 
       end module ESMF_BundleMod
+
+
+
 
 
 
