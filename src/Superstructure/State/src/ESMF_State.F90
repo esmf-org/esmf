@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.43 2004/05/24 15:29:46 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.44 2004/05/25 04:46:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.43 2004/05/24 15:29:46 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.44 2004/05/25 04:46:56 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1593,7 +1593,7 @@ end function
 !
 ! !DESCRIPTION:
 !     Releases all resources associated with this {\tt ESMF\_State}.
-!     {\tt ESMF\_States contain references only to other objects;
+!     {\tt ESMF\_State}s contain references only to other objects;
 !     when the {\tt ESMF\_State} is destroyed objects contained in it will
 !     not be destroyed.  Objects inside a {\tt ESMF\_State} cannot be
 !     destroyed before the container {\tt ESMF\_State} is destroyed.
