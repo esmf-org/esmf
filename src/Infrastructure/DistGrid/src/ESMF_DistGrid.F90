@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.68 2003/08/27 23:09:58 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.69 2003/08/28 16:49:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.68 2003/08/27 23:09:58 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.69 2003/08/28 16:49:11 nscollins Exp $'
 
 !==============================================================================
 !
@@ -252,14 +252,16 @@
 !EOP
 
       type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
-      integer :: status=ESMF_FAILURE                ! Error status
-      logical :: rcpresent=.FALSE.                  ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
 
 !     Initialize pointers
       nullify(distgrid)
       nullify(ESMF_DistGridCreateEmpty%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -324,8 +326,8 @@
 !EOP
 
       type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
-      integer :: status=ESMF_FAILURE                ! Error status
-      logical :: rcpresent=.FALSE.                  ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: nDEs(2)
       integer, dimension(:), allocatable :: countsPerDE1, countsPerDE2
 
@@ -334,6 +336,8 @@
       nullify(ESMF_DistGridCreateInternal%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -407,14 +411,16 @@
 !EOP
 
       type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
-      integer :: status=ESMF_FAILURE                ! Error status
-      logical :: rcpresent=.FALSE.                  ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
 
 !     Initialize pointers
       nullify(distgrid)
       nullify(ESMF_DistGridCreateIntSpec%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -533,11 +539,13 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: status=ESMF_SUCCESS               ! Error status
-      logical :: rcpresent=.FALSE.                 ! Return code present
-      integer :: i                                 ! loop counter
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
+      integer :: i                                  ! loop counter
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -621,13 +629,15 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: global_cell_count
       integer :: i, nDE
       integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim, nDEs
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -831,11 +841,13 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: i, j, nDEs
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -924,11 +936,13 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1140,11 +1154,13 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1213,13 +1229,15 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
       integer :: i, j, de
-      integer :: local, thisde                       ! increment counters
-      integer :: global_start, global_end            ! global counters
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: local, thisde                      ! increment counters
+      integer :: global_start, global_end           ! global counters
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1348,11 +1366,13 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1405,12 +1425,14 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: DE_id, local_cell_count, local_count_dim
       integer :: i
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1472,10 +1494,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1517,10 +1541,12 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1575,11 +1601,13 @@
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: i, base, l1, r1, l2, r2
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1705,11 +1733,13 @@
 !EOP
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                             ! Error status
+      logical :: rcpresent                          ! Return code present
       integer :: i, j,  base, local_count
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
