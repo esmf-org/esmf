@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.20 2004/09/20 22:41:19 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.21 2005/03/09 17:20:35 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -22,6 +22,9 @@
       implicit none
 
       private
+
+      ! Compute the halo pattern once and reuse it for each execution.
+      type(ESMF_RouteHandle), save :: precomputed_halo
     
       public FlowSolver_register
 
@@ -221,6 +224,11 @@
 ! temporary fix
       call ESMF_StateAddField(export_state, field_sie, rc)
       rc = ESMF_SUCCESS
+
+! and precompute the halo for one variable - the others can reuse the same
+! route handle because they have identical distributions.
+      precomputed_halo = ESMF_RouteHandleCreate(rc=rc)
+      call ESMF_FieldHaloStore(field_sie, precomputed_halo, rc=rc)
 
       end subroutine Flow_Init
 
@@ -768,7 +776,7 @@
 !
 ! Update RHOU with Halo
 !
-      call ESMF_FieldHalo(field_rhou, rc=status)
+      call ESMF_FieldHalo(field_rhou, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhou halo"
         return
@@ -808,7 +816,7 @@
 !
 ! Update RHOV with Halo
 !
-      call ESMF_FieldHalo(field_rhov, rc=status)
+      call ESMF_FieldHalo(field_rhov, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhov halo"
         return
@@ -928,7 +936,7 @@
 !
 ! Update RHOI with Halo
 !
-      call ESMF_FieldHalo(field_rhoi, rc=status)
+      call ESMF_FieldHalo(field_rhoi, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoI:  rhoi halo"
         return
@@ -1044,12 +1052,12 @@
 !
 ! Update the RHO and SIE arrays with Halo.
 !
-      call ESMF_FieldHalo(field_rho, rc=status)
+      call ESMF_FieldHalo(field_rho, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  rho halo"
         return
       endif
-      call ESMF_FieldHalo(field_sie, rc=status)
+      call ESMF_FieldHalo(field_sie, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  sie halo"
         return
@@ -1197,22 +1205,22 @@
 !
 ! Halo all the velocity and momentum arrays
 !
-      call ESMF_FieldHalo(field_u, rc=status)
+      call ESMF_FieldHalo(field_u, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  u halo"
         return
       endif
-      call ESMF_FieldHalo(field_v, rc=status)
+      call ESMF_FieldHalo(field_v, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  v halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhou, rc=status)
+      call ESMF_FieldHalo(field_rhou, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhou halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhov, rc=status)
+      call ESMF_FieldHalo(field_rhov, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhov halo"
         return
@@ -1298,12 +1306,12 @@
 !
 ! Halo calculated fields to update
 !
-      call ESMF_FieldHalo(field_p, rc=status)
+      call ESMF_FieldHalo(field_p, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  p halo"
         return
       endif
-      call ESMF_FieldHalo(field_q, rc=status)
+      call ESMF_FieldHalo(field_q, precomputed_halo, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  q halo"
         return
@@ -1468,6 +1476,10 @@
         return
       endif
 
+!
+! Release the route information stored for halos
+!
+      call ESMF_FieldHaloRelease(precomputed_halo, rc)
       rc = ESMF_SUCCESS
 
       end subroutine Flow_Final
