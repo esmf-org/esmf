@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.61 2004/12/28 18:17:37 theurich Exp $
+// $Id: ESMC_Base.h,v 1.62 2005/01/11 22:13:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,7 +132,8 @@ struct ESMC_Attribute {
     union {                     // overload pointers to conserve space 
       ESMF_KIND_I4    vi;       // integer, or
       ESMF_KIND_I4  *vip;       // pointer to integer list, or
-      ESMF_KIND_I8    vl;       // long, or
+      ESMF_KIND_I8   vtl;       // long, or
+                  //  ^  TODO: change back to vl when Cray X1 compiler fixed
       ESMF_KIND_I8  *vlp;       // pointer to long list, or
       ESMF_KIND_R4    vf;       // float (real*4), or
       ESMF_KIND_R4  *vfp;       // pointer to float (real*4) list, or

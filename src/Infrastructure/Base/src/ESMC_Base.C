@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.51 2004/12/31 19:57:12 theurich Exp $
+// $Id: ESMC_Base.C,v 1.52 2005/01/11 22:13:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,12 +31,12 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
-//#include "ESMC_VM.h"
+#include "ESMC_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.51 2004/12/31 19:57:12 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.52 2005/01/11 22:13:39 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2138,7 +2138,7 @@ extern "C" {
        return rc;
   }
 
-  *value = attr->vl;
+  *value = attr->vtl;
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeGet(long)
@@ -2197,7 +2197,7 @@ extern "C" {
 
   if (value) {
       if (attr->items == 1)
-          value[0] = attr->vl;
+          value[0] = attr->vtl;
       else for (i=0; i<attr->items; i++)
           value[i] = attr->vlp[i];
   }
@@ -2678,7 +2678,7 @@ extern "C" {
               if (attr->dk == ESMF_I4)
                   *(ESMF_KIND_I4 *)value = attr->vi; 
               else
-                  *(ESMF_KIND_I8 *)value = attr->vl; 
+                  *(ESMF_KIND_I8 *)value = attr->vtl; 
               break;
             case ESMF_DATA_REAL: 
               if (attr->dk == ESMF_R4)
@@ -2794,7 +2794,7 @@ extern "C" {
               if (attr->dk == ESMF_I4)
                   *(ESMF_KIND_I4 *)value = attr->vi; 
               else
-                  *(ESMF_KIND_I8 *)value = attr->vl; 
+                  *(ESMF_KIND_I8 *)value = attr->vtl; 
               break;
             case ESMF_DATA_REAL: 
               if (attr->dk == ESMF_R4)
@@ -3179,7 +3179,7 @@ extern "C" {
              if (dk == ESMF_I4)
                  sprintf(msgbuf, "%d\n", vi); 
              else
-                 sprintf(msgbuf, "%ld\n", vl); 
+                 sprintf(msgbuf, "%ld\n", vtl); 
              break;
         case ESMF_DATA_REAL:      
              if (dk == ESMF_R4)
@@ -3337,7 +3337,7 @@ extern "C" {
         if (dk == ESMF_I4)
             vi = source.vi;  
         else
-            vl = source.vl;  
+            vtl = source.vtl;  
         break;
       case ESMF_DATA_REAL:      
         if (dk == ESMF_R4)
@@ -3483,7 +3483,7 @@ extern "C" {
             if (dk == ESMF_I4)
                 vi = *(ESMF_KIND_I4 *)datap;  
             else
-                vl = *(ESMF_KIND_I8 *)datap;  
+                vtl = *(ESMF_KIND_I8 *)datap;  
             break;
           case ESMF_DATA_REAL:      
             if (dk == ESMF_R4)
