@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.19 2004/06/21 19:38:37 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.20 2004/09/20 22:41:19 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -128,7 +128,11 @@
 !
 ! Read in input file
 !
-      open(10, status="old", file="coupled_flow_input")
+      open(10, status="old", file="coupled_flow_input", action="read", &
+           iostat=status)
+      if (status .ne. 0) then
+         print *, "ERROR: unable to open file coupled_flow_input for reading" 
+      endif
       read(10, input, end=20)
    20 continue
 !

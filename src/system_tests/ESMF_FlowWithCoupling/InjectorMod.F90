@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.19 2004/06/15 13:34:44 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.20 2004/09/20 22:41:19 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -101,7 +101,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
-      integer :: counts(2)
+      integer :: counts(2), status
       real :: in_energy, in_velocity, in_rho
       integer :: printout
       type(ESMF_GridHorzStagger) :: horz_stagger
@@ -125,7 +125,11 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Read in input file
       !
-      open(10, status="old", file="coupled_inject_input")
+      open(10, status="old", file="coupled_inject_input", action="read", &
+           iostat=status)
+      if (status .ne. 0) then
+         print *, "ERROR: unable to open file coupled_inject_input for reading" 
+      endif
       read(10, input, end=20)
    20 continue
 
