@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.5 2003/03/24 17:41:38 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.6 2003/03/27 01:51:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.5 2003/03/24 17:41:38 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.6 2003/03/27 01:51:28 eschwab Exp $'
 
 !==============================================================================
 
@@ -166,7 +166,7 @@
 !EOP
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarInit(calendar, Type, rc)
+      call c_ESMC_CalendarInit(calendar, Type%caltype, rc)
     
       end subroutine ESMF_CalendarInit
     
@@ -224,13 +224,13 @@
 ! !IROUTINE: ESMF_CalendarConvertToTime - Convert user time units to ESMF_BaseTime
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarConvertToTime(YY, MM, DD, D, H, M, S, &
+      subroutine ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
                                             MS, US, NS, &
                                             d_, h_, m_, s_, ms_, us_, ns_, &
                                             Sn, Sd, basetime, rc)
 
 ! !ARGUMENTS:
-      integer, intent(in), optional :: YY
+      integer, intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
       integer, intent(in), optional :: D
@@ -258,8 +258,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[YY]]}]
-!          Integer year CCYY
+!     \item[{[YR]]}]
+!          Integer year CCYR
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
@@ -308,7 +308,7 @@
 
       ! invoke C to C++ entry point
       ! use optional args for any subset
-!       call c_ESMC_CalendarConvertToTime(YY, MM, DD, D, H, M, S, &
+!       call c_ESMC_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
 !                                         MS, US, NS, &
 !                                         d_, h_, m_, s_, ms_, us_, ns_, &
 !                                         Sn, Sd, basetime, rc)
@@ -320,14 +320,14 @@
 ! !IROUTINE: ESMF_CalendarConvertToDate - Convert ESMF_BaseTime into user units
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarConvertToDate(basetime, YY, MM, DD, D, H, &
+      subroutine ESMF_CalendarConvertToDate(basetime, YR, MM, DD, D, H, &
                                             M, S, MS, US, NS, &
                                             d_, h_, m_, s_, ms_, us_, ns_, &
                                             Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_BaseTime), intent(in) :: basetime
-      integer, intent(out), optional :: YY
+      integer, intent(out), optional :: YR
       integer, intent(out), optional :: MM
       integer, intent(out), optional :: DD
       integer, intent(out), optional :: D
@@ -356,8 +356,8 @@
 !     \begin{description}
 !     \item[basetime]
 !          Given {\tt BaseTime} value
-!     \item[{[YY]}]
-!          Integer year CCYY
+!     \item[{[YR]}]
+!          Integer year CCYR
 !     \item[{[MM]}]
 !          Integer month 1-12
 !     \item[{[DD]}]
@@ -404,7 +404,7 @@
 
 !     invoke C to C++ entry point
       ! use optional args for any subset
-!       call c_ESMC_CalendarConvertToDate(basetime, YY, MM, DD, D, H, &
+!       call c_ESMC_CalendarConvertToDate(basetime, YR, MM, DD, D, H, &
 !                                         M, S, MS, US, NS, &
 !                                         d_, h_, m_, s_, ms_, us_, ns_, &
 !                                         Sn, Sd, rc)
