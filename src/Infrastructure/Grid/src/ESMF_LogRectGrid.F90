@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.21 2004/02/18 20:36:46 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.22 2004/02/19 21:07:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.21 2004/02/18 20:36:46 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.22 2004/02/19 21:07:03 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1065,20 +1065,11 @@
         rc = ESMF_FAILURE
       endif
 
-!     Initialize the derived type contents
+!     Initialize the derived type contents, including setting name
       call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridConstructUniform: Grid construct"
         return
-      endif
-
-!     Set the Grid name if present, otherwise construct a default one
-      if (present(name)) then
-         call ESMF_SetName(grid%base, name, "Grid", status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridConstructNew: Setname"
-            return
-         endif
       endif
 
 !     sanity check for bad values
@@ -1318,20 +1309,11 @@
         rc = ESMF_FAILURE
       endif
 
-!     Initialize the derived type contents
+!     Initialize the derived type contents, including setting name
       call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridConstructSpecd: Grid construct"
         return
-      endif
-
-!     Set the Grid name if present, otherwise construct a default one
-      if (present(name)) then
-         call ESMF_SetName(grid%base, name, "Grid", status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridConstructNew: Setname"
-            return
-         endif
       endif
 
 !     Fill in logRectGrid derived type with subroutine arguments
