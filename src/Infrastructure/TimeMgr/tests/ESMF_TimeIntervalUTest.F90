@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.12 2004/03/19 21:12:28 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.13 2004/03/24 00:44:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.12 2004/03/19 21:12:28 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.13 2004/03/24 00:44:25 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -45,7 +45,7 @@
 
       ! individual test result code
       integer :: rc, H, M, S, MM, DD, YY, days, months, years, totalDays, &
-                 secs, testResults, ans
+                 hours, minutes, secs, testResults, ans
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -345,6 +345,18 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (months to years) Test"
+      write(failMsg, *) " Did not return 3 years and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, mm=36, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, &
+                                calendarIn=gregorianCalendar, rc=rc)
+      call ESMF_Test((years==3.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years = ", years
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
       write(name, *) "Gregorian Calendar Interval conversion (2 months to days) Test"
       write(failMsg, *) " Did not return 60 and ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=1, &
@@ -355,6 +367,19 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (days to months) Test"
+      write(failMsg, *) " Did not return 2 and ESMF_SUCCESS"
+      call ESMF_TimeSet(endTime, yy=2004, mm=3, dd=31, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, rc=rc)
+      call ESMF_Test((months==2.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
@@ -542,6 +567,18 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (months to years) Test"
+      write(failMsg, *) " Did not return 4 years or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, mm=48, calendar=gregorianCalendar, &
+                                rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, rc=rc)
+      call ESMF_Test((years==4 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years = ", years
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
       write(name, *) "Gregorian Calendar Interval conversion (2 months to days) Test"
       write(failMsg, *) " Did not return 59 and ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=1, &
@@ -552,6 +589,19 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (days to months) Test"
+      write(failMsg, *) " Did not return 2 and ESMF_SUCCESS"
+      call ESMF_TimeSet(endTime, yy=2003, mm=3, dd=31, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=59, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, rc=rc)
+      call ESMF_Test((months==2.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
@@ -1061,6 +1111,30 @@
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, "days = ", days, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Julian Day Calendar Interval conversion (days to hours) Test"
+      write(failMsg, *) " Did not return 96 hours or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, d=4, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, h=hours, &
+                                calendarIn=julianDayCalendar, rc=rc)
+      call ESMF_Test((hours==96 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "hours = ", hours
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Julian Day Calendar Interval conversion (minutes to days) Test"
+      write(failMsg, *) " Did not return 2 days or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, m=2880, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, &
+                                calendarIn=julianDayCalendar, rc=rc)
+      call ESMF_Test((days==2 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
 
       ! ----------------------------------------------------------------------------
       ! No-Calendar (Earth) Calendar Interval tests
