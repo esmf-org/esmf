@@ -1,23 +1,20 @@
-% $Id: ArraySpec_desc.tex,v 1.1 2004/03/17 04:56:31 cdeluca Exp $
+% $Id: ArraySpec_desc.tex,v 1.2 2004/03/18 05:24:22 cdeluca Exp $
 
-A Field represents a scalar physical field, such as temperature.  
-ESMF does not currently support vector fields, so the components of 
-a vector field must be stored as separate Field objects.  The 
-ESMF Field class contains the discretized field data, a reference 
-to its associated grid, and metadata.  
+An ArraySpec is a very simple class that contains 
+type, kind, and rank information about an array.  For those 
+unfamiliar with Fortran:
+\begin{itemize}
+\item {\bf Type} describes the data type of the elements in the array, 
+such as integer, real, logical, etc.;
+\item {\bf Kind} describes their precision; and
+\item {\bf Rank} refers to their dimensionality.
+\end{itemize}
 
-The Field class maintains the relationship of
-how data maps onto the Grid (e.g. one item per cell located at
-the cell center, one item per cell located at the NW corner, 
-one item per cell vertex, etc).  This means that different Fields
-which are on the same underlying Grid but have different
-mappings (staggerings) can share the same Grid object without
-needing to copy or replicate it multiple times. 
+The only methods that are associated with the ArraySpec class are those 
+that allow you to set and retrieve this type, kind, and rank information.
 
-The Field class provides methods for initialization, setting and 
-retrieving data values, I/O, general data redistribution and regridding, 
-standard communication methods such as gather and scatter, and 
-manipulation of attributes.
+
+
 
 
 

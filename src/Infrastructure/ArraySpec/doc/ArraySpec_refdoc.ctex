@@ -1,4 +1,4 @@
-% $Id: ArraySpec_refdoc.ctex,v 1.2 2004/03/18 00:07:28 cdeluca Exp $
+% $Id: ArraySpec_refdoc.ctex,v 1.3 2004/03/18 05:24:22 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -56,12 +56,12 @@
 \input{../Infrastructure/ArraySpec/doc/ArraySpec_rest}
 #endif
 
-%\subsection{Design and Implementation Notes}
-%#ifdef STANDALONE
-%\input{ArraySpec_implnotes}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ArraySpec/doc/ArraySpec_implnotes}
-%#endif
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{ArraySpec_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/ArraySpec/doc/ArraySpec_implnotes}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE

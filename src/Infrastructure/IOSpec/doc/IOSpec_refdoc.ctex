@@ -1,4 +1,4 @@
-% $Id: IOSpec_refdoc.ctex,v 1.1 2004/03/17 04:56:31 cdeluca Exp $
+% $Id: IOSpec_refdoc.ctex,v 1.2 2004/03/18 05:24:22 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Field Design}
+\newcommand{\mytitle}{IOSpec Design}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 
@@ -33,87 +33,54 @@
 \newpage
 #endif
 
-% Field_obj.tex wants to include the graphics  file
-% fieldclassNH.eps.  In processing in CONSTITUENT
-% mode, this file can not be found.
-%
-%
-%% \section{Object Model}
-%% #ifdef STANDALONE
-%% \input{Field_obj}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/Field_obj}
-%% #endif
-
-% %\section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% %\input{Field_param}
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Field/doc/Field_param}
-% #endif
-
-\section{Field Class}
+\section{IOSpec Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Field_desc}
+\input{IOSpec_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_desc}
+\input{../Infrastructure/IOSpec/doc/IOSpec_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Field_usage}
+\input{IOSpec_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_usage}
+\input{../Infrastructure/IOSpec/doc/IOSpec_usage}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-\input{Field_rest}
+\input{IOSpec_rest}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_rest}
+\input{../Infrastructure/IOSpec/doc/IOSpec_rest}
 #endif
 
-\subsubsection{Design and Implementation Notes}
+%\subsubsection{Design and Implementation Notes}
+%#ifdef STANDALONE
+%\input{IOSpec_implnotes}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/IOSpec/doc/IOSpec_implnotes}
+%#endif
+
+\subsection{Class API: Basic IOSpec Methods}
 #ifdef STANDALONE
-\input{Field_implnotes}
+\input{ESMF_IOSpec_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_implnotes}
+\input{../Infrastructure/IOSpec/doc/ESMF_IOSpec_fapi}
 #endif
 
-\subsection{Class API: Basic Field Methods}
-#ifdef STANDALONE
-\input{ESMF_Field_fapi}
-\input{ESMF_FieldGet_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_Field_fapi}
-\input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
-#endif
+%#ifdef STANDALONE
+%%\section{Glossary}
+%\input{IOSpec_glos}
+%#endif
 
-\subsection{Class API: Field Communications}
-#ifdef STANDALONE
-\input{../../FieldComm/doc/ESMF_FieldComm_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/FieldComm/doc/ESMF_FieldComm_fapi}
-#endif
-
-#ifdef STANDALONE
-\section{Review Status}
-\input{Field_desrev}
-#endif
-
-#ifdef STANDALONE
-%\section{Glossary}
-\input{Field_glos}
-#endif
-
-#ifdef STANDALONE
+%#ifdef STANDALONE
 %\section{Bibliography}
-\bibliography{comp} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{Bibliography}
-#endif
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
 
 #ifdef STANDALONE
 \end{document}

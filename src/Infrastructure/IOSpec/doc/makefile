@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/03/17 04:56:31 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2004/03/18 05:24:22 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -10,13 +10,13 @@ OBJSC     =
 OBJSF     = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/IO/doc
+LOCDIR	  = src/Infrastructure/IOSpec/doc
 
-DVIFILES  =   IO_reqdoc.dvi 
+DVIFILES  =   IOSpec_refdoc.dvi 
 
-PDFFILES  =   ${ESMC_DOCDIR}/IO_reqdoc.pdf
+PDFFILES  =   ${ESMC_DOCDIR}/IOSpec_refdoc.pdf
 
-HTMLFILES =   ${ESMC_DOCDIR}/IO_reqdoc 
+HTMLFILES =   ${ESMC_DOCDIR}/IOSpec_refdoc 
 
 
 #
@@ -43,8 +43,6 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 #
 REQDOC_DEP_FILES = 
 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
-
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 
@@ -52,9 +50,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = IO_reqdoc $(HTMLFILES)
+CLEANDIRS   = IOSpec_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
-              IO_Reqdoc.tex $(PDFFILES)
+              IOSpec_refdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 

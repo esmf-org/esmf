@@ -1,4 +1,4 @@
-% $Id: Field_obj.tex,v 1.2 2003/09/18 16:19:27 cdeluca Exp $
+% $Id: Field_obj.tex,v 1.3 2004/03/18 05:24:22 cdeluca Exp $
 
 %\section{Object Model}
 
@@ -89,14 +89,6 @@ This ensures that data values are not being updated by one
 DE at the same time another DE is trying to read out a consistent
 set of data values.
 
-\subsubsection{ArraySpec}
-
-An ArraySpec object contains the same metadata
-information maintained in an Array without the data buffer.  
-It can be used to
-describe a data buffer which will be created or added later.
-
-\subsection{DataMap}
 
 The DataMap objects maintain mapping information between the
 Grid and the ESMF Array objects contained in a Field object.

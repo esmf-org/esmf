@@ -1,0 +1,8 @@
+% $Id: ArraySpec_implnotes.tex,v 1.1 2004/03/18 05:24:22 cdeluca Exp $
+
+C and C++ arrays are simple pointers to memory.
+Fortran arrays contain shape and stride definitions and are strongly
+typed. To enable interoperability between the languages the C++ code
+must be able to obtain this information from the Fortran description
+(which is called the "dope vector" in Fortran), either through a priori
+knowledge or through query.

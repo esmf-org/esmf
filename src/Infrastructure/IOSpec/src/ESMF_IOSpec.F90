@@ -1,7 +1,7 @@
-! $Id: ESMF_IO.F90,v 1.12 2003/12/12 20:23:01 nscollins Exp $
+! $Id: ESMF_IOSpec.F90,v 1.1 2004/03/18 05:24:23 cdeluca Exp $
 !-------------------------------------------------------------------------
 !
-! ESMF IO module
+! ESMF IOSpec module
 !
 ! This code covered by the GNU public license.  See licence file for details.
 ! NCAR, 2002.
@@ -11,11 +11,8 @@
 !
 ! !PURPOSE:
 !
-! The code in this file implements the IO defined type
-!  and functions which operate on it.  This is an
-!  interface to the actual IO class object in the ../src dir.
-!
-! See the ESMF Developers Guide document for more details.
+! The code in this file implements the IOSpec defined type
+!  and functions which operate on it.  
 !
 ! (all lines between the !BOP and !EOP markers will be included in the
 ! automated document processing.)
@@ -30,7 +27,7 @@
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !MODULE: ESMF_IOmod
 !
 ! !USES:
@@ -138,7 +135,7 @@
 !     subroutine ESMF_IOSpecxxx
 !
 
-!EOP
+!EOPI
 
 !-------------------------------------------------------------------------
 
@@ -189,7 +186,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_IOSpecSet - set values in an IOSpec
+! !IROUTINE: ESMF_IOSpecSet - Set values in an IOSpec
 !
 ! !INTERFACE:
       subroutine ESMF_IOSpecSet(iospec, filename, iofileformat, &
@@ -246,7 +243,7 @@
 
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_IOSpecGet - get values in an IOSpec
+! !IROUTINE: ESMF_IOSpecGet - Get values in an IOSpec
 !
 ! !INTERFACE:
       subroutine ESMF_IOSpecGet(iospec, filename, iofileformat, &
@@ -320,4 +317,12 @@
 
 
       end module ESMF_IOMod
+
+
+
+
+
+
+
+
 

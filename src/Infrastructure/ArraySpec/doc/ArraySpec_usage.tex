@@ -1,4 +1,14 @@
-% $Id: ArraySpec_usage.tex,v 1.2 2004/03/18 00:07:28 cdeluca Exp $
+% $Id: ArraySpec_usage.tex,v 1.3 2004/03/18 05:24:22 cdeluca Exp $
 
 %\subsection{Use and Examples}
+
+The ArraySpec is passed in as an argument at Field and 
+Bundle creation in order to describe an array that will 
+be allocated or attached at a later time.  There are any
+number of situations in which this approach is useful.  
+One common example is a case in which the user wants to create
+a very flexible export state with many diagnostic variables 
+predefined, but only a subset desired and consequently 
+allocated for a particular run.  
+
 

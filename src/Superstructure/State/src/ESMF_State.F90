@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.31 2004/03/17 01:42:26 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.32 2004/03/18 05:24:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -288,7 +288,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.31 2004/03/17 01:42:26 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.32 2004/03/18 05:24:23 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -452,13 +452,13 @@ end interface
       interface ESMF_StateAddAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_StateSetIntAttr
-        module procedure ESMF_StateSetIntListAttr
-        module procedure ESMF_StateSetRealAttr
-        module procedure ESMF_StateSetRealListAttr
-        module procedure ESMF_StateSetLogicalAttr
-        module procedure ESMF_StateSetLogicalListAttr
-        module procedure ESMF_StateSetCharAttr
+        module procedure ESMF_StateAddIntAttr
+        module procedure ESMF_StateAddIntListAttr
+        module procedure ESMF_StateAddRealAttr
+        module procedure ESMF_StateAddRealListAttr
+        module procedure ESMF_StateAddLogicalAttr
+        module procedure ESMF_StateAddLogicalListAttr
+        module procedure ESMF_StateAddCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
@@ -611,6 +611,430 @@ function ESMF_validne(s1, s2)
 end function
 
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set an integer Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddIntAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an integer attribute to an {\tt ESMF\_State}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the Attribute to set.
+!     \item [value]
+!       The integer value of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set an integer list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddIntListAttr(state, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer, dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an integer list attribute to an {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the Attribute to set.
+!     \item [count]
+!       The number of values to be set.
+!     \item [value]
+!       The integer values of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+  
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_StateGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddIntListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set a real Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddRealAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      real, intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a real attribute to a {\tt ESMF\_State}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the Attribute to set.
+!     \item [value]
+!       The real value of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set a real list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddRealListAttr(state, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real, dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a real list attribute to a {\tt ESMF\_State}.
+!
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the Attribute to set.
+!     \item [count]
+!       The number of values to be set.
+!     \item [value]
+!       The real values of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_StateGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddRealListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set a logical Attribute 
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddLogicalAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an logical attribute to a {\tt ESMF\_State}.
+!
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the Attribute to set.
+!     \item [value]
+!       The logical true/false value of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set a logical list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddLogicalListAttr(state, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an logical list attribute to a {\tt ESMF\_State}.
+!
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!       An {\tt ESMF\_State} object.
+!     \item [name]
+!       The name of the Attribute to set.
+!     \item [count]
+!       The number of values to be set.
+!     \item [value]
+!       The logical true/false values of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_StateGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(state%statep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddLogicalListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddAttribute - Set a character Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddAttribute()
+      subroutine ESMF_StateAddCharAttr(state, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to a {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [state]
+!      An {\tt ESMF\_State} object.
+!     \item [name]
+!      The name of the Attribute to set.
+!     \item [value]
+!      The character value of the Attribute.
+!     \item [{[rc]}] 
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeAddChar(state%statep%base, name, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_StateAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateAddCharAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2692,430 +3116,6 @@ end function
         ESMF_StateReadRestart = a 
  
         end function ESMF_StateReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set an integer Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetIntAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer attribute to an {\tt ESMF\_State}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the Attribute to set.
-!     \item [value]
-!       The integer value of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetIntAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set an integer list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetIntListAttr(state, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer, dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer list attribute to an {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the Attribute to set.
-!     \item [count]
-!       The number of values to be set.
-!     \item [value]
-!       The integer values of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-  
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetIntListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a real Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetRealAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      real, intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_State}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the Attribute to set.
-!     \item [value]
-!       The real value of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetRealAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a real list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetRealListAttr(state, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real, dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_State}.
-!
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the Attribute to set.
-!     \item [count]
-!       The number of values to be set.
-!     \item [value]
-!       The real values of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetRealListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a logical Attribute 
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetLogicalAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_State}.
-!
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [name]
-!      The name of the Attribute to set.
-!     \item [value]
-!       The logical true/false value of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetLogicalAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a logical list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetLogicalListAttr(state, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_State}.
-!
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!       An {\tt ESMF\_State} object.
-!     \item [name]
-!       The name of the Attribute to set.
-!     \item [count]
-!       The number of values to be set.
-!     \item [value]
-!       The logical true/false values of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetLogicalListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a character Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateSetCharAttr(state, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [state]
-!      An {\tt ESMF\_State} object.
-!     \item [name]
-!      The name of the Attribute to set.
-!     \item [value]
-!      The character value of the Attribute.
-!     \item [{[rc]}] 
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetChar(state%statep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateSetCharAttr
 
 !------------------------------------------------------------------------------
 !BOP

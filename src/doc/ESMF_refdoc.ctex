@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.42 2004/03/17 23:39:49 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.43 2004/03/18 05:24:24 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -117,9 +117,9 @@
 
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
 
-#include "../Infrastructure/Grid/doc/ArraySpec_refdoc.ctex"
+#include "../Infrastructure/ArraySpec/doc/ArraySpec_refdoc.ctex"
 
-#include "../Infrastructure/Grid/doc/IOSpec_refdoc.ctex"
+#include "../Infrastructure/IOSpec/doc/IOSpec_refdoc.ctex"
 
 %===============================================================================
 \newpage
