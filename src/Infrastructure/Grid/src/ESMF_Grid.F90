@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.109 2003/10/16 23:13:50 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.110 2003/10/16 23:14:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.109 2003/10/16 23:13:50 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.110 2003/10/16 23:14:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -284,9 +284,9 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetCoordFromArray
          module procedure ESMF_GridSetCoordFromBuffer
-#if (__IFC | __EFC)
+#if (PARCH != linux_intel)
          ! don't include the following two in the interface def
-#else
+         ! for the intel build.  fails on jazz.
          module procedure ESMF_GridSetCoordSpecd
          module procedure ESMF_GridSetCoordUniform
 #endif
