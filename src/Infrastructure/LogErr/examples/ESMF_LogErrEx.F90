@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.25 2005/02/03 21:43:26 jwolfe Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.24.2.1 2005/02/09 18:49:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
