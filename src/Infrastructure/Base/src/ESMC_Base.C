@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.34 2004/03/17 01:42:25 cdeluca Exp $
+// $Id: ESMC_Base.C,v 1.35 2004/03/17 01:50:54 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.34 2004/03/17 01:42:25 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.35 2004/03/17 01:50:54 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2448,7 +2448,7 @@ extern "C" {
   else {
       len = strlen(name)+1;   // strlen doesn't count trailing null
       if (len > ESMF_MAXSTR) {
-          printf("ERROR in ESMF_AddAttribute: attr name longer than %d\n",
+          printf("ERROR in ESMF_Attribute: attr name longer than %d\n",
                                                 ESMF_MAXSTR);
           return; 
       }
