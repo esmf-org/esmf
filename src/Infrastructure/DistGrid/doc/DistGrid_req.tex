@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.9 2002/04/22 17:37:08 vbalaji Exp $
+% $Id: DistGrid_req.tex,v 1.10 2002/05/07 03:38:46 vbalaji Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -499,11 +499,7 @@ ESMF shall provide methods to declare halo points valid or invalid
   update. This may also be used to reduce the frequency of halo
   updates on high-latency networks, by declaring wide halos and
   performing redundant computations within them. See \cite{ref:b2001}
-  for details.  WS:  can this be simplified to halo is invalid
-  if at least one point in halo is invalid?  Partial halo updates
-  will complicate matters considerably.
-
-  VB: partial updates are useful. This may not necessarily support
+  for details. Partial updates may not necessarily support
   arbitrary lists of halo points, but the following are useful:
   \begin{itemize}
   \item ``Update N and E halos only, including the NE corner.''
@@ -877,10 +873,6 @@ flavors are supported.
 The distributed grid module will provide support the following 
 physical grids:
 
-WS: should these be mentioned explicitly and in such detail here?
-
-\req{Logically rectilinear grids}
-
 \req{Tripolar grid}
 
 The tripolar grid \cite{ref:m1996} is used to address the pole problem
@@ -1014,10 +1006,10 @@ unstructured grids and ungridded location streams. For the purpose of
 aligned on a single axis, each index of which is associated with a
 background grid cell.
 
-\sreq{Background grid retrieval}
+\sreq{Grid association}
 
-It shall be possible to retrieve a structured background grid
-associated with unstructured grids and ungridded location streams.
+It shall be possible to associate a structured grid with unstructured
+grids and ungridded location streams.
 
 \begin{reqlist}
 \item[Priority]

@@ -1,4 +1,4 @@
-% $Id: DistGrid_background.tex,v 1.5 2002/03/28 20:02:45 vbalaji Exp $
+% $Id: DistGrid_background.tex,v 1.6 2002/05/07 03:38:46 vbalaji Exp $
 
 \section{Background}
 
@@ -38,19 +38,20 @@ direct invocation of the communication primitives.
 
 \subsection{Summary}
 
-A gridded component is associated with a single global physical grid.
-Distributing this grid across PEs generates a \textbf{PhysGrid}, which
-is associated with a a single \textbf{DistGrid}, distributed across
-some or all of the PEs associated with the component. The
-\textbf{DistGrid} has operations to define domain decompositions on
-the pelist, and given user-specified data dependencies, it can define
-topologies, i.e. connectivities on the pelist for
-scheduling communication. It contains all the operations for sharing
-data according to those dependencies.  This includes familiar
-operations like the halo update and data transpose. It can perform
-global reductions (sum, max, min, maxloc, minloc) on distributed data.
-The sum has a bitwise exact option. It can create a copy of the global
-data on a single PE, and scatter a global array across a PElist.
+A gridded component is associated with one or more global physical
+grids.  Distributing a global physical grid across PEs generates a
+\textbf{PhysGrid}, which is associated with a a single
+\textbf{DistGrid}, distributed across some or all of the PEs
+associated with the component. The \textbf{DistGrid} has operations to
+define domain decompositions on the pelist, and given user-specified
+data dependencies, it can define topologies, i.e. connectivities on
+the pelist for scheduling communication. It contains all the
+operations for sharing data according to those dependencies.  This
+includes familiar operations like the halo update and data transpose.
+It can perform global reductions (sum, max, min, maxloc, minloc) on
+distributed data.  The sum has a bitwise exact option. It can create a
+copy of the global data on one or more PEs, and scatter a global array
+across a PElist.
 
 The \textbf{DistGrid} will perform sign flips, vector component interchanges,
 and redundancy checks as needed on certain types of grids (e.g
