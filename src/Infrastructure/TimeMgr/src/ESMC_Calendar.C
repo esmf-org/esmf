@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.42 2004/01/31 03:07:59 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.43 2004/02/02 19:14:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.42 2004/01/31 03:07:59 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.43 2004/02/02 19:14:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -73,7 +73,7 @@ int ESMC_Calendar::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreate() memory allocation failed\n";
+      cerr << "ESMC_CalendarCreate() (new) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -111,14 +111,14 @@ int ESMC_Calendar::count=0;
 
     return(calendar);
 
- } // end ESMC_CalendarCreate
+ } // end ESMC_CalendarCreate (new)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarCreateCustom - Allocates and Initializes a Custom Calendar object
+// !IROUTINE:  ESMC_CalendarCreate - Allocates and Initializes a Custom Calendar object
 //
 // !INTERFACE:
-      ESMC_Calendar *ESMC_CalendarCreateCustom(
+      ESMC_Calendar *ESMC_CalendarCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Calendar
@@ -148,7 +148,7 @@ int ESMC_Calendar::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreateCustom() memory allocation failed\n";
+      cerr << "ESMC_CalendarCreate() (custom) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -172,9 +172,9 @@ int ESMC_Calendar::count=0;
       sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
     }
 
-    returnCode = calendar->ESMC_CalendarSetCustom(monthsPerYear, daysPerMonth,
-                                                  secondsPerDay, daysPerYear,
-                                                  daysPerYearDn, daysPerYearDd);
+    returnCode = calendar->ESMC_CalendarSet(monthsPerYear, daysPerMonth,
+                                            secondsPerDay, daysPerYear,
+                                            daysPerYearDn, daysPerYearDd);
     if (returnCode != ESMF_SUCCESS) {
       if (rc != ESMC_NULL_POINTER) {
         *rc = returnCode;
@@ -189,14 +189,14 @@ int ESMC_Calendar::count=0;
 
     return(calendar);
 
- } // end ESMC_CalendarCreateCustom
+ } // end ESMC_CalendarCreate (custom)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarCreateCopy - Creates a copy of a calendar
+// !IROUTINE:  ESMC_CalendarCreate - Creates a copy of a calendar
 //
 // !INTERFACE:
-      ESMC_Calendar *ESMC_CalendarCreateCopy(
+      ESMC_Calendar *ESMC_CalendarCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Calendar
@@ -220,7 +220,7 @@ int ESMC_Calendar::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_CalendarCreateCopy() memory allocation failed\n";
+      cerr << "ESMC_CalendarCreate() (copy) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -234,7 +234,7 @@ int ESMC_Calendar::count=0;
 
     return(calendarCopy);     
 
- } // end ESMC_CalendarCreateCopy  
+ } // end ESMC_CalendarCreate (copy)
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -360,7 +360,7 @@ int ESMC_Calendar::count=0;
 
         case ESMC_CAL_CUSTOM:
             // user defined; need more info; user must call
-            //   SetCustom() instead
+            //   Set() (custom) instead
             // restore original calendar
             *this = saveCalendar;
             rc = ESMF_FAILURE;
@@ -374,14 +374,14 @@ int ESMC_Calendar::count=0;
     }
     return(rc);
 
-}  // end ESMC_CalendarSet
+}  // end ESMC_CalendarSet (new)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarSetCustom - custom calendar initializer
+// !IROUTINE:  ESMC_CalendarSet - custom calendar initializer
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarSetCustom(
+      int ESMC_Calendar::ESMC_CalendarSet(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -446,7 +446,7 @@ int ESMC_Calendar::count=0;
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_CalendarSetCustom
+}  // end ESMC_CalendarSet (custom)
 
 //-------------------------------------------------------------------------
 //BOP
@@ -1087,14 +1087,14 @@ int ESMC_Calendar::count=0;
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Time} to be of a custom user-defined type
-//      via {\tt ESMC\_CalendarSetCustom}
+//      via {\tt ESMC\_CalendarSet}
 //
 //EOP
 // !REQUIREMENTS: 
 
     ESMC_Calendar();  // invoke default constructor
-    ESMC_CalendarSetCustom(monthsPerYear, daysPerMonth, secondsPerDay, 
-                           daysPerYear, daysPerYeardN, daysPerYeardD);
+    ESMC_CalendarSet(monthsPerYear, daysPerMonth, secondsPerDay, 
+                     daysPerYear, daysPerYeardN, daysPerYeardD);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------

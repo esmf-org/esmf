@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.48 2004/01/31 03:07:59 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.49 2004/02/02 19:14:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -97,11 +97,8 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_CalendarCreate
-      public ESMF_CalendarCreateCustom
-      public ESMF_CalendarCreateCopy
       public ESMF_CalendarDestroy
       public ESMF_CalendarSet
-      public ESMF_CalendarSetCustom
       public ESMF_CalendarGet
 
 ! Required inherited and overridden ESMF_Base class methods
@@ -115,8 +112,60 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.48 2004/01/31 03:07:59 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.49 2004/02/02 19:14:08 eschwab Exp $'
 
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+! 
+!==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_CalendarCreate    
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarCreateNew
+      module procedure ESMF_CalendarCreateCustom
+      module procedure ESMF_CalendarCreateCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Calendar}
+!     Create methods.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_CalendarSet    
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarSetNew
+      module procedure ESMF_CalendarSetCustom
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Calendar}
+!     Set methods.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+!      interface operator(==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+!      module procedure ESMF_CalendarEQ
+
+! !DESCRIPTION:
+!     This interface overloads the == operator for the
+!     {\tt ESMF\_Calendar} class.
+! 
+!EOP
+!      end interface    
+!
 !==============================================================================
 
       contains
@@ -127,13 +176,13 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarCreate - Create a Calendar
+! !IROUTINE: ESMF_CalendarCreateNew - Create a new Calendar
 
 ! !INTERFACE:
-      function ESMF_CalendarCreate(name, type, rc)
+      function ESMF_CalendarCreateNew(name, type, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Calendar) :: ESMF_CalendarCreate
+      type(ESMF_Calendar) :: ESMF_CalendarCreateNew
 
 ! !ARGUMENTS:
       character (len=*),       intent(in),  optional :: name
@@ -142,6 +191,9 @@
 
 ! !DESCRIPTION:
 !     Creates and sets a {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -174,9 +226,10 @@
       end if
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarCreate(ESMF_CalendarCreate, nameLen, name, type, rc)
+      call c_ESMC_CalendarCreateNew(ESMF_CalendarCreateNew, nameLen, name, &
+                                    type, rc)
     
-      end function ESMF_CalendarCreate
+      end function ESMF_CalendarCreateNew
     
 !------------------------------------------------------------------------------
 !BOP
@@ -200,6 +253,9 @@
 
 ! !DESCRIPTION:
 !     Creates a custom {\tt ESMF\_Calendar} and sets its properties.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -282,6 +338,9 @@
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Calendar}.
 !
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarCreate()}.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
@@ -330,10 +389,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSet - Set the Calendar type
+! !IROUTINE: ESMF_CalendarSetNew - Set the Calendar type
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarSet(calendar, type, rc)
+      subroutine ESMF_CalendarSetNew(calendar, type, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
@@ -342,6 +401,9 @@
 
 ! !DESCRIPTION:
 !     Sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSet()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -364,9 +426,9 @@
 !     TMGn.n.n
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarSet(calendar, type, rc)
+      call c_ESMC_CalendarSetNew(calendar, type, rc)
     
-      end subroutine ESMF_CalendarSet
+      end subroutine ESMF_CalendarSetNew
     
 !------------------------------------------------------------------------------
 !BOP
@@ -388,6 +450,9 @@
 
 ! !DESCRIPTION:
 !     Sets properties in a custom {\tt ESMF\_Calendar}.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSet()}.
 !
 !     The arguments are:
 !     \begin{description}

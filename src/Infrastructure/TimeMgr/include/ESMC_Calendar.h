@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.30 2004/01/31 03:07:59 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.31 2004/02/02 19:14:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -131,13 +131,18 @@ class ESMC_Calendar {
 
   public:
 
+    // set built-in calendar type
     int ESMC_CalendarSet(ESMC_CalendarType type);
-    int ESMC_CalendarSetCustom(int          *monthsPerYear=0,
-                               int          *daysPerMonth=0,
-                               ESMF_KIND_I4 *secondsPerDay=0,
-                               ESMF_KIND_I4 *daysPerYear=0,
-                               ESMF_KIND_I4 *daysPerYearDn=0,
-                               ESMF_KIND_I4 *daysPerYearDd=0);
+
+    // set custom calendar type
+    int ESMC_CalendarSet(int          *monthsPerYear=0,
+                         int          *daysPerMonth=0,
+                         ESMF_KIND_I4 *secondsPerDay=0,
+                         ESMF_KIND_I4 *daysPerYear=0,
+                         ESMF_KIND_I4 *daysPerYearDn=0,
+                         ESMF_KIND_I4 *daysPerYearDd=0);
+
+    // get properties of any calendar type
     int ESMC_CalendarGet(ESMC_CalendarType *type=0,
                          int              *monthsPerYear=0,
                          int              *daysPerMonth=0,
@@ -189,18 +194,20 @@ class ESMC_Calendar {
 
  // < declare the rest of the public interface methods here >
 
-    // friend functions to allocate and initialize calendar from heap
+    // friend function to allocate and initialize calendar from heap
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
                                               ESMC_CalendarType, int*);
-    friend ESMC_Calendar *ESMC_CalendarCreateCustom(int, const char*,
-                                                    int*, int*,
-                                                    ESMF_KIND_I4*,
-                                                    ESMF_KIND_I4*,
-                                                    ESMF_KIND_I4*,
-                                                    ESMF_KIND_I4*, int*);
+
+    // friend function to allocate and initialize custom calendar from heap
+    friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
+                                              int*, int*,
+                                              ESMF_KIND_I4*,
+                                              ESMF_KIND_I4*,
+                                              ESMF_KIND_I4*,
+                                              ESMF_KIND_I4*, int*);
 
     // friend function to copy a calendar
-    friend ESMC_Calendar *ESMC_CalendarCreateCopy(ESMC_Calendar*, int*);
+    friend ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar*, int*);
 
     // friend function to de-allocate clock
     friend int ESMC_CalendarDestroy(ESMC_Calendar *);
@@ -231,18 +238,19 @@ class ESMC_Calendar {
                                                            ESMC_CAL_NOCALENDAR,
                                        int*              rc=0);
 
-    ESMC_Calendar *ESMC_CalendarCreateCustom(int           nameLen,
-                                             const char   *name=0,
-                                             int          *monthsPerYear=0,
-                                             int          *daysPerMonth=0,
-                                             ESMF_KIND_I4 *secondsPerDay=0,
-                                             ESMF_KIND_I4 *daysPerYear=0,
-                                             ESMF_KIND_I4 *daysPerYearDn=0,
-                                             ESMF_KIND_I4 *daysPerYearDd=0,
-                                             int          *rc=0);
+    // friend function to allocate and initialize custom calendar from heap
+    ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
+                                       const char   *name=0,
+                                       int          *monthsPerYear=0,
+                                       int          *daysPerMonth=0,
+                                       ESMF_KIND_I4 *secondsPerDay=0,
+                                       ESMF_KIND_I4 *daysPerYear=0,
+                                       ESMF_KIND_I4 *daysPerYearDn=0,
+                                       ESMF_KIND_I4 *daysPerYearDd=0,
+                                       int          *rc=0);
 
     // friend function to copy a calendar
-    ESMC_Calendar *ESMC_CalendarCreateCopy(ESMC_Calendar *calendar, int *rc=0);
+    ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar *calendar, int *rc=0);
 
     // friend function to de-allocate calendar
     int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
