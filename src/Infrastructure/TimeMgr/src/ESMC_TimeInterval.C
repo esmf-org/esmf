@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.31 2003/06/30 21:30:41 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.32 2003/07/01 20:12:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.31 2003/06/30 21:30:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.32 2003/07/01 20:12:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -507,7 +507,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(%) - Divide two time intervals, return time interval remainder
+// !IROUTINE:  ESMC_TimeInterval(\%) - Divide two time intervals, return time interval remainder
 //
 // !INTERFACE:
       ESMC_TimeInterval ESMC_TimeInterval::operator%(
@@ -541,7 +541,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInterval(%=) - Takes the modulus of two time intervals
+// !IROUTINE:  ESMC_TimeInterval(\%=) - Takes the modulus of two time intervals
 //
 // !INTERFACE:
       ESMC_TimeInterval& ESMC_TimeInterval::operator%=(
