@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 2003/10/16 22:43:24 nscollins Exp $
+# $Id: makefile,v 1.36 2003/10/17 19:30:14 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -70,7 +70,7 @@ info:
 	-@echo "Using ESMF flags: ${PCONF}"
 	-@echo "-----------------------------------------"
 	-@echo "Using configuration flags:"
-	-@grep "define " ${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)/conf.h
+	-@grep "define " ${ESMF_BUILD_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h
 	-@echo "-----------------------------------------"
 	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "-----------------------------------------"
@@ -83,7 +83,7 @@ info:
 	-@echo "=========================================="
 #
 #
-MINFO = ${ESMF_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)/machineinfo.h
+MINFO = ${ESMF_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/machineinfo.h
 info_h:
 	-@$(RM) -f MINFO ${MINFO}
 	-@echo  "static char *machineinfo = \"  " >> MINFO
@@ -212,11 +212,9 @@ ESMF_COUPLED_FLOW: chkopts build_libs chkdir_tests
 # ESMF users should not generally need to use these commands.
 
 
-BUILDFILES = build/common* build/*/base build/*/base_variables build/*/base.site \
-	     build/*/conf.h build/*/fix.h bin/config/base*.in \
-             build/*/buildtest
+BUILDFILES = build/* build_config/*/*
 
-DOCS	   = build/README build/conf.defs
+DOCS	   = build/README build/doc/*
 
 SCRIPTS    = 
 

@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.17 2003/10/16 22:31:36 nscollins Exp $
+#  $Id: common.mk,v 1.18 2003/10/17 19:30:43 nscollins Exp $
 #
 #  common.mk
 #
@@ -116,7 +116,7 @@ DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
-		  -I${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE) \
+		  -I${ESMF_BUILD_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
 		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR)
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
@@ -996,4 +996,5 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #
 #  Include site specific makefile fragment.
 #
-include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE).mk
+include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE).mk
+
