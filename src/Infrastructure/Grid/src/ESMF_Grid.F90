@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.202 2004/12/07 17:19:32 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.203 2004/12/07 21:39:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.202 2004/12/07 17:19:32 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.203 2004/12/07 21:39:02 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5839,40 +5839,40 @@
 
       ! figure out where the DEs from the old delayout need to be in the new one
       ! loop over the DEs from the old one
-   !   do j   = 1,oldNDEs(2)
-   !     do i = 1,oldNDEs(1)
-   !       oldDEId = (j-1)*oldNDEs(1) + i - 1
-   !       newDEId = (j-1)*newNDEs(1) + i - 1
-   !       petId   = oldDEId    ! TODO: if not 1-1, we need a call to get this
-   !       call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
-   !                                        coord=coords, pid=petId, rc=localrc)
-   !        petlist(newDEId) = newDEId
-   !        petTrack(petId)  = 0
-   !     enddo
-   !   enddo
+      do j   = 1,oldNDEs(2)
+        do i = 1,oldNDEs(1)
+          oldDEId = (j-1)*oldNDEs(1) + i - 1
+          newDEId = (j-1)*newNDEs(1) + i - 1
+          call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
+                                           coord=coords, pid=petId, rc=localrc)
+          petlist(newDEId) = petId
+          petTrack(petId)  = 0
+        enddo
+      enddo
 
       ! fill in the petlist with the remaining petIds
-   !   do j   = 1,newNDEs(2)
-   !     do i = oldNDEs(1)+1,newNDEs(1)
-   !       newDEId = (j-1)*newNDEs(1) + i - 1
-   !       do n = 0,npets-1
-   !         if (petTrack(n).ne.0) then
-   !           petId       = n
-   !           petTrack(n) = 0
-   !           exit
-   !         endif
-   !       enddo
-   !       petlist(newDEId) = petId
-   !     enddo
-   !   enddo
+      do j   = 1,newNDEs(2)
+        do i = oldNDEs(1)+1,newNDEs(1)
+          newDEId = (j-1)*newNDEs(1) + i - 1
+          do n = 0,npets-1
+            if (petTrack(n).ne.0) then
+              petId       = n
+              petTrack(n) = 0
+              exit
+            endif
+          enddo
+          petlist(newDEId) = petId
+        enddo
+      enddo
 
       newCountPerDE1 = 0
       newCountPerDE2 = 0
       do i = 1,oldNDEs(1)
-        oldDEId = i - 1
-        call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
-                                         coord=coords, pid=petId, rc=localrc)
-        newCountPerDE1(petId+1) = oldCountPerDE1(i)   ! TODO: fix for wild petlist
+        !oldDEId = i - 1
+        !call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
+        !                                 coord=coords, pid=petId, rc=localrc)
+        !newCountPerDE1(petId+1) = oldCountPerDE1(i)   ! TODO: fix for wild petlist
+        newCountPerDE1(i) = oldCountPerDE1(i)   ! TODO: fix for wild petlist
       enddo
       do j = 1,oldNDEs(2)
         newCountPerDE2(j) = oldCountPerDE2(j)
