@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.1 2004/06/17 16:20:03 theurich Exp $
+! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.2 2004/06/21 18:25:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ program ESMF_VMDefaultBasicsEx
   print *, 'localPet is: ', localPet,' out of a total of ',petCount,' PETs.'
   print *, 'there are ', peCount,' PEs referenced by this VM'
 
-  call ESMF_VMGetPET(vm, localPet, peCount=peCount, ssiId=ssiId, rc=rc)
+  call ESMF_VMGetPETLocalInfo(vm, localPet, peCount=peCount, ssiId=ssiId, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.9 2004/05/21 05:04:12 theurich Exp $
+// $Id: ESMC_VM.h,v 1.10 2004/06/21 18:25:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,8 +55,8 @@ class ESMC_VM : public vmachine {   // inherits from vmachine class
       int          *peCount,        // out - number of PEs
       int          *mpiCommunicator,// out - MPI Intracommunicator for VM
       ESMC_Logical *okOpenMpFlag);  // out - flag whether user-level OpenMP o.k.
-    // GetPET method that supports the F90 optional arguments interface
-    int ESMC_VMGetPET(
+    // GetPETLocalInfo method that supports the F90 optional arguments interface
+    int ESMC_VMGetPETLocalInfo(
       int pet,            // in  - id of specified PET
       int *peCount,       // out - number of PEs for specified PET
       int *ssiId,         // out - ssiid for specified PET

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.30 2004/06/11 15:32:50 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.31 2004/06/21 18:25:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,7 +125,7 @@ module ESMF_VMMod
   public ESMF_VMGather
   public ESMF_VMGet
   public ESMF_VMGetGlobal
-  public ESMF_VMGetPET
+  public ESMF_VMGetPETLocalInfo
   public ESMF_VMPrint
   public ESMF_VMRecv
   public ESMF_VMScatter
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.30 2004/06/11 15:32:50 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.31 2004/06/21 18:25:17 theurich Exp $'
 
 !==============================================================================
 
@@ -1238,12 +1238,13 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMGetPET()"
+#define ESMF_METHOD "ESMF_VMGetPETLocalInfo()"
 !BOP
-! !IROUTINE: ESMF_VMGetPET - Get VM PET internals
+! !IROUTINE: ESMF_VMGetPETLocalInfo - Get VM PET local internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, rc)
+  subroutine ESMF_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
+    threadId, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(in)              :: vm
@@ -1289,14 +1290,14 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, &
-      localrc)
+    call c_ESMC_VMGetPETLocalInfo(vm, pet, peCount, ssiId, threadCount, &
+      threadId, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-  end subroutine ESMF_VMGetPET
+  end subroutine ESMF_VMGetPETLocalInfo
 !------------------------------------------------------------------------------
 
 
