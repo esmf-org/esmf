@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2004/10/11 22:54:08 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.5 2004/10/12 16:27:51 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -71,10 +71,8 @@
       type(ESMF_Field) :: humidity1, humidity2
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: cplDElayout, delayout
-      type(ESMF_Array) :: array1, array2
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Grid) :: grid1, grid2
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
       integer :: npets, pet_id, countsPerDE1(4), countsPerDE2(2)

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2004/10/11 22:52:22 jwolfe Exp $
+! $Id: user_model2.F90,v 1.6 2004/10/12 16:27:51 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -70,9 +70,9 @@
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
-      real(ESMF_KIND_R8) :: min(2), max(2)
+      real(ESMF_KIND_R8) :: min(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      integer :: countsPerDE1(4), countsPerDE2(1), counts(2)
+      integer :: countsPerDE1(4), countsPerDE2(1)
       integer :: npets, pet_id
       type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: status
@@ -269,7 +269,7 @@
       call ESMF_FieldGetArray(humidity, array, rc=status)
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc=status)
-      print *, "rc from array get data = ", rc
+      print *, "rc from array get data = ", status
 
       ! allocate array for computed results and fill it
       if (counts(1)*counts(2).ne.0) then
