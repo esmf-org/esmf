@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.5 2002/12/30 21:23:38 nscollins Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.6 2002/12/30 21:30:26 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -82,7 +82,7 @@
 
     call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
     print *, "array 2 getdata returned"
-    !print *, "realptr2 data = ", intptr2
+    print *, "realptr2 data = ", realptr2
 
     call ESMF_ArrayDestroy(array2)
     print *, "array 2 destroy returned"
