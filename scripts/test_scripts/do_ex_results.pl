@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.1 2004/08/04 20:48:37 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.2 2004/08/04 21:56:57 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -115,7 +115,7 @@ getopts("d:", \%options);
                 }
                 print "\n\n";
 
-		print "EXample stdout files of zero length indicate that the system test\n";
+		print "Example stdout files of zero length indicate that the system test\n";
 		print "did not run because it failed to compile or it failed to execute. \n\n";
 
 		if ($pass_count != 0) {
