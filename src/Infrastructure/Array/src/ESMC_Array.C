@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.22 2003/12/10 13:25:19 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.23 2003/12/12 20:26:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1351,6 +1351,26 @@
                   }
                 }
                 break;
+              case 4:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                lmax = this->counts[3];
+                tcount = imax * jmax * kmax * lmax;
+                rcount = 0; 
+                for (l=0; l<lmax; l++) {
+                  for (k=0; k<kmax; k++) {
+                    for (j=0; j<jmax; j++) {
+                      for (i=0; i<imax; i++) {
+                          fprintf(ffile, "%lg ",
+                           *((float *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                                                         + l*kmax*jmax*imax));
+                      }
+                      fprintf(ffile, "\n");
+                    }
+                  }
+                }
+                break;
               default:
                 fprintf(ffile, "no code to handle real rank %d yet\n", this->rank);
                 break;    
@@ -1391,6 +1411,26 @@
                          *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     }
                     fprintf(ffile, "\n");
+                  }
+                }
+                break;
+              case 4:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                lmax = this->counts[3];
+                tcount = imax * jmax * kmax * lmax;
+                rcount = 0; 
+                for (l=0; l<lmax; l++) {
+                  for (k=0; k<kmax; k++) {
+                    for (j=0; j<jmax; j++) {
+                      for (i=0; i<imax; i++) {
+                          fprintf(ffile, "%lg ",
+                           *((double *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                                                         + l*kmax*jmax*imax));
+                      }
+                      fprintf(ffile, "\n");
+                    }
                   }
                 }
                 break;
@@ -1441,6 +1481,26 @@
                   }
                 }
                 break;
+              case 4:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                lmax = this->counts[3];
+                tcount = imax * jmax * kmax * lmax;
+                rcount = 0; 
+                for (l=0; l<lmax; l++) {
+                  for (k=0; k<kmax; k++) {
+                    for (j=0; j<jmax; j++) {
+                      for (i=0; i<imax; i++) {
+                          fprintf(ffile, "%d ",
+                           *((int *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                                                         + l*kmax*jmax*imax));
+                      }
+                      fprintf(ffile, "\n");
+                    }
+                  }
+                }
+                break;
               default:
                 fprintf(ffile, "no code to handle integer rank %d yet\n", this->rank);
                 break;    
@@ -1481,6 +1541,26 @@
                            *((long *)(this->base_addr) + i + j*imax + k*jmax*imax));
                     }
                     fprintf(ffile, "\n");
+                  }
+                }
+                break;
+              case 4:
+                imax = this->counts[0];
+                jmax = this->counts[1];
+                kmax = this->counts[2];
+                lmax = this->counts[3];
+                tcount = imax * jmax * kmax * lmax;
+                rcount = 0; 
+                for (l=0; l<lmax; l++) {
+                  for (k=0; k<kmax; k++) {
+                    for (j=0; j<jmax; j++) {
+                      for (i=0; i<imax; i++) {
+                          fprintf(ffile, "%ld ",
+                           *((long *)(this->base_addr) + i + j*imax + k*jmax*imax 
+                                                         + l*kmax*jmax*imax));
+                      }
+                      fprintf(ffile, "\n");
+                    }
                   }
                 }
                 break;
