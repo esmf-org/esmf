@@ -1,8 +1,7 @@
-! $Id: ESMF_SysTest74559.F90,v 1.8 2003/04/30 21:13:24 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.9 2003/05/02 14:26:12 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
-! System test code #74559
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -10,7 +9,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 74559.  
+! ESMF Coupled Flow Demo
 !   2 components and 1 coupler, two-way coupling.
 !   Flow application.
 !
@@ -19,9 +18,10 @@
 
     program ESMF_CoupledFlowDemo
 
-    ! ESMF Framework module
+    ! ESMF Framework module, defines all ESMF data types and procedures
     use ESMF_Mod
     
+    ! User Component registration routines
     use   InjectorMod, only : Injector_register
     use FlowSolverMod, only : FlowSolver_register
     use    CouplerMod, only : Coupler_register
@@ -29,15 +29,20 @@
     implicit none
     
     ! Local variables
+
+    ! Components
+    type(ESMF_AppComp) :: app
+    type(ESMF_GridComp) :: INcomp, FScomp
+    type(ESMF_CplComp) :: cpl
+
+    ! States and Layouts
+    character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
+    type(ESMF_DELayout) :: layoutApp, layoutIN, layoutFS
+    type(ESMF_State) :: INimp, INexp, FSimp, FSexp
+    type(ESMF_State) :: cplstateF2I, cplstateI2F, cplbothlists
+
     integer :: de_id, ndes, rc, delist(16)
     integer :: i, mid, quart
-    character(len=ESMF_MAXSTR) :: aname, cnameHI, cnameFS, cplname
-    type(ESMF_DELayout) :: layoutApp, layoutHI, layoutFS
-    type(ESMF_State) :: HIimp, HIexp, FSimp, FSexp
-    type(ESMF_State) :: cplstateF2H, cplstateH2F, cplbothlists
-    type(ESMF_AppComp) :: app
-    type(ESMF_GridComp) :: HIcomp, FScomp
-    type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -45,7 +50,6 @@
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-    integer(ESMF_IKIND_I8) :: advanceCount
 
         
 !------------------------------------------------------------------------------
@@ -60,27 +64,30 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Create the top level application component.
-    aname = "Coupled Flow Demo"
-    app = ESMF_AppCompCreate(aname, rc=rc)
-    print *, "Created component ", trim(aname), ",  rc =", rc
+    ! Create the top level application component.  This initializes the
+    ! ESMF Framework as well.
+    app = ESMF_AppCompCreate("Coupled Flow Demo", rc=rc)
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layoutApp, rc=rc)
-    !call ESMF_DELayoutPrint(layoutApp, rc=rc)
 
+    ! Sanity check the number of DEs we were started on.
     call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
-    !if (ndes .lt. 4) then
-    !    print *, "This system test needs to run at least 4-way, current np = ", ndes
+    !if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
+    !    print *, "This demo needs to run at least 4-way and no more than 16-way."
+    !    print *, "The requested number of processors was ", ndes
     !    goto 10
     !endif
     !if (mod(ndes, 4) .ne. 0) then
-    !    print *, "This system test needs to run on a multiple of 4 processes"
+    !    print *, "This demo needs to run on some multiple of 4 processors,"
+    !    print *, " at least 4-way and no more than 16-way."
+    !    print *, "The requested number of processors was ", ndes
     !    goto 10
     !endif
 
     ! Set up the component layouts so they are different, so we can show
     !  we really are routing data between processors.
+    delist = (/ (i, i=0, ndes-1) /)
     mid = ndes/2
     quart = ndes/4
 
@@ -88,26 +95,19 @@
     ! Create the 2 model components and coupler.  The first component will
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
     !  The coupler will run on the original default 1 x N layout.
-    cnameHI = "Injector model"
-    delist = (/ (i, i=0, ndes-1) /)
-    layoutHI = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0, 0 /), rc)
-    !layoutHI = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
-    !layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
-    HIcomp = ESMF_GridCompCreate(cnameHI, layout=layoutHI, rc=rc)
-    print *, "Created component ", trim(cnameHI), "rc =", rc
-    !call ESMF_DELayoutPrint(layoutHI, rc=rc)
+    cnameIN = "Injector model"
+    layoutIN = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0, 0 /), rc)
+    !layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
+    !layoutIN = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    INcomp = ESMF_GridCompCreate(cnameIN, layout=layoutIN, rc=rc)
 
     cnameFS = "Flow Solver model"
-    delist = (/ (i, i=0, ndes-1) /)
     layoutFS = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0, 0 /), rc)
     !layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
     FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
-    print *, "Created component ", trim(cnameFS), "rc =", rc
-    !call ESMF_DELayoutPrint(layoutFS, rc=rc)
 
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(cplname, layout=layoutApp, rc=rc)
-    print *, "Created component ", trim(cplname), ", rc =", rc
 
 
     print *, "Comp Creates finished"
@@ -118,7 +118,7 @@
 !  Register section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(HIcomp, Injector_register, rc)
+      call ESMF_GridCompSetServices(INcomp, Injector_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
       call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc)
@@ -138,9 +138,9 @@
       ! initialize time interval to 2 seconds
       call ESMF_TimeIntervalInit(timeStep, S=int(2,kind=ESMF_IKIND_I8), rc=rc)
 
-      ! initialize start time to 13May2003, 9:00 am
+      ! initialize start time to 12May2003, 9:00 am
       call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=5, DD=13, H=9, M=0, S=int(0,kind=ESMF_IKIND_I8), &
+                         MM=5, DD=12, H=9, M=0, S=int(0,kind=ESMF_IKIND_I8), &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 15May2003, 9:00 am
@@ -159,36 +159,37 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
-      HIimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT, &
-                               cnameHI)
-      HIexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, &
-                               cnameHI)
+      ! Create import/export states for Injection Component
+      INimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT,  cnameIN)
+      INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, cnameIN)
 
-      call ESMF_GridCompInitialize(HIcomp, HIimp, HIexp, clock, rc=rc)
+      call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, rc=rc)
       print *, "Injection Model Initialize finished, rc =", rc
  
-      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, &
-                               cnameFS)
-      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, &
-                                cnameFS)
+      ! Create import/export states for FlowSolver Component
+      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, cnameFS)
+      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, cnameFS)
 
       call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
       print *, "Flow Model Initialize finished, rc =", rc
 
-      cplstateH2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
+      ! Create a list of 2 states for Coupler, direction 1
+      cplstateI2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
                                                       ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstateH2F, HIexp, rc=rc)
-      call ESMF_StateAddData(cplstateH2F, FSimp, rc=rc)
+      call ESMF_StateAddData(cplstateI2F, INexp, rc=rc)
+      call ESMF_StateAddData(cplstateI2F, FSimp, rc=rc)
  
-      cplstateF2H = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
+      ! Create a list of 2 states for Coupler, direction 2
+      cplstateF2I = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
                                                       ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstateF2H, FSexp, rc=rc)
-      call ESMF_StateAddData(cplstateF2H, HIimp, rc=rc)
+      call ESMF_StateAddData(cplstateF2I, FSexp, rc=rc)
+      call ESMF_StateAddData(cplstateF2I, INimp, rc=rc)
  
+      ! Create a list of the previous 2 statelists for initialization
       cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, cplname)
 
-      call ESMF_StateAddData(cplbothlists, cplstateH2F, rc=rc)
-      call ESMF_StateAddData(cplbothlists, cplstateF2H, rc=rc)
+      call ESMF_StateAddData(cplbothlists, cplstateI2F, rc=rc)
+      call ESMF_StateAddData(cplbothlists, cplstateF2I, rc=rc)
 
       call ESMF_CplCompInitialize(cpl, cplbothlists, clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
@@ -199,31 +200,30 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-      print *, "start time"
+      print *, "Run Loop Start time"
       call ESMF_ClockPrint(clock, "currtime string", rc)
+
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
+        ! Run FlowSolver Component
         call ESMF_GridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
-        !print *, "Flow Model Run returned, rc =", rc
 
-#if 1
-        call ESMF_CplCompRun(cpl, cplstateF2H, clock, rc=rc)
-        !print *, "Coupler Run returned, rc =", rc
+        ! Couple export state of FlowSolver to import of Injector
+        call ESMF_CplCompRun(cpl, cplstateF2I, clock, rc=rc)
   
-        call ESMF_GridCompRun(HIcomp, HIimp, HIexp, clock, rc=rc)
-        !print *, "Injector Model Run returned, rc =", rc
+        ! Run Injector Component
+        call ESMF_GridCompRun(INcomp, INimp, INexp, clock, rc=rc)
   
-        call ESMF_CplCompRun(cpl, cplstateH2F, clock, rc=rc)
-        !print *, "Coupler Run returned, rc =", rc
-#endif
+        ! Couple export state of Injector to import of FlowSolver
+        call ESMF_CplCompRun(cpl, cplstateI2F, clock, rc=rc)
   
+        ! Advance the time
         call ESMF_ClockAdvance(clock, rc=rc)
-        !print *, "--Clock Advance"
         !call ESMF_ClockPrint(clock, "currtime string", rc)
 
 
       enddo
-      print *, "end time"
+      print *, "Run Loop End time"
       call ESMF_ClockPrint(clock, "currtime string", rc)
  
 !------------------------------------------------------------------------------
@@ -231,30 +231,16 @@
 !     Finalize section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!     Print result
 
-      call ESMF_GridCompFinalize(HIcomp, HIimp, HIexp, clock, rc=rc)
-      print *, "Injector Model Finalize finished, rc =", rc
+      ! Finalize Injector Component    
+      call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
 
+      ! Finalize FlowSolver Component
       call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
-      print *, "Flow Model Finalize finished, rc =", rc
 
-      call ESMF_CplCompFinalize(cpl, cplstateH2F, clock, rc=rc)
-      print *, "Coupler Finalize finished, rc =", rc
+      ! Finalize Coupler
+      call ESMF_CplCompFinalize(cpl, cplstateI2F, clock, rc=rc)
 
-
-      ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEID(layoutApp, de_id, rc)
-
-      print *, "------------------------------------------------------------"
-      print *, "------------------------------------------------------------"
-      print *, "Test finished, DE id = ", de_id
-      print *, "------------------------------------------------------------"
-      print *, "------------------------------------------------------------"
-
-      print *, "Comp Finalize returned"
-
-!
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !     Destroy section
@@ -262,22 +248,21 @@
 !------------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(HIimp, rc)
-      call ESMF_StateDestroy(HIexp, rc)
+      call ESMF_StateDestroy(INimp, rc)
+      call ESMF_StateDestroy(INexp, rc)
       call ESMF_StateDestroy(FSimp, rc)
       call ESMF_StateDestroy(FSexp, rc)
-      call ESMF_StateDestroy(cplstateH2F, rc)
-      call ESMF_StateDestroy(cplstateF2H, rc)
+      call ESMF_StateDestroy(cplstateI2F, rc)
+      call ESMF_StateDestroy(cplstateF2I, rc)
 
-      call ESMF_GridCompDestroy(HIcomp, rc)
+      call ESMF_GridCompDestroy(INcomp, rc)
       call ESMF_GridCompDestroy(FScomp, rc)
       call ESMF_CplCompDestroy(cpl, rc)
 
-      call ESMF_DELayoutDestroy(layoutHI, rc)
+      call ESMF_DELayoutDestroy(layoutIN, rc)
       call ESMF_DELayoutDestroy(layoutFS, rc)
 
       call ESMF_AppCompDestroy(app, rc)
-      print *, "All Destroy routines done"
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

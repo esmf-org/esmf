@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.4 2003/04/30 21:13:24 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.5 2003/05/02 14:30:15 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -14,11 +14,12 @@
 
     module CouplerMod
 
-    ! ESMF Framework module
+    ! ESMF Framework module - defines ESMF data types and procedures
     use ESMF_Mod
 
     implicit none
     
+    ! Public entry point 
     public Coupler_register
         
     contains
@@ -70,7 +71,6 @@
 
         call ESMF_StateGetData(flowstates, "FlowSolver Feedback", fromflow, rc)
         call ESMF_StateSetNeeded(fromflow, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(fromflow, "U", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(fromflow, "FLAG", ESMF_STATEDATAISNEEDED, rc)
@@ -80,7 +80,6 @@
 
         call ESMF_StateGetData(injectstates, "Injection Feedback", frominject, rc)
         call ESMF_StateSetNeeded(frominject, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(frominject, "U", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(frominject, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(frominject, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(frominject, "FLAG", ESMF_STATEDATAISNEEDED, rc)
@@ -163,24 +162,9 @@
            !  the data using the Comm routines.
            call ESMF_FieldRoute(srcfield, dstfield, cpllayout, status)
 
-           ! debug:  
-           !print *, "Route Source Field (after route)"
-           !call ESMF_FieldPrint(srcfield, "", rc=rc)
-           !print *, "Route Dest Field (after route)"
-           !call ESMF_FieldPrint(dstfield, "", rc=rc)
-
-           !call ESMF_FieldGetData(dstfield, dstarray, rc=status)
-           !call ESMF_ArrayPrint(dstarray, "full, line", rc=status)
-           !call ESMF_ArrayGetData(dstarray, dstptr, ESMF_DATA_REF, status)
-         
-          !call ESMF_FieldHalo(dstfield, rc)
-
-          ! Set export data in export state
-          !call ESMF_StateAddData(mydest, dstarray, rc=status)
+           !call ESMF_FieldHalo(dstfield, rc)
 
         enddo
-
-        !call ESMF_StatePrint(mydest, rc=status)
  
         rc = status
 

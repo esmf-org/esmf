@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.6 2003/04/30 21:13:25 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.7 2003/05/02 14:26:22 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -8,6 +8,7 @@
 !
 ! !DESCRIPTION:
 !   Inject energy and fluid flow into another model.
+!   Example of a user-supplied Component.
 !
 !
 !\begin{verbatim}
@@ -20,12 +21,13 @@
     
     implicit none
     
+    ! Private data block
     type injectdata
        type(ESMF_Time) :: inject_start_time
        type(ESMF_Time) :: inject_stop_time
-       real(kind=ESMF_IKIND_R4) :: inject_energy
-       real(kind=ESMF_IKIND_R4) :: inject_velocity
-       real(kind=ESMF_IKIND_R4) :: inject_density
+       real :: inject_energy
+       real :: inject_velocity
+       real :: inject_density
     end type
 
     type wrapper
@@ -33,6 +35,8 @@
     end type
 
    
+    ! External entry point which will register the Init, Run, and Finalize
+    !  routines for this Component.
     public Injector_register
         
     contains
@@ -70,18 +74,18 @@
         ! initialize calendar to be Gregorian type
         call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
-        ! initialize start time to 13May2003, 3:00 pm
-        ! for testing, initialize start time to 13May2003, 9:00:06 am
+        ! initialize start time to 12May2003, 3:00 pm
+        ! for testing, initialize start time to 13May2003, 2:00 pm
         call ESMF_TimeInit(datablock%inject_start_time, &
                            YR=int(2003,kind=ESMF_IKIND_I8), &
-                           MM=5, DD=13, H=10, M=0, &
-                           S=int(6,kind=ESMF_IKIND_I8), &
+                           MM=5, DD=12, H=14, M=0, &
+                           S=int(0,kind=ESMF_IKIND_I8), &
                            cal=gregorianCalendar, rc=rc)
 
-        ! initialize stop time to 14May2003, 3:00 pm
+        ! initialize stop time to 13May2003, 2:00 pm
         call ESMF_TimeInit(datablock%inject_stop_time, &
                            YR=int(2003,kind=ESMF_IKIND_I8), &
-                           MM=5, DD=14, H=15, M=0, &
+                           MM=5, DD=13, H=14, M=0, &
                            S=int(0,kind=ESMF_IKIND_I8), &
                            cal=gregorianCalendar, rc=rc)
 
@@ -192,15 +196,6 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       call ESMF_StateAddData(importstate, field_q, rc)
       call ESMF_StateAddData(importstate, field_flag, rc)
 
-      !!print *, "Fields at Injector init"
-      !!call ESMF_FieldPrint(field_sie, rc=rc)
-      !call ESMF_FieldPrint(field_u, rc=rc)
-      !call ESMF_FieldPrint(field_v, rc=rc)
-      !call ESMF_FieldPrint(field_rho, rc=rc)
-      !call ESMF_FieldPrint(field_p, rc=rc)
-      !call ESMF_FieldPrint(field_q, rc=rc)
-      !!call ESMF_FieldPrint(field_flag, rc=rc)
-
       ! This is adding names only to the export list, marked by default
       !  as "not needed". The coupler will mark the ones needed based
       !  on the requirements of the component(s) this is coupled to.
@@ -212,7 +207,12 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       call ESMF_StateAddData(exportstate, "Q", rc)
       call ESMF_StateAddData(exportstate, "FLAG", rc)
 
-      !call ESMF_StatePrint(exportstate, rc=rc)
+      !! DEBUG: these are here so we can run w/o the coupler to debug
+      !!  code.  remove these lines later.
+      call ESMF_StateAddData(exportstate, field_sie, rc)
+      call ESMF_StateAddData(exportstate, field_v, rc)
+      call ESMF_StateAddData(exportstate, field_rho, rc)
+      call ESMF_StateAddData(exportstate, field_flag, rc)
 
     end subroutine injector_init
 
@@ -231,30 +231,24 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         type(ESMF_Field) :: thisfield
         type(ESMF_Field) :: local_sie, local_v, local_rho, local_flag
         type(ESMF_Array) :: array_sie, array_v, array_rho, array_flag
-        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_sie, data_v, data_rho, data_flag
+        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_sie, data_v
+        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_rho, data_flag
         type(ESMF_Time) :: currtime
         type(injectdata), pointer :: datablock
         type(wrapper) :: wrap
+
         ! debug
         integer, save :: counter = 1
+        integer :: ilb, jlb, iub, jub
 
-        integer :: i, datacount
+        integer :: i, j, datacount
         character(len=ESMF_MAXSTR), dimension(7) :: datanames
 
       
         !print *, "Import States at start of injector run"
         !call ESMF_StatePrint(importstate, "", rc)
 
-        !!print *, "Field_sie"
-        !!call ESMF_FieldPrint(field_sie, "", rc)
-        !!print *, "local_sie"
-        !!call ESMF_StateGetData(importstate, "SIE", local_sie, rc)
-        !!call ESMF_FieldPrint(local_sie, "", rc)
-        !!call ESMF_StatePrint(importstate, "", rc)
-
-        !!call FlowPrint(comp, clock, 900+counter, rc)
-        !!counter = counter + 1
-
+        ! All possible export data fields.
         datacount = 7
         datanames(1) = "SIE"
         datanames(2) = "U"
@@ -275,45 +269,70 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         call ESMF_StateGetData(importstate, "RHO", local_rho, rc=rc)
         call ESMF_StateGetData(importstate, "FLAG", local_flag, rc=rc)
       
-        !call ESMF_FieldHalo(local_sie, rc)
-        !call ESMF_FieldHalo(local_u, rc)
-        !call ESMF_FieldHalo(local_v, rc)
-        !call ESMF_FieldHalo(local_rho, rc)
-        
+        ! Get the Field and Bundle data from the State, and a pointer to
+        !  the existing data (not a copy).
+        call ESMF_FieldGetData(local_sie, array_sie, rc=rc) 
+        call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
+            
+        call ESMF_FieldGetData(local_v, array_v, rc=rc) 
+        call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
+      
+        call ESMF_FieldGetData(local_rho, array_rho, rc=rc) 
+        call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
+      
+        call ESMF_FieldGetData(local_flag, array_flag, rc=rc) 
+        call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
+          
+        !! DEBUG.
+        ! Debug checks for data pointers, exclusive region only
+        ilb = lbound(data_flag, 1) + 1
+        jlb = lbound(data_flag, 2) + 1
+        iub = ubound(data_flag, 1) - 1
+        jub = ubound(data_flag, 2) - 1
+        if ((ilb .ne. imin) .or. (jlb .ne. jmin) .or. (iub .ne. imax) &
+            .or. (jub .ne. jmax)) then
+            print *, "!!!----Injector-----------!!!"
+            print *, "run counter = ", counter
+            call ESMF_ClockPrint(clock, "currtime string", rc)
+            print *, "!!! i lbound = ", ilb, " imin = ", imin, " !!!"
+            print *, "!!! j lbound = ", jlb, " jmin = ", jmin, " !!!"
+            print *, "!!! i ubound = ", iub, " imax = ", imax, " !!!"
+            print *, "!!! j ubound = ", jub, " jmax = ", jmax, " !!!"
+       endif
+       counter = counter + 1
+       !! DEBUG.
+    
+        ! Update values.  Flag = 10 means override values with our own.
+
         ! Check time to see if we are still injecting
         call ESMF_ClockGetCurrTime(clock, currtime, rc)
         if ((currtime .ge. datablock%inject_start_time) .and. &
             (currtime .le. datablock%inject_stop_time)) then
 
-            ! Get pointers to data contents
-            !print *, "injecting energy, flow, density:"
-            !print *,  datablock%inject_energy, datablock%inject_velocity, &
-            !            datablock%inject_density
-    
-            ! Get the Field and Bundle data from the State
-            call ESMF_FieldGetData(local_sie, array_sie, rc=rc) 
-            call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
-                
-            call ESMF_FieldGetData(local_v, array_v, rc=rc) 
-            call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
-          
-            call ESMF_FieldGetData(local_rho, array_rho, rc=rc) 
-            call ESMF_ArrayGetData(array_rho, data_rho, ESMF_DATA_REF, rc)
-          
-            call ESMF_FieldGetData(local_flag, array_flag, rc=rc) 
-            call ESMF_ArrayGetData(array_flag, data_flag, ESMF_DATA_REF, rc)
-          
-    
-            ! Update values.  Flag = 10 means override values with our own.
-            !print *, "ready to update values"
-            !print *, count(data_flag .eq. 10.0), "values to be overwritten"
-            where (data_flag .eq. 10.0) 
-    
-                data_sie = datablock%inject_energy
-                data_v = datablock%inject_velocity
-                data_rho = datablock%inject_density
-    
-            end where
+            ! Set injection values
+            do j = jmin, jmax
+              do i = imin, imax
+                if (data_flag(i,j).eq.10) then
+                  data_sie(i,j) = datablock%inject_energy
+                  data_v(i,j) = datablock%inject_velocity
+                  data_rho(i,j) = datablock%inject_density
+                endif
+              enddo
+            enddo
+
+        else
+
+            ! Set default constant values.
+            do j = jmin, jmax
+              do i = imin, imax
+                if (data_flag(i,j).eq.10) then
+                  data_sie(i,j) = 200.0
+                  data_v(i,j) = 0.0
+                  data_rho(i,j) = 6.0
+                endif
+              enddo
+            enddo
+
         endif 
  
         ! Update any required fields in the export state
@@ -329,16 +348,6 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
 
         enddo
 
-        !!print *, "Fields at end of injector run"
-        !!print *, "Field_sie"
-        !!call ESMF_FieldPrint(field_sie, "", rc)
-        !!print *, "local_sie"
-        !!call ESMF_StateGetData(exportstate, "SIE", local_sie, rc)
-        !!call ESMF_FieldPrint(local_sie, "", rc)
-
-        !print *, "Export states at end of Injector run"
-        !call ESMF_StatePrint(exportstate, rc=rc)
- 
     end subroutine injector_run
 
 
@@ -391,11 +400,9 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       integer :: status
       logical :: rcpresent
       integer :: ni, nj, i, j, de_id
-      integer(kind=ESMF_IKIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
-      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
       !
       ! Set initial values
@@ -409,46 +416,42 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
+      ! 
+      ! Get our layout from the component, and our de number
+      !
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      call ESMF_DELayoutGetDEID(layout, de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file
       !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
-      call ESMF_DELayoutGetDEID(layout, de_id, status)
-      !
-      ! Frame number from computation
-      !
-      call ESMF_ClockGetAdvanceCount(clock, frame, status)
-      !
-      ! And now test output to a file
-      !
+      call ESMF_FieldAllGather(field_sie, outarray, status)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "SIE", file_no
+        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+      endif
+      call ESMF_ArrayDestroy(outarray, status)
+
       call ESMF_FieldAllGather(field_u, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      !call ESMF_ArrayDestroy(outarray, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
       call ESMF_FieldAllGather(field_v, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      !call ESMF_ArrayDestroy(outarray, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_sie, outarray, status)
-      if (de_id .eq. 0) then
-        write(filename, 20)  "SIE", file_no
-        call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-      endif
-      !call ESMF_ArrayDestroy(outarray, status)
-
-      if(file_no .eq. 901) then
+      if(file_no .eq. 1) then
         call ESMF_FieldAllGather(field_flag, outarray, status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         endif
-        !call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_ArrayDestroy(outarray, status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
