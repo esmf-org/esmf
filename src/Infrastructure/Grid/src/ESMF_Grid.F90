@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.28 2003/01/16 16:24:17 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.29 2003/01/16 18:19:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,6 +80,7 @@
                                             ! coordinate system
         integer :: coord_order              ! enum for mapping of xyz 
                                             ! to ijk
+        integer :: coord_index              ! enum for global or local indexing
         integer :: num_physgrids            ! number of grid descriptors
                                             ! necessary to support
                                             ! staggering, vertical
@@ -191,12 +192,18 @@
       ESMF_CoordOrder_YZX             =  4, &! IJK maps to YZX
       ESMF_CoordOrder_ZXY             =  5, &! IJK maps to ZXY
       ESMF_CoordOrder_ZYX             =  6   ! IJK maps to ZYX
+
+   integer, parameter, public ::            &! recognized coordinate indexings
+      ESMF_CoordIndex_Unknown         =  0, &! unknown or undefined coord indexing
+      ESMF_CoordIndex_Local           =  1, &! uses local indexing
+      ESMF_CoordIndex_Global          =  2   ! uses global indexing
+
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.28 2003/01/16 16:24:17 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.29 2003/01/16 18:19:19 jwolfe Exp $'
 
 !==============================================================================
 !
