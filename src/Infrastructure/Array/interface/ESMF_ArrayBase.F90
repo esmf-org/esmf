@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.35 2004/03/15 23:00:09 svasquez Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.36 2004/03/16 15:52:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.35 2004/03/15 23:00:09 svasquez Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.36 2004/03/16 15:52:06 svasquez Exp $'
 !
 !==============================================================================
 !
@@ -312,7 +312,7 @@ end subroutine
         end subroutine ESMF_ArrayGetAxisIndex
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayReorder
 !
 ! !INTERFACE:
@@ -337,11 +337,12 @@ end subroutine
 !      make one into the other.   is this a type of create?  or is this
 !      a copy?)
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
+!	Changed BOP/EOP to BOPI/EOPI until code is written.
 !
         if (present(rc)) rc = ESMF_FAILURE
 
@@ -379,6 +380,30 @@ end subroutine
 !      Returns information about the array.  For queries where the caller
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the array input are optional to facilitate this.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[rank]}]
+!           The number of dimensions of the array.
+!     \item [{[type]}]
+!	    Real or integer.
+!     \item [{[kind]}]
+!           Item size in bytes.
+!     \item [{[counts]}]
+!           The number of items in each dimension of the array.
+!     \item [{[lbounds]}]
+!           The lower index value.
+!     \item [{[ubounds]}]
+!           The upper index value.
+!     \item [{[strides]}]
+!           None contiguous index values.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -469,6 +494,17 @@ end subroutine
 !      Returns the name of the array.  If the array was created without
 !      specifying a name, the framework will have assigned it a unique one.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [name]
+!           The array name.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
@@ -509,6 +545,17 @@ end subroutine
 !
 ! !DESCRIPTION:
 !      Sets the name of the array.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [name]
+!           The array name.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
@@ -557,6 +604,17 @@ end subroutine
 !      (see Read/Write for other options).  Internally this routine uses the
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -588,6 +646,17 @@ end subroutine
 ! !DESCRIPTION:
 !      Used to reinitialize
 !      all data associated with a Array from the last call to Checkpoint.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -630,6 +699,20 @@ end subroutine
 !      options specified in the IOSpec derived type. 
 !
 !
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[filename]}]
+!           The file name.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -667,7 +750,7 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayRead
 !
 ! !INTERFACE:
@@ -684,12 +767,23 @@ end subroutine
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[iospece]}]
+!           The file specification.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
-!EOP
+!
+!EOPI
 ! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
+!	Changed BOP/EOP to BOPI/EOPI until function is implemented.
 !
         type (ESMF_Array) :: a
 
@@ -722,6 +816,17 @@ end subroutine
 !
 ! !DESCRIPTION:
 !      Routine to print information about a array.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[options]}]
+!           The validation options.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -781,6 +886,18 @@ end subroutine
 !
 ! !DESCRIPTION:
 !      Routine to print information about a array.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [array]
+!           A {\tt ESMF\_Array} object.
+!     \item [{[options]}]
+!           The print options
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
