@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.1 2003/09/18 15:57:06 cdeluca Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.2 2003/09/25 17:56:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -242,7 +242,7 @@ extern "C" {
              delete[] filetemp;
      }
 
-     void FTN(c_esmf_sizeprint)(char *p1, char *p2, int *rank, int *total) {
+     void FTN(c_esmf_sizeprint)(char *p1, char *p2, int *rank) {
          int psize = (int)(p2 - p1);
 
          int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -250,9 +250,15 @@ extern "C" {
              bytes += ESMF_F90_PTR_PLUS_RANK;
 
          if (psize != bytes) {
-            printf("!!Error! FAIL - need to fix ESMF_F90_PTR_xxx in conf.h\n");
-            printf("real size is %d, computed size for rank %d is %d (diff=%d)\n", 
-                                       psize, *rank, bytes, psize-bytes);
+            printf("FAIL: summary - rank %d=%d, computed=%d (diff=%d)\n",
+                             *rank, psize, bytes, psize-bytes);
+            printf(" details: \n");
+            printf("  rank %d: actual size is %d bytes, computed size is %d bytes (diff=%d)\n", 
+                             *rank, psize, bytes, psize-bytes);
+            printf("  in platform specific conf.h file, ESMF_F90_PTR_BASE_SIZE = %d\n",
+                             ESMF_F90_PTR_BASE_SIZE);
+            printf("  increment per rank ESMF_F90_PTR_PLUS_RANK = %d\n",
+                             ESMF_F90_PTR_PLUS_RANK);
 ;
          } else
             printf("rank %d Fortran 90 pointer is %d bytes, matches computed size ok\n", 
