@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.26 2003/01/28 17:03:27 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.27 2003/02/21 17:44:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -191,6 +191,7 @@
     public ESMF_DistGridSetValue
     public ESMF_DistGridLocalToGlobalIndex
     public ESMF_DistGridGlobalToLocalIndex
+    public ESMF_DistGridHalo
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
  
@@ -199,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.26 2003/01/28 17:03:27 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.27 2003/02/21 17:44:51 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1591,6 +1592,65 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridLocalToGlobalIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridHalo - Data Halo operation on a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridHalo(distgrid, array, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid) :: distgrid
+      type(ESMF_Array) :: array
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Call {\tt Array} routines to perform a Halo operation over the data
+!     in a {\tt DistGrid}.  This routine updates the data inside the 
+!     {\tt Array} so there is no separate return argument.
+!
+!     \begin{description}
+!     \item [distgrid]
+!           {\tt DistGrid} containing data to be haloed.
+!     \item [array]
+!           {\tt Array} containing data to be haloed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_AxisIndex) :: axis1, axis2    ! TODO: whatever is needed?
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! TODO: add code which calls array methods here.
+      call ESMF_ArraySetAxisIndex(array, axis1, status)
+      call ESMF_ArraySetAxisIndex(array, axis2, status)
+
+      call ESMF_ArrayRedist(array, layout, etc, status)
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in DistGridHalo: ArrayRedist returned failure"
+        return
+      endif
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridHalo
 
 !------------------------------------------------------------------------------
 !BOP
