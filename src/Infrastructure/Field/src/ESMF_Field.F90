@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.57 2003/08/07 16:51:02 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.58 2003/08/12 22:48:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -181,6 +181,7 @@
    public ESMF_FieldGetData            ! Return a data pointer
    public ESMF_FieldGetGlobalDataInfo  ! Return global data info
    public ESMF_FieldGetLocalDataInfo   ! Return local data info
+   public ESMF_FieldGetRelLoc          ! Return relative location
  
    public ESMF_FieldGetDataMap         ! Return a pointer to DataMap object
 
@@ -213,6 +214,7 @@
 
    public ESMF_FieldValidate           ! Check internal consistency
    public ESMF_FieldPrint              ! Print contents of a Field
+   public ESMF_FieldBoxIntersect       ! Intersect bounding boxes
 
 !  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !  !function ESMF_FieldReadRestart(name, iospec, rc)
@@ -225,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.57 2003/08/07 16:51:02 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.58 2003/08/12 22:48:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3521,6 +3523,73 @@
 
 
         end function ESMF_FieldRead
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGetRelLoc - Return Relative location
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetRelLoc(field, relloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field             ! field to cover
+      type(ESMF_RelLoc), intent(out) :: relloc          ! RelLoc to return
+      integer, intent(out), optional :: rc              ! return code
+!
+! !DESCRIPTION:
+!     Finds and returns the relative location of the field. Use
+!     DataMap access routines to get relloc.
+!
+! !REQUIREMENTS:
+!EOP
+
+      call ESMF_DataMapGet(field%ftypep%mapping, relloc=relloc, rc=rc)
+
+      end subroutine ESMF_FieldGetRelLoc
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
+!
+! !INTERFACE:
+      subroutine ESMF_FieldBoxIntersect(src_field, clip_field, src_DE, &
+                                 de_list, domainlist, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: src_field         ! field to cover
+      type(ESMF_Field), intent(in) :: clip_field        ! field to find a cover in
+      integer, intent(in), optional  :: src_DE          ! The DE to 'cover'
+      integer, intent(out), optional :: de_list         ! DE's that cover
+      type(ESMF_DomainList), optional :: domainlist     ! domain list hint
+      integer, intent(out), optional :: rc              ! return code
+!
+! !DESCRIPTION:
+!      Clips the src_field physgrid box against the clip_field, i.e. returns
+!      a description of the area in clip_field which is necessary to cover the
+!      desired area in src_field.  This procedure is mostly an entry point;
+!      most of the work is done in the {\tt ESMF\_Grid} class.
+!
+! !REQUIREMENTS:
+!EOP
+        type(ESMF_Grid) :: src_grid, clip_grid
+        type(ESMF_RelLoc) :: src_relloc, clip_relloc
+
+        call ESMF_FieldGetGrid(src_field, src_grid, rc)
+        call ESMF_FieldGetGrid(clip_field, clip_grid, rc)
+
+        ! Retrieve the relative locations
+        call ESMF_FieldGetRelloc(src_field, src_relloc, rc)
+        call ESMF_FieldGetRelloc(clip_field, clip_relloc, rc)
+
+        ! Here is the main reason for this function in field.  To avoid
+        ! burdening the user with getting each grid and each RelLoc flag
+        print *, 'in fieldboxintersect, calling gridboxintersect'
+        !call ESMF_GridBoxIntersect(src_grid, clip_grid, &
+                         !src_relloc, clip_relloc, &
+                         !src_DE, de_list, &
+                         !domainlist, rc)
+
+        end subroutine ESMF_FieldBoxIntersect
 
 
         end module ESMF_FieldMod
