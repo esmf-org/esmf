@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.88 2004/07/22 14:46:29 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.89 2004/07/22 17:49:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.88 2004/07/22 14:46:29 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.89 2004/07/22 17:49:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -247,7 +247,7 @@
       type(ESMF_Grid) :: ESMF_GridCreateHorzLatLon
 !
 ! !ARGUMENTS:
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
@@ -497,7 +497,7 @@
       type(ESMF_Grid) :: ESMF_GridCreateHorzXY
 !
 ! !ARGUMENTS:
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
@@ -2567,6 +2567,14 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! If Grid is unitialized, return with warning
+      if (grid%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
+        if (ESMF_LogWrite("destroying uninitialized grid", ESMF_LOG_WARNING, &
+                          ESMF_CONTEXT)) continue
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
+
       !TODO: destruct these
       !  type (ESMF_Base) :: base
       !  type (ESMF_Status) :: gridStatus
@@ -2582,36 +2590,38 @@
       grid%numPhysGrids    = 0
       grid%numDistGrids    = 0
 
-      do n = 1,grid%numPhysGridsAlloc
-        call ESMF_PhysGridDestroy(grid%physgrids(n), rc=localrc)
+      if (grid%gridStatus.eq.ESMF_GRID_STATUS_READY) then
+        do n = 1,grid%numPhysGridsAlloc
+          call ESMF_PhysGridDestroy(grid%physgrids(n), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        end do
+        grid%numPhysGridsAlloc = 0
+        deallocate(grid%physgrids, &
+                   grid%distGridIndex, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating physgrids", &
+                                       ESMF_CONTEXT, rc)) return
+
+        do n = 1,grid%numDistGridsAlloc
+          call ESMF_DistGridDestroy(grid%distgrids(n), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        end do
+        grid%numDistGridsAlloc = 0
+        deallocate(grid%distgrids, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrids", &
+                                       ESMF_CONTEXT, rc)) return
+
+        grid%minGlobalCoordPerDim(:) = 0
+        grid%maxGlobalCoordPerDim(:) = 0
+
+        call ESMF_LocalArrayDestroy(grid%boundingBoxes, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      end do
-      grid%numPhysGridsAlloc = 0
-      deallocate(grid%physgrids, &
-                 grid%distGridIndex, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating physgrids", &
-                                     ESMF_CONTEXT, rc)) return
-
-      do n = 1,grid%numDistGridsAlloc
-        call ESMF_DistGridDestroy(grid%distgrids(n), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      end do
-      grid%numDistGridsAlloc = 0
-      deallocate(grid%distgrids, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating distgrids", &
-                                     ESMF_CONTEXT, rc)) return
-
-      grid%minGlobalCoordPerDim(:) = 0
-      grid%maxGlobalCoordPerDim(:) = 0
-
-      call ESMF_LocalArrayDestroy(grid%boundingBoxes, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
