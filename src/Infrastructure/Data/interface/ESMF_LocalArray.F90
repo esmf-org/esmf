@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.4 2003/07/15 18:15:19 jwolfe Exp $
+! $Id: ESMF_LocalArray.F90,v 1.5 2003/07/15 21:14:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.4 2003/07/15 18:15:19 jwolfe Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.5 2003/07/15 21:14:32 jwolfe Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -609,7 +609,7 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
-        call ESMF_ArraySpecGet(spec, rank, type, kind, status)
+        call ESMF_LocalArraySpecGet(spec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
         ! Call the list function to make the array
         ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByList(rank, type, &
@@ -16637,7 +16637,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI21D%I21Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16652,13 +16652,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI21D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI21D, & 
  localI21D%I21Dptr( 1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16667,7 +16667,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI41D%I41Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16682,13 +16682,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI41D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI41D, & 
  localI41D%I41Dptr( 1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16697,7 +16697,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI81D%I81Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16712,13 +16712,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI81D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI81D, & 
  localI81D%I81Dptr( 1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16731,7 +16731,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI22D%I22Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16746,13 +16746,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI22D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI22D, & 
  localI22D%I22Dptr( 1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16761,7 +16761,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI42D%I42Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16776,13 +16776,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI42D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI42D, & 
  localI42D%I42Dptr( 1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16791,7 +16791,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI82D%I82Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16806,13 +16806,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI82D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI82D, & 
  localI82D%I82Dptr( 1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16825,7 +16825,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI23D%I23Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16840,13 +16840,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI23D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI23D, & 
  localI23D%I23Dptr( 1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16855,7 +16855,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI43D%I43Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16870,13 +16870,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI43D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI43D, & 
  localI43D%I43Dptr( 1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16885,7 +16885,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI83D%I83Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16900,13 +16900,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI83D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI83D, & 
  localI83D%I83Dptr( 1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16919,7 +16919,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI24D%I24Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16934,13 +16934,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI24D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI24D, & 
  localI24D%I24Dptr( 1,1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16949,7 +16949,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI44D%I44Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16964,13 +16964,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI44D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI44D, & 
  localI44D%I44Dptr( 1,1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -16979,7 +16979,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localI84D%I84Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -16994,13 +16994,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localI84D, & 
+ call c_ESMC_LocalArraySetInfo(array, localI84D, & 
  localI84D%I84Dptr( 1,1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17017,7 +17017,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR41D%R41Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17032,13 +17032,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR41D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR41D, & 
  localR41D%R41Dptr( 1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17047,7 +17047,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR81D%R81Dptr( counts(1) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17062,13 +17062,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR81D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR81D, & 
  localR81D%R81Dptr( 1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17081,7 +17081,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR42D%R42Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17096,13 +17096,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR42D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR42D, & 
  localR42D%R42Dptr( 1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17111,7 +17111,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR82D%R82Dptr( counts(1), counts(2) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17126,13 +17126,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR82D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR82D, & 
  localR82D%R82Dptr( 1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17145,7 +17145,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR43D%R43Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17160,13 +17160,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR43D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR43D, & 
  localR43D%R43Dptr( 1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17175,7 +17175,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR83D%R83Dptr( counts(1), counts(2), counts(3) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17190,13 +17190,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR83D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR83D, & 
  localR83D%R83Dptr( 1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17209,7 +17209,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR44D%R44Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17224,13 +17224,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR44D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR44D, & 
  localR44D%R44Dptr( 1,1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17239,7 +17239,7 @@ end function
 ! <Created by macro - do not edit directly > 
  allocate(localR84D%R84Dptr( counts(1), counts(2), counts(3), counts(4) ), stat=status) 
  if (status .ne. 0) then 
- print *, "ESMC_ArrayCreate: Allocation error" 
+ print *, "ESMC_LocalArrayCreate: Allocation error" 
  return 
  endif 
  
@@ -17254,13 +17254,13 @@ end function
  strides = 0 
  offsets = 0 
  
- call c_ESMC_ArraySetInfo(array, localR84D, & 
+ call c_ESMC_LocalArraySetInfo(array, localR84D, & 
  localR84D%R84Dptr( 1,1,1,1 ), & 
  counts, lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, ESMF_TF_TRUE) 
  
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Array internal set info error" 
+ print *, "LocalArray internal set info error" 
  return 
  endif 
 ! < End macro - do not edit directly > 
@@ -17356,21 +17356,21 @@ end function
             select case (localkind)
               case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI21D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI21D, status) 
  deallocate(localI21D%I21Dptr, stat=status) 
  nullify(localI21D%I21Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI41D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI41D, status) 
  deallocate(localI41D%I41Dptr, stat=status) 
  nullify(localI41D%I41Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI81D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI81D, status) 
  deallocate(localI81D%I81Dptr, stat=status) 
  nullify(localI81D%I81Dptr) 
 ! < End macro - do not edit directly > 
@@ -17381,21 +17381,21 @@ end function
             select case (localkind)
               case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI22D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI22D, status) 
  deallocate(localI22D%I22Dptr, stat=status) 
  nullify(localI22D%I22Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI42D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI42D, status) 
  deallocate(localI42D%I42Dptr, stat=status) 
  nullify(localI42D%I42Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI82D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI82D, status) 
  deallocate(localI82D%I82Dptr, stat=status) 
  nullify(localI82D%I82Dptr) 
 ! < End macro - do not edit directly > 
@@ -17406,21 +17406,21 @@ end function
             select case (localkind)
               case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI23D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI23D, status) 
  deallocate(localI23D%I23Dptr, stat=status) 
  nullify(localI23D%I23Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI43D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI43D, status) 
  deallocate(localI43D%I43Dptr, stat=status) 
  nullify(localI43D%I43Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI83D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI83D, status) 
  deallocate(localI83D%I83Dptr, stat=status) 
  nullify(localI83D%I83Dptr) 
 ! < End macro - do not edit directly > 
@@ -17431,21 +17431,21 @@ end function
             select case (localkind)
               case (ESMF_KIND_I2%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI24D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI24D, status) 
  deallocate(localI24D%I24Dptr, stat=status) 
  nullify(localI24D%I24Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI44D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI44D, status) 
  deallocate(localI44D%I44Dptr, stat=status) 
  nullify(localI44D%I44Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_I8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localI84D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localI84D, status) 
  deallocate(localI84D%I84Dptr, stat=status) 
  nullify(localI84D%I84Dptr) 
 ! < End macro - do not edit directly > 
@@ -17460,14 +17460,14 @@ end function
             select case (localkind)
               case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR41D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR41D, status) 
  deallocate(localR41D%R41Dptr, stat=status) 
  nullify(localR41D%R41Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR81D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR81D, status) 
  deallocate(localR81D%R81Dptr, stat=status) 
  nullify(localR81D%R81Dptr) 
 ! < End macro - do not edit directly > 
@@ -17478,14 +17478,14 @@ end function
             select case (localkind)
               case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR42D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR42D, status) 
  deallocate(localR42D%R42Dptr, stat=status) 
  nullify(localR42D%R42Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR82D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR82D, status) 
  deallocate(localR82D%R82Dptr, stat=status) 
  nullify(localR82D%R82Dptr) 
 ! < End macro - do not edit directly > 
@@ -17496,14 +17496,14 @@ end function
             select case (localkind)
               case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR43D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR43D, status) 
  deallocate(localR43D%R43Dptr, stat=status) 
  nullify(localR43D%R43Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR83D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR83D, status) 
  deallocate(localR83D%R83Dptr, stat=status) 
  nullify(localR83D%R83Dptr) 
 ! < End macro - do not edit directly > 
@@ -17514,14 +17514,14 @@ end function
             select case (localkind)
               case (ESMF_KIND_R4%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR44D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR44D, status) 
  deallocate(localR44D%R44Dptr, stat=status) 
  nullify(localR44D%R44Dptr) 
 ! < End macro - do not edit directly > 
 
               case (ESMF_KIND_R8%dkind)
 ! <Created by macro - do not edit directly > 
- call c_ESMC_ArrayGetF90Ptr(array, localR84D, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, localR84D, status) 
  deallocate(localR84D%R84Dptr, stat=status) 
  nullify(localR84D%R84Dptr) 
 ! < End macro - do not edit directly > 
