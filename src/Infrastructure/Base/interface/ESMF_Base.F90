@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.3 2002/10/15 19:09:18 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.4 2002/10/22 19:27:06 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF Base module
@@ -103,6 +103,12 @@
           character (len=ESMF_MaxStr) :: attr_name
           type (ESMF_DataType) :: attr_type
           type (ESMF_DataValue) :: attr_value
+      end type
+
+      type ESMF_Pointer
+      sequence
+      private
+          integer*8 :: base
       end type
 
       type ESMF_Base
