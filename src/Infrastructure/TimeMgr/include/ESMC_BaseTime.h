@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.11 2003/04/25 08:58:38 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.12 2003/04/27 19:30:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -139,65 +139,6 @@ class ESMC_BaseTime {
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
-
-    // individual get/set accessor methods which perform signed conversion
-    //  (TMG 1.1, 1.2, 2.1)
-
-    // Integer Days
-    int ESMC_BaseTimeGet_D(int *D) const;
-    int ESMC_BaseTimeSet_D(int  D);
-
-    // Integer Hours
-    int ESMC_BaseTimeGet_H(int *H) const;
-    int ESMC_BaseTimeSet_H(int  H);
-
-    // Integer Minutes
-    int ESMC_BaseTimeGet_M(int *M) const;
-    int ESMC_BaseTimeSet_M(int  M);
-
-    // Integer Seconds
-    int ESMC_BaseTimeGet_S(int *S) const;
-    int ESMC_BaseTimeSet_S(int  S);
-
-    // Integer Millseconds
-    int ESMC_BaseTimeGet_MS(int *MS) const;
-    int ESMC_BaseTimeSet_MS(int  MS);
-
-    // Integer Microseconds
-    int ESMC_BaseTimeGet_US(int *US) const;
-    int ESMC_BaseTimeSet_US(int  US);
-
-    // Integer Nanoseconds
-    int ESMC_BaseTimeGet_NS(int *NS) const;
-    int ESMC_BaseTimeSet_NS(int  NS);
-
-    // Floating point days
-    int ESMC_BaseTimeGet_d(double *d) const;
-    int ESMC_BaseTimeSet_d(double  d);
-
-    // Floating point hours
-    int ESMC_BaseTimeGet_h(double *h) const;
-    int ESMC_BaseTimeSet_h(double  h);
-
-    // Floating point minutes
-    int ESMC_BaseTimeGet_m(double *m) const;
-    int ESMC_BaseTimeSet_m(double  m);
-
-    // Floating point seconds
-    int ESMC_BaseTimeGet_s(double *s) const;
-    int ESMC_BaseTimeSet_s(double  s);
-
-    // Floating point milliseconds
-    int ESMC_BaseTimeGet_ms(double *ms) const;
-    int ESMC_BaseTimeSet_ms(double  ms);
-
-    // Floating point microseconds
-    int ESMC_BaseTimeGet_us(double *us) const;
-    int ESMC_BaseTimeSet_us(double  us);
-
-    // Floating point nanoseconds
-    int ESMC_BaseTimeGet_ns(double *ns) const;
-    int ESMC_BaseTimeSet_ns(double  ns);
 
     // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
     bool operator==(const ESMC_BaseTime &) const; 
