@@ -1,4 +1,4 @@
-! $Id: ESMF_RTableTest.F90,v 1.1 2003/03/10 23:21:14 nscollins Exp $
+! $Id: ESMF_RTableTest.F90,v 1.2 2003/03/14 15:27:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RTableTest.F90,v 1.1 2003/03/10 23:21:14 nscollins Exp $'
+      '$Id: ESMF_RTableTest.F90,v 1.2 2003/03/14 15:27:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,64 +52,29 @@
 
       ! instantiate a RTable 
       type(ESMF_RTable) :: rtable
+ 
+      ! local args needed to create/construct objects
+      integer :: mydeid
+      integer :: decount
+
+      mydeid = 1
+      decount = 4
 
       ! test dynamic allocation of ESMF_RTable
-      rtable = ESMF_RTableCreate(args, rc)
+      rtable = ESMF_RTableCreate(mydeid, decount, rc)
       write(name, *) "ESMF_RTableCreate"
-      write(failMsg, *) "rc =", rc, ", args =", args
+      write(failMsg, *) "rc =", rc, ", args =", mydeid, decount
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
     
       ! test internal dynamic allocation within statically allocated
       !   ESMF_RTable
-      call ESMF_RTableConstruct(rtable, args, rc)
+      call ESMF_RTableConstruct(rtable, mydeid, decount, rc)
       write(name, *) "ESMF_RTableConstruct"
-      write(failMsg, *) "rc =", rc, ", args =", args
+      write(failMsg, *) "rc =", rc, ", args =", mydeid, decount
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! test initialization of members of statically allocated ESMF_RTable
-      !   may want to read back values via Get methods for comparison
-      call ESMF_RTableInit(rtable, args, rc)
-      write(name, *) "ESMF_RTableInit"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of configuration values
-      type(ESMF_RTableConfig) config_set
-      call ESMF_RTableSetConfig(rtable, config_set, rc)
-      write(name, *) "ESMF_RTableSetConfig"
-      write(failMsg, *) "rc =", rc, ", config_set =", config_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of configuration values,
-      !  compare to values set previously
-      type(ESMF_RTableConfig) :: config_get
-      call ESMF_RTableGetConfig(rtable, config_get, rc)
-      write(name, *) "ESMF_RTableGetConfig"
-      write(failMsg, *) "rc =", rc, ", config_get =", config_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test setting of ESMF_RTable members values
-      <value type> :: value_set
-      call ESMF_RTableSet<Value>(rtable, value_set, rc)
-      write(name, *) "ESMF_RTableSet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! test getting of ESMF_RTable members values,
-      !   compare to values set previously
-      <value type> :: value_get
-      call ESMF_RTableGet<Value>(rtable, value_get, rc)
-      write(name, *) "ESMF_RTableGet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
-    
       ! test validate method via option string
       character(ESMF_MAXSTR) :: validate_options
       call ESMF_RTableValidate(rtable, validate_options, rc)
