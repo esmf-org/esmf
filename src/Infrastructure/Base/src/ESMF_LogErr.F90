@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.21 2004/08/28 00:15:38 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.22 2004/09/01 22:19:41 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,9 +60,9 @@ end type
 
 !     ! Msg Types
 type(ESMF_MsgType), parameter           :: &
-    ESMF_LOG_INFO  = ESMF_MsgType(1), &
+    ESMF_LOG_INFO  =   ESMF_MsgType(1), &
     ESMF_LOG_WARNING = ESMF_MsgType(2), &
-    ESMF_LOG_ERROR = ESMF_MsgType(3)
+    ESMF_LOG_ERROR =   ESMF_MsgType(3)
 
 !     ! ESMF_Halt
 type ESMF_HaltType
@@ -72,9 +72,9 @@ end type
 
 !     ! Halt Types
 type(ESMF_HaltType), parameter           :: &
-    ESMF_LOG_HALTNEVER  = ESMF_HaltType(1), &
+    ESMF_LOG_HALTNEVER  =  ESMF_HaltType(1), &
     ESMF_LOG_HALTWARNING = ESMF_HaltType(2), &
-    ESMF_LOG_HALTERROR = ESMF_HaltType(3)
+    ESMF_LOG_HALTERROR =   ESMF_HaltType(3)
     
 !     ! ESMF_LogType
 type ESMF_LogType
@@ -91,23 +91,29 @@ type(ESMF_LogType), parameter		:: &
 !     ! Log Entry                            
 type ESMF_LOGENTRY
     private
-    sequence
-    character(len=32) context
-    integer err_type
-    character(len=32) mod_name
-	integer number
-	integer pe_number	
+    sequence  	
+    character(len=32)				msg	
+    character(len=32) 				file,method	
+    character(len=8) 				d		                                     
+    character(len=8)				lt  			   				
+    integer					h,m,s,ms				        
+    integer					line   
+    logical					methodflag,lineflag,fileflag,stopprogram					
 end type ESMF_LOGENTRY
 
 !     ! Log  
 type ESMF_Log
     private
     sequence       
-                                            
+    !Set fileIO=ESMF_FALSE
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
+#else
+    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
+#endif                                        
     type(ESMF_Logical)                      ::  FileIsOpen
-    type(ESMF_Logical)                      ::  flush
+    type(ESMF_Logical)                      ::  flushImmediately
     type(ESMF_HaltType)                     ::  halt
-    type(ESMF_LOGENTRY), dimension(1)       ::  LOG_ENTRY
     integer                                     maxElements
     character(len=32)                           nameLogErrFile 
     type(ESMF_Logical)                      ::  rootOnly
@@ -115,14 +121,9 @@ type ESMF_Log
     integer                                     stream 
     integer                                     unitNumber 
     type(ESMF_Logical)                      ::  verbose
+    integer                                     fIndex
     
-!Set fileIO=ESMF_FALSE
-#ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_Logical)                      ::  fileIO=ESMF_FALSE
-    
-#else
-    type(ESMF_Logical)                      ::  fileIO
-#endif
+
 end type ESMF_Log
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -131,12 +132,16 @@ end type ESMF_Log
     public ESMF_LOG_ERROR
     public ESMF_LOG_SINGLE
     public ESMF_LOG_MULTI
+    public ESMF_LOG_HALTNEVER
+    public ESMF_LOG_HALTWARNING
+    public ESMF_LOG_HALTERROR
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
    public ESMF_Log
    public ESMF_LogClose
    public ESMF_LogFinalize
+   public ESMF_LogFlush
    public ESMF_LogFoundAllocError
    public ESMF_LogFoundError
    public ESMF_LogGet
@@ -148,12 +153,51 @@ end type ESMF_Log
    public ESMF_LogSet
    public ESMF_LogWrite
 
+!  Overloaded = operator functions
+   public operator(.eq.),operator(.gt.)
+   
+! overload .eq. with additional derived types so you can compare 
+!  them as if they were simple integers.
+ 
+
+interface operator (.eq.)
+   module procedure ESMF_mteq
+   module procedure ESMF_hteq
+end interface
+
+interface operator (.gt.)
+   module procedure ESMF_mtgt
+end interface
 !EOPI  
 
 type(ESMF_Log),SAVE::ESMF_LogDefault	
 !----------------------------------------------------------------------------
 
 contains
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_DataTypes to see if they're the same or not
+
+function ESMF_hteq(ht1, ht2)
+ logical ESMF_hteq
+ type(ESMF_HaltType), intent(in) :: ht1,ht2
+
+ ESMF_hteq = (ht1%htype .eq. ht2%htype)
+end function
+
+function ESMF_mteq(mt1, mt2)
+ logical ESMF_mteq
+ type(ESMF_MsgType), intent(in) :: mt1,mt2
+
+ ESMF_mteq = (mt1%mtype .eq. mt2%mtype)
+end function
+
+function ESMF_mtgt(mt1, mt2)
+ logical ESMF_mtgt
+ type(ESMF_MsgType), intent(in) :: mt1,mt2
+
+ ESMF_mtgt = (mt1%mtype .gt. mt2%mtype)
+end function
 
 !--------------------------------------------------------------------------
 !BOP
@@ -220,11 +264,11 @@ end subroutine ESMF_LogClose
 !      \end{description}
 ! 
 !EOPI
-	if (present(rc)) then
-	  	rc=ESMF_FAILURE
-	endif
+	integer::rc2,status
+	if (present(rc)) rc=ESMF_FAILURE
+	deallocate(ESMF_LogDefault%LOG_ENTRY,stat=status)
 	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
-!	FLUSH	
+	        call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)	
 		ESMF_LogDefault%FileIsOpen=ESMF_FALSE
 		if (present(rc)) then
 			rc=ESMF_SUCCESS
@@ -377,7 +421,7 @@ end function ESMF_LogFoundError
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
 	type(ESMF_HaltType), intent(out),optional               :: halt
-	type(ESMF_LogType), intent(out),optional	                :: logtype
+	type(ESMF_LogType), intent(out),optional	        :: logtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -393,6 +437,8 @@ end function ESMF_LogFoundError
 !            Log object.
 !      \item [{[verbose]}]
 !            Verbose flag.
+!      \item [{[flush]}]
+!            Flush flag.
 !      \item [{[rootOnly]}]
 !	     Root only flag
 !      \item [{[halt]}]
@@ -410,7 +456,7 @@ end function ESMF_LogFoundError
 !EOPI
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(verbose)) verbose=log%verbose
-	if (present(flush)) flush=log%flush
+	if (present(flush)) flush=log%flushImmediately
 	if (present(rootOnly)) rootOnly=log%rootOnly
 	if (present(halt)) halt=log%halt
 	if (present(logtype)) logtype=log%logtype
@@ -446,13 +492,16 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
-    integer 				                    :: status, i, rc2	
+    integer 				          :: status, i, rc2	
 	
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
-
+    ESMF_LogDefault%flushImmediately = ESMF_TRUE
+    ESMF_LogDefault%fIndex = 1
+    ESMF_LogDefault%maxElements = 1
+    allocate(ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%maxElements),stat=status)
     ESMF_LogDefault%unitnumber=ESMF_LOG_FORT_STDOUT   
     do i=ESMF_LogDefault%unitnumber, ESMF_LOG_UPPER
         inquire(unit=i,iostat=status)
@@ -460,11 +509,11 @@ end subroutine ESMF_LogGet
             ESMF_LogDefault%FileIsOpen = ESMF_TRUE
             exit
      	endif
-   	enddo 
-	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_FALSE) return
-	ESMF_LogDefault%unitNumber = i  
-	call c_ESMC_LogInitialize(filename,rc2)
-	if (present(rc)) rc=ESMF_SUCCESS
+   enddo 
+   if (ESMF_LogDefault%FileIsOpen .eq. ESMF_FALSE) return
+   ESMF_LogDefault%unitNumber = i  
+   call c_ESMC_LogInitialize(filename,rc2)
+       if (present(rc)) rc=ESMF_SUCCESS
 	
 end subroutine ESMF_LogInitialize
 
@@ -727,7 +776,7 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log)		 				:: log
+	type(ESMF_Log) 				   		:: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
@@ -762,16 +811,98 @@ end subroutine ESMF_LogOpen
 !      \end{description}
 ! 
 !EOPI 
+    integer :: status
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(verbose)) log%verbose=verbose
-	if (present(flush)) log%flush=flush
+	if (present(flush)) log%flushImmediately=flush
 	if (present(rootOnly)) log%rootOnly=rootOnly
 	if (present(halt)) log%halt=halt
 	if (present(logtype)) log%logtype=logtype
 	if (present(stream)) log%stream=stream
-	if (present(maxElements)) log%maxElements=maxElements
+	if (present(maxElements) .and. maxElements .gt. 0) then
+	    if (log%maxElements .ne. maxElements) then
+	        deallocate(log%LOG_ENTRY,stat=status)
+		allocate(log%LOG_ENTRY(maxElements),stat=status)
+		log%maxElements=maxElements
+	    endif
+	endif    
 	if (present(rc)) rc=ESMF_SUCCESS 
 end subroutine ESMF_LogSet
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogFlush - Flushes the Log file(s)
+
+! !INTERFACE: 
+	subroutine ESMF_LogFlush(log,rc)
+!
+!
+! !ARGUMENTS:
+	type(ESMF_LOG)				:: log
+	integer, intent(out),optional		:: rc
+
+! !DESCRIPTION:
+!      This subroutine flushes a log associated with an {\tt ESMF\_Log}.
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [{[log]}]
+!            An optional {\tt ESMF\_Log} object that can be used instead
+!	     of the default log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
+    integer 			    :: i,j,ok,status
+
+    if (present(rc)) rc=ESMF_FAILURE
+    
+    if (log%FileIsOpen .eq. ESMF_TRUE) then	
+    	ok=0
+    	do i=1, ESMF_LOG_MAXTRYOPEN
+    	    OPEN(UNIT=log%unitnumber, File=log%nameLogErrFile, POSITION="APPEND", &
+    		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
+            if (status.eq.0) then
+	        do j=1, log%findex
+    		    if (log%LOG_ENTRY(j)%lineflag .eq. .TRUE.) then								
+    		        if (log%LOG_ENTRY(j)%methodflag .eq. .TRUE.) then
+    			    WRITE(log%unitnumber,122) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
+                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," ",trim(log%LOG_ENTRY(j)%file)," ",&
+    				log%LOG_ENTRY(j)%line," ",trim(log%LOG_ENTRY(j)%method)," ",trim(log%LOG_ENTRY(j)%msg)
+    		        else
+    			    WRITE(log%unitnumber,123) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
+                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," ",trim(log%LOG_ENTRY(j)%file)," ",&
+    				log%LOG_ENTRY(j)%line," ",trim(log%LOG_ENTRY(j)%msg)
+    		        endif	
+                    else
+    		        if (log%LOG_ENTRY(j)%methodflag .eq. .TRUE.) then
+    		            WRITE(log%unitnumber,132) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
+                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," ",&
+    			        " ",trim(log%LOG_ENTRY(j)%method)," ",trim(log%LOG_ENTRY(j)%msg)
+    		        else
+    		            WRITE(log%unitnumber,133) log%LOG_ENTRY(j)%d," ",log%LOG_ENTRY(j)%h,&
+                                log%LOG_ENTRY(j)%m,log%LOG_ENTRY(j)%s,".",log%LOG_ENTRY(j)%ms," ",trim(log%LOG_ENTRY(j)%lt)," "," ",trim(log%LOG_ENTRY(j)%msg)
+    		        endif	
+    	            endif
+		enddo    
+    	        CLOSE(UNIT=log%unitnumber)
+    	        ok=1
+    	    endif	
+    	    if (ok.eq.1) exit    
+       enddo
+   endif
+   
+   log%findex = 1 
+   122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
+   123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
+   132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
+   133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
+   
+   rc=ESMF_SUCCESS	
+      
+end subroutine ESMF_LogFlush
 
 !--------------------------------------------------------------------------
 !BOP
@@ -791,7 +922,7 @@ end subroutine ESMF_LogSet
 	integer, intent(out),optional		:: rc
 
 ! !DESCRIPTION:
-!      This function writes to the file associated with an {\tt ESMF\_Log}.
+!      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
 !      A message is passed in along with the {\tt msgtype}, {\tt line}, 
 !      {\tt file} and {\tt method}.  If the write to the {\tt ESMF\_Log}
 !      is successful, the function will return a logical {\tt true}.  This 
@@ -825,81 +956,58 @@ end subroutine ESMF_LogSet
     character(len=10)               :: t
     character(len=8)                :: d
     character(len=7)                :: lt
-    !character(len=32)               :: f
     character(len=32)               ::tmethod,tfile
     integer			    ::status,tline
-    integer                         ::ok
-    integer	                    ::i
     integer                         ::h,m,s,ms,y,mn,dy
+    integer			    ::rc2
     
+    call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
+    call DATE_AND_TIME(d,t)	
     if (present(rc)) rc=ESMF_FAILURE
-    if (present(method)) tmethod=adjustl(method)
-    if (present(line)) tline=line 
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%methodflag = .FALSE.
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%lineflag = .FALSE.
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%fileflag = .FALSE.
+    if (present(method)) then
+        tmethod=adjustl(method)
+	ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%methodflag=.TRUE.
+	ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%method = tmethod
+    endif	
+    if (present(line)) then
+        tline=line 
+	ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%lineflag = .TRUE.
+	ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%line = tline
+    endif	
     if (present(file)) then
         tfile=adjustl(file)
-    else
-        tfile=""
+	ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%fileflag = .TRUE.
+	ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%file = tfile
     endif
-    call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
-    
-    if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
-    	call DATE_AND_TIME(d,t)	
-    	select case (msgtype%mtype)
-          case (1)
-    	    lt="INFO"
-          case (2)
-    	    lt="WARNING"
-   	  case default
-    	    lt="ERROR"
-   	end select				
-    	ok=0
-    	do i=1, ESMF_LOG_MAXTRYOPEN
-    	    OPEN(UNIT=ESMF_LogDefault%unitnumber, &
-                File=ESMF_LogDefault%nameLogErrFile, POSITION="APPEND", &
-    		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
-            if (status.eq.0) then
-    		if (present(line)) then								
-    		    if (present(method)) then
-    			WRITE(ESMF_LogDefault%unitnumber,122) d," ",h,&
-                                m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
-    				tline," ",trim(tmethod)," ",trim(msg)
-			!if (log%verbose .eq. ESMF_TRUE) print *, &
-                        ! d,"  ",t,"  ", lt,"    ",tfile,tline,"  ",tmethod,msg
-    		    else
-    			WRITE(ESMF_LogDefault%unitnumber,123) d," ",h,&
-                                m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
-    				tline," ",trim(msg)
-			!if (log%verbose .eq. ESMF_TRUE) print *, &
-                        ! d,"  ",t,"  ", lt,"    ",tfile,tline,"  ",msg
-    		    endif	
-            else
-    		if (present(method)) then
-    		    WRITE(ESMF_LogDefault%unitnumber,132) d," ",h,&
-                        m,s,".",ms," ",trim(lt)," ",&
-    			" ",trim(tmethod)," ",trim(msg)
-		    !if (log%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-    		    !lt,"    ","  ",tmethod,msg
-    		else
-    		    WRITE(ESMF_LogDefault%unitnumber,133) d," ",h,&
-                        m,s,".",ms," ",trim(lt)," "," ",trim(msg)
-		    !if (log%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-    		    !lt,"    ","  ",msg
-    		endif	
-    	    endif
-    	    CLOSE(UNIT=ESMF_LogDefault%unitnumber)
-    	    ok=1
-    	endif	
-    	if (ok.eq.1) exit    
-   enddo
-   endif
-122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
-123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
-132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
-133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
+    select case (msgtype%mtype)
+        case (1)
+    	    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%lt="INFO"
+        case (2)
+    	    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%lt="WARNING"
+   	case default
+    	    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%lt="ERROR"
+    end select	
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%d = d
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%h = h
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%m = m
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%s = s
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%ms = ms	
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%msg = msg
+    if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTERROR).and. (msgtype .eq. ESMF_LOG_ERROR)) then
+        ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%stopprogram=.TRUE.
+        call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
+    endif    	 
+    if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTWARNING).and. (msgtype .gt. ESMF_LOG_WARNING)) then
+        ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%stopprogram=.TRUE.
+	call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
+    endif	
+    if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
+    ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1
 
-if (present(rc)) rc=ESMF_SUCCESS
-if ((ESMF_LogDefault%halt%htype .eq. 3).and. (msgtype%mtype .eq. 3)) STOP
-
+   if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
 end module ESMF_LogErrMod
