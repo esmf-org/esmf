@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.73 2004/11/02 23:50:37 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.74 2004/11/05 18:18:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.73 2004/11/02 23:50:37 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.74 2004/11/05 18:18:12 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -3904,7 +3904,6 @@ end interface
 !
 !EOPI
 
-#if 1
       integer :: localrc                  ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
@@ -4062,7 +4061,6 @@ end interface
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-#endif
       end subroutine ESMF_StateClassAddArrayList
 
 !------------------------------------------------------------------------------
@@ -4097,7 +4095,6 @@ end interface
 !
 !EOPI
 
-#if 1
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: fname
@@ -4266,7 +4263,6 @@ end interface
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-#endif
       end subroutine ESMF_StateClassAddFieldList
 
 !------------------------------------------------------------------------------
@@ -4301,7 +4297,6 @@ end interface
 !
 !EOPI
 
-#if 1
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
@@ -4628,7 +4623,6 @@ end interface
       endif
 
       ! do not reset rc here - it should already have a valid value.
-#endif
 
       end subroutine ESMF_StateClassAddBundleList
 
@@ -4665,7 +4659,6 @@ end interface
 !
 !EOPI
 
-#if 1
       integer :: status                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
@@ -4803,7 +4796,6 @@ end interface
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-#endif
       end subroutine ESMF_StateClassAddStateList
 
 !------------------------------------------------------------------------------
@@ -4856,7 +4848,6 @@ end interface
 !
 !EOPI
 
-#if 1
       integer :: localrc                   ! local error status
       integer :: i, dcount, itemindex
       logical :: itemfound
@@ -4909,7 +4900,6 @@ end interface
 
       if (present(rc)) rc = localrc
 
-#endif
       end function ESMF_StateClassFindData
 
 !------------------------------------------------------------------------------
@@ -4948,7 +4938,6 @@ end interface
 !
 !EOPI
 
-#if 1
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
@@ -5076,7 +5065,6 @@ end interface
 
 
       if (present(rc)) rc = ESMF_SUCCESS
-#endif
 
       end subroutine ESMF_StateClassAddDataNameList
 
@@ -5111,7 +5099,6 @@ end interface
 !
 !EOPI
 
-#if 1
       type(ESMF_StateItem), dimension(:), pointer :: temp_list
       integer :: i
       integer :: allocsize 
@@ -5165,7 +5152,6 @@ end interface
       endif
    
       rc = ESMF_SUCCESS
-#endif
 
       end subroutine ESMF_StateClassExtendList
 
