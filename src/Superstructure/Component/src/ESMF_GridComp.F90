@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.5 2003/05/07 17:39:53 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.6 2003/06/26 23:05:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,8 +87,8 @@
       public ESMF_GridCompFinalize
 
       ! Other routines the user might request to setup.
-      !public ESMF_GridCompCheckpoint
-      !public ESMF_GridCompRestore
+      public ESMF_GridCompCheckpoint
+      public ESMF_GridCompRestore
       !public ESMF_GridCompWrite
       !public ESMF_GridCompRead
 !EOPI
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.5 2003/05/07 17:39:53 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.6 2003/06/26 23:05:04 nscollins Exp $'
 
 !==============================================================================
 !
@@ -364,7 +364,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompInitialize(component%compp, importstate, exportstate, &
+        call ESMF_CompInitialize(component%compp, 2, importstate, exportstate, &
                                               clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_GridCompInitialize
@@ -414,7 +414,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRun(component%compp, importstate, exportstate, &
+        call ESMF_CompRun(component%compp, 2, importstate, exportstate, &
                                              clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_GridCompRun
@@ -581,12 +581,103 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompFinalize(component%compp, importstate, exportstate, &
+        call ESMF_CompFinalize(component%compp, 2, importstate, exportstate, &
                                               clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_GridCompFinalize
 
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompCheckpoint -- Call the Component's checkpoint routine
+
+! !INTERFACE:
+      subroutine ESMF_GridCompCheckpoint(component, iospec, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp), intent(inout) :: component
+      type (ESMF_IOSpec), intent(inout), optional :: iospec
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user checkpoint code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Checkpoint routine for.
+!
+!   \item[{[iospec]}]  I/O options.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompCheckpoint(component%compp, iospec, clock, phase, rc)
+
+        end subroutine ESMF_GridCompCheckpoint
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompRestore -- Call the Component's restore routine
+
+! !INTERFACE:
+      subroutine ESMF_GridCompRestore(component, iospec, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp), intent(inout) :: component
+      type (ESMF_IOSpec), intent(inout), optional :: iospec
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user restore code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Restore routine for.
+!
+!   \item[{[iospec]}]  I/O options.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompRestore(component%compp, iospec, clock, phase, rc)
+
+        end subroutine ESMF_GridCompRestore
+
+
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_GridCompDestroy -- Release resources for a Component
