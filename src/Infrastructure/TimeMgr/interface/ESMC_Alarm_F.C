@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.19 2004/01/31 03:07:19 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.20 2004/02/02 19:11:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,8 +35,8 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_alarmcreate)(ESMC_Alarm **ptr, int *nameLen, 
-                                    const char *name, ESMC_Clock **clock,
+       void FTN(c_esmc_alarmcreatenew)(ESMC_Alarm **ptr, int *nameLen, 
+                const char *name, ESMC_Clock **clock,
                 ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
                 ESMC_Time *stopTime, ESMC_TimeInterval *ringDuration, 
                 int *ringTimeStepCount, ESMC_Time *refTime,
@@ -71,7 +71,7 @@ extern "C" {
        void FTN(c_esmc_alarmcreatecopy)(ESMC_Alarm **ptr,
                                         ESMC_Alarm **alarm,
                                         int *status) {
-          *ptr = ESMC_AlarmCreateCopy(
+          *ptr = ESMC_AlarmCreate(
                             *alarm,   // required
 
                     ((void*) status == (void*)ESMC_BAD_POINTER ?

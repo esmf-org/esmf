@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.39 2004/01/31 03:07:19 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.40 2004/02/02 19:11:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,7 +73,6 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_AlarmCreate
-      public ESMF_AlarmCreateCopy
       public ESMF_AlarmDestroy
       public ESMF_AlarmSet
       public ESMF_AlarmGet
@@ -109,13 +108,29 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.39 2004/01/31 03:07:19 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.40 2004/02/02 19:11:59 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_AlarmCreate    
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_AlarmCreateNew
+      module procedure ESMF_AlarmCreateCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Alarm} Create
+!     methods.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       interface operator(==)
@@ -143,16 +158,16 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmCreate - Create an Alarm
+! !IROUTINE: ESMF_AlarmCreateNew - Create a new Alarm
 
 ! !INTERFACE:
-      function ESMF_AlarmCreate(name, clock, ringTime, ringInterval, &
-                                stopTime, ringDuration, &
-                                ringTimeStepCount, &
-                                refTime, enabled, sticky, rc)
+      function ESMF_AlarmCreateNew(name, clock, ringTime, ringInterval, &
+                                   stopTime, ringDuration, &
+                                   ringTimeStepCount, &
+                                   refTime, enabled, sticky, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Alarm) :: ESMF_AlarmCreate
+      type(ESMF_Alarm) :: ESMF_AlarmCreateNew
 
 ! !ARGUMENTS:
       character (len=*),       intent(in),  optional :: name
@@ -169,6 +184,9 @@
 
 ! !DESCRIPTION:
 !     Initializes an {\tt ESMF\_Alarm}'s properties.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_AlarmCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -231,12 +249,12 @@
       end if
 
 !     invoke C to C++ entry point to allocate and initialize new alarm
-      call c_ESMC_AlarmCreate(ESMF_AlarmCreate, nameLen, name, clock, &
-                              ringTime, ringInterval, stopTime, ringDuration, &
-                              ringTimeStepCount, refTime, enabled, &
-                              sticky, rc)
+      call c_ESMC_AlarmCreateNew(ESMF_AlarmCreateNew, nameLen, name, clock, &
+                                 ringTime, ringInterval, stopTime, &
+                                 ringDuration, ringTimeStepCount, refTime, &
+                                 enabled, sticky, rc)
 
-      end function ESMF_AlarmCreate
+      end function ESMF_AlarmCreateNew
 
 !------------------------------------------------------------------------------
 !BOP    
@@ -254,6 +272,9 @@
 
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Alarm}.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_AlarmCreate()}.
 !
 !     The arguments are:
 !     \begin{description}

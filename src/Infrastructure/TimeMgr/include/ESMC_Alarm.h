@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.22 2004/01/31 03:07:19 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.23 2004/02/02 19:11:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -235,7 +235,7 @@ class ESMC_Alarm {
                                  bool*, int*);
 
     // friend function to copy an alarm
-    friend ESMC_Alarm *ESMC_AlarmCreateCopy(ESMC_Alarm*, int*);
+    friend ESMC_Alarm *ESMC_AlarmCreate(ESMC_Alarm*, int*);
 
     // friend to de-allocate alarm
     friend int ESMC_AlarmDestroy(ESMC_Alarm *);
@@ -275,7 +275,7 @@ class ESMC_Alarm {
                                  int*               rc=0);
 
     // friend function to copy a alarm
-    ESMC_Alarm *ESMC_AlarmCreateCopy(ESMC_Alarm *alarm, int *rc=0);
+    ESMC_Alarm *ESMC_AlarmCreate(ESMC_Alarm *alarm, int *rc=0);
 
     // friend to de-allocate alarm
     int ESMC_AlarmDestroy(ESMC_Alarm *alarm);

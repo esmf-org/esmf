@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.24 2004/01/31 03:08:30 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.25 2004/02/02 19:11:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,16 +34,16 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_clockcreate)(ESMC_Clock **ptr,
-                                    int *nameLen,
-                                    const char *name,
-                                    ESMC_TimeInterval *timeStep,
-                                    ESMC_Time *startTime,
-                                    ESMC_Time *stopTime,
-                                    ESMC_TimeInterval *runDuration,
-                                    int *runTimeStepCount,
-                                    ESMC_Time *refTime,
-                                    int *status) {
+       void FTN(c_esmc_clockcreatenew)(ESMC_Clock **ptr,
+                                       int *nameLen,
+                                       const char *name,
+                                       ESMC_TimeInterval *timeStep,
+                                       ESMC_Time *startTime,
+                                       ESMC_Time *stopTime,
+                                       ESMC_TimeInterval *runDuration,
+                                       int *runTimeStepCount,
+                                       ESMC_Time *refTime,
+                                       int *status) {
           *ptr = ESMC_ClockCreate(
                     *nameLen,   // always present internal argument.
 
@@ -67,7 +67,7 @@ extern "C" {
        void FTN(c_esmc_clockcreatecopy)(ESMC_Clock **ptr,
                                         ESMC_Clock **clock,
                                         int *status) {
-          *ptr = ESMC_ClockCreateCopy(
+          *ptr = ESMC_ClockCreate(
                             *clock,   // required
 
                     ((void*) status == (void*)ESMC_BAD_POINTER ?

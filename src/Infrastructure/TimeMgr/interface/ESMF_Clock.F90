@@ -64,7 +64,6 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_ClockCreate
-      public ESMF_ClockCreateCopy
       public ESMF_ClockDestroy
       public ESMF_ClockSet
       public ESMF_ClockGet
@@ -96,13 +95,29 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.40 2004/01/31 02:25:42 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.41 2004/02/02 19:11:58 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_ClockCreate
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_ClockCreateNew
+      module procedure ESMF_ClockCreateCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Clock} Create
+!     methods. 
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       interface operator(==)
@@ -127,14 +142,14 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockCreate - Create a Clock
+! !IROUTINE: ESMF_ClockCreateNew - Create a new Clock
 
 ! !INTERFACE:
-      function ESMF_ClockCreate(name, timeStep, startTime, stopTime, &
-                                runDuration, runTimeStepCount, refTime, rc)
+      function ESMF_ClockCreateNew(name, timeStep, startTime, stopTime, &
+                                   runDuration, runTimeStepCount, refTime, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Clock) :: ESMF_ClockCreate
+      type(ESMF_Clock) :: ESMF_ClockCreateNew
 
 ! !ARGUMENTS:
       character (len=*),       intent(in),  optional :: name
@@ -147,7 +162,10 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Creates and sets the initial values in an {\tt ESMF\_Clock}.    
+!     Creates and sets the initial values in a new {\tt ESMF\_Clock}.    
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_ClockCreate()}.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -193,11 +211,11 @@
       end if
 
 !     invoke C to C++ entry point to allocate and initialize new clock
-      call c_ESMC_ClockCreate(ESMF_ClockCreate, nameLen, name, timeStep, &
-                              startTime, stopTime, runDuration, &
-                              runTimeStepCount, refTime, rc)
+      call c_ESMC_ClockCreateNew(ESMF_ClockCreateNew, nameLen, name, &
+                                 timeStep, startTime, stopTime, runDuration, &
+                                 runTimeStepCount, refTime, rc)
 
-      end function ESMF_ClockCreate
+      end function ESMF_ClockCreateNew
 
 !------------------------------------------------------------------------------
 !BOP
@@ -215,6 +233,9 @@
     
 ! !DESCRIPTION:
 !     Creates a copy of a given {\tt ESMF\_Clock}.    
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_ClockCreate()}.
 !     
 !     The arguments are:
 !     \begin{description}

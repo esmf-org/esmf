@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.28 2004/01/31 03:07:19 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.29 2004/02/02 19:11:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.28 2004/01/31 03:07:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.29 2004/02/02 19:11:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -84,7 +84,7 @@ int ESMC_Alarm::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_AlarmCreate() memory allocation failed\n";
+      cerr << "ESMC_AlarmCreate() (new) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -174,14 +174,14 @@ int ESMC_Alarm::count=0;
 
     return(alarm);
 
- } // end ESMC_AlarmCreate
+ } // end ESMC_AlarmCreate (new)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmCreateCopy - Creates a copy of an alarm
+// !IROUTINE:  ESMC_AlarmCreate- Creates a copy of an alarm
 //
 // !INTERFACE:
-      ESMC_Alarm *ESMC_AlarmCreateCopy(
+      ESMC_Alarm *ESMC_AlarmCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Alarm
@@ -205,7 +205,7 @@ int ESMC_Alarm::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_AlarmCreateCopy() memory allocation failed\n";
+      cerr << "ESMC_AlarmCreate() (copy) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -219,7 +219,7 @@ int ESMC_Alarm::count=0;
 
     return(alarmCopy);     
 
- } // end ESMC_AlarmCreateCopy  
+ } // end ESMC_AlarmCreate (copy)
 
 //-----------------------------------------------------------------------------
 //BOP

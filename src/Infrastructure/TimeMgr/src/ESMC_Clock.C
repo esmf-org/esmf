@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.45 2004/01/31 03:08:30 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.46 2004/02/02 19:11:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.45 2004/01/31 03:08:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.46 2004/02/02 19:11:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -81,7 +81,7 @@ int ESMC_Clock::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_ClockCreate() memory allocation failed\n";
+      cerr << "ESMC_ClockCreate() (new) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -129,14 +129,14 @@ int ESMC_Clock::count=0;
 
     return(clock);
 
- } // end ESMC_ClockCreate
+ } // end ESMC_ClockCreate (new)
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockCreateCopy - Creates a copy of a clock
+// !IROUTINE:  ESMC_ClockCreate - Creates a copy of a clock
 //
 // !INTERFACE:
-      ESMC_Clock *ESMC_ClockCreateCopy(
+      ESMC_Clock *ESMC_ClockCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Clock
@@ -160,7 +160,7 @@ int ESMC_Clock::count=0;
     }
     catch (...) {
       // TODO:  call ESMF log/err handler
-      cerr << "ESMC_ClockCreateCopy() memory allocation failed\n";
+      cerr << "ESMC_ClockCreate() (copy) memory allocation failed\n";
       if (rc != ESMC_NULL_POINTER) {
         *rc = ESMF_FAILURE;
       }
@@ -174,7 +174,7 @@ int ESMC_Clock::count=0;
 
     return(clockCopy);
 
- } // end ESMC_ClockCreateCopy
+ } // end ESMC_ClockCreate (copy)
 
 //-----------------------------------------------------------------------------
 //BOP
