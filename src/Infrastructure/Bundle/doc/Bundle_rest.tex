@@ -1,4 +1,4 @@
-% $Id: Bundle_rest.tex,v 1.9 2004/09/23 21:44:59 nscollins Exp $
+% $Id: Bundle_rest.tex,v 1.10 2004/09/23 21:48:51 nscollins Exp $
 
 \label{sec:bundlerest}
 
@@ -15,9 +15,12 @@ be working on print options.
 
 \item{\bf Limited communication support.}
 Only a subset of the communication routines are currently supported
-for Bundles.  For those routines not implemented yet the user can
-loop over the Fields in the Bundle and call the Field level 
-communication routines instead.
+for Bundles, and the Fields contained in the Bundles must currently
+have the same structure (e.g. same halo width, same dimensionality). 
+Support for more variable data will be added in a later release.
+For those routines not implemented yet, or for those Bundles which
+contain Fields with differing data, the user can loop over the Fields 
+in the Bundle and call the Field level communication routines instead.
 
 \item{\bf Packed data not supported.}
 One of the options that we are currently working on for Bundles is
