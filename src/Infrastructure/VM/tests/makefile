@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/08/24 21:49:00 svasquez Exp $ 
+# $Id: makefile,v 1.2 2004/12/15 23:16:26 theurich Exp $ 
 
 ALL:  build_tests
 
@@ -15,13 +15,19 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/VM/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_VMUTest
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_VMUTest\
+		$(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest\
+		$(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest
 
-TESTS_RUN     = RUN_ESMF_VMUTest
+TESTS_RUN     = RUN_ESMF_VMUTest\
+                RUN_ESMF_VMSendVMRecvUTest\
+                RUN_ESMF_VMScatterVMGatherUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI 
+# Don't run ESMF_VMSendVMRecvUTest on one processor.
+# Don't run ESMF_VMScatterVMGatherUTest on one processor.
 
-TESTS_RM      = ESMF_VMUTest.rm
+TESTS_RM      =
 
 include ${ESMF_DIR}/makefile
 
@@ -41,9 +47,16 @@ RUN_ESMF_VMUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_VMUTest.tmps
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_VMUTest > $(ESMC_TESTDIR)/ESMF_VMUTest.stdout
 
-ESMF_VMUTest.rm:
-	echo "ESMF_VMUTest.rm target called here."
+#
+# VM Send Receive
+#
+RUN_ESMF_VMSendVMRecvUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMSendVMRecvUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest.stdout
 
-
-
-
+#
+# VM Scatter Gather
+#
+RUN_ESMF_VMScatterVMGatherUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMScatterVMGatherUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest > $(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest.stdout
