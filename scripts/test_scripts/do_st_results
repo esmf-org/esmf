@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: do_st_results,v 1.1 2004/03/12 16:24:39 nscollins Exp $
+# $Id: do_st_results,v 1.2 2004/07/30 22:56:07 svasquez Exp $
 # This script runs at the end of the "run_system_tests" target.
 # The purpose is to give the user the results of running the system_tests.
 
@@ -73,3 +73,4 @@ rm -f stdoutfiles
 rm -f zerofiles
 rm -f NULL
 
+exit 0

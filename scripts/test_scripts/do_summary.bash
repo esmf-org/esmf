@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: do_summary.bash,v 1.2 2004/07/06 19:41:02 svasquez Exp $
+# $Id: do_summary.bash,v 1.3 2004/07/30 22:56:09 svasquez Exp $
 
 # which summary to say what seems to have build and run in the examples,
 # unit tests, and system tests
@@ -50,3 +50,4 @@ echo $st_pass_count "system tests passed partially or fully"
 echo $st_fail_count "system tests failed partially or fully"
 
 
+exit 0

@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: do_ut_results.bash,v 1.2 2004/07/06 19:39:03 svasquez Exp $
+# $Id: do_ut_results.bash,v 1.3 2004/07/30 22:56:09 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -63,3 +63,4 @@ rm -f stdoutfiles
 rm -f zerofiles
 rm -f NULL
 
+exit 0

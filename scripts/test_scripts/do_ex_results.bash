@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: do_ex_results.bash,v 1.2 2004/07/06 19:39:43 svasquez Exp $
+# $Id: do_ex_results.bash,v 1.3 2004/07/30 22:56:07 svasquez Exp $
 # This script runs at the end of the "run_example" target.
 # The purpose is to give the user the results of running the examples.
 
@@ -71,3 +71,4 @@ rm -f stdoutfiles
 rm -f zerofiles
 rm -f NULL
 
+exit 0
