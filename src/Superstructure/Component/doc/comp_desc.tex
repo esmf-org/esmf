@@ -1,4 +1,4 @@
-% $Id: comp_desc.tex,v 1.4 2003/02/20 21:51:59 nscollins Exp $
+% $Id: comp_desc.tex,v 1.5 2003/11/11 01:54:10 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,18 +16,19 @@ hierarchy.  Components consist of user supplied code
 which follows certain conventions defined by the ESMF framework.
 Components must provide a set of subroutines which match ESMF
 defined interfaces. They must encapsulate
-all their input and output data in an ESMF {\tt State} object.  They
+their input and output data in an ESMF {\tt State} object.  They
 must able to interpret an ESMF {\tt Time} object in order
 to execute the requested number of model timesteps or time interval
 before exchanging data with other Components.
 
-Components are identified as being one or more of the
-following subtypes: {\bf Application}, {\bf Gridded}, or {\bf Coupler}.
-An Application Component is the top level Component which
-contains other Components that cooperate in a computation. 
+Components are identified as being one of the
+following subtypes: {\bf Gridded} or {\bf Coupler}.
 A Gridded Component
-does the actual model computation.  A Coupler Component executes or
+does the actual model computation.  
+A Coupler Component executes or
 arranges the execution of the necessary data transformations between one
 or more Gridded Components.
+Both types of Components can in turn create subcomponents of either type
+and manage their execution.
 
 
