@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.3 2003/10/15 23:36:11 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.4 2003/10/16 20:19:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.3 2003/10/15 23:36:11 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.4 2003/10/16 20:19:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -65,11 +65,14 @@ ESMC_Machine Machine;
 // !IROUTINE:  ESMC_MachineInitialize
 //
 // !INTERFACE:
-      int ESMC_MachineInitialize(void) {
+      int ESMC_MachineInitialize(
 //
 // !RETURN VALUE:
 //    int error return code
 //
+// !ARGUMENTS:
+//
+      enum ESMC_MainLanguage language) {    // was main in F90 or C++?
 //
 // !DESCRIPTION:
 //     Should query {\tt ESMC\_Machine} for configuration, characteristics.

@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.h,v 1.1 2003/04/24 14:13:20 nscollins Exp $
+// $Id: ESMC_Machine.h,v 1.2 2003/10/16 20:19:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,9 +48,11 @@
 
 // !PUBLIC TYPES:
 // class ESMC_MachineConfig;
- class ESMC_Machine;
+class ESMC_Machine;
 
- extern ESMC_Machine Machine;
+extern ESMC_Machine Machine;
+
+enum ESMC_MainLanguage { ESMF_MAIN_C=1, ESMF_MAIN_F90 };
 
 // !PRIVATE TYPES:
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Mach.F90,v 1.3 2003/10/15 23:16:32 nscollins Exp $
+! $Id: ESMF_Mach.F90,v 1.4 2003/10/16 20:19:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,8 +56,13 @@
       end type
 
 !------------------------------------------------------------------------------
+!     ! Main program source
+!     !   ESMF_FrameworkInitialize is called from what language?
+      integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_Machine
+      public ESMF_Machine, ESMF_MAIN_C, ESMF_MAIN_F90
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -80,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Mach.F90,v 1.3 2003/10/15 23:16:32 nscollins Exp $'
+      '$Id: ESMF_Mach.F90,v 1.4 2003/10/16 20:19:53 nscollins Exp $'
 
 !==============================================================================
 
@@ -99,9 +104,10 @@
 ! !IROUTINE: ESMF_MachineInitialize - Query the hardware configuration
 
 ! !INTERFACE:
-      subroutine ESMF_MachineInitialize(rc)
+      subroutine ESMF_MachineInitialize(language, rc)
 !
 ! !ARGUMENTS:
+      integer, intent(in) :: language
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -110,6 +116,9 @@
 !  The arguments are:
 !  \begin{description}
 ! 
+!   \item[language]
+!    Flag saying what language the main program is.
+!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -139,7 +148,9 @@
       ! mpi has been initialized before it calls again, so it should
       ! just return w/o complaint.  in theory.
 
-      call MPI_Init(status)
+      if (language .eq. ESMF_MAIN_F90) then
+          call MPI_Init(status)
+      endif
 
       ! END SECTION
 #endif
