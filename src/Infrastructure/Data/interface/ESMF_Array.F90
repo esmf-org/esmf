@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.14 2002/12/16 18:56:19 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.15 2002/12/16 22:48:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -103,12 +103,15 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_ArrayCreate, ESMF_ArrayDestroy
+      public ESMF_ArrayCreate
+      public ESMF_ArrayDestroy
  
       public ESMF_ArraySpecCreate
       !public ESMF_ArraySpecDestroy
 
-      public ESMF_ArraySetData, ESMF_ArrayGet
+      public ESMF_ArraySetData
+      !public ESMF_ArrayGetData
+      public ESMF_ArrayGet
  
       public ESMF_ArrayCheckpoint
       public ESMF_ArrayRestore
@@ -121,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.14 2002/12/16 18:56:19 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.15 2002/12/16 22:48:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -137,8 +140,8 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_ArrayCreateNewNoData
-!        module procedure ESMF_ArrayCreateNewBuffer
+!        module procedure ESMF_ArrayCreateNewNoData
+        module procedure ESMF_ArrayCreateNewBuffer
 !        module procedure ESMF_ArrayCreateNewFPtr
 !        module procedure ESMF_ArrayCreateBySpecNoData
 !        module procedure ESMF_ArrayCreateBySpecBuffer
@@ -151,7 +154,7 @@
 !        module procedure ESMF_ArrayCreateByPtr2Dr8
 !        module procedure ESMF_ArrayCreateByPtr2Di4
 !        module procedure ESMF_ArrayCreateByPtr2Di8
-! ...to be expanded to all types, kinds, ranks
+! ! TODO: ...to be expanded to all types, kinds, ranks
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -233,15 +236,15 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayCreateNew -- Create a new Array specifying all options.
+! !IROUTINE: ESMF_ArrayCreateNewBuffer -- Create a new Array specifying all options.
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateNew(rank, type, kind, &
+      function ESMF_ArrayCreateNewBuffer(rank, type, kind, &
                                    lbounds, ubounds, strides, &
                                    bufaddr, copyflag, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateNew
+      type(ESMF_Array) :: ESMF_ArrayCreateNewBuffer
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
@@ -332,10 +335,10 @@ end function
         endif
 
 !       set return values
-        ESMF_ArrayCreateNew%this => ptr 
+        ESMF_ArrayCreateNewBuffer%this => ptr 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_ArrayCreateNew
+        end function ESMF_ArrayCreateNewBuffer
 
 
 !------------------------------------------------------------------------------
@@ -584,7 +587,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         end subroutine ESMF_ArraySetData
 
@@ -602,6 +605,9 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to alter the local memory ordering (layout) of this Array.
+!
+!  !TODO: remove this note before generating user documentation
+!
 !      (i'm not sure this makes sense now, or that the routine should be
 !      in this class.  but i'm leaving this here as a reminder that we
 !      might need some low level reorder functions.  maybe the argument
@@ -614,7 +620,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         end subroutine ESMF_ArrayReorder
 
@@ -851,7 +857,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         end subroutine ESMF_ArrayGet
 
@@ -880,7 +886,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         end subroutine ESMF_ArrayCheckpoint
 
@@ -907,7 +913,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         type (ESMF_Array) :: a 
 
@@ -917,7 +923,7 @@ end function
         nullify(a%this)
 
 !
-! add code here
+! TODO: add code here
 !
 
         ESMF_ArrayRestore = a 
@@ -945,7 +951,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         end subroutine ESMF_ArrayWrite
 
@@ -971,7 +977,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
         type (ESMF_Array) :: a
 
@@ -981,7 +987,7 @@ end function
         nullify(a%this)
 
 !
-! add code here
+! TODO: add code here
 !
 
         ESMF_ArrayRead = a 
@@ -1009,7 +1015,7 @@ end function
 ! !REQUIREMENTS:
 
 !
-! code goes here
+! TODO: code goes here
 !
        character (len=6) :: defaultopts="brief"
        integer :: status=ESMF_FAILURE      ! local error status
