@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.15 2004/04/09 20:13:37 eschwab Exp $
+// $Id: ESMC_ClockEx.C,v 1.16 2004/06/18 20:39:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,6 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 //
-//!EXAMPLE        String used by test script to count examples.
 //-----------------------------------------------------------------------------
 //BOP
 // !PROGRAM:  ESMC_ClockEx - Clock initialization and time-stepping
@@ -29,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.15 2004/04/09 20:13:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.16 2004/06/18 20:39:38 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
