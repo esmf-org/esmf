@@ -1,4 +1,6 @@
-# $Id: makefile,v 1.12 2003/04/04 18:13:58 jwolfe Exp $ 
+# $Id: makefile,v 1.13 2003/04/04 21:09:57 nscollins Exp $ 
+
+all: system_tests
 
 LOCDIR   = src/SystemTests
 
