@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.17 2004/08/09 22:29:57 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.18 2004/08/25 23:02:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.17 2004/08/09 22:29:57 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.18 2004/08/25 23:02:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -891,10 +891,8 @@
                         calendar=gregorianCalendar, rc=rc)
       alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
                                 ringInterval=alarmStep, &
-
                                 ringTimeStepCount=3, &
                                 ringDuration=ringDuration, &
-
                                 stopTime=alarmStopTime, sticky=.false., rc=rc)
       ! number of clock time steps alarm rings for
       nstep = 0
