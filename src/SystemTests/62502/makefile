@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/18 14:12:53 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/03/24 23:23:09 jwolfe Exp $ 
 
 ALL: system_tests
 
@@ -41,11 +41,10 @@ $(ESMC_TESTDIR)/ESMF_SysTest62502: ESMF_SysTest62502.o user_model1.o \
 
 RUN_ESMF_SysTest62502:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest62502.tmps
-	${MPIRUN} -np 2 $(ESMC_TESTDIR)/ESMF_SysTest62502 >$(ESMC_TESTDIR)/ESMF_SysTest62502.stdout
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest62502 >$(ESMC_TESTDIR)/ESMF_SysTest62502.stdout
 
 RUN_ESMF_SysTest62502UNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest62502.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest62502 > $(ESMC_TESTDIR)/ESMF_SysTest62502.stdout
+	echo "ESMF_SysTest62502 cannot be run as uniprocessor."
 
 ESMF_SysTest62502.rm:
 	echo "ESMF_SysTest62502.rm target called here."
