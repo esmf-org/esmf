@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.7 2003/11/07 21:55:34 nscollins Exp $
+! $Id: ESMF_UserMain.F90,v 1.8 2004/01/26 21:35:52 eschwab Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -74,11 +74,11 @@
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
 
     ! initialize start time to 5/1/2003
-    call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=1, &
+    call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
                       calendar=gregorianCalendar, rc=rc)
 
     ! initialize stop time to 5/2/2003
-    call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=2, &
+    call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
                       calendar=gregorianCalendar, rc=rc)
 
     ! initialize the clock with the above values

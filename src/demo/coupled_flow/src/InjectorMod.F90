@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+! $Id: InjectorMod.F90,v 1.2 2004/01/26 21:37:29 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -220,13 +220,13 @@
       ! initialize start time to 12May2003, 3:00 pm
       ! for testing, initialize start time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_start_time, &
-                        yr=2003, mm=on_month, dd=on_day, &
+                        yy=2003, mm=on_month, dd=on_day, &
                         h=on_hour, m=on_min, s=0, &
                         calendar=datablock%gregorianCalendar, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_stop_time, &
-                        yr=2003, mm=off_month, dd=off_day, &
+                        yy=2003, mm=off_month, dd=off_day, &
                         h=off_hour, m=off_min, s=0, &
                         calendar=datablock%gregorianCalendar, rc=rc)
 

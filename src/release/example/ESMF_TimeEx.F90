@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.3 2003/09/04 18:57:57 cdeluca Exp $
+! $Id: ESMF_TimeEx.F90,v 1.4 2004/01/26 21:35:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,50 +32,53 @@
       type(ESMF_Calendar) :: gregorianCalendar
 
       ! Instantiate some times
-      type(ESMF_Time) :: Time
+      type(ESMF_Time) :: time
       type(ESMF_Time) :: midMonth
       type(ESMF_Time) :: wallClock
 
       ! Temp variables for Get functions
-      integer :: MM, DD, H, M
-      integer(ESMF_KIND_I8) :: S
+      integer :: mm, dd, h, m
+      integer(ESMF_KIND_I8) :: s
       type(ESMF_Calendar) :: cal
-      character, dimension(ESMF_MAXSTR) :: Ts
+      character, dimension(ESMF_MAXSTR) :: tS
       integer :: dayOfYear, dayOfWeek, dayOfMonth
 
       ! Result code
       integer :: rc
 
       ! Initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! Initialize time to 5/12/2003 2:24:45
-      call ESMF_TimeInit(Time, YR=int(2003,kind=ESMF_KIND_I8), &
-                       MM=5, DD=12, H=2, M=24, S=int(45,kind=ESMF_KIND_I8), &
+      call ESMF_TimeSet(time, yy=2003, &
+                       mm=5, dd=12, h=2, m=24, s=45, &
                        cal=gregorianCalendar, rc=rc)
 
-      call ESMF_TimePrint(Time, "string", rc)
+      call ESMF_TimePrint(time, "string", rc)
 
-      call ESMF_TimeGetCalendar(Time, cal, rc)
+      call ESMF_TimeGet(time, calendar=cal, rc)
       call ESMF_CalendarPrint(cal, rc=rc)
 
-      call ESMF_TimeGetDayOfYear(Time, dayOfYear, rc)
+      call ESMF_TimeGet(time, dayOfYear=dayOfYear, rc)
       print *, "Day of the year = ", dayOfYear
 
-      call ESMF_TimeGetDayOfMonth(Time, dayOfMonth, rc)
+      call ESMF_TimeGet(time, dd=dayOfMonth, rc)
       print *, "Day of the month = ", dayOfMonth
 
-      call ESMF_TimeGetDayOfWeek(Time, dayOfWeek, rc)
+      call ESMF_TimeGet(time, dayOfWeek=dayOfWeek, rc)
       print *, "Day of the week = ", dayOfWeek
 
-      call ESMF_TimeGetMidMonth(Time, midMonth, rc)
+      call ESMF_TimeGet(time, midMonth=midMonth, rc)
       print *
       print *, "Middle of the month = "
       call ESMF_TimePrint(midMonth, "string", rc)
 
+      call ESMF_TimeGet(time, timeString=tS, rc)
+      print *, "Time in string format = ", tS
+
       ! Get wall clock time
-      call ESMF_TimeInit(wallClock, cal=gregorianCalendar, rc=rc)
-      call ESMF_TimeGetRealTime(wallClock, rc)
+      call ESMF_TimeSet(wallClock, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSyncToRealTime(wallClock, rc)
       print *, "Wall Clock Time = "
       call ESMF_TimePrint(wallClock, "string", rc)
 
