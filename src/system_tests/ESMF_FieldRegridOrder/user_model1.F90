@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2004/03/24 14:54:50 nscollins Exp $
+! $Id: user_model1.F90,v 1.3 2004/03/24 15:57:58 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -101,9 +101,9 @@
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: ni, nj, de_id
-        type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-        type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-        type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+        type(ESMF_GridType) :: horzGridtype
+        type(ESMF_GridStagger) :: horzStagger
+        type(ESMF_CoordSystem) :: horzCoordSystem
         integer :: status, myde
 
         ! query comp for layout
@@ -119,25 +119,25 @@
         max(1) = 60.0
         min(2) = 0.0
         max(2) = 50.0
-        horz_gridtype = ESMF_GridType_XY
-        horz_stagger = ESMF_GridStagger_A
-        horz_coord_system = ESMF_CoordSystem_Cartesian
+        horzGridtype = ESMF_GridType_XY
+        horzStagger = ESMF_GridStagger_A
+        horzCoordSystem = ESMF_CoordSystem_Cartesian
 
         grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                layout=layout, &
-                                horzGridType=horz_gridtype, &
-                                horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
-                                name="source grid", rc=status)
+                                              minGlobalCoordPerDim=min, &
+                                              maxGlobalCoordPerDim=max, &
+                                              layout=layout, &
+                                              horzGridType=horzGridtype, &
+                                              horzStagger=horzStagger, &
+                                              horzCoordSystem=horzCoordSystem, &
+                                              name="source grid", rc=status)
 
         ! Figure out our local processor id
         call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
         ! Set up a 2D real array
         call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                                kind=ESMF_R8)
+                               kind=ESMF_R8)
 
         ! Create the field and have it create the array internally
         humidity = ESMF_FieldCreate(grid1, arrayspec, &
