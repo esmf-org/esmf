@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.55 2004/05/21 09:26:33 nscollins Exp $
+#  $Id: common.mk,v 1.56 2004/06/17 11:21:32 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -766,6 +766,13 @@ tree_build_quick_start: chkdir_quick_start
 #-------------------------------------------------------------------------------
 #  Doc targets
 #-------------------------------------------------------------------------------
+
+doc: chkdir_doc tex
+	-@echo "========================================="
+	cd $(ESMF_TOP_DIR)/src/doc ;\
+	$(MAKE) $(DVIFILES) $(PDFFILES) $(HTMLFILES) 
+	-@echo "Build doc completed."
+
 alldoc: chkdir_doc 
 	-@echo "Building All Documentation"
 	-@echo "========================================="
@@ -787,7 +794,7 @@ dvi: chkdir_doc tex
 tree_dvi: chkdir_doc ${DVIFILES}
 
 
-pdf: chkdir_doc tex
+pdf: chkdir_doc
 	-@echo "Building .pdf files"
 	-@echo "========================================="
 	-@${OMAKE} ACTION=tree_pdf  tree 
@@ -795,7 +802,7 @@ pdf: chkdir_doc tex
 tree_pdf: chkdir_doc ${PDFFILES}
 
 
-html: chkdir_doc tex
+html: chkdir_doc
 	-@echo "Building .html files"
 	-@echo "========================================="
 	-@${OMAKE} ACTION=tree_html tree 
