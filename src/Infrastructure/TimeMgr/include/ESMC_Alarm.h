@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.14 2003/07/25 22:57:54 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.15 2003/08/07 16:52:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -107,6 +107,7 @@ class ESMC_Alarm {
     bool              sticky;     // must be turned off via ESMC_AlarmTurnOff(),
                                   //  otherwise will turn self off after
                                   //  ringDuration.
+    bool              pad1;       //  align on byte boundary
 
 // !PUBLIC MEMBER FUNCTIONS:
 
