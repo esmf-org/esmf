@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.9 2003/04/02 22:13:58 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.10 2003/04/03 23:06:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.9 2003/04/02 22:13:58 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.10 2003/04/03 23:06:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -992,6 +992,11 @@
         return
       endif 
 
+      ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, relloc, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldConstructNew: datamap create"
+        return
+      endif 
       ftype%localfield%localdata = array
 
       if(rcpresent) rc = ESMF_SUCCESS
