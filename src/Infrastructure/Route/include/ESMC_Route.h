@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.27 2003/08/13 21:50:25 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.28 2003/08/14 21:58:25 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,6 @@
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
                        ESMC_AxisIndex *AI_tot, int AI_count, 
                        int *global_start, int *global_count,
-                       ESMC_AxisIndex *ai_global,
                        ESMC_DELayout *layout, ESMC_Logical *periodic = NULL);
     int ESMC_RoutePrecomputeRedist(int rank, int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
