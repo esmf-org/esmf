@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.3 2003/10/14 23:44:34 cdeluca Exp $
+% $Id: LogErr_rest.tex,v 1.4 2004/03/16 20:04:12 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,5 +10,12 @@
 
 %\subsubsection{Restrictions}
 
-No restrictions are noted. 
+\begin{enumerate}
 
+\item Message writing methods are expanded using a macro that adds the
+predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ to the argument list.
+Using these constants, we can associate a file name and line number with the
+message.  If the CPP preprocessor is not used, this expansion will not be done
+and the file and line number will not appear in the Log text.
+
+\end{enumerate}
