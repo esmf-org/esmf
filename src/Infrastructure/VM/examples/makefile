@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/05/22 03:14:26 theurich Exp $
+# $Id: makefile,v 1.4 2004/05/22 03:27:35 theurich Exp $
 
 ALL: build_examples
 
@@ -60,7 +60,8 @@ LOCDIR	  = src/Infrastructure/VM/examples
 
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMTest1Ex \
                     $(ESMF_EXDIR)/ESMF_VMTest2Ex \
-                    $(ESMF_EXDIR)/ESMF_VMTest3Ex
+                    $(ESMF_EXDIR)/ESMF_VMTest3Ex \
+                    $(ESMF_EXDIR)/ESMF_VMTest4Ex
 
 #
 # List the example run targets in EXAMPLES_RUN and 
