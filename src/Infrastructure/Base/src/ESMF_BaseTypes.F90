@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.3 2004/06/18 22:07:46 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.4 2004/07/21 21:26:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -159,7 +159,8 @@
                    ESMF_R4 = ESMF_DataKind(5), &
                    ESMF_R8 = ESMF_DataKind(6), &
                    ESMF_C8 = ESMF_DataKind(7), &
-                   ESMF_C16 = ESMF_DataKind(8)
+                   ESMF_C16 = ESMF_DataKind(8), &
+                   ESMF_NOKIND = ESMF_DataKind(99)
 
       ! these work where you have to declare an array or something that
       ! the compiler needs to have a fixed 'kind' for.
