@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.11 2003/07/31 23:04:51 jwolfe Exp $
+! $Id: InjectorMod.F90,v 1.12 2003/08/01 14:55:37 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -432,21 +432,21 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       !
       ! Collect results on DE 0 and output to a file
       !
-      call ESMF_FieldAllGather(field_sie, outarray, status)
+      call ESMF_FieldAllGather(field_sie, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
       call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_u, outarray, status)
+      call ESMF_FieldAllGather(field_u, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
       call ESMF_ArrayDestroy(outarray, status)
 
-      call ESMF_FieldAllGather(field_v, outarray, status)
+      call ESMF_FieldAllGather(field_v, outarray, rc=status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
@@ -454,7 +454,7 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       call ESMF_ArrayDestroy(outarray, status)
 
       if(file_no .eq. 1) then
-        call ESMF_FieldAllGather(field_flag, outarray, status)
+        call ESMF_FieldAllGather(field_flag, outarray, rc=status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.6 2003/07/22 19:52:17 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.7 2003/08/01 14:55:37 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -160,7 +160,7 @@
 
            ! These are fields on different layouts - call Redist to rearrange
            !  the data using the Comm routines.
-           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, status)
+           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, rc=status)
 
            !call ESMF_FieldHalo(dstfield, rc)
 

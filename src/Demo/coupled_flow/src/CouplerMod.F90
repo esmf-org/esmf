@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.3 2003/07/22 19:50:55 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.4 2003/08/01 14:56:23 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -241,7 +241,7 @@
 !   example of a Field Route call:
 !
 !\begin{verbatim}
-           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, status)
+           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, rc=status)
 !\end{verbatim}
 !EOP
 

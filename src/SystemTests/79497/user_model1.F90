@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2003/07/29 20:08:18 jwolfe Exp $
+! $Id: user_model1.F90,v 1.3 2003/08/01 14:55:37 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -140,7 +140,7 @@
         call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
         ! Set up a 2D integer array
-        call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+        call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
                                 kind=ESMF_KIND_I4)
 
         ! Create the field and have it create the array internally

@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.11 2003/07/29 16:45:36 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.12 2003/08/01 14:55:37 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -472,7 +472,7 @@
                     + (dt/dx)*(p(i,j)+q(i,j)-p(i+1,j)-q(i+1,j))
         enddo
       enddo
-      call ESMF_FieldHalo(field_rhou, rc)
+      call ESMF_FieldHalo(field_rhou, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhou halo"
         return
@@ -509,7 +509,7 @@
                     + (dt/dy)*(p(i,j)+q(i,j)-p(i,j+1)-q(i,j+1))
         enddo
       enddo
-      call ESMF_FieldHalo(field_rhov, rc)
+      call ESMF_FieldHalo(field_rhov, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhov halo"
         return
@@ -589,7 +589,7 @@
           endif
         enddo
       enddo
-      call ESMF_FieldHalo(field_rhoi, rc)
+      call ESMF_FieldHalo(field_rhoi, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoI:  rhoi halo"
         return
@@ -676,12 +676,12 @@
           endif
         enddo
       enddo
-      call ESMF_FieldHalo(field_rho, rc)
+      call ESMF_FieldHalo(field_rho, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  rho halo"
         return
       endif
-      call ESMF_FieldHalo(field_sie, rc)
+      call ESMF_FieldHalo(field_sie, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  sie halo"
         return
@@ -799,22 +799,22 @@
           endif
         enddo
       enddo
-      call ESMF_FieldHalo(field_u, rc)
+      call ESMF_FieldHalo(field_u, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  u halo"
         return
       endif
-      call ESMF_FieldHalo(field_v, rc)
+      call ESMF_FieldHalo(field_v, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  v halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhou, rc)
+      call ESMF_FieldHalo(field_rhou, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhou halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhov, rc)
+      call ESMF_FieldHalo(field_rhov, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhov halo"
         return
@@ -873,12 +873,12 @@
         enddo
       enddo
 
-      call ESMF_FieldHalo(field_p, rc)
+      call ESMF_FieldHalo(field_p, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  p halo"
         return
       endif
-      call ESMF_FieldHalo(field_q, rc)
+      call ESMF_FieldHalo(field_q, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  q halo"
         return
@@ -925,7 +925,7 @@
       call ESMF_ClockGetAdvanceCount(clock, frame, rc)
 
       ! call ESMF_StateGetData(import_state, "U", field_u, rc)
-      call ESMF_FieldAllGather(field_u, array2, rc)
+      call ESMF_FieldAllGather(field_u, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "U_velocity", frame
         call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
@@ -933,7 +933,7 @@
       !call ESMF_ArrayDestroy(array2, rc)
 
       ! call ESMF_StateGetData(import_state, "V", field_v, rc)
-      call ESMF_FieldAllGather(field_v, array2, rc)
+      call ESMF_FieldAllGather(field_v, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", frame
         call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
@@ -941,7 +941,7 @@
       !call ESMF_ArrayDestroy(array2, rc)
 
       ! call ESMF_StateGetData(import_state, "SIE", field_sie, rc)
-      call ESMF_FieldAllGather(field_sie, array2, rc)
+      call ESMF_FieldAllGather(field_sie, array2, rc=rc)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", frame
         call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
