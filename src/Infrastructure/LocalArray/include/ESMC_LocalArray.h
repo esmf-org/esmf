@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.4 2003/10/25 04:03:04 cdeluca Exp $
+// $Id: ESMC_LocalArray.h,v 1.5 2003/12/19 21:44:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -128,7 +128,7 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
             ESMC_DataKind dk, int *counts, void *base, 
             ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
             ESMC_ArrayDoAllocate aflag, 
-            ESMC_DataCopy docopy, ESMC_Logical dflag, 
+            ESMC_DataCopy docopy, ESMC_Logical dflag, char *name,
             int *lbounds, int *ubounds, int *offsets);
     int ESMC_LocalArrayDestruct(void);
 
@@ -228,18 +228,18 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 // these are functions, but not class methods.
 ESMC_LocalArray *ESMC_LocalArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
                     int *counts = NULL, void *base = NULL, 
-                    ESMC_DataCopy docopy = ESMC_DATA_REF,
+                    ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL,
                     int *rc = NULL);
 int ESMC_LocalArrayDestroy(ESMC_LocalArray *array);
 ESMC_LocalArray *ESMC_LocalArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
                     int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, 
                     void *base = NULL, 
-                    ESMC_DataCopy docopy = ESMC_DATA_REF,
+                    ESMC_DataCopy docopy = ESMC_DATA_REF, char *name = NULL,
                     int *lbounds = NULL, int *ubounds = NULL, 
                     int *offsets = NULL, int *rc = NULL);
 ESMC_LocalArray *ESMC_LocalArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
-                                   int *rc = NULL);
+                                   char *name = NULL, int *rc = NULL);
 
 
  #endif  // ESMC_LocalArray_H

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.3 2003/10/20 20:13:56 cdeluca Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.4 2003/12/19 21:44:09 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -57,8 +57,8 @@
  
 !   ! Allocate and set initial data values
     ni = 15 
-    allocate(intptr(ni))
-    do i=1,ni
+    allocate(intptr(5:ni+5))
+    do i=5,ni+5
        intptr(i) = i
     enddo
     print *, "intptr data = ", intptr
@@ -70,6 +70,10 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 create returned"
 
+! hack code
+    call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc=rc)  
+    print *, "lb, ub = ", lbound(intptr2), ubound(intptr2)
+! end hack
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a Local Array with Integer 1D Data Test"
@@ -223,13 +227,13 @@
 !   ! Allocate and set initial data values
     ni = 5 
     nj = 3 
-    allocate(realptr(ni,nj))
-    do i=1,ni
-     do j=1,nj
+    allocate(realptr(3:ni+3,7:nj+7))
+    do i=3,ni+3
+     do j=7,nj+7
        realptr(i,j) = i + ((j-1)*ni) + 0.1
      enddo
     enddo
-    print *, "partial print of realptr data = ", realptr(1:3,1:3)
+    print *, "partial print of realptr data = ", realptr(3:6,7:9)
 
    !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -241,8 +245,8 @@
     call ESMF_LocalArrayPrint(array2, "foo", rc)
     print *, "array 2 print returned"
 
-    do i=1,ni
-     do j=1,nj
+    do i=3,ni+3
+     do j=7,nj+7
        realptr(i,j) = (i*2) + ((j-1)*ni) 
      enddo
     enddo
@@ -252,7 +256,8 @@
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
     print *, "array 2 getdata returned"
-    print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
+    print *, "bounds: ", lbound(realptr2), ubound(realptr2)
+    print *, "partial print of realptr2 data = ", realptr2(3:7,7:9)
 
    !NEX_UTest
     do i=1,ni

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.5 2003/10/08 21:36:51 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.6 2003/12/19 21:44:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,12 +35,14 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
+char *name = NULL;
+
      void FTN(c_esmc_localarraycreateall)(ESMC_LocalArray **ptr, int *rank, 
                                      ESMC_DataType *dt, ESMC_DataKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
                                      int *status)  {
          (*ptr) = ESMC_LocalArrayCreate_F(*rank, *dt, *dk, counts, 
-                                    NULL, NULL, ESMC_DATA_NONE, 
+                                    NULL, NULL, ESMC_DATA_NONE, name,
                                     lbounds, ubounds, NULL, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
@@ -50,7 +52,8 @@ extern "C" {
                                         ESMC_DataType *dt, ESMC_DataKind *dk, 
                                         ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_LocalArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
+             (*ptr) = ESMC_LocalArrayCreateNoData(*rank, *dt, *dk, *oflag, 
+                                                  name, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
@@ -145,6 +148,20 @@ extern "C" {
          *kind = (*ptr)->ESMC_LocalArrayGetKind();
          *status = ESMF_SUCCESS;
      }
+
+     void FTN(c_esmc_localarraygetname)(ESMC_LocalArray **ptr, 
+                                        char *name, int *status, int nlen) {
+         if ((nlen <= 0) || (name == NULL)) {
+             if (status) *status = ESMF_FAILURE;
+             return;
+         }
+
+         memset(name, ' ', nlen);
+         strncpy(name, (*ptr)->ESMC_BaseGetName(),
+                                   MIN(nlen, strlen((*ptr)->ESMC_BaseGetName())));
+         *status = ESMF_SUCCESS;
+     }
+
 
      void FTN(c_esmc_localarraydestroy)(ESMC_LocalArray **ptr, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {

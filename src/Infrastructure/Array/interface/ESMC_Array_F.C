@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.16 2003/10/09 22:05:18 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.17 2003/12/19 21:42:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,6 +24,9 @@
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
+
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -102,6 +105,19 @@ extern "C" {
      void FTN(c_esmc_arraygetkind)(ESMC_Array **ptr, int *kind, int *status) {
       
          *kind = (*ptr)->ESMC_ArrayGetKind();
+         *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arraygetname)(ESMC_Array **ptr, char *name, int *status,
+                                                                   int nlen) {
+         if ((nlen <= 0) || (name == NULL)) {
+             if (status) *status = ESMF_FAILURE;
+             return;
+         }
+           
+         memset(name, ' ', nlen);
+         strncpy(name, (*ptr)->ESMC_BaseGetName(), 
+                                   MIN(nlen, strlen((*ptr)->ESMC_BaseGetName())));
          *status = ESMF_SUCCESS;
      }
 

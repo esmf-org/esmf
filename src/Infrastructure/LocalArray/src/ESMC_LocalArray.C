@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.5 2003/12/10 13:36:09 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.6 2003/12/19 21:44:09 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -58,6 +58,7 @@
     int *icounts,              // number of items in each dim
     void *base,                // if non-null, this is already allocated memory
     ESMC_DataCopy docopy,      // if base != NULL, copy data?
+    char *name,                // array name
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
@@ -96,7 +97,7 @@
      status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                           ESMC_FROM_CPLUSPLUS,
                                           NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                          docopy, ESMF_TRUE, 
+                                          docopy, ESMF_TRUE, name,
                                           NULL, NULL, NULL); 
      
      if (rc != NULL)
@@ -150,6 +151,7 @@
     ESMC_DataType dt,          // int, float, etc
     ESMC_DataKind dk,          // short/long, etc
     ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
+    char *name,                // array name
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
@@ -168,7 +170,7 @@
 
      status = a->ESMC_LocalArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
-                            ESMC_DATA_NONE, ESMF_FALSE, 
+                            ESMC_DATA_NONE, ESMF_FALSE, name,
                             NULL, NULL, NULL);
 
      if (rc != NULL)
@@ -196,6 +198,7 @@
     struct c_F90ptr *f90ptr,   // opaque type which fortran uses (dope v)
     void *base,                // real start of memory 
     ESMC_DataCopy docopy,      // if base is null and this is Copy, alloc here
+    char *name,                // array name, default created if NULL
     int *lbounds,              // lower index number per dim
     int *ubounds,              // upper index number per dim
     int *offsets,              // number of bytes to start of data/dim
@@ -242,13 +245,13 @@
          status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_DO_ALLOCATE,
-                                              ESMC_DATA_NONE, ESMF_TRUE, 
+                                              ESMC_DATA_NONE, ESMF_TRUE, name,
                                               lbounds, ubounds, offsets); 
      else
          status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
                                               ESMC_FROM_FORTRAN, f90ptr, 
                                               ESMC_ARRAY_NO_ALLOCATE, 
-                                              docopy, ESMF_FALSE, 
+                                              docopy, ESMF_FALSE, name,
                                               lbounds, ubounds, offsets); 
 
      if (rc != NULL)
@@ -279,6 +282,7 @@
     ESMC_ArrayDoAllocate aflag, // do we allocate space or not?
     ESMC_DataCopy docopy,      // do we make a copy of the data?
     ESMC_Logical dflag,        // do we deallocate space or not?
+    char *name,                // array name, default created if NULL
     int *lbounds,              // lower index number per dim
     int *ubounds,              // upper index number per dim
     int *offsets) {            // offset in bytes to start of each dim
@@ -328,6 +332,8 @@
                                                       counts, &status);
     } 
 
+    // call base class routine to set name 
+    ESMC_BaseSetName(name, "Array");
     
     // TODO: memcpy from base to base_addr, proper number of bytes?
     //  if docopy flag is set.

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.5 2003/12/02 22:00:39 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.6 2003/12/19 21:44:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -317,7 +317,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.5 2003/12/02 22:00:39 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.6 2003/12/19 21:44:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -16967,14 +16967,11 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      ! TODO: add an interface to the C code here
-      !call c_ESMC_LocalArrayGetName(array, name, status)
-      !if(status .NE. ESMF_FAILURE) then
-      ! print *, "ERROR in ESMF_LocalArrayGetName"
-      ! return
-      !endif
-
-      name = "default array name"
+      call c_ESMC_LocalArrayGetName(array, name, status)
+      if(status .eq. ESMF_FAILURE) then
+       print *, "ERROR in ESMF_LocalArrayGetName"
+       return
+      endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 

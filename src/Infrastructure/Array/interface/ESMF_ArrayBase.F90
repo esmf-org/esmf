@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.24 2003/10/14 21:32:18 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.25 2003/12/19 21:42:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.24 2003/10/14 21:32:18 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.25 2003/12/19 21:42:07 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -493,7 +493,7 @@ end subroutine
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if (present(rc)) then
@@ -501,14 +501,11 @@ end subroutine
           rc = ESMF_FAILURE
       endif
 
-      ! TODO: add an interface to the C code here
-      !call c_ESMC_ArrayGetName(array, name, status)
-      !if(status .NE. ESMF_FAILURE) then
-      !  print *, "ERROR in ESMF_ArrayGetName"
-      !  return
-      !endif
-
-      name = "default array name"
+      call c_ESMC_ArrayGetName(array, name, status)
+      if(status .eq. ESMF_FAILURE) then
+        print *, "ERROR in ESMF_ArrayGetName"
+        return
+      endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 
