@@ -44,13 +44,76 @@
 \tableofcontents
 
 \newpage
-%\section{Synopsis}
+\section{Synopsis}
 
-\req{Assesing Community Requirements}
+This document lists a series of risks that the Earth System Modeling Framework project faces
+in delivering a system that meets the requirements of 
+
+\begin{enumerate}
+\item adequate performance
+\item general present and future applicability to a range of applications and a broad mix of hardware platforms
+\item reasonable ease of adoption
+\item ongoing extensibility
+\end{enumerate}
+
+Risks have been categorized as {\bf Very High}, {\bf High}, {\bf Medium}, {\bf Fairly Low} and {\bf Low}.
+This classification is used for both measuring impact on the ESMF project ( the {\it Level of Impact On Project})
+category and for quantifying the currently perceived exposure to the risk within
+the project ( the {\it Problem Likelihood} attribute), so that the
+status of the risk is a pair of values, such as ({\bf Low,Low}), that expresses
+both the risk seriousness (the first element) and the risk impact (the second element) on
+ESMF.  This document is reviewed on a monthly basis by the technical lead team and adjustments
+made. Preventitive measures are to be taken for any risk that has a status greater than {\bf Medium, Medium}.
+Fix actions are taken for risks with a ({\bf High, Medium}) status or higher.
+
+\req{Community Adoption Issues}
 \sreq{Inadequate community dialog}
+\begin{reqlist}
+{\bf Level of Impact On Project:}  High \\
+{\bf Problem Likelihood:} Fairly Low\\
+{\bf Preventive Measures Being Taken:} Community meetings. Active participation by project
+members in related community efforts. Deployment of wide number of community codes
+onto the framework. Attendance by project participants at related project
+meetings.\\
+{\bf Fix:} Increase community pariticpation in project. Improve features to make
+adoption more compeling.\\
+{\bf Notes:} \\
+\end{reqlist}
+
 \sreq{Unable to respond to all commuity needs}
+\begin{reqlist}
+{\bf Level of Impact On Project:}  Medium \\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventitive Measures Being Taken:} Ongoing dialog to identify an prioritize
+community needs. Critical requirements will be adopted to the extent
+that contractual obligactions admit.\\
+{\bf Fix:} Seek resources for requirements that cannot be accomodated within current
+contract obligations. Discuss contract modifications with NASA if truly critical
+need (as determined by advisory board members) can not be addressed. \\
+{\bf Notes:} \\
+\end{reqlist}
+
 \sreq{Overcommitment to support community}
-\sreq{Unable to Achieve Community Adoption}
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventitive Measures Being Taken:} Clear emphasis of project milestones. Implementation
+team only accountable to technical leads.\\
+{\bf Fix:} \\
+{\bf Notes:} \\
+\end{reqlist}
+
+\sreq{Unable to achieve community adoption}
+\begin{reqlist}
+{\bf Level of Impact On Project:}  High \\
+{\bf Problem Likelihood:} Fairly low \\
+{\bf Preventitive Measures Being Taken:} Broad range of dialog and visibility 
+forums being maintained. Example codes and workshops are being planned.
+Close monitoring of experiences of collaborator groups.
+\\
+{\bf Fix:} Solicit non-adopter input on what is missing or why framework is not working for them.\\
+{\bf Notes:} \\
+\end{reqlist}
 
 \req{Superstructure Level Issues}
 \sreq{Arbitrary SPMD and MPMD support}
@@ -58,18 +121,29 @@ The {\it Control} layer in ESMF is required to manage arbitrary collections
 of SPMD and MPMD programs running across a potentially heterogeneous
 mix of platforms.
 \begin{reqlist}
-{\bf Potential Imapact:} Serious \\
+{\bf Level of Impact On Project:} High \\
 {\bf Problem Likelihood:} Low \\
-{\bf Action Being Taken:} ed-1. \\
-{\bf Fix:} Milestone demonstrations.\\
-{\bf Notes:} Some form of component versioning, labeling and naming
-is required that enables experiment configuration logs
-to include information of which components were used.
+{\bf Preventitive Measures Being Taken:} Detailed prototype studies to demostrate all required
+combinations.\\
+{\bf Fix:} Reduce scope of support to a tractable level.\\
+{\bf Notes:}
 \end{reqlist}
 
 \req{System Issues}
 \sreq{Interoperation between languages}
-ESMF will use a mix of Fortran, C and C++
+ESMF will use a mix of Fortran, C and C++ languages. Several interlanguage binary binding
+issues need to be addressed covering both normal execution and exceptional
+behavior.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Problem Likelihood:} Low\\
+{\bf Preventitive Measures Being Taken:} Significant prototyping in being undertaken and
+the language boundaries are being very clearly delineated.\\
+{\bf Fix:} Entire framework would need to be in C/C++.\\
+{\bf Notes:} Reimplementation in C/C++ would be time-consuming but
+otherwise straightforward.
+\end{reqlist}
+
 \sreq{F90 Continued Availability}
 Fortran 90/95 remain {\it fringe} languages, even though most of the Earth system
 community uses them. Two consequences of this are that ESMF Fortran 90 code will
@@ -78,9 +152,11 @@ that there is no true open-source compiler for Fortran 90/95.
 This impacts ESMF directly because some of its code will use F90 and
 indirectly because many of its components exist in F90 only.
 \begin{reqlist}
-{\bf Potential Imapact:} Serious \\
+{\bf Level of Impact On Project:} High \\
 {\bf Problem Likelihood:} Low\\
-{\bf Action Being Taken:} Some framework development is being pursued in C/C++\\
+{\bf Preventitive Measures Being Taken:} Some framework development is being pursued in C/C++.
+Availability and quality of Fortran 90/95 compilers
+is being tracked.\\
 {\bf Fix:} Entire framework would need to be in C/C++.\\
 {\bf Notes:} Reimplementation in C/C++ would be time-consuming but
 otherwise straightforward. For components the impact would be far more
@@ -89,26 +165,89 @@ Components in Fortran 77, C and C++ would not be affected by lack of
 compiler availability as compilers exist almost all hardware for these languages.
 \end{reqlist}
 
-\sreq{Vector Platform Availability}
+\sreq{Vector Platform Availability of ESMF}
+\begin{reqlist}
+{\bf Level of Impact On Project:} Medium \\
+{\bf Problem Likelihood:} Fairly Low\\
+{\bf Preventitive Measures Being Taken:} ESMF being tested and built on a range of *NIX systems \\
+{\bf Fix:} Test and modify to build on apropriate system\\
+{\bf Notes:} This could require resources but otherwise would not be a major challenge.
+\end{reqlist}
 
-\sreq{Windows Availability}
+\sreq{MS Windows Availability of ESMF}
+\begin{reqlist}
+{\bf Level of Impact On Project:} Fairly Low \\
+{\bf Problem Likelihood:} High \\
+{\bf Preventitive Measures Being Taken:}  ESMF being tested and built on a range of *NIX systems.
+No specific tests of build actions are envisaged to ensure Windows compatability.\\
+{\bf Fix:} Test and modify to build on a Windows system\\
+{\bf Notes:} This could require resources but otherwise would not be a major challenge.
+\end{reqlist}
 
 \sreq{Other OS Validation}
+\begin{reqlist}
+{\bf Level of Impact On Project:} Low \\
+{\bf Problem Likelihood:} High \\
+{\bf Preventitive Measures Being Taken:} ESMF being tested and built on a range of *NIX systems\\
+{\bf Fix:}  Test and modify to build on a Windows system\\
+{\bf Notes:} This could require resources but otherwise would not be a major challenge.
+\end{reqlist}
 
-\req{Infrastructure Fields and Grid Level Issues}
+\req{Infrastructure - Fields and Grid Level Issues}
+\sreq{Too many complex features}
+Many different grids will be supported under ESMF. A manageable and scalable approach
+to development and testing is required to enable robust support for different grids.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventitive Measures Being Taken:} A layered interface has been defined 
+which highlights generic grid properties and expresses them through common abstractions.
+Many groups will attempt to deploy the system in their own in-house
+applications and their experiences will be fed-back into the system design.\\
+{\bf Fix:} Interface redesign \\
+{\bf Notes:} 
+\end{reqlist}
+\sreq{Inadequate performance for certain grids}
+Grid operations, like halo-update and transpose, can have significant impact on parallel scaling.
+Regriddings between different grids can also greatly impact scaling.
+A general purpose system that can scale and perform as well as specialized, application and
+grid specific forms, could be hared to devise. Definciencies in this areana will
+impact adoption.
+\begin{reqlist} 
+{\bf Level of Impact On Project:} High \\ 
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventitive Measures Being Taken:} Quantitative measures of grid primitives
+performance are being devised and will be tracked.\\
+{\bf Fix:} Develop specialized forms and increase level of resources
+to developing these parts of the system.\\
+{\bf Notes:} 
+\end{reqlist}
+\sreq{Inadequate performance for certain platforms}
+Grid operations can be spcialized to take advatage of platform specific
+architectural features. In a general purpose system it can be hard to compete with these
+specialized forms.
+\begin{reqlist}
+{\bf Level of Impact On Project:} Medium \\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventitive Measures Being Taken:} Quantitative measures of grid primitives
+performance are being devised and will be tracked.\\
+{\bf Fix:} Develop specialized forms and increase level of resources
+to developing these parts of the system.\\
+{\bf Notes:} 
+\end{reqlist}
 
-\req{Infrastructure Utilities Level Issues}
+\req{Infrastructure - Utilities Level Issues}
+Inadequate reqources for developing highly portable and versatile
+signaling, prefromance monitoring, I/O, communication, memory sharing and namespace sharing tools.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventitive Measures Being Taken:} Tools developed under other projects (for example PetSC, ALICE, TAU)
+will be adopted wherever possible.
+\\
+{\bf Fix:} Devote more resources to this area \\
+{\bf Notes:} 
+\end{reqlist}
 
 
 \end{document}
-
-
-
-
-
-
-
-
-
-
-
