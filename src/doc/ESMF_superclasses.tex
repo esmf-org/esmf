@@ -166,11 +166,16 @@ will provide methods that enable a user to add or remove fields and data from
 A {\tt Coupler Component} produces a specification of the sequence of 
 operations that are necessary to effect communication between components, 
 both scientific and computational, generic and user-defined.  The {\tt Coupler} 
-returns these to the {\tt Application} or parent in the form of a set of {\tt Transform} objects 
-along with associated sequencing restrictions.  Each {\tt Transform} has a
-function pointer to a transform operation and may be bundled with 
+may be called directly, or it may return a set of {\tt Transform} objects to 
+the {\tt Application} or parent.  Each {\tt Transform} has a
+function pointer to a coupling operation and may be bundled with 
 associated data, information about coupling frequency, and 
-data validation criteria.
+data validation criteria. With sequentially executing components the {\tt Coupler}
+may be invoked directly from within the timestepping loop.  For concurrently executing
+components the {\tt Coupler} may initially generate a set of {\tt Transforms}, which 
+are passed at the application level to individual components.  These components
+can execute the {\tt Transforms} without needing to return control to the 
+{\tt Application}.
 
 The {\tt Application} or parent component initiates the coupling and manages 
 its scheduling.  It is responsible for instantiating the {\tt Gridded Component}s
@@ -610,6 +615,8 @@ fields and data to an import and export {\tt State}, for verifying that
 these states are fully or partially complete, and for returning these
 states when queried.
 
+
+
 \subsection{State (ESMF\_State)}
 A {\tt State} is a description of a set of data that a 
 {\tt Gridded Component} either needs to run or can make available.  
@@ -633,6 +640,22 @@ components is shown in figure \ref{fig:ESMFSystemDiagram}.
 \label{fig:ESMFSystemDiagram}
 \scalebox{0.70}{\includegraphics{ESMFSystemdiagram.eps}}
 \end{figure}
+
+\subsection{Exchange Packet (ESMF\_XPacket)}
+\label{sec:xpacket} 
+The purpose of an {\tt Exchange Packet} is to efficiently pack and organize 
+data that is going to be sent into or out of a component.  An Exchange Packet 
+contains a selection of {\tt Field} and other data from a {\tt State}.  
+The data in Exchange Packets may be copied into a single buffer for optimized
+communications.
+
+\subsection{Regrid (ESMF\_Regrid)}
+\label{sec:xpacket} 
+The {\tt Regrid} class contains all the information necessary to interpolate
+and redistribute {\tt Field} or {\tt Bundle} data onto different Grids.  Regrid
+methods include create, which may precompute routes and preallocate swap space;
+run, which will execute a {\tt Regrid} method; and destroy, which removes
+any resources associated with a {\tt Regrid} method.
 
 \subsection{Transform (ESMF\_XForm)} 
 A {\tt Transform} acts on a {\tt State} or other type of 
