@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.29 2004/01/28 22:49:11 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.30 2004/01/29 20:44:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.29 2004/01/28 22:49:11 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.30 2004/01/29 20:44:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: x, y, intattr
+      integer :: x, y, intattr, intattr2
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
@@ -406,20 +406,36 @@
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    1, dm, "Field 0", ios, rc)
-      call ESMF_FieldPrint(f3, "", rc)
       call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
-      call ESMF_FieldPrint(f3, "", rc)
+      intattr = 0
+      call ESMF_FieldGetAttribute(f3, "Scale Factor", intattr, rc)
       write(failMsg, *) ""
       write(name, *) "Getting an Integer Attribute back from a Field"
-      call ESMF_FieldGetAttribute(f3, "Scale Factor", intattr, rc)
-      print *, "Scale Factor should be 4, is: ", intattr
       call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
+ 
+      !NEX_UTest
+      ! test setting a second attribute
+      call ESMF_FieldSetAttribute(f3, "Invalid Data Tag", -999, rc)
+      intattr2 = 0
+      call ESMF_FieldGetAttribute(f3, "Invalid Data Tag", intattr2, rc)
+      print *, "Invalid Data Tag should be -999, is: ", intattr2
+      write(failMsg, *) ""
+      write(name, *) "Getting a second Integer Attribute back from a Field"
+      call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+      ! getting a non-existant attribute
+      write(failMsg, *) ""
+      write(name, *) "Getting an non-existant Integer Attribute from a Field"
+      call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
       ! Requirement 1.2 Local memory layout 
-      ! It shall be possible to specify whether the field data is row major or column 
-      ! major at field creation and to rearrange it (assumes local copy).
+      ! It shall be possible to specify whether the field data is row major 
+      ! or column major at field creation and to rearrange it (assumes 
+      ! local copy).
       ! Cannot be tested until Bug 705247 "Unable to query Data Map from Field" 
       ! is fixed.
       !EX_UTest
@@ -430,19 +446,21 @@
       call ESMF_DataMapPrint(dm, "", rc=rc)
 
       ! Requirement 1.3 Index Order
-      ! It shall be possible to specify the index order of field data and also to rearrange it.
-      ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not implemented"
-      ! is fixed.
+      ! It shall be possible to specify the index order of field data and 
+      !  also to rearrange it.
+      ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not 
+      !  implemented" is fixed.
 
       ! Requirement 1.7.2 Query number of dimensions and index order
-      ! A Field shall be able to return the number of dimensions and index order it has.
-      ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not implemented"
-      ! is fixed.
+      ! A Field shall be able to return the number of dimensions and index 
+      !  order it has.
+      ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not 
+      !  implemented" is fixed.
 
       ! Requirement 1.7.3 Query attributes
       ! A Field can return its list of attributes.
-      ! Cannot be tested until Bug 705716 "Field Query attributes not implemented"
-      ! is fixed.
+      ! Cannot be tested until Bug 705716 "Field Query attributes not 
+      !  implemented" is fixed.
 
 #endif
 
