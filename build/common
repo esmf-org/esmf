@@ -1,4 +1,4 @@
-# $Id: common,v 1.48 2003/05/29 20:59:06 flanigan Exp $ 
+# $Id: common,v 1.49 2003/06/06 21:01:46 jwolfe Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -56,7 +56,7 @@ storeh: chkdir_include
 
 # Builds library.
 build_libs: chk_dir
-	cd $(ESMF_DIR) ;\
+	cd $(ESMF_TOP_DIR) ;\
 	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
 
 # Builds library
@@ -497,8 +497,8 @@ build_shared:
 	    mkdir tmp_$$LIBNAME ;\
 	    cd tmp_$$LIBNAME  ;\
             $(AR) $(AR_EXTRACT) ../$$LIBNAME.a ;\
-	    echo $(SL_F_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
-	    $(SL_F_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	    echo $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	    $(SL_LIB_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
 	    cd .. ;\
 	    rm -rf tmp_$$LIBNAME ;\
 	fi ;\
