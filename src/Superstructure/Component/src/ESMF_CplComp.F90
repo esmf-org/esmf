@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.21 2004/03/19 20:01:42 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.22 2004/03/19 21:23:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,11 @@
       use ESMF_GridMod
       use ESMF_StateMod
       use ESMF_CompMod
+
+#ifdef ESMF_ENABLE_VM
+      use ESMF_VMMod
+#endif
+      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -91,6 +96,15 @@
       !public ESMF_CplCompWrite
       !public ESMF_CplCompRead
 
+#ifdef ESMF_ENABLE_VM
+      ! Procedures for VM-enabled mode      
+      public ESMF_CplCompSetVMMaxThreads
+      public ESMF_CplCompSetVMMinThreads
+      public ESMF_CplCompSetVMMaxPEs
+      ! Return from user-provided routines
+      public ESMF_CplCompWait
+#endif
+
       !public operator(.eq.), operator(.ne.), assignment(=)
 
 !EOPI
@@ -98,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.21 2004/03/19 20:01:42 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.22 2004/03/19 21:23:09 theurich Exp $'
 
 !==============================================================================
 !
@@ -114,6 +128,9 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         !module procedure ESMF_CplCompCreateNew
         module procedure ESMF_CplCompCreateConf
+#ifdef ESMF_ENABLE_VM
+        module procedure ESMF_CplCompCreateVM
+#endif
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
@@ -310,6 +327,95 @@
 
         end function ESMF_CplCompCreateConf
     
+
+#ifdef ESMF_ENABLE_VM
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp with VM enabled
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CplCompCreate()      
+      function ESMF_CplCompCreateVM(vm, name, delayout, config, configFile, &
+                                      clock, petList, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_CplComp) :: ESMF_CplCompCreateVM
+!
+! !ARGUMENTS:
+      type(ESMF_VM),        intent(in)              :: vm
+      character(len=*), intent(in), optional :: name
+      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_Config), intent(in), optional :: config
+      character(len=*), intent(in), optional :: configFile
+      type(ESMF_Clock), intent(in), optional :: clock
+      integer,              intent(in),    optional :: petList(:)
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!
+!  The return value is a new {\tt ESMF\_CplComp}.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[{[name]}]
+!    CplComp name.
+!   \item[{[layout]}]
+!    CplComp delayout.
+!   \item[{[config]}]
+!    Already created {\tt Config} object.  If specified, takes
+!    priority over config filename.
+!   \item[{[configFile]}]
+!    CplComp-specific configuration filename. 
+!   \item[{[clock]}]
+!    CplComp-specific clock.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! local vars
+        type (ESMF_CompClass), pointer :: compclass      ! generic comp
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize the pointer to null.
+        nullify(ESMF_CplCompCreateVM%compp)
+        nullify(compclass)
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Allocate a new comp class
+        allocate(compclass, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
+          return
+        endif
+   
+        ! Call construction method to initialize cplcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+                                configFile=configFile, config=config, &
+                                vm=vm, petList=petList, clock=clock, rc=status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CplComp construction error"
+          return
+        endif
+
+        ! Set return values
+        ESMF_CplCompCreateVM%compp => compclass
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_CplCompCreateVM
+#endif    
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CplCompDestroy - Release resources for a CplComp
@@ -762,6 +868,242 @@
         end subroutine ESMF_CplCompWriteRestart
 
 
+
+#ifdef ESMF_ENABLE_VM
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Define a VM for this CplComp
+
+! !INTERFACE:
+  subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cplcomp] 
+!      cplcomp object
+!     \item[{[max]}] 
+!      Maximum threading level
+!     \item[{[pref\_intra\_process]}] 
+!      Intra process communication preference
+!     \item[{[pref\_intra\_ssi]}] 
+!      Intra SSI communication preference
+!     \item[{[pref\_inter\_ssi]}] 
+!      Inter process communication preference
+!     \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompSetVMMaxThreads error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CplCompSetVMMaxThreads
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompSetVMMinThreads - Define a VM for this CplComp
+
+! !INTERFACE:
+  subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cplcomp] 
+!      cplcomp object
+!     \item[{[max]}] 
+!      Maximum number of PEs per PET
+!     \item[{[pref\_intra\_process]}] 
+!      Intra process communication preference
+!     \item[{[pref\_intra\_ssi]}] 
+!      Intra SSI communication preference
+!     \item[{[pref\_inter\_ssi]}] 
+!      Inter process communication preference
+!     \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompSetVMMinThreads error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CplCompSetVMMinThreads
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Define a VM for this CplComp
+
+! !INTERFACE:
+  subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),  intent(in)            :: cplcomp
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cplcomp] 
+!      cplcomp object
+!     \item[{[max]}] 
+!      Maximum number of PEs per PET
+!     \item[{[pref\_intra\_process]}] 
+!      Intra process communication preference
+!     \item[{[pref\_intra\_ssi]}] 
+!      Intra SSI communication preference
+!     \item[{[pref\_inter\_ssi]}] 
+!      Inter process communication preference
+!     \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompSetVMMaxPEs error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CplCompSetVMMaxPEs
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
+
+! !INTERFACE:
+  subroutine ESMF_CplCompWait(cplcomp, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(in)            :: cplcomp
+    integer,            intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!     Wait for an {\tt ESMF\_CplComp} to return.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[cplcomp] 
+!      cplcomp object
+!     \item[{[rc]}] 
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompWait(cplcomp%compp, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompWait error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_CplCompWait
+!------------------------------------------------------------------------------
+#endif
 
 
 end module ESMF_CplCompMod
