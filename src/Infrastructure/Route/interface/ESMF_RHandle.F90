@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.7 2003/08/29 21:11:03 jwolfe Exp $
+! $Id: ESMF_RHandle.F90,v 1.8 2003/09/02 18:56:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.7 2003/08/29 21:11:03 jwolfe Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.8 2003/09/02 18:56:16 nscollins Exp $'
 
 !==============================================================================
 
@@ -300,6 +300,7 @@
         ! TODO: handle label string going through the interface
         call c_ESMC_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
                                    oldtdata, status)
+        oldlabel = "fake"  ! not handing strings thru interface yet
         if (status .ne. ESMF_SUCCESS) then  
           print *, "RouteHandle Get error"
           return  
@@ -395,7 +396,8 @@
 
         ! Get old values and only replace the ones specified.
         call c_ESMC_RouteHandleGet(rhandle, oldhtype, oldroute1, oldroute2, &
-                                   oldtdata, oldlabel, status)
+                                   oldtdata, status)
+        oldlabel = "fake"  ! not handling strings thru the interface yet
         changed = .false.
 
         if (present(htype)) then

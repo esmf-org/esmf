@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.3 2003/08/29 21:11:19 jwolfe Exp $
+// $Id: ESMC_RHandle_F.C,v 1.4 2003/09/02 18:56:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,10 +47,14 @@ extern "C" {
        void FTN(c_esmc_routehandleget)(ESMC_RouteHandle **ptr, 
                                        ESMC_HandleType *htype, 
                                        ESMC_Route **r1, ESMC_Route **r2, 
-                                       ESMC_TransformValues **tv,
+                                       ESMC_TransformValues *tv,
                                        // char **label,   not null terminated
                                        int *status) {
-           *status = (*ptr)->ESMC_RouteHandleGet(htype, r1, r2, tv, (char **)(NULL));
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
+           *status = (*ptr)->ESMC_RouteHandleGet(htype, r1, r2, &tv, (char **)(NULL));
        }
 
        void FTN(c_esmc_routehandleset)(ESMC_RouteHandle **ptr, 
@@ -59,16 +63,28 @@ extern "C" {
                                        ESMC_TransformValues **tv,
                                        // char **label,   not null terminated
                                        int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
            *status = (*ptr)->ESMC_RouteHandleSet(*htype, *r1, *r2, *tv, (char*)(NULL));
        }
 
        void FTN(c_esmc_routehandlevalidate)(ESMC_RouteHandle **ptr, char *opts,
                                             int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
            *status = (*ptr)->ESMC_RouteHandleValidate(opts);
        }
 
        void FTN(c_esmc_routehandleprint)(ESMC_RouteHandle **ptr, char *opts, 
                                          int *status) {
+           if ((ptr == NULL) || (ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+           }
            *status = (*ptr)->ESMC_RouteHandlePrint(opts);
        }
 
