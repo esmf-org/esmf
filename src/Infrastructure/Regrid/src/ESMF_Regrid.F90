@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.52 2004/02/14 00:34:01 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.53 2004/02/19 21:30:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.52 2004/02/14 00:34:01 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.53 2004/02/19 21:30:08 jwolfe Exp $'
 
 !==============================================================================
 
@@ -383,10 +383,7 @@
       integer(ESMF_KIND_I4), dimension(:), pointer :: dstIndex, srcIndex
       real(ESMF_KIND_R8) :: zero
       real(ESMF_KIND_R8), dimension(:), pointer :: weights
-      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData1D
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: gatheredData2D
-      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: gatheredData3D
-      real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: gatheredData4D
+      real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData2D
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstData3D
       real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
@@ -435,6 +432,7 @@
      call ESMF_RouteGetRecvItems(rh, asize, status)
 
      call ESMF_ArrayGet(srcarray, rank=rank, type=type, kind=kind, rc=status)
+   !  gatheredArray = ESMF_LocalArrayCreate(rank-1, type, kind, asize, rc=status)
      gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=status)
      srcLocalArray = srcarray
      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, status)
@@ -459,7 +457,7 @@
      !-------------
      case(2) ! 2D data for regrid
 
-       call ESMF_LocalArrayGetData(gatheredArray, gatheredData1D, &
+       call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
                                    ESMF_DATA_REF, rc)
        call ESMF_ArrayGetData(dstarray, dstData2D, ESMF_DATA_REF, rc)
 
@@ -474,13 +472,13 @@
          d2 = dstIndex((n-1)*2 + 2)
          s1 = srcIndex(n)
          dstData2D(d1,d2) = dstData2D(d1,d2) &
-                          + (gatheredData1D(s1) * weights(n))
+                          + (gatheredData(s1) * weights(n))
        enddo
 
      !-------------
      case(3) ! 3D data for regrid
 
-       call ESMF_LocalArrayGetData(gatheredArray, gatheredData2D, &
+       call ESMF_LocalArrayGetData(gatheredArray, gatheredData, &
                                    ESMF_DATA_REF, rc)
        call ESMF_ArrayGetData(dstarray, dstData3D, ESMF_DATA_REF, rc)
 
@@ -504,10 +502,10 @@
          do n = 1,numlinks
            d1 = dstIndex((n-1)*2 + 1)
            d2 = dstIndex((n-1)*2 + 2)
-           s1 = srcIndex(n)
+           s1 = (srcIndex(n)-1)*4
            do i = 1,i2
              dstData3D(i,d1,d2) = dstData3D(i,d1,d2) &
-                                + (gatheredData2D(i,s1) * weights(n))
+                                + (gatheredData(s1+i) * weights(n))
            enddo
          enddo
 
@@ -521,7 +519,7 @@
              d2 = dstIndex((n-1)*2 + 2)
              s1 = srcIndex(n)
              dstData3D(d1,d2,i) = dstData3D(d1,d2,i) &
-                                + (gatheredData2D(s1,i) * weights(n))
+                                + (gatheredData(s1) * weights(n))
            enddo
          enddo
 
@@ -542,7 +540,7 @@
            dk1 = dindex(dstDimOrder(3)+1,1)
            dk2 = dindex(dstDimOrder(3)+1,2)
            sindex(1,1) = 1
-           sindex(1,2) = size(gatheredData3D,srcUndecomp)
+           sindex(1,2) = size(gatheredData,srcUndecomp)
            sindex(2,1) = srcIndex((n-1)*2 + 1)
            sindex(2,2) = srcIndex((n-1)*2 + 1)
            sindex(3,1) = srcIndex((n-1)*2 + 2)
@@ -555,7 +553,7 @@
            sk2 = sindex(srcDimOrder(3)+1,2)
    !        dstData3D(di1:di2,dj1:dj2,dk1:dk2) = &
    !                 dstData3D(di1:di2,dj1:dj2,dk1:dk2) &
-   !              + (gatheredData2D(si1:si2,sj1:sj2) * weights(n))
+   !              + (gatheredData(si1:si2,sj1:sj2) * weights(n))
 
          enddo
        endif
