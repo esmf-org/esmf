@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/08/03 19:33:46 nscollins Exp $
+# $Id: makefile,v 1.7 2005/01/04 23:07:50 theurich Exp $
 
 ALL: build_examples
 
@@ -86,5 +86,5 @@ run_ESMF_DELayoutEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_DELayoutEx > $(ESMF_EXDIR)/ESMF_DELayoutEx.stdout
 
 run_ESMF_DELayoutEx_uni:
-	echo "ESMF_DELayoutEx not set up to run on one processor."
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_DELayoutEx > $(ESMF_EXDIR)/ESMF_DELayoutEx.stdout
 
