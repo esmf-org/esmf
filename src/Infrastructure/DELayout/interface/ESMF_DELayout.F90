@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.5 2003/12/08 23:12:20 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.6 2004/01/09 16:43:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.5 2003/12/08 23:12:20 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.6 2004/01/09 16:43:20 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -757,8 +757,8 @@
         return
       endif
 !     Translate to F90
-      x = x+1
-      y = y+1
+      x = x + 1
+      y = y + 1
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
@@ -788,6 +788,7 @@
 !     Local variables.
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
+      integer :: xUse, yUse
 
 !     Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -797,8 +798,12 @@
           rc = ESMF_FAILURE
       endif
 
+!     Translate F90 indices to C++
+      xUse = x - 1
+      yUse = y - 1
+
 !     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutGetDEIDat(layout, x, y, 0, id, status)
+      call c_ESMC_DELayoutGetDEIDat(layout, xUse, yUse, 0, id, status)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutGetDEIDat error"
         return
