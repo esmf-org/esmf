@@ -1,5 +1,7 @@
-# $Id: makefile,v 1.10 2003/09/19 22:13:43 cdeluca Exp $ 
-ALL: lib  install
+# $Id: makefile,v 1.11 2004/02/05 21:48:19 nscollins Exp $ 
+
+# default rule if no explicit target is given to make
+ALL: build_here
 
 CFLAGS    =
 FFLAGS    =

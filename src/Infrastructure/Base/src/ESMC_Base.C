@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.25 2004/02/04 21:54:10 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.26 2004/02/05 21:48:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.25 2004/02/04 21:54:10 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.26 2004/02/05 21:48:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -140,8 +140,8 @@ static int globalCount = 0;
 
   printf("  %d Attributes:\n", attrCount);
   for (i=0; i<attrCount; i++) {
-      printf(" Attr %d: %s, ", i, attrList[i].attrName);
-      attrList[i].attrValue.ESMC_Print();
+      printf(" Attr %d: ", i);
+      attrList[i]->ESMC_Print();
   }
                          
   return ESMF_SUCCESS;
@@ -1106,9 +1106,10 @@ extern "C" {
   if ((attrCount + adding) <= attrAlloc) 
       return ESMF_SUCCESS;
 
+  // FIXME: this should be arrays of *attrs, not whole size, right?
   saveme = (void *)attrList;
-  attrList = (ESMC_Attribute *)realloc((void *)attrList, 
-                           (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute));
+  attrList = (ESMC_Attribute **)realloc((void *)attrList, 
+                           (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute *));
   if (attrList == NULL) {
       free(saveme);   // although at this point, the heap is probably boffed
       return ESMF_FAILURE;
@@ -1118,6 +1119,7 @@ extern "C" {
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeAlloc
+
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1134,6 +1136,11 @@ extern "C" {
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
+//     This version of set is used when the caller has already allocated
+//     an attribute object and filled it, and the attribute is simply
+//     added to the list belonging to this object.  The caller must not
+//     delete the attribute.  Generally used internally - see below for
+//     individual attribute set routines for each supported type.
 //
 //EOP
 
@@ -1147,16 +1154,18 @@ extern "C" {
 
   // first, see if you are replacing an existing attribute
   for (i=0; i<attrCount; i++) {
-      if (strcmp(attr->attrName, attrList[i].attrName))
+      if (strcmp(attr->attrName, attrList[i]->attrName))
           continue;
 
       // FIXME: we might want an explicit flag saying that this is what
       // is wanted, instead of an error if a previous value not expected.
 
       // if you get here, you found a match.  replace previous copy.
-      // FIXME - if length > 1, you have to delete the pointer contents first
-      // otherwise, memory leaks here.
-      attrList[i].attrValue = attr->attrValue;        // struct contents copy
+
+      // delete old attribute, including possibly freeing a list
+      attrList[i]->~ESMC_Attribute();
+
+      attrList[i] = attr;
       return ESMF_SUCCESS;
   }   
 
@@ -1165,8 +1174,7 @@ extern "C" {
   if (rc != ESMF_SUCCESS)
       return rc;
   
-  strcpy(attrList[attrCount].attrName, attr->attrName);
-  attrList[attrCount].attrValue = attr->attrValue;      // struct contents copy
+  attrList[attrCount] = attr;   
   attrCount++;
   return ESMF_SUCCESS;
 
@@ -1174,16 +1182,280 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
+// !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGet(
-// 
+      int ESMC_Base::ESMC_AttributeSet(
+//
 // !RETURN VALUE:
 //    int return code
 // 
 // !ARGUMENTS:
-      ESMC_Attribute *attr) const {    // in/out - name in, type & value out
+      char *name,     // in - attribute name
+      int value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(int)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,     // in - attribute name
+      int count,      // in - number of ints in list
+      int *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_INTEGER, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(int *)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(double) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,        // in - attribute name
+      double value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(double)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(double *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,        // in - attribute name
+      int count,         // in - number of doubles in list
+      double *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_REAL, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(double *)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(bool) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      ESMC_Logical value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, 1, &value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(bool)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(bool *) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - attribute name
+      int count,               // in - number of logicals in list
+      ESMC_Logical *value) {   // in - attribute values
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_LOGICAL, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(bool *)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(char) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,       // in - attribute name
+      char *value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, ESMF_DATA_CHARACTER, 1, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(char)
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeSet(dt,count,value) - set attribute on an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeSet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,       // in - attribute name
+      ESMC_DataType dt, // in - data type
+      int count,        // in - number of values
+      void *value) {    // in - attribute value
+// 
+// !DESCRIPTION:
+//     Associate a (name,value) pair with any type in the system.
+//
+//EOP
+
+  int rc;
+  ESMC_Attribute *attr;
+
+  attr = new ESMC_Attribute(name, dt, count, value);  
+  if (!attr)
+    return ESMF_FAILURE;
+ 
+  rc = ESMC_AttributeSet(attr);
+
+  return rc;
+
+}  // end ESMC_AttributeSet(dt,count,value)
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet - get attribute from an ESMF type
+//
+// !INTERFACE:
+      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    pointer to requested attribute
+// 
+// !ARGUMENTS:
+      char *name) const {        // in - attr name to retrieve
 // 
 // !DESCRIPTION:
 //
@@ -1192,24 +1464,596 @@ extern "C" {
   int rc, i;
 
   // simple sanity checks
-  if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
-      printf("ESMF_AttributeGet: bad attribute object\n");
-      return ESMF_FAILURE;
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 5 bad attribute name\n");
+      return NULL;
   }
 
   for (i=0; i<attrCount; i++) {
-      if (strcmp(attr->attrName, attrList[i].attrName))
+      if (strcmp(name, attrList[i]->attrName))
           continue;
 
-      // if you get here, you found a match.  struct contents copy.
-      attr->attrValue = attrList[i].attrValue;
-      return ESMF_SUCCESS;
+      // if you get here, you found a match. 
+      return attrList[i]; 
   }   
 
   // bad news - you get here if no matches found
-  return ESMF_FAILURE;
+  return NULL;
 
 }  // end ESMC_AttributeGet
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(int) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,           // in - name of attribute to retrieve
+      int *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 6 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_INTEGER) {
+      printf("ESMF_AttributeGet: attribute not type integer\n");
+      return ESMF_FAILURE;
+  }
+  if (attr->items != 1) {
+      printf("ESMF_AttributeGet: attribute not single value\n");
+      return ESMF_FAILURE;
+  }
+
+  *value = attr->vi;
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(int)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(int *) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,           // in - name of attribute to retrieve
+      int *count,           // out - number of values in list
+      int *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 7 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_INTEGER) {
+      printf("ESMF_AttributeGet: attribute not type integer\n");
+      return ESMF_FAILURE;
+  }
+
+  if (count) 
+      *count = attr->items;
+
+  if (value) {
+      if (attr->items == 1)
+          value[0] = attr->vi;
+      else for (i=0; i<attr->items; i++)
+          value[i] = attr->vip[i];
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(int *)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(double) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - name of attribute to retrieve
+      double *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 8 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_REAL) {
+      printf("ESMF_AttributeGet: attribute not type real\n");
+      return ESMF_FAILURE;
+  }
+  if (attr->items != 1) {
+      printf("ESMF_AttributeGet: attribute not single value\n");
+      return ESMF_FAILURE;
+  }
+
+  *value = attr->vr;
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(double)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(double *) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,              // in - name of attribute to retrieve
+      int *count,              // out - number of values in list
+      double *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 9 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_REAL) {
+      printf("ESMF_AttributeGet: attribute not type real\n");
+      return ESMF_FAILURE;
+  }
+
+  if (count) 
+      *count = attr->items;
+
+  if (value) {
+      if (attr->items == 1)
+          value[0] = attr->vr;
+      else for (i=0; i<attr->items; i++)
+          value[i] = attr->vrp[i];
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(double *)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(bool) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      ESMC_Logical *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 10 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_LOGICAL) {
+      printf("ESMF_AttributeGet: attribute not type logical\n");
+      return ESMF_FAILURE;
+  }
+  if (attr->items != 1) {
+      printf("ESMF_AttributeGet: attribute not single value\n");
+      return ESMF_FAILURE;
+  }
+
+  *value = attr->vl;
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(bool)
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(bool *) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      int *count,                    // out - number of values in list
+      ESMC_Logical *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 1 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_LOGICAL) {
+      printf("ESMF_AttributeGet: attribute not type logical\n");
+      return ESMF_FAILURE;
+  }
+
+  if (count) 
+      *count = attr->items;
+
+  if (value) {
+      if (attr->items == 1)
+          value[0] = attr->vl;
+      else for (i=0; i<attr->items; i++)
+          value[i] = attr->vlp[i];
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(bool *)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(char) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,            // in - name of attribute to retrieve
+      char *value) const {   // out - attribute value
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 2 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+  if (!value) {
+      printf("ESMF_AttributeGet: bad return location\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt != ESMF_DATA_CHARACTER) {
+      printf("ESMF_AttributeGet: attribute not type character\n");
+      return ESMF_FAILURE;
+  }
+  if (attr->items != 1) {
+      printf("ESMF_AttributeGet: attribute not single value\n");
+      return ESMF_FAILURE;
+  }
+
+  strcpy(value, attr->vcp);
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(char)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(dt,count,value) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,                    // in - name of attribute to retrieve
+      ESMC_DataType *dt,             // out - data type
+      int *count,                    // out - number of values in list
+      void *value) const {           // out - attribute value(s)
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 3 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (dt) 
+      *dt = attr->dt;
+
+  if (count) {
+      if (attr->dt == ESMF_DATA_CHARACTER)
+          *count = attr->slen;
+      else
+          *count = attr->items;
+  }
+
+  if (value) {
+      if (attr->items == 1) {
+          switch(attr->dt) {
+            case ESMF_DATA_INTEGER: 
+              *(int *)value = attr->vi; 
+              break;
+            case ESMF_DATA_REAL: 
+              *(double *)value = attr->vr; 
+              break;
+            case ESMF_DATA_LOGICAL: 
+              *(ESMC_Logical *)value = attr->vl; 
+              break;
+            case ESMF_DATA_CHARACTER:
+              printf("ESMF_AttributeGet: cannot return character string here\n");
+              break;
+            default:  
+              printf("ESMF_AttributeGet: unknown data type\n");
+              return ESMF_FAILURE;
+          }
+ 
+      } else {
+          switch(attr->dt) {
+            case ESMF_DATA_INTEGER:
+              for (i=0; i<attr->items; i++)
+                  ((int *)value)[i] = attr->vip[i];
+            case ESMF_DATA_REAL:
+              for (i=0; i<attr->items; i++)
+                  ((double *)value)[i] = attr->vrp[i];
+            case ESMF_DATA_LOGICAL:
+              for (i=0; i<attr->items; i++)
+                  ((ESMC_Logical *)value)[i] = attr->vlp[i];
+            default:  
+              printf("ESMF_AttributeGet: unknown data type\n");
+              return ESMF_FAILURE;
+          }
+      }
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(dt,count,value)
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGet(dt,count,value) - get attribute from an ESMF type
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGet(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      int num,                       // in - number of attribute to retrieve
+      char *name,                    // out - attribute name
+      ESMC_DataType *dt,             // out - data type
+      int *count,                    // out - number of values in list
+      void *value) const {           // out - attribute value(s)
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  attr = ESMC_AttributeGet(num);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      return ESMF_FAILURE;
+  }
+
+  if (name)
+       strcpy(name, attr->attrName);
+
+  if (dt) 
+      *dt = attr->dt;
+
+  if (count) {
+      if (attr->dt == ESMF_DATA_CHARACTER)
+          *count = attr->slen;
+      else
+          *count = attr->items;
+  }
+
+  if (value) {
+      if (attr->items == 1) {
+          switch(attr->dt) {
+            case ESMF_DATA_INTEGER: 
+              *(int *)value = attr->vi; 
+              break;
+            case ESMF_DATA_REAL: 
+              *(double *)value = attr->vr; 
+              break;
+            case ESMF_DATA_LOGICAL: 
+              *(ESMC_Logical *)value = attr->vl; 
+              break;
+            case ESMF_DATA_CHARACTER:
+              printf("ESMF_AttributeGet: cannot return character string here\n");
+              break;
+            default:  
+              printf("ESMF_AttributeGet: unknown data type\n");
+              return ESMF_FAILURE;
+          }
+ 
+      } else {
+          switch(attr->dt) {
+            case ESMF_DATA_INTEGER:
+              for (i=0; i<attr->items; i++)
+                  ((int *)value)[i] = attr->vip[i];
+            case ESMF_DATA_REAL:
+              for (i=0; i<attr->items; i++)
+                  ((double *)value)[i] = attr->vrp[i];
+            case ESMF_DATA_LOGICAL:
+              for (i=0; i<attr->items; i++)
+                  ((ESMC_Logical *)value)[i] = attr->vlp[i];
+            default:  
+              printf("ESMF_AttributeGet: unknown data type\n");
+              return ESMF_FAILURE;
+          }
+      }
+  }
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGet(dt,count,value)
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeGetCount - get count of items in an attribute list
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeGetCount(
+// 
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      char *name,           // in - name of attribute to retrieve
+      int *count) const {   // out - number of items in list
+// 
+// !DESCRIPTION:
+//
+//EOP
+
+  int rc, i;
+  ESMC_Attribute *attr;
+
+  // simple sanity checks
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGet: 4 bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+  if (!count) {
+      printf("ESMF_AttributeGet: bad count argument\n");
+      return ESMF_FAILURE;
+  }
+
+  attr = ESMC_AttributeGet(name);
+  if (!attr) {
+      printf("ESMF_AttributeGet: attribute not found\n");
+      *count = 0;
+      return ESMF_FAILURE;
+  }
+
+  if (attr->dt == ESMF_DATA_CHARACTER)
+      *count = attr->slen;
+  else
+      *count = attr->items;
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeGetCount
+
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1237,21 +2081,16 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AttributeGetbyNumber - get an ESMF object's attribute by number
+// !IROUTINE:  ESMC_AttributeGet - get an ESMF object's attribute by number
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetbyNumber(
+      ESMC_Attribute *ESMC_Base::ESMC_AttributeGet(
 // 
 // !RETURN VALUE:
-//    int return code.  name must point to existing space long enough to
-//    hold up to ESMF_MAXSTR bytes.
+//    int return code.
 // 
 // !ARGUMENTS:
-      int number,                      // in - attribute number
-      // FIXME: should this be passing ESMC_Attribute * here?
-      char *name,                      // out - attribute name
-      ESMC_DataType *type,             // out - attribute type
-      ESMC_DataValue *value) const {   // out - attribute value
+      int number) const {             // in - attribute number
 // 
 // !DESCRIPTION:
 //     Allows the caller to get attributes by number instead of by name.
@@ -1266,22 +2105,18 @@ extern "C" {
 
   // simple sanity check
   if ((number < 0) || (number >= attrCount)) {
-      printf("ESMC_AttributeGetByNumber: attribute number must be  0 < N <= %d\n",
+      printf("ESMC_AttributeGet: attribute number must be  0 < N <= %d\n",
                                          attrCount-1);
-      return ESMF_FAILURE;
+      return NULL;
   }
 
-  if (name) strcpy(name, attrList[number].attrName);
-  if (type) *type = attrList[number].attrValue.dt;
-  if (value) *value = attrList[number].attrValue;      // struct contents copy
+  return attrList[number];
 
-  return ESMF_SUCCESS;
-
-}  // end ESMC_AttributeGetbyNumber
+}  // end ESMC_AttributeGet
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AttributeGetNameList - get an ESMF object's attribute name list
+// !IROUTINE:  ESMC_AttributeGetNameList - get the list of attribute names
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeGetNameList(
@@ -1305,7 +2140,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AttributeSetList - set an ESMF object's attributes
+// !IROUTINE:  ESMC_AttributeSetList - set multiple attributes at once
 // 
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeSetList(
@@ -1314,12 +2149,11 @@ extern "C" {
 //    int return code
 //
 // !ARGUMENTS:
-      char **namelist,          // in - list of attributes to set
-      ESMC_DataValue *values) { // in - list of attribute values
+      int count,                   // in - number of attributes to set
+      ESMC_Attribute *valuelist) { // in - list of attribute values
 // 
 // !DESCRIPTION:
-//    Set multiple attributes on an object in one call.  Depending on what is
-//    allowed by the interface, all attributes may have to have the same type.
+//    Set multiple attributes on an object in one call. 
 //
 //EOP
 // !REQUIREMENTS:   (none.  added for completeness)
@@ -1330,7 +2164,7 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AttributeGetList - get an ESMF object's attributes 
+// !IROUTINE:  ESMC_AttributeGetList - get multiple attributes at once
 // 
 // !INTERFACE:
       int ESMC_Base::ESMC_AttributeGetList(
@@ -1339,9 +2173,8 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char **namelist,                   // out - list of attribute names
-      ESMC_DataType *typelist,           // out - list of attribute types
-      ESMC_DataValue *valuelist) const { // out - list of attribute values
+      char **namelist,                   // in - null term list of names
+      ESMC_Attribute *valuelist) const { // out - list of attribute values
 // 
 // !DESCRIPTION:
 //     Get multiple attributes from an object in a single call
@@ -1369,9 +2202,7 @@ extern "C" {
 // 
 // !DESCRIPTION:
 //     The specified attribute associated with the source object (this) is
-//     copied to the destination object.  << does this assume overwriting the
-//     attribute if it already exists in the output or does this require yet
-//     another arg to say what to do with collisions? >>
+//     copied to the destination object. 
 
 //EOP
 // !REQUIREMENTS:   FLD1.5.4
@@ -1391,13 +2222,12 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      ESMC_Base *destination) {  // in - the destination object
+      ESMC_Base *source) {  // in - the source object
 // 
 // !DESCRIPTION:
-//     All attributes associated with the source object (this) are copied to the
-//     destination object.  Some attributes will have to be considered
-//     {\tt read only} and won't be updated by this call.  (e.g. an attribute
-//     like {\tt name} must be unique and therefore can't be duplicated.)
+//     All attributes associated with the source object are copied to the
+//     destination object (this).  Some attributes might have to be considered
+//     {\tt read only} and won't be updated by this call. 
 
 //EOP
 // !REQUIREMENTS:   FLD1.5.4
@@ -1408,10 +2238,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DataValue::ESMC_Print - print the DataValue contents
+// !IROUTINE:  ESMC_Attribute::ESMC_Print - print the Attribute contents
 //
 // !INTERFACE:
-      int ESMC_DataValue::ESMC_Print(
+      int ESMC_Attribute::ESMC_Print(
 //
 // !RETURN VALUE:
 //    int return code
@@ -1420,12 +2250,11 @@ extern "C" {
       void) {                    // could add options at some point
 // 
 // !DESCRIPTION:
-//     Print the contents of a DataValue object
-//     Set the same attribute on multiple objects in one call
+//     Print the contents of a Attribute object
 //
 //EOP
 
-  printf("type %s", ESMC_DataTypeString(dt));
+  printf("name '%s', type %s", attrName, ESMC_DataTypeString(dt));
 
   if (items <= 0) 
       printf("\n");
@@ -1441,8 +2270,8 @@ extern "C" {
       }
   }
 
-  if (items > 1) {  // yes, redundant test - this is all that's possible now 
-      printf(", %d items, values: ", items);
+  if (items > 1) { 
+      printf(", %d items, values:\n", items);
       for (int i=0; i<items; i++) {
           switch (dt) {
             case ESMF_DATA_INTEGER: printf(" item %d: %d\n", i, vip[i]); break;
@@ -1453,6 +2282,7 @@ extern "C" {
           }
       }
   }
+
   return ESMF_SUCCESS;
 
 }  // end ESMC_Print
@@ -1475,8 +2305,7 @@ extern "C" {
 // 
 // !ARGUMENTS:
       ESMC_Base *anytypelist,    // in - list of ESMC objects
-      char *name,                // in - attribute name
-      ESMC_DataValue *value) {   // in - attribute value
+      ESMC_Attribute *value) {   // in - attribute value
 // 
 // !DESCRIPTION:
 //     Set the same attribute on multiple objects in one call
@@ -1501,8 +2330,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base *anytypelist,            // in - list of ESMC objects
       char *name,                        // in - attribute name
-      ESMC_DataType *typelist,           // out - list of attribute types
-      ESMC_DataValue *valuelist) {       // out - list of attribute values
+      ESMC_Attribute *valuelist) {       // out - list of attribute values
 // 
 // !DESCRIPTION:
 //     Get the same attribute name from multiple objects in one call
@@ -1513,6 +2341,244 @@ extern "C" {
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeGetObjectList
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AttributeCopy(=) - assignment operator for attributes
+//
+// !INTERFACE:
+      ESMC_Attribute& ESMC_Attribute::operator=(
+//
+// !RETURN VALUE:
+//    new attribute object with allocations done if lists or char strings
+//    must be stored.
+//
+// !ARGUMENTS:
+        const ESMC_Attribute &source) {   // in - ESMC_Attribute
+//
+// !DESCRIPTION:
+//   copy an attribute, including contents, to current object (this)
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+  int i, len;
+
+  memcpy(attrName, source.attrName, ESMF_MAXSTR);
+
+  dt = source.dt;
+  items = source.items;
+  slen = source.slen;
+  
+  if (items == 0)
+    voidp = NULL;
+ 
+  else if (items == 1) {
+    switch (dt) {
+      case ESMF_DATA_INTEGER:   
+        vi = source.vi;  
+        break;
+      case ESMF_DATA_REAL:      
+        vr = source.vr;  
+        break;
+      case ESMF_DATA_LOGICAL:   
+        vl = source.vl;  
+        break;
+      case ESMF_DATA_CHARACTER: 
+        vcp = new char[slen];   // includes trailing null
+        memcpy(vcp, (char *)source.vcp, slen);
+        break;
+
+      default:
+        voidp = NULL;
+        break;
+    }
+
+  } else {
+    // items > 1, alloc space for a list and do the copy
+      switch (dt) {
+        case ESMF_DATA_INTEGER:   
+          vip = new int[items];      
+          for (i=0; i<items; i++)
+              vip[i] = source.vip[i];  
+          break;
+        case ESMF_DATA_REAL:      
+          vrp = new double[items];      
+          for (i=0; i<items; i++)
+              vrp[i] = source.vrp[i];  
+          break;
+        case ESMF_DATA_LOGICAL:   
+          vlp = new ESMC_Logical[items];      
+          for (i=0; i<items; i++)
+              vlp[i] = source.vlp[i];  
+          break;
+        case ESMF_DATA_CHARACTER: 
+        default:
+          // error - arrays of char strings not allowed
+          voidp = NULL;
+          break;
+      }
+  }
+
+  return (*this);
+
+ } // end ESMC_Attribute::operator=
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//     create an empty attribute structure
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  attrName[0] = '\0';
+  items = 0;
+  slen = 0;
+  voidp = NULL;
+
+ } // end ESMC_Attribute
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Attribute - native C++ constructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::ESMC_Attribute(
+//
+// !RETURN VALUE:
+//    new attribute object
+//
+// !ARGUMENTS:
+        char *name,                // attribute name
+        ESMC_DataType datatype,    // data type
+        int numitems,              // single or list
+        void *datap) {             // generic pointer to values
+//
+// !DESCRIPTION:
+//   initialize an attribute, and make a copy of the data if items > 1
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+  int i, len;
+
+  if (!name)
+      attrName[0] = '\0';
+  else {
+      len = strlen(name);
+      if (len >= ESMF_MAXSTR)
+          return; 
+      strncpy(attrName, name, MIN(len, ESMF_MAXSTR-1));
+  }
+
+  dt = datatype;
+  items = numitems;
+  slen = 0;          // only used for string values
+  
+  if (items == 0)
+      voidp = NULL;
+ 
+  else if (items == 1) {
+      if (!datap) 
+          voidp = NULL;
+      else  {
+        switch (dt) {
+          case ESMF_DATA_INTEGER:   
+            vi = *(int *)datap;  
+            break;
+          case ESMF_DATA_REAL:      
+            vr = *(double *)datap;  
+            break;
+          case ESMF_DATA_LOGICAL:   
+            vl = *(ESMC_Logical *)datap;  
+            break;
+          case ESMF_DATA_CHARACTER: 
+            slen = strlen((char *)datap) + 1;
+            vcp = new char[slen];
+            strncpy(vcp, (char *)datap, slen);
+            break;
+    
+          default:
+            voidp = NULL;
+            break;
+        }
+    }
+
+  } else {
+    // items > 1, alloc space for a list and do the copy
+    switch (dt) {
+      case ESMF_DATA_INTEGER:   
+        vip = new int[items];      
+        if (!datap) 
+            break;
+        for (i=0; i<items; i++)
+            vip[i] = ((int *)datap)[i];  
+        break;
+      case ESMF_DATA_REAL:      
+        vrp = new double[items];      
+        if (!datap) 
+            break;
+        for (i=0; i<items; i++)
+            vrp[i] = ((double *)datap)[i];  
+        break;
+      case ESMF_DATA_LOGICAL:   
+        vlp = new ESMC_Logical[items];      
+        if (!datap) 
+            break;
+        for (i=0; i<items; i++)
+            vlp[i] = ((ESMC_Logical *)datap)[i];  
+        break;
+      case ESMF_DATA_CHARACTER: 
+      default:
+        // error - arrays of char strings not allowed
+        voidp = NULL;
+        break;
+    }
+  }
+
+ } // end ESMC_Attribute
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ~ESMC_Attribute - native C++ destructor for ESMC_Attribute class
+//
+// !INTERFACE:
+      ESMC_Attribute::~ESMC_Attribute(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  if (dt == ESMF_DATA_CHARACTER) delete [] vcp;
+
+  if (items > 1) {
+    switch (dt) {
+      case ESMF_DATA_INTEGER:   delete [] vip;  break;
+      case ESMF_DATA_REAL:      delete [] vrp;  break;
+      case ESMF_DATA_LOGICAL:   delete [] vlp;  break;
+    }
+  }
+
+ } // end ~ESMC_Attribute
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1528,20 +2594,21 @@ extern "C" {
 //    none
 //
 // !DESCRIPTION:
-//     increment total number of instances; use for this instance's ID
+//   default initialization 
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  ID = ++globalCount;
+  refCount = 1;
+  strcpy(className, "global");
+  sprintf(baseName, "%s%3d", "unnamed", ID);
+  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
 
   attrCount = 0;
   attrAlloc = 0;
   attrList = ESMC_NULL_POINTER;
 
-  ID = ++globalCount;
-  refCount = 1;
-  strcpy(baseName, "unnamed");
-  ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
-  strcpy(className, "global");
   baseStatus = ESMF_STATE_READY;
 
  } // end ESMC_Base
@@ -1608,11 +2675,18 @@ extern "C" {
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+  int i;
 
   baseStatus = ESMF_STATE_INVALID;
-  if (attrList) delete (attrList);
+
+  // if attribute lists, delete them.
+  for (i=0; i<attrCount; i++) 
+      attrList[i]->~ESMC_Attribute();
+                         
+  if (attrList) delete [] attrList;
 
   // if we have to support reference counts someday,
-  // if (refCount > 0) do something;
+  // test if (refCount > 0) and do something if true;
 
  } // end ~ESMC_Base
+

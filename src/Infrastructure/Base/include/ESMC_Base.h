@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.41 2004/01/29 23:30:15 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.42 2004/02/05 21:48:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,33 +98,42 @@ enum ESMC_DataKind { ESMF_I1=1,
 #define MIN(a,b)  (((a)<(b))?(a):(b))
 #endif
 
-// union to hold a value of any type
-class ESMC_DataValue {
-  public:
-    ESMC_DataType dt;
-    int items;         // number of items (NOT byte count) only for pointers
-    union {            // overload pointers to conserve space 
+// Single Attribute, (name, value) pair which can contain:
+//  int / Integer*4, single value or list
+//  double / Real*8, single value or list
+//  char / Character - single character string (lists not allowed)
+//  ESMC_Logical - single value or arrays (note: not bool or .TRUE.)
+struct ESMC_Attribute {
+ //private:   // TODO: fix the interfaces and then make this private again
+    char attrName[ESMF_MAXSTR]; // inline to reduce memory thrashing
+    ESMC_DataType dt;           // type for selecting the right pointer below
+    int items;                  // number of items (NOT byte count) for lists
+    int slen;                   // for string, length, inc trailing NULL. 
+    union {                     // overload pointers to conserve space 
       int     vi;               // integer, or
       int    *vip;              // pointer to integer list, or
       double  vr;               // double (real), or
       double *vrp;              // pointer to double (real) list, or
       ESMC_Logical    vl;       // boolean (logical), or
       ESMC_Logical   *vlp;      // pointer to boolean (logical) list, or
-      char   *vcp;              // pointer to a character string, or
+      char   *vcp;              // pointer to a NULL term character string, or
       void   *voidp;            // cannot be dereferenced, but generic.
       // ESMC_Array *ap,        // pointer to an ESMC_Array object (someday?)
     };
 
+ public:
     int ESMC_Print(void);
-};
+    ESMC_Attribute& operator=(const ESMC_Attribute &);
+    ESMC_Attribute(void);
+    ESMC_Attribute(char *name, ESMC_DataType datatype, int numitems, 
+                   void *datap);
+    ~ESMC_Attribute(void);
 
 
-// elemental attribute
-struct ESMC_Attribute {
-  //private:
-    char attrName[ESMF_MAXSTR];  // inline to reduce memory thrashing
-    ESMC_DataValue attrValue;
+  friend class ESMC_Base;
+
 };
+
 
 // elemental index for axis decompositions
 struct ESMC_AxisIndex {
@@ -171,7 +180,7 @@ class ESMC_Base
   private:
     int attrCount;              // number of attributes in use in list
     int attrAlloc;              // number of attributes currently allocated
-    ESMC_Attribute *attrList;   // attribute list
+    ESMC_Attribute **attrList;  // attributes - array of pointers
 
 // !PUBLIC MEMBER FUNCTIONS:
   
@@ -216,18 +225,37 @@ class ESMC_Base
     virtual int ESMC_Print(const char *options=0) const;
 
     // attribute methods
+    int ESMC_AttributeSet(char *name, int value);
+    int ESMC_AttributeSet(char *name, int count, int *value);
+    int ESMC_AttributeSet(char *name, double value);
+    int ESMC_AttributeSet(char *name, int count, double *value);
+    int ESMC_AttributeSet(char *name, ESMC_Logical value);
+    int ESMC_AttributeSet(char *name, int count, ESMC_Logical *value);
+    int ESMC_AttributeSet(char *name, char *value);
+    int ESMC_AttributeSet(char *name, ESMC_DataType dt, int count, void *value);
     int ESMC_AttributeSet(ESMC_Attribute *attr);
-    int ESMC_AttributeGet(ESMC_Attribute *attr) const;
+
+    int ESMC_AttributeGet(char *name, int *value) const;
+    int ESMC_AttributeGet(char *name, int *count, int *value) const;
+    int ESMC_AttributeGet(char *name, double *value) const;
+    int ESMC_AttributeGet(char *name, int *count, double *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_Logical *value) const;
+    int ESMC_AttributeGet(char *name, int *count, ESMC_Logical *value) const;
+    int ESMC_AttributeGet(char *name, char *value) const;
+    int ESMC_AttributeGet(char *name, ESMC_DataType *dt, int *count, void *value) const;
+    int ESMC_AttributeGet(int num, char *name, ESMC_DataType *dt, int *count, void *value) const;
+    int ESMC_AttributeGetCount(char *name, int *count) const;
+    ESMC_Attribute *ESMC_AttributeGet(char *name) const;
+    ESMC_Attribute *ESMC_AttributeGet(int num) const;
+
     int ESMC_AttributeAlloc(int adding);
 
     int ESMC_AttributeGetCount(void) const;
-    int ESMC_AttributeGetbyNumber(int number, char *name, ESMC_DataType *type,
-                                  ESMC_DataValue *value) const;
+    int ESMC_AttributeGetbyNumber(int number, ESMC_Attribute *value) const;
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;
 
-    int ESMC_AttributeSetList(char **namelist, ESMC_DataValue *values);
-    int ESMC_AttributeGetList(char **namelist, ESMC_DataType *typelist,
-                              ESMC_DataValue *valuelist) const;
+    int ESMC_AttributeSetList(int count, ESMC_Attribute *valuelist);
+    int ESMC_AttributeGetList(char **namelist, ESMC_Attribute *valuelist) const;
 
     int ESMC_AttributeCopy(char *name, ESMC_Base *destination);
     int ESMC_AttributeCopyAll(ESMC_Base *destination);
@@ -250,24 +278,22 @@ extern "C" {
   void FTN(c_esmc_setf90name)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_getf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
   void FTN(c_esmc_setf90classname)(ESMC_Base **base, char *name, int *rc, int nlen);
-  void FTN(c_esmc_attributesetint)(ESMC_Base **base, char *name, int *value, int *rc, int nlen);
-  void FTN(c_esmc_attributesetreal)(ESMC_Base **base, char *name, double *value, int *rc, int nlen);
-  void FTN(c_esmc_attributesetlogical)(ESMC_Base **base, char *name, ESMC_Logical *value, int *rc, int nlen);
+
+  void FTN(c_esmc_attributesetvalue)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributesetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);
-  void FTN(c_esmc_attributegetint)(ESMC_Base **base, char *name, int *value, int *rc, int nlen);
-  void FTN(c_esmc_attributegetreal)(ESMC_Base **base, char *name, double *value, int *rc, int nlen);
-  void FTN(c_esmc_attributegetlogical)(ESMC_Base **base, char *name, ESMC_Logical *value, int *rc, int nlen);
+
+  void FTN(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, void *value, int *rc, int nlen);
   void FTN(c_esmc_attributegetchar)(ESMC_Base **base, char *name, char *value, int *rc, int nlen, int vlen);
+  void FTN(c_esmc_attributegetattrinfoname)(ESMC_Base **base, char *name, ESMC_DataType *dt, int *count, int *rc, int nlen);
+  void FTN(c_esmc_attributegetattrinfonum)(ESMC_Base **base, int num, char *name, ESMC_DataType *dt, int *count, int *rc, int nlen);
+  void FTN(c_esmc_attributegetcount)(ESMC_Base **base, int *count, int *rc);
 
 }
 
 // class utility functions, not methods, since they operate on
 //  multiple objects
-int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, char *name,
-                                ESMC_DataValue *value);
-int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, char *name,
-                                ESMC_DataType *typelist,
-                                ESMC_DataValue *valuelist);
+int ESMC_AttributeSetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
+int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelist);
 
 int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);

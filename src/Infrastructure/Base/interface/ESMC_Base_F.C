@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.7 2004/02/04 22:19:42 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.8 2004/02/05 21:48:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.7 2004/02/04 22:19:42 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.8 2004/02/05 21:48:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -303,10 +303,10 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSet - set attribute on an ESMF type
+// !IROUTINE:  c_ESMC_AttributeSetValue - Set Attribute on an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributesetint)(
+      void FTN(c_esmc_attributesetvalue)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -314,18 +314,22 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      int *value,               // in - integer value
+      ESMC_DataType *dt,        // in - data type, any but character 
+      int *count,               // in - number of value(s)
+      void *value,              // in - any value or list of values
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any object type in the system.
+//     Any type or list of types can be passed except character strings
+//     since they come with an additional hidden length argument.
 //
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
-  ESMC_Attribute attr;   // encapsulate data values to be set
+  char *cname;
 
   // simple sanity check before doing any more work
   if ((!name) || (name[0] == '\0')) {
@@ -335,125 +339,24 @@ extern "C" {
   }
 
   // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
-      return;
-  }
-
-  attr.attrValue.dt = ESMF_DATA_INTEGER;
-  attr.attrValue.items = 1;
-  attr.attrValue.vi = *value;
-
-  *rc = (*base)->ESMC_AttributeSet(&attr);
-  return;
-
-}  // end c_ESMC_AttributeSetInt
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSet - set attribute on an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetreal)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      double *value,            // in - real/double value
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//
-//EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
-
-  int i, status;
-  ESMC_Attribute attr;   // encapsulate data values to be set
-
-  // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeSet: bad attribute name\n");
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
       *rc = ESMF_FAILURE;
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
-      return;
-  }
+  // Set the attribute on the object.
+  *rc = (*base)->ESMC_AttributeSet(cname, *dt, *count, value);
 
-  attr.attrValue.dt = ESMF_DATA_REAL;
-  attr.attrValue.items = 1;
-  attr.attrValue.vr = *value;
-
-  *rc = (*base)->ESMC_AttributeSet(&attr);
+  delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeSetReal
+}  // end c_ESMC_AttributeSetValue
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeSet - set attribute on an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributesetlogical)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      ESMC_Logical *value,      // in - ESMF_Logical value
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//
-//EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
-
-  int i, status;
-  ESMC_Attribute attr;   // encapsulate data values to be set
-
-  // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeSet: bad attribute name\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
-      return;
-  }
-
-  attr.attrValue.dt = ESMF_DATA_LOGICAL;
-  attr.attrValue.items = 1;
-  attr.attrValue.vl = *value;
-
-  *rc = (*base)->ESMC_AttributeSet(&attr);
-  return;
-
-}  // end c_ESMC_AttributeSetInt
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeSet - set attribute on an ESMF type
+// !IROUTINE:  c_ESMC_AttributeSetChar - Set String Attribute on an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributesetchar)(
@@ -464,58 +367,65 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      char *value,              // in - character value
+      char *value,              // in - char string
       int *rc,                  // in - return code
       int nlen,                 // hidden/in - strlen count for name
       int vlen) {               // hidden/in - strlen count for value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any object type in the system.
+//     Character strings have this special version since they come in
+//     with an additional hidden length argument.
 //
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
-  char *vstring;
-  ESMC_Attribute attr;   // encapsulate data values to be set
+  char *cname, *cvalue;
 
-  // simple sanity check before doing any more work
+  // simple sanity checks before doing any more work
   if ((!name) || (name[0] == '\0')) {
       printf("ESMF_AttributeSet: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
-  // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
-      return;
-  }
-
-  // allocate space, and copy and convert F90 string to null terminated one
-  vstring = ESMC_F90toCstring(value, vlen);
-  if (!vstring) {
+  if ((!value) || (value[0] == '\0')) {
+      printf("ESMF_AttributeSet: bad attribute value\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
-  attr.attrValue.dt = ESMF_DATA_CHARACTER;
-  attr.attrValue.items = 1;
-  attr.attrValue.vcp = vstring;
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
 
-  *rc = (*base)->ESMC_AttributeSet(&attr);
+  // copy and convert F90 string to null terminated one
+  cvalue = ESMC_F90toCstring(value, vlen);
+  if (!cvalue) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // Set the attribute on the object.
+  *rc = (*base)->ESMC_AttributeSet(cname, ESMF_DATA_CHARACTER, 1, cvalue);
+
+  delete [] cname;
+  delete [] cvalue;
   return;
 
-}  // end c_ESMC_AttributeSetInt
-
+}  // end c_ESMC_AttributeSetChar
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGet - get attribute from an ESMF type
+// !IROUTINE:  c_ESMC_AttributeGetValue - get attribute from an ESMF type
 //
 // !INTERFACE:
-      void FTN(c_esmc_attributegetint)(
+      void FTN(c_esmc_attributegetvalue)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -523,164 +433,69 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      int *value,               // out - integer value
+      ESMC_DataType *dt,        // in - data type  
+      int *count,               // in - must match actual length
+      void *value,              // out - value
       int *rc,                  // in - return code
       int nlen) {               // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
+//     Return the (name,value) pair from any object type in the system.
 //
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
-  int i, status;
-  ESMC_Attribute attr;   // encapsulate data values to get
+  int i, status, attrCount;
+  ESMC_DataType attrDt;
+  char *cname;
 
   // simple sanity check before doing any more work
   if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: bad attribute name\n");
+      printf("ESMF_AttributeGetValue: bad attribute name\n");
       *rc = ESMF_FAILURE;
       return;
   }
 
   // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(&attr);
-  if (*rc != ESMF_SUCCESS) return;
+  *rc = (*base)->ESMC_AttributeGet(cname, &attrDt, &attrCount, NULL);
+  if (*rc != ESMF_SUCCESS) {
+    printf("ESMF_AttributeGetValue: failed getting attribute info\n");
+    delete [] cname;
+    return;
+  }
 
-  if (attr.attrValue.dt != ESMF_DATA_INTEGER) {
-      printf("ESMF_AttributeGet: attribute %s not type integer\n", name);
+  if (attrDt != *dt) {
+      printf("ESMF_AttributeGet: attribute %s not expected type %s, actually type %d\n", 
+                  name, ESMC_DataTypeString(*dt), ESMC_DataTypeString(attrDt));
+      delete [] cname;
       *rc = ESMF_FAILURE;
       return; 
   }
+  if (attrCount != *count) {
+      printf("ESMF_AttributeGetValue: expected count %d does not match actual count %d\n", 
+               *count, attrCount);
+      delete [] cname;
+      *rc = ESMF_FAILURE;
+      return;
+  }
 
-  *value = attr.attrValue.vi;
-  *rc = ESMF_SUCCESS;
+  *rc = (*base)->ESMC_AttributeGet(cname, NULL, NULL, value);
+
+  delete [] cname;
   return;
 
-}  // end c_ESMC_AttributeGetInt
+}  // end c_ESMC_AttributeGetValue
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_ESMC_AttributeGet - get attribute from an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetreal)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      double *value,            // out - real value
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//
-//EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
-
-  int i, status;
-  ESMC_Attribute attr;   // encapsulate data values to get
-
-  // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: bad attribute name\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
-      return;
-  }
-
-  *rc = (*base)->ESMC_AttributeGet(&attr);
-  if (*rc != ESMF_SUCCESS) return;
-
-  if (attr.attrValue.dt != ESMF_DATA_REAL) {
-      printf("ESMF_AttributeGet: attribute %s not type real\n", name);
-      *rc = ESMF_FAILURE;
-      return; 
-  }
-
-  *value = attr.attrValue.vr;
-  *rc = ESMF_SUCCESS;
-  return;
-
-}  // end c_ESMC_AttributeGetReal
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGet - get attribute from an ESMF type
-//
-// !INTERFACE:
-      void FTN(c_esmc_attributegetlogical)(
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
-      ESMC_Logical *value,      // out - logical value
-      int *rc,                  // in - return code
-      int nlen) {               // hidden/in - strlen count for name
-// 
-// !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
-//
-//EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
-
-  int i, status;
-  ESMC_Attribute attr;   // encapsulate data values to get
-
-  // simple sanity check before doing any more work
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeGet: bad attribute name\n");
-      *rc = ESMF_FAILURE;
-      return;
-  }
-
-  // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
-      return;
-  }
-
-  *rc = (*base)->ESMC_AttributeGet(&attr);
-  if (*rc != ESMF_SUCCESS) return;
-
-  if (attr.attrValue.dt != ESMF_DATA_LOGICAL) {
-      printf("ESMF_AttributeGet: attribute %s not type logical\n", name);
-      *rc = ESMF_FAILURE;
-      return; 
-  }
-
-  *value = attr.attrValue.vl;
-  *rc = ESMF_SUCCESS;
-  return;
-
-}  // end c_ESMC_AttributeGetLogical
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_ESMC_AttributeGet - get attribute from an ESMF type
+// !IROUTINE:  c_ESMC_AttributeGetChar - get attribute from an ESMF type
 //
 // !INTERFACE:
       void FTN(c_esmc_attributegetchar)(
@@ -697,14 +512,15 @@ extern "C" {
       int vlen) {               // hidden/in - strlen count for value
 // 
 // !DESCRIPTION:
-//     Associate a (name,value) pair with any object type in the system.
+//     Retrieve a (name,value) pair from any object type in the system.
 //
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, status;
+  ESMC_DataType attrDt;
+  char *cname, *cvalue;
   int slen;              // actual attribute string length
-  ESMC_Attribute attr;   // encapsulate data values to get
 
   // simple sanity check before doing any more work
   if ((!name) || (name[0] == '\0')) {
@@ -714,34 +530,210 @@ extern "C" {
   }
 
   // copy and convert F90 string to null terminated one
-  status = ESMC_F90toCstring(name, nlen, attr.attrName, ESMF_MAXSTR);
-  if (status != ESMF_SUCCESS) {
-      *rc = status;
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
       return;
   }
 
-  *rc = (*base)->ESMC_AttributeGet(&attr);
-  if (*rc != ESMF_SUCCESS) return;
+  *rc = (*base)->ESMC_AttributeGet(cname, &attrDt, &slen, NULL);
+  if (*rc != ESMF_SUCCESS) {
+    delete [] cname;
+    return;
+  }
 
-  if (attr.attrValue.dt != ESMF_DATA_CHARACTER) {
+  if (attrDt != ESMF_DATA_CHARACTER) {
       printf("ESMF_AttributeGet: attribute %s not type character\n", name);
+      delete [] cname;
       *rc = ESMF_FAILURE;
       return; 
   }
 
-  // make sure destination will be long enough to make a copy
-  slen = strlen(attr.attrValue.vcp);
-  if (slen >= vlen) {
+  // make sure destination will be long enough
+  if (slen > vlen) {
       printf("ESMF_AttributeGet: attribute %s is %d bytes long, buffer length %s is too short", 
                                   name, slen, vlen);
+      delete [] cname;
       *rc = ESMF_FAILURE;
       return; 
   }
 
-  *rc = ESMC_CtoF90string(attr.attrValue.vcp, value, vlen);
+  cvalue = new char[slen+1];
+
+  *rc = (*base)->ESMC_AttributeGet(cname, cvalue);
+  if (*rc != ESMF_SUCCESS) {
+    delete [] cname;
+    delete [] cvalue;
+    return;
+  }
+
+  *rc = ESMC_CtoF90string(cvalue, value, vlen);
+
+  delete [] cname;
+  delete [] cvalue;
   return;
 
 }  // end c_ESMC_AttributeGetChar
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetAttrInfoName - get type and number of items in an attr
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetattrinfoname)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      char *name,               // in - F90, non-null terminated string
+      ESMC_DataType *dt,        // out - data type
+      int *count,               // out - item count
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//   Return the type, count of items in the (name,value) pair from any 
+//   object type in the system.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status, attrCount;
+  char *cname;
+
+  // simple sanity check before doing any more work
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeGetValue: bad attribute name\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+  if (!dt) {
+      printf("ESMF_AttributeGetValue: bad attribute datatype argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  // copy and convert F90 string to null terminated one
+  cname = ESMC_F90toCstring(name, nlen);
+  if (!cname) {
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *rc = (*base)->ESMC_AttributeGet(cname, dt, count, NULL);
+
+  delete [] cname;
+  return;
+
+}  // end c_ESMC_AttributeGetAttrInfoName
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetAttrInfoNum - get type and number of items in an attr
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetattrinfonum)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int num,                  // in - attr number
+      char *name,               // out - F90, non-null terminated string
+      ESMC_DataType *dt,        // out - data type
+      int *count,               // out - item count
+      int *rc,                  // in - return code
+      int nlen) {               // hidden/in - strlen count for name
+// 
+// !DESCRIPTION:
+//   Return the name, type, count of items in the (name,value) pair from any 
+//   object type in the system.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+  char *cname;
+
+  if (!name) {
+      printf("ESMF_AttributeGetValue: bad attribute name argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!dt) {
+      printf("ESMF_AttributeGetValue: bad attribute datatype argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  cname = new char[ESMF_MAXSTR];
+
+  *rc = (*base)->ESMC_AttributeGet(num, cname, dt, count, NULL);
+  if (*rc != ESMF_SUCCESS) {
+      delete [] cname;
+      return;
+  }
+
+  *rc = ESMC_CtoF90string(cname, name, nlen);
+  
+  delete [] cname;
+  return;
+
+}  // end c_ESMC_AttributeGetAttrInfoNum
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_AttributeGetCount - get number of attrs
+//
+// !INTERFACE:
+      void FTN(c_esmc_attributegetcount)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      int *count,               // out - attribute count
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//   Return the count of attributes for any object type in the system.
+//
+//EOP
+// !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+  int i, status;
+
+  if (!count) {
+      printf("ESMF_AttributeGetValue: bad attribute count argument\n");
+      *rc = ESMF_FAILURE;
+      return;
+  }
+
+  *count = (*base)->ESMC_AttributeGetCount();
+
+  *rc = (count == 0) ? ESMF_FAILURE : ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_AttributeGetCount
 
 
 #if 0
@@ -750,30 +742,6 @@ extern "C" {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AttributeGetCount - get an ESMF object's number of attributes
-// 
-// !INTERFACE:
-      int ESMC_Base::ESMC_AttributeGetCount(
-// 
-// !RETURN VALUE:
-//    int attribute count
-// 
-// !ARGUMENTS:
-      void) const {  
-// 
-// !DESCRIPTION:
-//      Returns number of attributes present
-//
-//EOP
-// !REQUIREMENTS:   FLD1.7.5
-
-  
-  return attrCount;
-
-} // end ESMC_AttributeGetCount
-
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_AttributeGetbyNumber - get an ESMF object's attribute by number
@@ -810,8 +778,8 @@ extern "C" {
   }
 
   if (name) strcpy(name, attr[number].attrName);
-  if (type) *type = attr[number].attrValue.dt;
-  if (value) *value = attr[number].attrValue;      // struct contents copy
+  if (type) *type = attr[number].dt;
+  if (value) *value = attr[number];      // struct contents copy
 
   return ESMF_SUCCESS;
 
@@ -1002,60 +970,11 @@ extern "C" {
 }  // end ESMC_AttributeGetObjectList
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
-//
-// !INTERFACE:
-      ESMC_Base::ESMC_Base(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//     increment total number of instances; use for this instance's ID
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  attrCount = 0;
-  attrAlloc = 0;
-  attr = ESMC_NULL_POINTER;
-
-  ID = ++globalCount;
-  refCount = 1;
-  strcpy(baseName, "unnamed");
-  baseStatus = ESMF_STATE_READY;
-
- } // end ESMC_Base
-
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ~ESMC_Base - native C++ destructor for ESMC_Base class
-//
-// !INTERFACE:
-      ESMC_Base::~ESMC_Base(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  baseStatus = ESMF_STATE_INVALID;
-  if (attr) delete (attr);
-
-  // if we have to support reference counts someday,
-  // if (refCount > 0) do something;
-
- } // end ~ESMC_Base
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 #endif
 
