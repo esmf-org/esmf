@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.97 2004/09/21 17:03:10 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.98 2004/10/05 22:48:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.97 2004/09/21 17:03:10 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.98 2004/10/05 22:48:57 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2085,6 +2085,7 @@
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
       integer :: distGridId, physGridId, nDEs(0:2)
+      integer :: localDE, myCount, myDEDecomp(0:2), myDE(3)
       integer :: i, dimCount, dimCountGrid, aSize, ndim
       integer, dimension(:), allocatable :: decompIdsUse, counts
       integer, dimension(:), allocatable :: countsPerDEDecomp1Use, &
@@ -2291,6 +2292,20 @@
           countsPerDE3(:) = countsPerDEDecomp2Use(:)
         endif
       endif
+
+      ! Check to see if this DE has any data associated with it
+      call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
+      call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
+                                       coord=myDEDecomp(1:2), rc=localrc)
+      myDEDecomp(0) = 1
+      ! modify myDE array by decompIds
+      do i = 1,dimCount
+        myDE(i) = myDEDecomp(decompIdsUse(i))
+      enddo
+      myCount = countsPerDE1(myDE(1))*countsPerDE2(myDE(2))
+      if (dimCount.eq.3) myCount = myCount*countsPerDE3(myDE(3))
+      grid%hasLocalData = .true.
+      if (myCount.le.0) grid%hasLocalData = .false.
 
       ! Create DistGrid and PhysGrid at cell center
       dimCountGrid = dimCount
@@ -3734,7 +3749,7 @@
       call ESMF_LRGridGet(gridp, delayout=delayout)
       call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
       call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
-        coord=myDEDecomp(1:2), rc=localrc)
+                                       coord=myDEDecomp(1:2), rc=localrc)
       myDEDecomp(0) = 1
 
       ! modify myDE array by decompIds
@@ -3746,73 +3761,75 @@
       localMin(2) = 0.0
       localStart(1) = 0
       localStart(2) = 0
-      if (myDE(1).ge.2) then
-        do j = 1,myDE(1)-1
-          localStart(1) = localStart(1) + countsPerDEDim1(j)
+      if (grid%hasLocalData) then
+        if (myDE(1).ge.2) then
+          do j = 1,myDE(1)-1
+            localStart(1) = localStart(1) + countsPerDEDim1(j)
+          enddo
+        endif
+        j1 = localStart(1) + 1
+        j2 = localStart(1) + countsPerDEDim1(myDE(1))
+        localMin(1) = minval(coord1(j1:j2))
+        localMax(1) = maxval(coord1(j1:j2))
+
+        if (myDE(2).ge.2) then
+          do j = 1,myDE(2)-1
+            localStart(2) = localStart(2) + countsPerDEDim2(j)
+          enddo
+        endif
+        j1 = localStart(2) + 1
+        j2 = localStart(2) + countsPerDEDim2(myDE(2))
+        localMin(2) = minval(coord2(j1:j2))
+        localMax(2) = maxval(coord2(j1:j2))
+  
+        ! modify global counts to include ghost region
+        compCount(1) = size(coord1)
+        compCount(2) = size(coord2)
+        counts(1) = compCount(1) + 2*gridBoundWidth
+        counts(2) = compCount(2) + 2*gridBoundWidth
+
+        ! allocate and load coords
+        allocate(coordUse1(counts(1)), &
+                 coordUse2(counts(2)), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "coordUse arrays", &
+                                       ESMF_CONTEXT, rc)) return
+
+        do i = 1,compCount(1)
+          coordUse1(i+gridBoundWidth) = coord1(i)
+        enddo
+        do i = gridBoundWidth,1,-1
+          coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
+        enddo
+        do i = compCount(1)+gridBoundWidth,compCount(1)+2*gridBoundWidth-1
+          coordUse1(i+1) = coordUse1(i) &
+                         + (coord1(compCount(1))-coord1(compCount(1)-1))
+        enddo
+        do i = 1,compCount(2)
+          coordUse2(i+gridBoundWidth) = coord2(i)
+        enddo
+        do i = gridBoundWidth,1,-1
+          coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
+        enddo
+        do i = compCount(2)+gridBoundWidth,compCount(2)+2*gridBoundWidth-1
+          coordUse2(i+1) = coordUse2(i) &
+                         + (coord2(compCount(2))-coord2(compCount(2)-1))
+        enddo
+
+        ! allocate and load cell type masks -- these are by cell and not vertex,
+        ! so the counts are all one less
+        allocate(cellType1(counts(1)-1), &
+                 cellType2(counts(2)-1), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "cellType arrays", &
+                                       ESMF_CONTEXT, rc)) return
+        cellType1 = 0
+        cellType2 = 0
+        do i = 1,gridBoundWidth
+          cellType1(i) = 1
+          cellType2(i) = 1
+          cellType1(compCount(1)-1+gridBoundWidth+i) = 1
+          cellType2(compCount(2)-1+gridBoundWidth+i) = 1
         enddo
       endif
-      j1 = localStart(1) + 1
-      j2 = localStart(1) + countsPerDEDim1(myDE(1))
-      localMin(1) = minval(coord1(j1:j2))
-      localMax(1) = maxval(coord1(j1:j2))
-
-      if (myDE(2).ge.2) then
-        do j = 1,myDE(2)-1
-          localStart(2) = localStart(2) + countsPerDEDim2(j)
-        enddo
-      endif
-      j1 = localStart(2) + 1
-      j2 = localStart(2) + countsPerDEDim2(myDE(2))
-      localMin(2) = minval(coord2(j1:j2))
-      localMax(2) = maxval(coord2(j1:j2))
-
-      ! modify global counts to include ghost region
-      compCount(1) = size(coord1)
-      compCount(2) = size(coord2)
-      counts(1) = compCount(1) + 2*gridBoundWidth
-      counts(2) = compCount(2) + 2*gridBoundWidth
-
-      ! allocate and load coords
-      allocate(coordUse1(counts(1)), &
-               coordUse2(counts(2)), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "coordUse arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      do i = 1,compCount(1)
-        coordUse1(i+gridBoundWidth) = coord1(i)
-      enddo
-      do i = gridBoundWidth,1,-1
-        coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
-      enddo
-      do i = compCount(1)+gridBoundWidth,compCount(1)+2*gridBoundWidth-1
-        coordUse1(i+1) = coordUse1(i) &
-                       + (coord1(compCount(1))-coord1(compCount(1)-1))
-      enddo
-      do i = 1,compCount(2)
-        coordUse2(i+gridBoundWidth) = coord2(i)
-      enddo
-      do i = gridBoundWidth,1,-1
-        coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
-      enddo
-      do i = compCount(2)+gridBoundWidth,compCount(2)+2*gridBoundWidth-1
-        coordUse2(i+1) = coordUse2(i) &
-                       + (coord2(compCount(2))-coord2(compCount(2)-1))
-      enddo
-
-      ! allocate and load cell type masks -- these are by cell and not vertex,
-      ! so the counts are all one less
-      allocate(cellType1(counts(1)-1), &
-               cellType2(counts(2)-1), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "cellType arrays", &
-                                     ESMF_CONTEXT, rc)) return
-      cellType1 = 0
-      cellType2 = 0
-      do i = 1,gridBoundWidth
-        cellType1(i) = 1
-        cellType2(i) = 1
-        cellType1(compCount(1)-1+gridBoundWidth+i) = 1
-        cellType2(compCount(2)-1+gridBoundWidth+i) = 1
-      enddo
 
       ! set parameters based on grid type
       select case (grid%horzGridType%gridType)
@@ -3882,21 +3899,23 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      do i = 1,dimCount
-        tempCoord = ESMF_PhysCoordCreate(coordType(i), coordNames(i), &
-                                         coordUnits(i), &
-                                         coordAligned(i), coordEqualSpaced(i), &
-                                         coordCyclic(i), localMin(i), &
-                                         localMax(i), rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+      if (grid%hasLocalData) then
+        do i = 1,dimCount
+          tempCoord = ESMF_PhysCoordCreate(coordType(i), coordNames(i), &
+                                           coordUnits(i), &
+                                           coordAligned(i), coordEqualSpaced(i), &
+                                           coordCyclic(i), localMin(i), &
+                                           localMax(i), rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
-        call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=i, rc=localrc) 
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      enddo
+          call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=i, rc=localrc) 
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        enddo
+      endif
 
       ! now that it's created, add the physgrid to the grid
       call ESMF_GridAddPhysGrid(grid, physGrid, localrc)
@@ -3905,55 +3924,57 @@
                                 ESMF_CONTEXT, rc)) return
       physGridId = grid%numPhysGrids
 
-      ! set coordinates using total cell count
-      counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
-      counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
-      i1 = localStart(1) + 1
-      i2 = localStart(1) + counts(1) + 1
-      j1 = localStart(2) + 1
-      j2 = localStart(2) + counts(2) + 1
-      call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
-                               gridBoundWidth, relloc, coordUse1(i1:i2), &
-                               coordUse2(j1:j2), total=.true., rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      if (grid%hasLocalData) then
+        ! set coordinates using total cell count
+        counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+        counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+        i1 = localStart(1) + 1
+        i2 = localStart(1) + counts(1) + 1
+        j1 = localStart(2) + 1
+        j2 = localStart(2) + counts(2) + 1
+        call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
+                                 gridBoundWidth, relloc, coordUse1(i1:i2), &
+                                 coordUse2(j1:j2), total=.true., rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      ! set coordinates using computational cell count
-      counts(1) = countsPerDEDim1(myDE(1))
-      counts(2) = countsPerDEDim2(myDE(2))
-      i1 = localStart(1) + 1
-      i2 = i1 + countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
-      j1 = localStart(2) + 1
-      j2 = j1 + countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
-      call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
-                               gridBoundWidth, relloc, &
-                               coordUse1(i1:i2), coordUse2(j1:j2), &
-                               total=.false., rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        ! set coordinates using computational cell count
+        counts(1) = countsPerDEDim1(myDE(1))
+        counts(2) = countsPerDEDim2(myDE(2))
+        i1 = localStart(1) + 1
+        i2 = i1 + countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+        j1 = localStart(2) + 1
+        j2 = j1 + countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+        call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
+                                 gridBoundWidth, relloc, &
+                                 coordUse1(i1:i2), coordUse2(j1:j2), &
+                                 total=.false., rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      ! set mask using total cell count
-      counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
-      counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
-      i1 = localStart(1) + 1
-      i2 = localStart(1) + counts(1)
-      j1 = localStart(2) + 1
-      j2 = localStart(2) + counts(2)
-      call ESMF_LRGridSetCellMask(grid, physGridId, dimCount, counts, &
-                                  gridBoundWidth, relloc, cellType1(i1:i2), &
-                                  cellType2(j1:j2), localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        ! set mask using total cell count
+        counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+        counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+        i1 = localStart(1) + 1
+        i2 = localStart(1) + counts(1)
+        j1 = localStart(2) + 1
+        j2 = localStart(2) + counts(2)
+        call ESMF_LRGridSetCellMask(grid, physGridId, dimCount, counts, &
+                                    gridBoundWidth, relloc, cellType1(i1:i2), &
+                                    cellType2(j1:j2), localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      deallocate(coordUse1, &
-                 coordUse2, &
-                 cellType1, &
-                 cellType2, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
-                                     ESMF_CONTEXT, rc)) return
+        deallocate(coordUse1, &
+                   coordUse2, &
+                   cellType1, &
+                   cellType2, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -7964,12 +7985,13 @@
       integer :: localrc                          ! Error status
       integer :: DE, numDE1, numDE2, numDEs, npts
       integer :: i, i1, j
-      real(ESMF_KIND_R8) :: start, stop
+      real(ESMF_KIND_R8) :: start, stop, huge
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      huge   = 999999.     !TODO: could be an ESMF constant -- OK for now
       numDE1 = size(countsPerDEDim1)
       numDE2 = size(countsPerDEDim2)
       numDEs = numDE1*numDE2
@@ -8001,6 +8023,10 @@
       do j = 1,numDE1
         start = minval(coord1(i1+1:i1+countsPerDEDim1(j)))
         stop  = maxval(coord1(i1+1:i1+countsPerDEDim1(j)))
+        if (countsPerDEDim1(j).eq.0) then
+          start = -huge
+          stop  = -huge
+        endif
         do i = 1,numDE2
           DE = (i-1)*numDE1 + j
           boxes(DE,1,1) = start
@@ -8019,6 +8045,10 @@
       do j = 1,numDE2
         start = minval(coord2(i1+1:i1+countsPerDEDim2(j)))
         stop  = maxval(coord2(i1+1:i1+countsPerDEDim2(j)))
+        if (countsPerDEDim2(j).eq.0) then
+          start = -huge
+          stop  = -huge
+        endif
         do i = 1,numDE1
           DE = (j-1)*numDE1 + i
           boxes(DE,1,2) = start
