@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 15:57:07 cdeluca Exp $
+# $Id: makefile,v 1.2 2003/09/25 21:01:38 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -25,6 +25,12 @@ LOCDIR	  = src/Infrastructure/LocalArray/interface
 
 
 include $(ESMF_DIR)/makefile
+
+# on the absoft compiler on the mac, files in this dir have to have
+# > 16 bit internal jump tables.  see the absoft faq's for more info.
+ifeq ($(ESMF_COMP),absoft)
+FFLAGS += -N11
+endif
 
 # leave the following line blank.
 DIRS	  = 
