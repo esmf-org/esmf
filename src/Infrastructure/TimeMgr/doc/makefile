@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003/05/29 20:59:11 flanigan Exp $
+# $Id: makefile,v 1.17 2003/10/21 23:47:28 cdeluca Exp $
 ALL: alldoc
 
 CFLAGS    =
@@ -12,7 +12,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/doc
 
-DVIFILES  = 	TimeMgr_reqdoc.dvi \
+DVIFILES  =	TimeMgr_reqdoc.dvi \
 		TimeMgr_desdoc.dvi \
 		TimeMgr_refdoc.dvi
 
@@ -23,9 +23,8 @@ PDFFILES  =     ${ESMC_DOCDIR}/TimeMgr_reqdoc.pdf \
 HTMLFILES = 	${ESMC_DOCDIR}/TimeMgr_reqdoc \
 		${ESMC_DOCDIR}/TimeMgr_desdoc \
 		${ESMC_DOCDIR}/TimeMgr_refdoc
-
-#
-# Tex Files to make
+# 
+# Tex files to make
 #
 TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../src/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../include/*.h))))
@@ -34,17 +33,16 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
 
-TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F))))
-TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
-TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f))))
-TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f90))))
-
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f90))))
 
 #
 # Files that a doc depends on.  Do not list the the ctex file !  
@@ -53,9 +51,8 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # all of the dependent files, but even a partial listing  will be helpful.
 #
 REQDOC_DEP_FILES = 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) TimeMgr_syn.tex
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
-
+DESDOC_DEP_FILES = TimeMgr_syn.tex
+REFDOC_DEP_FILES = 
 
 include $(ESMF_DIR)/makefile
 

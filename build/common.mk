@@ -1,14 +1,17 @@
-#  $Id: common.mk,v 1.21 2003/10/20 22:39:15 nscollins Exp $
-#
+#  $Id: common.mk,v 1.22 2003/10/21 23:47:27 cdeluca Exp $
+#===============================================================================
 #  common.mk
 #
+#  This file contains variables and rules that are common across all
+#  platforms.
+#===============================================================================
 
-#
+#-------------------------------------------------------------------------------
 #  If environment variables are not set give them default values.
 #  For some variables having the literal string 'default' is ok; 
 #  for others, look for this string and override it the same as 
 #  if it was unset originally.
-#
+#-------------------------------------------------------------------------------
 
 ifndef ESMF_ARCH
 export ESMF_ARCH := $(shell uname -s)
@@ -17,7 +20,8 @@ ifeq ($(ESMF_ARCH),default)
 export ESMF_ARCH := $(shell uname -s)
 endif
 
-
+#-------------------------------------------------------------------------------
+# Set defaults.
 #
 # Default value for ESMF_COMPILER is default 
 # in most cases.  Except ...
@@ -29,7 +33,7 @@ endif
 #
 # When ESMF_ARCH is Linux, then default value 
 # for ESMF_COMPILER is lahey.
-# 
+# -------------------------------------------------------------------------------
 
 ifndef ESMF_COMPILER
 export ESMF_COMPILER := default
@@ -54,7 +58,7 @@ ifeq ($(ESMF_PREC),default)
 export ESMF_PREC := 64
 endif
 
-# this is ok to remain as default
+# This is ok to remain as default
 ifndef ESMF_SITE
 export ESMF_SITE := default
 endif
@@ -72,28 +76,24 @@ endif
 
 
 
-############################################################
+#-------------------------------------------------------------------------------
+#  Common variables
 #
-#  File common_variables
-#
-
-
-#
-# LIBNAME       - library name
-# SOURCE        - source files
-# SSOURCE       - single precision versions of some source code
-# OBJS          - object files
-# SOBJS         - single precision versions of some object files
-# ESMC_INCLUDE    - locations of include files
-# CPPFLAGS      - preprocessor flags for *.c, *.F preprocessing
-# DOCS          - files that contain documentation, readmes etc.
-# ESMC_PARCH      - corresponds to the PARCH_arch in the source files, set in 
-#                 the file build/${ESMF_ARCH}/base
-# ESMF_BUILD    - Root directory to build in.  Set this variable on the make
-#                 line to build somewhere other than ESMF_DIR.
+# LIBNAME          - library name
+# SOURCE           - source files
+# SSOURCE          - single precision versions of some source code
+# OBJS             - object files
+# SOBJS            - single precision versions of some object files
+# ESMC_INCLUDE     - locations of include files
+# CPPFLAGS         - preprocessor flags for *.c, *.F preprocessing
+# DOCS             - files that contain documentation, readmes etc.
+# ESMC_PARCH       - corresponds to the PARCH_arch in the source files, set in 
+#                    the file build/${ESMF_ARCH}/base
+# ESMF_BUILD       - Root directory to build in.  Set this variable on the make
+#                    line to build somewhere other than ESMF_DIR.
 # ESMF_LIB_INSTALL - Directory for install target to place libs.
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
-#
+#-------------------------------------------------------------------------------
 
 ESMF_BUILD	= $(ESMF_TOP_DIR)
 
@@ -139,52 +139,37 @@ FCPPFLAGS	= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${FPPFLAGS} \
                    $(FCPP_EXHAUSTIVE)
 C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
 F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
-#
+
+ESMC_TIME_LIB	 = -L${LDIR}
+
+#-------------------------------------------------------------------------------
 # Defines all libraries needed for using linear and nonlinear solvers.
 # The order of listing these libraries is important!
 #
-ESMC_TIME_LIB	 = -L${LDIR}
-#
-# ---------------------------------------------------------------------------------------
-#
 # PCONF - indicates which OPTIONAL external packages are available at your site
-#
-#
-PCONF		= ${ESMC_HAVE_MPE}  ${ESMC_HAVE_BLOCKSOLVE} ${ESMC_HAVE_PVODE} ${ESMC_HAVE_PARMETIS} \
-                  ${ESMC_HAVE_AMS}  ${ESMC_HAVE_SPAI}       ${ESMC_HAVE_X11}   ${ESMC_HAVE_MATLAB} \
+#-------------------------------------------------------------------------------
+
+PCONF		= ${ESMC_HAVE_MPE}  ${ESMC_HAVE_PARMETIS} \
+                  ${ESMC_HAVE_AMS}  ${ESMC_HAVE_X11}   ${ESMC_HAVE_MATLAB} \
                   ${ESMC_HAVE_ADIC} ${ESMC_HAVE_JAVA}
-EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${PARMETIS_LIB} \
-                  ${AMS_LIB}        ${SPAI_LIB}                                                  \
+EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}  ${PARMETIS_LIB} \
+                  ${AMS_LIB}        ${SPAI_LIB} \
                   ${ADIC_LIB} 
 
 
-#
-# ESMF_EXHAUSTIVE is passed (by CPP) into test
-# programs to control the number of tests that 
-# a test program will do.
-#
+#-------------------------------------------------------------------------------
+# ESMF_EXHAUSTIVE is passed (by CPP) into test programs to control the number 
+# of tests that a test program will do.
+#-------------------------------------------------------------------------------
+
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
-#FCPPFLAGS       += $(FPP_PREFIX)-DESMF_EXHAUSTIVE 
 FCPP_EXHAUSTIVE  = $(FPP_PREFIX)-DESMF_EXHAUSTIVE 
 CCPPFLAGS       += -DESMF_EXHAUSTIVE 
 endif
 
-
-#
-# ----------------------------------------------------------------------------------------
-#
-# The following include files set customized site, optimization, and version
-# options.  Do NOT remove any of these include files.  You should generally
-# need to edit only ${ESMF_DIR}/build/${ESMF_ARCH}/base.site to specify your
-# particular machine configuration.  See the users manual for details.
-#
-
-
-############################################################
-#
-#  File common_g
-#
-ifeq ($(ESMF_BOPT),g)
+#-------------------------------------------------------------------------------
+#  Common variable definitions.
+#-------------------------------------------------------------------------------
 
 CC	       = ${C_CC}
 CXX	       = ${CXX_CC}
@@ -192,73 +177,44 @@ FC	       = ${C_FC}
 CLINKER_SLFLAG = ${C_CLINKER_SLFLAG}
 FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
 CLINKER	       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
-FLINKER	       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
-SYS_LIB	       = ${C_SYS_LIB}
 
 # C++ <=> F90 
-#F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
-F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
 F90CXXLIBS     = ${C_F90CXXLIBS}
-
-CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
 CXXF90LIBS     = ${C_CXXF90LIBS}
 CXXSO          = ${C_CXXSO}
 CXXSOLIBS      = ${C_CXXSOLIBS}
-
-COPTFLAGS      = ${G_COPTFLAGS}
-FOPTFLAGS      = ${G_FOPTFLAGS}
-
-BBOPT	       = ${G_BBOPT}
-
 ESMC_LANGUAGE = CONLY
 ESMC_SCALAR   = real
+SYS_LIB	       = ${C_SYS_LIB}
 
+#-------------------------------------------------------------------------------
+# Variable definitions for debug option.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_BOPT),g)
+
+CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
+F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
+FLINKER	       = ${C_FLINKER} ${FOPTFLAGS} ${F_SH_LIB_PATH}
+COPTFLAGS      = ${G_COPTFLAGS}
+FOPTFLAGS      = ${G_FOPTFLAGS}
+BBOPT	       = ${G_BBOPT}
 
 endif
 
-
-############################################################
-#
-#  File common_O
-#
+#-------------------------------------------------------------------------------
+# Variable definitions for optimize option.
+#-------------------------------------------------------------------------------
 ifeq ($(ESMF_BOPT),O)
 
-CC	       = ${C_CC}
-CXX            = ${CXX_CC}
-FC	       = ${C_FC}
-CLINKER_SLFLAG = ${C_CLINKER_SLFLAG}
-FLINKER_SLFLAG = ${C_FLINKER_SLFLAG}
-CLINKER	       = ${C_CLINKER} ${COPTFLAGS} ${C_SH_LIB_PATH}
+
 CXXF90LD       = ${C_CXXF90LINKER}
 F90CXXLD       = ${C_F90CXXLD}
 FLINKER	       = ${C_FLINKER} 
-
-# C++ <=> F90 
-F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
-F90CXXLIBS     = ${C_F90CXXLIBS}
-
-CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
-CXXF90LIBS     = ${C_CXXF90LIBS}
-CXXSO          = ${C_CXXSO}
-CXXSOLIBS      = ${C_CXXSOLIBS}
-
-SYS_LIB	       = ${C_SYS_LIB}
-
 COPTFLAGS      = ${O_COPTFLAGS}
 FOPTFLAGS      = ${O_FOPTFLAGS}
-
 BBOPT	       = ${O_BBOPT}
 
-ESMC_LANGUAGE = CONLY
-ESMC_SCALAR   = real
-
 endif
-
-############################################################
-#
-#  File common
-#
-
 
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -317,7 +273,9 @@ storeh: chkdir_include
 	done
 
 
-# Builds library.
+#-------------------------------------------------------------------------------
+# Builds ESMF recursively.
+#-------------------------------------------------------------------------------
 build_libs: chk_dir
 	cd $(ESMF_TOP_DIR) ;\
 	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree 
@@ -353,7 +311,7 @@ libfast: chk_dir ${SOURCEC} ${SOURCEF}
 	  ${RM} -f ${OBJSC} ${SOBJS}; \
 	fi
 
-
+#-------------------------------------------------------------------------------
 # Clean and clobber targets.
 #  
 # The clean and clobber targets are controlled by the settings of the
@@ -372,9 +330,8 @@ libfast: chk_dir ${SOURCEC} ${SOURCEF}
 # target.  The current directory and directories below will be cleaned
 # or clobbered.  The clobber target first calls gmake with the clean target
 # before the clobber actions are taken.
-# 
-#  
-#
+# -------------------------------------------------------------------------------
+
 clean:
 	$(MAKE) ACTION=tree_clean tree
 
@@ -396,64 +353,10 @@ tree_clean:
 	done
 	rm -f $(CLEANFILES)
 
-#
-#  testexamples_X - Runs various test suites
-#    1 - basic C suite used in installation tests
-#    2 - additional C suite including graphics
-#    3 - basic Fortran .F suite
-#    4 - uniprocessor version of 1 and 2
-#    5 - C examples that require complex numbers
-#    6 - C examples that don't work with complex numbers 
-#    7 - C examples that require BlockSolve
-#    8 - Fortran .F examples that don't work with complex numbers
-#    9 - uniprocessor version of 3
-#   10 - Fortran examples that require complex
-#   11 - uniprocessor version of 5
-#   12 - basic f90 examples
-#   13 - Examples that should only be compiled.
-#
-testexamples_1: ${TESTEXAMPLES_1}
-vtestexamples_1:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
-testexamples_2: ${TESTEXAMPLES_2}
-testexamples_3: ${TESTEXAMPLES_3}
-vtestexamples_3:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
-testexamples_4: ${TESTEXAMPLES_4}
-vtestexamples_4:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
-testexamples_5: ${TESTEXAMPLES_5}
-testexamples_6: ${TESTEXAMPLES_6}
-testexamples_7: ${TESTEXAMPLES_7}
-testexamples_8: ${TESTEXAMPLES_8}
-testexamples_9: ${TESTEXAMPLES_9}
-vtestexamples_9:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
-testexamples_10: ${TESTEXAMPLES_10}
-testexamples_11: ${TESTEXAMPLES_11}
-testexamples_12: ${TESTEXAMPLES_12}
-testexamples_13: ${TESTEXAMPLES_13}
+#-------------------------------------------------------------------------------
+# Targets for building and running system tests.
+#-------------------------------------------------------------------------------
 
-buildexamples_1: ${BUILDEXAMPLES_1}
-buildexamples_2: ${BUILDEXAMPLES_2}
-buildexamples_3: ${BUILDEXAMPLES_3}
-buildexamples_4: ${BUILDEXAMPLES_4}
-buildexamples_5: ${BUILDEXAMPLES_5}
-buildexamples_6: ${BUILDEXAMPLES_6}
-buildexamples_7: ${BUILDEXAMPLES_7}
-buildexamples_8: ${BUILDEXAMPLES_8}
-buildexamples_9: ${BUILDEXAMPLES_9}
-buildexamples_10: ${BUILDEXAMPLES_10}
-buildexamples_11: ${BUILDEXAMPLES_11}
-buildexamples_12: ${BUILDEXAMPLES_12}
-buildexamples_13: ${TESTEXAMPLES_13}
-
-########################################
-#
-#System tests
-#
-# system_tests, build and run system tests
-#
 system_tests: chkopts build_libs chkdir_tests
 	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
@@ -550,14 +453,10 @@ run_system_tests_uni:  chkopts chkdir_tests
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
 
-########################################
-#
-#  unit tests
-#
+#-------------------------------------------------------------------------------
+#  Targets for building and running unit tests.
+#-------------------------------------------------------------------------------
 
-#
-# tests
-#
 tests: chkopts chkdir_tests build_libs
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_tests tree
 	$(DO_UT_RESULTS)
@@ -609,9 +508,8 @@ run_tests_uni:  chkopts chkdir_tests
 
 tree_run_tests_uni: $(TESTS_RUN_UNI)
 
-########################################
-#
-#  examples
+#-------------------------------------------------------------------------------
+# Targets for building and running examples
 #
 #  The example targets depend on variables set in the
 #  makefile in the example source code directory.  The 
@@ -627,7 +525,7 @@ tree_run_tests_uni: $(TESTS_RUN_UNI)
 #      that run the examples on multiply processors.  EXAMPLES_RUN_UNI
 #      lists the targets that run the examples on single processors.
 #
-#      
+#-------------------------------------------------------------------------------      
 
 #
 # examples
@@ -692,10 +590,10 @@ run_examples_uni:  chkopts chkdir_examples
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 
 
-########################################
-#
-#  demo
-#
+#-------------------------------------------------------------------------------
+# Targets for building and running demos.
+#-------------------------------------------------------------------------------
+
 demo: chkopts build_libs chkdir_tests
 	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_demo tree
@@ -731,11 +629,50 @@ run_demo:  chkopts chkdir_tests
 tree_run_demo: $(DEMO_RUN) 
 
 
+#-------------------------------------------------------------------------------
+#  Doc targets
+#-------------------------------------------------------------------------------
+alldoc: chkdir_doc 
+	-@echo "Building All Documentation"
+	-@echo "========================================="
+	-@$(MAKE) tex dvi pdf html
+	-@echo "Build alldoc completed."
 
-##################################################
-#
+tex:
+	-@echo "Building .tex files"
+	-@echo "========================================="
+	$(MAKE) ACTION=tree_tex tree
+
+tree_tex: $(TEXFILES_TO_MAKE)
+
+dvi: chkdir_doc tex
+	-@echo "Building .dvi files"
+	-@echo "========================================="
+	-@${OMAKE} ACTION=tree_dvi  tree       
+
+tree_dvi: chkdir_doc ${DVIFILES}
+
+
+pdf: chkdir_doc tex
+	-@echo "Building .pdf files"
+	-@echo "========================================="
+	-@${OMAKE} ACTION=tree_pdf  tree 
+
+tree_pdf: chkdir_doc ${PDFFILES}
+
+
+html: chkdir_doc tex
+	-@echo "Building .html files"
+	-@echo "========================================="
+	-@${OMAKE} ACTION=tree_html tree 
+
+tree_html:chkdir_doc ${HTMLFILES}
+
+
+#-------------------------------------------------------------------------------
 # Recursive calls
-#
+#-------------------------------------------------------------------------------
+
 tree: $(ACTION)
 	@if [ "${DIRS}" != "" ]; then \
 	  for dir in ${DIRS} foo ; do \
@@ -751,13 +688,15 @@ tree: $(ACTION)
         fi
 
 
-# --------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# Suffixes
+#-------------------------------------------------------------------------------
 .SUFFIXES: .f .f90 .F .F90 ${SUFFIXES} .C .cc .cpp .r .rm .so
 
 
-#
+#-------------------------------------------------------------------------------
 #  Build shared library from regular lib (.so from .a)
-#
+#-------------------------------------------------------------------------------
 build_shared:
 	@echo making shared libraries in $(LDIR) 
 	@cd $(LDIR) ;\
@@ -776,57 +715,11 @@ build_shared:
 	fi ;\
 	done 
 
+#-------------------------------------------------------------------------------
+# Pattern rules for making Tex files using protex script.  Input to 
+# protex script is Fortran, C or .h source code.
+#-------------------------------------------------------------------------------
 
-#
-#  doc targets.
-#
-
-########## all doc formats ##########
-alldoc: chkdir_doc 
-	-@echo "Building All Documentation"
-	-@echo "========================================="
-	-@$(MAKE) tex dvi pdf html
-	-@echo "Build alldoc completed."
-
-##########  Tex ##########
-tex:
-	-@echo "Building .tex files"
-	-@echo "========================================="
-	$(MAKE) ACTION=tree_tex tree
-
-tree_tex: $(TEXFILES_TO_MAKE)
-
-##########  dvi ##########
-dvi: chkdir_doc tex
-	-@echo "Building .dvi files"
-	-@echo "========================================="
-	-@${OMAKE} ACTION=tree_dvi  tree 
-
-tree_dvi: chkdir_doc ${DVIFILES}
-
-##########  pdf ##########
-pdf: chkdir_doc tex
-	-@echo "Building .pdf files"
-	-@echo "========================================="
-	-@${OMAKE} ACTION=tree_pdf  tree 
-
-tree_pdf: chkdir_doc ${PDFFILES}
-
-##########  html ##########
-html: chkdir_doc tex
-	-@echo "Building .html files"
-	-@echo "========================================="
-	-@${OMAKE} ACTION=tree_html tree 
-
-tree_html:chkdir_doc ${HTMLFILES}
-
-
-
-#
-# Pattern rules for making Tex files using 
-# protex script.  Input to protex script 
-# is Fortran, C or .h source code.
-#
 %_fapi.tex : ../src/%.F 
 	export PROTEX=$(PROTEX) ;\
 	$(F_PROTEX) $* $<
@@ -891,10 +784,9 @@ tree_html:chkdir_doc ${HTMLFILES}
 	export PROTEX=$(PROTEX) ;\
 	$(CC_PROTEX) $* $<
 
-
-#
-# Pattern rules for making dvi, pdf and html
-#
+#-------------------------------------------------------------------------------
+# Pattern rules for making dvi, pdf and html files.
+#-------------------------------------------------------------------------------
 
 # The variable TEXINPUTS_VALUE can be set in the makefiles of the
 # source code tree to list the directory paths of the .tex and
@@ -905,12 +797,12 @@ tree_html:chkdir_doc ${HTMLFILES}
 # set, then only files in the local directory will be found by the
 # \input and \includegraphics LaTeX commands.
 #
-# Example:  TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/TimeMgr/doc/:"
-#
 
-#
-#  dvi
-#
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 
+
+#-------------------------------------------------------------------------------
+#  dvi rules
+#-------------------------------------------------------------------------------
 %_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* des
@@ -923,13 +815,17 @@ tree_html:chkdir_doc ${HTMLFILES}
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* req
 
+#-------------------------------------------------------------------------------
+#  pdf rules
+#-------------------------------------------------------------------------------
 
-# Pdf files
 $(ESMC_DOCDIR)/%.pdf: %.dvi
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	dvipdf $< $@
 
-# Html Files
+#-------------------------------------------------------------------------------
+#  html rules
+#-------------------------------------------------------------------------------
 $(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
@@ -955,61 +851,22 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	rm -f .latex2html-init
 	mv -f $(@F) $(ESMC_DOCDIR)
 
-
-
-#  .c.o: 
-#  	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-#  .c.a:
-#  	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-#  	${RM} $*.o
-#  .cpp.o .cc.o .C.o: 
-#  	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-#  .cpp.a .cc.a .C.a: 
-#  	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<
-#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-#  	${RM} $*.o
-#  
-#  .F.o .F90.o:
-#  	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
-#  
-#  .h.tex:
-#  	${PROTEX} -bF +f $< > doc/$*.tex
-#  
-#  .F.tex .F90.tex:
-#  	${PROTEX} -bF +f $< > doc/$*.tex
-#  
-#  .F.a: 
-#  	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
-#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-#  	${RM} $*.o
-#  
-#  .f.o .f90.o: 
-#  	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
-#  .f.a: 
-#  	${FC} -c ${FFLAGS} ${FOPTFLAGS} $<
-#  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-#  	${RM} $*.o
-#  
-#
+#-------------------------------------------------------------------------------
 #  These rules are for compiling the test examples.
-#
+#-------------------------------------------------------------------------------
 .cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
 	-@${RM} -f $* *.o $*.mon.* gmon.out mon.out
-# -------------------------------------------------------------------------------
 
 
-#
+#-------------------------------------------------------------------------------
 # Keep .o files
-#
+#-------------------------------------------------------------------------------
 .PRECIOUS: %.o
 
 
-
-#################################################################
-#
+#-------------------------------------------------------------------------------
 #  Include site specific makefile fragment.
-#
+#-------------------------------------------------------------------------------
 include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
 
