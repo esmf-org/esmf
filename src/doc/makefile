@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/01/27 23:07:02 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/01/29 22:59:46 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -25,7 +25,7 @@ HTMLFILES = \
 		${ESMC_DOCDIR}/ESMF_reqdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc \
 
-USERDOC_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex ESMF_usage.tex
+USERDOC_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex 
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
