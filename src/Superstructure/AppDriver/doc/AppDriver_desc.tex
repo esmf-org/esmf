@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.7 2004/02/05 19:15:41 cdeluca Exp $
+% $Id: AppDriver_desc.tex,v 1.8 2004/04/22 18:58:48 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,8 +10,16 @@
 
 %\subsection{Description}
 
-The AppDriver directory contains examples of how to structure 
-applications using the ESMF superstructure in a number of different
+The ESMF Application Driver ({\tt ESMF\_AppDriver}), is a generic ESMF 
+driver program that contains a ``main.''  Simpler applications may be
+able to use an Application Driver without modification; for more
+complex applications, an Application Driver can be used as a template
+that can be extended.
+
+ESMF provides a number of different Application Drivers in the 
+{\tt \$ESMF\_DIR/src/Superstructure/AppDriver} directory.  
+There are a number of different Application Drivers in the directory,
+that reflect use of the ESMF superstructure in a number of different
 modes.  Options when deciding how to structure an application 
 include choices about:
 
@@ -19,17 +27,17 @@ include choices about:
 
 \item[Serial vs. Concurrent Execution]
 
-In a serial execution model every DE executes the same Component 
-until it has produced data needed by another Component, and then 
-all DEs change to
-running the next Component.  This has the appeal of simplicity
-of data consumption and production: when a Component starts
-all required data is available for use, and when a Component finishes
-all data produced is ready for consumption by the next Component. 
-This approach also has
-the possibility of less data movement if the gridding and
-data decomposition is done such that each processor's memory contains
-the data needed by the next Component.
+In a serial execution model every DE executes the same Gridded 
+Component code until it has produced data needed by another 
+Gridded Component, and then all DEs change to running the next 
+Gridded Component, or a Coupler Component.  This has the appeal of 
+simplicity of data consumption and production: when a Gridded 
+Component starts all required data is available for use, and when 
+a Gridded Component finishes all data produced is ready for consumption 
+by the next Gridded Component.  This approach also has
+the potential for less data movement if the gridding and
+data decomposition is done such that each DEs memory contains
+the data needed by the next component.
 
 In a concurrent execution model subgroups of DEs run
 a Component and all Components are active at the same time.  
