@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 eschwab Exp $
+// $Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 eschwab Exp $
 //
 // ESMC <Class> method code (body) file
 //
@@ -24,7 +24,7 @@
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 eschwab Exp $";
+static const char *const version = "$Id: ESMC_class.C,v 1.4 2002/10/10 23:51:56 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -43,10 +43,10 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
       ESMC_<Class> *ESMC_<Class>::ESMC_<Class>Create(
 //
 // !ARGUMENTS:
-      int arg1,      // in
-      int arg2,      // in
-      char *arg3     // in
-      int rc) {      // out 
+      int arg1,            // in
+      int arg2,            // in
+      const char *arg3     // in
+      int *rc) {           // out - return code
 //
 // !DESCRIPTION:
 //      Create a new <Class> from ... Allocates memory for a new <Class>
@@ -95,9 +95,9 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
       int ESMC_<Class>::ESMC_<Class>Construct(
 //
 // !ARGUMENTS:
-      int arg1,      // in
-      int arg2,      // in
-      char *arg3) {  // in
+      int arg1,            // in
+      int arg2,            // in
+      const char *arg3) {  // in
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -149,9 +149,9 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
       int ESMC_<Class>::ESMC_<Class>Init(
 //
 // !ARGUMENTS:
-      int arg1,      // in
-      int arg2,      // in
-      char *arg3) {  // in
+      int arg1,            // in
+      int arg2,            // in
+      const char *arg3) {  // in
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes <Class> values; it does not
@@ -167,6 +167,28 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
 //
 
 } // end ESMC_<Class>Init
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_<Class>GetConfig - get configuration info from a <Class>
+//
+// !INTERFACE:
+      int ESMC_<Class>::ESMC_<Class>GetConfig(
+//
+// !ARGUMENTS:
+      ESMC_<Class>Config *config) const {  // out - resources
+//
+// !DESCRIPTION:
+//    Returns the set of resources the <Class> object was configured with.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+//
+//  code goes here
+//
+
+} // end ESMC_<Class>GetConfig
 
 //-------------------------------------------------------------------------
 //BOP
@@ -192,58 +214,13 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_<Class>GetConfig - get configuration info from a <Class>
-//
-// !INTERFACE:
-      int ESMC_<Class>::ESMC_<Class>GetConfig(
-//
-// !ARGUMENTS:
-      ESMC_<Class>Config *config) {     // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the <Class> object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
-} // end ESMC_<Class>GetConfig
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_<Class>Set<Value> - set <Value> for a <Class>
-//
-// !INTERFACE:
-      int ESMC_<Class>::ESMC_<Class>Set<Value>(
-//
-// !ARGUMENTS:
-      const <value type> *value) {     // in - value
-//
-// !DESCRIPTION:
-//     Sets the <Class> member <Value> with the given value.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
-} // end ESMC_<Class>Set<Value>
-
-//-------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_<Class>Get<Value> - get <Value> for a <Class>
 //
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Get<Value>(
 //
 // !ARGUMENTS:
-      <value type> *value) {     // out - value
+      <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
 //     Returns the value of <Class> member <Value>.
@@ -260,13 +237,36 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_<Class>Set<Value> - set <Value> for a <Class>
+//
+// !INTERFACE:
+      int ESMC_<Class>::ESMC_<Class>Set<Value>(
+//
+// !ARGUMENTS:
+      <value type> value) {     // in - value
+//
+// !DESCRIPTION:
+//     Sets the <Class> member <Value> with the given value.
+//     Can be multiple routines, one per value
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+//
+//  code goes here
+//
+
+} // end ESMC_<Class>Set<Value>
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_<Class>Validate - internal consistency check for a <Class>
 //
 // !INTERFACE:
       int ESMC_<Class>::ESMC_<Class>Validate(
 //
 // !ARGUMENTS:
-      const char *options) {    // in
+      const char *options) const {    // in
 //
 // !DESCRIPTION:
 //      Validates that a <Class> is internally consistent.
@@ -290,7 +290,7 @@ static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 
       int ESMC_<Class>::ESMC_<Class>Print(
 //
 // !ARGUMENTS:
-      const char *options) {     //  in
+      const char *options) const {     //  in
 //
 // !DESCRIPTION:
 //      Print information about a <Class>.  The options control the

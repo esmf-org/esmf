@@ -1,10 +1,14 @@
-// $Id: ESMC_class.h,v 1.3 2002/10/10 18:50:59 eschwab Exp $
+// $Id: ESMC_class.h,v 1.4 2002/10/10 23:51:55 eschwab Exp $
 //
 // ESMF <Class> C++ definition include file
 //
 // < Something here from legal about the status of the code, like:
 //  This code developed by NASA/NCAR/ESMF whatever, and is covered by
 //  the terms of the GNU public license.  See license file for more details. >
+//
+// (all lines below between the !BOP and !EOP markers will be included in 
+//  the automated document processing.)
+//-------------------------------------------------------------------------
 //
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
@@ -13,43 +17,47 @@
 #define ESMC_<Class>_H
 
 //-------------------------------------------------------------------------
-//
-// !PURPOSE:
-//
-// The code in this file defines the C++ <Class> members and method 
-// signatures (prototypes).  The companion file ESMC_<Class>.C contains
-// the full code (bodies) for the <Class> methods.
-//
-// < insert a paragraph or two explaining what you'll find in this file >
-//
-// (all lines below between the !BOP and !EOP markers will be included in 
-//  the automated document processing.)
-//
-//-------------------------------------------------------------------------
 
-// put any constants or macros which apply to the whole component in this file
+// put any constants or macros which apply to the whole component in this file.
+// anything public or esmf-wide should be up higher at the top level
+// include files.
 #include <ESMC_<Comp>.h> 
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMC_<Class>
+// !CLASS:  ESMC_<Class> - one line general statement about this class
 
-// this include section corresponds to the USES: section in F90 modules
+//-------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file defines the C++ <Class> members and declares method 
+// signatures (prototypes).  The companion file ESMC_<Class>.C contains
+// the definitions (full code bodies) for the <Class> methods.
+//
+// < insert a paragraph or two explaining what you'll find in this file >
+//
+// 
+// !USES:
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
-// ! PUBLIC TYPES:
+
+// !PUBLIC TYPES:
+class ESMC_<Class>Config;
+class ESMC_<Class>;
+
+// !PRIVATE TYPES:
 
 // class configuration type
-struct ESMC_<Class>Config
-{
+class ESMC_<Class>Config {
   private:
 //   < insert resource items here >
 };
 
 // class definition type
-class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
-{
+class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
+
 // < insert any C++ class declaratives here, e.g. friends >
 
   private:
@@ -76,26 +84,27 @@ class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
     int ESMC_<Class>Init(args);         // shallow class only
 
 // optional configuration methods
-    int ESMC_<Class>GetConfig(ESMC_<Class>Config *config);
+    int ESMC_<Class>GetConfig(ESMC_<Class>Config *config) const;
     int ESMC_<Class>SetConfig(const ESMC_<Class>Config *config);
 
 // accessor methods for class members
-    int ESMC_<Class>Get<Value>(<value type> *value);
+    int ESMC_<Class>Get<Value>(<value type> *value) const;
     int ESMC_<Class>Set<Value>(<value type>  value);
     
 // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_<Class>Validate(const char *options);
-    int ESMC_<Class>Print(const char *options);
+    int ESMC_<Class>Validate(const char *options) const;
+    int ESMC_<Class>Print(const char *options) const;
   
 // < list the rest of the public interface methods here >
   
-//EOP
-//-------------------------------------------------------------------------
-
+// !PRIVATE MEMBER FUNCTIONS:
+//
   private: 
 //
-// < list private interface methods here >
+// < declare private interface methods here >
 //
+//EOP
+//-------------------------------------------------------------------------
 
 };   // end class ESMC_<Class>
 
