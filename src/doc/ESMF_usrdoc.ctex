@@ -71,6 +71,11 @@
 %\section{Glossary}
 \input{ESMF_terms}
 
+%\section{Bibliography}
+\bibliography{ESMF} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+
 \end{document}
 
 
