@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.12 2004/06/15 13:34:41 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.13 2004/06/16 12:32:23 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -517,6 +517,7 @@
         ! Local variables
         type(injectdata), pointer :: datablock
         type(wrapper) :: wrap
+        integer :: allocrc
 
         print *, "Injector Finalize starting"
     
@@ -531,10 +532,12 @@
 
         datablock => wrap%ptr
         call ESMF_CalendarDestroy(datablock%gregorianCalendar, rc)
-        deallocate(datablock, stat=rc)
+        deallocate(datablock, stat=allocrc)
         nullify(wrap%ptr)
 
         print *, "Injector Finalize returning"
+
+        rc = ESMF_SUCCESS
    
     end subroutine injector_final
 
