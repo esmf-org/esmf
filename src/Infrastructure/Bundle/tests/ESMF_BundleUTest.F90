@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.35 2004/12/09 00:24:37 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.36 2005/03/23 20:08:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,16 +36,17 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.35 2004/12/09 00:24:37 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.36 2005/03/23 20:08:02 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc, fieldcount, count, countlist(2)
-      integer :: number
+      integer :: number, i, loop_rc
       type(ESMF_Grid) :: grid, grid2
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
       character (len = ESMF_MAXSTR) :: bname1, fname1, fname2, fname3
+      character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
       type(ESMF_Field) :: fields(10)
       type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
       type(ESMF_Field) :: simplefield, nofield
@@ -116,11 +117,28 @@
       !EX_UTest
       !  Verify the Field count query from an uninitialized Bundle is handled
       call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Getting Field count from an uninitialized Bundle Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
+     
+      !EX_UTest
+      !  Verify the Field count query from an uninitialized Bundle is 0
+      write(failMsg, *) "Field count not zero"
+      write(name, *) "Verify Field count from an uninitialized Bundle is zero Test"
+      call ESMF_Test((fieldCount.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !This test crashes, bug 1169299 created, commented out
+      !  Verify the getting Field names query from an uninitialized Bundle is handled
+      !call ESMF_BundleGetFieldNames(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      !write(failMsg, *) ""
+      !write(name, *) "Getting Field names from an uninitialized Bundle Test"
+      !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !print *, "Field count of uninitialized Bundle = ", nameCount
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Requirement FLD2.1.1 Creation using Field list
       ! It shall be possible to create a bundle with a field list, an optional 
@@ -144,7 +162,36 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      !  Verify the getting Field names query from Bundle returns ESMF_SUCCESS
+      call ESMF_BundleGetFieldNames(bundle1, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Field names from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      !  Verify the Field names query count is correct
+      write(failMsg, *) "Field count not 3"
+      write(name, *) "Verifying Field count from a Bundle Test"
+      call ESMF_Test((fieldcount.eq.3), name, failMsg, result, ESMF_SRCLINE)
+		
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      !  Verify the Field names are correct
+      write(failMsg, *) "Field names are wrong"
+      write(name, *) "Verifying Field names from a Bundle Test"
+      call ESMF_Test((fieldNameList(1).eq."pressure".and.fieldNameList(2).eq."temperature" &
+		.and.fieldNameList(3).eq."heat flux"), name, failMsg, result, ESMF_SRCLINE)
+		
+      print *, "The Field names are:"
+      do i = 1 , fieldcount
+	print *, fieldNameList(i)
+      end do
+
+      !------------------------------------------------------------------------
       !EX_UTest
 #if ESMF_NO_INITIALIZERS
       simplefield = nofield
@@ -206,6 +253,23 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
+      !  Verify the getting Field names query from Bundle returns ESMF_SUCCESS
+      call ESMF_BundleGetFieldNames(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Field names from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      
+      !EX_UTest
+      !  Verify the Field names query count is correct
+      write(failMsg, *) "Field count not 0"
+      write(name, *) "Verifying Field count from a Bundle Test"
+      call ESMF_Test((fieldcount.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Add a field to an empty Bundle
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       write(failMsg, *) ""
@@ -213,6 +277,36 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      !  Verify the getting Field names query from Bundle returns ESMF_SUCCESS
+      call ESMF_BundleGetFieldNames(bundle2, nameList=fieldNameList, nameCount=fieldcount, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Field names from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      
+      !EX_UTest
+      !  Verify the Field names query count is correct
+      write(failMsg, *) "Field count not 1"
+      write(name, *) "Verifying Field count from a Bundle Test"
+      call ESMF_Test((fieldcount.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+
+      !EX_UTest
+      !  Verify the Field names are correct
+      write(failMsg, *) "Field name is wrong"
+      write(name, *) "Verifying Field name from a Bundle Test"
+      call ESMF_Test((fieldNameList(1).eq."rh"), name, failMsg, result, ESMF_SRCLINE)
+		
+      print *, "The Field names is:"
+      do i = 1 , fieldcount
+	print *, fieldNameList(i)
+      end do
+
+      !------------------------------------------------------------------------
 
       !EX_UTest
       ! Getting Attribute Count from a Bundle
@@ -442,7 +536,7 @@
       write(name, *) "Validating a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+      !------------------------------------------------------------------------
 
       !EX_UTest
       ! Verify that the zeroth Field names cannot be queried fron a Bundle
