@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.19 2004/06/09 21:25:08 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.20 2004/06/09 21:30:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.19 2004/06/09 21:25:08 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.20 2004/06/09 21:30:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -161,6 +161,7 @@
 
       !  Verify that a Field can be added to a Bundle
       !  Verify that an empty Bundle can be created
+      !EX_UTest
       bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
       write(failMsg, *) ""
       write(name, *) "Creating Empty Bundle Test"
