@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.4 2004/03/22 14:55:44 theurich Exp $
+// $Id: ESMC_VM.h,v 1.5 2004/04/01 14:53:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,6 +76,9 @@ void ESMC_VMFinalize(int *rc);        // Shut down and clean up global vmachine
 
 // class definition
 class ESMC_VMPlan : public vmplan {   // inherits from vmplan class
+  public:
+    int nspawn;           // number of PETs this PET will spawn
+    ESMC_VM **myvms;      // pointer array of ESMC_VM instances for this PET
 };// end class ESMC_VMPlan
 
 #endif  // ESMC_VM_H
