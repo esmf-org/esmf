@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.8 2003/08/14 21:25:46 cdeluca Exp $
+% $Id: TimeMgr_desc.tex,v 1.9 2003/08/14 21:57:05 cdeluca Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -76,10 +76,6 @@ Section~\ref{sec:Calendar} for more details on supported calendars,
 and how to create a custom ESMF Calendar.
 
 \subsection{Time Instants and Time Intervals}
-Since climate modeling, numerical weather prediction and other 
-Earth and space applications have widely varying time scales and require 
-different sorts of calendars, the Time Manager must provide a wide range 
-of time specifiers, spanning nanoseconds to years.  
 
 TimeIntervals and Time instants (simply called Times) are the computational 
 building blocks of the Time Manager library.  TimeIntervals, which are 
@@ -89,13 +85,23 @@ reset value, copy value, and subdivide by a scalar.  Times, which
 are moments in time associated with specific Calendars, can be incremented 
 or decremented by TimeIntervals, compared to see which of two Times 
 is later, differenced to obtain the TimeInterval between two Times, 
-copied, reset, and manipulated in other useful ways.  Times support 
-a host of different queries, both for values of individual Time 
+copied, reset, and manipulated in other useful ways.  Times support a 
+host of different queries, both for values of individual Time 
 components such as year, month, day, and second, and for derived values such 
 as day of year, middle of current month and Julian day.  It is also possible 
-to retrieve the value of the hardware realtime clock in the form of a time 
-instant.  See Sections~\ref{sec:Time} and {sec:TimeInterval}, respectively,
+to retrieve the value of the hardware realtime clock in the form of a 
+Time.  See Sections~\ref{sec:Time} and {sec:TimeInterval}, respectively,
 for use and examples of Times and TimeIntervals.
+
+Since climate modeling, numerical weather prediction and other 
+Earth and space applications have widely varying time scales and require 
+different sorts of calendars, Times and TimeIntervals must support 
+a wide range of time specifiers, spanning nanoseconds to years.  The
+interfaces to these classes are defined so that you can specify a time
+using as a combination of time units selected from the list shown in 
+Figure~\ref{fig:timeOpts}.  
+
+\input{TimeMgr_abbr}
 
 \subsection{Clocks and Alarms}
 Although it is possible to repeatedly step a Time forward by a 
