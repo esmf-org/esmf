@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.23 2003/04/17 21:32:30 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.24 2003/04/17 21:34:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -171,7 +171,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.23 2003/04/17 21:32:30 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.24 2003/04/17 21:34:41 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1265,7 +1265,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DE's.
+! Used to gather a distributed Array into a global Array on all DEs.
 !
 !
 !EOP
