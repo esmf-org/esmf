@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.51 2004/02/12 23:54:34 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.52 2004/02/14 00:34:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.51 2004/02/12 23:54:34 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.52 2004/02/14 00:34:01 nscollins Exp $'
 
 !==============================================================================
 
@@ -358,7 +358,7 @@
 ! !ARGUMENTS:
 
       type(ESMF_Array), intent(in) :: srcarray    ! array to be regridded
-      type(ESMF_Array), intent(out) :: dstarray   ! resulting regridded array
+      type(ESMF_Array), intent(inout) :: dstarray   ! resulting regridded array
       type (ESMF_DataMap), intent(in) :: srcDatamap
       type (ESMF_DataMap), intent(in) :: dstDatamap
       type(ESMF_RouteHandle), intent(in) :: routehandle 
