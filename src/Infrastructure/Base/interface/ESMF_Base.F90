@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.90 2004/03/19 15:13:47 theurich Exp $
+! $Id: ESMF_Base.F90,v 1.91 2004/03/19 20:19:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -260,6 +260,20 @@
                                      
 !------------------------------------------------------------------------------
 !
+!     ! Typed blocking/non-blocking flag
+
+      type ESMF_BlockingFlag
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_BlockingFlag), parameter:: &
+        ESMF_BLOCKING     = ESMF_BlockingFlag(1), &
+        ESMF_NONBLOCKING  = ESMF_BlockingFlag(2)
+
+!------------------------------------------------------------------------------
+!
       ! Contains pointer to real Base object which is defined in C++
 
       type ESMF_Base
@@ -297,6 +311,7 @@
 !#ifdef ESMF_ENABLE_VM
       public ESMF_newOp, ESMF_newSUM, ESMF_newMIN, ESMF_newMAX
 !#endif
+      public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
@@ -411,7 +426,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.90 2004/03/19 15:13:47 theurich Exp $'
+               '$Id: ESMF_Base.F90,v 1.91 2004/03/19 20:19:25 theurich Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -426,6 +441,7 @@ interface operator (.eq.)
  module procedure ESMF_pteq
  module procedure ESMF_tfeq
  module procedure ESMF_aieq
+ module procedure ESMF_bfeq
 end interface
 
 interface operator (.ne.)
@@ -513,6 +529,16 @@ subroutine ESMF_dkas(intval, dkval)
  intval = dkval%dkind
 end subroutine
 
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_BlockingFlag's
+
+function ESMF_bfeq(bf1, bf2)
+ logical ESMF_bfeq
+ type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
+
+ ESMF_bfeq = (bf1%value .eq. bf2%value)
+end function
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Pointers to see if they're the same or not
