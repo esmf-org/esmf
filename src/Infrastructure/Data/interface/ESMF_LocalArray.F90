@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.7 2003/07/17 20:45:36 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.8 2003/07/21 18:35:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -286,7 +286,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.7 2003/07/17 20:45:36 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.8 2003/07/21 18:35:03 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -549,7 +549,7 @@ end function
         endif
         ! TODO: should this take the counts, or not? for now i am going to
         ! set the counts after i have created the f90 array and not here.
-        call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
+        call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
                                       ESMF_FROM_FORTRAN, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "LocalArray construction error"
