@@ -1,11 +1,14 @@
-#  $Id: build_rules.mk,v 1.13 2004/10/28 22:11:29 nscollins Exp $
+#  $Id: build_rules.mk,v 1.14 2005/02/03 17:53:51 nscollins Exp $
 #
-#  Linus.absoft.default.mk
+#  Linux.absoft.default makefile fragment
 #
 
 
 #
 #  Make sure that ESMF_PREC is set to 32
+#  When a 64-bit compiler comes out, then just make the default 32, but
+#  allow it to be set to 64 ahead of time.  (We will also need to add
+#  sections for 32 vs 64 bit if the flags are different.)
 #
 ESMF_PREC = 32
 
