@@ -1,4 +1,4 @@
-/* $Id: ESMC_Alarm.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_Alarm.h,v 1.3 2001/12/14 21:01:09 cdeluca Exp $ */
 
 #ifndef ESMC_ALARM_H
 #define ESMC_ALARM_H
@@ -8,6 +8,12 @@
 #include "ESMC_Date.h"
 #include "ESMC_Time.h"
 #include "ESMC_TimeMgr.h"
+
+/* 
+!BOP
+! !ROUTINE: Alarm Class
+\begin{verbatim}
+*/
 
 enum AlarmType{ ESMC_ALARM_PERIODIC,
                 ESMC_ALARM_MONTHLY,
@@ -21,6 +27,11 @@ struct AlarmClass{
   ESMC_TimeClass period;              /* alarm period */
   ESMC_Bool alarmOn;                  /* true if on */
 };
+
+/* 
+\end{verbatim}
+!EOP
+*/
 
 typedef struct AlarmClass *ESMC_Alarm;
 

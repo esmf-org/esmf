@@ -1,9 +1,15 @@
-/* $Id: ESMC_Calendar.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_Calendar.h,v 1.3 2001/12/14 21:01:09 cdeluca Exp $ */
 
 #ifndef ESMC_CALENDAR_H
 #define ESMC_CALENDAR_H
 
 #include "ESMC_BasicUtil.h"
+
+/* 
+!BOP
+! !ROUTINE: Calendar Class
+\begin{verbatim}
+*/
 
 enum CalendarType{ ESMC_CALENDAR_TYPE_UNDEFINED,
 		   ESMC_NO_LEAP,
@@ -13,11 +19,16 @@ enum CalendarType{ ESMC_CALENDAR_TYPE_UNDEFINED,
 typedef enum CalendarType ESMC_CalendarType;
 
 struct CalendarClass{
-  ESMC_CalendarType type;             /* calendar type */
-  int dim[13];                      /* number of days in each month, indexed 1:12 */
-  int dimRunningSum[13];            /* running sum of days in month, indexed 1:12 */
-  int diy;                          /* number of days in current year */
+  ESMC_CalendarType type;    /* calendar type */
+  int dim[13];               /* number of days in each month, indexed 1:12 */
+  int dimRunningSum[13];     /* running sum of days in month, indexed 1:12 */
+  int diy;                   /* number of days in current year */
 };
+
+/* 
+\end{verbatim}
+!EOP
+*/
 
 typedef struct CalendarClass *ESMC_Calendar;
 

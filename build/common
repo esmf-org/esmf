@@ -1,8 +1,9 @@
-# $Id: common,v 1.5 2001/11/29 23:59:43 dneckels Exp $ 
+# $Id: common,v 1.6 2001/12/14 21:01:08 cdeluca Exp $ 
 #
-#
+#-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
 # if it does not exist
+#-------------------------------------------------------------------------------
 chkalice_dir:
 	@if [ ${BOPT}foo = foo ] ; then \
 	  echo "You must use the make variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
@@ -26,8 +27,10 @@ chkdir_tests:
 	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
 
 
+#-------------------------------------------------------------------------------
 # 1. Checks that user has set BOPT variable
 # 2. Check if the ${LDIR} exists
+#-------------------------------------------------------------------------------
 chkopts_basic: 
 	@if [ ${BOPT}foo = foo ] ; then \
 	  echo "You must set the variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
@@ -58,11 +61,10 @@ chkopts: chkopts_basic
 # Does nothing; needed for some rules that require actions.
 foo:
 
-VPATH = ${ESMF_DIR}/${LOCDIR}
+VPATH = ${ESMF_DIR}/${LOCDIR}:${ESMF_DIR}/include
 
 libc:${LIBNAME}(${OBJSC})
 libf:${LIBNAME}(${OBJSF})
-
 
 buildtex: ${TEXFILES}
 
@@ -164,12 +166,6 @@ buildexamples_13: ${TESTEXAMPLES_13}
 buildexamples_14: ${BUILDEXAMPLES_14}
 buildexamples_15: ${BUILDEXAMPLES_15}
 
-#  Checks if directory requires particular package or language
-# The makefile may contain
-#    #requirespackage '-DESMC_HAVE_XXX' 
-#    #requireslanguage CONLY (or CPP)
-#    #requiresscalar   real (or complex)
-
 tree: ${ACTION}
 	@if [ "${DIRS}" != "" ]; then \
 	  for dir in ${DIRS} foo ; do \
@@ -245,39 +241,6 @@ alltree: ${ACTION}
 	${OMAKE} -f makefile alltree ACTION=${ACTION} BOPT=${BOPT} \
 	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
 	done ; fi
-
-etags_sourcec:
-	-@if [ "${SOURCEC}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${SOURCEC} ; fi
-etags_sourceh:
-	-@if [ "${SOURCEH}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${SOURCEH}; fi
-etags_sourcef:
-	-@if [ "${SOURCEF}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${SOURCEF}; fi
-etags_docs:
-	-@if [ "${DOCS}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${DOCS}; fi
-etags_buildfiles:
-	-@if [ "${buildFILES}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${buildFILES}; fi
-etags_examplesc:
-	-@if [ "${EXAMPLESC}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${EXAMPLESC}; fi
-etags_examplesch:
-	-@if [ "${EXAMPLESCH}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${EXAMPLESCH}; fi
-etags_examplesf:
-	-@if [ "${EXAMPLESF}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${EXAMPLESF}; fi
-etags_examplesfh:
-	-@if [ "${EXAMPLESFH}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${EXAMPLESFH}; fi
-etags_makefile:
-	-@etags -a -f ${TAGSFILE} makefile
-etags_scripts:
-	-@if [ "${SCRIPTS}" != "" ]; then \
-		etags -a -f ${TAGSFILE} ${SCRIPTS}; fi
 
 # --------------------------------------------------------------------
 #
@@ -391,6 +354,9 @@ manualpages:
 
 .F.o .F90.o:
 	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+
+.h.tex:
+	${PROTEX} -bF +f $< > doc/$*.tex
 
 .F.tex .F90.tex:
 	${PROTEX} -bF +f $< > doc/$*.tex

@@ -1,4 +1,4 @@
-/* $Id: ESMC_TimeMgr.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_TimeMgr.h,v 1.3 2001/12/14 21:01:09 cdeluca Exp $ */
 
 #ifndef ESMC_TIME_MGR_H
 #define ESMC_TIME_MGR_H
@@ -6,6 +6,12 @@
 #include "ESMC_BasicUtil.h"
 #include "ESMC_Time.h"
 #include "ESMC_Date.h"
+
+/* 
+!BOP
+! !ROUTINE: TimeMgr Class
+\begin{verbatim}
+*/
 
 struct TimeMgrClass{
   int nstep;
@@ -16,6 +22,11 @@ struct TimeMgrClass{
   ESMC_DateClass currDate;
   ESMC_DateClass prevDate;
 };
+
+/* 
+\end{verbatim}
+!EOP
+*/
 
 typedef struct TimeMgrClass *ESMC_TimeMgr;
 

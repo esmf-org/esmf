@@ -1,9 +1,15 @@
-/* $Id: ESMC_TOD.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_TOD.h,v 1.3 2001/12/14 21:01:09 cdeluca Exp $ */
 
 #ifndef ESMC_TOD_H
 #define ESMC_TOD_H
 
 #include "ESMC_BasicUtil.h"
+
+/* 
+!BOP
+! !ROUTINE: Time of Day (TOD) Class
+\begin{verbatim}
+*/
 
 enum TODType{ ESMC_TOD_TYPE_UNDEFINED,   /* Abbreviations */
 	      ESMC_TOD_INT_SEC,          /* IS = integer seconds */
@@ -16,6 +22,11 @@ struct TODClass{
   int sec;
   int msec;
 };
+
+/* 
+\end{verbatim}
+!EOP
+*/
 
 typedef struct TODClass *ESMC_TOD;
 

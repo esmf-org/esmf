@@ -1,4 +1,4 @@
-/* $Id: ESMC_Time.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_Time.h,v 1.3 2001/12/14 21:01:09 cdeluca Exp $ */
 
 #ifndef ESMC_TIME_H
 #define ESMC_TIME_H
@@ -7,10 +7,21 @@
 
 #include "ESMC_TOD.h"
 
+/* 
+!BOP
+! !ROUTINE: Time Class
+\begin{verbatim}
+*/
+
 struct TimeClass{
   int day;                   /* days in this time */
-  ESMC_TODClass tod;           /* time of day */
+  ESMC_TODClass tod;         /* time of day */
 };
+
+/* 
+\end{verbatim}
+!EOP
+*/
 
 typedef struct TimeClass *ESMC_Time;
 

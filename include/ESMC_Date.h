@@ -1,4 +1,4 @@
-/* $Id: ESMC_Date.h,v 1.2 2001/11/15 22:56:37 dneckels Exp $ */
+/* $Id: ESMC_Date.h,v 1.3 2001/12/14 21:01:09 cdeluca Exp $ */
 
 #ifndef ESMC_DATE_H
 #define ESMC_DATE_H
@@ -10,17 +10,28 @@
 #include "ESMC_Time.h"
 #include "ESMC_TOD.h"
 
+/* 
+!BOP
+! !ROUTINE: Date Class
+\begin{verbatim}
+*/
+
 struct DateClass{
   ESMC_CalendarClass calendar;
 
   int year;                         /* date year */         
   int month;                        /* date month */
   int day;                          /* date day */
-  ESMC_TODClass tod;                  /* date time of day */           
+  ESMC_TODClass tod;                /* date time of day */           
 
   int julianDay;                    /* absolute day for date calculations */
   int dayOfYear;                    /* day of year (e.g. Jan 1 is day 1) */
 };
+
+/* 
+\end{verbatim}
+!EOP
+*/
 
 typedef struct DateClass *ESMC_Date;
 
