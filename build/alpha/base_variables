@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.7 2003/02/27 17:53:51 flanigan Exp $ 
+# $Id: base_variables,v 1.8 2003/03/06 23:11:48 nscollins Exp $ 
 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
@@ -23,6 +23,7 @@ NO_AUTO_PARALLEL	= -nomp
 NO_INLINING		= -noinline
 REAL8			= -r8
 STRICT			= -nopipeline
+EXPAND_TEMPLATES        = -tall
 FPPFLAGS		= $(FPPOPTS)
 # ######################### C and Fortran compiler ########################
 #
