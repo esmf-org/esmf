@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.5 2003/12/18 20:29:41 svasquez Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.6 2004/01/06 17:26:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 !
 ! !DESCRIPTION:
 !
-! Excercises the DELayout F90 to C++ interface.
+! Exercises the DELayout F90 to C++ interface.
 ! pre-test for System Test #62501: Uses data from Test 62501: row 5
 !
 ! on halem, run with
@@ -23,8 +23,8 @@
 !-----------------------------------------------------------------------------
 !BOP
 
-See the following code fragments for examples of how to create DELayouts and use them in the communications routines.
-Also see the Programming Model section of this document.  
+!See the following code fragments for examples of how to create DELayouts and use them in the communications routines.
+!Also see the Programming Model section of this document.  
 !\begin{verbatim}
 
 program ESMF_DELayout_F1Ex
