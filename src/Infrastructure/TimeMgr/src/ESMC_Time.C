@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.48 2004/01/16 00:30:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.49 2004/01/20 20:41:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -614,7 +614,7 @@
 //
 // !DESCRIPTION:
 //    Subtracts given {\tt time} expression from this time, returns
-//    result as {\tt ESMC_TimeInterval}.
+//    result as {\tt ESMC\_TimeInterval}.
 //
 //EOP
 // !REQUIREMENTS:  
