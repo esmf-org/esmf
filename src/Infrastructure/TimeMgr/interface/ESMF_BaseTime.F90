@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTime.F90,v 1.8 2003/06/07 00:42:00 eschwab Exp $
+! $Id: ESMF_BaseTime.F90,v 1.9 2003/07/25 05:17:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,12 +28,12 @@
 ! !MODULE: ESMF_BaseTimeMod - Base ESMF time definition 
 !
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation
+! Part of Time Manager F90 API wrapper of C++ implemenation.
 !
 ! This module serves only as the common Time definition inherited
-! by {\tt ESMF\_TimeInterval} and {\tt ESMF\_Time}
+! by {\tt ESMF\_TimeInterval} and {\tt ESMF\_Time}.
 !
-! See {\tt ../include/ESMC\_BaseTime.h} for complete description
+! See {\tt ../include/ESMC\_BaseTime.h} for complete description.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -54,9 +54,9 @@
       type ESMF_BaseTime
       sequence                        ! for C++ interoperability
       private
-        integer(ESMF_IKIND_I8) :: S   ! whole seconds
-        integer                :: Sn  ! fractional seconds, numerator
-        integer                :: Sd  ! fractional seconds, denominator
+        integer(ESMF_IKIND_I8) :: s     ! whole seconds
+        integer                :: sN    ! fractional seconds, numerator
+        integer                :: sD    ! fractional seconds, denominator
         integer                :: pad1  ! to match halem C++ <vtbl> long[4]*
         integer                :: pad2  ! to match halem C++ <vtbl> long[6]*
       end type
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BaseTime.F90,v 1.8 2003/06/07 00:42:00 eschwab Exp $'
+      '$Id: ESMF_BaseTime.F90,v 1.9 2003/07/25 05:17:06 eschwab Exp $'
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.6 2003/06/07 00:42:00 eschwab Exp $
+! $Id: ESMF_Fraction.F90,v 1.7 2003/07/25 05:17:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,12 +29,12 @@
 ! !MODULE: ESMF_FractionMod
 !
 ! !DESCRIPTION:
-! Part of ESMF F90 API wrapper of C++ implemenation
+! Part of ESMF F90 API wrapper of C++ implemenation.
 !
 ! Defines F90 wrapper entry points for corresponding
-! C++ implementaion of class {\tt ESMC\_Fraction}
+! C++ implementaion of class {\tt ESMC\_Fraction}.
 !
-! See {\tt ../include/ESMC\_Fraction.h} for complete description
+! See {\tt ../include/ESMC\_Fraction.h} for complete description.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -53,8 +53,8 @@
       type ESMF_Fraction
       sequence
       private
-        integer :: n    ! Integer fraction (exact) n/d; numerator
-        integer :: d    ! Integer fraction (exact) n/d; denominator
+        integer :: numerator    ! Integer fraction (exact) n/d; numerator
+        integer :: denominator  ! Integer fraction (exact) n/d; denominator
       end type
 !
 !------------------------------------------------------------------------------
@@ -71,7 +71,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.6 2003/06/07 00:42:00 eschwab Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.7 2003/07/25 05:17:06 eschwab Exp $'
 
 !==============================================================================
 

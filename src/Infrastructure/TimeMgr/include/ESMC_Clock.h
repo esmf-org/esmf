@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.13 2003/06/07 00:41:59 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.14 2003/07/25 05:17:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
     int ESMC_ClockGetAlarmList(ESMC_Alarm **alarmList, int *NumAlarms) const;
     int ESMC_ClockGetNumAlarms(int *numAlarms) const; // (TMG 4.3)
 
-    int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
+    int ESMC_ClockSyncToRealTime(void); // TMG3.4.5
     // (see ESMC_Time::GetRealTime()
 
     int ESMC_ClockAdvance(ESMC_Alarm *ringingList=0, int *NumRingingAlarms=0);

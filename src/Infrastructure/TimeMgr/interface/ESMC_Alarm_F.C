@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.10 2003/06/11 06:58:43 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.11 2003/07/25 05:17:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,14 +58,6 @@ extern "C" {
        void FTN(c_esmc_alarmisringing)(ESMC_Alarm *ptr, 
                 int *esmf_alarmIsRinging, int *status) {
            *esmf_alarmIsRinging = (int) (ptr)->ESMC_AlarmIsRinging(status);
-       }
-
-       void FTN(c_esmc_alarmcheckringtime)(ESMC_Alarm *ptr,
-                int *esmf_alarmCheckRingTime, ESMC_Time *clockCurrTime, 
-                int *positive, int *status) {
-           *esmf_alarmCheckRingTime =
-                (int) (ptr)->ESMC_AlarmCheckRingTime(clockCurrTime, *positive,
-                                                     status);
        }
 
        void FTN(c_esmc_alarmgetringinterval)(ESMC_Alarm *ptr, 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.38 2003/06/07 00:42:00 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.39 2003/07/25 05:17:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.38 2003/06/07 00:42:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.39 2003/07/25 05:17:06 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -42,6 +42,10 @@
 // This section includes all the ESMC_Time routines
 //
 //
+// TODO: override the BaseTime (-) method to first check if the two
+// times' calendars are the same before performing the difference.
+// The F90 interface will then call this overridden method, rather
+// than the BaseTime method.
 
 //-------------------------------------------------------------------------
 //BOP
@@ -899,6 +903,7 @@
     struct tm wallClock;
 
     // get wall clock (system) time
+    // TODO:  use POSIX real-time function to get nanosecond resolution
     if (time(&tm) < 0) return (ESMF_FAILURE);
     wallClock = *localtime(&tm);          
     ESMF_IKIND_I8 YRl = wallClock.tm_year + 1900;
