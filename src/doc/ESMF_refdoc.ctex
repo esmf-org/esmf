@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.15 2003/04/10 21:15:06 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.16 2003/04/11 04:31:04 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -56,6 +56,8 @@
 
 #include "../Superstructure/Component/doc/Component_refdoc.ctex"
 
+%====================================================================================================
+
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
@@ -63,6 +65,8 @@
 \part{Infrastructure Fields and Grids: Fields}
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
+
+%====================================================================================================
 
 \newpage
 \begin{htmlonly}
@@ -73,6 +77,8 @@
 
 #include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
 
+%====================================================================================================
+
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
@@ -82,28 +88,30 @@
 
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
-\end{htmlonly}
-\part{Infrastructure Fields and Grids: Regridding}
-\label{part:Infrastructure_Fields_and_Grids:_Regridding}
+%====================================================================================================
 
-#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
+%\end{htmlonly}
+%\part{Infrastructure Fields and Grids: Regridding}
+%\label{part:Infrastructure_Fields_and_Grids:_Regridding}
+
+%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Base}
-\end{htmlonly}
-\part{Infrastructure Utilities: Base}
-\label{part:Infrastructure_Utilities:_Base}
 
-#include "../Infrastructure/TimeMgr/doc/Base_refdoc.ctex"
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Base}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Base}
+%\label{part:Infrastructure_Utilities:_Base}
 
-
+%#include "../Infrastructure/TimeMgr/doc/Base_refdoc.ctex"
 
 %====================================================================================================
+
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
@@ -113,8 +121,8 @@
 
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
-
 %====================================================================================================
+
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
