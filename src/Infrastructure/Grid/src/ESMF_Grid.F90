@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.18 2002/12/31 20:49:47 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.19 2003/01/08 21:24:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,11 +85,11 @@
                                                      ! necessary to support
                                                      ! staggering, vertical
                                                      ! grids, background grids
-        type (ESMF_PhysGrid), dimension(:), pointer :: &
+        type (ESMF_PhysGridType), dimension(:), pointer :: &
            physgrids         ! grid info for all grid descriptions necessary
                              ! to define horizontal, staggered and vertical grids
-        type (ESMF_DistGrid), pointer :: distgrid    ! decomposition and other
-                                                     ! logical space info for grid
+        type (ESMF_DistGrid) :: distgrid    ! decomposition and other
+                                            ! logical space info for grid
 
       end type
 
@@ -140,7 +140,7 @@
 !
 ! !PUBLIC DATA MEMBERS:
 
-   integer, parameter ::                    &! recognized grid types
+   integer, parameter, public ::            &! recognized grid types
       ESMF_GridType_Unknown           =  0, &! unknown or undefined grid
       ESMF_GridType_LatLon            =  1, &! equally-spaced lat/lon grid
       ESMF_GridType_Mercator          =  2, &! Mercator lat/lon grid
@@ -154,7 +154,7 @@
       ESMF_GridType_Geodesic          = 10, &! spherical geodesic grid
       ESMF_GridType_CubedSphere       = 11   ! cubed sphere grid
 
-   integer, parameter ::                    &! recognized staggering types
+   integer, parameter, public ::            &! recognized staggering types
       ESMF_GridStagger_Unknown        =  0, &! unknown or undefined staggering
       ESMF_GridStagger_A              =  1, &! Arakawa A (centered velocity)
       ESMF_GridStagger_B              =  2, &! Arakawa B (velocities at grid corner)
@@ -163,7 +163,7 @@
       ESMF_GridStagger_VertCenter     =  5, &! vert velocity at vertical midpoints
       ESMF_GridStagger_VertFace       =  6   ! vert velocity/Pgrad at top(bottom)face
 
-   integer, parameter ::                    &! recognized coordinate systems
+   integer, parameter, public ::            &! recognized coordinate systems
       ESMF_CoordSystem_Unknown        =  0, &! unknown or undefined coord system
       ESMF_CoordSystem_Spherical      =  1, &! spherical coordinates (lat/lon)
       ESMF_CoordSystem_Cartesian      =  2, &! Cartesian coordinates (x,y)
@@ -182,7 +182,7 @@
       ! I'm sure there are more - I'm not sure
       ! what the atmospheric ESMF models are using for vertical coords
 
-   integer, parameter ::                    &! recognized coordinate orderings
+   integer, parameter, public ::            &! recognized coordinate orderings
       ESMF_CoordOrder_Unknown         =  0, &! unknown or undefined coord ordering
       ESMF_CoordOrder_XYZ             =  1, &! IJK maps to XYZ
       ESMF_CoordOrder_XZY             =  2, &! IJK maps to XZY
@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.18 2002/12/31 20:49:47 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.19 2003/01/08 21:24:56 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1151,7 +1151,6 @@
       grid%coord_order = ESMF_CoordOrder_Unknown
       grid%num_physgrids = 0
       nullify(grid%physgrids)
-      nullify(grid%distgrid)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1252,6 +1251,9 @@
       real :: local_min_coord2
       real :: local_max_coord2
       integer :: local_nmax2
+      integer :: i
+      type(ESMF_PhysGridType), dimension(:), allocatable, target :: temp_pgrids
+                                             ! temporary array of physgrids
 
 !     Initialize return code
       if(present(rc)) then
@@ -1259,32 +1261,56 @@
         rc = ESMF_FAILURE
       endif
 
-!     Increment the number of physgrids in the grid
+!     Increment the number of physgrids in the grid and allocate memory
       grid%num_physgrids = grid%num_physgrids + 1
+      if(grid%num_physgrids .eq. 1) then
+        allocate(grid%physgrids(1), stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
+          return
+        endif
+      else
+        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
+          return
+        endif
+        do i = 1, grid%num_physgrids - 1
+          temp_pgrids(i) = grid%physgrids(i)
+        enddo
+        deallocate(grid%physgrids, stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGrid: physgrids deallocate"
+          return
+        endif
+        grid%physgrids => temp_pgrids
+      endif
       physgrid_id = grid%num_physgrids 
 
       delta1 = (x_max - x_min) / real(i_max)
-      local_min_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%start)
+      local_min_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%start-1)
       local_max_coord1 = delta1 * real(grid%distgrid%ptr%MyDE%n_dir1%end)
       local_nmax1 = grid%distgrid%ptr%MyDE%n_dir1%size
       delta2 = (y_max - y_min) / real(j_max)
-      local_min_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%start)
+      local_min_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%start-1)
       local_max_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%end)
       local_nmax2 = grid%distgrid%ptr%MyDE%n_dir2%size
-      grid%physgrids(1) = &
-                  ESMF_PhysGridCreate(local_min_coord1=local_min_coord1, &
-                                      local_max_coord1=local_max_coord1, &
-                                      local_nmax1=local_nmax1, &
-                                      local_min_coord2=local_min_coord2, &
-                                      local_max_coord2=local_max_coord2, &
-                                      local_nmax2=local_nmax2, &
-                                      global_min_coord1=x_min, &
-                                      global_max_coord1=x_max, &
-                                      global_nmax1=i_max, &
-                                      global_min_coord2=y_min, &
-                                      global_max_coord2=y_max, &
-                                      global_nmax2=j_max, &
-                                      name=physgrid_name, rc=status)
+      call ESMF_PhysGridConstruct(grid%physgrids(physgrid_id), &
+                                  local_min_coord1=local_min_coord1, &
+                                  local_max_coord1=local_max_coord1, &
+                                  local_nmax1=local_nmax1, &
+                                  local_min_coord2=local_min_coord2, &
+                                  local_max_coord2=local_max_coord2, &
+                                  local_nmax2=local_nmax2, &
+                                  global_min_coord1=x_min, &
+                                  global_max_coord1=x_max, &
+                                  global_nmax1=i_max, &
+                                  global_min_coord2=y_min, &
+                                  global_max_coord2=y_max, &
+                                  global_nmax2=j_max, &
+                                  name=physgrid_name, rc=status)
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAddPhysGrid
 
@@ -1558,7 +1584,7 @@
       endif
 
 !     Get physgrid info with global coordinate extents
-      call ESMF_PhysGridGetInfo(grid%physgrids(physgrid_id)%ptr, &
+      call ESMF_PhysGridGetInfo(grid%physgrids(physgrid_id), &
                                 global_min_coord1=global_min_coord1, &
                                 global_max_coord1=global_max_coord1, &
                                 global_min_coord2=global_min_coord2, &
@@ -1585,7 +1611,8 @@
 !     For now, set coord_loc by hand.  TODO:  automate for the different grid types
       coord_loc(1) = 1
       coord_loc(2) = 2
-      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id)%ptr, &
+      ncoord_locs = 2
+      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), &
                                  ncoord_locs, coord_loc, &
                                  global_nmin1, global_nmax1, &
                                  global_nmin2, global_nmax2, &

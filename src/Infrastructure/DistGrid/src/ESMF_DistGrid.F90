@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.13 2002/12/31 20:50:31 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.14 2003/01/08 21:25:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,18 +95,22 @@
       type ESMF_MyDE
       sequence
 !     private
-        integer :: MyDE      ! identifier for this DE
-        integer :: DE_East   ! identifier for DE to the east
-        integer :: DE_West   ! identifier for DE to the west
-        integer :: DE_North  ! identifier for DE to the north
-        integer :: DE_South  ! identifier for DE to the south
-        integer :: DE_NE     ! identifier for DE to the northeast
-        integer :: DE_NW     ! identifier for DE to the northwest
-        integer :: DE_SE     ! identifier for DE to the southeast
-        integer :: DE_SW     ! identifier for DE to the southwest
-        integer :: lsize     ! local (on this DE) number of cells
-        type (ESMF_DecompAxis) :: n_dir1  ! global cell count in 1st dir
-        type (ESMF_DecompAxis) :: n_dir2  ! global cell count in 2nd dir
+        integer :: MyDE     ! identifier for this DE
+        integer :: MyDEx
+        integer :: MyDEy
+        integer :: DE_E     ! identifier for DE to the east
+        integer :: DE_W     ! identifier for DE to the west
+        integer :: DE_N     ! identifier for DE to the north
+        integer :: DE_S     ! identifier for DE to the south
+        integer :: DE_NE    ! identifier for DE to the northeast
+        integer :: DE_NW    ! identifier for DE to the northwest
+        integer :: DE_SE    ! identifier for DE to the southeast
+        integer :: DE_SW    ! identifier for DE to the southwest
+        integer :: lsize                  ! local (on this DE) number of cells
+        type (ESMF_DecompAxis) :: n_dir1  ! local cell count in 1st dir, in
+                                          ! global index
+        type (ESMF_DecompAxis) :: n_dir2  ! local cell count in 2nd dir, in
+                                          ! global index
       end type
 
 !------------------------------------------------------------------------------
@@ -120,18 +124,19 @@
 !     private
         type (ESMF_Base) :: base
 !       type (ESMF_Layout), dimension(:), pointer :: layouts
+!       type (ESMF_Layout) :: layout
         type (ESMF_Decomp) :: decomp       ! DE decomposition object
         type (ESMF_MyDE) :: MyDE           ! local DE identifiers
         integer :: gsize                   ! global number of cells
         integer :: gsize_dir1              ! global number of cells in 1st dir
         integer :: gsize_dir2              ! global number of cells in 2nd dir
         type (ESMF_Array) :: DEids         ! array of all DE identifiers
-        type (ESMF_DecompAxis), dimension(:), pointer :: local_dir1
-        type (ESMF_DecompAxis), dimension(:), pointer :: local_dir2
-        type (ESMF_DecompAxis), dimension(:), pointer :: global_dir1
-        type (ESMF_DecompAxis), dimension(:), pointer :: global_dir2
-        type (ESMF_DecompAxis), dimension(:), pointer :: memory_dir1
-        type (ESMF_DecompAxis), dimension(:), pointer :: memory_dir2
+        type (ESMF_Array) :: DEx
+        type (ESMF_Array) :: DEy
+        type (ESMF_DecompAxis) :: global_dir1
+        type (ESMF_DecompAxis) :: global_dir2
+        type (ESMF_DecompAxis) :: memory_dir1
+        type (ESMF_DecompAxis) :: memory_dir2
         integer :: maxsize_dir1            ! maximum DE cell count in 1st dir
         integer :: maxsize_dir2            ! maximum DE cell count in 2nd dir
         logical :: covers_domain_dir1      ! identifiers if distgrid covers
@@ -170,6 +175,8 @@
     public ESMF_DistGridSetInfo
     public ESMF_DistGridGetCounts
     public ESMF_DistGridSetCounts
+!    public ESMF_DistGridGetDE
+    public ESMF_DistGridSetDE
     public ESMF_DistGridSetDecomp
     public ESMF_DistGridGetValue
     public ESMF_DistGridSetValue
@@ -181,7 +188,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.13 2002/12/31 20:50:31 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.14 2003/01/08 21:25:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -227,6 +234,21 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridSetCountsInternal
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     extent counts in a {\tt DistGrid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_DistGridSetDE
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DistGridSetDEInternal
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -499,10 +521,12 @@
       distgrid%decomp%periodic_dir2 = .false.
       distgrid%decomp%num_masks = 0
       distgrid%MyDE%MyDE = 0
-      distgrid%MyDE%DE_East = 0
-      distgrid%MyDE%DE_West = 0
-      distgrid%MyDE%DE_North = 0
-      distgrid%MyDE%DE_South = 0
+      distgrid%MyDE%MyDEx = 0
+      distgrid%MyDE%MyDEy = 0
+      distgrid%MyDE%DE_E = 0
+      distgrid%MyDE%DE_W = 0
+      distgrid%MyDE%DE_N = 0
+      distgrid%MyDE%DE_S = 0
       distgrid%MyDE%DE_NE = 0
       distgrid%MyDE%DE_NW = 0
       distgrid%MyDE%DE_SE = 0
@@ -517,24 +541,10 @@
       distgrid%gsize = 0
       distgrid%gsize_dir1 = 0
       distgrid%gsize_dir2 = 0
-      distgrid%local_dir1%start = 0
-      distgrid%local_dir1%end = 0
-      distgrid%local_dir1%size = 0
-      distgrid%local_dir2%start = 0
-      distgrid%local_dir2%end = 0
-      distgrid%local_dir2%size = 0
-      distgrid%global_dir1%start = 0
-      distgrid%global_dir1%end = 0
-      distgrid%global_dir1%size = 0
-      distgrid%global_dir2%start = 0
-      distgrid%global_dir2%end = 0
-      distgrid%global_dir2%size = 0
-      distgrid%memory_dir1%start = 0
-      distgrid%memory_dir1%end = 0
-      distgrid%memory_dir1%size = 0
-      distgrid%memory_dir2%start = 0
-      distgrid%memory_dir2%end = 0
-      distgrid%memory_dir2%size = 0
+!     nullify(global_dir1)
+!     nullify(global_dir2)
+!     nullify(memory_dir1)
+!     nullify(memory_dir2)
       distgrid%maxsize_dir1 = 0
       distgrid%maxsize_dir2 = 0
       distgrid%covers_domain_dir1 = .false.
@@ -596,6 +606,7 @@
       integer :: gsize_dir1
       integer :: gsize_dir2
       integer :: gsize
+      integer, dimension(:), allocatable :: PEList
       logical :: cover_domain_dir1
       logical :: cover_domain_dir2
 
@@ -619,18 +630,35 @@
                                 gsize=i_max*j_max, &
                                 covers_domain_dir1=.true., &
                                 covers_domain_dir2=.true., rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: distgrid setinfo"
+        return
+      endif
 
-!     Create layout with specified decomposition (assume 1 in 3rd direction)
-!     call ESMF_LayoutCreate(nDE_i, nDE_j, 1, status)
+!     Create layout with specified decomposition
+      allocate(PEList(2))
+      PEList(1) = 1
+      PEList(2) = 2
+!     call ESMF_LayoutCreate(nDE_i, nDE_j, PEList, 0, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
+        return
+      endif
+
+!     Allocate resources based on number of DE's 
+!jw   allocate(distgrid%global_dir1(nDE_i*nDE_j), stat=status)
+!jw   allocate(distgrid%global_dir2(nDE_i*nDE_j), stat=status)
+!jw   allocate(distgrid%memory_dir1(nDE_i*nDE_j), stat=status)
+!jw   allocate(distgrid%memory_dir2(nDE_i*nDE_j), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
 
 !     Set decomposition based on input numbers of processors
       call ESMF_DistGridSetDecomp(distgrid, nDE_i, nDE_j, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
+        print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set decomp"
         return
       endif
 
@@ -639,7 +667,7 @@
                                   status)
         
 !     Fill in DE derived type
-!     call ESMF_DistGridSetDE(distgrid, status)    TODO
+      call ESMF_DistGridSetDE(distgrid, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
         return
@@ -1035,16 +1063,26 @@
 
 !     Retrieve extent counts for each axis from the de identifier
 !     TODO:  check validity of DE_id
-      if(present(size_dir1)) size_dir1 = distgrid%global_dir1(DE_id)%size
-      if(present(size_dir2)) size_dir2 = distgrid%global_dir2(DE_id)%size
+!     if(present(size_dir1)) size_dir1 = distgrid%global_dir1(DE_id)%size
+!     if(present(size_dir2)) size_dir2 = distgrid%global_dir2(DE_id)%size
+!     if(present(global_start_dir1)) &
+!                global_start_dir1 = distgrid%global_dir1(DE_id)%start
+!     if(present(global_end_dir1)) &
+!                global_end_dir1 = distgrid%global_dir1(DE_id)%end
+!     if(present(global_start_dir2)) &
+!                global_start_dir2 = distgrid%global_dir2(DE_id)%start
+!     if(present(global_end_dir2)) &
+!                global_end_dir2 = distgrid%global_dir2(DE_id)%end
+      if(present(size_dir1)) size_dir1 = distgrid%global_dir1%size
+      if(present(size_dir2)) size_dir2 = distgrid%global_dir2%size
       if(present(global_start_dir1)) &
-                 global_start_dir1 = distgrid%global_dir1(DE_id)%start
+                 global_start_dir1 = distgrid%global_dir1%start
       if(present(global_end_dir1)) &
-                 global_end_dir1 = distgrid%global_dir1(DE_id)%end
+                 global_end_dir1 = distgrid%global_dir1%end
       if(present(global_start_dir2)) &
-                 global_start_dir2 = distgrid%global_dir2(DE_id)%start
+                 global_start_dir2 = distgrid%global_dir2%start
       if(present(global_end_dir2)) &
-                 global_end_dir2 = distgrid%global_dir2(DE_id)%end
+                 global_end_dir2 = distgrid%global_dir2%end
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1112,10 +1150,11 @@
       global_e = 0
       do i = 1,nDE_i
         global_e = min(global_e + ni, i_max)
-        distgrid%global_dir1(i)%start = global_s
-        distgrid%global_dir1(i)%end = global_e
-        distgrid%local_dir1(i)%start = 1
-        distgrid%local_dir1(i)%end = global_e - global_s + 1
+!       distgrid%global_dir1(i)%start = global_s
+!       distgrid%global_dir1(i)%end = global_e
+        distgrid%global_dir1%start = global_s
+        distgrid%global_dir1%end = global_e
+        distgrid%global_dir1%size = global_e - global_s + 1
         global_s = global_e + 1
       enddo
       nj = j_max/nDE_j
@@ -1123,12 +1162,15 @@
       global_e = 0
       do j = 1,nDE_j
         global_e = min(global_e + nj, j_max)
-        distgrid%global_dir2(j)%start = global_s
-        distgrid%global_dir2(j)%end = global_e
-        distgrid%local_dir2(j)%start = 1
-        distgrid%local_dir2(j)%end = global_e - global_s + 1
+!       distgrid%global_dir2(j)%start = global_s
+!       distgrid%global_dir2(j)%end = global_e
+        distgrid%global_dir2%start = global_s
+        distgrid%global_dir2%end = global_e
+        distgrid%global_dir2%size = global_e - global_s + 1
         global_s = global_e + 1
       enddo
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSetCountsInternal
 
@@ -1162,12 +1204,40 @@
 
       integer :: status=ESMF_FAILURE                 ! Error status
       logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: DE_id, DEx, DEy
 
 !     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
+
+      DEx = 1     ! TODO:  interface with layout to get DE identifier
+      DEy = 1     ! TODO:  interface with layout to get DE identifier
+      DE_id = 1
+!     call ESMF_LayoutGetPosition(distgrid%layout, DEx, DEy, status)
+!     call ESMF_LayoutGetIndex(distgrid%layout, DE_id, status)
+!     if(status .NE. ESMF_SUCCESS) then
+!       print *, "ERROR in ESMF_DistGridSetDEInternal: layout get position"
+!       return
+!     endif
+                    ! TODO:  identify neighbors
+
+      distgrid%MyDE%MyDE = DE_id
+      distgrid%MyDE%MyDEx = DEx
+      distgrid%MyDE%MyDEy = DEy
+!  TODO  after this, need to set similar information in distgrid arrays
+      distgrid%MyDE%n_dir1%start = distgrid%global_dir1%start ! TODO: global_dirs
+                                                              ! should be an array
+      distgrid%MyDE%n_dir1%end = distgrid%global_dir1%end
+      distgrid%MyDE%n_dir1%size = distgrid%global_dir1%size
+      distgrid%MyDE%n_dir2%start = distgrid%global_dir2%start
+      distgrid%MyDE%n_dir2%end = distgrid%global_dir2%end
+      distgrid%MyDE%n_dir2%size = distgrid%global_dir2%size
+      distgrid%MyDE%lsize = distgrid%MyDE%n_dir1%size * &
+                            distgrid%MyDE%n_dir2%size
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSetDEInternal
 
@@ -1177,7 +1247,7 @@
 !     ESMF_DistGridSetDecompInternal - Set decomposition for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetDecompInternal(DistGrid, nDE_i, nDE_j, rc)
+      subroutine ESMF_DistGridSetDecompInternal(distgrid, nDE_i, nDE_j, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
@@ -1224,6 +1294,8 @@
       distgrid%decomp%periodic_dir1 = .false.
       distgrid%decomp%periodic_dir2 = .false.
       distgrid%decomp%num_masks = 0
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSetDecompInternal
 

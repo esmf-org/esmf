@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.13 2002/12/31 20:50:07 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.14 2003/01/08 21:25:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -87,11 +87,9 @@
         real :: local_max_coord1         ! direction
         real :: local_min_coord2         ! coordinate extents in 2nd coord
         real :: local_max_coord2         ! direction
-        real, dimension(:,:), pointer :: center_coord1
-!       type (ESMF_Array) :: center_coord1   ! coord of center of
+        type (ESMF_Array) :: center_coord1   ! coord of center of
                                              ! each cell in 1st direction
-        real, dimension(:,:), pointer :: center_coord2
-!       type (ESMF_Array) :: center_coord2   ! coord of center of
+        type (ESMF_Array) :: center_coord2   ! coord of center of
                                              ! each cell in 2nd direction
         type (ESMF_Array) :: corner_coord1   ! coord of corner of
                                              ! each cell in 1st direction
@@ -133,6 +131,7 @@
 !
    public ESMF_PhysGridCreate
    public ESMF_PhysGridDestroy
+   public ESMF_PhysGridConstruct
    public ESMF_PhysGridGetInfo
    public ESMF_PhysGridSetInfo
 !   public ESMF_PhysGridGetCoord
@@ -152,7 +151,7 @@
 !
 ! !PUBLIC DATA MEMBERS:
 
-   integer, parameter ::                     &! internally-recognized grid metrics
+   integer, parameter, public ::             &! internally-recognized grid metrics
       ESMF_GridMetric_Unknown          =  0, &! unknown or undefined metric
       ESMF_GridMetric_Area             =  1, &! area of grid cell
       ESMF_GridMetric_Volume           =  2, &! volume of 3-d grid cell
@@ -169,7 +168,7 @@
       ESMF_GridMetric_WFaceDist        = 14, &! cell center to west  face distance
       ESMF_GridMetric_SFaceDist        = 15   ! cell center to south face distance
 
-   integer, parameter ::                     &! internally-recognized cell locations
+   integer, parameter, public ::             &! internally-recognized cell locations
       ESMF_CellLoc_Unknown             =  0, &! unknown or undefined metric
       ESMF_CellLoc_Center_X            =  1, &! cell center, x-coordinate  
       ESMF_CellLoc_Center_Y            =  2, &! cell center, y-coordinate  
@@ -183,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.13 2002/12/31 20:50:07 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.14 2003/01/08 21:25:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -564,8 +563,8 @@
       physgrid%local_max_coord1 = 0.0
       physgrid%local_min_coord2 = 0.0
       physgrid%local_max_coord2 = 0.0
-      nullify(physgrid%center_coord1)
-      nullify(physgrid%center_coord2)
+!     nullify(physgrid%center_coord1)
+!     nullify(physgrid%center_coord2)
       !physgrid%corner_coord1  TODO:  initialize ESMF_Arrays
       !physgrid%corner_coord2
       !physgrid%face_coord1
@@ -1144,6 +1143,7 @@
       integer :: global_n1, global_n2             ! counters
       integer :: local_n1, local_n2               ! counters
       logical :: rcpresent=.FALSE.                ! Return code present
+      real(selected_real_kind(6,45)), dimension(:,:), pointer :: temp
 
 !     Initialize return code
       if(present(rc)) then
@@ -1165,23 +1165,32 @@
         case (ESMF_CellLoc_Unknown)
           status = ESMF_FAILURE
         case (ESMF_CellLoc_Center_X)
+          allocate(temp(global_nmax1,global_nmax2))  ! TODO local sizing
           do global_n1 = global_nmin1,global_nmax1
             local_n1 = global_n1 - global_nmin1 + 1
-            do global_n2 = global_nmin1,global_nmax2
+            do global_n2 = global_nmin2,global_nmax2
               local_n2 = global_n2 - global_nmin2 + 1
-              physgrid%center_coord1(local_n1,local_n2) = &
+              temp(local_n1,local_n2) = &
                            delta1*0.5*real(global_n1+global_n1-1)
             enddo
           enddo
+          physgrid%center_coord1 = ESMF_ArrayCreate(temp, ESMF_NO_COPY, rc)
+          nullify(temp)
+!         deallocate(temp)
+          call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
         case (ESMF_CellLoc_Center_Y)
-          do global_n2 = global_nmin1,global_nmax2
+          allocate(temp(global_nmax1,global_nmax2))  ! TODO local sizing
+          do global_n2 = global_nmin2,global_nmax2
             local_n2 = global_n2 - global_nmin2 + 1
             do global_n1 = global_nmin1,global_nmax1
               local_n1 = global_n1 - global_nmin1 + 1
-              physgrid%center_coord2(local_n1,local_n2) = &
+              temp(local_n1,local_n2) = &
                            delta2*0.5*real(global_n2+global_n2-1)
             enddo
           enddo
+          physgrid%center_coord2 = ESMF_ArrayCreate(temp, ESMF_NO_COPY, rc)
+          nullify(temp)
+!         deallocate(temp)
         case (ESMF_CellLoc_Corner_X)
 !          corner_coord1()=
         case (ESMF_CellLoc_Corner_Y)
@@ -1194,6 +1203,7 @@
 
       enddo
 
+      call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridSetCoordInternal: TODO"
         return
