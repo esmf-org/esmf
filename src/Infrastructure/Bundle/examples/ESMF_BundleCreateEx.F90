@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.17 2004/04/28 23:11:47 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.18 2004/05/10 15:42:09 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -26,7 +26,7 @@
     integer :: i, x, y, rc, mycell, fieldcount
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_DataMap) :: datamap
+    type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: delayout
     type(ESMF_VM) :: vm
     character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2

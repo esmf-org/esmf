@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.14 2004/05/07 22:00:44 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.15 2004/05/10 15:42:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.14 2004/05/07 22:00:44 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.15 2004/05/10 15:42:10 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,7 +48,7 @@
       type(ESMF_VM) :: vm
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: arraya, arrayb
-      type(ESMF_DataMap) :: datamap
+      type(ESMF_FieldDataMap) :: datamap
       type(ESMF_RelLoc) :: relativelocation
       character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2, fname3
       type(ESMF_IOspec) :: iospec

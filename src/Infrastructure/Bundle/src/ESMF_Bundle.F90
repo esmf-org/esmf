@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.38 2004/05/07 22:01:39 svasquez Exp $
+! $Id: ESMF_Bundle.F90,v 1.39 2004/05/10 15:42:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,11 +36,13 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      use ESMF_DataMapMod
+      use ESMF_ArrayDataMapMod
       use ESMF_GridTypesMod
       use ESMF_GridMod
       use ESMF_ArrayMod
+      use ESMF_FieldDataMapMod
       use ESMF_FieldMod
+      use ESMF_BundleDataMapMod
       implicit none
 !
 ! !PRIVATE TYPES:
@@ -63,17 +65,32 @@
                                         ESMF_NO_PACKED_DATA = ESMF_PackFlag(2)
 
 !------------------------------------------------------------------------------
-!       ! ESMF_FieldInterleave
+!  ! For ease of accessing data for an individual field for a packed array.
+
+      type ESMF_BundleFieldAccess
+      sequence
+      private
+         !type(ESMF_BundleInterleave) :: bfa_type
+         integer :: bfa_start
+         integer :: bfa_end
+         integer :: bfa_strides
+      end type
+
+
+
+!------------------------------------------------------------------------------
+!       ! ESMF_BundleFieldInterleave
 !       !
 !       !  Data type to record the ordering information for multiple field
 !       !  data which is packed in a bundle.  Each has an associated
-!       !  {\tt ESMF\_DataMap} object to track the ordering of that 
-!       ! {\tt ESMF\_Field}'s data in the packed buffer.
-        type ESMF_FieldInterleave
+!       !  {\tt ESMF\_FieldDataMap} object to track the ordering of that 
+!       !  {\tt ESMF\_Field}'s data in the packed buffer.
+        type ESMF_BundleFieldInterleave
         sequence
-        !private
-          integer, pointer :: field_order                 ! index field order
-          type(ESMF_DataMap), pointer :: field_dm         ! array of data maps
+        private
+          integer :: field_order                      ! index of this field
+          !type(ESMF_FieldDataMap) :: field_dm         ! copy of this field's dm
+          type(ESMF_BundleFieldAccess) :: field_bfa   ! access info if packed
         end type
 
 !------------------------------------------------------------------------------
@@ -117,12 +134,12 @@
         type(ESMF_Field), dimension(:), pointer :: flist
         integer :: field_count
 #endif
-        type(ESMF_Grid) :: grid                   ! associated global grid
-        type(ESMF_LocalBundle) :: localbundle     ! this differs per DE
-        type(ESMF_Packflag) :: pack_flag          ! is packed data present?
-        type(ESMF_FieldInterleave) :: fil         ! ordering in buffer
-        type(ESMF_IOSpec) :: iospec               ! iospec values
-        type(ESMF_Status) :: iostatus             ! if unset, inherit from gcomp
+        type(ESMF_Grid) :: grid                  ! associated global grid
+        type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
+        type(ESMF_Packflag) :: pack_flag         ! is packed data present?
+        type(ESMF_BundleFieldInterleave) :: fil  ! ordering in buffer
+        type(ESMF_IOSpec) :: iospec              ! iospec values
+        type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
       
       end type
 
@@ -146,8 +163,8 @@
 !
 ! !PUBLIC TYPES:
       public ESMF_Bundle, ESMF_PackFlag, ESMF_PACKED_DATA, ESMF_NO_PACKED_DATA
-      public ESMF_BundleType   ! intended for internal ESMF use only
-      public ESMF_LocalBundle, ESMF_FieldInterleave
+      ! intended for internal ESMF use only but public for BundleComms
+      public ESMF_BundleType, ESMF_LocalBundle, ESMF_BundleFieldInterleave
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -1930,13 +1947,14 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_DataMap), intent(out) :: datamap
+      type(ESMF_BundleDataMap), intent(out) :: datamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      For querying current ordering of packed {\tt ESMF\_DataArray} type.
-!      Information is returned in the {\tt ESMF\_DataMap} type, and then can
-!      be queried by {\tt ESMF\_DataMap} subroutines for details.
+!      Information is returned in the {\tt ESMF\_BundleDataMap} type, 
+!      and then can be queried by {\tt ESMF\_BundleDataMap} 
+!      subroutines for details.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2378,7 +2396,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_DataMap), intent(in), optional :: datamap 
+      type(ESMF_BundleDataMap), intent(in), optional :: datamap 
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -2638,13 +2656,13 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_BundleDataMap), intent(in) :: datamap
       integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
 !      Used to alter memory ordering of packed {\tt ESMF\_Data} array.  Implemented by 
-!      setting the desired options in an {\tt ESMF\_DataMap} type and then passing it in
+!      setting the desired options in an {\tt ESMF\_BundleDataMap} type and then passing it in
 !      as a parameter to this routine.
 !
 !     The arguments are:
@@ -3066,7 +3084,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype
-      type(ESMF_DataMap), intent(in), optional :: datamap 
+      type(ESMF_BundleDataMap), intent(in), optional :: datamap 
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
