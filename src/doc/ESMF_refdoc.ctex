@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.27 2003/10/16 19:36:22 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.28 2003/10/22 14:36:36 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -88,7 +88,7 @@
 
 #include "../Infrastructure/DataMap/doc/DataMap_refdoc.ctex"
 
-#include "../Infrastructure/Array/doc/Array_refdoc.ctex"
+#include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
 
 #include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
 

@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.5 2003/10/22 03:58:50 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.1 2003/10/22 14:36:36 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,15 +47,15 @@
 #ifdef STANDALONE
 \input{Array_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/Array_desc}
+\input{../Infrastructure/ArrayComm/doc/Array_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Array_usage}
-\input{ESMF_ArrayCreateEx_fapi}
+\input{../../Array/doc/ESMF_ArrayCreateEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/Array_usage}
+\input{../Infrastructure/ArrayComm/doc/Array_usage}
 \input{../Infrastructure/Array/doc/ESMF_ArrayCreateEx_fapi}
 #endif
 
@@ -63,30 +63,30 @@
 #ifdef STANDALONE
 \input{Array_rest}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/Array_rest}
+\input{../Infrastructure/ArrayComm/doc/Array_rest}
 #endif
 
 \subsection{Design and Implementation Notes}
 #ifdef STANDALONE
 \input{Array_implnotes}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/Array_implnotes}
+\input{../Infrastructure/ArrayComm/doc/Array_implnotes}
 #endif
 
 \subsection{Object Model}
 #ifdef STANDALONE
 \input{Array_obj}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/Array_obj}
+\input{../Infrastructure/ArrayComm/doc/Array_obj}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_Array_fapi}
-\input{../../ArrayComm/doc/ESMF_ArrayComm_fapi}
+\input{../../Array/doc/ESMF_Array_fapi}
+\input{ESMF_ArrayComm_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
-\input{../Infrastructure/Array/doc/ESMF_ArrayComm_fapi}
+\input{../Infrastructure/ArrayComm/doc/ESMF_ArrayComm_fapi}
 #endif
 
 #ifdef STANDALONE
@@ -125,7 +125,7 @@
 #ifdef STANDALONE
 %\input{}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Array/doc/}
+%\input{../Infrastructure/ArrayComm/doc/}
 #endif
 
 

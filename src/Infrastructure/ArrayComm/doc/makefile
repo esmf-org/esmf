@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/10/22 03:58:50 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/10/22 14:36:36 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,11 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/ArrayComm/doc
 
-#DVIFILES  = 	Array_refdoc.dvi 
+DVIFILES  = 	Array_refdoc.dvi 
 
-#PDFFILES  =     ${ESMC_DOCDIR}/Array_refdoc.pdf
+PDFFILES  =     ${ESMC_DOCDIR}/Array_refdoc.pdf
 
-#HTMLFILES = 	${ESMC_DOCDIR}/Array_refdoc 
+HTMLFILES = 	${ESMC_DOCDIR}/Array_refdoc 
 
 #
 # Tex Files to make
