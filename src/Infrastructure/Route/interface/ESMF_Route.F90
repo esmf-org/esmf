@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.8 2003/03/18 18:31:03 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.9 2003/03/21 20:22:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.8 2003/03/18 18:31:03 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.9 2003/03/21 20:22:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -494,10 +494,6 @@
                        my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
                        my_DE_src, AI_src, AI_src_count, layout_src, &
                        lcache, lroute, rc)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Get Cached error"
-          return  
-        endif
 
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
@@ -510,6 +506,11 @@
             AI_src(i,j).r = AI_src(i,j).r + 1
           enddo
         enddo
+
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Get Cached error"
+          return  
+        endif
 
         if (present(hascachedroute)) hascachedroute = lcache
         if (present(route)) route = lroute

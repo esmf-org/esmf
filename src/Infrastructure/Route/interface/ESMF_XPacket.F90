@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.4 2003/03/17 20:57:38 nscollins Exp $
+! $Id: ESMF_XPacket.F90,v 1.5 2003/03/21 20:22:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.4 2003/03/17 20:57:38 nscollins Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.5 2003/03/21 20:22:25 nscollins Exp $'
 
 !==============================================================================
 
@@ -287,7 +287,39 @@
 
 
 !------------------------------------------------------------------------------
-! TODO: maybe it's worth putting a Print method back at some point.
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_XPacketPrint - Print the contents of a XPacket
+
+! !INTERFACE:
+      subroutine ESMF_XPacketPrint(xpacket, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_XPacket), intent(in) :: xpacket
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Routine to print information about an XPacket.
+!
+!EOP
+! !REQUIREMENTS:
+
+        integer :: status
+
+
+        if (present(rc)) rc = ESMF_FAILURE
+
+        print *, "XPacket Print:"
+        print *, "  Rank=", xpacket%rank, " Left=", xpacket%left, &
+                 " Right=", xpacket%right
+        print *, "  Strides=", xpacket%stride, " Nums=", xpacket%num
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_XPacketPrint
+!
 
 !------------------------------------------------------------------------------
 

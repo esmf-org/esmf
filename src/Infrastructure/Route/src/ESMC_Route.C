@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.19 2003/03/17 23:27:49 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.20 2003/03/21 20:22:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.19 2003/03/17 23:27:49 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.20 2003/03/21 20:22:25 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -364,10 +364,8 @@
     int sstrides[ESMF_MAXDIM], rstrides[ESMF_MAXDIM];
     int snums[ESMF_MAXDIM], rnums[ESMF_MAXDIM];
 
-    //rc = layout->ESMC_DELayout
-    //rc = sendRT->ESMC_RTable
-    //rc = recvRT->ESMC_RTable
-    //rc = ct->ESMC_CommTable
+    printf("Start of RouteRun:\n");
+    this->ESMC_RoutePrint(""); 
     
     rc = layout->ESMC_DELayoutGetDEid(&mydeid);
     rc = ct->ESMC_CommTableGetCount(&ccount);
@@ -383,11 +381,17 @@
         // look up the corresponding send/recv xpackets in the rtables
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
         if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
-        rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
+        if (xscount > 0)
+            rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
+        else
+            sendxp = NULL;
 
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
         if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
-        rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
+        if (xrcount > 0)
+            rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
+        else
+            recvxp = NULL;
         
         // ready to call the comm routines - possibly multiple times, one for
         //  each disjoint memory piece?
@@ -400,6 +404,10 @@
         // strided, which either means multiple single calls or a call
         // which does multiples at one time.
         // 
+  
+        // if sendxp == NULL, nothing to send
+        // if recvxp == NULL, nothing to recv
+
         // how is this loop to be structured?  we've got to set up both
         // a send and receive each time.  ranks must match?
         for (j=0, srcbytes = sleft, rcvbytes = rleft; j<srank; j++) {
@@ -503,6 +511,10 @@
           // calculate the intersection
           intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
 
+          // if there's no intersection, no need to add an entry here
+          if (intersect_XP->ESMC_XPacketEmpty())
+              continue;
+
           // TODO: translate from global to local
 
           // load the intersecting XPacket into the sending RTable
@@ -543,6 +555,10 @@
           // calculate the intersection
           intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
 
+          // if there's no intersection, no need to add an entry here
+          if (intersect_XP->ESMC_XPacketEmpty())
+              continue;
+
           // TODO: translate from global to local
 
           // load the intersecting XPacket into the receiving RTable
@@ -551,6 +567,8 @@
         }
     }
 
+    printf("end of RoutePrecompute:\n");
+    this->ESMC_RoutePrint("");
     return ESMF_SUCCESS;
 
  } // end ESMC_RoutePrecompute

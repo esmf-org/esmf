@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.10 2003/03/17 20:57:39 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.11 2003/03/21 20:22:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.10 2003/03/17 20:57:39 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.11 2003/03/21 20:22:25 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -269,8 +269,10 @@
 // !REQUIREMENTS:  
 
       if (partner < 0 || partner >= commcount) {
-          fprintf(stderr, "value out of range, %d not >= 0 and < %d\n",
+          fprintf(stderr, "CommTable partner value out of range, %d not >= 0 and < %d\n",
                         partner, commcount);
+          fprintf(stderr, "CommTable current values are:\n");
+          this->ESMC_CommTablePrint("");
           return ESMF_FAILURE;
       }
 

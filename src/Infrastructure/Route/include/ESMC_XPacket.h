@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.14 2003/03/15 00:14:04 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.15 2003/03/21 20:22:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,6 +80,9 @@
     int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
                                   int size_axisindex);
  
+    int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty
+    int ESMC_XPacketPrint(void);
+
  // native C++ constructors/destructors
 	ESMC_XPacket(void);
 	~ESMC_XPacket(void);

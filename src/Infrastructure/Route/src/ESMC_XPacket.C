@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.14 2003/03/21 18:51:32 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.15 2003/03/21 20:22:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.14 2003/03/21 18:51:32 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.15 2003/03/21 20:22:25 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -177,6 +177,12 @@
     }
     this->rank = xpacket1->rank;
 
+    // debug
+    printf("xpacket1: ");
+    xpacket1->ESMC_XPacketPrint();
+    printf("xpacket2: ");
+    xpacket2->ESMC_XPacketPrint();
+
     // check that the xpacket strides are the same
     if (this->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
@@ -264,6 +270,10 @@
       break;
     } 
 
+    // debug
+    printf("intersect: ");
+    this->ESMC_XPacketPrint();
+
     rc = ESMF_SUCCESS;
     return rc;
 
@@ -308,6 +318,8 @@
           this->rank = 2;
           // calculate global lefts and rights for the index space
           for (i=0; i<size_axisindex; i++) {
+    printf("incoming AxisIndex: [%d] left=%d, right=%d, gstart=%d, max=%d\n",
+     i, indexlist[i].l, indexlist[i].r, indexlist[i].gstart, indexlist[i].max);
             global_l[i] = indexlist[i].l + indexlist[i].gstart;
             global_r[i] = indexlist[i].r + indexlist[i].gstart;
           }
@@ -315,6 +327,8 @@
           this->right = global_l[1]*indexlist[0].max + global_r[0];
           this->strides[0] = indexlist[0].max;
           this->num[0] = indexlist[1].r - indexlist[1].l + 1;
+     printf("outgoing XPacket:\n");
+     this->ESMC_XPacketPrint();
         }
       break;
       case 3:
@@ -339,6 +353,69 @@
 
  } // end ESMC_XPacketFromAxisIndex
 
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_XPacketPrint - Print an XPacket
+//
+// !INTERFACE:
+      int ESMC_XPacket::ESMC_XPacketPrint(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//     none
+//
+// !DESCRIPTION:
+//     Print the contents of an XPacket
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i;
+
+    printf("XPacket: rank=%d, left=%d, right=%d\n", rank, left, right);
+ 
+    printf("   strides=(");
+    for (i=0; i<rank; i++) 
+      printf("%d ", strides[i]);
+    printf("), num=(");
+    for (int i=0; i<rank; i++) 
+      printf("%d, ", num[i]);
+    printf(")\n"); 
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketPrint
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_XPacketEmpty - Return true (1) if xp is empty, 0 otherwise
+//
+// !INTERFACE:
+      int ESMC_XPacket::ESMC_XPacketEmpty(void) {
+//
+// !RETURN VALUE:
+//    True/False (1)/(0) return code
+//
+// !ARGUMENTS:
+//     none
+//
+// !DESCRIPTION:
+//     Return true if XP describes an empty region.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i;
+
+    if (num[0] == 0)
+        return 1;
+  
+    return 0;
+
+ } // end ESMC_XPacketEmpty
 
 //-----------------------------------------------------------------------------
 //BOP
