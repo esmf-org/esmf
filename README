@@ -1,4 +1,4 @@
- $Id: README,v 1.14 2003/05/30 22:44:00 flanigan Exp $
+ $Id: README,v 1.15 2003/06/27 22:33:10 flanigan Exp $
 ================================================================================
                                    README
 
@@ -67,6 +67,18 @@ To build and run the unit tests:
 
   gmake BOPT=[g,O] tests
   gmake BOPT=[g,O] tests_uni          ! for non-mpi machines
+
+To build and run the unit tests in exhaustive mode:
+
+  gmake BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests
+  gmake BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests_uni    ! for non-mpi machines
+
+The exhaustive unit tests option is a *compile* time option.  Use
+
+  gmake clean 
+
+first if the unit tests have already been compiled without the 
+ESMF_EXHAUSTIVE=ON option.
 
 Output files from the tests are directed to files in $ESMF_DIR/test${BOPT}/${ESMF_ARCH}
 directories.
