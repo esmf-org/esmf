@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.9 2004/12/22 20:52:45 jwolfe Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.10 2004/12/23 17:04:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.9 2004/12/22 20:52:45 jwolfe Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.10 2004/12/23 17:04:51 svasquez Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -196,7 +196,7 @@
       ! up the Regrid structure
 
       !------------------------------------------------------------------------
-      !N*E*X_UTest_Multi_Proc_Only
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
@@ -206,14 +206,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !N*E*X_UTest_Multi_Proc_Only
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
       write(failMsg, *) "regrid run rc =", rc
       write(name, *) "regrid run rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !N*E*X_UTest_Multi_Proc_Only
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegridRelease(routehandle, rc=rc)
       write(failMsg, *) "regrid release rc =", rc
       write(name, *) "regrid release rc =", rc
@@ -225,6 +225,7 @@
 
       !------------------------------------------------------------------------
       ! This unt test fails openned bug 1089931
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_NEAR_NBR, &
