@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.3 2005/01/26 18:00:45 svasquez Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.4 2005/01/26 20:43:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.3 2005/01/26 18:00:45 svasquez Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.4 2005/01/26 20:43:56 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -48,7 +48,7 @@
       character(len=8) :: strvalue
 
       ! local variables
-      integer:: i, rc, loop_rc, loop_rc
+      integer:: i, rc, loop_rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
       integer:: count,root  
