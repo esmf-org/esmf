@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.27 2004/03/03 17:44:59 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.28 2004/03/04 23:55:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.27 2004/03/03 17:44:59 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.28 2004/03/04 23:55:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1731,15 +1731,16 @@
         print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
         return
       endif
-      distGridId = distGridId + 1 
       call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                  coord1, coord2, &
+                                  decompIdsUse(1:2), coord1, coord2, &
                                   countsPerDE1, countsPerDE2, &
                                   dimNames, dimUnits, physGridName, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
         return
       endif
+      grid%distGridIndex(physGridId) = distGridId
+      distGridId = distGridId + 1 
       physGridId = physGridId + 1 
 
 !     Create any other DistGrids and PhysGrids necessary for horizontal
@@ -1764,15 +1765,16 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1 
           physGridId = physGridId + 1 
 
         ! Arakawa B_SW (velocities at SW grid corner)
@@ -1789,16 +1791,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
         ! Arakawa B_SE (velocities at SE grid corner)
         case (4)
@@ -1814,16 +1817,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
         ! Arakawa B_NW (velocities at NW grid corner)
         case (5)
@@ -1839,16 +1843,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
         ! Arakawa C_NE (U at E face, V at N face) and
         ! Arakawa D_NE (V at E face, U at N face)
@@ -1865,16 +1870,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
           distGridName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
@@ -1887,16 +1893,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
         ! Arakawa C_SW (U at W face, V at S face) and
         ! Arakawa D_SW (V at W face, U at S face)
@@ -1913,16 +1920,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
           distGridName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
@@ -1935,16 +1943,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
         ! Arakawa C_SE (U at E face, V at S face) and
         ! Arakawa D_SE (V at E face, U at S face)
@@ -1961,16 +1970,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
           distGridName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
@@ -1983,16 +1993,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
         ! Arakawa C_NW (U at W face, V at N face) and
         ! Arakawa D_NW (V at W face, U at N face)
@@ -2009,16 +2020,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
           distGridName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
@@ -2031,16 +2043,17 @@
             print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
             return
           endif
-          distGridId = distGridId + 1
           call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDimsGrid, &
-                                      coord1, coord2, &
+                                      decompIdsUse(1:2), coord1, coord2, &
                                       countsPerDE1, countsPerDE2, &
                                       dimNames, dimUnits, physGridName, status)
           if(status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
             return
           endif
-          physGridId = physGridId + 1 
+          grid%distGridIndex(physGridId) = distGridId
+          distGridId = distGridId + 1
+          physGridId = physGridId + 1
 
       end select
 
@@ -2064,6 +2077,7 @@
           print *, "ERROR in ESMF_LRGridDistribute: Add vert PhysGrid"
           return
         endif
+        grid%distGridIndex(physGridId) = distGridId
         distGridId = distGridId + 1
         physGridId = physGridId + 1
 
@@ -2092,6 +2106,7 @@
               print *, "ERROR in ESMF_LRGridDistribute: Add vert PhysGrid"
               return
             endif
+            grid%distGridIndex(physGridId) = distGridId
             distGridId = distGridId + 1
             physGridId = physGridId + 1
 
@@ -2196,7 +2211,7 @@
       !TODO: add status to deallocate calls and trap errors
       deallocate(grid%physgrids)
 
-  !    deallocate(grid%distGridIndex)   TODO: not yet implemented
+      deallocate(grid%distGridIndex)
 
       do n = 1,grid%numDistGridsAlloc
          call ESMF_DistGridDestroy(grid%distgrids(n), rc=status)
@@ -2324,7 +2339,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, &
-                                        coord1, coord2, &
+                                        decompIds, coord1, coord2, &
                                         countsPerDEDim1, countsPerDEDim2, &
                                         dimNames, dimUnits, &
                                         physGridName, rc)
@@ -2334,6 +2349,7 @@
       integer, intent(out) :: physGridId
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(in) :: numDims
+      integer, dimension(:), intent(in) :: decompIds
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
       integer, dimension(:), intent(in) :: countsPerDEDim1
@@ -2357,6 +2373,8 @@
 !          the {\tt Grid}.
 !     \item[numDims]
 !          Number of grid dimensions.
+!     \item[decompIds]
+!          Identifier for which Grid axes are decomposed.
 !     \item[coord1]
 !          Array of physical coordinates in the first direction.
 !     \item[coord2]
@@ -2418,6 +2436,11 @@
         print *, "ERROR in ESMF_LRGridAddPhysGrid: delayout get position"
         return
       endif
+     
+      ! modify myDE array by decompIds
+      do i = 1,numDims
+        if (decompIds(i).eq.0) myDE(i) = 1
+      enddo
 
       localMin(1) = 0.0
       localMin(2) = 0.0
@@ -2764,8 +2787,8 @@
       endif
 
       ! Create the actual PhysGrid object
-      grid%physGrids(physGridId) = ESMF_PhysGridCreate(1, relloc, physGridName, &
-                                                       coordSystem, rc=status)
+      physGrid = ESMF_PhysGridCreate(1, relloc, physGridName, coordSystem, &
+                                     rc=status)
 
       tempCoord = ESMF_PhysCoordCreate(coordKind, name=coordName, &
                                        units=coordUnit, &
@@ -2774,8 +2797,11 @@
                                        cyclic=coordCyclic, &
                                        minVal=localMinCoord, &
                                        maxVal=localMaxCoord, rc=status)
-      call ESMF_PhysGridSetCoord(grid%physGrids(physGridId), tempCoord, &
-                                 dimOrder=1, rc=status)
+      call ESMF_PhysGridSetCoord(physGrid, tempCoord, dimOrder=1, rc=status)
+
+      ! now that it's created, add the physgrid to the grid
+      call ESMF_GridAddPhysGrid(grid, physGrid, status)
+      physGridId = grid%numPhysGrids
 
       ! set coordinates using total cell count
       localCount(1) = countsPerDEDim(1) + 2*gridBoundWidth  ! TODO: indirect address for countPer
@@ -3000,7 +3026,7 @@
       subroutine ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
                                   horzPhysGridId, vertPhysGridId, &
                                   horzRelLoc, vertRelLoc, &
-                                  myDE, localCellCount, localCellCountPerDim, &
+                                  localCellCount, localCellCountPerDim, &
                                   globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
@@ -3011,7 +3037,6 @@
       integer, intent(in), optional :: vertPhysGridId
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
@@ -3054,8 +3079,6 @@
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
-!     \item[{[myDE]}]
-!          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
@@ -3115,6 +3138,8 @@
           print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
           return
         endif
+        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+        horzIsValid   = .true.
       endif
       if (present(horzPhysGridId)) then
         if ((horzPhysGridId.ge.1) .and. &
@@ -3144,6 +3169,8 @@
           print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
           return
         endif
+        vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+        vertIsValid   = .true.
       endif
       if (present(vertPhysGridId)) then
         if ((vertPhysGridId.ge.1) .and. &
@@ -3176,7 +3203,7 @@
       if (present(localCellCountPerDim)) aSize(1)=size(localCellCountPerDim)
       if (present(   globalStartPerDim)) aSize(2)=size(   globalStartPerDim)
       if (present(      globalAIPerDim)) aSize(3)=size(      globalAIPerDim)
-      if (maxval(aSize).lt.gridRank) then
+      if (maxval(aSize).lt.gridRank .and. maxval(aSize).ge.1) then
         print *, "ERROR in ESMF_LRGridGetDE: ", &
                  "input array sizes less than the corresponding grid rank"
         return
@@ -3189,9 +3216,6 @@
         horzIsNeeded = .true.
         if (gridRank.eq.3) vertIsNeeded = .true.
       endif
-      ! myDE could come from either.  if it is the only query argument this
-      ! could cause an error because at least one of the distgrids will be needed
-      ! TODO: fix
 
       ! print error message if an identifier is needed but not valid
       if (horzIsNeeded .and. .not.(horzIsValid)) then
@@ -3210,7 +3234,7 @@
       horzCellCount = 1
       vertCellCount = 1
       if (horzIsNeeded) then
-        call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, myDE, &
+        call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
                                 horzCellCount, &
                                 localCellCountPerDimUse(1:2), &
                                 globalStartPerDimUse(1:2), &
@@ -3222,7 +3246,7 @@
         endif
       endif
       if (vertIsNeeded) then
-        call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, myDE, &
+        call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
                                 vertCellCount, &
                                 localCellCountPerDimUse(3:3), &
                                 globalStartPerDimUse(3:3), &
@@ -3254,15 +3278,14 @@
 ! !IROUTINE: ESMF_LRGridGetAllAxisIndex - Get all axis indices for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGetAllAxisIndex(grid, globalAI, distGridId, &
-                                            physGridId, relloc, total, rc)
+      subroutine ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, &
+                                            vertRelLoc, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -3275,6 +3298,12 @@
 !          Class to be queried.
 !     \item[globalAI]
 !          Global axis indices on all DE's.
+!     \item[horzRelLoc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
 !     \item[{[total]}]
 !          Logical flag for whether the axis indices should be for total
 !          cells or not.  Default is false, which infers computational cells.
@@ -3287,7 +3316,10 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: distGridIdUse
+      integer :: gridRank, sizeAI, i
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: horzAI, vertAI
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -3297,21 +3329,74 @@
         rc = ESMF_FAILURE
       endif
 
-! TODO: add code to get distgridId from relloc or physgridId, test for the
-!       presence of at least one of these optional arguments
-      distGridIdUse = 1          ! default
-      if (present(distGridId)) distGridIdUse = distGridId
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
 
-!     call DistGrid method to retrieve information otherwise not available
-!     to the application level
-      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(distGridIdUse)%ptr, &
-                                        globalAI, total, rc=status)
+      ! Get the grid rank and check against size of globalAI
+      gridRank = grid%ptr%numDims
+      if (size(globalAI,2).lt.gridRank) then
+        print *, "WARNING in ESMF_LRGridGetDE: ", &
+                 "globalAI array size smaller than grid rank"
+      endif
+
+      ! Get the size of the AI array and allocate horz and vert temp AI arrays
+      sizeAI = size(globalAI,1)
+      allocate(horzAI(sizeAI,2))
+      allocate(vertAI(sizeAI,1))
+
+      ! get distgrid identifier from relative locations
+      call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
+        return
+      endif
+      horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+
+      if (present(vertRelLoc)) then
+        call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGetDE: get PhysGrid id"
+          return
+        endif
+        vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+      endif
+
+      ! call DistGrid method to retrieve information otherwise not available
+      ! to the application level
+      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+                                        horzAI, total, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridGetAllAxisIndex: ", &
                  "distgrid get all axis index"
         return
       endif
+      if (vertDistIdUse.ne.-1) then
+        call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+                                          vertAI, total, rc=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGetAllAxisIndex: ", &
+                   "distgrid get all axis index"
+          return
+        endif
+      else
+        if (size(globalAI,2).ge.3 .and. gridRank.eq.3) then
+          print *, "ERROR in ESMF_LRGridGetDE: ", &
+                   "no valid vertRelLoc when one is needed"
+          return
+        endif
+      endif
 
+      ! Load temp values into input array and clean up
+      do i = 1,sizeAI
+        globalAI(i,1) = horzAI(i,1)
+        globalAI(i,2) = horzAI(i,2)
+        if (gridRank.eq.3) globalAI(i,3) = vertAI(i,1)
+      enddo
+      deallocate(horzAI)
+      deallocate(vertAI)
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridGetAllAxisIndex
@@ -3321,8 +3406,8 @@
 ! !IROUTINE: ESMF_LRGridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGlobalToLocalIndex(grid, distGridId, physGridId, &
-                                               relloc, global1D, local1D, &
+      subroutine ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
+                                               global1D, local1D, &
                                                global2D, local2D, &
                                                globalAI1D, localAI1D, &
                                                globalAI2D, localAI2D, &
@@ -3330,9 +3415,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer(ESMF_KIND_I4), dimension(:), intent(in),  optional :: global1D
       integer(ESMF_KIND_I4), dimension(:), intent(out), optional :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), intent(in),  optional :: global2D
@@ -3352,6 +3436,12 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
+!     \item[horzRelLoc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
 !     \item[{[global1D]}]
 !          One-dimensional {\tt ESMF\_LocalArray} of global identifiers to be
 !          translated.  Infers translating between positions in memory.
@@ -3381,7 +3471,11 @@
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
-      integer :: distGridIdUse
+      integer :: gridRank, arraySize, i
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      integer, dimension(:), allocatable :: dimOrderUse
+      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -3391,23 +3485,162 @@
         rc = ESMF_FAILURE
       endif
 
-! TODO: add code to get distgridId from relloc or physgridId, test for the
-!       presence of at least one of these optional arguments
-      distGridIdUse = 1          ! default
-      if (present(distGridId)) distGridIdUse = distGridId
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
+
+      ! determine the largest input array size
+      arraySize = 0
+      if (present(global1D))   arraySize = max(arraySize, size(global1D))
+      if (present(global2D))   arraySize = max(arraySize, size(global2D,2))
+      if (present(globalAI1D)) arraySize = max(arraySize, size(globalAI1D))
+      if (present(globalAI2D)) arraySize = max(arraySize, size(globalAI2D,2))
+
+      ! Get the grid rank and check against size of input arrays
+      gridRank = grid%ptr%numDims
+      if (arraySize.lt.gridRank) then
+        print *, "WARNING in ESMF_LRGridGlobalToLocalIndex: ", &
+                 "input array sizes smaller than grid rank"
+      endif
+
+      ! calculate default if dimOrder is not present
+      allocate(dimOrderUse(size(globalAI1D)))
+      if (present(dimOrder)) then
+        dimOrderUse(:) = dimOrder(:)
+      else
+        do i = 1,size(dimOrderUse)
+          dimOrderUse(i) = i
+        enddo
+      endif
+
+      ! get distgrid identifier from relative locations
+      call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: get PhysGrid id"
+        return
+      endif
+      horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+
+      if (present(vertRelLoc)) then
+        call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: get PhysGrid id"
+          return
+        endif
+        vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+      endif
+
+      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      if (vertDistIdUse.ne.-1) then
+        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+      else
+        if (arraySize.ge.3 .and. gridRank.eq.3) then
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "no valid vertRelLoc when one is needed"
+          return
+        endif
+      endif
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridGlobalToLocalIndex(grid%ptr%distgrids(distGridIdUse)%ptr, &
-                                           global1D, local1D, &
-                                           global2D, local2D, &
-                                           globalAI1D, localAI1D, &
-                                           globalAI2D, localAI2D, &
-                                           dimOrder=dimOrder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
-                 "distgrid global to local"
-        return
+!     can't send parts of optional arguments, so for now break out  TODO: fix
+      if (present(global1D)) then
+        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+                                             global1D=global1D(1:2), &
+                                             local1D=local1D(1:2), &
+                                             dimOrder=dimOrderUse(1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
+                                               global1D=global1D(3:3), &
+                                               local1D=local1D(3:3), &
+                                               dimOrder=dimOrderUse(3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
+      endif
+      if (present(global2D)) then
+        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+                                             global2D=global2D(:,1:2), &
+                                             local2D=local2D(:,1:2), &
+                                             dimOrder=dimOrderUse(1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
+                                               global2D=global2D(:,3:3), &
+                                               local2D=local2D(:,3:3), &
+                                               dimOrder=dimOrderUse(3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
+      endif
+      if (present(globalAI1D)) then
+        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+                                             globalAI1D=globalAI1D(1:2), &
+                                             localAI1D=localAI1D(1:2), &
+                                             dimOrder=dimOrderUse(1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
+                                               globalAI1D=globalAI1D(3:3), &
+                                               localAI1D=localAI1D(3:3), &
+                                               dimOrder=dimOrderUse(3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
+      endif
+      if (present(globalAI2D)) then
+        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+                                             globalAI2D=globalAI2D(:,1:2), &
+                                             localAI2D=localAI2D(:,1:2), &
+                                             dimOrder=dimOrderUse(1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
+                                               globalAI2D=globalAI2D(:,3:3), &
+                                               localAI2D=localAI2D(:,3:3), &
+                                               dimOrder=dimOrderUse(3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -3419,17 +3652,16 @@
 ! !IROUTINE: ESMF_LRGridLocalToGlobalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridLocalToGlobalIndex(grid, distGridId, physGridId, &
-                                               relloc, local1D, global1D, &
+      subroutine ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+                                               local1D, global1D, &
                                                local2D, global2D, &
                                                localAI1D, globalAI1D, &
                                                localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) ::  local2D
@@ -3448,6 +3680,12 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
+!     \item[horzRelLoc]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
 !     \item[{[local1D]}]
 !          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
 !          translated.  Infers translating between positions in memory.
@@ -3477,7 +3715,10 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: distGridIdUse
+      integer :: gridRank, arraySize
+      integer :: horzDistIdUse, vertDistIdUse
+      integer :: horzPhysIdUse, vertPhysIdUse
+      type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -3487,22 +3728,144 @@
         rc = ESMF_FAILURE
       endif
 
-! TODO: add code to get distgridId from relloc or physgridId, test for the
-!       presence of at least one of these optional arguments
-      distGridIdUse = 1          ! default
-      if (present(distGridId)) distGridIdUse = distGridId
+      ! Initialize other variables
+      horzDistIdUse = -1
+      vertDistIdUse = -1
+      horzPhysIdUse = -1
+      vertPhysIdUse = -1
+
+      ! determine the largest input array size
+      arraySize = 0
+      if (present(local1D))   arraySize = max(arraySize, size(local1D))
+      if (present(local2D))   arraySize = max(arraySize, size(local2D,2))
+      if (present(localAI1D)) arraySize = max(arraySize, size(localAI1D))
+      if (present(localAI2D)) arraySize = max(arraySize, size(localAI2D,2))
+
+      ! Get the grid rank and check against size of input arrays
+      gridRank = grid%ptr%numDims
+      if (arraySize.lt.gridRank) then
+        print *, "WARNING in ESMF_LRGridLocalToGlobalIndex: ", &
+                 "input array sizes smaller than grid rank"
+      endif
+
+      ! get distgrid identifier from relative locations
+      call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
+        return
+      endif
+      horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+
+      if (present(vertRelLoc)) then
+        call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
+          return
+        endif
+        vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
+      endif
+
+      hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
+      if (vertDistIdUse.ne.-1) then
+        vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
+      else
+        if (arraySize.ge.3 .and. gridRank.eq.3) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                   "no valid vertRelLoc when one is needed"
+          return
+        endif
+      endif
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
-      call ESMF_DistGridLocalToGlobalIndex(grid%ptr%distgrids(distGridIdUse)%ptr, &
-                                           local1D, global1D, &
-                                           local2D, global2D, &
-                                           localAI1D, globalAI1D, &
-                                           localAI2D, globalAI2D, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
-                 "distgrid local to global"
-        return
+!     can't send parts of optional arguments, so for now break out  TODO: fix
+      if (present(local1D)) then
+        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                             local1D=local1D(1:2), &
+                                             global1D=global1D(1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+                                               local1D=local1D(3:3), &
+                                               global1D=global1D(3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
+      endif
+      if (present(local2D)) then
+        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                             local2D=local2D(:,1:2), &
+                                             global2D=global2D(:,1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+                                               local2D=local2D(:,3:3), &
+                                               global2D=global2D(:,3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
+      endif
+      if (present(localAI1D)) then
+        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                             localAI1D=localAI1D(1:2), &
+                                             globalAI1D=globalAI1D(1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+                                               localAI1D=localAI1D(3:3), &
+                                               globalAI1D=globalAI1D(3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
+      endif
+      if (present(localAI2D)) then
+        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                             localAI2D=localAI2D(:,1:2), &
+                                             globalAI2D=globalAI2D(:,1:2), &
+                                             rc=status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                   "distgrid global to local"
+          return
+        endif
+        if (vertDistIdUse.ne.-1) then
+          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
+                                               localAI2D=localAI2D(:,3:3), &
+                                               globalAI2D=globalAI2D(:,3:3), &
+                                               rc=status)
+          if(status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        endif
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -4828,11 +5191,12 @@
       call ESMF_LocalArrayGetData(array, boxes, rc=status)
 
       ! get set of axis indices from grid
-      call ESMF_LRGridGetAllAxisIndex(grid, grid_ai, distGridId=1, &
-                                      total=total, rc=status)
+      call ESMF_LRGridGetAllAxisIndex(grid, grid_ai, &
+                                      horzRelLoc=ESMF_CELL_CENTER, total=total, &
+                                      rc=status)
 
       ! translate the AIs from global to local
-      call ESMF_LRGridGlobalToLocalIndex(grid, distGridId=1, &
+      call ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc=ESMF_CELL_CENTER, &
                                          globalAI2D=grid_ai, &
                                          localAI2D=localAI, rc=status)
 
@@ -5008,9 +5372,9 @@
       endif
 
       ! translate myAI to local index
-      call ESMF_LRGridGlobalToLocalIndex(srcGrid, distGridId=1, &
-                                         globalAI1D=myAI, &
-                                         localAI1D=myLocalAI, rc=status)
+      call ESMF_LRGridGlobalToLocalIndex(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
+                                         globalAI1D=myAI, localAI1D=myLocalAI, &
+                                         rc=status)
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=status)
