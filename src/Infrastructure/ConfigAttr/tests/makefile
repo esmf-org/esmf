@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/04/15 21:06:34 lzaslavsky Exp $
+# $Id: makefile,v 1.2 2003/04/16 04:03:48 lzaslavsky Exp $
 
 ALL:  tests
 
@@ -12,7 +12,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Infrastructure/ConfigAttr/tests
+LOCDIR	  =  src/Infrastructure/ConfigAttr/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ConfigUTest
 #	        $(ESMC_TESTDIR)/ESMC_ConfigUTest 
