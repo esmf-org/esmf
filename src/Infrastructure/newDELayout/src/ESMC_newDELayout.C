@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.12 2004/04/09 19:48:49 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.13 2004/04/19 21:53:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.12 2004/04/09 19:48:49 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.13 2004/04/19 21:53:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -383,6 +383,7 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  int i;
   if (nDEs != ESMC_NULL_POINTER)
     *nDEs = ndes;
   if (ndim != ESMC_NULL_POINTER)
@@ -390,7 +391,7 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
   if (nmyDEs != ESMC_NULL_POINTER)
     *nmyDEs = nmydes;
   if (len_myDEs >= nmydes)
-    for (int i=0; i<nmydes; i++)
+    for (i=0; i<nmydes; i++)
       myDEs[i] = mydes[i];
   if (oneToOneFlag != ESMC_NULL_POINTER)
     *oneToOneFlag = this->oneToOneFlag;
@@ -398,9 +399,12 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
     *localDe = mydes[0];
   if (logRectFlag != ESMC_NULL_POINTER)
     *logRectFlag = this->logRectFlag;
-  if ((len_deCountPerDim >= this->ndim) && (this->logRectFlag == ESMF_TRUE))
-    for (int i=0; i<this->ndim; i++)
+  if ((len_deCountPerDim >= this->ndim) && (this->logRectFlag == ESMF_TRUE)) {
+    for (i=0; i<this->ndim; i++)
       deCountPerDim[i] = dims[i];
+    for (i=this->ndim; i<len_deCountPerDim; i++)
+      deCountPerDim[i] = 1;
+  }
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -433,15 +437,25 @@ int ESMC_newDELayout::ESMC_newDELayoutGetDE(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  if (len_coord >= ndim)
-    for (int i=0; i<ndim; i++)
+  int i;
+  if (len_coord >= ndim) {
+    for (i=0; i<ndim; i++)
       DEcoord[i] = des[DEid].coord[i];
-  if (len_cde >= des[DEid].nconnect)
-    for (int i=0; i<des[DEid].nconnect; i++)
+    for (i=ndim; i<len_coord; i++)
+      DEcoord[i] = 0;
+  }
+  if (len_cde >= des[DEid].nconnect) {
+    for (i=0; i<des[DEid].nconnect; i++)
       DEcde[i] = des[DEid].connect_de[i];
-  if (len_cw >= des[DEid].nconnect)
-    for (int i=0; i<des[DEid].nconnect; i++)
+    for (i=des[DEid].nconnect; i<len_cde; i++)
+      DEcde[i] = 0;
+  }
+  if (len_cw >= des[DEid].nconnect) {
+    for (i=0; i<des[DEid].nconnect; i++)
       DEcw[i] = des[DEid].connect_w[i];
+    for (i=des[DEid].nconnect; i<len_cw; i++)
+      DEcw[i] = 0;
+  }
   if (nDEc != ESMC_NULL_POINTER)
     *nDEc = des[DEid].nconnect;
   return ESMF_SUCCESS;
@@ -563,6 +577,56 @@ int ESMC_newDELayout::ESMC_newDELayoutPrint(){
   }
   printf("--- ESMC_newDELayoutPrint end ---\n");
   return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutValidate
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutValidate(){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Validate details of DELayout object 
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int rc;
+
+  // validate info about the vmachine object
+  //printf("--- ESMC_newDELayoutValidate start ---\n");
+  //printf("myvm = %p\n", myvm);
+  //printf("ndes = %d\n", ndes);
+  //for (int i=0; i<ndes; i++){
+  //  printf("  des[%d]: deid=%d, petid=%d, pid=%d, nconnect=%d\n", i, 
+  //    des[i].deid, des[i].petid, des[i].pid, des[i].nconnect);
+  //  for (int j=0; j<des[i].nconnect; j++)
+  //    printf("      connect_de[%d]=%d, weight=%d\n", j, des[i].connect_de[j],
+  //      des[i].connect_w[j]);
+  //}
+  //printf("nmydes=%d\n", nmydes);
+  //for (int i=0; i<nmydes; i++)
+  //  printf("  mydes[%d]=%d\n", i, mydes[i]);
+  //printf("ndim = %d\n", ndim);
+  //for (int i=0; i<ndes; i++){
+  //  printf("[%d]: ", i);
+  //  int j;
+  //  for (j=0; j<ndim-1; j++)
+  //    printf("%d, ", des[i].coord[j]);
+  //  printf("%d\n", des[i].coord[j]);
+  // }
+  // printf("--- ESMC_newDELayoutValidate end ---\n");
+ 
+  // for now, validate at least the base object
+  rc = this->ESMC_Validate();
+
+  return rc;
 }
 //-----------------------------------------------------------------------------
 
