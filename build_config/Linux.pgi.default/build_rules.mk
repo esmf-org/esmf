@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2005/01/25 17:13:25 nscollins Exp $
+# $Id: build_rules.mk,v 1.14 2005/02/18 23:19:51 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -66,9 +66,23 @@ MPI_INCLUDE    =
 MPIRUN         =  mpirun
 endif
 
-ifeq ($(ESMF_COMM),mpich)
+# for mpich: if your system sets either MPI_HOME or MPICH to the location of
+# the mpi include files, libraries, and binary executables, this makefile 
+# should work unchanged.  (MPI_HOME takes precedence over MPICH if both are 
+# set.)  if your system has mpich installed but not in either /usr or
+# /usr/local, and neither of these environment variables are set, you must 
+# set one of them to the location where the include, lib, and bin dirs will 
+# be found.
+
 # set up to use MPICH
-MPI_HOME       = /opt/mpich-gm
+ifeq ($(ESMF_COMM),mpich)
+ifndef MPI_HOME
+ ifdef MPICH
+  export MPI_HOME := $(MPICH)
+ else
+  export MPI_HOME := /usr/local
+ endif
+endif
 MPI_LIB        = -L${MPI_HOME}/lib -lmpich
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
 MPIRUN         = ${MPI_HOME}/bin/mpirun
@@ -101,17 +115,17 @@ SH_LD		   = pgcc
 # C and Fortran compiler 
 #
 ifneq ($(ESMF_COMM),mpich)
-C_CC		   = pgcc -mp
-C_FC		   = pgf90 -mp
+C_CC		   = pgcc 
+C_FC		   = pgf90
 CXX_CC		   = pgCC -tlocal
-CXX_FC		   = pgf90 -mp 
+CXX_FC		   = pgf90
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-C_CC		   = mpicc -mp
-C_FC		   = mpif90 -mp
+C_CC		   = mpicc
+C_FC		   = mpif90
 CXX_CC		   = mpiCC -tlocal
-CXX_FC		   = mpif90 -mp
+CXX_FC		   = mpif90
 endif
 
 C_FC_MOD           = -I
@@ -153,13 +167,14 @@ ifeq ($(origin LD_LIBRARY_PATH), environment)
 LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
 LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
 else
-LIB_PATHS   = -L/opt/pgi/linux86-64/5.1/lib
-LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/linux86-64/5.1/lib
+LIB_PATHS   = -L/opt/pgi-5.2/linux86/5.2/lib -L/opt/intel/icc/icc-8.1/lib
+LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib \
+              $(C_FLINKER_SLFLAG)/opt/intel/icc/icc-8.1/lib
 endif
-C_F90CXXLD         = ${CXX_FC} -mp ${LD_PATHS}
-C_F90CXXLIBS       = ${LIB_PATHS} -lpgc -lrt -lstd -lC
+C_F90CXXLD         = ${CXX_FC} ${LD_PATHS}
+C_F90CXXLIBS       = ${LIB_PATHS} -lgm -lrt -lpthread -lC -lc
 C_CXXF90LD         = ${CXX_CC}  ${LD_PATHS}
-C_CXXF90LIBS       = ${LIB_PATHS} -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
+C_CXXF90LIBS       = ${LIB_PATHS} -lgm -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 C_CXXSO            = ${CXX_CC} -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
