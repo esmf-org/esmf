@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.14 2003/04/28 21:17:01 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.15 2003/06/06 20:24:14 nscollins Exp $
 !
 ! System test code #70384
 
@@ -15,8 +15,11 @@
 
     program ESMF_SysTest70384
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
     
     implicit none
     
@@ -26,22 +29,30 @@
     integer :: result, len, base, de_id
     integer :: i_max, j_max, k_max, miscount
     integer :: status
-    integer :: ndex, ndey
+    integer :: ndex, ndey, ndes
     logical :: match
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
-    type(ESMF_DELayout) :: layout1 
+    type(ESMF_DELayout) :: layout0, layout1, layout2
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
     type(ESMF_State) :: state1
         
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
     print *, "System Test #70384:"
-
 
 !
 !-------------------------------------------------------------------------
@@ -52,11 +63,20 @@
 !
     call ESMF_FrameworkInitialize(rc)
 
-    ! Create a DELayout
-    delist = (/ 0, 1, 2, 3, 4, 5 /)
+    ! Create a default 1xN DELayout
+    layout0 = ESMF_DELayoutCreate(rc=rc)
+    call ESMF_DELayoutGetNumDES(layout0, ndes, rc)
+
+    if (ndes .eq. 1) then
+       print *, "This test must run with > 1 processor"
+       goto 20
+    endif
+
     ndex = 2
-    ndey = 3
-    layout1 = ESMF_DELayoutCreate(delist, 2,  (/ ndex, ndey /), (/ 0, 0 /), rc)
+    ndey = ndes/2
+    delist = (/ (i, i=0, ndes) /)
+    layout1 = ESMF_DELayoutCreate(layout0, 2, (/ ndex, ndey /), (/ 0, 0 /), &
+                                                      de_indices=delist, rc=rc)
     print *, "DELayout Create finished, rc =", rc
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -245,13 +265,20 @@
     call ESMF_DELayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
+    call ESMF_FrameworkFinalize(rc)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 20    print *, "System Test #70384 complete!"
 
+    write(failMsg, *)  "Transposed transpose not same as original"
+    write(testname, *) "System Test 70384: Array Transpose/Redistribute"
+
+    if (de_id .eq. 0) then
+      call ESMF_Test((miscount.eq.0) .and. (rc.eq.ESMF_SUCCESS), &
+                        testname, failMsg, testresult, ESMF_SRCLINE)
+    endif
     
-    call ESMF_FrameworkFinalize(rc)
 
     end program ESMF_SysTest70384
     

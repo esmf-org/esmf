@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.10 2003/05/02 21:54:27 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.11 2003/06/06 20:24:14 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -18,8 +18,11 @@
 
     program ESMF_CoupledFlowDemo
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module, defines all ESMF data types and procedures
     use ESMF_Mod
+    use ESMF_TestMod
     
     ! User Component registration routines
     use   InjectorMod, only : Injector_register
@@ -50,6 +53,15 @@
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
+
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
 
         
 !------------------------------------------------------------------------------
@@ -265,6 +277,14 @@
 !------------------------------------------------------------------------------
 10    print *, "Coupled Flow Demo complete!"
 
+      write(failMsg, *)  "System Test failure"
+      write(testname, *) "System Test 74559: Coupled Fluid Flow"
+  
+      if (de_id .eq. 0) then
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                          testname, failMsg, testresult, ESMF_SRCLINE)
+      endif
+    
       end program ESMF_CoupledFlowDemo
     
 !\end{verbatim}

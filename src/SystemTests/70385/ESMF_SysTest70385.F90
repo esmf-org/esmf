@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.15 2003/04/29 14:14:35 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.16 2003/06/06 20:24:14 nscollins Exp $
 !
 ! System test code #70385
 
@@ -15,8 +15,11 @@
 
     program ESMF_SysTest70385
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
     
     implicit none
     
@@ -28,10 +31,20 @@
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1, deflayout
     integer, dimension(12) :: delist
+    integer :: de_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: ndes, rc
+    integer :: i, ndes, rc
         
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -54,10 +67,10 @@
         goto 10
     endif
 
-    
+    call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
     
 !   Create a DELayout for the Component
-    delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
+    delist = (/ (i, i=0, 11) /)
     layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
 
     cname = "System Test #70385"
@@ -108,6 +121,15 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test #70385 complete!"
 
+
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test 70385: Field Halo Test"
+
+    if (de_id .eq. 0) then
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                        testname, failMsg, testresult, ESMF_SRCLINE)
+    endif
+    
     end program ESMF_SysTest70385
     
 

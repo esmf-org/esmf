@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.11 2003/04/28 21:17:02 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.12 2003/06/06 20:24:14 nscollins Exp $
 !
 ! System test code #74558
 
@@ -15,8 +15,11 @@
 
     program ESMF_SysTest74558
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
     
     use flowmod
 
@@ -38,6 +41,15 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
     integer(ESMF_IKIND_I8) :: advanceCount
+
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -188,6 +200,15 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test #74558 complete!"
 
+
+      write(failMsg, *)  "System Test failure"
+      write(testname, *) "System Test 74558: Fluid Solver, single component"
+  
+      if (de_id .eq. 0) then
+        call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                          testname, failMsg, testresult, ESMF_SRCLINE)
+      endif
+    
       end program ESMF_SysTest74558
     
 !\end{verbatim}

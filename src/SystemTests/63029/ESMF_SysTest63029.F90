@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.13 2003/05/07 16:07:38 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.14 2003/06/06 20:24:13 nscollins Exp $
 !
 ! System test code #63029
 
@@ -15,8 +15,11 @@
 
     program ESMF_SysTest63029
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
     
     use user_model
 
@@ -30,6 +33,15 @@
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
         
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -45,7 +57,7 @@
     call ESMF_FrameworkInitialize(rc)
 
     ! Create a default 1xN DELayout
-    layout1 = ESMF_DELayoutCreate(rc)
+    layout1 = ESMF_DELayoutCreate(rc=rc)
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
 
     if (ndes .le. 1) then
@@ -141,12 +153,21 @@
       call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 
+      call ESMF_FrameworkFinalize(rc)
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
  10   print *, "System Test #63029 complete!"
 
-      call ESMF_FrameworkFinalize(rc)
+      write(failMsg, *) "System Test failure"
+      write(testname, *) "System Test 63029: Component Create Test"
+  
+      if (de_id .eq. 0) then
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                          testname, failMsg, testresult, ESMF_SRCLINE)
+      endif
+
 
       end program ESMF_SysTest63029
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.12 2003/04/28 21:16:59 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.13 2003/06/06 20:24:13 nscollins Exp $
 !
 ! System test code #69527
 
@@ -15,8 +15,11 @@
 
     program ESMF_SysTest69527
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
     
     implicit none
     
@@ -41,11 +44,19 @@
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
         
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
     print *, "System Test #69527:"
-
 
 
 !
@@ -211,13 +222,22 @@
     call ESMF_DELayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
+    call ESMF_FrameworkFinalize(rc)
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     print *, "System Test #69527 complete!"
 
+
+    write(failMsg, *)  "Row Reduction value incorrect"
+    write(testname, *) "System Test 69527: Field Row Reduction"
+
+    if (de_id .eq. 0) then
+      call ESMF_Test((result .eq. 7585) .and. (rc.eq.ESMF_SUCCESS), &
+                        testname, failMsg, testresult, ESMF_SRCLINE)
+    endif
     
-    call ESMF_FrameworkFinalize(rc)
+    
 
     end program ESMF_SysTest69527
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.8 2003/04/30 14:32:53 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.9 2003/06/06 20:24:13 nscollins Exp $
 !
 ! System test code #62503
 
@@ -16,8 +16,11 @@
 
     program ESMF_SysTest62503
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+    use ESMF_TestMod
 
     use user_model1, only : userm1_register
     use user_model2, only : userm2_register
@@ -41,6 +44,15 @@
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
     integer(ESMF_IKIND_I8) :: advanceCount
+
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
 
         
 !-------------------------------------------------------------------------
@@ -240,6 +252,15 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test #62503 complete!"
 
+
+    write(failMsg, *) "System Test failure"
+    write(testname, *) "System Test 62503: Components on Exclusive DE sets"
+
+    if (de_id .eq. 0) then
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                        testname, failMsg, testresult, ESMF_SRCLINE)
+    endif
+    
       end program ESMF_SysTest62503
     
 !\end{verbatim}

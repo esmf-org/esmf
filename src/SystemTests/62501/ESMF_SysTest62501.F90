@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.6 2003/04/24 16:43:13 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.7 2003/06/06 20:24:13 nscollins Exp $
 !
 ! System test code #62501
 
@@ -15,8 +15,13 @@
 
     program ESMF_SysTest62501
 
+#include <ESMF_Macros.inc>
+
     ! ESMF Framework module
     use ESMF_Mod
+
+    ! Standard Testing pass/fail messages
+    use ESMF_TestMod
     
     implicit none
     
@@ -24,7 +29,7 @@
     integer :: nx, ny, i, j, ni, nj, rc
     integer, dimension(2) :: delist
     integer :: row_to_reduce
-    integer :: timestep, rowlen, rowi, rstart, rend
+    integer :: rowlen, rowi, rstart, rend
     integer :: result, len, base, de_id
     integer :: i_max, j_max
     integer :: horz_gridtype, vert_gridtype
@@ -39,13 +44,23 @@
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
-    type(ESMF_GridComp) :: comp1
+
+    ! cumulative result: count failures; no failures equals "all pass"
+    integer :: testresult = 0
+
+    ! individual test name
+    character(ESMF_MAXSTR) :: testname
+
+    ! individual test failure message
+    character(ESMF_MAXSTR) :: failMsg
+
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
     print *, "System Test #62501:"
 
+    call ESMF_FrameworkInitialize(rc)
 
 !
 !-------------------------------------------------------------------------
@@ -55,15 +70,8 @@
 !-------------------------------------------------------------------------
 !
 
-!   ! Create a DELayout for the Component
-    delist = (/ 0, 1 /)
-    layout1 = ESMF_DELayoutCreate(2, 1, delist, ESMF_XFAST, rc)
-
-    cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(cname, layout1, ESMF_GRIDCOMP, &
-                                       ESMF_ATM, "/usr/local", rc=rc)
-
-    print *, "Comp Create finished, name = ", trim(cname)
+!   ! Create a default 1xN DELayout for the Component
+    layout1 = ESMF_DELayoutCreate(rc=rc)
 
 !
 !-------------------------------------------------------------------------
@@ -72,19 +80,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_GridCompInit(comp1, istate, estate, clock, rc)
-       type(ESMF_GridComp) :: comp1
-       type(ESMF_State) :: istate, estate
-       type(ESMF_Clock) :: clock
-       integer :: rc
 
 !   !  The user creates a simple horizontal Grid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
-
-      type(ESMF_DELayout) :: layout
- 
-     
-      call ESMF_GridCompGet(comp1, layout=layout, rc=status)
 
       i_max = 40
       j_max = 20
@@ -159,9 +157,6 @@
 !-------------------------------------------------------------------------
 !
 
-    timestep = 1
-    call ESMF_GridCompRun(comp1, timestep, rc)
-
 
 !   Call Reduction operator here
     row_to_reduce = 5
@@ -209,8 +204,6 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_GridCompFinalize(comp1, rc)
-
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
     print *, "-----------------------------------------------------------------"
@@ -229,7 +222,6 @@
 !-------------------------------------------------------------------------
 !   Clean up
 
-    call ESMF_GridCompDestroy(comp1, rc)
     call ESMF_FieldDestroy(field1, rc)
     call ESMF_GridDestroy(grid1, rc)
     call ESMF_ArrayDestroy(array1, rc)
@@ -237,10 +229,19 @@
     print *, "All Destroy routines done"
 
 
+    call ESMF_FrameworkFinalize(rc)
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     print *, "System Test #62501 complete!"
 
+    write(failMsg, *) "Row reduction value not correct"
+    write(testname, *) "System Test 62501: Field Data Reduction Test"
+
+    if (de_id .eq. 0) then
+      call ESMF_Test((result .eq. 12205) .and. rc.eq.ESMF_SUCCESS), &
+                        testname, failMsg, testresult, ESMF_SRCLINE)
+    endif
     
 
     end program ESMF_SysTest62501
