@@ -1,16 +1,12 @@
-# $Id: makefile,v 1.4 2002/10/08 20:49:13 jwolfe Exp $ 
+# $Id: makefile,v 1.5 2002/10/22 19:36:13 nscollins Exp $ 
 
-DIRS     = Base BasicUtil IO Machine Log Error TimeMgr \
-           PhysGrid DistGrid Grid Fields App mpiuni
+DIRS     = Base BasicUtil ConfigAttr LogErr Machine TimeMgr CommMem \
+           PerfProf IO PhysGrid DistGrid Regrid Grid Fields App mpiuni
+
 LOCDIR   = src/Infrastructure
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 
 
-
-
-
-
-
-
+# DO NOT DELETE
