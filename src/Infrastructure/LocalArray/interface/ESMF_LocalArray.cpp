@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.2 2004/03/16 23:28:16 cdeluca Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.3 2004/03/17 21:06:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,6 +46,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
+      use ESMF_ArraySpecMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -107,21 +108,6 @@
                             ESMF_DOMAIN_EXCLUSIVE     = ESMF_DomainType(3)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_ArraySpec
-!
-!     ! Data array specification, with no associated data buffer.
-
-      type ESMF_ArraySpec
-      sequence
-      !!private
-   
-        integer :: rank                     ! number of dimensions
-        type(ESMF_DataType) :: type         ! real/float, integer, etc enum
-        type(ESMF_DataKind) :: kind         ! fortran "kind" enum/integer
-
-      end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_LocalArray
 !
 !     ! LocalArray data type.  All information is kept on the C++ side inside
@@ -151,7 +137,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
-      public ESMF_ArraySpec, ESMF_LocalArray
+      public ESMF_LocalArray
       public ESMF_DomainType
       public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_COMPUTATIONAL, ESMF_DOMAIN_EXCLUSIVE
 !------------------------------------------------------------------------------
@@ -161,8 +147,6 @@ AllTypesMacro(LocalArrayType)
       public ESMF_LocalArrayCreate
       public ESMF_LocalArrayDestroy
  
-      public ESMF_ArraySpecSet
-      public ESMF_ArraySpecGet
 
       public ESMF_LocalArraySetData, ESMF_LocalArrayGetData
       public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
@@ -188,7 +172,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.2 2004/03/16 23:28:16 cdeluca Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.3 2004/03/17 21:06:29 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1086,79 +1070,6 @@ DeclarationMacro(LocalArrayDeallocate)
         end subroutine ESMF_LocalArraySetData
 
 !------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-     subroutine ESMF_ArraySpecSet(arrayspec, rank, type, kind, rc)
-!
-!
-! !ARGUMENTS:
-     type(ESMF_ArraySpec), intent(inout) :: arrayspec
-     integer, intent(in) :: rank
-     type(ESMF_DataType), intent(in) :: type
-     type(ESMF_DataKind), intent(in) :: kind
-     integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!  Creates a description of the data -- the type, the dimensionality, etc.  
-!  This specification can be used in an {\tt ESMF\_LocalArrayCreate} call with
-!  data to create a full {\tt ESMF\_LocalArray}.
-!    
-!  The arguments are:
-!  \begin{description}
-!  \item[arrayspec]
-!    Uninitialized array spec.
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 7D.
-!  \item[type]
-!    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!  \item[kind]
-!    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-        ! Local vars
-        integer :: status                        ! local error status
-        logical :: rcpresent                     ! did user specify rc?
-
-        ! Initialize pointer
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Set arrayspec contents with some checking to keep Silverio at bay
-        if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
-          arrayspec%rank = rank
-        else
-          print *, "ERROR in ESMF_ArraySpecSet: bad rank"
-          ! something to trigger on next time that this is bad
-          arrayspec%rank = 0   
-          return
-        endif
-
-        ! Since type and kind are derived types, you cannot set them to
-        !  illegal values, so no additional tests are needed.
-        arrayspec%type = type
-        arrayspec%kind = kind
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArraySpecSet
-
-
-
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! 
 ! Query for information from the array.
@@ -1293,66 +1204,6 @@ DeclarationMacro(LocalArrayDeallocate)
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LocalArrayGetName
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(arrayspec, rank, type, kind, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: arrayspec
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Return information about the contents of a {\tt ESMF\_ArraySpec} type.
-!
-!  The arguments are:
-!  \begin{description}
-!  \item[arrayspec]
-!    An {\tt ESMF\_ArraySpec} object.
-!  \item[rank]
-!    {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc).  Maximum
-!    allowed is 7D.
-!  \item[type]
-!    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!  \item[kind]
-!    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-        ! Local vars
-        integer :: i
-        integer :: status                        ! local error status
-        logical :: rcpresent                     ! did user specify rc?
-
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Get arrayspec contents
-      
-        if(present(rank)) rank = arrayspec%rank
-        if(present(type)) type = arrayspec%type
-        if(present(kind)) kind = arrayspec%kind
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArraySpecGet
 
 
 !------------------------------------------------------------------------------
