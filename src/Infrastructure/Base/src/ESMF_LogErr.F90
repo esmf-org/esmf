@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.4 2004/06/09 16:07:53 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.5 2004/06/09 16:55:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -210,8 +210,7 @@ end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-! ESMF_LogFoundAllocError - Returns logical associated with finding an error
+! !IROUTINE:  ESMF_LogFoundAllocError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
 	function ESMF_LogFoundAllocError(rcToCheck,line,file,method,rcToReturn)
