@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.17 2003/04/21 22:17:36 flanigan Exp $ 
+# $Id: base_variables,v 1.18 2003/04/22 19:06:28 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -73,13 +73,14 @@ C_F90CXXLD		= ${CXX_CC}
 C_CXXF90LIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
-			  -L/usr/lib \
+			  -L/usr/lib -L/usr/vac/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
 			  -lpthreads -lm_r -lm -lc_r -lc 
 
 C_F90CXXLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
+			  -L/usr/lib -L/usr/vac/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
 			  -lpthreads -lm_r -lm -lc_r -lc  \
 			  /usr/lpp/ppe.poe/lib/libc.a 
@@ -89,6 +90,7 @@ C_CXXSO			= cc_r -G
 C_CXXSOLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
+			  -L/usr/lib -l/usr/vac/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
 			  -lpthreads -lm_r -lm -lc_r -lc -lC 
 # ------------------------- BOPT - g_c++ options ------------------------------
@@ -108,9 +110,9 @@ PARCH			= rs6000
 
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G 
-SL_LINKOPTS = -lC -brtl
-SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 
-SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 
+SL_LINKOPTS = -lC -blazy
+SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
+SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 
 include $(ESMF_BUILD_DIR)/common_variables
 
