@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.9 2003/04/02 17:24:55 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.10 2003/04/09 21:32:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.9 2003/04/02 17:24:55 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.10 2003/04/09 21:32:30 eschwab Exp $'
 
 !==============================================================================
 !
@@ -142,7 +142,7 @@
                                 StopTime, Enabled, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_TimeInterval), intent(in), optional :: RingInterval
       type(ESMF_Time), intent(in), optional :: RingTime
       type(ESMF_Time), intent(in), optional :: StopTime
@@ -184,7 +184,7 @@
       subroutine ESMF_AlarmEnable(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -214,7 +214,7 @@
       subroutine ESMF_AlarmDisable(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -245,7 +245,7 @@
       subroutine ESMF_AlarmTurnOn(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -275,7 +275,7 @@
       subroutine ESMF_AlarmTurnOff(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       integer, intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -308,7 +308,7 @@
       logical :: ESMF_AlarmIsRinging
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -379,7 +379,7 @@
       subroutine ESMF_AlarmGetRingInterval(alarm, RingInterval, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       type(ESMF_TimeInterval), intent(out) :: RingInterval
       integer, intent(out), optional :: rc
 
@@ -412,7 +412,7 @@
       subroutine ESMF_AlarmSetRingInterval(alarm, RingInterval, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_TimeInterval), intent(in) :: RingInterval
       integer, intent(out), optional :: rc
 
@@ -445,7 +445,7 @@
       subroutine ESMF_AlarmGetRingTime(alarm, RingTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       type(ESMF_Time), intent(out) :: RingTime
       integer, intent(out), optional :: rc
 
@@ -478,7 +478,7 @@
       subroutine ESMF_AlarmSetRingTime(alarm, RingTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_Time), intent(in) :: RingTime
       integer, intent(out), optional :: rc
 
@@ -511,7 +511,7 @@
       subroutine ESMF_AlarmGetPrevRingTime(alarm, PrevRingTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       type(ESMF_Time), intent(out) :: PrevRingTime
       integer, intent(out), optional :: rc
 
@@ -544,7 +544,7 @@
       subroutine ESMF_AlarmSetPrevRingTime(alarm, PrevRingTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_Time), intent(in) :: PrevRingTime
       integer, intent(out), optional :: rc
    
@@ -577,7 +577,7 @@
       subroutine ESMF_AlarmGetStopTime(alarm, StopTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       type(ESMF_Time), intent(out) :: StopTime
       integer, intent(out), optional :: rc
 
@@ -610,7 +610,7 @@
       subroutine ESMF_AlarmSetStopTime(alarm, StopTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_Time), intent(in) :: StopTime
       integer, intent(out), optional :: rc
 
@@ -675,7 +675,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmRead - resotres an alarm
+! !IROUTINE: ESMF_AlarmRead - restores an alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmRead(alarm, RingInterval, RingTime, &
@@ -683,7 +683,7 @@
                            Enabled, ID, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_TimeInterval), intent(in) :: RingInterval
       type(ESMF_Time), intent(in) :: RingTime
       type(ESMF_Time), intent(in) :: PrevRingTime
@@ -736,7 +736,7 @@
                             Enabled, ID, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       type(ESMF_TimeInterval), intent(out) :: RingInterval
       type(ESMF_Time), intent(out) :: RingTime
       type(ESMF_Time), intent(out) :: PrevRingTime
@@ -787,7 +787,7 @@
       subroutine ESMF_AlarmValidate(alarm, opts, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
@@ -820,7 +820,7 @@
       subroutine ESMF_AlarmPrint(alarm, opts, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_Alarm), intent(in) :: alarm
       character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 

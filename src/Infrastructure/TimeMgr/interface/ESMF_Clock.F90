@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.11 2003/04/02 22:48:51 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.12 2003/04/09 21:33:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.11 2003/04/02 22:48:51 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.12 2003/04/09 21:33:29 eschwab Exp $'
 
 !==============================================================================
 
@@ -121,7 +121,7 @@
                                 RefTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(out) :: clock
       type(ESMF_TimeInterval), intent(in), optional :: TimeStep
       type(ESMF_Time), intent(in) :: StartTime
       type(ESMF_Time), intent(in) :: StopTime
@@ -197,7 +197,7 @@
       subroutine ESMF_ClockGetAlarmList(clock, AlarmList, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Alarm), intent(out) :: AlarmList(:)
       integer, intent(out), optional :: rc
 
@@ -230,7 +230,7 @@
       subroutine ESMF_ClockGetNumAlarms(clock, NumAlarms, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: NumAlarms
       integer, intent(out), optional :: rc
 
@@ -334,7 +334,7 @@
       logical :: ESMF_ClockIsStopTime
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -364,7 +364,7 @@
       subroutine ESMF_ClockGetAdvanceCount(clock, AdvanceCount, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       integer(ESMF_IKIND_I8), intent(out) :: AdvanceCount
       integer, intent(out), optional :: rc
 
@@ -398,7 +398,7 @@
       subroutine ESMF_ClockGetTimeStep(clock, TimeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_TimeInterval), intent(out) :: TimeStep
       integer, intent(out), optional :: rc
 
@@ -431,7 +431,7 @@
       subroutine ESMF_ClockSetTimeStep(clock, TimeStep, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(out) :: clock
       type(ESMF_TimeInterval), intent(in) :: TimeStep
       integer, intent(out), optional :: rc
 
@@ -464,7 +464,7 @@
       subroutine ESMF_ClockGetCurrTime(clock, CurrTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: CurrTime
       integer, intent(out), optional :: rc
 
@@ -497,7 +497,7 @@
       subroutine ESMF_ClockSetCurrTime(clock, CurrTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(out) :: clock
       type(ESMF_Time), intent(in) :: CurrTime
       integer, intent(out), optional :: rc
 
@@ -530,7 +530,7 @@
       subroutine ESMF_ClockGetStartTime(clock, StartTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: StartTime
       integer, intent(out), optional :: rc
 
@@ -563,7 +563,7 @@
       subroutine ESMF_ClockGetStopTime(clock, StopTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: StopTime
       integer, intent(out), optional :: rc
 
@@ -596,7 +596,7 @@
       subroutine ESMF_ClockGetRefTime(clock, RefTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: RefTime
       integer, intent(out), optional :: rc
 
@@ -629,7 +629,7 @@
       subroutine ESMF_ClockGetPrevTime(clock, PrevTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: PrevTime
       integer, intent(out), optional :: rc
 
@@ -662,7 +662,7 @@
       subroutine ESMF_ClockGetCurrSimTime(clock, CurrSimTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: CurrSimTime
       integer, intent(out), optional :: rc
 
@@ -695,7 +695,7 @@
       subroutine ESMF_ClockGetPrevSimTime(clock, PrevSimTime, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_Time), intent(out) :: PrevSimTime
       integer, intent(out), optional :: rc
 
@@ -731,11 +731,11 @@
 
 ! !INTERFACE:
       subroutine ESMF_ClockRead(clock, TimeStep, StartTime, StopTime, &
-                           RefTime, CurrTime, PrevTime, AdvanceCount, &
-                           AlarmList, rc)
+                                RefTime, CurrTime, PrevTime, AdvanceCount, &
+                                AlarmList, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(out) :: clock
       type(ESMF_TimeInterval), intent(in) :: TimeStep
       type(ESMF_Time), intent(in) :: StartTime
       type(ESMF_Time), intent(in) :: StopTime
@@ -792,7 +792,7 @@
                             AlarmList, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       type(ESMF_TimeInterval), intent(out) :: TimeStep
       type(ESMF_Time), intent(out) :: StartTime
       type(ESMF_Time), intent(out) :: StopTime
@@ -847,7 +847,7 @@
       subroutine ESMF_ClockValidate(clock, opts, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
@@ -880,7 +880,7 @@
       subroutine ESMF_ClockPrint(clock, opts, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Clock), intent(in) :: clock
       character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
