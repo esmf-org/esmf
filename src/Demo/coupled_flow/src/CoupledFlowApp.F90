@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.1 2003/05/07 06:58:53 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.2 2003/05/07 20:05:36 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -51,7 +51,8 @@
 
     ! Read in from config file
     namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
-                     s_month, s_day, s_hour, e_month, e_day, e_hour
+                     s_month, s_day, s_hour, s_min, &
+                     e_month, e_day, e_hour, e_min
 !BOP
 !
 ! !DESCRIPTION:
