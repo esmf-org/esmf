@@ -73,6 +73,13 @@
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_desc}
 #endif
 
+%\section{Abbreviations Table}
+#ifdef STANDALONE
+\input{TimeMgr_specs}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_specs}
+#endif
+
 %\subsection{Implementation Notes}
 #ifdef STANDALONE
 \input{TimeMgr_implnotes}
