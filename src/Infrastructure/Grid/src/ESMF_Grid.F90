@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.111 2003/10/17 22:42:45 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.112 2003/10/20 15:36:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.111 2003/10/17 22:42:45 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.112 2003/10/20 15:36:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3731,7 +3731,6 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: physgridId
       integer :: i                                ! Loop index
       type(ESMF_GridType), pointer :: gridp
 
@@ -3758,19 +3757,6 @@
       if(present(horz_coord_system)) horz_coord_system = gridp%horz_coord_system
       if(present(vert_coord_system)) vert_coord_system = gridp%vert_coord_system
       if(present(coord_order)) coord_order = gridp%coord_order
-    
-      ! Get physgrid info with global coordinate extents
-      if(present(global_min_coords) .or. present(global_max_coords)) then
-        physgridId = gridp%num_physgrids  ! TODO: fix so passed in?
-      !  call ESMF_PhysGridGet(gridp%physgrids(physgridId)%ptr, &
-      !                        global_min=global_min_coords, &
-      !                        global_max=global_max_coords, rc=status)
-      ! TODO: fix once we figure out where global min/max is
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGet: PhysGrid get"
-          return
-        endif
-      endif
 
       ! Get distgrid info with global coordinate counts
       if(present(global_cell_dim) .or. present(global_start)) then
