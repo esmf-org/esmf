@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.10 2003/05/27 22:52:20 flanigan Exp $ 
+# $Id: base_variables,v 1.11 2003/06/04 20:05:37 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -19,8 +19,8 @@ C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = pgcc
 C_FLINKER	   = pgf90
-C_CCV		   = ${C_CC} --version
-C_FCV              = pgf90 -mp
+C_CCV		   = ${C_CC} -V
+C_FCV              = pgf90 -V
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc -lf2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
