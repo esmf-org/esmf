@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.133 2004/01/29 19:05:52 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.134 2004/01/31 00:01:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,6 +64,7 @@
 
     public ESMF_GridCreate
     public ESMF_GridDestroy
+    public ESMF_GridDistribute
     public ESMF_GridGetCoord
     public ESMF_GridSetCoord
     public ESMF_GridGetDE
@@ -93,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.133 2004/01/29 19:05:52 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.134 2004/01/31 00:01:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -912,6 +913,112 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridDestroy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridDistribute - distribute a grid that has already been initialized
+
+! !INTERFACE:
+      subroutine ESMF_GridDistribute(grid, layout, countsPerDEDim1, &
+                                     countsPerDEDim2, decompIds, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_DELayout), intent(in) :: layout
+      integer, dimension(:), intent(in), optional :: countsPerDEDim1
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
+      integer, dimension(:), intent(in), optional :: decompIds
+      character (len = *), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be distributed.
+!     \item[layout]
+!         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[countsPerDEDim1]}]
+!          Array of number of grid increments per DE in the x-direction.
+!     \item[{[countsPerDEDim2]}]
+!          Array of number of grid increments per DE in the y-direction.
+!     \item[{[decompIds]}]
+!          Identifier for which Grid axes are decomposed.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Call GridGetDE routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GridStructure_Unknown
+      case(0)
+        print *, "ERROR in ESMF_GridDistributeGetDE: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_LogRect
+      case(1)
+        call ESMF_LRGridDistribute(grid, layout, countsPerDEDim1, &
+                                   countsPerDEDim2, decompIds, name, rc)
+
+      !-------------
+      ! ESMF_GridStructure_LogRectBlock
+      case(2)
+        print *, "ERROR in ESMF_GridDistribute: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_Unstruct
+      case(3)
+        print *, "ERROR in ESMF_GridDistribute: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_User
+      case(4)
+        print *, "ERROR in ESMF_GridDistribute: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridDistribute: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridDistribute: error in get'
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridDistribute
 
 !------------------------------------------------------------------------------
 !BOP
