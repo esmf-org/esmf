@@ -1,4 +1,4 @@
-# $Id: base,v 1.3 2002/12/17 02:28:17 eschwab Exp $ 
+# $Id: base,v 1.4 2003/02/03 17:47:45 nscollins Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
@@ -9,16 +9,16 @@ libf: ${LIBNAME}(${OBJSF})
 #########
 
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --nfix ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -free ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} --nfix ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -free ${ESMC_INCLUDE} $<
 
 .f90.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --fix ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -fixed ${ESMC_INCLUDE} $<
 
 .f.o:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} --fix ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -fixed ${ESMC_INCLUDE} $<
 
 .c.o:
 	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
@@ -27,22 +27,22 @@ libf: ${LIBNAME}(${OBJSF})
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --nfix ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -free ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} --nfix ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -free ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .f90.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Cpp --fix ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -fixed ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .f.a:
-	${FC} -c ${FOPTFLAGS} ${FFLAGS} --fix ${ESMC_INCLUDE} $<
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -fixed ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
