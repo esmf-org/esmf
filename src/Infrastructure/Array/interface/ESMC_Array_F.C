@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.14 2003/10/07 22:33:11 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.15 2003/10/08 15:43:16 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,6 @@
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
-#include "ESMC_Grid.h" 
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
