@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.13 2004/02/05 00:05:09 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.14 2004/02/05 18:44:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.13 2004/02/05 00:05:09 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.14 2004/02/05 18:44:08 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -186,7 +186,7 @@
 
       if (present(totalindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &
-                                           globalindex, nDEs, &
+                                           globalindex, nDEs, numDims, &
                                            totalindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -201,7 +201,7 @@
 
       if (present(compindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_COMPUTATIONAL, &
-                                           globalindex, nDEs, &
+                                           globalindex, nDEs, numDims, &
                                            compindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90
@@ -215,7 +215,7 @@
 
       if (present(exclindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_EXCLUSIVE, &
-                                           globalindex, nDEs, &
+                                           globalindex, nDEs, numDims, &
                                            exclindex, status)
           if (status .ne. ESMF_SUCCESS) goto 10
           ! translate from C++ to F90

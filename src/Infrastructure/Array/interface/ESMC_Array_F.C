@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.17 2003/12/19 21:42:07 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.18 2004/02/05 18:42:24 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -137,27 +137,29 @@ extern "C" {
 
      void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, 
                                      ESMC_AxisIndex *global, int *nDEs,
-                                     ESMC_AxisIndex *total, ESMC_AxisIndex *comp, 
-                                     ESMC_AxisIndex *excl, int *status) {
-          *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, 
+                                     int *rank, ESMC_AxisIndex *total,
+                                     ESMC_AxisIndex *comp, ESMC_AxisIndex *excl,
+                                     int *status) {
+          *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, *rank,
                                      total, comp, excl);
      }
 
      void FTN(c_esmc_arraygetallaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
                                      ESMC_AxisIndex *global, int *nDEs,
-                                     ESMC_AxisIndex *ai, int *status) {
+                                     int *rank, ESMC_AxisIndex *ai,
+                                     int *status) {
           switch(*dt) {
             case ESMC_DOMAIN_TOTAL:
                *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, 
-                                                           ai, NULL, NULL);
+                                                   *rank, ai, NULL, NULL);
                break;
             case ESMC_DOMAIN_COMPUTATIONAL:
                *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, 
-                                                           NULL, ai, NULL);
+                                                   *rank, NULL, ai, NULL);
                break;
             case ESMC_DOMAIN_EXCLUSIVE:
                *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, 
-                                                           NULL, NULL, ai);
+                                                   *rank, NULL, NULL, ai);
                break;
          }
      }

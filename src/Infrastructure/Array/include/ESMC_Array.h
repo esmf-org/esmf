@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.21 2003/12/09 20:41:07 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.22 2004/02/05 18:41:35 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,8 +87,8 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     int ESMC_ArrayGetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index) const;
     int ESMC_ArraySetAxisIndex(ESMC_DomainType dt, struct ESMC_AxisIndex *index);
     int ESMC_ArrayGetAllAxisIndices(struct ESMC_AxisIndex *global, int nDEs,
-                 struct ESMC_AxisIndex *total, struct ESMC_AxisIndex *comp,
-                 struct ESMC_AxisIndex *excl) const; 
+                 int rank, struct ESMC_AxisIndex *total,
+                 struct ESMC_AxisIndex *comp, struct ESMC_AxisIndex *excl) const; 
 
     
  // accessor methods for class members
