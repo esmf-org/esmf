@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.49 2004/09/23 17:26:47 nscollins Exp $
+# $Id: makefile,v 1.50 2004/10/07 17:45:22 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -43,36 +43,36 @@ all       : info info_h chk_dir build_libs shared
 #-------------------------------------------------------------------------------
 # Prints information about the system and version of ESMF being compiled
 #-------------------------------------------------------------------------------
-info:
-	-@echo "=========================================="
-	-@echo "=========================================="
-	-@echo On `date` on `hostname`
-	-@echo Machine characteristics: `uname -a`
-	-@echo "-----------------------------------------"
-	-@echo "Using C compiler: ${CC} ${COPTFLAGS} ${CCPPFLAGS}"
+script_info:
 	-@if [ -n "${C_CCV}" -a "${C_CCV}" != "unknown" ] ; then \
 	  echo "C Compiler version:" ; ${C_CCV} ; fi
 	-@if [ -n "${CXX_CCV}" -a "${CXX_CCV}" != "unknown" ] ; then \
 	  echo "C++ Compiler version:" ; ${CXX_CCV} ; fi
-	-@echo "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}"
 	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; fi
+	-@echo " "
 	-@if [ -f ${ESMF_DIR}/src/include/ESMC_Macros.h ] ; then \
 	  fgrep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMC_Macros.h | ${SED} "s/^#define //" ; fi
+	-@echo "ESMF_DIR: ${ESMF_TOP_DIR}"
+	-@echo "ESMF_ARCH: ${ESMF_ARCH}"
+	-@echo "ESMF_COMPILER: ${ESMF_COMPILER}"
+	-@echo "ESMF_PREC: ${ESMF_PREC}"
+	-@echo "ESMF_SITE: ${ESMF_SITE}"
+	-@echo "ESMF_COMM: ${ESMF_COMM}"
+	-@echo "ESMF_BOPT: ${ESMF_BOPT}"
+#
+info:   script_info
 	-@echo "-----------------------------------------"
-	-@echo "Using ESMF flags: ${PCONF}"
-	-@echo "-----------------------------------------"
-	-@echo "Using configuration flags:"
-	-@grep "define " ${ESMF_TOP_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h
-	-@echo "-----------------------------------------"
-	-@echo "Using include paths: ${ESMC_INCLUDE}"
-	-@echo "-----------------------------------------"
-	-@echo "Using ESMF directory: ${ESMF_TOP_DIR}"
-	-@echo "Using ESMF arch: ${ESMF_ARCH}"
-	-@echo "------------------------------------------"
+	-@echo "Using C compiler: ${CC} ${COPTFLAGS} ${CCPPFLAGS}"
+	-@echo "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}"
 	-@echo "Using C linker: ${CLINKER}"
 	-@echo "Using Fortran linker: ${FLINKER}"
+	-@echo "------------------------------------------"
+	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "Using libraries: ${ESMC_TIME_LIB}"
+	-@echo "------------------------------------------"
+	-@echo Compiling on `date` on `hostname`
+	-@echo Machine characteristics: `uname -a`
 	-@echo "=========================================="
 #
 #
