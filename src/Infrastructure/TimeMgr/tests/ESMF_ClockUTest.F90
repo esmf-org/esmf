@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.63 2004/02/11 06:53:24 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.64 2004/02/11 21:51:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 !------------------------------------------------------------------------------
 !
 
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
  
 !==============================================================================
 !BOP
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.63 2004/02/11 06:53:24 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.64 2004/02/11 21:51:26 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -306,14 +306,20 @@
 
       ! ----------------------------------------------------------------------------
 
+! run this test only on platforms that support F95 initializers, otherwise
+!   may crash or produce FAIL
+! see bug #755424
+! TODO:  test count will be "off-by-one" where this test doesn't run
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       !NEX_UTest
       ! This code crashes, bug 79753 has been opened.
       ! Attempt to get un-initialized year from stop time
-      !write(name, *) "Get Uninitialized StopTime Year Test"
-      !call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
-      !write(failMsg, *) " Returned ESMF_SUCCESS"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
-      !               name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Get Uninitialized StopTime Year Test"
+      call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
+      write(failMsg, *) " Returned ESMF_SUCCESS"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                     name, failMsg, result, ESMF_SRCLINE)
+#endif
 
       ! ----------------------------------------------------------------------------
 
@@ -403,10 +409,13 @@
 
       ! ----------------------------------------------------------------------------
 
-#ifdef ESMF_EXHAUSTIVE
-
+! run this test only on platforms that support F95 initializers, otherwise
+!   may crash or produce FAIL
+! see bug #755445
+! TODO:  test count will be "off-by-one" where this test doesn't run
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       ! Initialize clock with uninitialized Start Time.
-      !EX_UTest
+      !NEX_UTest
        write(name, *) "Clock Initialization Test with uninitialized startTime"
        write(failMsg, *) " Returned ESMF_SUCCESS"
        clock = ESMF_ClockCreate("Clock 1", timeStep, startTime2, &
