@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2003/05/07 15:12:41 flanigan Exp $ 
+# $Id: makefile,v 1.31 2003/05/07 15:23:07 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -71,6 +71,7 @@ usrpdf: $(ESMC_DOCDIR)/ESMF_usrdoc.pdf
 
 # Dvi files
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
+	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
 	${DO_LATEX} ESMF usr
 	mv -f ESMF_usrdoc.dvi $(ESMC_DOCDIR)
@@ -83,6 +84,7 @@ ${ESMC_DOCDIR}/ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 
 # Html Files
 ${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_DEP_FILES)
+	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
 	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
 	${DO_L2H} ESMF usr
