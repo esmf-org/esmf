@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.11 2003/01/07 21:15:33 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.12 2003/01/07 21:31:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.11 2003/01/07 21:15:33 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.12 2003/01/07 21:31:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -440,7 +440,7 @@
 //  code goes here
 //
     int rc = ESMF_FAILURE;
-    int i;
+    int i, j, k;
 
     printf("ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
     printf("            rank = %d, type = %d, kind = %d, ", 
@@ -451,9 +451,26 @@
         printf("dim[%d] = %d  ", i, this->length[i]);
     printf("\n");
     
+    // TODO: make this look at one of the option letters to see if user
+    //   wants data printed.
     if (this->type == ESMF_DATA_REAL) {
-        for (i=0; i<10; i++)  // make sure it's also less than count
-            printf("%d %lg\n", i, *((double *)(this->base_addr) + i));
+        switch (this->rank) {
+          case 1:
+            printf("  Data values:\n");
+            for (i=0; i<this->length[0]; i++)
+                printf("(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
+            break;
+          case 2:
+            printf("  Data values:\n");
+            for (j=0; j<this->length[1]; j++)
+                for (i=0; i<this->length[0]; i++)
+                printf("(%2d,%2d) =  %lg\n", i+1, j+1, *((double *)(this->base_addr) + 
+                                              i + j*this->length[0]) );
+            break;
+          default:
+            printf("no code to handle rank %d yet\n", this->rank);
+            break;    
+        }
     }
 
     rc = ESMF_SUCCESS;
