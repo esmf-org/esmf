@@ -29,9 +29,9 @@ ESMC_MODDIR     = ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
 ESMF_INCDIR     = $(ESMF_TOP_DIR)/src/include
 
 
-ESMF_LDIR     = ${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
-ESMF_MDIR     = ${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
-ESMF_IDIR     = $(ESMF_DIR)/src/include
+ESMF_LDIR     = ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
+ESMF_MDIR     = ${ESMF_TOP_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
+ESMF_IDIR     = $(ESMF_TOP_DIR)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
@@ -57,7 +57,7 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/src/include \
 		  -I/usr/local/include \
 		  -I${ESMF_BUILD_DIR}/${ESMF_ARCH} \
-		  -I${ESMF_DIR}/include \
+		  -I${ESMF_TOP_DIR}/include \
 		  -I${ESMC_MODDIR} \
 		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_TOP_DIR}/src/timing \
