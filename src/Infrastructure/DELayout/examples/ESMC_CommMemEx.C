@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.4 2004/01/09 21:29:50 svasquez Exp $
+// $Id: ESMC_CommMemEx.C,v 1.5 2004/01/09 21:58:00 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
   }
 
   // allow other threads to start before main thread continues
-  sleep(10);  // TODO:  ?? avoids MPI_Init() vs. thread creation race condition
+  sleep(1);  // TODO:  ?? avoids MPI_Init() vs. thread creation race condition
              //           condition variable initCV in CommInit not enough ? 
              //           - no, doesn't prevent main from racing thru first
              //           need "all threads created" condition variable ?
