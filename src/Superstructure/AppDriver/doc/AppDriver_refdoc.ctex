@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.1 2003/11/12 21:56:47 nscollins Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.2 2003/11/12 23:54:31 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,12 +54,12 @@
 \input{../Superstructure/AppDriver/doc/AppDriver_desc}
 #endif
 
-\subsection{Design}
-#ifdef STANDALONE
-\input{AppDriver_design}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/AppDriver/doc/AppDriver_design}
-#endif
+%\subsection{Design}
+%#ifdef STANDALONE
+%\input{AppDriver_design}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/AppDriver/doc/AppDriver_design}
+%#endif
 
 \subsection{Usage}
 #ifdef STANDALONE
@@ -77,9 +77,9 @@
 
 \subsection{AppDriver F90 Use and Examples}
 #ifdef STANDALONE
-\input{AppDriver_fex}
+\input{AppDriver_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/AppDriver/doc/AppDriver_fex}
+\input{../Superstructure/AppDriver/doc/AppDriver_fapi}
 #endif
 
 %\subsection{AppDriver C++ Use and Examples}
