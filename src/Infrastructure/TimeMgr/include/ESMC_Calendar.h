@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.3 2003/02/11 19:03:32 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.4 2003/03/27 01:39:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -73,14 +73,14 @@
 #define MONTHSPERYEAR 12
 
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
-typedef enum ESMC_CalendarType {ESMC_GREGORIAN=1,
-                                ESMC_JULIAN,
-                                ESMC_NOLEAP,      // like Gregorian, except
-                                                  //   Feb always has 28 days
-                                ESMC_360DAY,      // 12 months, 30 days each
-                                ESMC_GENERIC,     // user defined
-                                ESMC_NOCALENDAR}  // track base time seconds
-                                                  //   only
+typedef enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
+                                ESMC_CAL_JULIAN,
+                                ESMC_CAL_NOLEAP,     // like Gregorian, except
+                                                     //   Feb always has 28 days
+                                ESMC_CAL_360DAY,     // 12 months, 30 days each
+                                ESMC_CAL_GENERIC,    // user defined
+                                ESMC_CAL_NOCALENDAR} // track base time seconds
+                                                     //   only
              ESMC_CalendarType_e;
 
 // !PUBLIC TYPES:
@@ -120,16 +120,10 @@ class ESMC_Calendar {
 
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
-    int ESMC_CalendarConvertToTime(int YY, int MM, int DD,
-                      int D, int H, int M, int S,
-                      int MS, int US, int NS, int Sn, int Sd,
-                      double d, double h, double m, double s, double ms,
-                      double us, double ns, ESMC_BaseTime *T);
+    int ESMC_CalendarConvertToTime(int YR, int MM, int DD, int D,
+                                   ESMC_BaseTime *T);
     int ESMC_CalendarConvertToDate(ESMC_BaseTime *T,
-                      int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                      int *S, int *MS, int *US, int *NS, int *Sn,
-                      int *Sd, double *d, double *h, double *m, double *s,
-                      double *ms);
+                                   int *YR, int *MM, int *DD, int *D);
 
     // required methods inherited and overridden from the ESMC_Base class
 
