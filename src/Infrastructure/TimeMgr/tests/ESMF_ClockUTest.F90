@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.52 2003/10/07 16:42:08 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.53 2003/10/07 20:14:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.52 2003/10/07 16:42:08 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.53 2003/10/07 20:14:20 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -821,8 +821,6 @@
 
       ! ----------------------------------------------------------------------------
 
-
-
       !EX_UTest
       write(failMsg, *) "Results Total Counts = ", advanceCounts
       write(name, *) "Total Counts 73049 from -100 to +100 years in Gregorian Cal. Test"
@@ -1060,17 +1058,18 @@
 
       ! ----------------------------------------------------------------------------
       
-      !NEX_UTest
       ! Verify the year is set correctly
-      write(name, *) "Get Sync Time Year Test"
-      call ESMF_TimeGet(syncTime, yr=YR, rc=rc)
-      write(failMsg, *) " Did not return ESMF_SUCCESS and/or Year not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.2003), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      ! write(name, *) "Get Sync Time Year Test"
+      ! call ESMF_TimeGet(syncTime, yr=YR, rc=rc)
+      ! write(failMsg, *) " Did not return ESMF_SUCCESS and/or Year not correct value"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.2003), &
+                      ! name, failMsg, result, ESMF_SRCLINE)
       
-      print *, " Sync Time year = ", YR
-      print *, " Get Sync Time rc  = ", rc
+      ! print *, " Sync Time year = ", YR
+      ! print *, " Get Sync Time rc  = ", rc
       ! ----------------------------------------------------------------------------
+
+#ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
@@ -1094,7 +1093,8 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+
+      !EX_UTest
       ! Test Setting Time Interval
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Time Interval to 73049 days Test"
@@ -1128,7 +1128,9 @@
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
       ! Test Decrementing Time by Time Interval
+      !EX_UTest
       write(failMsg, *) " startTime not equal to stopTime"
       write(name, *) "Decrementing stoptime by 73049 days Test"
       stopTime=stopTime-timeStep
@@ -1254,7 +1256,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      ! ----------------------------------------------------------------------------
 
       !EX_UTest
       write(failMsg, *) "startTime should be greater than or equal to startTime2"
@@ -1334,6 +1335,8 @@
       call ESMF_TimeValidate(stopTime3, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+#endif
 
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
