@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.29 2005/02/28 20:40:26 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.30 2005/03/31 05:15:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -301,10 +301,10 @@
 ! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF
 !
 ! !INTERFACE:
-      subroutine ESMF_Finalize(terminationType, rc)
+      subroutine ESMF_Finalize(terminationflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_TerminationType), intent(in), optional  :: terminationType
+      type(ESMF_TerminationFlag), intent(in), optional  :: terminationflag
       integer, intent(out), optional                    :: rc
 
 !
@@ -312,19 +312,15 @@
 !     Finalize the ESMF.  This must be called before the application exits
 !     to allow the ESMF to flush buffers, close open connections, and 
 !     release internal resources cleanly. The optional argument 
-!     {\tt terminationType} may be used to indicate a global abort of the 
-!     entire ESMF application.
+!     {\tt terminationflag} may be used to indicate the mode of termination.
 !
-!     The argument is:
+!     The arguments are:
 !     \begin{description}
-!     \item [{[terminationType]}]
-!           Used to specify type of termination. Default is {\tt ESMF\_FINAL}
-!           which waits for all PETs of the global VM to reach the finalize call
-!           before termination. Specifying {\tt ESMF\_ABORT} instead will result
-!           in a global abort of the ESMF application. There is no guarantee 
-!           that all PETs will shut down cleanly during an abort. However, the
-!           application should not hang and the LogErr of at least one PET
-!           should be completely flushed during the abort.
+!     \item [{[terminationflag]}]
+!           Specify mode of termination. The default is {\tt ESMF\_FINAL}
+!           which waits for all PETs of the global VM to reach 
+!           {\tt ESMF\_Finalize()} before termination. See section 
+!           \ref{app:terminationflag} for a complete list of valid flags.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -372,8 +368,8 @@
       endif
 
       abortFlag = .false.
-      if (present(terminationType)) then
-        if (terminationType==ESMF_ABORT) abortFlag = .true.
+      if (present(terminationflag)) then
+        if (terminationflag==ESMF_ABORT) abortFlag = .true.
       endif
       
       if (abortFlag) then

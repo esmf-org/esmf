@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.15 2005/03/29 19:12:49 theurich Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.16 2005/03/31 05:14:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -356,17 +356,17 @@
 
 !------------------------------------------------------------------------------
 !
-!     ! Typed termination type
+!     ! Typed termination flag
 
-      type ESMF_TerminationType
+      type ESMF_TerminationFlag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_TerminationType), parameter:: &
-        ESMF_FINAL        = ESMF_TerminationType(1), &
-        ESMF_ABORT        = ESMF_TerminationType(2)
+      type(ESMF_TerminationFlag), parameter:: &
+        ESMF_FINAL        = ESMF_TerminationFlag(1), &
+        ESMF_ABORT        = ESMF_TerminationFlag(2)
 
 !------------------------------------------------------------------------------
 !
@@ -407,7 +407,7 @@
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
       public ESMF_ContextFlag, ESMF_CHILD_IN_NEW_VM, ESMF_CHILD_IN_PARENT_VM
-      public ESMF_TerminationType, ESMF_FINAL, ESMF_ABORT
+      public ESMF_TerminationFlag, ESMF_FINAL, ESMF_ABORT
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
@@ -457,7 +457,7 @@ interface operator (.eq.)
  module procedure ESMF_aieq
  module procedure ESMF_bfeq
  module procedure ESMF_cfeq
- module procedure ESMF_tteq
+ module procedure ESMF_tnfeq
 end interface
 
 interface operator (.ne.)
@@ -469,7 +469,7 @@ interface operator (.ne.)
  module procedure ESMF_aine
  module procedure ESMF_bfne
  module procedure ESMF_cfne
- module procedure ESMF_ttne
+ module procedure ESMF_tnfne
 end interface
 
 interface assignment (=)
@@ -590,20 +590,20 @@ function ESMF_cfne(cf1, cf2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_TerminationTypes
+! function to compare two ESMF_TerminationFlags
 
-function ESMF_tteq(tt1, tt2)
- logical ESMF_tteq
- type(ESMF_TerminationType), intent(in) :: tt1, tt2
+function ESMF_tnfeq(tnf1, tnf2)
+ logical ESMF_tnfeq
+ type(ESMF_TerminationFlag), intent(in) :: tnf1, tnf2
 
- ESMF_tteq = (tt1%value .eq. tt2%value)
+ ESMF_tnfeq = (tnf1%value .eq. tnf2%value)
 end function
 
-function ESMF_ttne(tt1, tt2)
- logical ESMF_ttne
- type(ESMF_TerminationType), intent(in) :: tt1, tt2
+function ESMF_tnfne(tnf1, tnf2)
+ logical ESMF_tnfne
+ type(ESMF_TerminationFlag), intent(in) :: tnf1, tnf2
 
- ESMF_ttne = (tt1%value .ne. tt2%value)
+ ESMF_tnfne = (tnf1%value .ne. tnf2%value)
 end function
 
 !------------------------------------------------------------------------------
