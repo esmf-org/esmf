@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.104 2004/11/01 21:33:28 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.105 2004/11/01 21:40:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.104 2004/11/01 21:33:28 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.105 2004/11/01 21:40:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3775,6 +3775,12 @@
           enddo
         endif
 
+        ! modify global counts to include ghost region
+        compCount(1) = size(coord1)
+        compCount(2) = size(coord2)
+        counts(1) = compCount(1) + 2*gridBoundWidth
+        counts(2) = compCount(2) + 2*gridBoundWidth
+
         ! allocate and load coords
         allocate(coordUse1(counts(1)), &
                  coordUse2(counts(2)), stat=localrc)
@@ -3801,12 +3807,6 @@
           coordUse2(i+1) = coordUse2(i) &
                          + (coord2(compCount(2))-coord2(compCount(2)-1))
         enddo
-
-        ! modify global counts to include ghost region
-        compCount(1) = size(coord1)
-        compCount(2) = size(coord2)
-        counts(1) = compCount(1) + 2*gridBoundWidth
-        counts(2) = compCount(2) + 2*gridBoundWidth
 
         ! allocate and load cell type masks -- these are by cell and not vertex,
         ! so the counts are all one less
