@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.40 2004/01/28 21:46:49 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.41 2004/03/01 18:53:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.40 2004/01/28 21:46:49 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.41 2004/03/01 18:53:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1058,29 +1058,25 @@
 ! !IROUTINE: ESMF_RoutePrecomputeRedist - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeRedist(route, rank, &
-               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-               dst_global_start, dst_global_count, layout_dst, &
-               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-               src_global_start, src_global_count, layout_src, rc)
+      subroutine ESMF_RoutePrecomputeRedist(route, rank, dstMyDE, dstAI, &
+                                            dstGlobalStart, dstGlobalCount, &
+                                            dstLayout, srcMyDE, srcAI, &
+                                            srcGlobalStart, srcGlobalCount, &
+                                            srcLayout, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
-      integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
-      integer, intent(in) :: AI_dst_count
-      integer, dimension(:,:), intent(in) :: dst_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
-      type(ESMF_DELayout), intent(in) :: layout_dst
-      integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
-      integer, intent(in) :: AI_src_count
-      integer, dimension(:,:), intent(in) :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
-      type(ESMF_DELayout), intent(in) :: layout_src
+      integer, intent(in) :: dstMyDE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstAI
+      integer, dimension(:,:), intent(in) :: dstGlobalStart
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dstGlobalCount
+      type(ESMF_DELayout), intent(in) :: dstLayout
+      integer, intent(in) :: srcMyDE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: srcAI
+      integer, dimension(:,:), intent(in) :: srcGlobalStart
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: srcGlobalCount
+      type(ESMF_DELayout), intent(in) :: srcLayout
       integer, intent(out), optional :: rc
 
 !
@@ -1101,8 +1097,9 @@
 
         ! local variables
         integer :: status                  ! local error status
-        integer :: i,j                     ! counters
         logical :: rcpresent               ! did user specify rc?
+        integer :: i,j                     ! counters
+        integer :: dstAICount, srcAICount
 
         ! Set initial values
         status = ESMF_FAILURE
@@ -1114,46 +1111,43 @@
           rc = ESMF_FAILURE
         endif
 
+        ! set some sizes to pass to C++ code
+        dstAICount = size(dstAI,2)
+        srcAICount = size(srcAI,2)
+
         ! Translate AxisIndices from F90 to C++
-        do j=1,rank
-          do i=1,AI_dst_count
-            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
-            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
-            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
-            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
+        do j   = 1,rank
+          do i = 1,dstAICount
+            dstAI(i,j)%min = dstAI(i,j)%min - 1
+            dstAI(i,j)%max = dstAI(i,j)%max - 1
           enddo
-          do i=1,AI_src_count
-            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
-            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
-            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
-            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
+          do i = 1,srcAICount
+            srcAI(i,j)%min = srcAI(i,j)%min - 1
+            srcAI(i,j)%max = srcAI(i,j)%max - 1
           enddo
         enddo
 
         ! Call C++  code
-        call c_ESMC_RoutePrecomputeRedist(route, rank, &
-           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-           dst_global_start, dst_global_count, layout_dst, &
-           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-           src_global_start, src_global_count, layout_src, status)
+        call c_ESMC_RoutePrecomputeRedist(route, rank, dstMyDE, dstAI, &
+                                          dstAICount, dstGlobalStart, &
+                                          dstGlobalCount, dstLayout, &
+                                          srcMyDE, srcAI, srcAICount, &
+                                          srcGlobalStart, srcGlobalCount, &
+                                          srcLayout, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRedist error"
           ! don't return before adding 1 back to AIs
         endif
 
         ! Translate AxisIndices back to  F90 from C++
-        do j=1,rank
-          do i=1,AI_dst_count
-            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
-            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
-            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
-            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
+        do j   = 1,rank
+          do i = 1,dstAICount
+            dstAI(i,j)%min = dstAI(i,j)%min + 1
+            dstAI(i,j)%max = dstAI(i,j)%max + 1
           enddo
-          do i=1,AI_src_count
-            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
-            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
-            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
-            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
+          do i = 1,srcAICount
+            srcAI(i,j)%min = srcAI(i,j)%min + 1
+            srcAI(i,j)%max = srcAI(i,j)%max + 1
           enddo
         enddo
 
