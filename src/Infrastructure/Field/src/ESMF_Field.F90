@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.140 2004/04/20 22:47:25 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.141 2004/04/23 21:30:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.140 2004/04/20 22:47:25 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.141 2004/04/23 21:30:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1299,7 +1299,7 @@
           return
       endif
 
-      !call ESMF_StatusString(ftypep%datastatus, str, rc)
+      !call ESMF_StringStatus(ftypep%datastatus, str, rc)
       !print *, "getting array data, status = ", trim(str)
       array = ftypep%localfield%localdata
    
@@ -2153,7 +2153,7 @@
           return
         endif
 
-        call ESMF_StatusString(fp%fieldstatus, str, status)
+        call ESMF_StringStatus(fp%fieldstatus, str, status)
         print *, "Field status = ", trim(str)
 
         if (fp%fieldstatus .ne. ESMF_STATE_READY) then
@@ -2168,13 +2168,13 @@
         endif 
         print *, "  Name = '",  trim(name), "'"
 
-        call ESMF_StatusString(fp%gridstatus, str, status)
+        call ESMF_StringStatus(fp%gridstatus, str, status)
         print *, "Grid status = ", trim(str)
         if (fp%gridstatus .eq. ESMF_STATE_READY) then 
            call ESMF_GridPrint(fp%grid, "", status)
         endif
 
-        call ESMF_StatusString(fp%datastatus, str, status)
+        call ESMF_StringStatus(fp%datastatus, str, status)
         print *, "Data status = ", trim(str)
         if (fp%datastatus .eq. ESMF_STATE_READY) then 
            call ESMF_ArrayPrint(fp%localfield%localdata, "", status)

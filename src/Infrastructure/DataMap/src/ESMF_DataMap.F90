@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.23 2004/04/23 21:23:58 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.24 2004/04/23 21:29:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.23 2004/04/23 21:23:58 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.24 2004/04/23 21:29:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -1090,11 +1090,11 @@ end function
           enddo
         endif
 
-        call ESMF_RelLocString(datamap%horzRelloc, str, rc)
+        call ESMF_StringRelLoc(datamap%horzRelloc, str, rc)
         print *, "  Horizontal Relative location = ", trim(str)
-        call ESMF_RelLocString(datamap%vertRelloc, str, rc)
+        call ESMF_StringRelLoc(datamap%vertRelloc, str, rc)
         print *, "  Vertical Relative location = ", trim(str)
-        call ESMF_InterleaveString(datamap%interleave%il_type, str, rc)
+        call ESMF_StringInterleave(datamap%interleave%il_type, str, rc)
         print *, "  Interleave type = ", trim(str), ".  Start,end,stride = ",  &
                                          datamap%interleave%il_start, & 
                                          datamap%interleave%il_end, & 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.160 2004/04/13 22:57:37 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.161 2004/04/23 21:30:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.160 2004/04/13 22:57:37 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.161 2004/04/23 21:30:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1975,7 +1975,7 @@
       !TODO: complete prints
 
       gp => grid%ptr
-  !    call ESMF_StatusString(gp%gridStatus, str, rc)
+  !    call ESMF_StringStatus(gp%gridStatus, str, rc)
   !    print *, "Grid status = ", trim(str)
 
       if (gp%gridStatus /= ESMF_GridStatus_Ready) then

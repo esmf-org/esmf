@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.47 2004/04/15 17:16:02 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.48 2004/04/23 21:31:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.47 2004/04/15 17:16:02 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.48 2004/04/23 21:31:05 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -506,7 +506,7 @@
       !call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
       call ESMF_FieldGetAttribute(f3, "Sky is Blue", lattr, rc)
-      call ESMF_LogicalString(lattr, lattrstr, rc)
+      call ESMF_StringLogical(lattr, lattrstr, rc)
       print *, "Sky is Blue  should be true, is: ", lattrstr
       write(failMsg, *) ""
       write(name, *) "Getting a logical Attribute back from a Field"
@@ -522,7 +522,7 @@
       print *, count, "attributes found in list"
       print *, "FlipFlop should be alternate, are: " 
       do i=1, 3
-        call ESMF_LogicalString(lattrlist(i), lattrstr, rc)
+        call ESMF_StringLogical(lattrlist(i), lattrstr, rc)
         print *, i, lattrstr
       enddo
       write(failMsg, *) ""
