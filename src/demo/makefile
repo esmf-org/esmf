@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.2 2004/10/14 17:00:53 nscollins Exp $
+# $Id: makefile,v 1.3 2005/02/02 20:47:55 jwolfe Exp $
 
-all: demo
+all: demos
 
 LOCDIR   = src/demo
 
