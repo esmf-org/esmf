@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapEx.F90,v 1.1 2004/06/03 12:50:05 nscollins Exp $
+! $Id: ESMF_BundleDataMapEx.F90,v 1.2 2004/06/11 17:56:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@
 !EOP
 
 !BOC
-      il = ESMF_BIL_BYITEM
+      il = ESMF_INTERLEAVE_BY_ITEM
       call ESMF_BundleDataMapSet(bundleDM, bundleInterleave=il, rc=rc)
 !EOC
 
@@ -95,9 +95,9 @@
 
 !BOC
       call ESMF_BundleDataMapGet(bundleDM, bundleInterleave = il, rc=rc)
-      if (il .eq. ESMF_BIL_BYITEM) then
+      if (il .eq. ESMF_INTERLEAVE_BY_ITEM) then
         print *, "Interleaved by individual data items"
-      else if (il .eq. ESMF_BIL_BYFIELD) then
+      else if (il .eq. ESMF_INTERLEAVE_BY_FIELD) then
         print *, "Interleaved by fields"
       endif
 !EOC
