@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.72 2004/05/26 23:15:44 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.73 2004/06/01 21:33:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1433,6 +1433,10 @@
       ! Fill in default values for optional arguments which weren't specified
       ! and check for an over-specified system which isn't consistent.  (in which
       ! case, deltas are overwritten and a warning printed.)
+      grid%gridStructure   = ESMF_GRID_STRUCTURE_LOGRECT
+      grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_A
+      grid%coordOrder      = ESMF_COORD_ORDER_XYZ
+      grid%coordIndex      = ESMF_COORD_INDEX_LOCAL
       if (present(deltaPerDim)) then
          do i=1,dimCount
            useDeltas(i) = deltaPerDim(i)
@@ -1479,7 +1483,6 @@
 
       ! Fill in grid derived type with subroutine arguments
       grid%dimCount      = dimCount
-      grid%gridStructure = ESMF_GRID_STRUCTURE_LOGRECT
       if (present(horzGridType   )) grid%horzGridType    = horzGridType
       if (present(horzStagger    )) grid%horzStagger     = horzStagger
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
@@ -1488,13 +1491,13 @@
 
       ! Set dimension names and units for each dimension
       if (present(dimNames)) then
-        do i=1,ESMF_MAXGRIDDIM
+        do i = 1,dimCount
           if (i > size(dimNames)) exit
           grid%dimNames(i) = dimNames(i)
         enddo
       endif
       if (present(dimUnits)) then
-        do i=1,ESMF_MAXGRIDDIM
+        do i = 1,dimCount
           if (i > size(dimUnits)) exit
           grid%dimUnits(i) = dimUnits(i)
         enddo
@@ -1502,7 +1505,7 @@
 
       ! Set periodic flags for each dimension
       if (present(periodic)) then
-        do i=1,ESMF_MAXGRIDDIM
+        do i = 1,dimCount
           if (i > size(periodic)) exit
           grid%periodic(i) = periodic(i)
         enddo
@@ -1513,7 +1516,7 @@
         print *,'ESMF_LRGridConstruct: minGlobalCoordPerDim too big'
         return
       endif
-      do i=1,size(minGlobalCoordPerDim)
+      do i = 1,dimCount
         grid%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
       enddo
 
@@ -1522,12 +1525,12 @@
           print *,'ESMF_LRGridConstruct: maxGlobalCoordPerDim too big'
           return
         endif
-        do i=1,size(maxGlobalCoordPerDim)
+        do i = 1,dimCount
           grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
         enddo
       else
         ! default values computed above
-        do i=1,size(maxGlobalCoordPerDim)
+        do i = 1,dimCount
           grid%maxGlobalCoordPerDim(i) = useMaxes(i)
         enddo
       endif
@@ -1667,6 +1670,10 @@
 
       ! Fill in logRectGrid derived type with subroutine arguments
       ! TODO: check stat return code against 0 (not ESMF_FAILURE)
+      grid%gridStructure   = ESMF_GRID_STRUCTURE_LOGRECT
+      grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_A
+      grid%coordOrder      = ESMF_COORD_ORDER_XYZ
+      grid%coordIndex      = ESMF_COORD_INDEX_LOCAL
       allocate(grid%gridSpecific%logRectGrid, stat=status) 
       lrgrid => grid%gridSpecific%logRectGrid
       call ESMF_LRGridConstructSpecificNew(lrgrid, status)
