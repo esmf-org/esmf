@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.6 2002/11/07 18:32:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_DistGrid.h>
+#include <ESMF_Macros.inc>
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_DistGridMod - One line general statement about this class
@@ -33,8 +34,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseMod    ! ESMF base class
-!     use ESMF_<XXX>Mod   ! any other dependencies
+      use ESMF_BaseMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -53,16 +53,28 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_DistGridType
+!
+!     !  Description of ESMF_DistGrid. 
+
+      type ESMF_DistGridType
+      sequence
+      private
+        type (ESMF_Base) :: base
+        integer :: dummy
+!       < insert other class members here >
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_DistGrid
 !
-!     ! Description of ESMF_DistGrid. 
+!     !  The DistGrid data structure that is passed between languages.
 
       type ESMF_DistGrid
       sequence
       private
-!       type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
+        type (ESMF_DistGridType), pointer :: ptr     ! pointer to a distgrid
+                                                     ! type
       end type
 
 !------------------------------------------------------------------------------
@@ -82,11 +94,6 @@
 ! the following routines apply to deep classes only
     public ESMF_DistGridCreate                 ! interface only, deep class
     public ESMF_DistGridDestroy                ! interface only, deep class
-    public ESMF_DistGridConstruct              ! internal only, deep class
-    public ESMF_DistGridDestruct               ! internal only, deep class
-
-! the following routine applies to a shallow class
-    public ESMF_DistGridInit                   ! shallow class
 
     public ESMF_DistGridGetConfig
     public ESMF_DistGridSetConfig
@@ -104,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.6 2002/11/07 18:32:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -121,6 +128,21 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for DistGrid create
 !     methods.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_DistGridConstruct
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DistGridConstructNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that construct
+!     a complete {\tt DistGrid}.
 !
 !EOP
       end interface 
@@ -143,16 +165,17 @@
 !     ESMF_DistGridCreateNew - Create a new DistGrid
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_DistGridCreateNew(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
+
+!     integer, intent(in) :: arg1                        
+!     integer, intent(in) :: arg2                        
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt DistGrid} object and constructs its
@@ -160,8 +183,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
+!     \item[[name]] 
+!          {\tt DistGrid} name.
 !     \item[arg2]
 !          Argument 2.         
 !     \item[[arg3]] 
@@ -170,12 +193,42 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
+! !REQUIREMENTS:  TODO
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
-!
-!  code goes here
-!
+      type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
+      integer :: status=ESMF_FAILURE                ! Error status
+      logical :: rcpresent=.FALSE.                  ! Return code present
+
+!     Initialize pointers
+      nullify(distgrid)
+      nullify(ESMF_DistGridCreateNew%ptr)
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(distgrid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridCreateNew: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_DistGridConstructNew(distgrid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridCreateNew: DistGrid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_DistGridCreateNew%ptr => distgrid
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end function ESMF_DistGridCreateNew
 
 !------------------------------------------------------------------------------
@@ -213,16 +266,15 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_DistGridConstruct - Construct the internals of an allocated DistGrid
+!     ESMF_DistGridConstructNew - Construct the internals of an allocated
+!                                 DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstruct(distgrid, arg1, arg2, arg3, rc)
+      subroutine ESMF_DistGridConstructNew(distgrid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid   ! distgrid to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
+      type(ESMF_DistGridType), intent(in) :: distgrid 
+      character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
@@ -236,24 +288,37 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[distgrid] 
-!          The class to be constructed.
+!          Pointer to a {\tt DistGrid}.
 !     \item[arg1]
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
+!     \item[[name]] 
 !          Argument 3.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+! !REQUIREMENTS:  TODO
 !EOP
-! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
-      end subroutine ESMF_DistGridConstruct
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructNew: DistGrid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridConstructNew
 
 !------------------------------------------------------------------------------
 !BOP
@@ -289,50 +354,6 @@
 !  code goes here
 !
       end subroutine ESMF_DistGridDestruct
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: 
-!     ESMF_DistGridInit - Initialize a DistGrid 
-
-! !INTERFACE:
-      subroutine ESMF_DistGridInit(distgrid, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt DistGrid} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy and 
-!     Construct/Destruct.  Can be overloaded like ESMF_DistGridCreate
-!     via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[distgrid]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_DistGridInit
 
 !------------------------------------------------------------------------------
 !BOP
