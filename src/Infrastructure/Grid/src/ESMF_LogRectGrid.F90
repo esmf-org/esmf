@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.102 2004/11/01 16:17:12 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.103 2004/11/01 17:44:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.102 2004/11/01 16:17:12 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.103 2004/11/01 17:44:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -7984,7 +7984,7 @@
 
       integer :: localrc                          ! Error status
       integer :: DE, numDE1, numDE2, numDEs, npts, count(2)
-      integer :: i, i1, j
+      integer :: i, i1, i2, j
       real(ESMF_KIND_R8) :: start, stop, huge
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
 
@@ -8023,10 +8023,11 @@
       stop  = 0.0
       i1    = 0
       do j = 1,numDE1
-        start = minval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
-        stop  = maxval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
-        if (i1.ge.1         ) start = minval(coord1(i1+0:i1+1+countsPerDEDim1(j)))
-        if (i1.le.count(1)-2) stop  = maxval(coord1(i1+1:i1+2+countsPerDEDim1(j)))
+        i2 = i1+countsPerDEDim1(j)
+        start = minval(coord1(i1+1:i2+1))
+        stop  = maxval(coord1(i1+1:i2+1))
+        if (i1.ge.1         ) start = minval(coord1(i1+0:i2+1))
+        if (i2.le.count(1)-2) stop  = maxval(coord1(i1+1:i2+2))
         if (countsPerDEDim1(j).eq.0) then
           start = -huge
           stop  = -huge
@@ -8047,10 +8048,11 @@
       stop  = 0.0
       i1    = 0
       do j = 1,numDE2
-        start = minval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
-        stop  = maxval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
-        if (i1.ge.1         ) start = minval(coord2(i1+0:i1+1+countsPerDEDim2(j)))
-        if (i1.le.count(2)-2) stop  = maxval(coord2(i1+1:i1+2+countsPerDEDim2(j)))
+        i2 = i1+countsPerDEDim2(j)
+        start = minval(coord2(i1+1:i2+1))
+        stop  = maxval(coord2(i1+1:i2+1))
+        if (i1.ge.1         ) start = minval(coord2(i1+0:i2+1))
+        if (i2.le.count(2)-2) stop  = maxval(coord2(i1+1:i2+2))
         if (countsPerDEDim2(j).eq.0) then
           start = -huge
           stop  = -huge
