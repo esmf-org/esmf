@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2003/04/15 20:28:22 svasquez Exp $ 
+# $Id: makefile,v 1.17 2003/04/23 21:31:26 svasquez Exp $ 
 
 ALL:  tests
 
@@ -24,8 +24,8 @@ TESTS_RUN     = RUN_ESMF_FieldUTest \
 		RUN_ESMF_BundleUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
-		RUN_ESMF_FRouteUTestUNI \
 		RUN_ESMF_BundleUTestUNI 
+# Don't run ESMF_FRouteUtest on one processor
 
 TESTS_RM      = ESMF_FieldUTest.rm \
 		ESMF_FRouteUTest.rm \
