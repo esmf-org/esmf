@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StdCppMacros.h,v 1.2 2004/03/16 18:03:12 nscollins Exp $
+! $Id: ESMF_StdCppMacros.h,v 1.3 2004/04/14 20:48:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,8 +16,33 @@
 !------------------------------------------------------------------------------
 ! Macros for any functions which must be overloaded T/K/R (type/kind/rank).
 ! Internal macros used only by ESMF source code.  NOT intended for Public Use.
-! Defined from ranks 1 to 7, the maximum supported by fortran.
 !
+! Currently defined for ranks 1 to 7, types integer (kind *1,2,4,8) and
+! real (kind *4,8).  ranks, types, kinds can be added or removed and the
+! macros regenerated.
+!
+! The structure of this file and these macros are compatible with the gcc
+! preprocessor - they assume the use of ## as a paste operator, require that
+! no additional spaces be added (e.g. no pre-tokenization as done by some
+! preprocessors which assume C syntax), assume an option exists to suppress
+! C-specific syntax directives such as #line or #pragma, and that an option
+! exists to produce output on stdout and not into a file.  The output of
+! the preprocessor phase is a valid .F90 file ready to be compiled by the
+! standard fortran compiler.  (gcc is *not* used for compilation.)
+!
+! The macros are intended to be written with @\ at the end of each line of
+! a multiline macro, and the output piped thru 'tr' to translate each
+! @ into <cr> to produce multiple lines of fortran code from a single
+! macro invocation.   If any preprocessor directives are to be left in the
+! output file (e.g. #include <>), the source should use ^directive (e.g.
+! ^include <header.h> ) again using 'tr' to substitute # for ^ after
+! preprocessing is completed.  
+!------------------------------------------------------------------------------
+#endif
+
+#if 0
+!------------------------------------------------------------------------------
+! Predefined macros for use as arguments to other macros.
 ! These are defined outside the source file because they contain a 
 ! variable number of commas, and so the contents could not be given 
 ! literally as a single macro argument.  However, these symbols can 
@@ -66,7 +91,14 @@
 
 #if 0
 !------------------------------------------------------------------------------
-! Expand a string into each of the T/K/R procedure interface blocks
+! Expand a string into each of the T/K/R procedure interface blocks.
+! Expected use:
+!
+! interface fred
+!  InterfaceMacro(fred)
+!  module procedure other_explicit_non_TKR_interfaces_to_overload
+! end interface
+!
 !------------------------------------------------------------------------------
 #endif
 
@@ -122,7 +154,15 @@
 !------------------------------------------------------------------------------
 ! Expand a string into each of the T/K/R procedures.  Assumes one macro
 ! which contains only the general protex documentation, and the rest do NOT
-! contain protex.
+! contain protex.  Expected use:
+!
+!  DeclarationMacro(fred)
+!
+! where the following other macros are defined elsewhere by the user:
+!  #define fredDoc() ...
+! which contains generic protex documentation only, no code, plus:
+!  #define fredMacro(name, typekind, rank, col, len, rng, loc) ...
+! which contains the actual code for the function, with no protex documentation.
 !------------------------------------------------------------------------------
 #endif
 
@@ -182,7 +222,16 @@ funcname##Macro(real, R8, 7, COL7, LEN7, RNG7, LOC7) @\
 
 #if 0
 !------------------------------------------------------------------------------
-! Expand a string into a function call for each of the T/K/R procedures.
+! Expand generic code for each of the T/K/R procedures.
+! Expected use:
+!
+!   AllTypesMacro(fred)
+!
+! where the following macro is defined elsewhere by the user:
+!  #define fredMacro(name, typekind, rank, col) ...
+! Expected use is to invoke an instance of code for each type, e.g. for
+!  local variable declarations:
+!  type (fred##rank##typekind) :: localvar##rank##typekind(col)
 !------------------------------------------------------------------------------
 #endif
 
