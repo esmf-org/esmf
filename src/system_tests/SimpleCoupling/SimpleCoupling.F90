@@ -1,6 +1,6 @@
-! $Id: SimpleCoupling.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: SimpleCoupling.F90,v 1.2 2003/09/18 22:58:26 cdeluca Exp $
 !
-! System test code #62502
+! System test code SimpleCoupling
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,12 +8,13 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 62502.  2 components and 1 coupler, one-way coupling.
+! System test SimpleCoupling.  
+! 2 components and 1 coupler, one-way coupling.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest62502
+    program SimpleCoupling
 
 #include <ESMF_Macros.inc>
 
@@ -57,7 +58,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test #62502:"
+    print *, "System Test SimpleCoupling:"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -67,7 +68,7 @@
 !
 
     ! Create the top level application component.
-    aname = "System Test #62502"
+    aname = "System Test SimpleCoupling"
     app = ESMF_AppCompCreate(aname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(aname), ",  rc =", rc
@@ -279,14 +280,14 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test #62502 complete!"
+10    print *, "System Test SimpleCoupling complete!"
 
       ! Only output on processor 0, or if error anyplace
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
         ! Standard ESMF Test output to log file
         write(failMsg, *)  "Component Coupling"
-        write(testname, *) "System Test 62502: Simple Component Coupling"
+        write(testname, *) "System Test SimpleCoupling: Simple Component Coupling"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
@@ -307,7 +308,7 @@
       call ESMF_AppCompDestroy(app, rc)
       ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
 
-      end program ESMF_SysTest62502
+      end program SimpleCoupling
     
 !\end{verbatim}
     

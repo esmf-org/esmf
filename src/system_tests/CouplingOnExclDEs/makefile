@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 21:26:46 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/18 23:03:05 cdeluca Exp $ 
 
 ALL: system_tests
 
@@ -12,22 +12,22 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/SystemTests/62503
+LOCDIR	  = src/system_tests/CouplingOnExclDEs
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest62503
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/CouplingOnExclDEs
 
-# Object files other than ESMF_SysTest%.o that the
+# Object files other than SysTest%.o that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
 SYSTEM_TESTS_OBJ      = user_model1.o user_model2.o user_coupler.o
 
-SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest62503  
+SYSTEM_TESTS_RUN      = RUN_CouplingOnExclDEs  
 
-SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SysTest62503UNI
+SYSTEM_TESTS_RUN_UNI  = RUN_CouplingOnExclDEsUNI
 
-SYSTEM_TESTS_RM       = ESMF_SysTest62503.rm
+SYSTEM_TESTS_RM       = CouplingOnExclDEs.rm
 
 include $(ESMF_DIR)/makefile
 
@@ -38,16 +38,16 @@ CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
 
-RUN_ESMF_SysTest62503:
-	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest62503.tmps
-	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/ESMF_SysTest62503 >$(ESMC_TESTDIR)/ESMF_SysTest62503.stdout
+RUN_CouplingOnExclDEs:
+	-@rm -f testlog stdlog.* logfile.* CouplingOnExclDEs.tmps
+	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/CouplingOnExclDEs >$(ESMC_TESTDIR)/CouplingOnExclDEs.stdout
 
-RUN_ESMF_SysTest62503UNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest62503.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest62503 >$(ESMC_TESTDIR)/ESMF_SysTest62503.stdout
+RUN_CouplingOnExclDEsUNI:
+	-@rm -f testlog stdlog.* logfile.* CouplingOnExclDEs.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/CouplingOnExclDEs >$(ESMC_TESTDIR)/CouplingOnExclDEs.stdout
 
-ESMF_SysTest62503.rm:
-	echo "ESMF_SysTest62503.rm target called here."
+CouplingOnExclDEs.rm:
+	echo "CouplingOnExclDEs.rm target called here."
 
 
 

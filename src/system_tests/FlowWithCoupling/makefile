@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 21:26:47 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/18 22:58:26 cdeluca Exp $ 
 
 ALL: system_tests
 
@@ -11,23 +11,23 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/SystemTests/74559
+LOCDIR	  = src/system_tests/FlowWithCoupling
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest74559
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/FlowWithCoupling
 
-# Object files other than ESMF_SysTest%.o that the
+# Object files other than SysTest%.o that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
 SYSTEM_TESTS_OBJ      = FlowArraysMod.o InjectArraysMod.o \
                         FlowSolverMod.o InjectorMod.o CouplerMod.o 
 
-SYSTEM_TESTS_RUN      = RUN_ESMF_SysTest74559  
+SYSTEM_TESTS_RUN      = RUN_FlowWithCoupling  
 
-SYSTEM_TESTS_RUN_UNI  = RUN_ESMF_SysTest74559UNI
+SYSTEM_TESTS_RUN_UNI  = RUN_FlowWithCouplingUNI
 
-SYSTEM_TESTS_RM       = ESMF_SysTest74559.rm
+SYSTEM_TESTS_RM       = FlowWithCoupling.rm
 
 include $(ESMF_DIR)/makefile
 
@@ -37,16 +37,16 @@ CLEANDIRS   = coredir.*
 CLEANFILES  = *.o *.mod *.txt core $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
-RUN_ESMF_SysTest74559:
-	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest74559.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest74559 >$(ESMC_TESTDIR)/ESMF_SysTest74559.stdout
+RUN_FlowWithCoupling:
+	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCoupling.stdout
 
-RUN_ESMF_SysTest74559UNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest74559.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest74559 >$(ESMC_TESTDIR)/ESMF_SysTest74559.stdout
+RUN_FlowWithCouplingUNI:
+	-@rm -f testlog stdlog.* logfile.* FlowWithCoupling.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FlowWithCoupling >$(ESMC_TESTDIR)/FlowWithCoupling.stdout
 
-ESMF_SysTest74559.rm:
-	echo "ESMF_SysTest74559.rm target called here."
+FlowWithCoupling.rm:
+	echo "FlowWithCoupling.rm target called here."
 
 
 

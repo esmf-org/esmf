@@ -1,4 +1,4 @@
-! $Id: FlowWithCoupling.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: FlowWithCoupling.F90,v 1.2 2003/09/18 22:58:26 cdeluca Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -332,7 +332,7 @@
 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         write(failMsg, *)  "System Test failure"
-        write(testname, *) "System Test 74559: Coupled Fluid Flow"
+        write(testname, *) "System Test FlowWithCoupling: Coupled Fluid Flow"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)

@@ -1,6 +1,6 @@
-! $Id: CouplingOnExclDEs.F90,v 1.1 2003/09/18 21:26:46 cdeluca Exp $
+! $Id: CouplingOnExclDEs.F90,v 1.2 2003/09/18 23:03:05 cdeluca Exp $
 !
-! System test code #62503
+! System test code CouplingOnExclDEs
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,13 +8,14 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 62503.  2 components and 1 coupler, one-way coupling.
+! System test CouplingOnExclDEs.  
+!   2 components and 1 coupler, one-way coupling.
 !   Non-overlapping layouts.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest62503
+    program CouplingOnExclDEs
 
 #include <ESMF_Macros.inc>
 
@@ -58,9 +59,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "--------------------------- "
-    print *, "Start of System Test #62503:"
-    print *, "--------------------------- "
+    print *, "-------------------------------------- "
+    print *, "Start of System Test CouplingOnExclDEs:"
+    print *, "-------------------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -70,7 +71,7 @@
 !
 
     ! Create the top level application component.
-    aname = "System Test #62503"
+    aname = "System Test CouplingOnExclDEs"
     app = ESMF_AppCompCreate(aname, rc=rc)
     print *, "Created component ", trim(aname), ",  rc =", rc
     call ESMF_AppCompPrint(app, "", rc)
@@ -249,14 +250,14 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test #62503 complete!"
+10    print *, "System Test CouplingOnExclDEs complete!"
 
       ! Only on de 0 or any DE with an error. 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
         ! Normal ESMF Test output
         write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test 62503: Components on Exclusive DE sets"
+        write(testname, *) "System Test CouplingOnExclDEs: Components on Exclusive DE sets"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
@@ -277,7 +278,7 @@
       call ESMF_AppCompDestroy(app, rc)
       ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
 
-      end program ESMF_SysTest62503
+      end program CouplingOnExclDEs
     
 !\end{verbatim}
     
