@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2002/12/11 21:59:11 nscollins Exp $ 
+# $Id: makefile,v 1.7 2003/02/05 17:10:24 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -40,10 +40,14 @@ LIBBASE	  = liboldworld
 DIRS	  = examples doc
 LOCDIR	  = src/Infrastructure/TimeMgmt/src
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+RMMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
+# RM MOD FILES does generate the right list, but the case of the basename isn't
+# correct - it needs to be all lower case.  try using tr first...
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
-
-
+lib:: 
+	rm `echo ${RMMODFILES} | tr [:upper:]  [:lower:] `
+	echo "removing TimeMgmt module files to prevent name collisions with newer TimeMgr"
 
 
