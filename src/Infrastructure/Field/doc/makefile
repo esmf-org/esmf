@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/03/18 00:07:28 cdeluca Exp $ 
+# $Id: makefile,v 1.9 2004/08/03 19:33:46 nscollins Exp $ 
 ALL: alldoc 
 
 
@@ -13,14 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Field/doc
 
-DVIFILES  = 	Field_reqdoc.dvi \
-		Field_refdoc.dvi
+DVIFILES  =
 
-PDFFILES  =     ${ESMC_DOCDIR}/Field_reqdoc.pdf \
-		${ESMC_DOCDIR}/Field_refdoc.pdf
+PDFFILES  =
 
-HTMLFILES = 	${ESMC_DOCDIR}/Field_reqdoc \
-		${ESMC_DOCDIR}/Field_refdoc
+HTMLFILES =
 
 #
 # Tex Files to make

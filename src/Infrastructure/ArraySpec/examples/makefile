@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/06/18 09:17:33 nscollins Exp $
+# $Id: makefile,v 1.4 2004/08/03 19:33:42 nscollins Exp $
 
 # makefile template for the examples directory.
 
@@ -32,7 +32,7 @@ include ${ESMF_DIR}/makefile
 DIRS = 
 
 CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core ESMF_LogFile $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 run_ESMF_ArraySpecEx:

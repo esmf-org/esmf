@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2004/03/23 18:30:30 nscollins Exp $
+# $Id: makefile,v 1.13 2004/08/03 19:33:41 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -9,17 +9,18 @@ ALL: build_here
 CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
-# if you have C files in this directory, list them all on the line below.
+# files which are generated from .cpp files
+AUTOGEN   = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90
+
 SOURCEC	  = ESMC_Array_F.C
-# if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Array.F90 ESMF_ArrayCreate.F90 \
-             ESMF_ArrayGet.F90 ESMF_Alloc_C.F90
-# if you have .h include files in this dir, list them all on the line below.
+SOURCEF	  =  ESMF_Array.F90 $(AUTOGEN) ESMF_Alloc_C.F90
 SOURCEH	  =
+CPPFILES  = $(AUTOGEN)
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 # is MANSEC something about documentation?
 MANSEC	  = Arrayobj
@@ -44,7 +45,7 @@ endif
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_ArrayCreate.F90 ESMF_ArrayGet.F90
+CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 ESMF_ArrayCreate.o: ESMF_ArrayCreate.cpp ESMF_ArrayCreateMacros.h ESMF_Array.o

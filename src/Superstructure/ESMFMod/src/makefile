@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/04/23 23:38:58 nscollins Exp $
+# $Id: makefile,v 1.6 2004/08/03 19:33:52 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -21,7 +21,6 @@ STOREH	  =
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
 MANSEC	  = Baseobj
@@ -32,7 +31,7 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Superstructure/ESMFMod/src
 
 # leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+CLEANFILES = 
 
 include ${ESMF_DIR}/makefile
 

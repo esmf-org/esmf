@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/03/23 18:30:30 nscollins Exp $
+# $Id: makefile,v 1.6 2004/08/03 19:33:52 nscollins Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -9,14 +9,14 @@ ALL: build_here
 CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    =
 
-# If you have C files in this directory, list them all on the line below.
+AUTOGEN   = ESMF_StateGet.F90
+
 SOURCEC	  = 
-# If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_State.F90  ESMF_StateGet.F90
-# If you have .h include files in this dir, list them all on the line below.
+SOURCEF	  = ESMF_State.F90  $(AUTOGEN)
 SOURCEH	  = 
-# If you have public .h files in this dir, list them here
 STOREH    = ESMC_State.h
+CPPFILES  = $(AUTOGEN)
+TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -36,7 +36,7 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_StateGet.F90
+CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 ESMF_StateGet.o: ESMF_StateGet.cpp ESMF_StateMacros.h ESMF_State.o

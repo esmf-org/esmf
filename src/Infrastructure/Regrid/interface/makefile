@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/02/13 15:37:30 nscollins Exp $
+# $Id: makefile,v 1.7 2004/08/03 19:33:50 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -21,7 +21,6 @@ STOREH	  =
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
 MANSEC	  = Regridobj

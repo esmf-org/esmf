@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/03/18 18:34:54 nscollins Exp $
+# $Id: makefile,v 1.4 2004/08/03 19:33:47 nscollins Exp $
 
 ALL: build_here
 
@@ -14,7 +14,6 @@ include ${ESMF_DIR}/makefile
 #  directly below this directory, and have either library,
 #  example/test code, or documents which need to be generated.
 DIRS	  = src interface examples doc
-#DIRS	  = src interface examples doc
 
 CLEANDIRS   =
 CLEANFILES  =

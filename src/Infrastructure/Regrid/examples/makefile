@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/06/18 10:54:27 nscollins Exp $
+# $Id: makefile,v 1.8 2004/08/03 19:33:50 nscollins Exp $
 
 ALL: build_examples
 
@@ -37,7 +37,6 @@ SOURCEF	  =
 SOURCEH	  = 
 OBJSC     = 
 OBJSF     = 
-TEXFILES  = 
 
 #
 # Set EXAMPLES_BUILD to full path of the examples to be
@@ -73,7 +72,7 @@ DIRS =
 
 
 CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core ESMF_LogFile $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 

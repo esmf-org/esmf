@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/05/03 16:12:58 nscollins Exp $
+# $Id: makefile,v 1.2 2004/08/03 19:33:41 nscollins Exp $
 
 # leave alone.
 ALL: build_here
@@ -32,7 +32,7 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/ArrayDataMap/interface
 
 # leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+CLEANFILES = 
 
 include ${ESMF_DIR}/makefile
 

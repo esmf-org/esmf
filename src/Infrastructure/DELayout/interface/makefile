@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/04/28 23:11:49 cdeluca Exp $
+# $Id: makefile,v 1.5 2004/08/03 19:33:46 nscollins Exp $
 
 # leave alone.
 ALL: build_here
@@ -21,7 +21,6 @@ STOREH	  =
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 MANSEC	  = DELayoutobj
 LIBBASE	  = libesmf
@@ -31,7 +30,7 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/DELayout/interface
 
 # Leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+CLEANFILES = 
 
 include ${ESMF_DIR}/makefile
 

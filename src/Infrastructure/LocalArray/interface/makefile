@@ -1,16 +1,15 @@
-# $Id: makefile,v 1.9 2004/03/23 18:30:30 nscollins Exp $
+# $Id: makefile,v 1.10 2004/08/03 19:33:49 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
 
-# if you have C files in this directory, list them all on the line below.
+AUTOGEN   = ESMF_LocalArray.F90
+
 SOURCEC	  = ESMC_LocalArray_F.C 
-# if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_LocalArray.F90 ESMF_LocalAlloc_C.F90
-# if you have .h include files in this dir, list them all on the line below.
+SOURCEF	  = $(AUTOGEN) ESMF_LocalAlloc_C.F90
 SOURCEH	  = 
-# include files which go into the public src dir
 STOREH	  = 
+CPPFILES  = $(AUTOGEN)
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -37,7 +36,7 @@ endif
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_LocalArray.F90
+CLEANFILES  = $(AUTOGEN)
 CLOBBERDIRS =
 
 ESMF_LocalAlloc_C.o:  ESMF_LocalArray.o

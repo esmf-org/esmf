@@ -1,15 +1,19 @@
-# $Id: makefile,v 1.8 2004/04/19 23:13:40 nscollins Exp $ 
+# $Id: makefile,v 1.9 2004/08/03 19:33:43 nscollins Exp $ 
 
 
 ALL: build_here 
 
-CFLAGS    =
-FFLAGS    =
+AUTOGEN   = ESMF_BundleGet.F90
+
 SOURCEC	  = 
-SOURCEF	  = ESMF_Bundle.F90  ESMF_BundleGet.F90
+SOURCEF	  = ESMF_Bundle.F90  $(AUTOGEN)
 SOURCEH	  = 
+CPPFILES  = $(AUTOGEN)
+
+
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 MANSEC	  = Bundleobj
 LIBBASE	  = libesmf
@@ -21,7 +25,7 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = ESMF_BundleGet.F90
+CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )
 CLOBBERDIRS =
 
 ESMF_BundleGet.o:   ESMF_Bundle.o ESMF_BundleGet.cpp ESMF_BundleGetMacros.h

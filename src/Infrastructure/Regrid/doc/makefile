@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004/03/23 22:50:11 cdeluca Exp $ 
+# $Id: makefile,v 1.14 2004/08/03 19:33:50 nscollins Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,14 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Regrid/doc
 
-DVIFILES  =	Regrid_refdoc.dvi \
-                Regrid_reqdoc.dvi
+DVIFILES  =
 
-PDFFILES  =     ${ESMC_DOCDIR}/Regrid_refdoc.pdf \
-		${ESMC_DOCDIR}/Regrid_reqdoc.pdf
+PDFFILES  =
 
-HTMLFILES =	${ESMC_DOCDIR}/Regrid_refdoc \
-		${ESMC_DOCDIR}/Regrid_reqdoc
+HTMLFILES =
 
 #
 # Tex Files to make

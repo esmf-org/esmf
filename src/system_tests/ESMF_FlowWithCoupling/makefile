@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/02/09 17:58:43 nscollins Exp $ 
+# $Id: makefile,v 1.4 2004/08/03 19:33:54 nscollins Exp $ 
 
 ALL: build_system_tests
 
@@ -36,7 +36,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt core $(SYSTEM_TESTS_BUILD)
+CLEANFILES  = *.o *.mod *.txt core ESMF_LogFile $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_FlowWithCoupling:

@@ -1,6 +1,4 @@
-# $Id: makefile,v 1.41 2004/02/10 23:34:58 svasquez Exp $ 
-ALL: alldoc 
-
+# $Id: makefile,v 1.42 2004/08/03 19:33:53 nscollins Exp $ 
 
 #
 #  Note that the ref doc build rules are redefined here.
@@ -36,7 +34,7 @@ HTMLFILES =	${ESMC_DOCDIR}/ESMF_refdoc \
                 ${ESMC_DOCDIR}/ESMF_reqdoc
 
 
-TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:" 
 
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
@@ -53,25 +51,25 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILES)
-CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex \
-              ESMF_refdoc.tex ESMF_usrdoc.tex $(PDFFILES) $(DVIFILES)
+CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.out *.ORIG ESMF.bib \
+	      ESMF_reqdoc.tex ESMF_refdoc.tex ESMF_usrdoc.tex \
+	      ESMF_reqdoc.pdf ESMF_refdoc.pdf ESMF_usrdoc.pdf \
+	      ESMF_reqdoc.bib ESMF_refdoc.bib ESMF_usrdoc.bib \
+	      $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
 
 #-------------------------------------------------------------------------------
 # Dvi files
 #-------------------------------------------------------------------------------
-ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
+ESMF_usrdoc.dvi: ESMF_usrdoc.ctex $(USRDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_LATEX} ESMF usr
 
-ESMF_reqdoc.dvi: $(REQDOC_DEP_FILES)
+ESMF_reqdoc.dvi: ESMF_reqdoc.ctex $(REQDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_LATEX} ESMF req
 
 ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
-	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
 

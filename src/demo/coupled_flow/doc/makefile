@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+# $Id: makefile,v 1.2 2004/08/03 19:33:53 nscollins Exp $
 ALL: alldoc 
 
 CFLAGS    =
@@ -43,6 +43,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 #
 USRDOC_DEP_FILES = $(TEXFILES_TO_MAKE) flow_intro.tex
 
+export TEXINPUTS := .
 
 include $(ESMF_DIR)/makefile
 

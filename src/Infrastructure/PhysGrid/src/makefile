@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2004/02/13 15:40:09 nscollins Exp $
+# $Id: makefile,v 1.9 2004/08/03 19:33:49 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -19,7 +19,6 @@ SOURCEH	  =
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 MANSEC	  = PhysGridobj
 LIBBASE	  = libesmf

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/06/11 18:49:22 svasquez Exp $
+# $Id: makefile,v 1.6 2004/08/03 19:33:44 nscollins Exp $
 
 ALL:  build_tests
 
@@ -32,7 +32,7 @@ include ${ESMF_DIR}/makefile
 DIRS	  = 
 
 CLEANDIRS   = coredir.*
-CLEANFILES  = *.o *.mod *.txt NULL core $(TESTS_BUILD)
+CLEANFILES  = *.o *.mod *.txt NULL core ESMF_LogFile $(TESTS_BUILD)
 CLOBBERDIRS =
 
 #
@@ -59,11 +59,11 @@ $(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
 
 RUN_ESMC_<Class>UTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
 RUN_ESMC_<Class>UTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
 ESMC_<Class>UTest.rm:
 	echo "ESMC_<Class>Test.rm target called here."

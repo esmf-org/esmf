@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:35:04 nscollins Exp $
+# $Id: makefile,v 1.3 2004/08/03 19:33:44 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -32,7 +32,7 @@ LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/BundleComm/src
 
 # leave these alone 
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
+CLEANFILES = 
 
 include ${ESMF_DIR}/makefile
 
