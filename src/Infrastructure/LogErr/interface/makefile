@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/03/24 17:01:32 cpboulder Exp $ 
+# $Id: makefile,v 1.5 2004/03/24 17:36:30 cpboulder Exp $ 
 
 ALL: build_here 
 
@@ -27,4 +27,4 @@ CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-
+ESMF_LogErr.o:	makefile
