@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.9 2005/01/12 07:23:55 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.10 2005/01/28 22:10:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,7 +163,7 @@ class ESMC_VMK{
       // free allocations within an existing ESMC_VMK object
 
     void *vmk_startup(class ESMC_VMKPlan *vmp, void *(fctp)(void *, void *),
-      void *cargo);
+      void *cargo, int *rc);
       // enter a vm derived from current vm according to the ESMC_VMKPlan
     void vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt);
     void vmk_exit(class ESMC_VMKPlan *vmp, void *arg);

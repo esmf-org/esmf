@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.21 2005/01/12 07:32:45 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.22 2005/01/28 22:10:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,7 +109,8 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   pthread_mutex_lock(&(vmkt->mut_extra2));
   pthread_cond_init(&(vmkt->cond_extra2), NULL);
   int error = pthread_create(&(vmkt->tid), NULL, vmkt_spawn, arg);
-  pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));
+  if (!error) // only wait if the thread was successfully created
+    pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));
   return error;
 }
 
@@ -766,7 +767,7 @@ static void *vmk_block(void *arg){
 
 
 void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp, 
-  void *(fctp)(void *, void *), void *cargo){
+  void *(fctp)(void *, void *), void *cargo, int *rc){
   // enter a vm derived from current vm according to the ESMC_VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -904,11 +905,12 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
             if (mypet==k){
               // mypet (k) contributes to this pet (i)
               // mypet does not spawn but contributes -> spawn blocker thread
-              //pthread_create(&(sarg[0].pthid), NULL, vmk_block, NULL);
-              vmkt_create(&(sarg[0].vmkt), vmk_block, (void *)&sarg[0]);
+              *rc = vmkt_create(&(sarg[0].vmkt), vmk_block, (void *)&sarg[0]);
+              if (*rc) return NULL;  // could not create pthread -> bail out
               // also spawn sigcatcher thread
-              vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher, 
+              *rc = vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher, 
                 (void *)&sarg[0]);
+              if (*rc) return NULL;  // could not create pthread -> bail out
               // fill in the info about mypet contibuting...
               new_contributors[new_petid][ncontrib_counter].blocker_tid =
                 sarg[0].pthid;
@@ -1225,8 +1227,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
     // cargo
     sarg[i].cargo = cargo;
     // finally spawn threads from this pet...
-    //pthread_create(&(sarg[i].pthid), NULL, vmk_spawn, (void *)&sarg[i]);
-    vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i]);
+    *rc = vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i]);
+    if (*rc) return NULL;  // could not create pthread -> bail out
   }
   // free all the temporary arrays.... (not sarg array!!!)
   delete [] new_lpid;
