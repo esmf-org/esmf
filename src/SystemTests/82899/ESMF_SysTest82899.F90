@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.9 2003/08/05 21:20:18 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.10 2003/08/07 15:10:41 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -31,11 +31,15 @@
     type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1, deflayout
-    integer, dimension(12) :: delist
+    integer, dimension(16) :: delist
+    integer, dimension(2) :: shape
     integer :: de_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
     integer :: i, ndes, rc
+
+    ! set to true to get more output
+    logical :: verbose = .false.
         
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -66,24 +70,41 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    if (ndes .ne. 12) then
-        print *, "This system test needs to run 12-way, current np = ", ndes
-        goto 10
-    endif
 
     call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
-    delist = (/ (i, i=0, 11) /)
-    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
+    ! assign default DE numbers and only use as many as we get procs
+    delist = (/ (i, i=0, 15) /)
+    select case (ndes)
+       case (4)
+           shape(1) = 2
+           shape(2) = 2
+       case (6)
+           shape(1) = 3
+           shape(2) = 2
+       case (8)
+           shape(1) = 2
+           shape(2) = 4
+       case (12)
+           shape(1) = 3
+           shape(2) = 4
+       case (16)
+           shape(1) = 4
+           shape(2) = 4
+       case default
+           shape(1) = ndes
+           shape(2) = 1
+    end select
+    layout1 = ESMF_DELayoutCreate(delist, 2, shape, (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #82899"
     comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    print *, "Comp Create finished, name = ", trim(cname)
+    if (verbose) print *, "Comp Create finished, name = ", trim(cname)
 
     call ESMF_GridCompSetServices(comp1, setserv, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -97,7 +118,7 @@
     call ESMF_GridCompInitialize(comp1, importstate=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    print *, "Comp Init returned"
+    if (verbose) print *, "Comp Init returned"
 
 !
 !-------------------------------------------------------------------------
@@ -107,7 +128,7 @@
     call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    print *, "Comp Run returned"
+    if (verbose) print *, "Comp Run returned"
 
 !
 !-------------------------------------------------------------------------
@@ -116,7 +137,7 @@
     call ESMF_GridCompFinalize(comp1, importstate=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    print *, "Comp Finalize returned without error"
+    if (verbose) print *, "Comp Finalize returned without error"
 
 !
 !-------------------------------------------------------------------------
@@ -129,7 +150,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "All Destroy routines done"
+    if (verbose) print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -220,12 +241,13 @@
       real :: x_min, x_max, y_min, y_max
       type(ESMF_Logical) :: periodic(2)
       character(len=ESMF_MAXSTR) :: gname, fname
+      logical :: verbose = .false.
 
-      print *, "Entering Initialization routine"
+      if (verbose) print *, "Entering Initialization routine"
 
       ! Query component for layout
       call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
-      print *, "myinit: getting layout, rc = ", rc
+      if (verbose) print *, "myinit: getting layout, rc = ", rc
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! The user creates a simple horizontal Grid internally by passing all
@@ -240,10 +262,11 @@
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      !periodic(1) = ESMF_TF_TRUE
+
+      print *, "Grid is Periodic along the 2nd dimension"
       periodic(1) = ESMF_TF_FALSE
       periodic(2) = ESMF_TF_TRUE
-      !periodic(2) = ESMF_TF_FALSE
+
       gname = "test grid 1"
 
       grid1 = ESMF_GridCreate(counts=counts, x_min=x_min, x_max=x_max, &
@@ -255,7 +278,7 @@
                              name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      print *, "Grid Create returned"
+      if (verbose) print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
       call ESMF_DELayoutGetDEID(layout1, de_id, rc=rc)
@@ -270,16 +293,16 @@
       field1 = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
                                 haloWidth=2, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_FieldPrint(field1, "", rc)
+      if (verbose) call ESMF_FieldPrint(field1, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_FieldValidate(field1, "", rc)
+      if (verbose) call ESMF_FieldValidate(field1, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "Field Create returned"
+      if (verbose) print *, "Field Create returned"
 
       ! Add the field to the import state.
       call ESMF_StateAddData(importstate, field1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StatePrint(importstate, "", rc)
+      if (verbose) call ESMF_StatePrint(importstate, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get pointer to the actual data
@@ -304,7 +327,7 @@
         enddo
       enddo
 
-      print *, "Exiting Initialization routine"
+      if (verbose) print *, "Exiting Initialization routine"
 
 30    continue
       ! you come directly here on errors.  you also fall into this code
@@ -330,28 +353,29 @@
 
       ! Local variables
       type(ESMF_Field) :: field1
+      logical :: verbose = .false.
 
-      print *, "Entering Run routine"
+      if (verbose) print *, "Entering Run routine"
 
-      call ESMF_StatePrint(importstate, "", rc)
+      if (verbose) call ESMF_StatePrint(importstate, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get the field from the import state
-      print *, "About to get field from import state"
+      if (verbose) print *, "About to get field from import state"
       call ESMF_StateGetData(importstate, "DE id", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "Returned from getting field from import state"
-      call ESMF_FieldPrint(field1, "", rc)
+      if (verbose) print *, "Returned from getting field from import state"
+      if (verbose) call ESMF_FieldPrint(field1, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
 
       ! Call Field method to halo data.  This updates the data in place.
-      print *, "about to call Field Halo"
+      if (verbose) print *, "about to call Field Halo"
       call ESMF_FieldHalo(field1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "returned from Field Halo call"
+      if (verbose) print *, "returned from Field Halo call"
 
-      print *, "Exiting Run routine"
+      if (verbose) print *, "Exiting Run routine"
 
 30    continue
       ! you come directly here on errors.  you also fall into this code
@@ -386,8 +410,9 @@
       type(ESMF_Field) :: field1
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
+      logical :: verbose = .false.
 
-      print *, "Entering Finalize routine"
+      if (verbose) print *, "Entering Finalize routine"
       ! this must match halo width in original program!!
       halo_width = 2
 
@@ -406,12 +431,12 @@
       ! Get a pointer to the data Array in the Field
       call ESMF_FieldGetData(field1, array1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "data back from field"
+      if (verbose) print *, "data back from field"
 
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "data back from array"
+      if (verbose) print *, "data back from array"
 
       ! Get size of local array
       call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
