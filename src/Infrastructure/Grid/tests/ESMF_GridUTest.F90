@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.29 2004/04/28 23:11:53 cdeluca Exp $
+! $Id: ESMF_GridUTest.F90,v 1.30 2004/05/20 22:16:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.29 2004/04/28 23:11:53 cdeluca Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.30 2004/05/20 22:16:28 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -89,6 +89,8 @@
 !--------------------------------------------------------------------------------
 
       call ESMF_Initialize(rc=status)
+
+#ifdef ESMF_EXHAUSTIVE
       call ESMF_VMGetGlobal(vm, status)
 
       !------------------------------------------------------------------------
@@ -109,7 +111,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       layout = ESMF_DELayoutCreate(vm, rc=rc)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
@@ -127,7 +129,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -140,7 +142,7 @@
       ! expected to fail).  but this still crashes randomly if the layout
       ! object is left completely uninitialized.  this should be addressed.
       ! Bug report 796975 has been filed
-      !NEX_UTest
+      !EX_UTest
       layout2 = ESMF_DELayoutCreate(vm, rc=rc)
       call ESMF_DELayoutDestroy(layout2, status)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
@@ -173,7 +175,7 @@
                               delayout=layout, &
                               name=name, rc=status)
 
-      !NEX_UTest
+      !EX_UTest
 
 
       write(failMsg, *) "Returned ESMF_FAILURE"
@@ -182,7 +184,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Get Coord from a Grid
       call ESMF_GridGetCoord(grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -200,14 +202,13 @@
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Printing a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
       ! Test creating an internal Grid
@@ -233,9 +234,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#endif
 
-      !NEX_UTest
+      !EX_UTest
 
 
       ! Test destroy subroutine
@@ -248,7 +248,7 @@
 
       !----------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
 
 
       ! Test creation of empty grid
@@ -263,7 +263,6 @@
 
 
 
-#ifdef ESMF_EXHAUSTIVE
 
       !------------------------------------------------------------------------
       ! The following code crashes, bug 722780 has been filed

@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.21 2004/05/18 23:36:44 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.22 2004/05/20 22:13:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.21 2004/05/18 23:36:44 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.22 2004/05/20 22:13:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -90,6 +90,29 @@
       ! initialize ESMF framework
       call ESMF_Initialize(rc=rc)
 
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! initialize one calendar to be Gregorian type
+      write(name, *) "Create Gregorian Type Calendar Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Destroy  Calendar
+      ! Test Calendar Destroy
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Destroy Gregorian Type Calendar Test"
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 #ifdef ESMF_EXHAUSTIVE
       !EX_UTest
       ! print out initialized variables
@@ -111,10 +134,9 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#endif
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! initialize one calendar to be Gregorian type
       write(name, *) "Initialize Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -125,7 +147,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Get calendar  type
       write(name, *) "Get Calendar Type Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -135,7 +157,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -146,8 +168,7 @@
 
       ! ----------------------------------------------------------------------------
 
-
-      !NEX_UTest
+      !EX_UTest
       ! Validate Gregorian Calendar
       ! Test that validate subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -158,7 +179,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Make a copy of Gregorian type calendar
       write(name, *) "Make copy of  Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -168,7 +189,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Get calendar  type
       write(name, *) "Get Calendar Type Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -177,7 +198,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar equality
       ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
       write(failMsg, *) "Returned not equal"
@@ -189,7 +210,7 @@
       ! ----------------------------------------------------------------------------
       
                           
-      !NEX_UTest
+      !EX_UTest
       ! initialize another calendar to be Gregorian type
       write(name, *) "Initialize Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -199,7 +220,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar equality
       ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
       write(failMsg, *) "Returned not equal"
@@ -210,7 +231,7 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! initialize secand calendar to be Julian Day type
       write(name, *) "Initialize Julian Day Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -221,7 +242,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Get calendar  type
       write(name, *) "Get Calendar Type Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -231,7 +252,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -241,7 +262,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar inequality
       ! calendarsEqual = ESMF_CalendarOperator(==)(calendar1,calendar2)
       write(failMsg, *) "Returned equal"
@@ -251,7 +272,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar inequality
       ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar1,calendar2)
       write(failMsg, *) "Returned equal"
@@ -261,7 +282,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar equality
       ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar1,calendar2)
       write(failMsg, *) "Returned equal"
@@ -271,7 +292,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar type equality
       ! calendarsEqual = ESMF_CalendarTypeOperator(==)(calendarType1,calendarType2)
       write(failMsg, *) "Returned not equal"
@@ -280,7 +301,7 @@
       call ESMF_Test((calendarsEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar type inequality
       ! calendarsEqual = ESMF_CalendarTypeOperator(==)(calendarType1,calendarType2)
       write(failMsg, *) "Returned equal"
@@ -290,7 +311,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar type inequality
       ! calendarsNotEqual = ESMF_CalendarTypeOperator(/=)(calendarType1,calendarType2)
       write(failMsg, *) "Returned equal"
@@ -300,7 +321,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar type equality
       ! calendarsNotEqual = ESMF_CalendarTypeOperator(/=)(calendarType1,calendarType2)
       write(failMsg, *) "Returned not equal"
@@ -310,7 +331,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Testing for calendar type equality
       ! calendarsEqual = ESMF_CalendarTypeOperator(==)(calendarType1,calendarType2)
       write(failMsg, *) "Returned not equal"
@@ -321,7 +342,7 @@
 
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Validate Julian Day Calendar
       ! Test that validate subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -331,7 +352,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! initialize third calendar to be No Leap type
       write(name, *) "Initialize No Leap Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -341,7 +362,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -352,7 +373,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Validate No Leap Calendar
       ! Test that validate subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -363,7 +384,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! initialize third calendar to be 360 day type
       write(name, *) "Initialize 360 Day Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -372,7 +393,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -384,7 +405,7 @@
       ! ----------------------------------------------------------------------------
 
 
-      !NEX_UTest
+      !EX_UTest
       ! Validate 360 Day Calendar
       ! Test that validate subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -394,7 +415,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -409,7 +430,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! print out initialized variables
       ! Test that print subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -420,7 +441,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Validate Custom Type Calendar
       ! Test that validate subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
@@ -431,8 +452,6 @@
       call ESMF_CalendarDestroy(customCalendar, rc)
 
       ! ----------------------------------------------------------------------------
-#ifdef ESMF_EXHAUSTIVE
-
 
       !EX_UTest
       ! initialize fourth calendar to be custom type
@@ -545,10 +564,9 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#endif
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Start Time for the Gregorian Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit of Gregorian Calendar Test"
@@ -559,14 +577,12 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Start Time Print Test"
       call ESMF_TimePrint(startTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -587,10 +603,9 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#endif 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Stop Time for the Gregorian Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit of Gregorian Calendar Test"
@@ -602,14 +617,13 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Stop Time Print Test"
       call ESMF_TimePrint(stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
 
@@ -632,12 +646,10 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#endif 
-
 
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Setting the Start Time for the Julian Day Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit of Julian Day Calendar Test"
@@ -648,14 +660,13 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Start Time Print Test"
       call ESMF_TimePrint(startTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -676,7 +687,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#endif 
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
@@ -691,14 +701,12 @@
       
       ! ----------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Stop Time Print Test"
       call ESMF_TimePrint(stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
 
@@ -902,12 +910,12 @@
 
 
 
-#endif 
 
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
       call ESMF_CalendarDestroy(julianDayCalendar, rc)
       call ESMF_CalendarDestroy(no_leapCalendar, rc)
       call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
+#endif 
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
