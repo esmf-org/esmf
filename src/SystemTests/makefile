@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.10 2003/03/25 00:18:34 flanigan Exp $ 
+# $Id: makefile,v 1.11 2003/04/02 18:51:05 nscollins Exp $ 
 
 LOCDIR   = src/SystemTests
 
 include $(ESMF_DIR)/makefile
 
-DIRS     = 70384 70385 63029 62502
+DIRS     = 69527 70384 70385 63029 62502
 
 CLEANDIRS   =
 CLEANFILES  =
