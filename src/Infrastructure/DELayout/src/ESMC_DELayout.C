@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.25 2004/11/17 23:52:27 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.26 2004/12/02 18:45:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.25 2004/11/17 23:52:27 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.26 2004/12/02 18:45:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -675,6 +675,196 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
   printf("--- ESMC_DELayoutPrint end ---\n");
   return ESMF_SUCCESS;
 }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_DELayoutSerialize"
+//BOPI
+// !IROUTINE:  ESMC_DELayoutSerialize - Turn delayout information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutSerialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in delayout class into a stream of bytes.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    int fixedpart, nbytes, rc;
+    int i, j;
+    char *cp;
+    int *ip;
+    ESMC_Logical *lp;
+    ESMC_VM **vp;
+    de_type *dep;
+
+    // TODO: we cannot reallocate from C++ if the original buffer is
+    //  allocated on the f90 side.  change the code to make the allocate
+    //  happen in C++; then this will be fine.  (for now make sure buffer
+    //  is always big enough so realloc is not needed.)
+
+    // fixedpart = sizeof(ESMC_DELayout);
+    // if ((*length - *offset) < fixedpart) {
+    //     buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+    //     *length += 2 * fixedpart;
+    //  }
+
+    // first set the base part of the object
+    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+
+#if 0
+/ DE type used internally in the ESMC_DELayout class
+typedef struct{
+  int deid;         // DE's external id number (in case not base zero)
+  int petid;        // Id of the PET associated with this DE
+  int pid;          // absolute process ID, specifying virtual memory space
+  int nconnect;     // number of connections from this DE
+  int *connect_de;  // connected DEs
+  int *connect_w;   // connection weight
+  int *coord;       // coordinates of this DE in the layout
+}de_type;
+
+// class definition
+class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
+    ESMC_VM *myvm;  // ptr to this PET's VM instance this layout is running on
+    int ndes;       // number of DEs
+    de_type *des;   // list that holds all of this layout's DE info
+    int nmydes;     // number of DEs associated with instantiating PET
+    int *mydes;     // list that holds all of the des indices for this instance
+    int ndim;       // dimensionality of this layout
+    ESMC_Logical oneToOneFlag;  // indicate whether this is a 1-to-1 layout
+    ESMC_Logical logRectFlag;   // indicate whether this is logical rectangular
+    int *dims;      // sizes of dimensions in a logical rectangular layout
+#endif
+
+    cp = (char *)(buffer + *offset);
+    
+    // TODO: for now, send NULL as the vm, because i do not know how to
+    // serialize a VM.
+    vp = (ESMC_VM **)cp;   
+    *vp++ = NULL;     
+
+    ip = (int *)vp;
+    *ip++ = ndes;
+
+    for (i=0, dep=des; i<ndes; i++, dep++) {
+        *ip++ = dep->deid;
+        *ip++ = dep->petid;
+        *ip++ = dep->pid;
+        *ip++ = dep->nconnect;
+        for (j=0; j<ndes; j++) {
+            *ip++ = dep->connect_de[j];
+            *ip++ = dep->connect_w[j];
+            *ip++ = dep->coord[j];
+        }
+    }
+  
+    *ip++ = nmydes;
+    for (i=0; i<nmydes; i++) 
+        *ip++ = mydes[i];
+
+    *ip++ = ndim;
+    for (i=0; i<ndim; i++) 
+        *ip++ = dims[i];
+
+    lp = (ESMC_Logical *)ip;
+    *lp++ = oneToOneFlag;
+    *lp++ = logRectFlag;
+
+    cp = (char *)lp;
+
+    *offset = (cp - buffer);
+   
+    return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_DELayoutDeserialize"
+//BOPI
+// !IROUTINE:  ESMC_DELayoutDeserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+      ESMC_DELayout *ESMC_DELayoutDeserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+    ESMC_DELayout *a = new ESMC_DELayout;
+    int fixedpart, nbytes, rc;
+    int i, j;
+    char *cp;
+    int *ip;
+    ESMC_Logical *lp;
+    ESMC_VM **vp;
+    de_type *dep;
+
+    // first get the base part of the object
+    rc = a->ESMC_Base::ESMC_Deserialize(buffer, offset);
+
+    // now the rest
+    cp = (char *)(buffer + *offset);
+    
+    vp = (ESMC_VM **)cp;
+    a->myvm = *vp++; 
+
+    ip = (int *)vp;
+    a->ndes = *ip++;
+
+    for (i=0, dep=a->des; i<a->ndes; i++, dep++) {
+        dep->deid = *ip++;
+        dep->petid = *ip++;
+        dep->pid = *ip++;
+        dep->nconnect = *ip++;
+        for (j=0; j<a->ndes; j++) {
+            dep->connect_de[j] = *ip++;
+            dep->connect_w[j] = *ip++;
+            dep->coord[j] = *ip++;
+        }
+    }
+  
+    a->nmydes = *ip++;
+    for (i=0; i<a->nmydes; i++) 
+        a->mydes[i] = *ip++;
+
+    a->ndim = *ip++;
+    for (i=0; i<a->ndim; i++) 
+        a->dims[i] = *ip++;
+
+    lp = (ESMC_Logical *)ip;
+    a->oneToOneFlag = *lp++;
+    a->logRectFlag = *lp++;
+
+    cp = (char *)lp;
+
+    *offset = (cp - buffer);
+   
+    return a;
+
+ } // end ESMC_DELayoutDeserialize
 //-----------------------------------------------------------------------------
 
 

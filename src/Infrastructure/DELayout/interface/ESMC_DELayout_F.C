@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.21 2004/11/05 08:14:49 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.22 2004/12/02 18:45:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -265,4 +265,79 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
-};
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutserialize"
+//BOP
+// !IROUTINE:  c_ESMC_DELayoutSerialize - Serialize DELayout object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_delayoutserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_DELayout **delayout,       // in/out - delayout object
+      char *buf,                // in/out - really a byte stream
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a delayout object.
+//     Warning!!  Not completely implemented yet.
+//
+//EOP
+
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError(
+      (*delayout)->ESMC_DELayoutSerialize(buf, length, offset),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_DELayoutSerialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutdeserialize"
+//BOP
+// !IROUTINE:  c_ESMC_DELayoutDeserialize - Deserialize DELayout object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_delayoutdeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_DELayout **delayout,       // in/out - delayout object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a delayout object.
+//
+//EOP
+    int localrc;
+
+    (*delayout) = ESMC_DELayoutDeserialize(buf, offset);
+    if (*delayout == NULL) 
+        localrc = ESMF_FAILURE;
+    else
+        localrc = ESMF_SUCCESS;
+
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_ESMC_DELayoutDeserialize
+
+
+
+#undef  ESMC_METHOD
+}
+

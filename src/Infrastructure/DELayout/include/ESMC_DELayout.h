@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.16 2004/11/05 00:12:10 theurich Exp $
+// $Id: ESMC_DELayout.h,v 1.17 2004/12/02 18:45:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -96,7 +96,9 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DELayoutGetDEMatchPET(int DEid, ESMC_VM &vmMatch,
       int *petMatchCount, int *petMatchList, int len_petMatchList);
     // IO and validation
+    friend ESMC_DELayout *ESMC_DELayoutDeserialize(char *buffer, int *offset);
     int ESMC_DELayoutPrint(void);
+    int ESMC_DELayoutSerialize(char *buffer, int *length, int *offset);
     int ESMC_DELayoutValidate(void);
     // Communication
     int ESMC_DELayoutCopy(void **srcdata, void **destdata, 
@@ -146,4 +148,7 @@ void **ESMC_DELayoutDataCreate(int n, int *rc);
 int ESMC_DELayoutDataAdd(void **ptr, void *a, int index);
 int ESMC_DELayoutDataDestroy(void **ptr);
 
+ESMC_DELayout *ESMC_DELayoutDeserialize(char *buffer, int *offset);
+
 #endif  // ESMC_DELayout_H
+
