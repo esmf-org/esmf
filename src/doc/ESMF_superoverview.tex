@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.10 2004/03/24 20:01:00 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.11 2004/04/21 18:35:03 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,22 +10,29 @@
 
 \section{Overview of Superstructure}
 
-The ESMF superstructure classes define an architecture for assembling
-Earth system applications from modeling components.  Earth system research 
-often requires that large scale components such as atmosphere, ocean,
-and land models be coupled together to create an application.  
-Coupling components may involve both data transformations and, on 
-parallel computing systems, data transfers.  The ESMF offers coupling 
-services to simplify the organization and execution of inter-component 
-data exchange.  ESMF coupling services can also be utilized for 
-smaller-scale tasks within components, such as the 
-transformation of data between the physics and dynamics in a spectral 
-atmosphere model, or the creation of nested higher resolution regions 
+ESMF superstructure classes define an architecture for assembling
+Earth system applications from modeling {\bf components}.  A component
+may be defined in terms of the physical domain that it represents,
+such as an atmosphere or sea ice model.  It may also be defined in terms
+of a computational function, such as a data assimilation system.
+Earth system research often requires that such components be {\bf coupled} 
+together to create an application.  By coupling we mean the data 
+transformations and, on parallel computing systems, data transfers, 
+that are necessary to allow data from one component to be utilized by 
+another.  ESMF offers coupling services to simplify the organization and 
+execution of inter-component data exchanges.  
+
+In addition to components defined at the level of major physical 
+domains and functions, components may be defined that represent 
+smaller functions within larger components, such as the transformation 
+of data between the physics and dynamics in a spectral atmosphere model, 
+or the creation of nested higher resolution regions 
 within a coarser grid.  The objective is to couple components at varying 
-scales both flexibly and efficiently.  The ESMF encourages a hierachical
+scales both flexibly and efficiently.  ESMF encourages a hierachical
 application structure, in which large components branch into 
-smaller sub-components.  It also allows the same component to be 
-used in multiple contexts without changes to its source code.
+smaller sub-components.  It also makes it easier for the same 
+component to be used in multiple contexts without changes to its 
+source code.
 
 \begin{center}  
 \begin{tabular}{|p{6in}|}
@@ -102,12 +109,24 @@ ocean/atmosphere simulation.  When the Initialize method of the
 parent Gridded Component is called by the AppDriver, it in turn 
 calls the Initialize methods of its child atmosphere and ocean 
 Gridded Components, and the Initialize method of an 
-ocean-to-atmosphere Coupler Component.
+ocean-to-atmosphere Coupler Component.  Figure \ref{fig:appunit}
+shows this schematically for a coupled hurricane model with ocean
+and atmosphere components.
 
 The framework supplies methods to do basic transformations which 
 may include regridding, interpolation, unit conversions, 
 accumulations, averaging, transformations which conserve specific 
 values.
+
+\begin{center}
+\begin{figure}
+\caption{A call to a standard ESMF initialize (run, finalize) method
+by a parent component triggers calls to initialize (run, finalize) 
+all of its child components.}
+\label{fig:appunit}
+\scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
+\end{figure}
+\end{center}
 
 \subsection{Distribution and Scoping of Components}
 \label{sec:scoping}
