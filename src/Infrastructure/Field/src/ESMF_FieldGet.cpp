@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cpp,v 1.1 2004/03/15 23:58:21 nscollins Exp $
+! $Id: ESMF_FieldGet.cpp,v 1.2 2004/03/16 18:04:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
       use ESMF_BaseMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayBaseMod
-      use ESMF_ArrayExpandMod
+      use ESMF_ArrayGetMod
       use ESMF_FieldMod
       implicit none
 
@@ -47,7 +47,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cpp,v 1.1 2004/03/15 23:58:21 nscollins Exp $'
+      '$Id: ESMF_FieldGet.cpp,v 1.2 2004/03/16 18:04:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 
 !BOP
-! !IROUTINE: ESMF_FieldGetDataPointer -- Get an F90 pointer to the data contents
+! !IROUTINE: ESMF_FieldGetDataPointer -- Get a Fortran pointer to the data contents
 
 ! !INTERFACE:
      interface ESMF_FieldGetDataPointer
