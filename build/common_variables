@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.27 2003/04/24 17:07:09 flanigan Exp $ 
+# $Id: common_variables,v 1.28 2003/05/21 16:43:18 flanigan Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -91,7 +91,7 @@ EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${
 # a test program will do.
 #
 ifeq ($(ESMF_EXHAUSTIVE),ON) 
-FCPPFLAGS += -DESMF_EXHAUSTIVE 
+FCPPFLAGS += $(FPP_PREFIX)-DESMF_EXHAUSTIVE 
 CCPPFLAGS += -DESMF_EXHAUSTIVE 
 endif
 
