@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.39 2003/04/17 19:36:16 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.40 2003/04/17 20:37:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.39 2003/04/17 19:36:16 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.40 2003/04/17 20:37:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1255,12 +1255,12 @@
         }
     }
 
-    fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:\n", (unsigned long)this);
-    fprintf(ffile, "            rank = %d, type = %d, kind = %d, ", 
+    fprintf(ffile, "ArrayWrite: Array at address 0x%08lx:  ", 
+                           (unsigned long)this);
+    fprintf(ffile, "rank = %d, type = %d, kind = %d\n", 
                              this->rank, this->type, this->kind);
-    fprintf(ffile, "            ");
     for (i=0; i<this->rank; i++) 
-        fprintf(ffile, "dim[%d] = %d  ", i, this->length[i]);
+        fprintf(ffile, " dim[%d] = %d  ", i, this->length[i]);
     fprintf(ffile, "\n");
     
     // TODO: make this look at one of the option letters to see how user
@@ -1269,7 +1269,6 @@
       case ESMF_DATA_REAL:
         switch (this->rank) {
           case 1:
-            fprintf(ffile, "  Real, Dim 1, Data values:\n");
             imax = this->length[0];
             tcount = imax;
             for (i=0; i<tcount; i++) {
@@ -1277,7 +1276,6 @@
             }
             break;
           case 2:
-            fprintf(ffile, "  Real, Dim 2, Data values:\n");
             imax = this->length[0];
             jmax = this->length[1];
             tcount = imax * jmax;
@@ -1291,7 +1289,6 @@
             }
             break;
           case 3:
-            fprintf(ffile, "  Real, Dim 3, Data values:\n");
             imax = this->length[0];
             jmax = this->length[1];
             kmax = this->length[2];
@@ -1317,13 +1314,11 @@
           case 1:
             imax = this->length[0];
             tcount = imax;
-            fprintf(ffile, "  Integer, Dim 1, Data values:\n");
             for (i=0; i<imax; i++) {
                 fprintf(ffile, "%d\n", *((int *)(this->base_addr) + i));
             }
             break;
           case 2:
-            fprintf(ffile, "  Integer, Dim 2, Data values:\n");
             imax = this->length[0];
             jmax = this->length[1];
             tcount = imax * jmax;
@@ -1337,7 +1332,6 @@
             }
             break;
           case 3:
-            fprintf(ffile, "  Integer, Dim 3, Data values:\n");
             imax = this->length[0];
             jmax = this->length[1];
             kmax = this->length[2];
