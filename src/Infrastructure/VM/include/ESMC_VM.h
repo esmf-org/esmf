@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.11 2004/10/21 20:04:48 theurich Exp $
+// $Id: ESMC_VM.h,v 1.12 2004/10/26 21:30:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,22 +30,23 @@
 // The companion file {\tt ESMC\_VM.C} contains the full code (bodies) 
 // for the methods.
 //
-// Currently class {\tt ESMC\_VM} is derived from base class {\tt vmachine}
-// and class {\tt ESMC\_VMPlan} is derived from base class {\tt vmplan}. There
-// are only very few new features that the derived classes add to their base
-// classes, thus most of the implementing code is located in {vmachine.C}.
+// Currently class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
+// and class {\tt ESMC\_VMPlan} is derived from base class {\tt ESMC_VMKPlan}.
+// There are only very few new features that the derived classes add to their
+// base classes, thus most of the implementing code is located in 
+// {\tt ESMC_VMKernel.C}.
 //
 ///EOP
 //-------------------------------------------------------------------------
 
 #include <ESMC_Base.h>  
-#include <vmachine.h>   // inherit from vmachine class
+#include <ESMC_VMKernel.h>   // inherit from ESMC_VMK class
 
 class ESMC_VM;
 class ESMF_VMPlan;
 
 // class definition
-class ESMC_VM : public vmachine {   // inherits from vmachine class
+class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
   // This is the ESMF derived virtual machine class.
   public:
     // Get method that supports the F90 optional arguments interface
@@ -65,16 +66,16 @@ class ESMC_VM : public vmachine {   // inherits from vmachine class
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
-ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global vmachine
-void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global vmachine
+ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
+void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global ESMC_VMK
 ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
 
 // class definition
-class ESMC_VMPlan : public vmplan {   // inherits from vmplan class
+class ESMC_VMPlan : public ESMC_VMKPlan {   // inherits from ESMC_VMKPlan class
   public:
     int nspawn;           // number of PETs this PET will spawn
     ESMC_VM **myvms;      // pointer array of ESMC_VM instances for this PET
-    vmachine **myvmachs;  // pointer array of vmachine instances for this PET
+    ESMC_VMK **myvmachs;  // pointer array of ESMC_VMK instances for this PET
 };// end class ESMC_VMPlan
 
 #endif  // ESMC_VM_H

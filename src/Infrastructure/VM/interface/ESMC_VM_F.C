@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.19 2004/10/21 19:54:11 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.20 2004/10/26 21:30:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmallfullreduce()"
     // start assuming local success
     int localrc = ESMF_SUCCESS;
-    // need to type cast or transform dtk and op into vmachine types
+    // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
     case ESMF_I4:
@@ -68,8 +68,8 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
       return;
-    (*vm)->vmachine_allglobalreduce(input, output, *count, vmt, (vmOp)(*op));
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*vm)->vmk_allglobalreduce(input, output, *count, vmt, (vmOp)(*op));
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmallreduce)(ESMC_VM **vm, void *input, void *output, 
@@ -78,7 +78,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmallreduce()"
     // start assuming local success
     int localrc = ESMF_SUCCESS;
-    // need to type cast or transform dtk and op into vmachine types
+    // need to type cast or transform dtk and op into ESMC_VMK types
     vmType vmt;
     switch (*dtk){
     case ESMF_I4:
@@ -95,23 +95,23 @@ extern "C" {
     }
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
       return;
-    (*vm)->vmachine_allreduce(input, output, *count, vmt, (vmOp)(*op));
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*vm)->vmk_allreduce(input, output, *count, vmt, (vmOp)(*op));
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmbarrier)(ESMC_VM **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmbarrier()"
-    (*ptr)->vmachine_barrier();
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*ptr)->vmk_barrier();
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmgather)(ESMC_VM **vm, void *input, void *output, int *size, 
     int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgather()"
-    (*vm)->vmachine_gather(input, output, *size, *root);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*vm)->vmk_gather(input, output, *size, *root);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmget)(ESMC_VM **ptr, int *localPet, int *petCount, 
@@ -156,48 +156,48 @@ extern "C" {
   void FTN(c_esmc_vmprint)(ESMC_VM **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmprint()"
-    (*ptr)->vmachine_print();
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*ptr)->vmk_print();
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmrecv)(ESMC_VM **ptr, void *message, int *size, int *source,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmrecv()"
-    (*ptr)->vmachine_recv(message, *size, *source);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*ptr)->vmk_recv(message, *size, *source);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmscatter)(ESMC_VM **vm, void *input, void *output, int *size,
     int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmscatter()"
-    (*vm)->vmachine_scatter(input, output, *size, *root);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*vm)->vmk_scatter(input, output, *size, *root);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
   
   void FTN(c_esmc_vmsend)(ESMC_VM **ptr, void *message, int *size, int *dest,
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsend()"
-    (*ptr)->vmachine_send(message, *size, *dest);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*ptr)->vmk_send(message, *size, *dest);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmsendrecv)(ESMC_VM **ptr, void *sendData, int *sendSize, 
     int *dst, void *recvData, int *recvSize, int *src, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendrecv()"
-    (*ptr)->vmachine_sendrecv(sendData, *sendSize, *dst, 
+    (*ptr)->vmk_sendrecv(sendData, *sendSize, *dst, 
       recvData, *recvSize, *src);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vmthreadbarrier)(ESMC_VM **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmthreadbarrier()"
-    (*ptr)->vmachine_threadbarrier();
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+    (*ptr)->vmk_threadbarrier();
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 
   void FTN(c_esmc_vminitialize)(ESMC_VM **ptr, int *rc){
@@ -216,6 +216,17 @@ extern "C" {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
+  void FTN(c_esmc_vmshutdown)(ESMC_VM **ptr_vmparent, ESMC_VMPlan **ptr_vmplan,
+    void **vm_info, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmshutdown()"
+    int localrc;
+    ESMC_VMPlan &vmplan = **ptr_vmplan;
+    (*ptr_vmparent)->vmk_shutdown(vmplan, *vm_info);
+    
+    localrc=ESMF_SUCCESS;
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+  }
   
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   // ESMC_VMPlan interfaces
@@ -228,20 +239,20 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmplanconstruct()"
     (*ptr) = new ESMC_VMPlan;
     if (npetlist > 0)
-      (*ptr)->vmplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
+      (*ptr)->vmkplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
     else
-      (*ptr)->vmplan_minthreads(**ptr_vm, 1);
-    //debug: (*ptr)->vmplan_print();
+      (*ptr)->vmkplan_minthreads(**ptr_vm, 1);
+    //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
-    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->nspawn = (*ptr)->vmkplan_nspawn(); // determine spawned PETs
     (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
-    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new ESMC_VMK*[(*ptr)->nspawn];
     for (int i=0; i<(*ptr)->nspawn; i++){
       (*ptr)->myvms[i] = new ESMC_VM;
-      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+      (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
-    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
 
@@ -288,19 +299,19 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    (*ptr)->vmplan_maxcores(**ptr_vm, maxx, (int*)petlist, *npetlist,
+    (*ptr)->vmkplan_maxcores(**ptr_vm, maxx, (int*)petlist, *npetlist,
       ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
-    //debug: (*ptr)->vmplan_print();
+    //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
-    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->nspawn = (*ptr)->vmkplan_nspawn(); // determine spawned PETs
     (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
-    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new ESMC_VMK*[(*ptr)->nspawn];
     for (int i=0; i<(*ptr)->nspawn; i++){
       (*ptr)->myvms[i] = new ESMC_VM;
-      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+      (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
-    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
        
@@ -334,19 +345,19 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    (*ptr)->vmplan_maxthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
+    (*ptr)->vmkplan_maxthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
       ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
-    //debug: (*ptr)->vmplan_print();
+    //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
-    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->nspawn = (*ptr)->vmkplan_nspawn(); // determine spawned PETs
     (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
-    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new ESMC_VMK*[(*ptr)->nspawn];
     for (int i=0; i<(*ptr)->nspawn; i++){
       (*ptr)->myvms[i] = new ESMC_VM;
-      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+      (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
-    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
@@ -380,19 +391,19 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    (*ptr)->vmplan_minthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
+    (*ptr)->vmkplan_minthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
       ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
-    //debug: (*ptr)->vmplan_print();
+    //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
-    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->nspawn = (*ptr)->vmkplan_nspawn(); // determine spawned PETs
     (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
-    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new ESMC_VMK*[(*ptr)->nspawn];
     for (int i=0; i<(*ptr)->nspawn; i++){
       (*ptr)->myvms[i] = new ESMC_VM;
-      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+      (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
-    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/08/03 19:33:51 nscollins Exp $
+# $Id: makefile,v 1.4 2004/10/26 21:31:23 theurich Exp $
 
 # leave alone.
 ALL: build_here 
@@ -10,13 +10,13 @@ CFLAGS    =
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_VM.C vmachine.C
+SOURCEC	  = ESMC_VM.C ESMC_VMKernel.C
 # If you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List all .h files which should be copied to common include dir
-STOREH	  = ESMC_VM.h vmachine.h
+STOREH	  = ESMC_VM.h ESMC_VMKernel.h
 
 # Leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

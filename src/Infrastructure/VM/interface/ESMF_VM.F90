@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.35 2004/08/19 16:52:22 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.36 2004/10/26 21:31:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -136,6 +136,7 @@ module ESMF_VMMod
 ! - ESMF-private methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
+  public ESMF_VMShutdown
   public ESMF_VMPlanConstruct
   public ESMF_VMPlanDestruct
   public ESMF_VMPlanMaxPEs
@@ -148,7 +149,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.35 2004/08/19 16:52:22 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.36 2004/10/26 21:31:00 theurich Exp $'
 
 !==============================================================================
 
@@ -2533,6 +2534,49 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMFinalize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMShutdown()"
+!BOPI
+! !IROUTINE: ESMF_VMShutdown - Shutdown a VM
+
+! !INTERFACE:
+  subroutine ESMF_VMShutdown(vm, vmplan, vm_info, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),      intent(in)              :: vm
+    type(ESMF_VMPlan),  intent(in)              :: vmplan
+    type(ESMF_Pointer), intent(inout)           :: vm_info
+    integer,            intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Shutdown a VM
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMShutdown(vm, vmplan, vm_info, localrc)
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMShutdown
 !------------------------------------------------------------------------------
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.16 2004/10/21 19:54:11 theurich Exp $
+// $Id: ESMC_VM.C,v 1.17 2004/10/26 21:31:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,10 +18,11 @@
 // {\tt ESMC\_VM} and {\tt ESMC\_VMPlan} which are defined in the companion 
 // file {\tt ESMC\_VM.C}.
 //
-// Currently class {\tt ESMC\_VM} is derived from base class {\tt vmachine}
-// and class {\tt ESMC\_VMPlan} is derived from base class {\tt vmplan}. There
-// are only very few new features that the derived classes add to their base
-// classes, thus most of the implementing code is located in {\tt vmachine.C}.
+// Currently class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
+// and class {\tt ESMC\_VMPlan} is derived from base class {\tt ESMC_VMKPlan}.
+// There are only very few new features that the derived classes add to their
+// base classes, thus most of the implementing code is located in 
+// {\tt ESMC_VMKernel.C}.
 //
 //-----------------------------------------------------------------------------
 
@@ -39,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.16 2004/10/21 19:54:11 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.17 2004/10/26 21:31:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -109,17 +110,17 @@ int ESMC_VM::ESMC_VMGet(
 //EOP
 //-----------------------------------------------------------------------------
   if (localPet != ESMC_NULL_POINTER)
-    *localPet = this->vmachine_mypet();
+    *localPet = this->vmk_mypet();
   if (petCount != ESMC_NULL_POINTER)
-    *petCount = this->vmachine_npets();
+    *petCount = this->vmk_npets();
   if (peCount != ESMC_NULL_POINTER){
-    int npets = this->vmachine_npets();
+    int npets = this->vmk_npets();
     *peCount = 0; // reset
     for (int i=0; i<npets; i++)
-      *peCount += this->vmachine_ncpet(i);
+      *peCount += this->vmk_ncpet(i);
   }
   if (mpiCommunicator != ESMC_NULL_POINTER){
-    *mpiCommunicator = this->vmachine_mpi_comm();
+    *mpiCommunicator = this->vmk_mpi_comm();
   }
   if (okOpenMpFlag != ESMC_NULL_POINTER)
     *okOpenMpFlag = ESMF_TRUE;    // TODO: Determine this at compile time...
@@ -153,13 +154,13 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
 //EOP
 //-----------------------------------------------------------------------------
   if (peCount != ESMC_NULL_POINTER)
-    *peCount = this->vmachine_ncpet(pet);
+    *peCount = this->vmk_ncpet(pet);
   if (ssiId != ESMC_NULL_POINTER)
-    *ssiId = this->vmachine_ssiid(pet);
+    *ssiId = this->vmk_ssiid(pet);
   if (threadCount != ESMC_NULL_POINTER)
-    *threadCount = this->vmachine_nthreads(pet);
+    *threadCount = this->vmk_nthreads(pet);
   if (threadId != ESMC_NULL_POINTER)
-    *threadId = this->vmachine_tid(pet);
+    *threadId = this->vmk_tid(pet);
   return ESMF_SUCCESS;            // TODO: Do some real error handling here...
 }
 //-----------------------------------------------------------------------------
@@ -186,7 +187,7 @@ ESMC_VM *ESMC_VMInitialize(
 //EOP
 //-----------------------------------------------------------------------------
   GlobalVM = new ESMC_VM;
-  GlobalVM->vmachine_init();      // set up default vmachine (all MPI)
+  GlobalVM->vmk_init();      // set up default ESMC_VMK (all MPI)
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
   return GlobalVM;
 }
@@ -212,7 +213,7 @@ void ESMC_VMFinalize(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  GlobalVM->vmachine_finalize();
+  GlobalVM->vmk_finalize();
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
 }
 //-----------------------------------------------------------------------------
