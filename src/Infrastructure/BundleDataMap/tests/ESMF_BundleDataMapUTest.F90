@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapUTest.F90,v 1.3 2004/05/26 18:27:50 nscollins Exp $
+! $Id: ESMF_BundleDataMapUTest.F90,v 1.4 2004/06/07 21:41:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleDataMapUTest.F90,v 1.3 2004/05/26 18:27:50 nscollins Exp $'
+      '$Id: ESMF_BundleDataMapUTest.F90,v 1.4 2004/06/07 21:41:39 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,26 +54,85 @@
       ! local variables needed to pass into function/subroutine calls
       type(ESMF_BundleDataMap) :: bundleDataMap1, bundleDataMap2, bundleDataMap3
 
-!-------------------------------------------------------------------------------
-! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-! always run. When the environment variable, EXHAUSTIVE, is set to ON then
-! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-! to OFF, then only the sanity unit tests.
-! Special strings (Non-exhaustive and exhaustive) have been
-! added to allow a script to count the number and types of unit tests.
-!-------------------------------------------------------------------------------
+      !-------------------------------------------------------------------------------
+      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+      ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+      ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+      ! to OFF, then only the sanity unit tests.
+      ! Special strings (Non-exhaustive and exhaustive) have been
+      ! added to allow a script to count the number and types of unit tests.
+      !-------------------------------------------------------------------------------
 
       call ESMF_Initialize(rc=rc)
 
-!-------------------------------------------------------------------------------
+      !-------------------------------------------------------------------------------
       !NEX_UTest
       ! Test BundleDataMap Initialization
       call ESMF_BundleDataMapSetDefault(bundleDataMap1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "SetDefault BundleDataMap Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set Default BundleDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test BundleDataMap Invalid
+      call ESMF_BundleDataMapSetInvalid(bundleDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set Invalid BundleDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test BundleDataMap Initialization
+      call ESMF_BundleDataMapSetDefault(bundleDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set BundleDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test BundleDataMap Print
+      call ESMF_BundleDataMapPrint(bundleDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Print BundleDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test BundleDataMap Validate
+      call ESMF_BundleDataMapValidate(bundleDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validate BundleDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test BundleDataMap Set
+      call ESMF_BundleDataMapSet(bundleDataMap1, bundleInterleave=ESMF_BIL_BYITEM, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set BundleDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test BundleDataMap Print
+      call ESMF_BundleDataMapPrint(bundleDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Print BundleDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
   
+#endif
+      
+      call ESMF_Finalize(rc)
+      
+      print *, "******  End of BundleDataMapUTest  ******"
+
       end program ESMF_BundleDataMapUTest
