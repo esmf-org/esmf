@@ -1,4 +1,4 @@
- $Id: README,v 1.41 2003/10/29 20:34:41 nscollins Exp $
+ $Id: README,v 1.42 2003/11/13 21:18:32 svasquez Exp $
 ================================================================================
                                    README
 
@@ -20,7 +20,7 @@ Documentation" link.
 
 The ESMF library source code is also available for download at:
 
-  http://sourceforge.net/cvs/?group_id=38089
+	http://sourceforge.net/projects/esmf
 
 Follow the directions on that webpage to access the ESMF CVS repository.
 
@@ -69,12 +69,16 @@ mod:             Contains the Fortran module files.
 
 test:            Contains unit and system test executables and output.
 
+examples:	 Contains examples executables and output.
+
 
 System Information
 ------------------
 
-The following platforms are supported: Alpha, IRIX64, IBM 32-bit and
-64-bit addressing.
+The following platforms are fully supported: Alpha, IRIX64 32-bit and 64-bit
+addressing, IBM 32-bit and 64-bit addressing, Linux intel 32-bit and 64-bit
+addressing. ESMF is built and debugged in other platforms on a regular basis.
+Check the build_config directory for more information.
 
 
 Environment Variables
@@ -82,60 +86,14 @@ Environment Variables
 
 Currently the ESMF_DIR environment variable must be set on all
 platforms.  ESMF_DIR should be set to the path of the top
-level ESMF directory.  
+level ESMF directory. The ESMF_COMPILER environment variable
+must be set only on Linux platforms. The possible values are:
+absoft, intel, lahey, pgi or nag. 
 
-The following environment variables need to be set only if the
-default values are not acceptable.  For supported platforms,
-the default values should be all that is needed.
-
-ESMF_ARCH      Normally value of uname -s.
-
-ESMF_SITE      Build configure site name or the value default.
-               If not set, then the value of default is assumed.
-
-ESMF_COMPILER  Set to the name of the compiler to use.  If not set 
-               then the default compiler is used.  Values can be 
-               default, absoft, intel, lahey, pgi or nag.
-
-ESMF_PREC      Precision value of 32 or 64.  When possible the default
-               value will be 64, otherwise it will be 32.
-
-ESMF_COMM      MPI communications library to use.  Set to mpiuni,
-               mpich, lam or mpi.   Default values will vary by
-               machine.
-
-ESMF_BOPT      Build option value of g (for debug) or O (for Optimize). 
-               Default value will be O.
-
-The README file in the directory build_config documents these
-variables in more detail, as does the ESMF User's Guide.
-
-Environment variables must be set in the user's shell and not inside
-an ESMF makefile or build system file.  They can also be set on the
-gmake command line.  Here is an example of setting an environment
-variable in tcsh and csh shells:
-
-        setenv ESMF_PREC 32
-
-In ksh shell environment variables are set this way:
-
-        export ESMF_PREC=32
-
-Example of setting variables on the gmake command line:
-
-        gmake ESMF_PREC=32
-
-Platform notes:
-
-Compaq alpha - Before running on the Compaq, you will need to set the
-environment variable ESMF_PROJECT to a valid project number suitable
-for the -P option on bsub. If you do not know what to set this to
-first run with it unset and you should be prompted by the system for
-valid values for your userid.
-
-IBM rs6000 - Before running on rs6000 machines, you will need to set
-an additional environment variable MP_RMPOOL to a valid node
-allocation pool.  Usually this will be a value of 1.
+There are several other environment variables which can be set to 
+customize the ESMF make process. The README file in the directory 
+build_config documents the entire list of environment variables in detail, 
+as does the ESMF User's Guide.
 
 
 Build Information
@@ -148,32 +106,32 @@ make commands to determine which is GNU make.
 
 Build the library with the command:
  
-  gmake ESMF_BOPT=g 
+  gmake 
 
-for a debug version or
+for an optimized version or
 
-  gmake ESMF_BOPT=O
+  gmake ESMF_BOPT=g
 
-for an optimized version.
+for a debug version.
 
 To build and run the coupled fluid flow demo:
 
-  gmake ESMF_BOPT=[g,O] ESMF_COUPLED_FLOW
+  gmake  ESMF_COUPLED_FLOW
 
 To build and run the system tests:
 
-  gmake ESMF_BOPT=[g,O] system_tests
-  gmake ESMF_BOPT=[g,O] system_tests_uni   ! for non-mpi machines
+  gmake  system_tests
+  gmake  system_tests_uni   ! for non-mpi machines
 
 To build and run the unit tests:
 
-  gmake ESMF_BOPT=[g,O] tests
-  gmake ESMF_BOPT=[g,O] tests_uni          ! for non-mpi machines
+  gmake  tests
+  gmake  tests_uni          ! for non-mpi machines
 
 To build and run the unit tests in exhaustive mode:
 
-  gmake ESMF_BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests
-  gmake ESMF_BOPT=[g,O] ESMF_EXHAUSTIVE=ON tests_uni    ! for non-mpi machines
+  gmake  ESMF_EXHAUSTIVE=ON tests
+  gmake  ESMF_EXHAUSTIVE=ON tests_uni    ! for non-mpi machines
 
 The exhaustive unit tests option is a *compile* time option.  Use
 
@@ -222,8 +180,8 @@ If you prefer standard libraries, a *.a file is provided in the same
 library directory as the shared object file.
 
 For information on how to link with shared libraries on a particular
-platform, please see the ESMF User's Guide on the ESMF web site, under
-the "Downloads & Documentation" link.
+platform, please see the link_rules files in the platform directories
+in build_config.
  
 ================================================================================
 
