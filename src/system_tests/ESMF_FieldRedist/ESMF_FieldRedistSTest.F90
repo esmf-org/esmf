@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.13 2004/04/09 19:54:16 eschwab Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.14 2004/04/12 22:12:00 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -34,8 +34,7 @@
     
     ! Local variables
     integer :: i, j, rc
-    integer, dimension(:), allocatable :: delist
-    integer :: ndes, deId, nde(2)
+    integer :: ndes, deId
     integer :: miscount, hWidth
     integer :: status
     integer, dimension(2) :: decompids1, decompids2, counts, localCounts
@@ -47,14 +46,22 @@
     type(ESMF_GridType)    :: horzGridType
     type(ESMF_GridStagger) :: horzStagger
     type(ESMF_CoordSystem) :: horzCoordSystem
-    type(ESMF_DELayout) :: layout0, layout1
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
     type(ESMF_Array), dimension(:), pointer :: coordArray
+    type(ESMF_DELayout) :: layout0, layout1       ! these could go once the
+                                                  ! newDELayout takes over
     type(ESMF_Grid)  ::  grid1,  grid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
-        
+
+#ifdef ESMF_ENABLE_VM
+    type(ESMF_VM):: vm
+    type(ESMF_newDELayout) :: delayout0, delayout1
+#endif
+    integer, dimension(:), allocatable :: delist
+    integer :: nde(2)
+
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
 
@@ -78,6 +85,16 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
+#ifdef ESMF_ENABLE_VM
+    call ESMF_VMGetGlobal(vm, rc)
+
+    ! Create a default 1-dim DELayout with N DE's, where N is number of PETs in VM
+    delayout0 = ESMF_newDELayoutCreate(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) stop
+    call ESMF_newDELayoutGet(delayout0, ndes, rc=rc)
+    if (rc /= ESMF_SUCCESS) stop
+    call ESMF_newDELayoutPrint(delayout0)
+#endif
     ! Create a default 1xN DELayout
     layout0 = ESMF_DELayoutCreate(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
@@ -90,6 +107,11 @@
     endif
 
     ! And then create a 2D layout to be used by the Fields
+#ifdef ESMF_ENABLE_VM
+    delayout1 = ESMF_newDELayoutCreate(vm, (/ 2, ndes/2 /), rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_newDELayoutPrint(delayout1)
+#endif
     nde(1) = 2
     nde(2) = ndes/2
     allocate(delist(ndes))
@@ -97,6 +119,7 @@
     layout1 = ESMF_DELayoutCreate(layout0, 2, (/ nde(1), nde(2) /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
+
     print *, "DELayout Create finished, rc =", rc
 
     print *, "Create section finished"
@@ -134,7 +157,11 @@
                                           horzGridType=horzGridType, &
                                           horzStagger=horzStagger, &
                                           horzCoordSystem=horzCoordSystem, &
-                                          name="source grid", rc=status)
+                                          name="source grid", rc=status &
+#ifdef ESMF_ENABLE_VM
+                                           , delayout=delayout1 &
+#endif
+                                          )
     field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field1", rc=rc)
     field3 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
@@ -150,13 +177,25 @@
                                           horzGridType=horzGridType, &
                                           horzStagger=horzStagger, &
                                           horzCoordSystem=horzCoordSystem, &
-                                          name="destination grid", rc=status)
+                                          name="destination grid", rc=status &
+#ifdef ESMF_ENABLE_VM
+                                           , delayout=delayout1 &
+#endif
+                                          )
     field2 = ESMF_FieldCreate(grid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field2", rc=rc)
 
     ! precompute communication patterns
-    call ESMF_FieldRedistStore(field1, field2, layout1, rh12, rc=status)
-    call ESMF_FieldRedistStore(field2, field3, layout1, rh23, rc=status)
+    call ESMF_FieldRedistStore(field1, field2, layout1, rh12, rc=status &
+#ifdef ESMF_ENABLE_VM
+                               , parentDelayout=delayout1 &
+#endif
+                               )
+    call ESMF_FieldRedistStore(field2, field3, layout1, rh23, rc=status &
+#ifdef ESMF_ENABLE_VM
+                               , parentDelayout=delayout1 &
+#endif
+                               )
 
     ! get coordinate arrays available for setting the source data array
     allocate(coordArray(2))
@@ -230,7 +269,11 @@
 !-------------------------------------------------------------------------
 !   Print result
 
+#ifdef ESMF_ENABLE_VM
+    call ESMF_newDELayoutGet(delayout1, localDe=deId, rc=rc)
+#else
     call ESMF_DELayoutGetDEID(layout1, deId, rc)
+#endif
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "-----------------------------------------------------------------"
