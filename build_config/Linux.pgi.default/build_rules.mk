@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.2 2003/10/20 22:39:58 nscollins Exp $
+# $Id: build_rules.mk,v 1.3 2004/02/19 21:37:09 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -73,14 +73,14 @@ ifneq ($(ESMF_COMM),mpich)
 C_CC		   = pgcc -mp
 C_FC		   = pgf90 -mp
 CXX_CC		   = pgCC -tlocal
-CXX_FC		   = pgf90 -mp -tlocal
+CXX_FC		   = pgf90 -mp 
 endif
 
 ifeq ($(ESMF_COMM),mpich)
 C_CC		   = mpicc -mp
 C_FC		   = mpif90 -mp
 CXX_CC		   = mpiCC -tlocal
-CXX_FC		   = mpif90 -mp -tlocal
+CXX_FC		   = mpif90 -mp
 endif
 
 C_FC_MOD           = -I
