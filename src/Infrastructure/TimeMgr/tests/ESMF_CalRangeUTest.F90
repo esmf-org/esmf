@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.19 2004/05/04 22:40:04 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.20 2004/05/19 21:38:27 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.19 2004/05/04 22:40:04 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.20 2004/05/19 21:38:27 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -76,6 +76,8 @@
 
       ! initialize ESMF framework
       call ESMF_Initialize(rc=rc)
+
+#ifdef ESMF_EXHAUSTIVE
 
       ! Julian Calendar
 
@@ -169,15 +171,14 @@
       ! range (TODO: parallelize?)                                       !
       !------------------------------------------------------------------!
 
-#ifdef ESMF_EXHAUSTIVE
+      ! The following values are used for a long exhaustive test.
+      !TODO create a flag to allow testing with these values.
+      !first_test = HIGH_LO
+      !last_test  = HIGH_HI
+
       !EX_UTest
-      first_test = HIGH_LO
-      last_test  = HIGH_HI
-#else
-      !NEX_UTest
       first_test = HIGH_HI
       last_test  = HIGH_HI
-#endif
 
       do test = first_test, last_test
 
@@ -211,19 +212,19 @@
           Dl = Dl * 100000  !  since F90 constants
           Dl = Dl + 67300   !    are 32-bit
 
-#ifdef ESMF_EXHAUSTIVE
-	  !EX_UTest
+	  ! Commented out because od test duration
+          !TODO Create a flag to allow runing of this test.
           ! start back a few 10,000 years, then come forward
-          Dl = Dl - 10000000
+          !Dl = Dl - 10000000
 
           ! matching start date is October 3, 292,276,992,535
-          YYl = 292276992  ! break up initialization,
-          YYl = YYl * 1000  !   since F90 constants
-          YYl = YYl + 535   !     are 32-bit
-          MM = 10
-          DD = 3
-#else
-          !NEX_UTest
+          !YYl = 292276992  ! break up initialization,
+          !YYl = YYl * 1000  !   since F90 constants
+          !YYl = YYl + 535   !     are 32-bit
+          !MM = 10
+          !DD = 3
+
+          !EX_UTest
           ! start back 1000 days, then come forward
           Dl = Dl - 1000
 
@@ -233,7 +234,6 @@
           YYl = YYl + 912   !     are 32-bit
           MM = 2
           DD = 2
-#endif
 
         endif
 
@@ -321,6 +321,7 @@
       ! destroy calendars
       call ESMF_CalendarDestroy(gregorianCalendar, rc)
       call ESMF_CalendarDestroy(julianDayCalendar, rc)
+#endif
 
       ! finalize ESMF framework
       call ESMF_Finalize(rc)
