@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2004/10/13 22:26:33 nscollins Exp $ 
+# $Id: makefile,v 1.17 2004/11/01 17:14:42 theurich Exp $ 
 
 ALL: build_system_tests
 
@@ -23,10 +23,7 @@ DIRS     = ESMF_RowReduce \
 # tests not yet ready
 #           ESMF_MergeCoupling \
 #           ESMF_CplOnExclDEs \
-# the next one runs, but you must comment out the
-# CPPFLAGS += -DVM_DONT_SPAWN_PTHREADS 
-# line in $ESMF_DIR/build/common.mk before
-# you compile the framework and the test.
+# the next one exercises the pthread mechanism in VM
 #           ESMF_FieldExcl \
 
 

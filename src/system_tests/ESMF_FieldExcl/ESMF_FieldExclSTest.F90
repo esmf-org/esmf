@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.8 2004/10/14 17:28:36 theurich Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.9 2004/11/01 17:14:42 theurich Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -86,27 +86,6 @@
     call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-#ifdef VM_DONT_SPAWN_PTHREADS
-    write(failMsg, *) "This system test must be compiled WITHOUT defining"
-    print *, failMsg
-    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
-
-    write(failMsg, *) "VM_DONT_SPAWN_PTHREADS in $ESMF_DIR/build/common.mk"
-    print *, failMsg
-    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
-
-    write(failMsg, *) "(Both this test and the whole ESMF library must be"
-    print *, failMsg
-    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
-
-    write(failMsg, *) "recompiled without this symbol.)"
-    print *, failMsg
-    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
-
-    rc = ESMF_FAILURE
-    goto 10
-#endif
-   
     if (npets .lt. 8) then
       print *, "This system test needs to run at least 8-way, current np = ", &
                npets

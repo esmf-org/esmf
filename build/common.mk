@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.81 2004/10/28 22:24:29 nscollins Exp $
+#  $Id: common.mk,v 1.82 2004/11/01 17:14:40 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -81,10 +81,6 @@ endif
 ifeq ($(ESMF_ARCH),IRIX64)
 CPPFLAGS       += -DVM_DONT_HAVE_MPI_COMM_C2F
 endif
-
-# Comment out the following flags if you want to allow VM to use Pthreads
-#FPPFLAGS       += $(FPP_PREFIX)-DVM_DONT_SPAWN_PTHREADS
-#CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
 
 # Comment out the following lines if you want to include the IO code
 FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
