@@ -1,4 +1,4 @@
-% $Id: TimeMgr_implnotes.tex,v 1.5 2003/09/03 21:12:24 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.6 2003/09/04 16:55:30 cdeluca Exp $
 
 \subsection{Implementation Notes}
 \begin{enumerate}
@@ -43,7 +43,7 @@ representations of time intervals and time instances.
 The BaseTime class defines increment and decrement methods for basic
 TimeInterval calculations between Time instants.  It is done here rather
 than in the Calendar class because it can be done with simple 
-day-based arithmetic that is calendar independent.  
+second-based arithmetic that is calendar independent.  
 
 Comparison methods can also be defined in the BaseTime class.  These
 perform equality/inequality, less than, and greater than comparisons
