@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.9 2004/01/30 20:00:19 eschwab Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.10 2004/01/31 02:26:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 
 
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock
+      type(ESMF_Clock) :: clock, clockCopy
 
       ! instantiate Alarm lists (of pointers)
       integer, parameter :: NUMALARMS = 2
@@ -213,6 +213,35 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       print *, "alarm(2) = "
       call ESMF_AlarmPrint(alarm(2), rc=rc)
 
+!\end{verbatim}
+!EOP
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+      clockCopy = ESMF_ClockCreateCopy(clock, rc)
+!\end{verbatim}
+!EOP
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+      print *, "Original clock = "
+      call ESMF_ClockPrint(clock, "name", rc=rc)
+!\end{verbatim}
+!EOP
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+      print *, "Clock copy = "
+      call ESMF_ClockPrint(clockCopy, "name", rc=rc)
 !\end{verbatim}
 !EOP
       if (rc.NE.ESMF_SUCCESS) then
