@@ -255,7 +255,7 @@ end subroutine ESMF_LogOpen
 		end select				
 		f=adjustl(__FILE__)
 		ok=0
-		do i=1, aLog%MaxTryOpenlt
+		do i=1, 100000
 			OPEN(UNIT=aLog%unitnumber,File=aLog%nameLogErrFile,POSITION="APPEND", &
 			ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
 			if (status.eq.0) then
