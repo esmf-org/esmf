@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.5 2004/03/18 23:13:19 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,7 +83,7 @@
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
 
 
       ! These are fields on different Grids - call RegridStore to set
@@ -128,7 +128,7 @@
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
       ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
+      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
       !  the data.   The communication pattern was computed at init,

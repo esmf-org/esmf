@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.14 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_model1.F90,v 1.15 2004/03/18 23:13:19 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -107,7 +107,7 @@
         integer :: status, myde
 
         ! query comp for layout
-        call ESMF_GridCompGet(comp, layout=layout, rc=status)
+        call ESMF_GridCompGet(comp, delayout=layout, rc=status)
         call ESMF_DELayoutGetDEID(layout, de_id)
 
         print *, de_id, "User Comp 1 Init starting"
@@ -218,7 +218,7 @@
 
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
-        call ESMF_FieldGetData(humidity, array1, rc=rc) 
+        call ESMF_FieldGetArray(humidity, array1, rc=rc) 
         ! Get a pointer to the start of the data
         call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 

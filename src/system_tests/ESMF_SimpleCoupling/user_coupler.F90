@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.7 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.8 2004/03/18 23:17:50 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,7 +75,7 @@
         call ESMF_FieldPrint(humidity2, rc=rc)
 
         ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+        call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
 
         ! Precompute communication patterns
         call ESMF_FieldRedistStore(humidity1, humidity2, cpllayout, &

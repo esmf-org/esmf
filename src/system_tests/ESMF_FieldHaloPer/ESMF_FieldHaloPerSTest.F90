@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.11 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.12 2004/03/18 23:09:03 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -136,7 +136,7 @@
     print *, ""
 
     cname = "System Test FieldHaloPeriodic"
-    comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname, delayout=layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Create finished, name = ", trim(cname)
@@ -286,7 +286,7 @@
       if (verbose) print *, "Entering Initialization routine"
 
       ! Query component for layout
-      call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
+      call ESMF_GridCompGet(comp, delayout=layout1, rc=rc)
       if (verbose) print *, "myinit: getting layout, rc = ", rc
       if (rc .ne. ESMF_SUCCESS) goto 30
 

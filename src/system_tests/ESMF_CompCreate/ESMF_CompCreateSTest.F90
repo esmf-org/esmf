@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.2 2003/10/20 20:13:58 cdeluca Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.3 2004/03/18 23:02:50 nscollins Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -80,7 +80,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test CompCreate"
-    comp1 = ESMF_GridCompCreate(cname, layout=layout2, mtype=ESMF_ATM, rc=rc)
+    comp1 = ESMF_GridCompCreate(cname, delayout=layout2, gridcompType=ESMF_ATM, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompPrint(comp1)
 

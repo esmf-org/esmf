@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.13 2004/03/18 21:49:29 cdeluca Exp $
+! $Id: ESMF_CompCreate.F90,v 1.14 2004/03/18 23:01:48 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -35,7 +35,7 @@
     print *, "Component Test 1:"
 
     cname = "Atmosphere"
-    comp1 = ESMF_GridCompCreate(name=cname, mtype=ESMF_ATM, &
+    comp1 = ESMF_GridCompCreate(name=cname, gridcompType=ESMF_ATM, &
                                              configFile="grid.rc", rc=rc)  
 
     print *, "Grid Comp Create returned, name = ", trim(cname)

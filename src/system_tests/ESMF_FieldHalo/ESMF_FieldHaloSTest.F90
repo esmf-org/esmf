@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.14 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.15 2004/03/18 23:04:32 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -92,7 +92,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test FieldHalo"
-    comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
+    comp1 = ESMF_GridCompCreate(name=cname, delayout=layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create finished, name = ", trim(cname)
@@ -248,7 +248,7 @@
       print *, "Entering Initialization routine"
 
       ! Query component for layout
-      call ESMF_GridCompGet(comp, layout=layout1, rc=rc)
+      call ESMF_GridCompGet(comp, delayout=layout1, rc=rc)
       print *, "myinit: getting layout, rc = ", rc
       if (rc .ne. ESMF_SUCCESS) goto 30
 
@@ -424,7 +424,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get layout from component
-      call ESMF_GridCompGet(comp, layout=layout, rc=rc)
+      call ESMF_GridCompGet(comp, delayout=layout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_DELayoutGetDEID(layout, de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30

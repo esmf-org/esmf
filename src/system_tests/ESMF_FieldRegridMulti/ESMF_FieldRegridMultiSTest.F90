@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.3 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.4 2004/03/18 23:15:49 nscollins Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -99,7 +99,7 @@
     delist = (/ (i, i=0, ndes-1) /)
     layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
-    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
+    comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
   !  call ESMF_GridCompPrint(comp1, "", rc)
 
@@ -109,12 +109,12 @@
     layout3 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
                                   de_indices=delist, rc=rc)
 
-    comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
+    comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
   !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, layout=layout1, rc=rc)
+    cpl = ESMF_CplCompCreate(cplname, delayout=layout1, rc=rc)
     print *, "Created component ", trim(cplname), ", rc =", rc
   !  call ESMF_CplCompPrint(cpl, "", rc)
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.8 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_model1.F90,v 1.9 2004/03/18 23:15:49 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -110,7 +110,7 @@
         print *, "User Comp Init starting"
 
         ! query comp for layout
-        call ESMF_GridCompGet(comp, layout=layout, rc=status)
+        call ESMF_GridCompGet(comp, delayout=layout, rc=status)
 
         ! Add a "humidity" field to the export state.
         counts(1) = 4
@@ -218,7 +218,7 @@
 
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
-        call ESMF_FieldGetData(humidity, array1, rc=rc) 
+        call ESMF_FieldGetArray(humidity, array1, rc=rc) 
         ! get size of local array
         call ESMF_ArrayGet(array1, counts=counts, rc=rc)
         ! Get a pointer to the start of the data

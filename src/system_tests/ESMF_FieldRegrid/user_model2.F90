@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.13 2004/03/18 21:49:30 cdeluca Exp $
+! $Id: user_model2.F90,v 1.14 2004/03/18 23:13:19 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -100,7 +100,7 @@
 
 
       ! Initially import state contains a field with a grid but no data.
-      call ESMF_GridCompGet(comp, layout=layout, rc=status)
+      call ESMF_GridCompGet(comp, delayout=layout, rc=status)
       call ESMF_DELayoutGetDEID(layout, de_id)
 
       print *, de_id, "User Comp 2 Init starting"
