@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.14 2003/04/08 15:23:50 flanigan Exp $
+% $Id: ESMF_refdoc.ctex,v 1.15 2003/04/10 21:15:06 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -44,52 +44,8 @@
 \tableofcontents
 
 \newpage
-%\section{Synopsis}
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{General Requirements}
-\end{htmlonly}
-\part{General Requirements}
-\label{part:General_Requirements}
-
-\section{Target codes and review team}
-\input{ESMF_auth}
-
-\newpage
 %\section{Introduction}
-\input{ESMF_intro}
-
-%\section{Objectives}
-\input{ESMF_obj}
-
-%\section{Scope}
-\input{ESMF_scope}
-
-\section{Organization and conventions of detailed requirements chapters}
-\input{../../scripts/doc_templates/templates/conv_reqdoc}
-
-\subsection{Requirement attributes}
-\input{../../scripts/doc_templates/templates/attr_reqdoc}
-
-\newpage
-
-\begin{htmlonly}
-\addcontentsline{toc}{section}{Framework-wide requirements}
-\end{htmlonly}
-\section{Framework-wide requirements}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-\input{ESMF_req}
-
-%\section{Bibliography}
-\bibliography{ESMF} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{References}
+\input{ESMF_refintro}
 
 \newpage
 \begin{htmlonly}
@@ -98,12 +54,6 @@
 \part{Superstructure: Components}
 \label{part:Superstructure:_Components}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-
 #include "../Superstructure/Component/doc/Component_refdoc.ctex"
 
 \newpage
@@ -111,11 +61,6 @@
 \addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
 \end{htmlonly}
 \part{Infrastructure Fields and Grids: Fields}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
@@ -126,13 +71,7 @@
 \part{Infrastructure Fields and Grids: Physical Grids}
 \label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
-
 
 \newpage
 \begin{htmlonly}
@@ -140,11 +79,6 @@
 \end{htmlonly}
 \part{Infrastructure Fields and Grids: Distributed Grids}
 \label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
@@ -155,11 +89,6 @@
 \part{Infrastructure Fields and Grids: Regridding}
 \label{part:Infrastructure_Fields_and_Grids:_Regridding}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
 %====================================================================================================
@@ -169,11 +98,6 @@
 \end{htmlonly}
 \part{Infrastructure Utilities: Base}
 \label{part:Infrastructure_Utilities:_Base}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/TimeMgr/doc/Base_refdoc.ctex"
 
@@ -187,11 +111,6 @@
 \part{Infrastructure Utilities: Time Management}
 \label{part:Infrastructure_Utilities:_Time_Management}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
 
@@ -203,11 +122,6 @@
 \part{Infrastructure Utilities: Communication and Memory Kernels}
 \label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/CommMem/doc/CommMem_refdoc.ctex"
 
 %====================================================================================================
@@ -218,10 +132,6 @@
 %\part{Infrastructure Utilities: Configuration Atrributes}
 %\label{part:Infrastructure_Utilities:_Configuration_Attributes}
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 % replace % with # below to uncomment
 %include "../Infrastructure/ConfigAttr/doc/ConfigAttr_refdoc.ctex"
@@ -235,11 +145,6 @@
 \part{Infrastructure Utilities: Performance Profiling}
 \label{part:Infrastructure_Utilities:_Performance_Profiling}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
 %====================================================================================================
@@ -249,11 +154,6 @@
 \end{htmlonly}
 \part{Infrastructure Utilities: Log}
 \label{part:Infrastructure_Utilities:_Log}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
 
@@ -265,11 +165,6 @@
 \part{Infrastructure Utilities: Machine}
 \label{part:Infrastructure_Utilities:_Machine}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
 
 %====================================================================================================
@@ -279,11 +174,6 @@
 \end{htmlonly}
 \part{Infrastructure Utilities: Route}
 \label{part:Infrastructure_Utilities:_Route}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #include "../Infrastructure/Route/doc/Route_refdoc.ctex"
 
@@ -296,11 +186,6 @@
 \part{Infrastructure Utilities: Data}
 \label{part:Infrastructure_Utilities:_Data}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
 #include "../Infrastructure/Data/doc/Data_refdoc.ctex"
 
 %====================================================================================================
@@ -310,11 +195,6 @@
 %\end{htmlonly}
 %\part{Infrastructure Utilities: I/O}
 %\label{part:Infrastructure Utilities:_I/O}
-
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 %#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
@@ -326,11 +206,6 @@
 \end{htmlonly}
 \part{Glossary}
 \label{part:Glossary}
-
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \section{Glossary}
 \input{ESMF_terms}
