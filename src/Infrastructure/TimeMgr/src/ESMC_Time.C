@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.23 2003/04/24 02:59:56 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.24 2003/04/25 09:03:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,6 +22,7 @@
  // higher level, 3rd party or system includes
  #include <iostream.h>
  #include <math.h>     // modf()
+ #include <time.h>
  #include <ESMC_TimeInterval.h>
 
  // associated class definition file
@@ -30,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.23 2003/04/24 02:59:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.24 2003/04/25 09:03:58 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -687,7 +688,7 @@
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeGet
+ }  // end ESMC_TimeGetString
 
 //-------------------------------------------------------------------------
 //BOP
@@ -854,7 +855,28 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
+    time_t tm;
+    struct tm wallClock;
+
+    // get wall clock (system) time
+    if (time(&tm) < 0) return (ESMF_FAILURE);
+    wallClock = *localtime(&tm);          
+    int YR = wallClock.tm_year + 1900;
+    int MM = wallClock.tm_mon + 1;
+    int DD = wallClock.tm_mday;
+    int H  = wallClock.tm_hour;
+    int M  = wallClock.tm_min;
+    int S  = wallClock.tm_sec;
+
+    // set this time to wall clock time
+    // TODO: use native C++ version when ready
+    ESMC_TimeSet((ESMF_IKIND_I8 *)&YR, &MM, &DD, ESMC_NULL_POINTER,
+                 &H, &M, &S, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER);
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetRealTime
