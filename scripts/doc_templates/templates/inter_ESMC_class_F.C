@@ -1,4 +1,4 @@
-// $Id: inter_ESMC_class_F.C,v 1.5 2003/03/28 01:34:45 eschwab Exp $
+// $Id: inter_ESMC_class_F.C,v 1.6 2003/03/28 17:15:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,6 +52,8 @@ extern "C" {
        }
 
        // for either shallow or deep classes, the following are needed. 
+       // for deep classes, use **ptr/*ptr as in create/destroy above;
+       // for shallow ones use *ptr/ptr as in init above
        void FTN(c_esmc_<class>getconfig)(ESMC_<Class> *ptr, 
                                          ESMC_<Class>Config *config, int *status) {
            *status = (ptr)->ESMC_<Class>GetConfig(&config);
