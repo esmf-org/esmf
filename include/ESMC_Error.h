@@ -58,6 +58,7 @@ typedef struct ErrHandlerClass ESMC_ErrHandlerClass;
 #define ESMC_ERR_MEMC            78   /* memory corruption */
 #define ESMC_ERR_DATE            90   /* invalid date generated */
 #define ESMC_ERR_BUSY            91   /* Resource is busy */
+#define ESMC_ERR_SYS             92   /* System call error */
 
 #define ESMC_ERR_ARG_SIZ         60   /* nonconforming object sizes used in operation */
 #define ESMC_ERR_ARG_IDN         61   /* two arguments not allowed to be the same */

@@ -4,6 +4,7 @@
 #include "ESMC.h"
 
 #include "ESMC_Machine.h"
+#include "ESMC_BasicUtil.h"
 
 #ifdef ESMC_HAVE_PTHREADS
 #include <pthread.h>
@@ -17,47 +18,7 @@
 #include <mpi.h>
 #endif
 
-#ifdef ESMC_HAVE_PTHREADS
-static pthread_t *threadid;
-static pthread_mutex_t t_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
 static int numthreads;
-
-#ifdef ESMC_HAVE_OMP_THREADS
-static omp_lock_t lock;
-#endif
-
-static int lock_mutex();
-static int unlock_mutex();
-
-static int lock_mutex ()
-{
-#ifdef ESMC_HAVE_OMP_THREADS
-  omp_set_lock (&lock);
-#elif defined (ESMC_HAVE_PTHREADS)
-  if (pthread_mutex_lock (&t_mutex) != 0)
-    {
-      printf("pthread_mutex_lock failure\n");
-      return -1;
-    }
-#endif
-  return 0;
-}
-
-static int unlock_mutex ()
-{
-#ifdef ESMC_HAVE_OMP_THREADS
-  omp_unset_lock (&lock);
-#elif defined(ESMC_HAVE_PTHREADS)
-  if (pthread_mutex_unlock (&t_mutex) != 0)
-    {
-      printf("pthread_mutex_unlock failure\n");
-      return -1;
-    }
-#endif
-  return 0;
-}
-
 
 static int get_thread_num ()
 {
@@ -88,7 +49,7 @@ static int get_thread_num ()
 
   mythreadid = pthread_self ();
 
-  if (lock_mutex () < 0)
+  if (ESMC_BasicUtilLockMutex () < 0)
     {
       printf("get_thread_num: mutex lock failure\n");
       return -1;
@@ -125,7 +86,7 @@ static int get_thread_num ()
       numthreads++;
     }
 
-    if (unlock_mutex () < 0)
+    if (ESMC_BasicUtilUnlockMutex () < 0)
       {
 	printf("get_thread_num: mutex unlock failure\n");
 	return -1;
@@ -190,7 +151,6 @@ int ESMC_MachineConstruct(ESMC_Machine machine)
   numthreads = 1;
 #elif defined (ESMC_HAVE_OMP_THREADS)
   numthreads = omp_get_max_threads();
-  omp_init_lock(&lock);
 #endif
 
   return ESMC_SUCCESS;

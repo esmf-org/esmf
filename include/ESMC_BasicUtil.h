@@ -15,6 +15,10 @@ typedef enum {ESMC_FALSE, ESMC_TRUE} ESMC_Bool;
 
 #define ESMC_EQUAL(v1,v2)          ((v1>=(v2-ESMC_EPS)) && (v1<v2+ESMC_EPS))
 
+int ESMC_BasicUtilInit();
+int ESMC_BasicUtilLockMutex();
+int ESMC_BasicUtilUnlockMutex();
+
 #endif
 
 
