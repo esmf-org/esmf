@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.20 2003/05/01 00:31:27 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.21 2003/05/02 22:13:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.20 2003/05/01 00:31:27 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.21 2003/05/02 22:13:09 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -121,8 +121,11 @@
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    return(ESMC_TimeIntervalSet(YY, MO, D, H, M, S, MS, US, NS,
-                                d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd));
+    if (ESMC_TimeIntervalSet(YY, MO, D, H, M, S, MS, US, NS,
+                       d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd) != ESMF_SUCCESS)
+      return(ESMF_FAILURE);
+
+    return(ESMC_TimeIntervalValidate());
 
  }  // end ESMC_TimeIntervalInit
 
@@ -937,8 +940,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
-    return(ESMF_SUCCESS);
+    return (ESMC_BaseTime::ESMC_BaseTimeValidate());
 
  }  // end ESMC_TimeIntervalValidate
 
