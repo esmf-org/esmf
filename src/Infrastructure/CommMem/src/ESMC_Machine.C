@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.9 2003/04/14 14:51:31 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.10 2003/04/17 17:59:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.9 2003/04/14 14:51:31 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.10 2003/04/17 17:59:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -100,16 +100,18 @@ ESMC_Machine Machine;
 //
 // !DESCRIPTION:
 //     Place to shut down any needed resources.
-//     TODO: This is currently NOT called.  We need to find a place
-//      to put the call to this code.
 //
 //EOP
 // !REQUIREMENTS:  
 
     //  TODO: shut down any necessary resources
 
-    //  TODO: This is currently NOT called.  We need to find a place
-    //   to put the call to this code.
+    int finalized;
+
+    MPI_Finalized(&finalized);
+    if (!finalized) 
+      MPI_Finalize();
+
 
     return ESMF_SUCCESS;
 
@@ -405,7 +407,7 @@ ESMC_Machine Machine;
     if (!initialized) {
       MPI_Init(0, NULL);
     } else {
-      // log error
+      // log error?
     }
 
     // TODO: MPI overrides given nProcs ?
