@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.35 2004/05/21 09:37:39 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.36 2004/05/25 11:37:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.35 2004/05/21 09:37:39 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.36 2004/05/25 11:37:30 nscollins Exp $'
 
 !==============================================================================
 !
@@ -96,7 +96,7 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Cplcomp
+! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Component
 !
 ! !INTERFACE:
       interface ESMF_CplCompCreate
@@ -109,8 +109,8 @@
         module procedure ESMF_CplCompCreateCPar
 
 ! !DESCRIPTION:
-!     This interface provides an entry point for methods that create a 
-!     Coupler {\tt Cplcomp}.  The various varieties allow the resources
+!     This interface provides an entry point for methods that create an 
+!     {\tt ESMF\_CplComp}.  The various varieties allow the resources
 !     to default, to be specified explicitly, or inherited from a parent
 !     component.
 !
@@ -161,7 +161,7 @@
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
-!  The return value is a new {\tt ESMF\_CplComp}.
+!  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -176,7 +176,7 @@
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !    queried and updated by the new component as it chooses.  This should
 !    not be the parent component clock, which should be maintained and passed
-!    down to the Initialize/Run/Finalize routines separately.
+!    down to the initialize/run/finalize routines separately.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -236,7 +236,7 @@
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
-!  The return value is a new {\tt ESMF\_CplComp}.
+!  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -260,7 +260,7 @@
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !    queried and updated by the new component as it chooses.  This should
 !    not be the parent component clock, which should be maintained and passed
-!    down to the Initialize/Run/Finalize routines separately.
+!    down to the initialize/run/finalize routines separately.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -324,7 +324,7 @@
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
-!  The return value is a new {\tt ESMF\_CplComp}.
+!  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -352,7 +352,7 @@
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !    queried and updated by the new component as it chooses.  This should
 !    not be the parent component clock, which should be maintained and passed
-!    down to the Initialize/Run/Finalize routines separately.
+!    down to the initialize/run/finalize routines separately.
 !   \item[{[petList]}]
 !    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
 !    component is giving to the created child 
@@ -422,7 +422,7 @@
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
-!  The return value is a new {\tt ESMF\_CplComp}.
+!  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -449,7 +449,7 @@
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !    queried and updated by the new component as it chooses.  This should
 !    not be the parent component clock, which should be maintained and passed
-!    down to the Initialize/Run/Finalize routines separately.
+!    down to the initialize/run/finalize routines separately.
 !   \item[{[vm]}]
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
 !    inherit parents {\tt VM}.
@@ -523,12 +523,12 @@
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
-!  The return value is a new {\tt ESMF\_CplComp}.
+!  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[{[parent]}]
-!    The Parent component object.  The child component will inherit all
+!    The parent component object.  The child component will inherit all
 !    the {\tt PET}s from the parent.
 !   \item[{[name]}]
 !    Name of the newly-created component.  This name can be altered 
@@ -550,7 +550,7 @@
 !    Component-specific {\tt ESMF\_Clock}.  This clock is available to be
 !    queried and updated by the new component as it chooses.  This should
 !    not be the parent component clock, which should be maintained and passed
-!    down to the Initialize/Run/Finalize routines separately.
+!    down to the initialize/run/finalize routines separately.
 !   \item[{[vm]}]
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
 !    inherit parents {\tt VM}.
@@ -677,12 +677,11 @@
 ! !DESCRIPTION:
 !  Call the associated user-supplied finalization routine for a child 
 !  coupler component.
-!
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call Finalize routine for.
+!    {\tt ESMF\_CplComp} object to call finalize routine for.
 !   \item[{[importState]}]
 !    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
@@ -738,7 +737,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns information about an {\tt ESMF\_CplComp} coupler component.  
+!      Returns information about an {\tt ESMF\_CplComp}.
 !      For queries where the caller
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the {\tt cplcomp} argument are optional 
@@ -787,12 +786,12 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user initialization code for a cplcomp.
+!  Call the associated user initialization code for an {\tt ESMF\_CplComp}.
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call Initialize routine for.
+!    {\tt ESMF\_CplComp} to call initialize routine for.
 !   \item[{[importState]}]  
 !    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]  
@@ -843,12 +842,12 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a cplcomp.
+!      Routine to print information about an {\tt ESMF\_CplComp}.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to print.
+!    {\tt ESMF\_CplComp} to print.
 !   \item[{[options]}]
 !    Print options.  See ref XX for the list of standard options.
 !   \item[{[rc]}]
@@ -880,12 +879,12 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user restore code for a cplcomp.
+!  Call the associated user restore code for an {\tt ESMF\_CplComp}.
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call ReadRestart routine for.
+!    {\tt ESMF\_CplComp} object to call readrestart routine for.
 !   \item[{[iospec]}]
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
@@ -938,12 +937,12 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user run code for a cplcomp.
+!  Call the associated user run code for an {\tt ESMF\_CplComp}.
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call Run routine for.
+!    {\tt ESMF\_CplComp} object to call run routine for.
 !   \item[{[importState]}]
 !    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
@@ -1000,10 +999,10 @@
 
 !
 ! !DESCRIPTION:
-!      Sets or resets information about a {\tt ESMF\_CplComp} Coupler
-!      component.  When the caller
-!      only wants to set a single value specify the argument by name.
-!      All the arguments after the cplcomp input are optional 
+!      Sets or resets information about an {\tt ESMF\_CplComp}.
+!      The caller can set individual values by specifying
+!      the arguments by name.
+!      All the arguments except the {\tt cplcomp} are optional 
 !      to facilitate this.
 !
 !  The arguments are:
@@ -1044,7 +1043,7 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to ensure a CplComp is valid.
+!      Routine to ensure an {\tt ESMF\_CplComp} is valid.
 !
 !  The arguments are:
 !  \begin{description}
@@ -1081,13 +1080,13 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user checkpoint code for a cplcomp.
+!  Call the associated user checkpoint code for an {\tt ESMF\_CplComp}.
 !    
 !  The arguments are: 
 !  \begin{description} 
 !  
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call WriteRestart routine for.
+!    {\tt ESMF\_CplComp} object to call writerestart routine for.
 !   \item[{[iospec]}]
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
@@ -1138,12 +1137,12 @@
     integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Set characteristics of the VM for this component.
+!     Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp] 
-!      cplcomp object
+!      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 !     \item[{[max]}] 
 !      Maximum threading level
 !     \item[{[pref\_intra\_process]}] 
@@ -1194,12 +1193,12 @@
     integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Set characteristics of the VM for this component.
+!     Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp] 
-!      cplcomp object
+!      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 !     \item[{[max]}] 
 !      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
@@ -1251,12 +1250,12 @@
     integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Set characteristics of the VM for this component.
+!     Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp] 
-!      cplcomp object
+!      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 !     \item[{[max]}] 
 !      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
