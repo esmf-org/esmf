@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2004/03/04 22:34:15 nscollins Exp $
+# $Id: build_rules.mk,v 1.4 2004/03/15 19:39:06 nscollins Exp $
 #
 # SunOs.default.default.mk
 #
@@ -82,8 +82,8 @@ C_CCV		   = ${C_CC} -V
 C_FCV              = /opt/SUNWspro/bin/f90 -openmp -dalign
 C_SYS_LIB	   = -L/opt/SUNWspro/SC5.0/lib -lF77 -lM77 -lfsu -lsunmath -lnsl -lsocket -lgen -ldl -lm
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g -xs
-G_FOPTFLAGS	   = -g -xs
+G_COPTFLAGS	   = 
+G_FOPTFLAGS	   = 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -fast -xO4 -fsimple=2 -xtarget=native
 O_FOPTFLAGS	   = -fast
@@ -112,14 +112,14 @@ C_CXXF90LIBS       = -L/opt/SUNWspro/lib -lfui -lfai -lfai2 -lfsumai -lfprodai -
 C_CXXSO            = /opt/SUNWspro/bin/CC -G
 C_CXXSOLIBS        = -Kpic  -lCstd -lCrun -lm -lw -lcx -lc
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g 
-GCXX_FOPTFLAGS	   = -g
+GCXX_COPTFLAGS	   = 
+GCXX_FOPTFLAGS	   =
 # ------------------------- BOPT - O_c++ options ------------------------------
 OCXX_COPTFLAGS	   = -O 
 OCXX_FOPTFLAGS	   = -O
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g
-GCOMP_FOPTFLAGS	   = -g
+GCOMP_COPTFLAGS	   =
+GCOMP_FOPTFLAGS	   =
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
