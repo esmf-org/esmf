@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.16 2002/12/13 20:24:21 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.17 2003/01/09 16:58:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -61,6 +61,10 @@
       private
           integer*8 :: ptr
       end type
+
+      type(ESMF_Pointer), parameter :: ESMF_NULL_POINTER = ESMF_Pointer(0), &
+                                       ESMF_BAD_POINTER = ESMF_Pointer(-1)
+
 
       type ESMF_DataType
       sequence
@@ -134,6 +138,8 @@
 
       public ESMF_KIND_4, ESMF_KIND_8
 
+      public ESMF_NULL_POINTER, ESMF_BAD_POINTER
+
       public ESMF_Status, ESMF_DataType, ESMF_DataKind, ESMF_DataValue 
       public ESMF_Attribute, ESMF_BasePointer, ESMF_Base, ESMF_Pointer
 
@@ -202,7 +208,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.16 2002/12/13 20:24:21 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.17 2003/01/09 16:58:28 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -213,12 +219,14 @@ interface operator (.eq.)
  module procedure ESMF_sfeq
  module procedure ESMF_dteq
  module procedure ESMF_dkeq
+ module procedure ESMF_opeq
 end interface
 
 interface operator (.ne.)
  module procedure ESMF_sfne
  module procedure ESMF_dtne
  module procedure ESMF_dkne
+ module procedure ESMF_opne
 end interface
 
       contains
@@ -240,6 +248,7 @@ function ESMF_sfne(sf1, sf2)
 
  ESMF_sfne = (sf1%status .ne. sf2%status)
 end function
+
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_DataTypes to see if they're the same or not
 
@@ -256,6 +265,7 @@ function ESMF_dtne(dt1, dt2)
 
  ESMF_dtne = (dt1%dtype .ne. dt2%dtype)
 end function
+
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_DataKinds to see if they're the same or not
 
@@ -273,6 +283,23 @@ function ESMF_dkne(dk1, dk2)
  ESMF_dkne = (dk1%dkind .ne. dk2%dkind)
 end function
 
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_Pointers to see if they're the same or not
+
+function ESMF_opeq(op1, op2)
+ logical ESMF_opeq
+ type(ESMF_Pointer), intent(in) :: op1, op2
+
+ ESMF_opeq = (op1%ptr .eq. op2%ptr)
+end function
+
+function ESMF_opne(op1, op2)
+ logical ESMF_opne
+ type(ESMF_Pointer), intent(in) :: op1, op2
+
+ ESMF_opne = (op1%ptr .ne. op2%ptr)
+end function
 
 
 !------------------------------------------------------------------------------
