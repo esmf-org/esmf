@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.10 2003/08/01 22:03:53 nscollins Exp $
+! $Id: user_model2.F90,v 1.11 2003/08/04 20:31:31 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -95,9 +95,7 @@
         real :: x_min, x_max, y_min, y_max
         integer :: counts(2)
         integer :: ni, nj, de_id
-        integer :: horz_gridtype, vert_gridtype
-        integer :: horz_stagger, vert_stagger
-        integer :: horz_coord_system, vert_coord_system
+        integer :: horz_gridtype, horz_stagger, horz_coord_system
         integer :: status, myde
 
         print *, "User Comp Init starting"
@@ -113,22 +111,16 @@
         y_min = 0.0
         y_max = 5.0
         horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
-        vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
-        vert_coord_system = ESMF_CoordSystem_Unknown
 
         grid1 = ESMF_GridCreate(counts=counts, &
                                 x_min=x_min, x_max=x_max, &
                                 y_min=y_min, y_max=y_max, &
                                 layout=layout, &
                                 horz_gridtype=horz_gridtype, &
-                                vert_gridtype=vert_gridtype, &
                                 horz_stagger=horz_stagger, &
-                                vert_stagger=vert_stagger, &
                                 horz_coord_system=horz_coord_system, &
-                                vert_coord_system=vert_coord_system, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
