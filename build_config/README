@@ -54,6 +54,7 @@ settings for its architecture.
 Current build files for supported platforms:
 
       build_config/AIX.default.default
+                   Darwin.absoft.default
                    Darwin.xlf.default
                    IRIX64.default.default
                    Linux.absoft.default
@@ -66,8 +67,9 @@ Current build files for supported platforms:
 
 Current build files for unsupported platforms:
 
-      build_config/Darwin.absoft.default
-                   Darwin.nag.default
+      build_config/Darwin.nag.default
+                   Linux.xlf.default
+                   SunOS.default.default
 
 Notice that there is no default compiler value for Linux or Darwin
 (Mac) machines.  This is because there are a number of Fortran90 Linux
@@ -97,6 +99,20 @@ Environment Variables
                    machine architecture.  Default value
                    is value returned by uname -s.
 
+ ESMF_BOPT         Variable specifying that the build system
+                   use either debugging  or optimization options.
+                   Value of g specifies the debugging options.
+                   Value of O (capital oh) specifies optimization
+                   options.  Default value is O.
+ 
+ ESMF_COMM         Defines which MPI communications library to use.
+                   Many times a machine will come with its own MPI
+                   library and in those cases the default setting
+                   will be mpi.  Otherwise the default setting will be
+                   mpiuni so that the mpiuni library will be used.
+                   That is the case for Darwin and Linux platforms.
+                   Other possible settings are mpich and lam.
+
  ESMF_COMPILER     Variable specifying which compiler to use.  Value
                    can be default, absoft, intel, lahey, pgi or nag. 
                    If the value is default or ESMF_COMPILER is 
@@ -104,6 +120,47 @@ Environment Variables
                    will be used.  Exceptions for default values:
                    On Linux machines the default value is lahey and
                    on Darwin machines it is absoft.
+
+ ESMF_C_COMPILER   Variable specifying which C/C++ compiler to use.
+                   In most cases this should not be set; the default
+                   is to use the vendor-supplied compilers on those
+                   systems which normally come with a single development
+                   environment; on other systems like Linux clusters, the
+                   default is to use the ESMF_COMPILER setting.  However,
+                   some Fortran compilers support linking with C and C++
+                   code compiled with the GNU compilers; in these cases,
+                   you can set this variable to the value gnu in order to
+                   compile with the vendor Fortran compiler and the 
+                   GNU C/C++.   This option is only supported for
+                   ESMF_ARCH=Darwin, ESMF_COMPILER=xlf, and ESMF_ARCH=Linux,
+                   ESMF_COMPILER=intel.
+
+ ESMF_C_LIBRARY    Variable specifying which C/C++ libraries to link with.
+                   In most cases this should not be set; the default is to
+                   use the vendor-supplied libraries on those systems which
+                   normally come with a single development environment; on
+                   other systems like Linux clusters, the default is to use
+                   the ESMF_COMPILER setting.  However, some vendor compilers
+                   support compiling with their compilers but linking with
+                   the GNU C/C++ libraries.  In these cases, you can set this
+                   variable to the value gnu in order to link with the 
+                   GNU C/C++ libraries.  This option is only supported for
+                   ESMF_ARCH=Linux, ESMF_COMPILER=intel.
+
+ ESMF_EXHAUSTIVE   The unit tests by default compile only a subset of the unit
+                   tests.  If ESMF_EXHAUSTIVE is set to the value "ON", then when
+                   compiling the unit tests, all tests will be included.  Note
+                   that this is a compile time, not run time, option.
+
+ ESMF_NO_IOCODE    The current release of the system is prepared to link with
+                   the netCDF I/O libraries, but since the installation of the
+                   libraries and include files varies widely from system to
+                   system support for them is disabled by default.  To enable
+                   I/O support, edit the build/common.mk file and comment out
+                   the setting of both the CPPFLAG and environment variable.
+                   Additional customization will be needed in the build_config
+                   makefile fragments to point the framework to the location
+                   of the include and library files.
 
  ESMF_PREC         Variable specifying the precision.  Value 
                    can be 32 or 64.  When possible the default 
@@ -118,19 +175,6 @@ Environment Variables
                        http://sourceforge.net/projects/esmfcontrib/
                    for existing site files or to contribute new ones.
 
- ESMF_COMM         Defines which MPI communications library to use.  
-                   Many times a machine will come with its own MPI 
-                   library and in those cases the default setting 
-                   will be mpi.  Otherwise the default setting will be 
-                   mpiuni so that the mpiuni library will be used.
-                   Other possible settings are mpich and lam.
-
- ESMF_BOPT         Variable specifying that the build system
-                   use either debugging  or optimization options.
-                   Value of g specifies the debugging options.
-                   Value of O (capital oh) specifies optimization
-                   options.  Default value is O.
- 
  ESMF_DIR or       See note below.
  ESMF_EVA_DIR or
  ESMF_IMPL_DIR
@@ -166,7 +210,7 @@ provided only for the supported platforms.
 
 
 ================================================================================
- $Id: README,v 1.18 2005/01/14 20:44:09 nscollins Exp $
+ $Id: README,v 1.18.2.1 2005/03/10 23:50:14 jwolfe Exp $
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
