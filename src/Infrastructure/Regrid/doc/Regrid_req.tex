@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.8 2002/05/03 18:17:22 pwjones Exp $
+% $Id: Regrid_req.tex,v 1.9 2002/05/08 14:45:00 wsawyer Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -230,10 +230,10 @@ required have been so noted within their own respective decriptions.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} Needed by PSAS, but not milestone
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -359,10 +359,11 @@ A method for verifying conservation must be supplied.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  \\
+{\bf Source:} CAM-FV \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} Biogeochemical models may need this.  First-order
+{\bf Notes:} CAM-FV vertical remapping requires this.
+	     Biogeochemical models may need this.  First-order
              conservative schemes are generally monotone by
              construction, so this could be satisfied by the
              conservation requirement for gridded data.
@@ -588,7 +589,7 @@ Adjoints shall be supplied for interpolation TO ungridded data.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-SSI (milestone) \\
+{\bf Source:}  NCEP-SSI (milestone), PSAS (not milestone)  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -619,7 +620,7 @@ strongly dependent on model fields.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  \\
+{\bf Source:}  CAM-FV \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} The implementation report will examine use of
