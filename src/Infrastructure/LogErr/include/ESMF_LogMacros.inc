@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.5 2004/05/05 20:30:48 cpboulder Exp $
+ $Id: ESMF_LogMacros.inc,v 1.6 2004/05/11 22:04:41 cpboulder Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -17,23 +17,11 @@
  they will have to include this file and use a preprocessing step.
 
 #endif
+#define ESMC_LogWrite(...) \
+ESMC_LogWrite(__LINE__,__FILE__,__VA_ARGS__)
 
-#define ESMC_LogWrite(msg,logtype) \
-ESMC_LogWrite(__LINE__,__FILE__,msg,logtype)
 
-#define ESMC_LogWrite(msg,logtype,modmeth) \
-ESMC_LogWrite(__LINE__,__FILE__,msg,logtype,modmeth)
 
-#define ESMC_LogWrite(msg,logtype,module,method) \
-ESMC_LogWrite(__LINE__,__FILE__,msg,logtype,module,method)
-
-#define ESMC_LogFoundError(rc,msg,logtype) \
-ESMC_LogFoundError(rc,__LINE__,__FILE__,msg,logtype)
-
-#define ESMC_LogFoundError(rc,msg,logtype,modmeth) \
-ESMC_LogFoundError(rc,__LINE__,__FILE__,msg,logtype,modmeth)
-
-#define ESMC_LogFoundError(rc,msg,logtype,module,method) \
-ESMC_LogFoundError(rc,__LINE__,__FILE__,msg,logtype,module,method)
-
+#define ESMC_LogFoundError(rc,...) \
+ESMC_LogFoundError(rc,__LINE__,__FILE__,__VA_ARGS__)
 
