@@ -1,0 +1,27 @@
+% $Id: Time_ccex.tex,v 1.3 2003/02/11 18:21:17 eschwab Exp $
+
+A Time will typically be used to set the start time in a
+clock.  The following shows how to create and initialize three in C++:
+
+\begin{verbatim}
+// use the Time class;
+#include <ESMC_Time.h>
+
+// create 3 Time instants
+ESMC_Time StartTime1, StartTime2, StartTime3;
+
+// initialize first to 8/1/2002, 14:25:45.250, Gregorian calendar
+StartTime1.ESMC_TimeInit("YY:DD:H:M:S:MS", 2002, 8, 1, 14, 25, 45, 250,
+                        Gregorian);
+
+// initialize second by synchronizing it to the real-time clock (wall clock)
+StartTime2.ESMC_TimeGetRealTime();
+
+// initialize third to be same as the second
+StartTime3 = StartTime2;
+
+// pass them to their clocks ...
+ModelTime1.ESMC_ClockInit(&TimeStep, &StartTime1, ...);
+ModelTime2.ESMC_ClockInit(&TimeStep, &StartTime2, ...);
+ModelTime3.ESMC_ClockInit(&TimeStep, &StartTime3, ...);
+\end{verbatim}

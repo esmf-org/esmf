@@ -1,0 +1,13 @@
+% $Id: Time_design.tex,v 1.3 2003/02/11 18:21:19 eschwab Exp $
+
+{\tt Time} inherits from the base class {\tt BaseTime}.  As such, it gains
+the core representation of time as well as its associated methods.
+{\tt Time} further specializes {\tt BaseTime} by adding shortcut methods
+to set and get a {\tt Time} in a natural way with appropriate unit
+combinations, as per the requirements.  A {\tt Time} is calendar-dependent,
+since its largest units of time are months and years.  {\tt Time} also
+defines special methods for getting the day of the year, day of the week,
+middle of the month, and synchronizing with a real-time clock.  {\tt Time}
+adds its associated {\tt Calendar} and local Timezone attributes to
+{\tt BaseTime}.
+

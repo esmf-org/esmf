@@ -1,0 +1,10 @@
+% $Id: Time_def.tex,v 1.3 2003/02/11 18:21:18 eschwab Exp $
+\begin{verbatim}
+      type ESMF_Time
+      sequence                           ! match C++ storage order
+      private                            !   (members opaque on F90 side)
+        type(ESMF_BaseTime) :: basetime  ! inherit base class
+        type(ESMF_Calendar) :: calendar  ! associated calendar
+        integer :: timezone              ! local timezone
+      end type
+\end{verbatim}
