@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.10 2003/11/12 22:39:02 svasquez Exp $
+%  $Id: ESMF_builddetail.tex,v 1.11 2004/06/22 14:19:04 nscollins Exp $
 
 
 \subsection{Make System}
@@ -17,6 +17,7 @@ syntax defining build rules and actions, but do not constitute a
 complete build system.
 
 The main components of the make system are:
+\label{sec:BuildOptions}
 \begin{itemize}
 \item{{\bf Build directories}}
 
@@ -69,7 +70,7 @@ of an ESMF source code tree.
 
 \end{description}
 
-There are six other variables that the build system uses.  If they
+There are eight other variables that the build system uses.  If they
 are not set, then the build system will assign default values to
 them.  In most cases the default values will be fine.
 
@@ -81,26 +82,12 @@ Defines the current architecture. Default value is the value returned
 by the command uname -s.  There should be almost no reason for
 ESMF\_ARCH to be set by a user.
 
-\item{ESMF\_COMPILER}
+\item{ESMF\_BOPT} 
 
-Variable specifying which compiler to use.  Value can be default,
-absoft, intel, lahey or nag.  If the value is default or the
-ESMF\_COMPILER is left unset, then the default compiler will be
-used. Exceptions for default values: On Linux machines the default
-value is lahey and on Darwin machines it is absoft.
-
-\item{ESMF\_PREC}
-
-Variable specifying the precession build arguments.  Value can be 32
-or 64.  When possible the default value will be 64, otherwise it will
-be 32.
-
-
-\item{ESMF\_SITE}
-
-If ESMF\_SITE is not set or has the value of default, default build
-settings for the current machine architecture and compiler will be
-used.  Values are created from a machine's name.
+Variable specifying that the build system use either debugging or
+optimization options.  Value of g specifies the debugging options.
+Value of O (capital oh) specifies optimization options.  Default value
+is O.
 
 \item{ESMF\_COMM}
 
@@ -110,12 +97,42 @@ setting will be mpi.  Otherwise the default setting will be mpiuni so
 that the mpiuni library will be used.  Other possible settings are
 mpich and lam.
 
-\item{ESMF\_BOPT} 
+\item{ESMF\_COMPILER}
 
-Variable specifying that the build system use either debugging or
-optimization options.  Value of g specifies the debugging options.
-Value of O (capital oh) specifies optimization options.  Default value
-is O.
+Variable specifying which compiler to use.  Value can be default,
+absoft, intel, lahey or nag.  If the value is default or the
+ESMF\_COMPILER is left unset, then the default compiler will be
+used. Exceptions for default values: On Linux machines the default
+value is lahey and on Darwin machines it is absoft.
+
+\item{ESMF\_EXHAUSTIVE}
+
+The unit tests by default compile only a subset of the unit tests.
+If ESMF\_EXHAUSTIVE is set to the value {\tt ON}, then when
+compiling the unit tests, all tests will be included.  Note that this
+is a compile time, not run time, option.
+
+\item{ESMF\_NO\_IOCODE}
+
+The current release of the system is prepared to link with the
+{\tt netCDF} I/O libraries, but since the installation of the
+libraries and include files varies widely from system to system
+support for them is disabled by default.  To enable I/O support,
+edit the {\tt build/common.mk} file and comment out the setting
+of both the CPPFLAG and environment variable.  Additional customization
+will be needed in the build\_config makefile fragments to point the
+framework to the location of the include and library files.
+
+\item{ESMF\_PREC}
+
+Variable specifying the precession build arguments.  Value can be 32
+or 64.  When possible the default value will be 64, otherwise it will be 32.
+
+\item{ESMF\_SITE}
+
+If ESMF\_SITE is not set or has the value of default, default build
+settings for the current machine architecture and compiler will be
+used.  Values are created from the user's site.
 
 \end{description}
 
@@ -128,7 +145,7 @@ The top level makefile contains makefile settings specific for the
 source code that it is found in.
 
 Each directory in the source tree contains a makefile which includes
-the top level makefile.  These local Makefiles include definitions that
+the top level makefile.  These local makefiles include definitions that
 allow the local files and documents to be built.
 \end{itemize}
 
@@ -157,10 +174,10 @@ fragments follow this naming convention:
     ESMF_ARCH.ESMF_COMPILER.ESMF_SITE/build_rules.mk
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_COPMILER, and ESMF\_SITE are environment
+Where ESMF\_ARCH, ESMF\_COMPILER, and ESMF\_SITE are environment
 variables either set by the user or given default values by the build
 system. ESMF\_ARCH is the current architecture and will have the value
-returned by the command uname -s.  ESMF\_COMPILER is the compiler
+returned by the command {\tt uname -s}.  ESMF\_COMPILER is the compiler
 name.  ESMF\_SITE is the current machine name. If there are no site
 specific files for a particular architecture, then ESMF\_COMPILER and
 ESMF\_SITE will be set to default values.  Examples:
@@ -180,33 +197,36 @@ is compiled.  The directives are used to determine among other things,
 the memory requirements of variable types and the system resources
 that are available.
 
-The ESMF build system provides preprocessor directives in conf.h files
-that are included in the source code.  The path to the conf.h files is
+The ESMF build system provides preprocessor directives in 
+{\tt ESMC\_Conf.h} and {\tt ESMF\_Conf.inc} files
+that are included in the source code.  The path to these files is
 
 \begin{verbatim}
-    build_config/ESMF_ARCH.ESMF_COMPILER.ESMF_PREC.ESMF_SITE/conf.h
+    build_config/ESMF_ARCH.ESMF_COMPILER.ESMF_PREC.ESMF_SITE
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_COMPIELR, ESMF\_PREC and ESMF\_SITE are
+Where ESMF\_ARCH, ESMF\_COMPILER, ESMF\_PREC and ESMF\_SITE are
 environment variables set by the user or given default values be the
 build system.  Based on the settings of these environment variables,
-the build system provides a path to the correct conf.h file during
+the build system provides a path to the correct files during
 source code compiles.
 
 \subsubsection{Building on New Platforms}
 
 The build system can be ported to other Unix platforms by adding new
-makefile fragment and conf.h files.  The new makefile fragment file has to follow the naming
+makefile fragments and configuration files.  The new makefile fragment 
+file has to follow the naming
 convention used by the existing makefile fragment files and be created in the
 directory build\_config.  The new file will also have to define
 the same makefile variables as the existing makefile fragment files.
 
-Porting to a new machine will require a new conf.h as well. 
-New conf.h files have to define the same machine attributes as
-existing conf.h files. Example:
+Porting to a new machine will require new configuration files as well. 
+New configuration files have to define the same machine attributes as
+existing configuration files. Example:
 
 \begin{verbatim}
       build_config/Linux.pgi.mysite/build_rules.mk
-      build_config/Linux.pgi.mysite/conf.h
+      build_config/Linux.pgi.mysite/ESMF_Conf.inc
+      build_config/Linux.pgi.mysite/ESMC_Conf.h
 \end{verbatim}
 

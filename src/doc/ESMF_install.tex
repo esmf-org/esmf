@@ -1,31 +1,18 @@
-% $Id: ESMF_install.tex,v 1.36 2004/02/19 23:51:37 svasquez Exp $
+% $Id: ESMF_install.tex,v 1.37 2004/06/22 14:17:44 nscollins Exp $
 
 \subsection{ESMF Download Options}
 
 Major releases of the ESMF software can be downloaded by following
 the instructions on the 
 the {\bf Downloads \& Documentation} link on the ESMF 
-website, \htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  There are two options for using the ESMF:
+website, \htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.
 
-\begin{itemize}
-\item Download a pre-built ESMF shared object library and
-test applications for a particular platform.  If you choose
-this approach, you can skip ahead to Section~\ref{UsingLibrary},
-Using the ESMF.  
-\item Download the full ESMF source code, and compile and link
-the framework to any necessary system libraries.  This will
-result in a shared object file (with a *.so extension)
-that can be linked in with the user's code, or with the demo
-{ESMF\_COUPLED\_FLOW} executable.  In this case you will need
-to follow all the instructions in subsequent sections of the 
+The ESMF is distributed as a full source code tree.  You will need
+to compile the code into the {\tt libesmf.a} library.
+On some platforms a shared library, {\tt libesmf.so}, is also created.
+Follow the instructions in the following sections of the 
 {\it Quick Start} guide, beginning with Section~\ref{InstallProcedures},
-Installation.
-\end{itemize}
-
-You may find it necessary to build the ESMF yourself
-if we do not offer a shared object library for the current
-version of your compiler.  The compiler versions that we offer
-shared objects for are noted on the download webpage.
+Installation, to build the library and link it with your application.
 
 \subsection{Installation}
 \label{InstallProcedures}
@@ -39,7 +26,7 @@ Currently the ESMF\_DIR environment variable must be set on all
 platforms.  ESMF\_DIR should be set to the path of the top
 level ESMF directory.  
 
-There are six other environment variables that the build system uses.
+There are eight other environment variables that the build system uses.
 In most cases they do not have to be set by the user.  If they are not
 set, then the build system will assign default values to them.  For the
 current supported platforms, the default values are fine.  The other
@@ -47,35 +34,50 @@ environment variables are:
 \begin{quote}
 \begin{description}
 
-  \item[ESMF\_ARCH] Value of uname -s.  For example, his will be AIX for IBM
+  \item[ESMF\_ARCH] Value of uname -s.  For example, this will be AIX for IBM
                  RS6000's.  There should be almost no reason for the
-                 user to set ESMF\_ARCH.
+                 user to set ESMF\_ARCH since the proper value should be
+                 determined automatically.
+
+  \item[ESMF\_BOPT] Build option value of g (for debug) or O (for
+                 Optimize).  Default value will be O.
+
+  \item[ESMF\_COMM] Defines which MPI communications library to use.  
+                 Many times a machine will come with its own MPI 
+                 library and in those cases the default setting 
+                 will be mpi.  Otherwise the default setting will be 
+                 mpiuni so that the mpiuni library will be used.
+                 Other possible settings are mpich and lam.
 
   \item[ESMF\_COMPILER] Variable specifying which compiler to use.  Value
-                   can be default, absoft, intel, lahey or nag. 
-                   If the value is default or ESMF\_COMPILER is 
-                   left unset, then the default compiler 
-                   will be used.  Exceptions for default values:  
-                   On Linux machines the default value 
-                   is lahey and on Darwin machines it is absoft.
+                 can be default, absoft, intel, lahey, pgi, or nag. 
+                 If the value is default or ESMF\_COMPILER is 
+                 left unset, then the default compiler 
+                 will be used.  Exceptions for default values:  
+                 On Linux machines the default value 
+                 is lahey and on Darwin machines it is absoft.
+
+  \item[ESMF\_EXHAUSTIVE] Variable specifying how to compile the unit tests.
+                 If set to the value ON, then all unit tests will be compiled
+                 and will be executed when the test is run.  If unset or set 
+                 to any other value, only a subset of the unit tests will 
+                 be included to verify basic functions.  Note that this
+                 is a compile-time selection, not a run-time option.
+
+  \item[ESMF\_NO\_IOCODE] This version of the framework is prepared to use
+                 the {\tt netCDF} I/O library.  However, because the location
+                 of the library and include files varies widely from 
+                 system to system the support for I/O is disabled by default.
+                 To enable support, edit build/common.mk and comment out the 2
+                 lines which set ESMF\_NO\_IOCODE to ON and set the CPP flag,
+                 and recompile.
 
   \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
                  default value will be 64, otherwise it will be 32.
 
+  \item[ESMF\_SITE] Build configure file site name or the value default.  
+                 If not set, then the value of default is assumed.
 
-  \item[ESMF\_SITE] Build configure file site name or the value
-                 default.  If not set, then the value of default is
-                 assumed.
-
-  \item[ESMF\_COMM] Defines which MPI communications library to use.  
-                   Many times a machine will come with its own MPI 
-                   library and in those cases the default setting 
-                   will be mpi.  Otherwise the default setting will be 
-                   mpiuni so that the mpiuni library will be used.
-                   Other possible settings are mpich and lam.
-
-  \item[ESMF\_BOPT] Build option value of g (for debug) or O (for
-                 Optimize).  Default value will be O.
 
 \end{description}
 \end{quote}
@@ -130,7 +132,7 @@ Build the library with the command:
 \begin{verbatim}
   gmake 
 \end{verbatim}
-  for a debug version or
+  for an optimized version or
 \begin{verbatim}
   gmake ESMF_BOPT=g  
 \end{verbatim}
@@ -150,42 +152,47 @@ described in Section~\ref{EnvironmentVariables}.
 Users may also run examples or execute unit tests of specific classes
 by changing directories to the desired class {\tt examples} or {\tt tests} 
 directories and entering {\tt gmake run\_examples} or 
-{\tt gmake run\_tests}, respectively.
+{\tt gmake run\_tests}, respectively.  For non-multiprocessor machines,
+uni-processor targets are available as {\tt gmake run\_examples\_uni} or
+{\tt gmake run\_tests\_uni}.
 
 \subsubsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
+The documentation consists of a User's Guide, the Requirements Specification,
+and a Fortran API Reference Manual.  
 \noindent To build documentation:
 \begin{verbatim}
-  gmake pdf           ! Makes the pdf files.
-  gmake html          ! Creates the html directory.
-  gmake alldoc        ! Builds all the above documents.
+  gmake doc              ! Builds the manuals, including pdf and html.
 \end{verbatim}
 
-\noindent Documentation files will be built in the top level directory doc.
+\noindent The resulting documentation files will be
+located in the top level directory \${ESMF\_DIR}/doc.
 
-\noindent To build documentation for one module:
-
-\noindent First change directory to the where the desired module's documentation 
-resides; for example, to build the {\tt TimeMgr} documentation start
-with:
-
-\begin{verbatim}
-cd $ESMF_DIR/src/Infrastructure/TimeMgr/doc
-\end{verbatim}
-
-\noindent Next issue one of the following commands:
-\begin{verbatim}
-  gmake pdf      ! Builds local pdf files.
-  gmake html     ! Builds local html files.
-  gmake alldoc   ! Builds all of the local documents.
-\end{verbatim}
-
-\noindent The output from this local documentation build is in the top 
-level {\tt doc} directory, as with the previous commands.
-
-
-
-
+%%
+%% nsc 22jun04 - this is no longer true, so i'm commenting it out for now.
+%% when we make it work again, comment this section back in and update it.
+%% 
+%% \noindent To build documentation for one module:
+%% 
+%% \noindent First change directory to the where the desired module's documentation 
+%% resides; for example, to build the {\tt TimeMgr} documentation start
+%% with:
+%% 
+%% \begin{verbatim}
+%% cd $ESMF_DIR/src/Infrastructure/TimeMgr/doc
+%% \end{verbatim}
+%% 
+%% \noindent Next issue one of the following commands:
+%% \begin{verbatim}
+%%   gmake pdf      ! Builds local pdf files.
+%%   gmake html     ! Builds local html files.
+%%   gmake alldoc   ! Builds all of the local documents.
+%% \end{verbatim}
+%% 
+%% \noindent The output from this local documentation build is in the top 
+%% level {\tt doc} directory, as with the previous commands.
+%% 
+%% 
 
 

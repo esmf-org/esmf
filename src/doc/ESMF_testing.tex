@@ -1,4 +1,4 @@
-% $Id: ESMF_testing.tex,v 1.16 2003/11/12 23:09:48 svasquez Exp $
+% $Id: ESMF_testing.tex,v 1.17 2004/06/22 14:17:44 nscollins Exp $
 
 \subsection{Running ESMF Self-Tests}
 \label{testing}
@@ -132,14 +132,16 @@ tests are no longer compatible with the current API, but are included
 in the release for completeness.  A complete description of each
 available system test and its current compatibility status can be
 found at the ESMF website,
-\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  The testing
-and validation page is accessible from the {\bf Development} link on the navigation bar.
+\htmladdnormallink{http://www.esmf.ucar.edu}{http://www.esmf.ucar.edu}.  
+The testing
+and validation page is accessible from the {\bf Development} 
+link on the navigation bar.
 
 The following commands are used to build and run the system tests:
 
 \begin{verbatim}
-        gmake [SYSTEM_TEST=NNNNN] system_tests
-        gmake [SYSTEM_TEST=NNNNN] system_tests_uni
+        gmake [SYSTEM_TEST=xxx] system_tests
+        gmake [SYSTEM_TEST=xxx] system_tests_uni
 \end{verbatim}
 
 The {\tt system\_tests\_uni} target runs the tests on a single processor. 

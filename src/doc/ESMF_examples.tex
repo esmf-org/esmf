@@ -1,4 +1,4 @@
-% $Id: ESMF_examples.tex,v 1.4 2003/11/12 19:01:51 svasquez Exp $
+% $Id: ESMF_examples.tex,v 1.5 2004/06/22 14:17:44 nscollins Exp $
 
 \subsection{Running ESMF Examples}
 \label{examples}
@@ -14,13 +14,16 @@ are found in this directory:
         ESMF_DIR/src/Infrastructure/TimeMgr/examples/
 \end{verbatim}
 
+While the example code is formatted to be included in the documentation,
+it also runs and compiles to ensure accuracy.  Examples generally 
+contain simple usage of the basic methods for the class.
 
 \subsubsection{Building and Running Examples}
 
 The GNU makefile targets {\tt examples} and {\tt examples\_uni} build
 and run programs found in a class's examples directory.  After the
 examples are built, the {\tt examples} target runs the examples using
-multiple processors , while {\tt examples\_uni} runs the examples on
+multiple processors, while {\tt examples\_uni} runs the examples on
 a single processor.
 
 These targets first build the ESMF library.
@@ -42,3 +45,4 @@ and output files are created in this directory:
 
 The name of an output file will begin with the name of the example
 that created it followed by .stdout.
+

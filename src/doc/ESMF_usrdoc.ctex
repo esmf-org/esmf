@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.17 2004/05/12 14:03:23 nscollins Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.18 2004/06/22 14:17:44 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -70,7 +70,7 @@
 %\section{ESMF Technical Overview}
 \input{ESMF_techoverview}
 
-%\section{Looking Ahead:  How to Adapt Applications for ESMF}
+%\section{How to Adapt Applications for ESMF}
 \input{ESMF_adoption}
 
 \newpage

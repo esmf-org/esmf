@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.16 2003/11/12 22:17:27 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.17 2004/06/22 14:17:44 nscollins Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -12,28 +12,29 @@ $ESMF_DIR/mod/mod$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
 
 to your search path for {\tt *.mod} files.  For most compilers this path 
 is identified either with a {\tt -I} or a {\tt -M}.  You must also link 
-with the ESMF shared object library.  This is a file called 
-{\tt libesmf.so} that is located in the following directory:
+with the ESMF library.  For most compilers, adding the {\tt -L} directory 
+search flag with the following directory:
 
 \begin{verbatim}
 $ESMF_DIR/lib/lib$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
 \end{verbatim} 
 
-The details of how to link on specific platforms are included in the 
+followed by the {\tt -lesmf} flag, will link in the ESMF library.
+
+More details of how to link on specific platforms are included in the 
 next section.
 
 There is a single ESMF module, called {\tt ESMF\_Mod}, that should be 
 included in applications with the Fortran {\tt USE} statement.  It 
 is not necessary to include any header files in Fortran.
 
-To use ESMF from C/C++, link with the ESMF shared object library 
+To use ESMF from C/C++, link with the ESMF library 
 and include the {\tt ESMC.h} file. 
 
-If you prefer standard libraries, a {\tt *.a} file is provided  
-in the same library directory as the shared object file.  
+\subsubsection{Shared Object Libraries}
 
-\subsubsection{Shared Object Libraries and Linking}
-
+On some platforms, a shared object library is created in addition to the
+standard {\tt .a} library.
 Shared object libraries are libraries that are loaded by the first program 
 that uses them. All programs that start afterwards automatically use the 
 existing shared library. The library is kept in memory as long as any 
@@ -49,31 +50,37 @@ shared objects helps to hide some of this complexity.
 The order in which shared libraries are presented to 
 the linker is important. Library routines must be called before they are 
 defined. So, if a library {\bf A} uses functionality provided by library 
-{\bf B}, then library {\bf A} must appear before library {\bf B} on the link line. 
+{\bf B}, then library {\bf A} must appear before library {\bf B} on the 
+link line. 
 
-To link a Fortran90 application to the ESMF shared libraries please refer to the
-{\tt link\_rules} files found in the following directories:
+\subsubsection{Linking}
 
+To link a Fortran90 application to the ESMF libraries please 
+refer to the {\tt link\_rules} files found in the following directories:
 
 \begin{verbatim}
 	$ESMF_DIR/build_config/AIX.default.default
 	$ESMF_DIR/build_config/IRIX64.default.default
 	$ESMF_DIR/build_config/Linux.intel.default
+	$ESMF_DIR/build_config/Linux.lahey.default
+	$ESMF_DIR/build_config/Linux.pgi.default
 	$ESMF_DIR/build_config/OSF1.default.default
 \end{verbatim}
 
-In an effort to provide platform specific information for building ESMF and linking the
-shared libraries with your application, a new sourceforge site, esmfcontrib, has been created.
-To locate the platforms makefiles for specific institutions checkout the {\tt build\_config\_files}
-using the appropriate CVSROOT.
+In an effort to provide platform specific information for building ESMF 
+and linking the libraries with your application, a new sourceforge 
+site, esmfcontrib, has been created.
+To locate the platforms makefiles for specific institutions checkout 
+the {\tt build\_config\_files} using the appropriate CVSROOT.
 The URL for the esmfcontrib Sourceforge site is:
 
 \begin{verbatim}
-	http://sourceforge.net/cvs/?group_id=90647
+        http://sourceforge.net/projects/esmfcontrib/
 \end{verbatim}
 
-Additionally, you may checkout all the platforms makefile fragments for a particular institution
-from the esmfcontrib. For example to checkout the makefile fragments for the platforms at the
+Additionally, you may checkout all the platforms makefile fragments 
+for a particular institution from the esmfcontrib. For example to 
+checkout the makefile fragments for the platforms at the
 National Center for Atmospheric Research, ncar, change directories to
 
 \begin{verbatim}
