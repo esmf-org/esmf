@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.82 2004/12/18 00:05:53 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.83 2004/12/20 18:23:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.82 2004/12/18 00:05:53 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.83 2004/12/20 18:23:00 nscollins Exp $'
 
 !==============================================================================
 
@@ -159,6 +159,13 @@
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
+
+      nullify(srcUserMask, dstUserMask, found)
+      nullify(foundCount, srcLocalMask, srcGatheredMask)
+      nullify(srcGatheredCoordX, srcGatheredCoordY)
+      nullify(srcLocalCoordX, srcLocalCoordY)
+      nullify(dstLocalCoordX, dstLocalCoordY)
+      nullify(dstLocalCoordArray, srcLocalCoordArray)
 
       ! Construct an empty regrid structure
       rh = ESMF_RouteHandleCreate(rc=localrc)
@@ -318,6 +325,11 @@
                  srcGatheredMask  (size), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
                                        ESMF_CONTEXT, rc)) return
+      !else
+      !  ! TODO: make route run routines take a nullified pointers.
+      !  allocate(srcGatheredCoordX(0), &
+      !           srcGatheredCoordY(0), &
+      !           srcGatheredMask  (0), stat=localrc)
       endif
 
       ! Execute Route now to gather grid center coordinates from source
@@ -454,7 +466,7 @@
                                        ESMF_CONTEXT, rc)) return
         deallocate(   srcGatheredMask, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                       ESMF_CONTEXT, rc)) return
+                                     ESMF_CONTEXT, rc)) return
         deallocate(dstLocalCoordArray, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                        ESMF_CONTEXT, rc)) return
