@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.20 2004/06/18 21:54:00 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.21 2004/06/21 19:38:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.20 2004/06/18 21:54:00 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.21 2004/06/21 19:38:33 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -445,12 +445,12 @@ int ESMC_DELayout::ESMC_DELayoutGet(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_DELayoutGetDE()"
+#define ESMC_METHOD "ESMC_DELayoutGetDELocalInfo()"
 //BOP
-// !IROUTINE:  ESMC_DELayoutGetDE
+// !IROUTINE:  ESMC_DELayoutGetDELocalInfo
 //
 // !INTERFACE:
-int ESMC_DELayout::ESMC_DELayoutGetDE(
+int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
 //
 // !RETURN VALUE:
 //    int error return code

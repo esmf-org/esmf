@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.83 2004/06/18 21:59:26 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.84 2004/06/21 19:38:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.83 2004/06/18 21:59:26 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.84 2004/06/21 19:38:33 theurich Exp $'
 
 !==============================================================================
 !
@@ -2775,8 +2775,8 @@
       gridp%ptr => grid
       call ESMF_LRGridGet(gridp, delayout=delayout)
       call ESMF_DELayoutGet(delayout, localDE=localDE, rc=localrc)
-      call ESMF_DELayoutGetDE(delayout, de=localDE, coord=myDEDecomp(1:2), &
-                              rc=localrc)
+      call ESMF_DELayoutGetDELocalInfo(delayout, de=localDE, &
+        coord=myDEDecomp(1:2), rc=localrc)
       myDEDecomp(0) = 1
 
       ! modify myDE array by decompIds

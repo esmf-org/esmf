@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.29 2004/06/15 13:34:43 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.30 2004/06/21 19:38:35 theurich Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -693,7 +693,7 @@
       nx = ncount(1)
       ny = ncount(2)
       if (rc .ne. ESMF_SUCCESS) goto 40
-      call ESMF_DELayoutGetDE(layout, pe_id, coord=pos, rc=rc)
+      call ESMF_DELayoutGetDELocalInfo(layout, pe_id, coord=pos, rc=rc)
       xpos = pos(1)
       ypos = pos(2)
       if (rc .ne. ESMF_SUCCESS) goto 40

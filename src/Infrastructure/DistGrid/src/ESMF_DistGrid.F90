@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.116 2004/06/08 09:27:16 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.117 2004/06/21 19:38:33 theurich Exp $'
 
 !==============================================================================
 !
@@ -1714,8 +1714,8 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_DELayoutGetDE(dgtype%delayout, de=localDe, coord=coord, &
-                              rc=localrc)
+      call ESMF_DELayoutGetDELocalInfo(dgtype%delayout, de=localDe, &
+        coord=coord, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

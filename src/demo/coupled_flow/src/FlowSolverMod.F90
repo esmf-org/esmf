@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.17 2004/06/16 05:29:39 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.18 2004/06/21 19:38:34 theurich Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -477,7 +477,7 @@
       endif
       nx = ncounts(1)
       ny = ncounts(2)
-      call ESMF_DELayoutGetDE(layout, de_id, coord=pos, rc=status)
+      call ESMF_DELayoutGetDELocalInfo(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return

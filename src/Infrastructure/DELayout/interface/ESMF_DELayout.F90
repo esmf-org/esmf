@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.33 2004/06/18 21:53:13 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.34 2004/06/21 19:38:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutDestroy
   
   public ESMF_DELayoutGet
-  public ESMF_DELayoutGetDE
+  public ESMF_DELayoutGetDELocalInfo
   public ESMF_DELayoutGetDEMatch
   
   public ESMF_DELayoutPrint
@@ -142,7 +142,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.33 2004/06/18 21:53:13 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.34 2004/06/21 19:38:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -559,12 +559,12 @@ contains
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DELayoutGetDE()"
+#define ESMF_METHOD "ESMF_DELayoutGetDELocalInfo()"
 !BOP
-! !IROUTINE: ESMF_DELayoutGetDE - Get DE specific DELayout internals
+! !IROUTINE: ESMF_DELayoutGetDELocalInfo - Get DE specific DELayout internals
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutGetDE(delayout, de, coord, connectionCount, &
+  subroutine ESMF_DELayoutGetDELocalInfo(delayout, de, coord, connectionCount, &
     connectionList, connectionWeightList, rc)
 !
 ! !ARGUMENTS:
@@ -638,7 +638,7 @@ contains
       opt_DEcw => dummy
     endif
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_DELayoutGetDE(delayout, de, opt_DEcoord, len_coord, &
+    call c_ESMC_DELayoutGetDELocalInfo(delayout, de, opt_DEcoord, len_coord, &
       opt_DEcde, len_cde, opt_DEcw, len_cw, connectionCount, localrc)
 
     ! Use LogErr to handle return code
@@ -652,7 +652,7 @@ contains
       enddo
     endif
 
-  end subroutine ESMF_DELayoutGetDE
+  end subroutine ESMF_DELayoutGetDELocalInfo
 !------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------

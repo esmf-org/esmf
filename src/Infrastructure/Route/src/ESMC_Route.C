@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.98 2004/06/08 13:14:14 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.99 2004/06/21 19:38:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.98 2004/06/08 13:14:14 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.99 2004/06/21 19:38:34 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -994,8 +994,8 @@ static int maxroutes = 10;
     // already obtained "decount" during last call
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_DELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
-                                      NULL, 0, NULL, 0, NULL);
+      delayout->ESMC_DELayoutGetDELocalInfo(their_de, their_DE_pos,
+        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL);
       // get "their" AI out of the AI_tot array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_tot[their_de + j*AI_count];
@@ -1052,8 +1052,8 @@ static int maxroutes = 10;
     // loop over DE's from layout to calculate receive table
     for (k=0; k<decount; k++) {
       their_de = k;
-      delayout->ESMC_DELayoutGetDE(their_de, their_DE_pos, ESMF_MAXGRIDDIM,
-                                      NULL, 0, NULL, 0, NULL);
+      delayout->ESMC_DELayoutGetDELocalInfo(their_de, their_DE_pos,
+        ESMF_MAXGRIDDIM, NULL, 0, NULL, 0, NULL);
       // get "their" AI out of the AI_exc array
       for (j=0; j<rank; j++) {
         their_AI[j] = AI_exc[their_de + j*AI_count];

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.32 2004/06/15 13:34:43 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.33 2004/06/21 19:38:35 theurich Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -447,7 +447,7 @@
       nx = nDE(1)
       ny = nDE(2)
       write(*,*) 'nx, ny = ', nx, ny
-      call ESMF_DELayoutGetDE(delayout, de_id, coord=myDE, rc=rc)
+      call ESMF_DELayoutGetDELocalInfo(delayout, de_id, coord=myDE, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       xpos = myDE(1)
       ypos = myDE(2)
