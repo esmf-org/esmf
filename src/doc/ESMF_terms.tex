@@ -117,6 +117,11 @@ associated with a processing element and an address space.  A DE may
 be associated with an MPI process or a thread.  Layouts 
 assign a topology to decomposition elements.
 
+\item{Deep objects] \label{glos:DeepObjects} In an environment
+in which the calling and implementation language of a library are
+different, deep objects are defined as those whose memory is 
+allocated by the implementation language.  
+
 \item[Distributed grid] \label{glos:DistGrid}
   A distributed grid defines the decomposition of the global index space 
   across the layout and methods on the indexed data.
@@ -249,6 +254,10 @@ Document.
 \item[Instantiate] \label{glos:Instantiate}
   To create an actual instance of a software class.
 
+\item[Interface] \label{glos:Interface}
+  A named set of operations that characterize the behavior of a class
+  or a component.
+
 \item[JMC] \label{glos:JMC} 
   Joint Milestone Codeset.  This is the set of climate, weather and
   data assimilation applications that will be used as ESMF testbeds 
@@ -339,6 +348,10 @@ have a framework ID that is different than its vendor-assigned ID.
 \item[Processing node] \label{glos:Pnode} A set of processors to which an
   operating system scheduler is capable of assigning to a single job.
 
+\item[Realization] \label{glos:Realization} A realization is the 
+implementation of a specification.  It doesn't imply that any kind
+of structure from a base class is inherited.
+
 \item[Restart state] \label{glos:RestartState} The component 
   data that 
   is needed for an exact restart. This can include, in addition to 
@@ -357,6 +370,11 @@ to run.  Components executing sequentially may be in the same or
 different executables and may have conincident or non-overlapping 
 memory distributions.  See \htmladdnormallink{concurrent execution}
 {glos:ConcurrentExecution}.
+
+\item{Shallow objects] \label{glos:ShallowObjects} In an environment
+in which the calling and implementation language of a library are
+different, shallow objects are defined as those whose memory is 
+allocated by the calling language.  
 
 \item[Span] \label{glos:Span} The physical extent associated with a grid.
 
