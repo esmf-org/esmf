@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.10 2004/05/18 11:31:01 nscollins Exp $
+#  $Id: build_rules.mk,v 1.11 2004/05/28 07:54:26 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -145,11 +145,11 @@ CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CCV		   = ${CXX_CC} -V
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
-C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lnag -lf96 \
+C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lnag -lrt -lf96 \
                      -L${CXXLIBBASE} -lcxa -lunwind -lcprts
 F90LIBBASE         = /soft/com/packages/nag-f95-4.2/lib
 C_CXXF90LIBS       = -L${F90LIBBASE} -lnag \
-                      ${F90LIBBASE}/safefit.o ${MPI_LIB} -lf96
+                      ${F90LIBBASE}/safefit.o ${MPI_LIB} -lrt -lf96
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g

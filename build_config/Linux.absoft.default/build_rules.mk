@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2004/05/18 11:31:01 nscollins Exp $
+#  $Id: build_rules.mk,v 1.9 2004/05/28 07:55:28 nscollins Exp $
 #
 #  Linus.absoft.default.mk
 #
@@ -144,7 +144,8 @@ CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 C_F90CXXLD         = ${CXX_FC}
-C_F90CXXLIBS       = ${MPI_LIB} -lf90math -lfio -lf77math -lrt -lstdc++
+CXXLIBBASE         = /usr/lib/gcc-lib/i386-redhat-linux/2.96
+C_F90CXXLIBS       = ${MPI_LIB} -L${CXXLIBBASE} -lf90math -lfio -lf77math -lrt -lstdc++
 C_CXXF90LD         = ${CXX_CC} 
 F90LIBBASE         = /soft/com/packages/absoft-8.0/opt/absoft/lib
 C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L${F90LIBBASE} -lf90math -lrt -lfio -lf77math
