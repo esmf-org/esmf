@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/25 00:18:09 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/06/19 15:47:50 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -21,10 +21,6 @@ CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-
-
-#ESMF_Array.o:	
-#ESMF_DataMap.o:		ESMF_Array.o
 
 ESMF_DataMap.o:
 
