@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.rs6000_sp,v 1.6 2003/03/04 17:48:15 nscollins Exp $
+# $Id: mpirun.rs6000_sp,v 1.7 2003/04/03 15:48:45 nscollins Exp $
 # This script provides an interface such that the simple command
 # mpirun -np # runs # copies of the program in parallel.
 # The IBM poe command does not fit this paradigm.
@@ -36,6 +36,16 @@ fi
 MP_PROCS=$num_procs
 MP_NODES=$num_nodes
 MP_TASKS_PER_NODE=$num_tasks
+
+# TODO: when we install the real error/logger handler, we may want to
+#  unset this.  but for now, we can ask the default stdout be sorted by
+#  processor.  it means that if the processes do not finish correctly you
+#  may not see messages - so for debugging you generally do not want this
+#  set.   nsc 4/2/2003
+
+MP_STDOUTMODE=ordered
+export MP_STDOUTMODE
+echo "setting MP_STDOUTMODE=ordered, stdout to be sorted by proc"
 
 export MP_NODES MP_TASKS_PER_NODE MP_PROCS
 
