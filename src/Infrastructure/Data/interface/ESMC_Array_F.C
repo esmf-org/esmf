@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.10 2002/12/30 21:23:21 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.11 2002/12/30 21:30:41 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,10 +64,10 @@ extern "C" {
 
      void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, 
                                  enum ESMC_DataType *dt, enum ESMC_DataKind *dk,
-                                 int *rank, int **lengths, int *status) {
+                                 int *rank, int *lengths, int *status) {
              ESMC_Array *lptr;
              
-             lptr = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, *lengths,
+             lptr = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, lengths,
                                       NULL, NULL, status);
 
              *(unsigned long *)ptr = (unsigned long)lptr;
