@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2005/02/28 16:34:57 nscollins Exp $
+# $Id: makefile,v 1.18 2005/02/28 17:15:15 nscollins Exp $
 
 ALL:  build_tests
 
@@ -64,7 +64,7 @@ RUN_ESMF_RouteUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RouteUTest > $(ESMF_TESTDIR)/ESMF_RouteUTest.stdout
 
 RUN_ESMF_RouteUTestUNI:
-	echo "PASS: ESMF_RouteUTest not set up to run on one processor." > /Users/nancy/esmf/esmf_head/examples/examplesg/Darwin.absoft.32.default/ESMF_RouteUTest.stdout
+	echo "PASS: ESMF_RouteUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_RouteUTest.stdout
 
 #
 # C++ Route
@@ -73,7 +73,7 @@ RUN_ESMC_RouteUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RouteUTest > $(ESMF_TESTDIR)/ESMC_RouteUTest.stdout
 
 RUN_ESMC_RouteUTestUNI:
-	echo "PASS: ESMC_RouteUTest not set up to run on one processor." > /Users/nancy/esmf/esmf_head/examples/examplesg/Darwin.absoft.32.default/ESMC_RouteUTest.stdout
+	echo "PASS: ESMC_RouteUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_RouteUTest.stdout
 
 
 
@@ -84,7 +84,7 @@ RUN_ESMF_CommTableUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_CommTableUTest > $(ESMF_TESTDIR)/ESMF_CommTableUTest.stdout
 
 RUN_ESMF_CommTableUTestUNI:
-	echo "PASS: ESMF_CommTableUTest not set up to run on one processor." > /Users/nancy/esmf/esmf_head/examples/examplesg/Darwin.absoft.32.default/ESMF_CommTableUTest.stdout
+	echo "PASS: ESMF_CommTableUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_CommTableUTest.stdout
 
 
 #
@@ -94,7 +94,7 @@ RUN_ESMC_CommTableUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_CommTableUTest > $(ESMF_TESTDIR)/ESMC_CommTableUTest.stdout
 
 RUN_ESMC_CommTableUTestUNI:
-	echo "PASS: ESMC_CommTableUTest not set up to run on one processor." > /Users/nancy/esmf/esmf_head/examples/examplesg/Darwin.absoft.32.default/ESMC_CommTableUTest.stdout
+	echo "PASS: ESMC_CommTableUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_CommTableUTest.stdout
 
 
 
@@ -105,7 +105,7 @@ RUN_ESMF_RTableUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RTableUTest > $(ESMF_TESTDIR)/ESMF_RTableUTest.stdout
 
 RUN_ESMF_RTableUTestUNI:
-	echo "PASS: ESMF_RTableUTest not set up to run on one processor." > /Users/nancy/esmf/esmf_head/examples/examplesg/Darwin.absoft.32.default/ESMF_RTableUTest.stdout
+	echo "PASS: ESMF_RTableUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_RTableUTest.stdout
 
 
 #
@@ -115,6 +115,6 @@ RUN_ESMC_RTableUTest:
 	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RTableUTest > $(ESMF_TESTDIR)/ESMC_RTableUTest.stdout
 
 RUN_ESMC_RTableUTestUNI:
-	echo "PASS: ESMC_RTableUTest not set up to run on one processor." > /Users/nancy/esmf/esmf_head/examples/examplesg/Darwin.absoft.32.default/ESMC_RTableUTest.stdout
+	echo "PASS: ESMC_RTableUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMC_RTableUTest.stdout
 
 
