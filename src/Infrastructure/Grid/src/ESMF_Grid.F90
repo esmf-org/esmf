@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.141 2004/03/02 00:02:49 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.142 2004/03/04 23:52:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.141 2004/03/02 00:02:49 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.142 2004/03/04 23:52:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1284,7 +1284,7 @@
       subroutine ESMF_GridGetDE(grid, horzDistGridId, vertDistGridId, &
                                 horzPhysGridId, vertPhysGridId, &
                                 horzRelLoc, vertRelLoc, &
-                                myDE, localCellCount, localCellCountPerDim, &
+                                localCellCount, localCellCountPerDim, &
                                 globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
@@ -1295,7 +1295,6 @@
       integer, intent(in), optional :: vertPhysGridId
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
@@ -1338,8 +1337,6 @@
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.          
-!     \item[{[myDE]}]
-!          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
@@ -1386,7 +1383,7 @@
         call ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
                               horzPhysGridId, vertPhysGridId, &
                               horzRelLoc, vertRelLoc, &
-                              myDE, localCellCount, localCellCountPerDim, &
+                              localCellCount, localCellCountPerDim, &
                               globalStartPerDim, globalAIPerDim, total, status)
 
       !-------------
@@ -1431,15 +1428,14 @@
 ! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, distGridId, &
-                                          physGridId, relloc, total, rc)
+      subroutine ESMF_GridGetAllAxisIndex(grid, globalAI, horzRelLoc, &
+                                          vertRelLoc, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalAI
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -1487,8 +1483,8 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridGetAllAxisIndex(grid, globalAI, distGridId, &
-                                        physGridId, relloc, total, status)
+        call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
+                                        total, status)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
@@ -1532,8 +1528,8 @@
 ! !IROUTINE: ESMF_GridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_GridGlobalToLocalIndex(grid, distGridId, physGridId, &
-                                             relloc, global1D, local1D, &
+      subroutine ESMF_GridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
+                                             global1D, local1D, &
                                              global2D, local2D, &
                                              globalAI1D, localAI1D, &
                                              globalAI2D, localAI2D, &
@@ -1541,9 +1537,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: global1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
@@ -1615,8 +1610,8 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridGlobalToLocalIndex(grid, distGridId, physGridId, &
-                                           relloc, global1D, local1D, &
+        call ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
+                                           global1D, local1D, &
                                            global2D, local2D, &
                                            globalAI1D, localAI1D, &
                                            globalAI2D, localAI2D, &
@@ -1664,17 +1659,16 @@
 ! !IROUTINE: ESMF_GridLocalToGlobalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_GridLocalToGlobalIndex(grid, distGridId, physGridId, &
-                                             relloc, local1D, global1D, &
+      subroutine ESMF_GridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+                                             local1D, global1D, &
                                              local2D, global2D, &
                                              localAI1D, globalAI1D, &
                                              localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) ::  local1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) ::  local2D
@@ -1745,8 +1739,8 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridLocalToGlobalIndex(grid, distGridId, physGridId, &
-                                           relloc, local1D, global1D, &
+        call ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+                                           local1D, global1D, &
                                            local2D, global2D, &
                                            localAI1D, globalAI1D, &
                                            localAI2D, globalAI2D, status)

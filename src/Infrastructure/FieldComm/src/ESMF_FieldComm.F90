@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.7 2004/03/02 16:23:35 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.8 2004/03/04 23:49:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.7 2004/03/02 16:23:35 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.8 2004/03/04 23:49:43 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -664,8 +664,8 @@
         rc = ESMF_FAILURE
       endif     
 
-      dstFtypep = dstField%ftypep
-      srcFtypep = srcField%ftypep
+      dstFtypep => dstField%ftypep
+      srcFtypep => srcField%ftypep
 
       call ESMF_ArrayRedist(srcFtypep%localfield%localdata, &
                             dstFtypep%localfield%localdata, &
@@ -1429,6 +1429,7 @@
       integer :: i, j, gridrank, datarank, thisdim, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       type(ESMF_Route) :: route
       type(ESMF_LocalArray) :: local_array
       logical :: hascachedroute    ! can we reuse an existing route?
@@ -1460,6 +1461,7 @@
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
+                           horizRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHalo: DataMapGet returned failure"
@@ -1500,13 +1502,17 @@
                                        compindex=src_AI, rc=status)       
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalIndex(ftypep%grid, localAI2D=dst_AI, &
+      call ESMF_GridLocalToGlobalIndex(ftypep%grid, horzRelLoc=horzRelLoc, &
+                                       vertRelLoc=vertRelLoc, &
+                                       localAI2D=dst_AI, &
                                        globalAI2D=gl_dst_AI, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridLocalToGlobalIndex returned failure"
          return
       endif
-      call ESMF_GridLocalToGlobalIndex(ftypep%grid, localAI2D=src_AI, &
+      call ESMF_GridLocalToGlobalIndex(ftypep%grid, horzRelLoc=horzRelLoc, &
+                                       vertRelLoc=vertRelLoc, &
+                                       localAI2D=src_AI, &
                                        globalAI2D=gl_src_AI, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridLocalToGlobalIndex returned failure"

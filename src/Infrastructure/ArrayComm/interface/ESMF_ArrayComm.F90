@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.17 2004/03/01 18:46:44 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.18 2004/03/04 23:49:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.17 2004/03/01 18:46:44 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.18 2004/03/04 23:49:11 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -177,6 +177,7 @@
       type(ESMF_AxisIndex), dimension(:), pointer :: arrayindex
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridindex, globalindex
       type(ESMF_DELayout) :: layout
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
@@ -186,7 +187,8 @@
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
-      call ESMF_DataMapGet(datamap, dimlist=dimOrder, rc=status)
+      call ESMF_DataMapGet(datamap, dimlist=dimOrder, horizRelLoc=horzRelLoc, &
+                           vertRelLoc=vertRelLoc, rc=status)
 
       ! allocate arrayindex array and get all of them from the array
       allocate(arrayindex(datarank), stat=status)
@@ -194,7 +196,8 @@
 
       ! allocate gridindex array and get all of them from the grid
       allocate(gridindex(nDEs,gridrank), stat=status)
-      call ESMF_GridGetAllAxisIndex(grid, gridindex, rc=status)
+      call ESMF_GridGetAllAxisIndex(grid, gridindex, horzRelLoc=horzRelLoc, &
+                                    vertRelLoc=vertRelLoc, rc=status)
 
       ! load globalindex with arrayindex and gridindex
       allocate(globalindex(nDEs,datarank), stat=status)
@@ -310,6 +313,8 @@
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstAI, srcAI, &
                                                        dstLocalAI, srcLocalAI
+      type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
+                           dstVertRelLoc, srcVertRelLoc
       type(ESMF_Route) :: route
       integer, dimension(:), allocatable :: dstCellCountPerDim, decompids, &
                                             srcCellCountPerDim
@@ -375,12 +380,16 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(dstDataMap, dimlist=dstDimOrder, rc=status)
+      call ESMF_DataMapGet(dstDataMap, horizRelLoc=dstHorzRelLoc, &
+                           vertRelLoc=dstVertRelLoc, &
+                           dimlist=dstDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayRedist: DataMapGet returned failure"
         return
       endif
-      call ESMF_DataMapGet(srcDataMap, dimlist=srcDimOrder, rc=status)
+      call ESMF_DataMapGet(srcDataMap, horizRelLoc=srcHorzRelLoc, &
+                           vertRelLoc=srcVertRelLoc, &
+                           dimlist=srcDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayRedist: DataMapGet returned failure"
         return
@@ -409,13 +418,19 @@
       endif
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalIndex(dstGrid, localAI2D=dstLocalAI, &
+      call ESMF_GridLocalToGlobalIndex(dstGrid, &
+                                       horzRelLoc=dstHorzRelLoc, &
+                                       vertRelLoc=dstVertRelLoc, &
+                                       localAI2D=dstLocalAI, &
                                        globalAI2D=dstAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
          return
       endif
-      call ESMF_GridLocalToGlobalIndex(srcGrid, localAI2D=srcLocalAI, &
+      call ESMF_GridLocalToGlobalIndex(srcGrid, &
+                                       horzRelLoc=srcHorzRelLoc, &
+                                       vertRelLoc=srcVertRelLoc, &
+                                       localAI2D=srcLocalAI, &
                                        globalAI2D=srcAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
@@ -671,6 +686,7 @@
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       type(ESMF_Route) :: route
       integer, dimension(:), allocatable :: globalCellCountPerDim, decompids
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
@@ -722,7 +738,9 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(datamap, dimlist=dimorder, rc=status)
+      call ESMF_DataMapGet(datamap, horizRelLoc=horzRelLoc, &
+                           vertRelLoc=vertRelLoc, &
+                           dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayHalo: DataMapGet returned failure"
         return
@@ -742,13 +760,15 @@
                                        compindex=src_AI, rc=status)
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalIndex(grid, localAI2D=dst_AI, &
+      call ESMF_GridLocalToGlobalIndex(grid, horzRelLoc=horzRelLoc, &
+                                       vertRelLoc=vertRelloc, localAI2D=dst_AI, &
                                        globalAI2D=gl_dst_AI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayHalo: GridLocalToGlobalIndex returned failure"
          return
       endif
-      call ESMF_GridLocalToGlobalIndex(grid, localAI2D=src_AI, &
+      call ESMF_GridLocalToGlobalIndex(grid, horzRelLoc=horzRelLoc, &
+                                       vertRelLoc=vertRelloc, localAI2D=src_AI, &
                                        globalAI2D=gl_src_AI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayHalo: GridLocalToGlobalIndex returned failure"
