@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWriteEx.F90,v 1.5 2004/06/16 14:03:13 nscollins Exp $
+! Id: ESMF_FieldWriteEx.F90,v 1.5 2004/06/16 14:03:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,20 +225,18 @@ call ESMF_ArrayPrint(array_temp)
       end if
 
 
-      call ESMF_Finalize(rc)
-
-
-      if (rc.NE.ESMF_SUCCESS) then
+      if (rc.ne.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
           print*, "'call ESMF_Finalize' failed"
       end if
 
-     if (finalrc.EQ.ESMF_SUCCESS) then
+     if (finalrc.eq.ESMF_SUCCESS) then
         print *, "PASS: ESMF_FieldWriteEx.F90"
      else
         print *, "FAIL: ESMF_FieldWriteEx.F90"
      end if
 
+      call ESMF_Finalize(rc)
 !BOC
    end program ESMF_FieldWriteEx
 !EOC   
