@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.18 2003/07/29 21:07:58 jwolfe Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.19 2003/07/29 21:10:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.18 2003/07/29 21:07:58 jwolfe Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.19 2003/07/29 21:10:33 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -171,7 +171,7 @@
 
       !NEX_UTest
       ! Verifing that an Array can be created
-      call ESMF_GridGetDE(grid1, lcelltot_index=g1_ai)
+      call ESMF_GridGetDE(grid1, ai_global=g1_ai)
       allocate(f90ptr1(g1_ai(1)%max, g1_ai(2)%max))
       f90ptr1 = 10+myde
       arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
@@ -183,7 +183,7 @@
 
       !NEX_UTest
       ! second array
-      call ESMF_GridGetDE(grid2, lcelltot_index=g2_ai)
+      call ESMF_GridGetDE(grid2, ai_global=g2_ai)
       allocate(f90ptr2(g2_ai(1)%max, g2_ai(2)%max))
       f90ptr2 = -1
       arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
