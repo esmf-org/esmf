@@ -1,20 +1,8 @@
-# $Id: makefile,v 1.1 2002/10/08 15:24:54 nscollins Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.2 2002/10/22 19:25:56 nscollins Exp $ 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = ESMF_PhysGrid.F90
-SOURCEH	  = 
-OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
-OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
-MANSEC	  = Timeobj
-LIBBASE	  = libesmf
-DIRS	  = 
+DIRS	  = src
 #DIRS	  = examples doc
 LOCDIR	  = src/Infrastructure/PhysGrid/
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
