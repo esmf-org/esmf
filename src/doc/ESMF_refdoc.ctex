@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.25 2003/09/18 17:15:35 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.26 2003/10/14 20:32:11 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -94,9 +94,9 @@
 
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
 
-#include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
+%#include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
 
-#include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
+%#include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
 #include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
@@ -120,7 +120,7 @@
 
 %#include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
-%#include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
+#include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
 
 %#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
 
