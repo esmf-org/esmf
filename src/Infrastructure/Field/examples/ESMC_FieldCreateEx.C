@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldCreateEx.C,v 1.1 2003/03/10 21:54:20 cdeluca Exp $
+// $Id: ESMC_FieldCreateEx.C,v 1.2 2003/10/14 19:27:02 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -32,6 +32,10 @@ main(int argc, char **argv) {
 //   ESMC_IOSpec iospec;
     ESMC_Field *field1, *field2, *field3, *field4;
         
+//-------------------------------------------------------------------------
+     //rc = ESMC_FrameworkInitialize();
+//-------------------------------------------------------------------------
+
 //-------------------------------------------------------------------------
 //   // Example 1:
 //   //
@@ -109,6 +113,11 @@ main(int argc, char **argv) {
      //ESMC_FieldDestroy(field3);
      ESMC_FieldDestroy(field4);
      //ESMC_FieldDestroy(field5);
+
+//-------------------------------------------------------------------------
+     //rc = ESMC_FrameworkFinalize();
+//-------------------------------------------------------------------------
+
 }
 
     

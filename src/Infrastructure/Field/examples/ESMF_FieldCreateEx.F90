@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.3 2003/05/27 23:01:33 jwolfe Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.4 2003/10/14 19:27:02 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -35,6 +35,10 @@
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
         
 !-------------------------------------------------------------------------
+
+    call ESMF_FrameworkInitialize(rc)
+
+!-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
 !   !  The user has already created a Grid and has Field data
@@ -61,7 +65,7 @@
 !   !  The user creates an ArraySpec that describes the data and the
 !   !  Field create call allocates the appropriate memory for it. 
 
-!   !   arrayspec = ESMF_ArraySpecCreate()
+    call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc)
 
     field2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
@@ -114,6 +118,12 @@
      call ESMF_FieldDestroy(field2)
      call ESMF_FieldDestroy(field3)
      !call ESMF_FieldDestroy(field4)
+
+!-------------------------------------------------------------------------
+
+     call ESMF_FrameworkFinalize(rc)
+
+!-------------------------------------------------------------------------
 
      end program ESMF_FieldCreateEx
     
