@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.30 2004/06/08 09:27:16 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.31 2004/06/09 16:00:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -141,7 +141,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.30 2004/06/08 09:27:16 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.31 2004/06/09 16:00:18 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -297,7 +297,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutCreateND()"
 !BOP
-! !IROUTINE: ESMF_DELayoutCreate - Create N-dimensional DELayout
+! !IROUTINE: ESMF_DELayoutCreate - Create N-dimensional logically rectangular DELayout
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DELayoutCreate()
@@ -343,7 +343,8 @@ contains
 !  
 !     The {\tt cyclicFlagDimList} argument allows to enforce cyclic boundaries
 !     in each of the dimensions of {\tt ESMF\_DELayout}. If present its size
-!     must be equal to the number of DEs in the {\tt ESMF\_DELayout}.\newline
+!     must be equal to the number of DEs in the {\tt ESMF\_DELayout}. ({\it Not 
+!     yet implemented feature!}) \newline
 !
 !     The arguments are:
 !     \begin{description}
@@ -356,8 +357,9 @@ contains
 !          List specifying DE-to-PET mapping.
 !     \item[{[connectionWeightDimList]}] 
 !          List of connection weights along each dimension.
-!     \item[{[cyclicFlagDimList]}] 
+!     \item[{[cyclicFlagDimList]}]
 !          List of flags indicating cyclic boundaries in each dimension.
+!          ({\it Not yet implemented feature!})
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -415,7 +417,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutDestroy()"
 !BOP
-! !IROUTINE: ESMF_DELayoutDestroy - Destroy a DELayout object
+! !IROUTINE: ESMF_DELayoutDestroy - Destroy DELayout object
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutDestroy(delayout, rc)
@@ -459,7 +461,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGet()"
 !BOP
-! !IROUTINE: ESMF_DELayoutGet - Get internal info
+! !IROUTINE: ESMF_DELayoutGet - Get DELayout internals
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGet(delayout, deCount, dimCount, localDeCount, &
@@ -479,20 +481,34 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Get internal info
+!     Get internal decomposion information.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
-!          DELayout object.
+!        Queried {\tt ESMF\_DELayout} object.
 !     \item[{[deCount]}]
-!          Total number of DEs in layout.
+!        Upon return this holds the total number of DEs.
 !     \item[{[dimCount]}]
-!          Number of dimensions in coordinate tuple.
+!        Upon return this holds the number of dimensions in the specified 
+!        {\tt ESMF\_DELayout} object's coordinate tuples.
 !     \item[{[localDeCount]}]
-!          Number of DEs associated with this PET instance.
+!        Upon return this holds the number of DEs associated with the local PET.
 !     \item[{[localDeList]}]
-!          List of DEs associated with this PET instance.
+!        Upon return this holds the list of DEs associated with the local PET.
+!     \item[{[localDe]}]
+!        If the specified {\tt ESMF\_DELayout} object is 1-to-1 then upon 
+!        return this holds the DE associated with the local PET.
+!     \item[{[oneToOneFlag]}]
+!        Upon return this holds {\tt ESMF\_TRUE} if the specified 
+!        {\tt ESMF\_DELayout} object is 1-to-1, {\tt ESMF\_FALSE} otherwise.
+!     \item[{[logRectFlag]}]
+!        Upon return this holds {\tt ESMF\_TRUE} if the specified 
+!        {\tt ESMF\_DELayout} object is logically rectangular, {\tt ESMF\_FALSE}
+!        otherwise.
+!     \item[{[localDe]}]
+!        If the specified {\tt ESMF\_DELayout} object is logically rectangular
+!        then upon return this holds the number of DEs along each dimension.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -544,7 +560,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGetDE()"
 !BOP
-! !IROUTINE: ESMF_DELayoutGetDE - Get DE specific internal info
+! !IROUTINE: ESMF_DELayoutGetDE - Get DE specific DELayout internals
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGetDE(delayout, de, coord, connectionCount, &
@@ -561,23 +577,25 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Get DE specific internal info
+!     Get DE specific internal information about the decomposition.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
-!          DELayout object.
+!        Queried {\tt ESMF\_DELayout} object.
 !     \item[de]
-!          Id uniquely specifying the DE within this DELayout.
+!        Queried DE id within the specified {\tt ESMF\_DELayout} object.
 !     \item[{[coord]}]
-!          Coordinate tuple of the specified DE.
+!        Upon return this holds the coordinate tuple of the specified DE.
 !     \item[{[connectionCount]}]
-!          Number of connections associated with the specified DE.
+!        Upon return this holds the number of connections associated with the
+!        specified DE.
 !     \item[{[connectionList]}]
-!          List of DEs to which the specified DE is connected to.
+!        Upon return this holds the list of DEs the specified DE is connected
+!        to.
 !     \item[{[connectionWeightList]}]
-!          List of connection weights of all the connections with the specified
-!          DE.
+!        Upon return this holds the list of connection weights of all the
+!        connections with the specified DE.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -640,7 +658,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutGetDEMatch()"
 !BOP
-! !IROUTINE: ESMF_DELayoutGetDEMatch - Match DE's between DELayouts
+! !IROUTINE: ESMF_DELayoutGetDEMatch - Match virtual memory spaces between DELayouts
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGetDEMatch(delayout, de, delayoutMatch, &
@@ -656,20 +674,27 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Get DE specific internal info
+!     Match the virtual memory space of the specified DE in a DELayout with that
+!     of the DEs of a second DELayout. The use of this method is crutial when
+!     dealing with decomposed data structures that were not defined in the
+!     current VM context, i.e. defined in another component.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
-!          DELayout object.
+!        {\tt ESMF\_DELayout} object in which the specified DE is defined.
 !     \item[de]
-!          Id uniquely specifying the DE within this DELayout.
+!        Specified DE within delayout, for which to find matching DEs in 
+!        delayoutMatch,
 !     \item[delayoutMatch] 
-!          DELayout object to find matching DEs in.
+!        DELayout object in which to find DEs that match the virtual memory
+!        space of the specified DE.
 !     \item[{[deMatchCount]}]
-!          Number of DEs in delayoutMatch to share virtual memory space with de.
+!        Upon return this holds the number of DEs in delayoutMatch that share
+!        virtual memory space with the specified DE.
 !     \item[{[deMatchList]}]
-!          List of DEs in delayoutMatch that share virtual memory space with de.
+!        Upon return this holds the list of DEs in delayoutMatch that share
+!        virtual memory space with the specified DE.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -713,7 +738,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DELayoutPrint()"
 !BOP
-! !IROUTINE: ESMF_DELayoutPrint - Print details of DELayout object
+! !IROUTINE: ESMF_DELayoutPrint - Print DELayout internals
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutPrint(delayout, options, rc)
@@ -725,12 +750,12 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!     Print details of DELayout object
+!   Print internal information about the specified {\tt ESMF\_DELayout} object.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
-!          DELayout object.
+!          Specified {\tt ESMF\_DELayout} object.
 !     \item[{[options]}] 
 !          Output options.
 !     \item[{[rc]}] 
