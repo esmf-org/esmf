@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.6 2004/07/27 16:17:52 nscollins Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.7 2004/08/03 16:39:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,20 +35,23 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.6 2004/07/27 16:17:52 nscollins Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.7 2004/08/03 16:39:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     type(ESMF_Array) :: array1
     !character(ESMF_MAXSTR) :: filename
     real, dimension(:,:), pointer :: f90ptr1
-    integer :: width
+    integer :: width, attribute, attribute1, attribute2
+    real :: attribute3, attribute4
+    type(ESMF_DataType) :: att_datatype
+    type(ESMF_DataKind) :: att_datakind
 
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name, array_name
-    integer :: rc, result = 0
+    integer :: rc, att_count, result = 0
 
     
     call ESMF_Initialize()
@@ -135,10 +138,200 @@
     call ESMF_ArrayGet(array1, haloWidth=width, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !EX_UTest
+    write(name, *) "Verify Array HaloWidth Test"
     write(failMsg, *) "Halo Width not 2" 
     call ESMF_Test((width.eq.2), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 get halowidth returned"
 
+!-------------------------------------------------------------------------------
+!
+   !  Get Attribute count from an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Set an Attribute in an Array Test"
+    call ESMF_ArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Verify Attribute count from an Array
+    !EX_UTest
+    write(failMsg, *) "Attribute count is incorrect" 
+    write(name, *) "Verify Attribute count from an Array Test"
+    call ESMF_Test((attribute.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Set an Attribute in an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Set an Attribute in an Array Test"
+    call ESMF_ArraySetAttribute(array1, "test_attribute", 123456789, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Set an Attribute in an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Set an Attribute in an Array Test"
+    call ESMF_ArraySetAttribute(array1, "test_attribute1", 0, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+!-------------------------------------------------------------------------------
+!
+   !  Set an Attribute in an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Set an Attribute in an Array Test"
+    call ESMF_ArraySetAttribute(array1, "test_attribute2", 0.0, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Set an Attribute in an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Set an Attribute in an Array Test"
+    call ESMF_ArraySetAttribute(array1, "test_attribute3", 6789, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+!-------------------------------------------------------------------------------
+!
+   !  Set an Attribute in an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Set an Attribute in an Array Test"
+    call ESMF_ArraySetAttribute(array1, "test_attribute4", 5.87, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Get Attribute count from an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Get an Attribute from an Array Test"
+    call ESMF_ArrayGetAttributeCount(array1, attribute, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Verify Attribute count from an Array
+    !EX_UTest
+    write(failMsg, *) "Attribute count is incorrect" 
+    write(name, *) "Verify Attribute count from an Array Test"
+    call ESMF_Test((attribute.eq.5), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Get an Attribute from an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Get an Attribute from an Array Test"
+    call ESMF_ArrayGetAttribute(array1, "test_attribute", attribute, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Verify the value of the Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute value is wrong" 
+    write(name, *) "Verify Attribute value from an Array Test"
+    call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------------
+!
+   !  Get Attribute Info from an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Get Attribute Info from an Array Test"
+    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute", datatype=att_datatype, &
+                                     datakind=att_datakind, count=att_count, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Verify datatype of Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute datatype is wrong" 
+    write(name, *) "Verify Attribute datatype from an Array Test"
+    call ESMF_Test((att_datatype.eq.ESMF_DATA_INTEGER), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------------
+!
+   !  Verify datakind of Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute datakind is wrong" 
+    write(name, *) "Verify Attribute datakind from an Array Test"
+    call ESMF_Test((att_datakind.eq.ESMF_I4), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------------
+!
+   !  Verify count of Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute count is wrong" 
+    write(name, *) "Verify Attribute count from an Array Test"
+    call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Get an Attribute from an Array with wrong data type
+    !EX_UTest
+    write(failMsg, *) "Should not return ESMF_SUCCESS" 
+    write(name, *) "Get a Wrong Data type Attribute from an Array Test"
+    call ESMF_ArrayGetAttribute(array1, "test_attribute4", attribute, rc=rc)
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Get an Attribute from an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Get an Attribute from an Array Test"
+    call ESMF_ArrayGetAttribute(array1, "test_attribute4", attribute4, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Verify the value of the Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute value is wrong" 
+    write(name, *) "Verify Attribute value from an Array Test"
+    call ESMF_Test((attribute4.eq.5.87), name, failMsg, result, ESMF_SRCLINE)
+    print *, "test_attribute4 = ", attribute4
+!-------------------------------------------------------------------------------
+!
+   !  Get Attribute Info from an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Get Attribute Info from an Array Test"
+    call ESMF_ArrayGetAttributeInfo(array1, "test_attribute4", datatype=att_datatype, &
+                                     datakind=att_datakind, count=att_count, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------------
+!
+   !  Verify datatype of Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute datatype is wrong" 
+    write(name, *) "Verify Attribute datatype from an Array Test"
+    call ESMF_Test((att_datatype.eq.ESMF_DATA_REAL), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------------
+!
+   !  Verify datakind of Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute datakind is wrong" 
+    write(name, *) "Verify Attribute datakind from an Array Test"
+    call ESMF_Test((att_datakind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
+!-------------------------------------------------------------------------------
+!
+   !  Verify count of Attribute
+    !EX_UTest
+    write(failMsg, *) "Attribute count is wrong" 
+    write(name, *) "Verify Attribute count from an Array Test"
+    call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+    print *, "Attribute count =", att_count
 !-------------------------------------------------------------------------------
 !   !  Destroy an Array Test
 
