@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.2 2003/02/27 21:29:04 nscollins Exp $
+! $Id: user_model.F90,v 1.3 2003/02/27 23:03:07 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -68,6 +68,7 @@
 
 !     ! Local variables
         type(ESMF_State) :: import, export
+        type(ESMF_Field) :: humidity
         type(ESMF_Layout) :: mylayout
         integer :: de_id                        ! the current DE
 
@@ -85,6 +86,9 @@
         print *, "User Comp Init running on DE ", de_id
 
         ! If the initial Export state needs to be filled, do it here.
+        humidity = ESMF_FieldCreateNoData(name="humidity", rc=rc)
+        call ESMF_StateAddData(export, humidity, rc)
+        call ESMF_StatePrint(export, rc=rc)
 
         print *, "User Comp Init returning"
    
@@ -100,29 +104,46 @@
         integer :: rc
 
 !     ! Local variables
-        type(ESMF_State) :: import, export
+        type(ESMF_State) :: myimport, myexport
         type(ESMF_Field) :: humidity
         type(ESMF_Layout) :: mylayout
+        integer, save :: onetime=1              ! static variable
         integer :: de_id                        ! the current DE
+        integer :: status
 
         print *, "User Comp Run starting"
 
-        call ESMF_CompGet(comp, import=import, layout=mylayout, rc=rc)
-        call ESMF_StateGetData(import, "humidity", humidity, rc)
+        ! In a real application, the coupler would move the export from
+        ! one component to the import before this call.  For now, copy the
+        ! field from the export state to import state by hand.
+        if (onetime .gt. 0) then
+          call ESMF_CompGet(comp, import=myimport, export=myexport, rc=status)
+          call ESMF_StateGetData(myexport, "humidity", humidity, rc=status)
+          call ESMF_StateAddData(myimport, humidity, rc=status)
+          onetime = 0
+        endif
+
+        call ESMF_CompGet(comp, import=myimport, layout=mylayout, rc=status)
+        call ESMF_StatePrint(myimport, rc=status)
+        call ESMF_StateGetData(myimport, "humidity", humidity, rc=status)
+        call ESMF_FieldPrint(humidity, "", rc=status)
 
         ! This is where the model specific computation goes.
 
         ! Something to show we are running on different procs
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
+        call ESMF_LayoutGetDEId(mylayout, de_id, rc=status)
         print *, "User Comp Run running on DE ", de_id
 
 
         ! Here is where you produce output
 
-        call ESMF_CompGet(comp, export=export, rc=rc)
-        call ESMF_StateAddData(export, humidity, rc)
+        call ESMF_CompGet(comp, export=myexport, rc=status)
+        call ESMF_StateAddData(myexport, humidity, rc=status)
+        call ESMF_StatePrint(myexport, rc=status)
  
         print *, "User Comp Run returning"
+
+        rc = status
 
     end subroutine user_run
 
