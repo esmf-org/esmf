@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.127 2004/12/04 00:25:19 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.128 2004/12/08 18:31:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.127 2004/12/04 00:25:19 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.128 2004/12/08 18:31:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -786,11 +786,13 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Check DELayout attributes
-      if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layoutu
-        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, "not a 1-to-1 layout", &
-                                    ESMF_CONTEXT, rc)
-        return
-      endif
+      ! TODO: we only care about DEs with non-zero counts.  1-to-1 might
+      ! not be true and not an error.
+      !if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
+      !  call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, "not a 1-to-1 layout", &
+      !                              ESMF_CONTEXT, rc)
+      !  return
+      !endif
       ! if (ndim .ne. 2) then               ! ensure this is 2D Layout
       !   call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, "not a 2D layout", &
       !                               ESMF_CONTEXT, rc)
