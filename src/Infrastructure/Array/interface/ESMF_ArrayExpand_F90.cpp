@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.11 2004/03/11 16:16:36 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.12 2004/03/11 17:25:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.11 2004/03/11 16:16:36 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.12 2004/03/11 17:25:26 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1049,13 +1049,10 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[array]
 !       Destroy contents of this {\tt Array}.
-!
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !  To reduce the depth of crossings of the F90/C++ boundary we first
