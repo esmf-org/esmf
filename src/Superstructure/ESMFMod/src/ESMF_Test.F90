@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.7 2005/02/12 03:35:35 theurich Exp $
+! $Id: ESMF_Test.F90,v 1.8 2005/02/28 17:31:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.7 2005/02/12 03:35:35 theurich Exp $'
+      '$Id: ESMF_Test.F90,v 1.8 2005/02/28 17:31:25 nscollins Exp $'
 
 !==============================================================================
 
@@ -199,12 +199,16 @@
         return
       endif
 
+      ! This seems strange that if we do not have enough processors
+      ! that we print "PASS" - but the nightly scripts need to know that
+      ! we are successfully bypassing this test intentionally, and it was
+      ! not because of a system error, crash, or other actual problem.
       if (petCount .gt. numPETs) then
         write(failMsg, *) "This test must run on at least", petCount, "processors."
-        write(msg, *) "FAIL ", trim(file), ", line", &
+        write(msg, *) "PASS ", trim(file), ", line", &
                       line, trim(failMsg)
         print *, msg
-        call ESMF_LogWrite("FAIL ", ESMF_LOG_INFO, line, file)
+        call ESMF_LogWrite("PASS ", ESMF_LOG_INFO, line, file)
         if (present(unit)) write(unit, *) msg
         return
       endif
