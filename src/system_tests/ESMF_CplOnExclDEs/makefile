@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/02/13 15:40:46 nscollins Exp $ 
+# $Id: makefile,v 1.3 2004/06/04 08:19:03 nscollins Exp $ 
 
 ALL: build_system_tests
 
@@ -37,6 +37,7 @@ CLEANDIRS   =
 CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
+ESMF_CplOnExclDEsSTest.o:  user_model1.o user_model2.o user_coupler.o
 
 RUN_CouplingOnExclDEs:
 	-@rm -f testlog stdlog.* logfile.* ESMF_CplOnExclDEsSTest.tmps
