@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.17 2003/10/09 22:05:19 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.18 2003/10/10 17:21:04 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -357,8 +357,8 @@
     excl_stride = 1;
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 1;        
-//        lbound[i]   = lbounds ? lbounds[i] : 1;
-//        ubound[i]   = ubounds ? ubounds[i] : counts[i];
+        lbound[i]   = lbounds ? lbounds[i] : 1;
+        ubound[i]   = ubounds ? ubounds[i] : counts[i];
         bytestride[i] = 1;
         offset[i]     = offsets ? offsets[i] : 0;
 
@@ -380,8 +380,8 @@
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
         counts[i]     = 1;
-//        lbound[i] = 1;
-//        ubound[i] = 1;
+        lbound[i] = 1;
+        ubound[i] = 1;
         bytestride[i] = 1;
         offset[i]     = 0;
         ESMC_AxisIndexSet(ai_total+i, 0, 0, 1);
@@ -614,8 +614,8 @@
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
         bytestride[i] = 0;
-//        lbound[i] = lbounds ? lbounds[i] : 1;
-//        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        lbound[i] = lbounds ? lbounds[i] : 1;
+        ubound[i] = ubounds ? ubounds[i] : counts[i];
         if (halo_width == 0) {
             total_stride *= counts[i];
             ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
@@ -636,8 +636,8 @@
         counts[i]     = 1;
         offset[i]     = 0;
         bytestride[i] = 1;
-//        lbound[i] = 1;
-//        ubound[i] = 1;
+        lbound[i] = 1;
+        ubound[i] = 1;
         ESMC_AxisIndexSet(ai_total+i, 0, 0, 1);
         ESMC_AxisIndexSet(ai_comp+i, 0, 0, 1);
         ESMC_AxisIndexSet(ai_excl+i, 0, 0, 1);
