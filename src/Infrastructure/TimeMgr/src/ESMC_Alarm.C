@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.23 2003/12/19 19:20:21 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.24 2004/01/13 22:52:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.23 2003/12/19 19:20:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.24 2004/01/13 22:52:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -89,9 +89,8 @@ int ESMC_Alarm::count=0;
       return(ESMC_NULL_POINTER);
     }
     
-    // associate this alarm with given clock (bi-directional association)
+    // associate this alarm with given clock
     alarm->clock = clock;
-    alarm->clock->ESMC_ClockAddAlarm(alarm);
 
     // TODO: use inherited methods from ESMC_Base or share with ESMC_Clock
     if (name != ESMC_NULL_POINTER) {
@@ -149,6 +148,11 @@ int ESMC_Alarm::count=0;
     returnCode = alarm->ESMC_AlarmValidate();
     if (rc != ESMC_NULL_POINTER) {
       *rc = returnCode;
+    }
+
+    // add this new valid alarm to the given clock
+    if (returnCode == ESMF_SUCCESS) {
+      clock->ESMC_ClockAddAlarm(alarm);
     }
 
     return(alarm);
