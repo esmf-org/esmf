@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.1 2003/10/09 20:56:12 cdeluca Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.2 2003/10/17 22:47:09 jwolfe Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -143,7 +143,7 @@
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 5/02/2003
-      call ESMF_TimeSet(stopTime, yr=2003, mm=5, dd=2, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=5, dd=1, h=6, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
