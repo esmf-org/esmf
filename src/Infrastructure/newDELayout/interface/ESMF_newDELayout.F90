@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.19 2004/04/08 15:15:51 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.20 2004/04/13 16:01:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -141,7 +141,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.19 2004/04/08 15:15:51 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.20 2004/04/13 16:01:58 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -264,12 +264,12 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-      module procedure ESMF_newDELayoutAllGlobalReduceGeneralI4
-      module procedure ESMF_newDELayoutAllGlobalReduceGeneralR4
-      module procedure ESMF_newDELayoutAllGlobalReduceGeneralR8
-      module procedure ESMF_newDELayoutAllGlobalReduceI4
-      module procedure ESMF_newDELayoutAllGlobalReduceR4
-      module procedure ESMF_newDELayoutAllGlobalReduceR8
+      module procedure ESMF_newDELayoutGlobReduceGenI4
+      module procedure ESMF_newDELayoutGlobReduceGenR4
+      module procedure ESMF_newDELayoutGlobReduceGenR8
+      module procedure ESMF_newDELayoutGlobReduceI4
+      module procedure ESMF_newDELayoutGlobReduceR4
+      module procedure ESMF_newDELayoutGlobReduceR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -386,14 +386,14 @@ contains
     
     ! Routine which interfaces to the C++ creation routine.
     if (len==0) then
-      call c_ESMC_newDELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
+      call c_ESMC_nDELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
         dummy, len, status)
     else
-      call c_ESMC_newDELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
+      call c_ESMC_nDELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
         dePetList, len, status)
     endif
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCreate error"
+      print *, "c_ESMC_nDELayoutCreate error"
       return
     endif
     
@@ -444,9 +444,9 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDestroy(delayout, status)
+    call c_ESMC_nDELayoutDestroy(delayout, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutDestroy error"
+      print *, "c_ESMC_nDELayoutDestroy error"
       return
     endif
 
@@ -533,11 +533,11 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
+    call c_ESMC_nDELayoutGet(delayout, deCount, dimCount, localDeCount, &
       opt_localDeList, len_localDeList, localDe, oneToOneFlag, logRectFlag, &
       opt_deCountPerDim, len_deCountPerDim, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGet error"
+      print *, "c_ESMC_nDELayoutGet error"
       return
     endif
 
@@ -629,10 +629,10 @@ contains
       opt_DEcw => dummy
     endif
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGetDE(delayout, de, opt_DEcoord, len_coord, &
+    call c_ESMC_nDELayoutGetDE(delayout, de, opt_DEcoord, len_coord, &
       opt_DEcde, len_cde, opt_DEcw, len_cw, connectionCount, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGet error"
+      print *, "c_ESMC_nDELayoutGet error"
       return
     endif
 
@@ -706,10 +706,10 @@ contains
       opt_deMatchList => dummy
     endif
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGetDEMatch(delayout, de, delayoutMatch, &
+    call c_ESMC_nDELayoutGetDEMatch(delayout, de, delayoutMatch, &
       deMatchCount, opt_deMatchList, len_deMatchList, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGetDEMatch error"
+      print *, "c_ESMC_nDELayoutGetDEMatch error"
       return
     endif
 
@@ -760,9 +760,9 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutPrint(delayout, status)
+    call c_ESMC_nDELayoutPrint(delayout, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutPrint error"
+      print *, "c_ESMC_nDELayoutPrint error"
       return
     endif
 
@@ -828,16 +828,16 @@ contains
     mydata%dtk = ESMF_I4    !data type and kind
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
+    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutDataCreate error"
+      print *, "c_ESMC_nDELayoutDataCreate error"
       return
     endif
 
     do i=1, mydata%n
-      call c_ESMC_newDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
       if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_newDELayoutDataAdd error"
+        print *, "c_ESMC_nDELayoutDataAdd error"
         return
       endif
     enddo
@@ -903,16 +903,16 @@ contains
     mydata%dtk = ESMF_R4    !data type and kind
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
+    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutDataCreate error"
+      print *, "c_ESMC_nDELayoutDataCreate error"
       return
     endif
 
     do i=1, mydata%n
-      call c_ESMC_newDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
       if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_newDELayoutDataAdd error"
+        print *, "c_ESMC_nDELayoutDataAdd error"
         return
       endif
     enddo
@@ -978,16 +978,16 @@ contains
     mydata%dtk = ESMF_R8    !data type and kind
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDataCreate(mydata, mydata%n, status)
+    call c_ESMC_nDELayoutDataCreate(mydata, mydata%n, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutDataCreate error"
+      print *, "c_ESMC_nDELayoutDataCreate error"
       return
     endif
 
     do i=1, mydata%n
-      call c_ESMC_newDELayoutDataAdd(mydata, array(i)%ap, i, status)
+      call c_ESMC_nDELayoutDataAdd(mydata, array(i)%ap, i, status)
       if (status /= ESMF_SUCCESS) then
-        print *, "c_ESMC_newDELayoutDataAdd error"
+        print *, "c_ESMC_nDELayoutDataAdd error"
         return
       endif
     enddo
@@ -1037,9 +1037,9 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDataDestroy(delayoutData, status)
+    call c_ESMC_nDELayoutDataDestroy(delayoutData, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutDataDestroy error"
+      print *, "c_ESMC_nDELayoutDataDestroy error"
       return
     endif
 
@@ -1122,10 +1122,10 @@ contains
     if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
+    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCopy error"
+      print *, "c_ESMC_nDELayoutCopy error"
       return
     endif
 
@@ -1199,10 +1199,10 @@ contains
     if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutScatter error"
+      print *, "c_ESMC_nDELayoutScatter error"
       return
     endif
 
@@ -1275,10 +1275,10 @@ contains
     if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGather error"
+      print *, "c_ESMC_nDELayoutGather error"
       return
     endif
 
@@ -1294,7 +1294,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
-  subroutine ESMF_newDELayoutAllGlobalReduceGeneralI4(delayout, srcData, &
+  subroutine ESMF_newDELayoutGlobReduceGenI4(delayout, srcData, &
     dstData, count, operation, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -1346,17 +1346,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_I4, operation, ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduceGeneralI4
+  end subroutine ESMF_newDELayoutGlobReduceGenI4
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -1365,7 +1365,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
-  subroutine ESMF_newDELayoutAllGlobalReduceGeneralR4(delayout, srcData, &
+  subroutine ESMF_newDELayoutGlobReduceGenR4(delayout, srcData, &
     dstData, count, operation, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -1417,17 +1417,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R4, operation, ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduceGeneralR4
+  end subroutine ESMF_newDELayoutGlobReduceGenR4
 !------------------------------------------------------------------------------
 
 
@@ -1437,7 +1437,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
-  subroutine ESMF_newDELayoutAllGlobalReduceGeneralR8(delayout, srcData, &
+  subroutine ESMF_newDELayoutGlobReduceGenR8(delayout, srcData, &
     dstData, count, operation,  blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -1489,17 +1489,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R8, operation, ESMF_FALSE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduceGeneralR8
+  end subroutine ESMF_newDELayoutGlobReduceGenR8
 !------------------------------------------------------------------------------
 
 
@@ -1573,10 +1573,10 @@ contains
     blen = count * 4 ! 4 bytes
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
+    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCopy error"
+      print *, "c_ESMC_nDELayoutCopy error"
       return
     endif
 
@@ -1651,10 +1651,10 @@ contains
     blen = count * 4 ! 4 bytes
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
+    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCopy error"
+      print *, "c_ESMC_nDELayoutCopy error"
       return
     endif
 
@@ -1729,10 +1729,10 @@ contains
     blen = count * 8 ! 8 bytes
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
+    call c_ESMC_nDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutCopy error"
+      print *, "c_ESMC_nDELayoutCopy error"
       return
     endif
 
@@ -1804,10 +1804,10 @@ contains
     blen = count * 4 ! 4 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutScatter error"
+      print *, "c_ESMC_nDELayoutScatter error"
       return
     endif
 
@@ -1879,10 +1879,10 @@ contains
     blen = count * 4 ! 4 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutScatter error"
+      print *, "c_ESMC_nDELayoutScatter error"
       return
     endif
 
@@ -1954,10 +1954,10 @@ contains
     blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutScatter(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutScatter error"
+      print *, "c_ESMC_nDELayoutScatter error"
       return
     endif
 
@@ -2029,10 +2029,10 @@ contains
     blen = count * 4 ! 4 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGather error"
+      print *, "c_ESMC_nDELayoutGather error"
       return
     endif
 
@@ -2104,10 +2104,10 @@ contains
     blen = count * 4 ! 4 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGather error"
+      print *, "c_ESMC_nDELayoutGather error"
       return
     endif
 
@@ -2179,10 +2179,10 @@ contains
     blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(delayout, srcData, dstData, blen, root, &
+    call c_ESMC_nDELayoutGather(delayout, srcData, dstData, blen, root, &
       ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutGather error"
+      print *, "c_ESMC_nDELayoutGather error"
       return
     endif
 
@@ -2198,7 +2198,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
-  subroutine ESMF_newDELayoutAllGlobalReduceI4(delayout, srcData, &
+  subroutine ESMF_newDELayoutGlobReduceI4(delayout, srcData, &
     dstData, count, operation, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -2250,17 +2250,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_I4, operation, ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduceI4
+  end subroutine ESMF_newDELayoutGlobReduceI4
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -2269,7 +2269,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
-  subroutine ESMF_newDELayoutAllGlobalReduceR4(delayout, srcData, &
+  subroutine ESMF_newDELayoutGlobReduceR4(delayout, srcData, &
     dstData, count, operation, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -2321,17 +2321,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R4, operation, ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduceR4
+  end subroutine ESMF_newDELayoutGlobReduceR4
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -2340,7 +2340,7 @@ contains
 
 ! !INTERFACE:
   ! Private name; call using ESMF_newDELayoutAllGlobalReduce()
-  subroutine ESMF_newDELayoutAllGlobalReduceR8(delayout, srcData, &
+  subroutine ESMF_newDELayoutGlobReduceR8(delayout, srcData, &
     dstData, count, operation, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
@@ -2392,17 +2392,17 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+    call c_ESMC_nDELayoutGlobReduce(delayout, srcData, dstData, &
       count, ESMF_R8, operation, ESMF_TRUE, status)
     if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_newDELayoutAllGlobalReduce error"
+      print *, "c_ESMC_nDELayoutAllGlobalReduce error"
       return
     endif
 
     ! set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_newDELayoutAllGlobalReduceR8
+  end subroutine ESMF_newDELayoutGlobReduceR8
 !------------------------------------------------------------------------------
 
 
