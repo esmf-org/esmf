@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.37 2004/03/05 00:51:08 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.38 2004/03/19 00:31:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -239,6 +239,7 @@ class ESMC_Calendar {
   private:
 
     friend class ESMC_Time;
+    friend class ESMC_TimeInterval;
 
 //
  // < declare private interface methods here >
