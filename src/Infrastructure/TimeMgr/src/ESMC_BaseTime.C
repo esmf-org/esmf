@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.6 2003/03/21 17:11:11 nscollins Exp $
+// $Id: ESMC_BaseTime.C,v 1.7 2003/03/21 19:09:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,6 @@
  // insert any higher level, 3rd party or system includes here
  #include <iostream.h>
  #include <stdlib.h>
- #include <stdio.h>
  /*
  #include <iostream>
  #include <stdlib>
@@ -36,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.6 2003/03/21 17:11:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.7 2003/03/21 19:09:46 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -62,7 +61,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,              // in - integer seconds
+      ESMF_IKIND_I8 S,    // in - integer seconds
       int Sn,             // in - fractional seconds, numerator
       int Sd ) {          // in - fractional seconds, denominator
 //
@@ -72,8 +71,8 @@
 //EOP
 // !REQUIREMENTS:  
 
-    printf("ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = %lld, %d, %d\n",
-           S, Sn, Sd);
+//    cout << "ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = "
+//         << S << ", " << Sn << ", " << Sd << endl;
 
     // S, Sn must be either both positive or both negative;
     //    Sd always positive and >= 1
@@ -83,8 +82,8 @@
         this->Sn = Sn;
         this->Sd = Sd;
 
-        printf("ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = %lld, %d, %d\n",
-                    this->S, this->Sn, this->Sd);
+//        cout << "ESMC_BaseTime::ESMC_BaseTimeInit(): S, Sn, Sd = "
+//             << this->S << ", " << this->Sn << ", " << this->Sd << endl;
 
         // normalize (share logic with += ?? )
         int w;
