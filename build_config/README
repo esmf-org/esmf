@@ -1,4 +1,4 @@
- $Id: README,v 1.4 2003/09/02 15:30:10 flanigan Exp $
+ $Id: README,v 1.5 2003/09/02 15:50:34 flanigan Exp $
 
 README file for esmf_build_config directory.
 
@@ -71,12 +71,13 @@ Current site files for unsupported platforms:
 Notice that there is no default site value for Linux machines.  This
 is because there is no common Fortran90 Linux compiler.
 
-The build system can be ported to other sites by adding new site and
-conf.h files.  The new site file has to follow the naming convention
-used by the existing site files.  The new site file will also have to
-define the same makefile variables as the existing site files.
+The build system can be ported to other Unix platforms by adding new
+site and conf.h files.  The new site file has to follow the naming
+convention used by the existing site files and be created in
+build_config.  The new site file will also have to define the same
+makefile variables as the existing site files.
 
-The conf.h is used to define machine attributes within C and C++
+The conf.h files are used to define machine attributes within C and C++
 source code.  The build system stores the conf. h files in
 subdirectories in build_config/conf.  The subdirectories following a
 naming convention using the environment variables ESMF_ARCH, ESMF_PREC
@@ -86,7 +87,8 @@ and ESMF_SITE.  The naming convention is:
 
 Like site files, new conf.h files have to define the same machine
 attributes as existing conf.h files.  If a machine supports both 32
-and 64 bit precision, then then two conf.h files are needed.  Example:
+and 64 bit precision, then two conf.h files and the directories they
+are stored in are needed.  Example:
 
       build_config/conf/AIX.32.default/conf.h
       build_config/conf/AIX.64.default/conf.h
