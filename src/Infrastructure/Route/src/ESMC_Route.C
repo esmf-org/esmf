@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.47 2003/08/01 18:00:43 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.48 2003/08/01 22:21:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.47 2003/08/01 18:00:43 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.48 2003/08/01 22:21:21 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -870,6 +870,9 @@ static int maxroutes = 10;
     }
 
     // calculate "my" (local DE's) XPacket in the sense of the global data
+    // nsc - here is where we will need to do this again for periodic
+    // boundary support if periodic is true along any axis and if this
+    // xpacket is along a corresponding minimum-side boundary.
     my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride);
 
     // loop over DE's from receiving layout to calculate send table
@@ -917,6 +920,9 @@ static int maxroutes = 10;
     }
 
     // calculate "my" (local DE's) XPacket in the sense of the global data
+    // nsc - here is where we will need to do this again for periodic
+    // boundary support if periodic is true along any axis and if this
+    // xpacket is along a corresponding minimum-side boundary.
     my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, my_global_start, global_stride);
 
     // loop over DE's from layout to calculate receive table
