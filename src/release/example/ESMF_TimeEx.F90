@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.5 2004/01/27 20:54:16 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.6 2004/01/29 04:51:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +47,8 @@
       integer :: rc
 
       ! Initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 
       ! Initialize time to 5/12/2003 2:24:45
       call ESMF_TimeSet(time, yy=2003, &
@@ -81,6 +82,8 @@
       call ESMF_TimeSyncToRealTime(wallClock, rc)
       print *, "Wall Clock Time = "
       call ESMF_TimePrint(wallClock, "string", rc)
+
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       print *, "ESMF_Time Example completed successfully"
 

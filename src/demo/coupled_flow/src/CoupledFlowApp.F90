@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.7 2004/01/26 21:37:27 eschwab Exp $
+! $Id: CoupledFlowApp.F90,v 1.8 2004/01/29 04:51:37 eschwab Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -161,7 +161,8 @@
 !     the Demo.  As shown in this example, we first initialize a calendar to
 !     set the type of time scale (in this case, Gregorian):
 !\begin{verbatim}
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 !\end{verbatim}
 !     Next we initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
@@ -259,6 +260,12 @@
 !     Clean up
 
       call ESMF_StateDestroy(flowstate, rc)
+
+      call ESMF_GridDestroy(grid, rc)
+
+      call ESMF_ClockDestroy(clock, rc)
+
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       call ESMF_GridCompDestroy(compGridded, rc)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.9 2004/01/26 21:33:27 eschwab Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.10 2004/01/29 04:51:38 eschwab Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -137,7 +137,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 6 hours
       call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
@@ -238,6 +239,7 @@
       call ESMF_StateDestroy(cplstate, rc)
 
       call ESMF_ClockDestroy(clock, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       call ESMF_GridCompDestroy(comp1, rc)
       call ESMF_GridCompDestroy(comp2, rc)

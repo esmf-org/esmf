@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.15 2004/01/26 21:35:47 eschwab Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.16 2004/01/29 04:51:37 eschwab Exp $
 !
 ! Example code for a main Application program. 
 
@@ -287,7 +287,7 @@
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
-    call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+    gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc)
 
     ! initialize time interval to 6 hours
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
@@ -341,6 +341,8 @@
 
 
     ! Destroy components.
+    call ESMF_ClockDestroy(tclock, rc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc)
     call ESMF_GridCompDestroy(gcomp1, rc)
     call ESMF_GridCompDestroy(gcomp2, rc)
     call ESMF_CplCompDestroy(cpl, rc)

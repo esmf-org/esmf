@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.2 2004/01/26 21:37:29 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.3 2004/01/29 04:51:37 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -214,8 +214,8 @@
       datablock => wrap%ptr
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(datablock%gregorianCalendar, &
-                                          ESMF_CAL_GREGORIAN, rc)
+      datablock%gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                                        ESMF_CAL_GREGORIAN, rc)
 
       ! initialize start time to 12May2003, 3:00 pm
       ! for testing, initialize start time to 13May2003, 2:00 pm
@@ -527,6 +527,7 @@ end subroutine injector_init1
         call ESMF_GridCompGetInternalState(comp, wrap, rc)
 
         datablock => wrap%ptr
+        call ESMF_CalendarDestroy(datablock%gregorianCalendar, rc)
         deallocate(datablock, stat=rc)
         nullify(wrap%ptr)
 

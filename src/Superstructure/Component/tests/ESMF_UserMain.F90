@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.8 2004/01/26 21:35:52 eschwab Exp $
+! $Id: ESMF_UserMain.F90,v 1.9 2004/01/29 04:51:37 eschwab Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -68,7 +68,8 @@
     ! Create the main application clock
 
     ! initialize calendar to be Gregorian type
-    call ESMF_CalendarSet(gregorianCalendar, ESMF_CALENDAR_GREGORIAN, rc)
+    gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                            ESMF_CAL_GREGORIAN, rc)
 
     ! initialize time interval to 6 hours
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
@@ -82,10 +83,11 @@
                       calendar=gregorianCalendar, rc=rc)
 
     ! initialize the clock with the above values
-    clock = ESMF_ClockCreate(timeStep, startTime, stopTime, rc=rc)
+    tclock = ESMF_ClockCreate(timeStep, startTime, stopTime, rc=rc)
 
 
     print *, "Top Component Create completed, name = ", trim(tname)
+
 
     !-------------------------------------------------------------------------
     !  Create the 2 gridded components
@@ -193,6 +195,7 @@
     !
 
     call ESMF_ClockDestroy(tclock, rc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
     call ESMF_GridCompDestroy(oceangridcomp, rc)
     call ESMF_GridCompDestroy(atmgridcomp, rc)

@@ -141,7 +141,8 @@
 !    the config file.
 
 
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 
       call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
 
@@ -214,6 +215,8 @@
 !     Clean up
 
       call ESMF_ClockDestroy(clock, rc)
+
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       call ESMF_StateDestroy(defaultstate, rc)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.5 2004/01/26 21:33:56 eschwab Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.6 2004/01/29 04:51:38 eschwab Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -138,7 +138,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 4 hours
@@ -265,6 +266,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockDestroy(clock, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompDestroy(comp1, rc)

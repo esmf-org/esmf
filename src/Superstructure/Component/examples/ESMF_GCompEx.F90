@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.9 2004/01/27 22:07:11 eschwab Exp $
+! $Id: ESMF_GCompEx.F90,v 1.10 2004/01/29 04:51:37 eschwab Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -180,7 +180,7 @@
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
-    call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+    gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc)
 
     ! initialize time interval to 6 hours
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
@@ -222,6 +222,8 @@
 
 
     ! Destroy components.
+    call ESMF_ClockDestroy(tclock, rc)
+    call ESMF_CalendarDestroy(gregorianCalendar, rc)
     call ESMF_GridCompDestroy(gcomp, rc)
     print *, "Comp Destroy returned"
 

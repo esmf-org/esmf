@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.5 2004/01/26 21:33:25 eschwab Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.6 2004/01/29 04:51:37 eschwab Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -134,7 +134,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 6 hours
       call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
@@ -237,6 +238,7 @@
       call ESMF_StateDestroy(cplstate, rc)
 
       call ESMF_ClockDestroy(clock, rc)
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
       call ESMF_GridCompDestroy(comp1, rc)
       call ESMF_GridCompDestroy(comp2, rc)
