@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.3 2003/06/20 16:45:02 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.4 2004/10/08 20:36:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,8 @@
 !   contains methods to support testing
 !
 !------------------------------------------------------------------------------
-
+! !USES:
+      use ESMF_Mod
       implicit none
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -39,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.3 2003/06/20 16:45:02 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.4 2004/10/08 20:36:20 eschwab Exp $'
 
 !==============================================================================
 
@@ -73,18 +74,19 @@
 !EOP
 !-------------------------------------------------------------------------------
 
+      character(ESMF_MAXSTR) :: msg
+
       if(condition) then
-        print *, "PASS ", trim(name), ", ", trim(file), ", line", line
-        if (present(unit)) then
-          write(unit, *) "PASS ", trim(name), ", ", trim(file), ", line", line
-        endif
+        write(msg, *) "PASS ", trim(name), ", ", trim(file), ", line", line
+        print *, msg
+        call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+        if (present(unit)) write(unit, *) msg
       else
-        print *, "FAIL ", trim(name), ", ", trim(file), ", line", &
-                  line, trim(failMsg)
-        if (present(unit)) then
-          write(unit, *) "FAIL ", trim(name), ", ", trim(file), ", line", &
-                          line, trim(failMsg)
-        endif
+        write(msg, *) "FAIL ", trim(name), ", ", trim(file), ", line", &
+                      line, trim(failMsg)
+        print *, msg
+        call ESMF_LogWrite(msg, ESMF_LOG_INFO)
+        if (present(unit)) write(unit, *) msg
         result = result + 1  ! count total failures; 0 = all pass
       end if
 
