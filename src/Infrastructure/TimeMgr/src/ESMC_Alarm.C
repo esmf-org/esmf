@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.11 2003/05/02 00:58:26 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.12 2003/05/02 22:09:24 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.11 2003/05/02 00:58:26 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.12 2003/05/02 22:09:24 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -73,7 +73,7 @@
     if (stopTime     != ESMC_NULL_POINTER) StopTime     = *stopTime;
     Enabled = enabled;
 
-    return(ESMF_SUCCESS);
+    return(ESMC_AlarmValidate());
 
  } // end ESMC_AlarmInit
 
@@ -121,6 +121,7 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+    Ringing = false;
     Enabled = false;
 
     return(ESMF_SUCCESS);
@@ -145,6 +146,8 @@
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
+
+    if(!Enabled) return(ESMF_FAILURE);
 
     Ringing = true;
 
@@ -198,7 +201,7 @@
 
     *rc = ESMF_SUCCESS;
 
-    return(Ringing);
+    return(Enabled && Ringing);
 
  } // end ESMC_AlarmIsRinging
 
@@ -277,6 +280,8 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+    if (ringInterval == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
     *ringInterval = RingInterval;
 
     return(ESMF_SUCCESS);
@@ -301,6 +306,8 @@
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    if (ringInterval == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
     RingInterval = *ringInterval;
 
@@ -327,6 +334,8 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+    if (ringTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
     *ringTime = RingTime;
 
     return(ESMF_SUCCESS);
@@ -351,6 +360,8 @@
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    if (ringTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
     RingTime = *ringTime;
 
@@ -377,6 +388,8 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+    if (prevRingTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
     *prevRingTime = PrevRingTime;
 
     return(ESMF_SUCCESS);
@@ -401,6 +414,8 @@
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    if (prevRingTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
     PrevRingTime = *prevRingTime;
 
@@ -427,6 +442,8 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+    if (stopTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+
     *stopTime = StopTime;
 
     return(ESMF_SUCCESS);
@@ -451,6 +468,8 @@
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    if (stopTime == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
     StopTime = *stopTime; 
 
@@ -572,9 +591,14 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-//
-//  code goes here TODO
-//
+    // must have a ring time; RingInterval, StopTime, PrevRingTime optional
+    if (RingTime.ESMC_TimeValidate() != ESMF_SUCCESS) return(ESMF_FAILURE);
+
+    // invalid state
+    if (!Enabled && Ringing) return(ESMF_FAILURE);
+
+    // TODO: validate ID ?
+
     return(ESMF_SUCCESS);
 
  } // end ESMC_AlarmValidate
