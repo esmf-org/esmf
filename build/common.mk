@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.39 2004/02/18 18:24:08 nscollins Exp $
+#  $Id: common.mk,v 1.40 2004/02/24 14:09:35 theurich Exp $
 #===============================================================================
 #  common.mk
 #
@@ -95,6 +95,9 @@ endif
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #-------------------------------------------------------------------------------
 
+# Enable the following flag in order to activate VM features
+#CPPFLAGS        = -DESMF_ENABLE_VM
+
 ifndef ESMF_BUILD
 export ESMF_BUILD := $(ESMF_TOP_DIR)
 endif
@@ -140,7 +143,7 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
-FCPPFLAGS	= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${FPPFLAGS} \
+FCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
                    $(FCPP_EXHAUSTIVE)
 C_SH_LIB_PATH	= ${CLINKER_SLFLAG}${LDIR} ${C_DYLIBPATH}
 F_SH_LIB_PATH	= ${FLINKER_SLFLAG}${LDIR} ${F_DYLIBPATH}
