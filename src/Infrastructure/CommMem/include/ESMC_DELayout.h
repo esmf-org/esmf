@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.21 2003/07/23 02:11:33 eschwab Exp $
+// $Id: ESMC_DELayout.h,v 1.22 2003/07/29 16:40:00 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -141,10 +141,12 @@ typedef int ESMC_CommType;
     int ESMC_DELayoutSetAxisIndex(int global_counts[], int size_gcount,
                                 int decompids[], int size_decomp,
                                 ESMC_AxisIndex *AIPtr);
-    int ESMC_DELayoutGatherArrayI(int *DistArray, int decompids[], int size_decomp,
+    int ESMC_DELayoutGatherArrayI(int *DistArray, int global_dimlengths[],
+                                  int decompids[], int size_decomp,
                                   ESMC_AxisIndex *AIPtr, ESMC_AxisIndex *AIPtr2, 
                                   int *GlobalArray);
-    int ESMC_DELayoutGatherArrayF(float *DistArray, int decompids[], int size_decomp,
+    int ESMC_DELayoutGatherArrayF(float *DistArray, int global_dimlengths[],
+                                  int decompids[], int size_decomp,
                                   ESMC_AxisIndex *AIPtr, ESMC_AxisIndex *AIPtr2, 
                                   float *GlobalArray);
     
