@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.29 2004/10/20 20:24:33 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.30 2004/10/26 23:26:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !==============================================================================
 !
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
 !
 !BOP
 ! !PROGRAM: ESMF_StateUTest - One line general statement about this test
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.29 2004/10/20 20:24:33 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.30 2004/10/26 23:26:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -42,10 +42,10 @@
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
-      type(ESMF_Field) :: field1, field2, field3(3), field4
-      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle5
-      type(ESMF_State) :: state1, state2
-      type(ESMF_Array) :: array1, array2(2), array3, array3a
+      type(ESMF_Field) :: field1, field2, field3(3), field4, nofield
+      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle5, nobundle
+      type(ESMF_State) :: state1, state2, state3, nostate
+      type(ESMF_Array) :: array1, array2(2), array3, array3a, noarray
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
       type(ESMF_VM):: vm
@@ -73,7 +73,7 @@
 
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(npets, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
       
@@ -96,6 +96,17 @@
       !------------------------------------------------------------------------
 
 #ifdef ESMF_EXHAUSTIVE
+
+      ! set up destroyed objects for use below
+      nostate = ESMF_StateCreate(rc=rc)
+      call ESMF_StateDestroy(nostate, rc=rc)
+      nobundle = ESMF_BundleCreate(rc=rc)
+      call ESMF_BundleDestroy(nobundle, rc=rc)
+      nofield = ESMF_FieldCreateNoData(rc=rc)
+      call ESMF_FieldDestroy(nofield, rc=rc)
+      noarray = ESMF_ArrayCreate(1,ESMF_DATA_REAL,ESMF_R8,(/1/),rc=rc)
+      call ESMF_ArrayDestroy(noarray, rc=rc)
+
 
       !EX_UTest 
       ! Test Creation of an empty import State 
@@ -502,26 +513,42 @@
       !------------------------------------------------------------------------
  
       !EX_UTest
+#ifdef ESMF_NO_INITIALIZERS
+      state3 = nostate
+#endif
+      call ESMF_StateAddState(state1, state3, rc=rc)
+      write(name, *) "Adding an uninitialized State to a State Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+#ifdef ESMF_NO_INITIALIZERS
+      bundle5 = nobundle
+#endif
       call ESMF_StateAddBundle(state1, bundle5, rc=rc)
-      write(name, *) "Adding an uninitialized  Bundle to a State Test"
+      write(name, *) "Adding an uninitialized Bundle to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Test adding an uninitialized Field to a State
+#ifdef ESMF_NO_INITIALIZERS
+      field4 = nofield
+#endif
       call ESMF_StateAddField(state1, field4, rc)
-      write(name, *) "Adding an uninitialized  Field to a State Test"
+      write(name, *) "Adding an uninitialized Field to a State Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                        name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Test adding an uninitialized Array to a State
-      call ESMF_ArrayDestroy(array3a, rc)
-      call ESMF_StatePrint(state1, rc=rc)
+#ifdef ESMF_NO_INITIALIZERS
+      array3a = noarray
+#endif
       call ESMF_StateAddArray(state1, array3a, rc)
-      call ESMF_StatePrint(state1, rc=rc)
       write(name, *) "Adding an uninitialized Array to a State Test"
       print *, "rc = ", rc
       call ESMF_Test((rc.ne.ESMF_SUCCESS), &
@@ -691,6 +718,7 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
 
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
       call ESMF_Finalize(rc)
  
   
