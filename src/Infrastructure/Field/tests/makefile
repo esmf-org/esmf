@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/10 23:31:29 svasquez Exp $ 
+# $Id: makefile,v 1.4 2003/03/10 23:33:38 svasquez Exp $ 
 
 ALL:  tests
 
@@ -15,56 +15,19 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Field/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldUTest \
-		$(ESMC_TESTDIR)/ESMF_FieldTest \
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldTest \
 		$(ESMC_TESTDIR)/ESMF_BundleUTest
 
-TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMF_FieldTest \
+TESTS_RUN     = RUN_ESMF_FieldTest \
 		RUN_ESMF_BundleUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
-		RUN_ESMF_FieldTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_FieldTestUNI \
 		RUN_ESMF_BundleUTestUNI 
 
-TESTS_RM      = ESMF_FieldUTest.rm \
-		ESMF_FieldTest.rm \
+TESTS_RM      = ESMF_FieldTest.rm \
 		ESMF_BundleUTest.rm 
 
 include ${ESMF_DIR}/makefile
-
-#
-#  Field
-#
-$(ESMC_TESTDIR)/ESMF_FieldUTest: ESMF_FieldUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldUTest ESMF_FieldUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_FieldUTest.o
-
-$(ESMC_TESTDIR)/ESMF_FieldTest: ESMF_FieldTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldTest ESMF_FieldTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_FieldTest.o
-
-RUN_ESMF_FieldUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
-
-RUN_ESMF_FieldTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldTest > $(ESMC_TESTDIR)/ESMF_FieldTest.stdout
-
-RUN_ESMF_FieldUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
-
-RUN_ESMF_FieldTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldTest > $(ESMC_TESTDIR)/ESMF_FieldTest.stdout
-
-ESMF_FieldUTest.rm:
-	echo "ESMF_FieldUTest.rm target called here."
-
-ESMF_FieldTest.rm:
-	echo "ESMF_FieldTest.rm target called here."
 
 #
 #  Bundles
