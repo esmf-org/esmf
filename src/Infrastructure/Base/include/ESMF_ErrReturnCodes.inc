@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_ErrReturnCodes.inc,v 1.1 2004/05/19 11:29:28 nscollins Exp $
+$Id: ESMF_ErrReturnCodes.inc,v 1.2 2004/05/20 11:40:05 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,6 +15,9 @@ Do not have C++ or F90 style comments in here because this file is processed
 by both C++ and F90 compilers.
 
 #endif
+
+#ifndef ESMF_ERRRETURNCODES_INC
+#define ESMF_ERRRETURNCODES_INC
 
 #if 0
 Special macro for use in ESM[F,C]_LogMsgFoundError(), e.g.
@@ -146,3 +149,5 @@ C++ Return codes 501-1000
 #define  ESMC_RC_SYS             544
 #define  ESMC_RC_BUSY            545
 #define  ESMC_RC_LIB             546
+
+#endif
