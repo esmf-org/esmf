@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.15 2003/09/02 18:42:25 eschwab Exp $
+% $Id: TimeMgr_desc.tex,v 1.16 2003/12/19 19:14:51 eschwab Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -56,7 +56,7 @@ year when leaves start falling from the trees in a climate model.
 \newpage
 In the remainder of this section, we briefly summarize the 
 functionality that the Time Manager classes provide.  Detailed 
-descriptions and examples of use precede the API listing for each 
+descriptions and usage examples precede the API listing for each 
 class.
 
 \subsection{Calendar}
@@ -82,7 +82,7 @@ time periods independent of a calendar, support operations such as add,
 subtract, compare size, 
 reset value, copy value, and subdivide by a scalar.  Times, which 
 are moments in time associated with specific Calendars, can be incremented 
-or decremented by TimeIntervals, compared to see which of two Times 
+or decremented by TimeIntervals, compared to determine which of two Times 
 is later, differenced to obtain the TimeInterval between two Times, 
 copied, reset, and manipulated in other useful ways.  Times support a 
 host of different queries, both for values of individual Time 
@@ -96,7 +96,7 @@ Since climate modeling, numerical weather prediction and other
 Earth and space applications have widely varying time scales and require 
 different sorts of calendars, Times and TimeIntervals must support 
 a wide range of time specifiers, spanning nanoseconds to years.  The
-interfaces to these time classes are defined so that you can specify a time
+interfaces to these time classes are defined so that the user can specify a time
 using a combination of units selected from the list shown in 
 Table~\ref{table:timeOpts}.  
 

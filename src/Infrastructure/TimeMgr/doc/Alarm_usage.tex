@@ -1,20 +1,17 @@
-% $Id: Alarm_usage.tex,v 1.4 2003/08/15 20:23:21 cdeluca Exp $
+% $Id: Alarm_usage.tex,v 1.5 2003/12/19 19:14:51 eschwab Exp $
 
 Alarms are used in conjunction with Clocks (see Section~\ref{sec:Clock}).
-Multiple Alarms can be associated with a Clock.
-During the {\tt ESMF\_ClockAdvance} method, a Clock iterates over its 
-internal Alarms
+Multiple Alarms can be associated with a Clock.  During the
+{\tt ESMF\_ClockAdvance} method, a Clock iterates over its internal Alarms
 to determine if any are ringing.  Alarms ring when a specified Alarm 
-time is passed, taking into account whether the time step is positive 
-or negative.  On completion of the time advance call, the Clock returns
-the number of ringing Alarms.
+time is reached or exceeded, taking into account whether the time step is
+positive or negative.  On completion of the time advance call, the Clock
+optionally returns a list of ringing alarms.
 
-The user can then check  if the number of ringing Alarms is greater than zero.  If so, the user
-goes into a loop to query the Clock for each ringing Alarm, one at a time.
 Each ringing Alarm can then be processed using Alarm methods for identifying,
 turning off, disabling or resetting the Alarm.
 
-Alarm methods are defined for getting the ringing state, turning the
+Alarm methods are defined for obtaining the ringing state, turning the
 ringer on/off, enabling/disabling the Alarm, and getting/setting 
 associated times.
 

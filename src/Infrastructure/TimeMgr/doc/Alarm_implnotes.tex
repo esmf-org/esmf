@@ -1,4 +1,4 @@
-% $Id: Alarm_implnotes.tex,v 1.2 2003/11/12 17:19:20 eschwab Exp $
+% $Id: Alarm_implnotes.tex,v 1.3 2003/12/19 19:14:47 eschwab Exp $
 
 \subsection{Implementation Notes}
 
@@ -12,11 +12,12 @@ by the clock is affected, not just a user's local copy.  Direct alarm
 manipulation is the more common case where alarm API methods are invoked on
 the original alarm objects created by the user.
 
-For consistency, the ESMF\_Clock class is also designed as a deep class. 
+For consistency, the ESMF\_Clock class is also designed as a deep, dynamically
+allocatable class. 
 
 An additional benefit from this approach is that Clocks and Alarms can be
 created and used from anywhere in a user's code without regard to the scope
-in which they were created.  In constrast, statically created Alarms or
+in which they were created.  In constrast, statically created Alarms and
 Clocks would disappear if created within a user's routine that returns,
-whereas dynamically allocated Alarms or Clocks will persist until destroyed
-by the user.
+whereas dynamically allocated Alarms and Clocks will persist until explicitly
+destroyed by the user.
