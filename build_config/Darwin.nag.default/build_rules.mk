@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.13 2005/03/03 22:32:54 theurich Exp $
+#  $Id: build_rules.mk,v 1.14 2005/03/08 22:08:08 theurich Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -53,11 +53,17 @@ endif
 # it is installed under /usr/local - change MPI_HOME if other dir.)
 
 ifeq ($(ESMF_COMM),lam)
+ifdef MPI_HOME
+MPI_INCLUDE    = -I${MPI_HOME}/include
+MPI_LIB        = -L${MPI_HOME}/lib -llamf77mpi -lmpi -llam
+MPIRUN         =  ${MPI_HOME}/bin/mpirun
+else
 # with lam-mpi installed in /usr/local:
 MPI_HOME       = 
 MPI_LIB        = -lmpi -llam -llamf77mpi
 MPI_INCLUDE    = 
 MPIRUN         =  mpirun
+endif
 endif
 
 ifeq ($(ESMF_COMM),mpich)
