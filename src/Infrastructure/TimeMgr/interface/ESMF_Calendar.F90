@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.63 2004/04/20 17:27:27 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.64 2004/05/04 22:28:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.63 2004/04/20 17:27:27 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.64 2004/05/04 22:28:31 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -793,7 +793,7 @@
       end subroutine ESMF_CalendarPrint
       
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
@@ -821,7 +821,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
@@ -1100,7 +1100,7 @@
       end subroutine ESMF_CalendarValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
 
 ! !INTERFACE:
@@ -1125,7 +1125,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
 

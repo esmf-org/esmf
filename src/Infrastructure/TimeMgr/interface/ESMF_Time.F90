@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.69 2004/04/09 20:13:56 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.70 2004/05/04 22:28:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.69 2004/04/09 20:13:56 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.70 2004/05/04 22:28:31 eschwab Exp $'
 
 !==============================================================================
 !
@@ -738,7 +738,7 @@
       end subroutine ESMF_TimePrint
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeReadRestart - Restore the contents of a Time (not implemented)
 
 ! !INTERFACE:
@@ -766,7 +766,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
 
@@ -1013,7 +1013,7 @@
       end subroutine ESMF_TimeValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeWriteRestart - Save the contents of a Time (not implemented)
 
 ! !INTERFACE:
@@ -1038,7 +1038,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 !     TMGn.n.n
    

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.52 2004/04/14 20:43:16 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.53 2004/05/04 22:28:31 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.52 2004/04/14 20:43:16 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.53 2004/05/04 22:28:31 eschwab Exp $'
 
 !==============================================================================
 !
@@ -754,7 +754,7 @@
       end subroutine ESMF_AlarmPrint
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm (not implemented)
 
 ! !INTERFACE:
@@ -782,7 +782,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       ! get length of given name for C++ validation
@@ -1101,7 +1101,7 @@
       end function ESMF_AlarmWillRingNext
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm (not implemented)
 
 ! !INTERFACE:
@@ -1126,7 +1126,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !     invoke C to C++ entry point
