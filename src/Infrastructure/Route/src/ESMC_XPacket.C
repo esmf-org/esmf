@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.30 2003/08/04 23:01:01 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.31 2003/08/05 16:18:21 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.30 2003/08/04 23:01:01 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.31 2003/08/05 16:18:21 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -330,10 +330,8 @@
                // i, indexlist[i].min, indexlist[i].max, indexlist[i].stride);
 
           nxp = 1;
-          if ((periodic[0] == ESMF_TF_TRUE) && 
-              (indexlist[0].min < global_start[0])) nxp++;
-          if ((periodic[1] == ESMF_TF_TRUE) && 
-              (indexlist[1].min < global_start[1])) nxp++;
+          if ((periodic[0] == ESMF_TF_TRUE) && (global_start[0] <= 0)) nxp++;
+          if ((periodic[1] == ESMF_TF_TRUE) && (global_start[1] <= 0)) nxp++;
 
           xps = new ESMC_XPacket[nxp];
         
@@ -356,8 +354,7 @@
           xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
 
           // if periodic along the first axis and this piece along boundary:
-          if ((periodic[0] == ESMF_TF_TRUE) && 
-              (indexlist[0].min < global_start[0])) {
+          if ((periodic[0] == ESMF_TF_TRUE) && (global_start[0] <= 0)) {
  
               nextxp++;
 
@@ -379,8 +376,7 @@
           }
 
           // if periodic along the second axis and this piece along boundary:
-          if ((periodic[1] == ESMF_TF_TRUE) && 
-              (indexlist[1].min < global_start[1])) {
+          if ((periodic[1] == ESMF_TF_TRUE) && (global_start[1] <= 0)) {
 
               nextxp++;
 
