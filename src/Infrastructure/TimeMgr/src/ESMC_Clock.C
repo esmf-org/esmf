@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.63 2004/06/08 21:24:47 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.64 2004/06/08 21:47:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.63 2004/06/08 21:24:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.64 2004/06/08 21:47:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1100,13 +1100,7 @@ int ESMC_Clock::count=0;
                                      "stopTime.ESMC_TimeValidate() failed",
                                      &rc)) return(rc);
 
-// TODO: uncomment this section when LogErr implemented (ESMF_WARNING defined)
-//       and users approve.
-//  will fix bugs 801366, 801409, & 806784
-#if 1
-
-// TODO: put into ESMF_Base.F90 & ESMC_Macros.h, share with LogErr ?
-//#define ESMF_WARNING 1
+//  The following fixes bugs 801366, 801409, & 806784
 
       // startTime and stopTime calendars should generally be the same.
       //   (Conceptually could be different, if based on same zero-point).
@@ -1199,8 +1193,6 @@ int ESMC_Clock::count=0;
       // note:  don't check prevTime relative to currTime, as user could
       //        change direction with a variable time step.  Also, prevTime
       //        is exclusively maintained internally.
-
-#endif
 
     } // endif stopTimeSet
 
