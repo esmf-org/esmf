@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.31 2005/03/04 20:57:43 nscollins Exp $
+# $Id: build_rules.mk,v 1.32 2005/03/04 21:01:40 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -79,6 +79,22 @@ MPI_LIB        = -llamf77mpi -lmpi -llam
 MPIRUN         =  mpirun
 endif
 endif
+
+# This section is set up for vendor supplied MPI (e.g. SGI Altix).
+# It is assumed to be in a system-standard location, but can be overridden
+# by setting MPI_HOME to another location.
+ifeq ($(ESMF_COMM),mpi)
+ifdef MPI_HOME
+MPI_INCLUDE    = -I${MPI_HOME}/include
+MPI_LIB        = -L${MPI_HOME}/lib -lmpi -lmpi++
+MPIRUN         =  ${MPI_HOME}/bin/mpirun
+else
+MPI_INCLUDE    = 
+MPI_LIB        = -lmpi -lmpi++
+MPIRUN         =  mpirun
+endif
+endif
+
 
 # This section is set up for mpich mpi.   If the mpich include files, libs, and
 # mpirun executable are installed in the dirs normally searched by the
