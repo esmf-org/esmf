@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.8 2003/12/10 00:42:14 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.9 2004/01/07 22:31:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.8 2003/12/10 00:42:14 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.9 2004/01/07 22:31:52 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -394,14 +394,14 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedistDeprecated(array, layout, global_start, &
+      subroutine ESMF_ArrayRedistDeprecated(array, layout, globalStart, &
                                   global_dimlengths, rank_trans, olddecompids, &
                                   decompids, redistarray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
       type(ESMF_DELayout) :: layout
-      integer, dimension(:), intent(in) :: global_start
+      integer, dimension(:), intent(in) :: globalStart
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: rank_trans
       integer, dimension(:), intent(in) :: olddecompids
@@ -432,7 +432,7 @@
 ! call c routine to query index
         size_rank_trans = size(rank_trans)
         size_decomp = size(decompids)
-        call c_ESMC_ArrayRedist(array, layout, global_start, global_dimlengths, &
+        call c_ESMC_ArrayRedist(array, layout, globalStart, global_dimlengths, &
                                 rank_trans, size_rank_trans, olddecompids, &
                                 decompids, size_decomp, redistarray, status)
         if (status .ne. ESMF_SUCCESS) then
@@ -505,7 +505,7 @@
       type(ESMF_Route) :: route
       integer, dimension(ESMF_MAXGRIDDIM) :: global_count, decompids
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
-      integer, dimension(:,:), allocatable :: global_start
+      integer, dimension(:,:), allocatable :: globalStart
       integer :: size_decomp, size_AI
       integer :: nDEs, my_DE
       integer :: gridrank, datarank
@@ -531,7 +531,7 @@
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
 
       ! Allocate temporary arrays
-      allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(globalStart(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(      src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(      dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(   gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
@@ -539,7 +539,7 @@
      
       ! Extract more information from the Grid
       call ESMF_GridGet(grid, global_cell_dim=global_count, &
-                        global_start=global_start, periodic=periodic, rc=status)
+                        globalStart=globalStart, periodic=periodic, rc=status)
       ! TODO: get decompids, get grid rank here?
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayHalo: GridGet returned failure"
@@ -594,7 +594,7 @@
           route = ESMF_RouteCreate(layout, rc)
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
-                                        gl_dst_AI, nDEs, global_start, &
+                                        gl_dst_AI, nDEs, globalStart, &
                                         global_count, layout, periodic, status)
       endif
 
@@ -602,11 +602,11 @@
       call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
 
       ! get rid of temporary arrays
-      if (allocated(global_start)) deallocate(global_start, stat=status)
-      if (associated(     src_AI)) deallocate(src_AI, stat=status)
-      if (associated(     dst_AI)) deallocate(dst_AI, stat=status)
-      if (associated(  gl_src_AI)) deallocate(gl_src_AI, stat=status)
-      if (associated(  gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
+      if (allocated(globalStart)) deallocate(globalStart, stat=status)
+      if (associated(    src_AI)) deallocate(src_AI, stat=status)
+      if (associated(    dst_AI)) deallocate(dst_AI, stat=status)
+      if (associated( gl_src_AI)) deallocate(gl_src_AI, stat=status)
+      if (associated( gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
