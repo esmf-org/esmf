@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.44 2004/11/17 00:52:27 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.45 2004/11/17 16:11:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.44 2004/11/17 00:52:27 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.45 2004/11/17 16:11:27 jwolfe Exp $'
 
 !==============================================================================
 
@@ -934,23 +934,14 @@
               ! find next intersection of this segment with a grid
               ! line on the destination grid.  Offset from last
               ! intersection to nudge into next grid cell.
-              if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
-                call ESMF_RegridConservXSpher2D(iDst, jDst, &
-                                                xIntersect, yIntersect, &
-                                                xoff, yoff, coinc, &
-                                                xbeg, ybeg, xend, yend, fullLine, &
-                                                dstCenterX, dstCenterY, &
-                                                dstCornerX, dstCornerY, &
-                                                dstMask, localrc)
-              else
-                call ESMF_RegridConservXRect2D(iDst, jDst, startCorner, &
-                                               xIntersect, yIntersect, &
-                                               xoff, yoff, coinc, &
-                                               xbeg, ybeg, xend, yend, fullLine, &
-                                               dstCenterX, dstCenterY, &
-                                               dstCornerX, dstCornerY, &
-                                               dstMask, cornerX, cornerY, localrc)
-              endif
+              call ESMF_RegridConservIntersect2D(iDst, jDst, startCorner, &
+                                                 xIntersect, yIntersect, &
+                                                 xoff, yoff, coinc, &
+                                                 xbeg, ybeg, xend, yend, fullLine, &
+                                                 dstCenterX, dstCenterY, &
+                                                 dstCornerX, dstCornerY, &
+                                                 dstMask, coordSystem, &
+                                                 cornerX, cornerY, localrc)
 
               ! compute line integral for this subsegment.
               call ESMF_RegridConservLineInt(weights, coordSystem,       &
@@ -968,6 +959,8 @@
               ! store the appropriate addresses and weights.
               ! also add contributions to cell areas and centroids.
               if (iDst /= 0 .AND. jDst /= 0) then  ! found appropriate dest cell
+                ! is this the right mask -- in SCRIP it looks like the srcMask
+                ! but we have also kicked out of this loop if not srcMask
                 if (dstMask(iDst,jDst)) then
                   dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
                   dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
@@ -2193,18 +2186,19 @@
 
 !-----------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridConservXRect2D"
+#define ESMF_METHOD "ESMF_RegridConservIntersect2D"
 !BOPI
-! !IROUTINE: ESMF_RegridConservXRect2D - finds next intersection
+! !IROUTINE: ESMF_RegridConservIntersect2D - finds next intersection
 ! !INTERFACE:
 
-      subroutine ESMF_RegridConservXRect2D(iLoc, jLoc, srcCorner, &
-                                           xIntersect, yIntersect, &
-                                           xoff, yoff, coinc, &
-                                           xbeg, ybeg, xend, yend, fullLine,  &
-                                           srchCenterX, srchCenterY, &
-                                           srchCornerX, srchCornerY, &
-                                           mask, cornerX, cornerY, rc) 
+      subroutine ESMF_RegridConservIntersect2D(iLoc, jLoc, srcCorner, &
+                                               xIntersect, yIntersect, &
+                                               xoff, yoff, coinc, &
+                                               xbeg, ybeg, xend, yend, fullLine,  &
+                                               srchCenterX, srchCenterY, &
+                                               srchCornerX, srchCornerY, &
+                                               mask, coordSystem, &
+                                               cornerX, cornerY, rc) 
 
 !
 ! !ARGUMENTS:
@@ -2226,6 +2220,7 @@
       real(ESMF_KIND_R8), dimension(:,:,:), intent(in) :: srchCornerX
       real(ESMF_KIND_R8), dimension(:,:,:), intent(in) :: srchCornerY
       logical, dimension(:,:), intent(in) :: mask
+      type(ESMF_CoordSystem), intent(in) :: coordSystem
       real(ESMF_KIND_R8), dimension(:), intent(inout) :: cornerX
       real(ESMF_KIND_R8), dimension(:), intent(inout) :: cornerY
       integer, intent(out), optional :: rc      
@@ -2353,10 +2348,36 @@
       yb   = ybeg
       xe   = xend
       ye   = yend
+
+      ! correct for longitude crossings if necessary
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+        if ((xe-xb) > 1.5*pi) then 
+          xe = xe - pi2         
+        else if ((xe-xb) < -1.5*pi) then
+          xe = xe + pi2         
+        endif 
+      endif
+
       dx   = xe - xb
       dy   = ye - yb
       if (xend.eq.fullLine(1) .AND. yend.eq.fullLine(2)) reverse = .true.
  
+      ! if this the coordinate system is spherical and the point is
+      ! poleward of the threshold latitudes, compute the intersection
+      ! in a transformed coordinate system to avoid pole singularity
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+        if (yb > northThreshold .or. yb < southThreshold) then
+          call ESMF_RegridConservIntrsctPole2D(iLoc, jLoc, &
+                                     xIntersect, yIntersect, &
+                                     xoff, yoff, coinc,               &
+                                     xbeg, ybeg, xend, yend, fullLine, &
+                                     northThreshold, southThreshold,   &
+                                     srchCornerX, srchCornerY,         &
+                                     mask, localrc)
+           return
+         endif
+       endif
+
       ! search for location of the beginning of the segment 
       ! in input grid
       iLoc = 0 ! default is zero if no cell location found
@@ -2371,6 +2392,22 @@
             cornerX(corner) = srchCornerX(corner,i,j)
             cornerY(corner) = srchCornerY(corner,i,j)
           enddo
+
+          ! check for longitude crossings in spherical coords
+          if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+            if ((xb - refx) >  pi) then
+              xb = xb - pi2
+              xe = xe - pi2
+            endif
+            if ((xb - refx) < -pi) then
+              xb = xb + pi2
+              xe = xe + pi2
+            endif
+            do corner = 1,numCorners
+              if ((cornerX(corner) - xb) >  1.5*pi) cornerX = cornerX - pi2
+              if ((cornerX(corner) - xb) < -1.5*pi) cornerX = cornerX + pi2
+            enddo
+          endif
 
           ! if point is outside the cell bounding box, move on to the next cell
           if (xb.gt.maxval(cornerX) .OR. yb.gt.maxval(cornerY)) cycle cellLoop
@@ -2503,6 +2540,24 @@
           rhs1 = x1 - xb
           rhs2 = y1 - yb
 
+!          if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+!            if (mat1 >  pi) then
+!              mat1 = mat1 - pi2
+!            else if (mat1 < -pi) then
+!              mat1 = mat1 + pi2
+!            endif
+!            if (mat2 >  pi) then
+!              mat2 = mat2 - pi2
+!            else if (mat2 < -pi) then
+!              mat2 = mat2 + pi2
+!            endif
+!            if (rhs1 >  pi) then
+!              rhs1 = rhs1 - pi2
+!            else if (rhs1 < -pi) then
+!              rhs1 = rhs1 + pi2
+!            endif
+!          endif
+
           determ = mat1*mat4 - mat2*mat3
 
           ! if the determinant is zero, the segments are either parallel or
@@ -2535,6 +2590,19 @@
                 rhs2 = y1 - fullLine(4)
               endif
 
+!              if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+!                if (mat1 >  pi) then
+!                  mat1 = mat1 - pi2
+!                else if (mat1 < -pi) then
+!                  mat1 = mat1 + pi2
+!                endif
+!                if (rhs1 >  pi) then
+!                  rhs1 = rhs1 - pi2
+!                else if (rhs1 < -pi) then
+!                  rhs1 = rhs1 + pi2
+!                endif
+!              endif
+
               determ = mat1*mat4 - mat2*mat3
 
               ! sometimes due to roundoff, the previous determinant is non-zero,
@@ -2566,491 +2634,33 @@
 
         enddo intrsctLoop
 
-      endif ! found cell
-
-      end subroutine ESMF_RegridConservXRect2D
-
-!-----------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridConservXSpher2D"
-!BOPI
-! !IROUTINE: ESMF_RegridConservXSpher2D - finds next intersection
-! !INTERFACE:
-
-      subroutine ESMF_RegridConservXSpher2D(iLoc, jLoc, &
-                                            xIntersect, yIntersect, &
-                                            xoff, yoff, coinc, &
-                                            xbeg, ybeg, xend, yend, fullLine,  &
-                                            srchCenterX, srchCenterY, &
-                                            srchCornerX, srchCornerY, &
-                                            mask, rc) 
-
-!
-! !ARGUMENTS:
-      integer, intent(out) :: iLoc
-      integer, intent(out) :: jLoc
-      real(ESMF_KIND_R8), intent(out) :: xIntersect
-      real(ESMF_KIND_R8), intent(out) :: yIntersect
-      real(ESMF_KIND_R8), intent(out) :: xoff
-      real(ESMF_KIND_R8), intent(out) :: yoff
-      logical, intent(out) :: coinc
-      real(ESMF_KIND_R8), intent(in) :: xbeg
-      real(ESMF_KIND_R8), intent(in) :: ybeg
-      real(ESMF_KIND_R8), intent(in) :: xend
-      real(ESMF_KIND_R8), intent(in) :: yend
-      real(ESMF_KIND_R8), dimension(4), intent(in) :: fullLine
-      real(ESMF_KIND_R8), dimension(:,:), intent(in) :: srchCenterX
-      real(ESMF_KIND_R8), dimension(:,:), intent(in) :: srchCenterY
-      real(ESMF_KIND_R8), dimension(:,:,:), intent(in) :: srchCornerX
-      real(ESMF_KIND_R8), dimension(:,:,:), intent(in) :: srchCornerY
-      logical, dimension(:,:), intent(in) :: mask
-      integer, intent(out), optional :: rc      
-
-! !DESCRIPTION:
-!  Given the endpoints of a line segment, this routine finds the next 
-!  intersection of that line segment with a grid line of an input grid. 
-!  The location of the beginning point in the grid is returned together
-!  with the intersection point.  A coincidence flag is returned if the 
-!  segment is entirely coincident with a grid line.  If the segment
-!  lies entirely within a grid cell (no intersection), the endpoints
-!  of the segment are returned as the intersection point.  If the
-!  beginning point lies outside the grid, a location of zero is 
-!  returned but an intersection may still be returned if the segment
-!  enters the grid from outside the grid domain.  If the current segment
-!  is a sub-segment of a longer line segment, an optional argument with
-!  the coordinates of the longer segment endpoints can be supplied
-!  to provide consistent intersections along the longer segment.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[iLoc]
-!        The i location in the searched grid containing the beginning
-!        endpoint of the line segment.  If point could not be found,
-!        returns a zero signifying point outside grid.
-!     \item[jLoc]
-!        The j location in the searched grid containing the beginning
-!        endpoint of the line segment.  If point could not be found,
-!        returns a zero signifying point outside grid.
-!     \item[xIntersect, yIntersect]
-!        Coordinates of the next intersection of the input line segment
-!        with the input grid cells.
-!     \item[xoff, yoff]
-!        Amount to offset intersection coordinates for next call to
-!        this routine (to step into next cell).
-!     \item[coinc]
-!        Logical flag to denote cases where line segment is coincident
-!        with cell side.
-!     \item[xbeg, ybeg]
-!        The x,y coordinates for the beginning endpoint of this segment.
-!        x,y refer to lon,lat in radians for spherical coordinates.
-!     \item[xend, yend]
-!        The x,y coordinates for the second endpoint of this segment
-!        in the same convention as the beginning endpoint.
-!     \item[fullLine]
-!        The starting and ending coordinates of the full line segment
-!        in which the current segment is a subsegment.  This is necessary
-!        to provide consistent intersection calculations for different
-!        paths through the grid.
-!     \item[srchCenterX, srchCenterY]
-!        Coordinate points of cell centers for the list of cells to search
-!        for next intersection.  x,y refer to lon, lat in radians for
-!        spherical coordinates.
-!     \item[srchCornerX, srchCornerY]
-!        Coordinate points of cell corners for the list of cells to search
-!        for next intersection. x,y refer to lon, lat in radians for
-!        spherical coordinates.
-!     \item[mask]
-!        Logical mask to flag which of the above cells are participating 
-!        in regrid.
-!     \item[[rc]]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! !REQUIREMENTS:  TODO
-!EOPI
-
-      ! local variables
-      integer ::         &
-        i, j,            &! dummies for addresses
-        corner, nextCorner,        &! loop index, next index
-        localrc,         &! error signal
-        iCells, jCells,  &! search grid size
-        numCorners        ! number of corners in each search grid cell
-      integer :: iStrt=1
-      integer :: jStrt=1
-
-      logical ::      & 
-        reverse,    &! segment in opposite direction of full segment
-        thresh,     &! flags segments crossing threshold bndy
-        outside,    &! true if beg point outside grid
-        found         ! true if grid cell found
-
-      real (ESMF_KIND_R8), parameter :: offset = 1.d-10
-
-      real (ESMF_KIND_R8) ::     &
-        refx,                   &! temporary for manipulating longitudes
-        xb, yb, xe, ye,         &! local coordinates for segment endpoints
-        x1, y1, x2, y2,         &! coordinates for grid side endpoints
-        dx, dy,                 &! difference in x,y for stepping along seg
-        s1, s2, determ,         &! variables used for linear solve to
-        mat1, mat2, mat3, mat4, &! matrix entries for intersect linear system
-        rhs1, rhs2,             &! rhs for linear system to find intersect
-        vec1X, vec1Y,           &! vectors for cross product tests
-        vec2X, vec2Y,           &!
-        crossProduct             ! cross product to use in various tests 
-      real (ESMF_KIND_R8) :: srchMinX, srchMinY, srchMaxX, srchMaxY
-
-      real (ESMF_KIND_R8), dimension(:), allocatable :: cornerX
-      real (ESMF_KIND_R8), dimension(:), allocatable :: cornerY
-                             ! x,y corner coordinates for a given cell
-
-      real (ESMF_KIND_R8), parameter :: northThreshold =  1.48
-      real (ESMF_KIND_R8), parameter :: southThreshold = -1.48
-                            ! threshold latitude above/below which to use polar
-                            ! transformation for finding intersections in
-                            ! spherical coordinates
-                                  
-      ! Initialize return code; assume failure until success is certain
-      if (present(rc)) rc = ESMF_FAILURE
-
-      ! initialize defaults, flags, etc.
-      reverse = .false.
-      coinc   = .false.
-      thresh  = .false.
-      outside = .false.
-      found    = .false.
-      
-      iCells     = size(srchCenterX, 1)
-      jCells     = size(srchCenterX, 2)
-      numCorners = size(srchCornerX, 1)
-      allocate(cornerX(numCorners), &
-               cornerY(numCorners), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "corner arrays", &
-                                     ESMF_CONTEXT, rc)) return
-      
-      xIntersect = xend
-      yIntersect = yend
-      xoff = 0.0d0
-      yoff = 0.0d0
-      s1   = 0.01d0
-      s2   = 0.0d0
-      xb = xbeg
-      yb = ybeg
-      xe = xend
-      ye = yend
-   !   srchMinX = minval(srchCornerX)
-   !   srchMinY = minval(srchCornerY)
-   !   srchMaxX = maxval(srchCornerX)
-   !   srchMaxY = maxval(srchCornerY)
-
-      ! correct for longitude crossings if necessary
-      if ((xe-xb) > 1.5*pi) then
-        xe = xe - pi2
-      else if ((xe-xb) < -1.5*pi) then
-        xe = xe + pi2
-      endif
-      dx = xe - xb
-      dy = ye - yb
-      if (xend == fullLine(1) .AND. &
-          yend == fullLine(2)) reverse = .true.
- 
-      ! if the point is poleward of the threshold latitudes, compute the
-      ! intersection in a transformed coordinate system to avoid pole singularity
-      if (yb > northThreshold .or. yb < southThreshold) then
-        call ESMF_RegridConservIntrsctPole2D(iLoc, jLoc, &
-                                   xIntersect, yIntersect, &
-                                   xoff, yoff, coinc,               &
-                                   xbeg, ybeg, xend, yend, fullLine, &
-                                   northThreshold, southThreshold,   &
-                                   srchCornerX, srchCornerY,         &
-                                   mask, localrc) 
-         return
-       endif
-
-      ! search for location of the beginning of the segment 
-      ! in input grid
-      iLoc = 0 ! default is zero if no cell location found
-      jLoc = 0
-
-    5 do j             = jStrt, jCells
-        cellLoop: do i = iStrt, iCells
-
-          ! set up local info for this cell
-          refx    = srchCenterX(i,j)
-          cornerX = srchCornerX(:,i,j)
-          cornerY = srchCornerY(:,i,j)
-
-          ! check for longitude crossings in spherical coords
-          if ((xb - refx) >  pi) then
-            xb = xb - pi2
-            xe = xe - pi2
-          endif
-          if ((xb - refx) < -pi) then
-            xb = xb + pi2
-            xe = xe + pi2
-          endif
-
-          do corner = 1,numCorners
-            if ((cornerX(corner) - xb) >  1.5*pi) cornerX = cornerX - pi2
-            if ((cornerX(corner) - xb) < -1.5*pi) cornerX = cornerX + pi2
-          enddo
-
-          ! if point is outside the cell bounding box, move on to the next cell
-          if (xb < minval(cornerX) .OR. xb > maxval(cornerX) .OR. &
-              yb < minval(cornerY) .OR. yb > maxval(cornerY)) cycle cellLoop
-  !        if (xe < minval(cornerX) .OR. xb > maxval(cornerX) .OR. &
-  !            ye < minval(cornerY) .OR. yb > maxval(cornerY)) cycle cellLoop
-
-          ! congratulations.  you have jumped through another hoop successfully.
-          ! now check this cell more carefully to see if the point is inside
-          cornerLoop: do corner = 1,numCorners
-            nextCorner = MOD(corner,numCorners) + 1
-
-            ! here we take the cross product of the vector making 
-            ! up each cell side with the vector formed by the vertex
-            ! and search point.  if all the cross products are 
-            ! positive, the point is contained in the cell.
-            ! TODO: the crossProduct >0 assumes a counterclockwise
-            ! TODO:   ordering of corner points.  A more general
-            ! TODO:   test is that all the cross products are same sign
-
-            x1 = cornerX(corner    )
-            x2 = cornerX(nextCorner)
-            y1 = cornerY(corner    )
-            y2 = cornerY(nextCorner)
-
-            vec1X = x2 - x1
-            vec1Y = y2 - y1
-            vec2X = xb - x1
-            vec2Y = yb - y1
-
-            ! if this side has zero length, skip the side
-            if (vec1X == 0.0d0 .AND. vec1Y == 0.0d0) cycle cornerLoop
-
-            ! if endpoint coincident with vertex, offset the endpoint before
-            !   computing cross product
-            if (vec2X == 0 .AND. vec2Y == 0) then
-                vec2X = (xb + offset*(xe-xb)) - x1
-                vec2Y = (yb + offset*(ye-yb)) - y1
-            endif
-
-            crossProduct = vec1X*vec2Y - vec2X*vec1Y
-
-            if (crossProduct == 0.0d0) then
-
-              ! if the cross product for a side is zero, the point 
-              !   lies exactly on the side. perform another cross
-              !   product between the side and the segment itself. 
-              ! if this cross product is also zero, the line is 
-              !   coincident with the cell boundary - perform the 
-              !   dot product and only choose the cell if the dot 
-              !   product is positive (parallel vs anti-parallel).
-              vec2X = xe - xb
-              vec2Y = ye - yb
-
-              crossProduct = vec1X*vec2Y - vec2X*vec1Y
-
-              if (crossProduct == 0.0d0) then
-                coinc = .true.
-                crossProduct = vec1X*vec2X + vec1Y*vec2Y
-                if (reverse) crossProduct = -crossProduct
-              endif
-            endif
-
-            ! if cross product is less than zero, this cell doesn't work
-            if (crossProduct < 0.0d0) exit cornerLoop
-
-          enddo cornerLoop
-
-          ! if cross products all positive, we found the location
-          if (corner > numCorners) then
-            found = .true.
-            iLoc  = i
-            jLoc  = j
-            iStrt = i
-            jStrt = j
-            go to 10
-          endif
-
-          ! otherwise move on to next cell
-        enddo cellLoop
-      enddo
-
-      ! assumes found is false
-      if (iStrt.ne.1 .OR. jStrt.ne.1) then
-        iStrt = 1
-        jStrt = 1
-        goto 5
-      endif
-
-      ! the following logic is not included in SCRIP, so please be aware
-      if ((xbeg.lt.srchMinX .AND. xend.lt.srchMinX) .OR. &
-          (xbeg.gt.srchMaxX .AND. xend.gt.srchMaxX) .OR. &
-          (ybeg.lt.srchMinY .AND. yend.lt.srchMinY) .OR. &
-          (ybeg.gt.srchMaxY .AND. yend.gt.srchMaxY)) then
-        go to 10
-      else
-        ! cell not found - assume beg point outside grid
-        ! take baby steps along segment to find a point inside the grid
-        s2 = s2 + s1
-        if (s2 > 1.0d0) go to 10
-        outside = .true.
-        xb   = xb + s1*dx
-        yb   = yb + s1*dy
-        go to 5
-      endif
-   
-   10 continue
-
-      ! if the first part of the segment was outside the grid the found point
-      !   corresponds to the first point inside the grid. invert the segment
-      !   to find first intersection with grid boundary
-      if (outside) then
-        xe   = xbeg
-        ye   = ybeg
-        iLoc = 0
-        jLoc = 0
-      endif
-
-      ! now that a cell is found, search for the next intersection.
-      ! loop over sides of the cell to find intersection with side
-      ! must check all sides for coincidences or intersections
-      if (found) then
-
-        intrsctLoop: do corner = 1,numCorners
-          nextCorner = mod(corner,numCorners) + 1
-
-          x1 = cornerX(corner    )
-          x2 = cornerX(nextCorner)
-          y1 = cornerY(corner    )
-          y2 = cornerY(nextCorner)
-
-          ! set up linear system to solve for intersection
-          mat1 = xe - xb
-          mat2 = x1 - x2
-          mat3 = ye - yb
-          mat4 = y1 - y2
-          rhs1 = x1 - xb
-          rhs2 = y1 - yb
-
-          if (mat1 >  pi) then
-            mat1 = mat1 - pi2
-          else if (mat1 < -pi) then
-            mat1 = mat1 + pi2
-          endif
-          if (mat2 >  pi) then
-            mat2 = mat2 - pi2
-          else if (mat2 < -pi) then
-            mat2 = mat2 + pi2
-          endif
-          if (rhs1 >  pi) then
-            rhs1 = rhs1 - pi2
-          else if (rhs1 < -pi) then
-            rhs1 = rhs1 + pi2
-          endif
-
-          determ = mat1*mat4 - mat2*mat3
-
-          ! if the determinant is zero, the segments are either parallel or
-          !   coincident.  coincidences were detected above so do nothing.
-          ! if the determinant is non-zero, solve for the linear parameters
-          !   s for the intersection point on each line segment.
-          ! if 0<s1,s2<1 then the segment intersects with this side.
-          !   return the point of intersection (adding a small
-          !   number so the intersection is off the grid line).
-          if (abs(determ) > 1.e-30) then
-
-            s1 = (rhs1*mat4 - mat2*rhs2)/determ
-            s2 = (mat1*rhs2 - rhs1*mat3)/determ
-
-            if (s2 >= 0.0d0 .AND. s2 <= 1.0d0 .AND. &
-                s1 >  0.0d0 .AND. s1 <= 1.0d0) then
-
-              ! recompute intersection based on full segment so intersections
-              !   are consistent in cases where computing intersections between
-              !   two grids
-              if (.not. reverse) then
-                mat1 = fullLine(3) - fullLine(1)
-                mat3 = fullLine(4) - fullLine(2)
-                rhs1 = x1 - fullLine(1)
-                rhs2 = y1 - fullLine(2)
-              else
-                mat1 = fullLine(1) - fullLine(3)
-                mat3 = fullLine(2) - fullLine(4)
-                rhs1 = x1 - fullLine(3)
-                rhs2 = y1 - fullLine(4)
-              endif
-
-              if (mat1 >  pi) then
-                mat1 = mat1 - pi2
-              else if (mat1 < -pi) then
-                mat1 = mat1 + pi2
-              endif
-              if (rhs1 >  pi) then
-                rhs1 = rhs1 - pi2
-              else if (rhs1 < -pi) then
-                rhs1 = rhs1 + pi2
-              endif
-
-              determ = mat1*mat4 - mat2*mat3
-
-              ! sometimes due to roundoff, the previous determinant is non-zero,
-              !   but the lines are actually coincident.  if this is the case,
-              !   skip the rest.
-              if (determ /= 0.0d0) then
-                s1 = (rhs1*mat4 - mat2*rhs2)/determ
-                s2 = (mat1*rhs2 - rhs1*mat3)/determ
- 
-                xoff = abs(offset/determ)
-                if (s1 + xoff > 1.0d0) xoff = 1.0d0 - s1
-                yoff = mat3*xoff
-                xoff = mat1*xoff
-
-                if (.not. reverse) then
-                  xIntersect = fullLine(1) + mat1*s1
-                  yIntersect = fullLine(2) + mat3*s1
-                else
-                  xIntersect = fullLine(3) + mat1*s1
-                  yIntersect = fullLine(4) + mat3*s1
-                endif
-                exit intrsctLoop
-              endif
-            endif
-          endif
-
-          ! no intersection this side, move on to next side
-
-        enddo intrsctLoop
-
         ! if intersection crosses pole threshold, reset intersection to
         !   threshold lat
-        if (yIntersect > northThreshold .OR. &
-            yIntersect < southThreshold) then
-          if (yIntersect > 0.0d0) then
-            yIntersect = northThreshold
-          else
-            yIntersect = southThreshold
-          endif
-          if (.not. reverse) then
-            s1 = (yIntersect - fullLine(2))/mat3
-            xIntersect = fullLine(1) + mat1*s1
-          else
-            s1 = (yIntersect - fullLine(4))/mat3
-            xIntersect = fullLine(3) + mat1*s1
-          endif
-          if (xoff == 0.0d0) then  ! no intersection from above
-            yoff = mat3*offset
-            xoff = mat1*offset
-          endif
-        endif
+!        if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+!          if (yIntersect > northThreshold .OR. &
+!              yIntersect < southThreshold) then
+!            if (yIntersect > 0.0d0) then
+!              yIntersect = northThreshold
+!            else  
+!              yIntersect = southThreshold
+!            endif
+!            if (.not. reverse) then
+!              s1 = (yIntersect - fullLine(2))/mat3
+!              xIntersect = fullLine(1) + mat1*s1
+!            else
+!              s1 = (yIntersect - fullLine(4))/mat3
+!              xIntersect = fullLine(3) + mat1*s1
+!            endif
+!            if (xoff == 0.0d0) then  ! no intersection from above
+!              yoff = mat3*offset
+!              xoff = mat1*offset
+!            endif
+!          endif
+!        endif
 
       endif ! found cell
 
-      deallocate(cornerX, &
-                 cornerY, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate corner arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-      end subroutine ESMF_RegridConservXSpher2D
+      end subroutine ESMF_RegridConservIntersect2D
 
 !-----------------------------------------------------------------------
 #undef  ESMF_METHOD
