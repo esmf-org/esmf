@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.13 2005/01/14 16:05:08 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.14 2005/02/11 22:49:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -342,6 +342,20 @@
 
 !------------------------------------------------------------------------------
 !
+!     ! Typed termination type
+
+      type ESMF_TerminationType
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_TerminationType), parameter:: &
+        ESMF_FINAL        = ESMF_TerminationType(1), &
+        ESMF_ABORT        = ESMF_TerminationType(2)
+
+!------------------------------------------------------------------------------
+!
       ! Contains pointer to real Base object which is defined in C++
 
       type ESMF_Base
@@ -378,6 +392,7 @@
 
       public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
+      public ESMF_TerminationType, ESMF_FINAL, ESMF_ABORT
 
       public ESMF_FAILURE, ESMF_SUCCESS
       public ESMF_MAXSTR
@@ -426,6 +441,7 @@ interface operator (.eq.)
  module procedure ESMF_tfeq
  module procedure ESMF_aieq
  module procedure ESMF_bfeq
+ module procedure ESMF_tteq
 end interface
 
 interface operator (.ne.)
@@ -436,6 +452,7 @@ interface operator (.ne.)
  module procedure ESMF_tfne
  module procedure ESMF_aine
  module procedure ESMF_bfne
+ module procedure ESMF_ttne
 end interface
 
 interface assignment (=)
@@ -536,6 +553,23 @@ function ESMF_bfne(bf1, bf2)
  type(ESMF_BlockingFlag), intent(in) :: bf1, bf2
 
  ESMF_bfne = (bf1%value .ne. bf2%value)
+end function
+
+!------------------------------------------------------------------------------
+! function to compare two ESMF_TerminationTypes
+
+function ESMF_tteq(tt1, tt2)
+ logical ESMF_tteq
+ type(ESMF_TerminationType), intent(in) :: tt1, tt2
+
+ ESMF_tteq = (tt1%value .eq. tt2%value)
+end function
+
+function ESMF_ttne(tt1, tt2)
+ logical ESMF_ttne
+ type(ESMF_TerminationType), intent(in) :: tt1, tt2
+
+ ESMF_ttne = (tt1%value .ne. tt2%value)
 end function
 
 !------------------------------------------------------------------------------
