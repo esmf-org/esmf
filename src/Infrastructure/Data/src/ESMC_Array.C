@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.13 2003/01/10 18:06:12 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.14 2003/01/10 21:07:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.13 2003/01/10 18:06:12 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.14 2003/01/10 21:07:32 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -441,6 +441,7 @@
 //
     int rc = ESMF_FAILURE;
     int i, j, k;
+    int tcount, rcount;
 
     printf("ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
     printf("            rank = %d, type = %d, kind = %d, ", 
@@ -457,39 +458,73 @@
       case ESMF_DATA_REAL:
         switch (this->rank) {
           case 1:
-            printf("  Data values:\n");
-            for (i=0; i<this->length[0]; i++)
+            printf("  Real, Dim 1, Data values:\n");
+            tcount = this->length[0];
+            for (i=0; i<tcount; i++) {
                 printf("(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
+                if ((tcount > 22) && (i==10)) {
+                   printf(" skipping to end ...\n");
+                   i = tcount - 11;
+                }
+            }
             break;
           case 2:
-            printf("  Data values:\n");
-            for (j=0; j<this->length[1]; j++)
-                for (i=0; i<this->length[0]; i++)
-                printf("(%2d,%2d) =  %lg\n", i+1, j+1, *((double *)(this->base_addr) + 
+            printf("  Real, Dim 2, Data values:\n");
+            tcount = this->length[0] * this->length[1];
+            rcount = 0;
+            for (j=0; j<this->length[1]; j++) {
+                for (i=0; i<this->length[0]; i++) {
+                    printf("(%2d,%2d) =  %lg\n", i+1, j+1, *((double *)(this->base_addr) + 
                                               i + j*this->length[0]) );
+                    rcount++;
+                    if ((tcount > 22) && (rcount==10)) {
+                       printf(" skipping to end ...\n");
+                       j = (tcount-11) / this->length[0];
+                       i = (tcount-11) % this->length[0];
+                    }
+                }
+            }
             break;
           default:
-            printf("no code to handle rank %d yet\n", this->rank);
+            printf("no code to handle real rank %d yet\n", this->rank);
             break;    
         }
+        break;
       case ESMF_DATA_INTEGER:
         switch (this->rank) {
           case 1:
-            printf("  Data values:\n");
-            for (i=0; i<this->length[0]; i++)
+            tcount = this->length[0];
+            printf("  Integer, Dim 1, Data values:\n");
+            for (i=0; i<this->length[0]; i++) {
                 printf("(%2d) =  %d\n", i+1, *((int *)(this->base_addr) + i));
+                if ((tcount > 22) && (i==10)) {
+                   printf(" skipping to end ...\n");
+                   i = tcount - 11;
+                }
+            }
             break;
           case 2:
-            printf("  Data values:\n");
-            for (j=0; j<this->length[1]; j++)
-                for (i=0; i<this->length[0]; i++)
+            printf("  Integer, Dim 2, Data values:\n");
+            tcount = this->length[0] * this->length[1];
+            rcount = 0; 
+            for (j=0; j<this->length[1]; j++) {
+                for (i=0; i<this->length[0]; i++) {
                 printf("(%2d,%2d) =  %d\n", i+1, j+1, *((int *)(this->base_addr) + 
                                               i + j*this->length[0]) );
+                    rcount++;
+                    if ((tcount > 22) && (rcount==10)) {
+                       printf(" skipping to end ...\n");
+                       j = (tcount-11) / this->length[0];
+                       i = (tcount-11) % this->length[0];
+                    }
+                }
+            }
             break;
           default:
-            printf("no code to handle rank %d yet\n", this->rank);
+            printf("no code to handle integer rank %d yet\n", this->rank);
             break;    
         }
+        break;
       default:
             printf("no code to handle data type %d yet\n", this->type);
 
