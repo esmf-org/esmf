@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.45 2004/02/04 23:24:00 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.46 2004/02/05 21:31:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,6 +22,8 @@
  // higher level, 3rd party or system includes
  #include <iostream.h>
  #include <limits.h>
+ #include <string.h>
+ #include <ctype.h>
 
  // associated class definition file
  #include <ESMC_Calendar.h>
@@ -29,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.45 2004/02/04 23:24:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.46 2004/02/05 21:31:36 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -1077,17 +1079,68 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS: 
 
     cout << "Calendar -------------------------------" << endl;
-    cout << "name = "      << name << endl;
-    cout << "calendarType = " << calendarType << endl;
-    cout << "daysPerMonth = " << endl;
-    for (int i=0; i<this->monthsPerYear; i++) cout << daysPerMonth[i] << " ";
-    cout << endl;
-    cout << "monthsPerYear = "  << monthsPerYear  << endl;
-    cout << "secondsPerDay = "  << secondsPerDay  << endl;
-    cout << "secondsPerYear = " << secondsPerYear << endl;
-    cout << "daysPerYear = "    << daysPerYear.d  << endl;
-    cout << "daysPerYeardN = "  << daysPerYear.dN << endl;
-    cout << "daysPerYeardD = "  << daysPerYear.dD << endl;
+
+    // print out individually selected components
+    // TODO: enable multiple simultaneous options (token parsing)
+    //       (currently mutually exclusive)
+    if (options != ESMC_NULL_POINTER) {
+
+      // make options case insensitive
+      // TODO: put this into function to share
+      char opts[ESMF_MAXSTR];
+      int i;
+      for(i=0; i<strlen(options) && i<ESMF_MAXSTR-1; i++) {
+        opts[i] = tolower(options[i]);
+      }
+      opts[i] = '\0';
+
+      if (strncmp(opts, "name", 4) == 0) {
+        cout << "name = " << name << endl;
+      }
+      else if (strncmp(opts, "calendartype", 12) == 0) {
+        // TODO:  make lookup table: int -> string
+        cout << "calendarType = " << calendarType << endl;
+      }
+      else if (strncmp(opts, "dayspermonth", 12) == 0) {
+        cout << "daysPerMonth = ";
+        for (int i=0; i<this->monthsPerYear; i++) {
+          cout << daysPerMonth[i] << " ";
+        }
+      }
+      else if (strncmp(opts, "monthsperyear", 13) == 0) {
+        cout << "monthsPerYear = "  << monthsPerYear  << endl;
+      }
+      else if (strncmp(opts, "secondsperday", 13) == 0) {
+        cout << "secondsPerDay = "  << secondsPerDay  << endl;
+      }
+      else if (strncmp(opts, "secondsperyear", 14) == 0) {
+        cout << "secondsPerYear = " << secondsPerYear << endl;
+      }
+      else if (strncmp(opts, "daysperyear", 11) == 0) {
+        cout << "daysPerYear = "    << daysPerYear.d  << endl;
+        cout << "daysPerYeardN = "  << daysPerYear.dN << endl;
+        cout << "daysPerYeardD = "  << daysPerYear.dD << endl;
+      }
+
+    } else {
+      // default:  print out all properties
+
+      cout << "name = " << name << endl;
+
+      // TODO:  make lookup table: int -> string
+      cout << "calendarType = " << calendarType << endl;
+
+      cout << "daysPerMonth = "; 
+      for (int i=0; i<this->monthsPerYear; i++) cout << daysPerMonth[i] << " ";
+      cout << endl;
+      cout << "monthsPerYear = "  << monthsPerYear  << endl;
+      cout << "secondsPerDay = "  << secondsPerDay  << endl;
+      cout << "secondsPerYear = " << secondsPerYear << endl;
+      cout << "daysPerYear = "    << daysPerYear.d  << endl;
+      cout << "daysPerYeardN = "  << daysPerYear.dN << endl;
+      cout << "daysPerYeardD = "  << daysPerYear.dD << endl;
+    }
+
     cout << "end Calendar ---------------------------" << endl << endl;
     
     return(ESMF_SUCCESS);
