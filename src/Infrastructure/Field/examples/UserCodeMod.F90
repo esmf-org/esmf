@@ -1,4 +1,4 @@
-! $Id: UserCodeMod.F90,v 1.1 2005/01/28 18:13:21 jwolfe Exp $
+! $Id: UserCodeMod.F90,v 1.2 2005/01/28 20:47:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@
     implicit none
     private :: countX, countY, haloWidth, nPEsX, nPEsY, distGridX, distGridY
     integer :: countX=50, countY=30
-    integer :: haloWidth=2
+    integer :: haloWidth=0
     integer :: nPEsX=3, nPEsY=2
     integer, dimension(3) :: distGridX = (/ 10, 15, 25 /)
     integer, dimension(2) :: distGridY = (/ 12, 18 /)
@@ -96,6 +96,7 @@
     integer, intent(in) :: myY
 
     allocate(f90ptr(distGridX(myX)+2*haloWidth,distGridY(myY)+2*haloWidth))
+    f90ptr = 1.0d0
 
     end subroutine UserGetPointer2D
 
@@ -110,6 +111,7 @@
     integer, intent(in) :: myY
 
     allocate(f90ptr(5,distGridX(myX)+2*haloWidth,distGridY(myY)+2*haloWidth))
+    f90ptr = 2.0d0
 
     end subroutine UserGetPointer3D
 
