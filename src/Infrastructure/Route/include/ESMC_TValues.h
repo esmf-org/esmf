@@ -1,4 +1,4 @@
-// $Id: ESMC_TValues.h,v 1.1 2003/09/23 17:53:52 nscollins Exp $
+// $Id: ESMC_TValues.h,v 1.2 2003/09/23 21:44:17 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,6 +91,6 @@
 
 
  ESMC_TransformValues *ESMC_TransformValuesCreate(int *rc);
- int ESMC_TransformValuesDestroy(ESMC_TransformValues *rtable);
+ int ESMC_TransformValuesDestroy(ESMC_TransformValues *tv);
 
  #endif  // ESMC_TValues_H
