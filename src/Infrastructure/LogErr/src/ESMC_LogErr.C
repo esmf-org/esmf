@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.19 2003/10/17 19:17:06 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.20 2003/10/17 21:16:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.19 2003/10/17 19:17:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.20 2003/10/17 21:16:53 nscollins Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -1172,7 +1172,7 @@ void ESMC_Log:: ESMC_LogPrint(
 // !IROUTINE: ESMC_LogSetFlush() - set the flushSet variable.
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetFlush(
+/*inline*/ void ESMC_Log::ESMC_LogSetFlush(
 //
 // !RETURN VALUE:
 //  none
@@ -1222,7 +1222,7 @@ ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
 // !IROUTINE: ESMC_LogSetNotFlush() - output not flushed
 // !INTERFACE:       
 	     
-inline void ESMC_Log::ESMC_LogSetNotFlush(
+/*inline*/ void ESMC_Log::ESMC_LogSetNotFlush(
 //
 // !RETUN VALUE:
 //  none
@@ -1247,7 +1247,7 @@ inline void ESMC_Log::ESMC_LogSetNotFlush(
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetVerbose(
+/*inline*/ void ESMC_Log::ESMC_LogSetVerbose(
 //
 // !RETURN VALUE:
 //  none
@@ -1294,7 +1294,7 @@ ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetNotVerbose(
+/*inline*/ void ESMC_Log::ESMC_LogSetNotVerbose(
 // RETURN VALUE:
 //  none
 // !ARGUMENTS
@@ -1318,7 +1318,7 @@ inline void ESMC_Log::ESMC_LogSetNotVerbose(
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetHaltOnErr(
+/*inline*/ void ESMC_Log::ESMC_LogSetHaltOnErr(
 // RETURN VALUE:
 //  none
 // !ARGUMENTS
@@ -1365,7 +1365,7 @@ ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
+/*inline*/ void ESMC_Log::ESMC_LogSetNotHaltOnErr(
 //
 // !RETURN VALUE:
 //  none
@@ -1390,7 +1390,7 @@ inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
+/*inline*/ void ESMC_Log::ESMC_LogSetHaltOnWarn(
 //
 // !RETURN VALUE:
 // none
@@ -1440,7 +1440,7 @@ ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogSetNotHaltOnWarn(
+/*inline*/ void ESMC_Log::ESMC_LogSetNotHaltOnWarn(
 //
 // !RETURN VALUE:
 //  none
