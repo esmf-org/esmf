@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.7 2004/02/24 14:36:44 theurich Exp $
+// $Id: ESMC_FTable.h,v 1.8 2004/04/01 15:59:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ class ESMC_FTable {
     int ESMC_FTableExtend(int nfuncp, int ndatap);
     int ESMC_FTableCallVFuncPtr(char *name, int *funcrc);
 #ifdef ESMF_ENABLE_VM
-    int ESMC_FTableCallVFuncPtr(char *name, ESMC_VM **vm, int *funcrc);
+    int ESMC_FTableCallVFuncPtr(char *name, ESMC_VM *vm, int *funcrc);
 #endif
     
     int ESMC_FTableValidate(const char*) const;

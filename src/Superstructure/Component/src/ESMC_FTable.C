@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.5 2004/02/24 14:40:21 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.6 2004/04/01 16:00:28 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.5 2004/02/24 14:40:21 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.6 2004/04/01 16:00:28 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -565,9 +565,9 @@
 //    integer return code
 //
 // !ARGUMENTS:
-      char *name,         // in, function name
-      ESMC_VM **vm,       // in, p3 to this PET's VM instance
-      int *rc) {          // out, function return
+      char *name,           // in, function name
+      ESMC_VM *vm_pointer,  // in, pointer to this PET's VM instance
+      int *rc) {            // out, function return
 //
 // !DESCRIPTION:
 //    Calls the named function pointer
@@ -576,7 +576,9 @@
 // !REQUIREMENTS:  
 
     int i;
-
+    ESMC_VM *vmm = vm_pointer;
+    ESMC_VM **vm = &vmm;
+    
     *rc = ESMF_FAILURE;
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
