@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_st_results.pl,v 1.1 2004/08/03 22:03:50 svasquez Exp $
+# $Id: do_st_results.pl,v 1.2 2004/08/04 17:15:42 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 
@@ -123,7 +123,7 @@ getopts("d:", \%options);
 			print @pass_tests;
 		}
 		else {
-			print "No system tests passed\n";
+			print "No system tests passed.\n";
 		}
 
                 print "\n\n";
@@ -133,7 +133,7 @@ getopts("d:", \%options);
 			print @fail_tests;
 		}
 		else {
-			print "No system tests failed\n";
+			print "No system tests failed.\n";
 		}
         }
                 print "\n\n";
