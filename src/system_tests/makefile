@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2004/03/09 23:53:50 jwolfe Exp $ 
+# $Id: makefile,v 1.10 2004/03/11 00:05:56 nscollins Exp $ 
 
 ALL: build_system_tests
 
@@ -16,6 +16,7 @@ DIRS     = ESMF_RowReduce \
            ESMF_FieldRegrid \
            ESMF_FieldRegridMulti \
            ESMF_SimpleCoupling \
+           ESMF_MergeCoupling \
            ESMF_FlowComp \
            ESMF_FlowWithCoupling
 
