@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.37 2004/11/19 00:29:24 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.38 2004/12/10 22:39:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.37 2004/11/19 00:29:24 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.38 2004/12/10 22:39:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -45,7 +45,7 @@
 
       ! individual test result code
       integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, &
-                 hours, secs, ans, npets, ns, sN, sD
+                 hours, secs, ans, ns, sN, sD
       logical :: bool
 
       ! individual test name
@@ -53,7 +53,6 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      type(ESMF_VM):: vm
 
       ! to retrieve time in string format
       character(ESMF_MAXSTR) :: timeString
@@ -80,10 +79,7 @@
 !-------------------------------------------------------------------------------
 
      ! initialize ESMF framework
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
-
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! ----------------------------------------------------------------------------
       ! Calendar Interval tests
@@ -2510,6 +2506,6 @@
   
 #endif
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
       end program ESMF_TimeIntervalUTest

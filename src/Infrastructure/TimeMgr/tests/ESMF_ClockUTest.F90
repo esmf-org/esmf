@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.80 2004/12/03 01:01:21 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.81 2004/12/10 22:39:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.80 2004/12/03 01:01:21 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.81 2004/12/10 22:39:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,7 +60,7 @@
       ! Random number
       real :: ranNum
       integer :: seed(32)
-      integer :: timevals(8), npets
+      integer :: timevals(8)
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
@@ -77,13 +77,9 @@
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
-      type(ESMF_VM):: vm
-
 
       ! initialize ESMF framework
-      call ESMF_Initialize(vm=vm, defaultCalendar=ESMF_CAL_GREGORIAN, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! initialize one calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
@@ -1746,6 +1742,6 @@
       ! return result  ! TODO: no way to do this in F90 ?
   
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
       end program ESMF_ClockTest

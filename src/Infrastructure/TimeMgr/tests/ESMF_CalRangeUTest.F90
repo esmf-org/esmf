@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.23 2004/10/05 16:25:33 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.24 2004/12/10 22:39:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.23 2004/10/05 16:25:33 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.24 2004/12/10 22:39:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -57,8 +57,7 @@
       integer :: rc
 
       ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0, npets
-      type(ESMF_VM):: vm
+      integer :: result = 0
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -76,9 +75,7 @@
 !-------------------------------------------------------------------------------
 
       ! initialize ESMF framework
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
 #ifdef ESMF_EXHAUSTIVE
 
@@ -326,7 +323,7 @@
 #endif
 
       ! finalize ESMF framework
-      call ESMF_Finalize(rc)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 !==============================================================================
 
