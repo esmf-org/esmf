@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.6 2004/06/07 09:07:14 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.7 2004/06/07 09:07:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,6 +19,7 @@
 !BOP
 
 !EOP
+#include "ESMF.h"
 !==============================================================================
 !
 ! This file contains the Transform class definition and all Transform
@@ -77,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.6 2004/06/07 09:07:14 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.7 2004/06/07 09:07:50 nscollins Exp $'
 
 !==============================================================================
 ! 
