@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.3 2003/12/19 21:49:38 nscollins Exp $
+! $Id: ESMF_StateUTest.F90,v 1.4 2004/01/28 17:47:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.3 2003/12/19 21:49:38 nscollins Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.4 2004/01/28 17:47:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -100,7 +100,7 @@
       !NEX_UTest
       ! Test adding Bundle to a State
       bundlename = "Temperature"
-      bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+      bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -116,7 +116,7 @@
       !NEX_UTest
       ! Test adding a second Bundle to a State
       bundlename = "Temperature"
-      bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+      bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -173,7 +173,7 @@
 
       !NEX_UTest
       ! Test getting Bundle from State
-      call  ESMF_StateGetData(state1, bundlename, bundle2(1), rc)
+      call  ESMF_StateGetData(state1, bundlename, bundle2(1), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Bundle from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -277,7 +277,7 @@
 
       !NEX_UTest
       ! Test getting Field from State
-      call  ESMF_StateGetData(state1, fieldname, field2, rc)
+      call  ESMF_StateGetData(state1, fieldname, field2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -374,7 +374,7 @@
       compname = "Atmosphere2"
       statename = "Export State"
       x = 1
-      bundle2(1) = ESMF_BundleCreate(bundlename, rc=rc)
+      bundle2(1) = ESMF_BundleCreate(name=bundlename, rc=rc)
       state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, compname, &
                                 bundles=bundle2, itemcount=x, rc=rc)
       write(failMsg, *) ""

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.2 2003/12/19 21:46:40 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.3 2004/01/28 17:47:50 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -179,7 +179,7 @@
 
       bname = sname
       P_IN("ESMF_BundleCreate")
-      bundle2 = ESMF_BundleCreate(bname, rc=rc)
+      bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
       P_OUT2("ESMF_BundleCreate", trim(bname))
       
       fname = "Downward wind field"
@@ -266,7 +266,7 @@
 
     bname = "Collected quantities"
     P_IN("ESMF_BundleCreate")
-    bundle2 = ESMF_BundleCreate(bname, rc=rc)
+    bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
     P_OUT2("ESMF_BundleCreate", trim(bname))
       
     fname = "Surface pressure"
