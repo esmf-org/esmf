@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.6 2003/04/01 23:47:57 nscollins Exp $
+! $Id: ESMF_CompCreate.F90,v 1.7 2003/04/03 22:43:57 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -19,7 +19,7 @@
 #include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by Comps
-    use ESMF_CompMod
+    use ESMF_Mod
     
     implicit none
     

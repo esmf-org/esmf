@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.5 2003/03/24 22:56:56 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.6 2003/04/03 22:43:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,9 +13,9 @@
       program ESMF_FRouteUTest
 
 !------------------------------------------------------------------------------
-! INCLUDES
-#include <ESMF.h>
-!
+ 
+#include <ESMF_Macros.inc>
+
 !==============================================================================
 !BOP
 ! !PROGRAM: ESMF_FRouteUTest - Unit test for Field Route function.
@@ -28,21 +28,14 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod     ! test methods
-      use ESMF_BaseMod
-      use ESMF_IOMod
-      use ESMF_ArrayMod
-      use ESMF_DataMapMod
-      use ESMF_GridMod
-      use ESMF_DELayoutMod
-      use ESMF_RouteMod
-      use ESMF_FieldMod
+      use ESMF_Mod
 
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.5 2003/03/24 22:56:56 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.6 2003/04/03 22:43:57 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

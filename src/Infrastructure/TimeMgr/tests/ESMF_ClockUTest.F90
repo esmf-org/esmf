@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.2 2003/03/18 04:38:57 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.3 2003/04/03 22:43:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,8 +13,6 @@
       program ESMF_ClockTest
 
 !------------------------------------------------------------------------------
-! INCLUDES
-#include <ESMF.h>
 !
 !==============================================================================
 !BOP
@@ -29,16 +27,13 @@
 !-----------------------------------------------------------------------------
 ! !USES:
       use ESMF_TestMod      ! test methods
-      use ESMF_TimeIntervalMod
-      use ESMF_TimeMod
-      use ESMF_CalendarMod
-      use ESMF_ClockMod     ! the class to test
+      use ESMF_Mod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.2 2003/03/18 04:38:57 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.3 2003/04/03 22:43:57 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"

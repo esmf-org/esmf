@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.1 2003/04/01 23:51:19 nscollins Exp $
+! $Id: ESMF_UserMain.F90,v 1.2 2003/04/03 22:43:58 nscollins Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -20,11 +20,7 @@
 #include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by Comps
-    use ESMF_BaseMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_StateMod
-    use ESMF_CompMod
+    use ESMF_Mod
 
     use UserGridCompMod, only: User_SetServices => grid_services
     use UserCplCompMod, only: User_SetServices => coupler_services

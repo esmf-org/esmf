@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.9 2003/02/13 17:51:53 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.10 2003/04/03 22:43:57 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -27,11 +27,7 @@
 #define P_OUT2(string, val)   print *, "Return  ", string, " (rc=", rc, "), value = ", val
 
 !   ! Other ESMF modules which are needed by States
-    use ESMF_IOMod
-    use ESMF_ArrayMod
-    use ESMF_FieldMod
-    use ESMF_BundleMod
-    use ESMF_StateMod
+    use ESMF_Mod
     
     implicit none
     

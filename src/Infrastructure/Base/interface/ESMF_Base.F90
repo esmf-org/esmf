@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.27 2003/04/02 22:15:15 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.28 2003/04/03 22:43:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,11 +14,6 @@
 ! automated document processing.)
 !------------------------------------------------------------------------------
 
-#include <ESMF_Macros.inc>
-
-!------------------------------------------------------------------------------
-!
-!
 !------------------------------------------------------------------------------
 ! module definition
 
@@ -43,6 +38,23 @@
 ! !PRIVATE TYPES:
       private
 
+!------------------------------------------------------------------------------
+!
+!    Global integer parameters, used frequently
+
+      integer, parameter :: ESMF_FAILURE = 0, ESMF_SUCCESS = -1
+      integer, parameter :: ESMF_MAXSTR = 128
+      integer, parameter :: ESMF_MAXDIM = 7, &
+                            ESMF_MAXDECOMPDIM=2, &
+                            ESMF_MAXGRIDDIM=2
+     
+      integer, parameter :: ESMF_MAJOR_VERSION = 0
+      integer, parameter :: ESMF_MINOR_VERSION = 0
+      integer, parameter :: ESMF_REVISION = 1
+      character(32), parameter :: ESMF_VERSION_STRING = "0.0.1"
+
+!------------------------------------------------------------------------------
+!
       type ESMF_Status
       sequence
       private
@@ -186,6 +198,14 @@
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
+
+      public ESMF_FAILURE, ESMF_SUCCESS
+      public ESMF_MAXSTR
+      public ESMF_MAXDIM, ESMF_MAXDECOMPDIM, ESMF_MAXGRIDDIM
+     
+      public ESMF_MAJOR_VERSION, ESMF_MINOR_VERSION, ESMF_REVISION
+      public ESMF_VERSION_STRING 
+
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue, ESMF_Attribute, ESMF_AxisIndex, ESMF_MemIndex
       public ESMF_BasePointer, ESMF_Base
@@ -255,7 +275,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.27 2003/04/02 22:15:15 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.28 2003/04/03 22:43:56 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/25 00:18:18 flanigan Exp $
+# $Id: makefile,v 1.5 2003/04/03 22:43:57 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -10,11 +10,13 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = 
+SOURCEC	  = ESMC_HWMonitor.C ESMC_Perf.C ESMC_Segment.C ESMC_Timer.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
+# include files that should be copied to public esmf include dir
+STOREH    =
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -27,7 +29,7 @@ LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/PerfProf/<subdir>
+LOCDIR	  = src/Infrastructure/PerfProf/src
 
 
 include $(ESMF_DIR)/makefile
@@ -38,17 +40,6 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
-
-
-# if you have class files which need to be compiled in a particular
-# order, list the dependencies below, with no rules following.
-#
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
 
 
 

@@ -1,11 +1,12 @@
-# $Id: makefile,v 1.7 2003/03/25 00:18:30 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/04/03 22:43:57 nscollins Exp $ 
 
-# Coupler is here only for the reqdocs - which maybe should move
-# over to the component dir?
 
 LOCDIR   = src/Superstructure
 
 include $(ESMF_DIR)/makefile
+
+# the ESMF_Mod file is currently in the Component/src directory,
+# since this is the last to get built.
 
 DIRS     = Component 
 
