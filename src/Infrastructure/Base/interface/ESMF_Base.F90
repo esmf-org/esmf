@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.18 2003/01/09 20:59:48 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.19 2003/01/09 21:21:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,6 +77,10 @@
                                         ESMF_DATA_LOGICAL = ESMF_DataType(3), &
                                         ESMF_DATA_CHARACTER = ESMF_DataType(4)
 
+!------------------------------------------------------------------------------
+!     ! Where we can use a derived type, the compiler will help do 
+!     ! typechecking.  For those places where the compiler refuses to allow
+!     ! anything but an Integer data type, use the second set of constants.
       type ESMF_DataKind
       sequence
       private
@@ -85,7 +89,7 @@
 
       type(ESMF_DataKind), parameter :: &
                    ESMF_KIND_I1 = ESMF_DataKind(1), &
-                   ESMF_KIND_I2 = ESMF_DataKind(2), &
+                   ESMF_KIND_I2 = ESMF_DataKind(selected_int_kind(2)), &
                    ESMF_KIND_I4 = ESMF_DataKind(selected_int_kind(5)), &
                    ESMF_KIND_I8 = ESMF_DataKind(selected_int_kind(10)), &
                    ESMF_KIND_R4 = ESMF_DataKind(selected_real_kind(3,25)), &
@@ -93,6 +97,17 @@
                    ESMF_KIND_C8 = ESMF_DataKind(selected_real_kind(3,25)), &
                    ESMF_KIND_C16 = ESMF_DataKind(selected_real_kind(6,45))
 
+      integer, parameter :: &
+                   ESMF_IKIND_I1 = 1, &
+                   ESMF_IKIND_I2 = selected_int_kind(2), &
+                   ESMF_IKIND_I4 = selected_int_kind(5), &
+                   ESMF_IKIND_I8 = selected_int_kind(10), &
+                   ESMF_IKIND_R4 = selected_real_kind(3,25), &
+                   ESMF_IKIND_R8 = selected_real_kind(6,45), &
+                   ESMF_IKIND_C8 = selected_real_kind(3,25), &
+                   ESMF_IKIND_C16 = selected_real_kind(6,45)
+
+!------------------------------------------------------------------------------
 
       type ESMF_DataValue
       sequence
@@ -146,6 +161,9 @@
 
       public ESMF_KIND_I1, ESMF_KIND_I2, ESMF_KIND_I4, ESMF_KIND_I8, & 
              ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
+
+      public ESMF_IKIND_I1, ESMF_IKIND_I2, ESMF_IKIND_I4, ESMF_IKIND_I8, & 
+             ESMF_IKIND_R4, ESMF_IKIND_R8, ESMF_IKIND_C8, ESMF_IKIND_C16
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
@@ -217,12 +235,12 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.18 2003/01/09 20:59:48 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.19 2003/01/09 21:21:45 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-! overload .eq. & .ne. with additional derived types so you can compare them as if
-!  they were simple integers
+! overload .eq. & .ne. with additional derived types so you can compare 
+!  them as if they were simple integers.
 
 interface operator (.eq.)
  module procedure ESMF_sfeq
