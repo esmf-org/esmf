@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.7 2003/01/16 17:13:49 pwjones Exp $
+! $Id: ESMF_Regrid.F90,v 1.8 2003/01/21 01:14:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
       use ESMF_BaseMod      ! ESMF base  class
       use ESMF_ArrayMod     ! ESMF array class
       use ESMF_FieldMod     ! ESMF field class
+      use ESMF_BundleMod    ! ESMF bundle class
       use ESMF_GridMod      ! ESMF grid  class
       use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_DistGridMod  ! ESMF distributed grid class
@@ -73,7 +74,8 @@
       private
         type (ESMF_Base) :: base
 
-        !character (???) :: name
+        ! in base, not needed here
+        !character (len=ESMF_MAXLEN) :: name
 
         type (ESMF_Bundle), pointer :: & ! if created with bundle pair
            src_bundle,          &! pointer to source field bundle
@@ -88,7 +90,7 @@
 
         type (ESMF_Array), pointer :: &
            src_address,      &! addresses of source field for regrid operation
-           dst_address       &! addresses of destination field for regrid op
+           dst_address        ! addresses of destination field for regrid op
 
         type (ESMF_Array), pointer :: &
            weights            ! array of weights for performing the
@@ -148,7 +150,7 @@
 
     public ESMF_RegridDo          ! perform a regrid operation
 
-    public ESMF_RegridGetName     ! Get name of regrid
+    !public ESMF_RegridGetName     ! Get name of regrid
     !public ESMF_RegridGetField    ! Get fields associated with this regrid
     !public ESMF_RegridGetBundle   ! Get bundles associated with this regrid
 
@@ -161,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid.F90,v 1.7 2003/01/16 17:13:49 pwjones Exp $'
+      '$Id: ESMF_Regrid.F90,v 1.8 2003/01/21 01:14:27 nscollins Exp $'
 
 !==============================================================================
 !
@@ -192,9 +194,9 @@
       interface ESMF_RegridDo
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridDoField
-         module procedure ESMF_RegridDoBundle
-         module procedure ESMF_RegridDoArray
+         !module procedure ESMF_RegridDoField
+         !module procedure ESMF_RegridDoBundle
+         !module procedure ESMF_RegridDoArray
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for performing the
@@ -332,9 +334,9 @@
       type(ESMF_Regrid) :: ESMF_RegridCreateFromBundle
 !
 ! !ARGUMENTS:
-      type (ESMF_Field), intent(in) :: &
-         src_field,          &! field to be regridded
-         dst_field            ! destination (incl grid) of resulting regridded field
+      type (ESMF_Bundle), intent(in) :: &
+         src_bundle,          &! bundle to be regridded
+         dst_bundle            ! destination (incl grid) of resulting regridded field
 
       integer, intent(in) :: method   ! method to use for regridding
 
@@ -515,7 +517,7 @@
       subroutine ESMF_RegridDestroy(regrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
+      type(ESMF_Regrid), intent(inout) :: regrid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -570,7 +572,7 @@
 
       type(ESMF_RegridType), intent(out) :: regrid  ! newly created regrid
 
-      type (ESMF_Field), intent(in) :: &
+      type (ESMF_Field), target, intent(in) :: &
          src_field,          &! field to be regridded
          dst_field            ! destination (incl grid) of resulting regridded field
 
@@ -648,7 +650,7 @@
       regrid%src_field => src_field
       regrid%dst_field => dst_field
 
-      regrid%method = method
+      regrid%regrid_method = method
 
       !TODO
       ! calculate the actual regridding here including:
@@ -682,7 +684,7 @@
 
       type(ESMF_RegridType), intent(out) :: regrid  ! newly created regrid
 
-      type (ESMF_Bundle), intent(in) :: &
+      type (ESMF_Bundle), target, intent(in) :: &
          src_bundle,          &! field bundle to be regridded
          dst_bundle            ! destination (incl grid) of resulting regridded bundle
 
@@ -761,7 +763,7 @@
       regrid%src_bundle => src_bundle
       regrid%dst_bundle => dst_bundle
 
-      regrid%method = method
+      regrid%regrid_method = method
 
       !TODO
       ! calculate the actual regridding here including:
@@ -788,16 +790,14 @@
 !     ESMF_RegridConstructFromRegrid - Constructs Regrid structure from existing Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridConstructFromRegrid(regrid, src_field, dst_field, &
+      subroutine ESMF_RegridConstructFromRegrid(regrid, old_regrid, &
                                                 method, name, index_shift, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_RegridType), intent(out) :: regrid  ! newly created regrid
+      type(ESMF_RegridType), intent(out) :: regrid     ! newly created regrid
 
-      type (ESMF_Field), intent(in) :: &
-         src_field,          &! field to be regridded
-         dst_field            ! destination (incl grid) of resulting regridded field
+      type(ESMF_RegridType), intent(in) :: old_regrid    ! existing regrid
 
       integer, intent(in) :: method   ! method to use for regridding
 
@@ -880,7 +880,7 @@
          !assign name
       endif
 
-      regrid%method = method
+      regrid%regrid_method = method
 
       select case (method)
       case (ESMF_RegridMethod_Copy)
@@ -941,17 +941,17 @@
         !name = blank character string
 
 !       if created with bundles, nullify bundle pointer
-        if (associated(src_bundle)) nullify(src_bundle)
-        if (associated(dst_bundle)) nullify(dst_bundle)
+        if (associated(regrid%src_bundle)) nullify(regrid%src_bundle)
+        if (associated(regrid%dst_bundle)) nullify(regrid%dst_bundle)
 
 !       if created with fields, nullify field pointers
-        if (associated(src_field)) nullify(src_field)
-        if (associated(dst_field)) nullify(dst_field)
+        if (associated(regrid%src_field)) nullify(regrid%src_field)
+        if (associated(regrid%dst_field)) nullify(regrid%dst_field)
 
-        regrid_method = ESMF_RegridMethod_none
+        regrid%regrid_method = ESMF_RegridMethod_none
 
 !       deallocate regrid transform
-        deallocate(src_address, dst_address, weights)
+        deallocate(regrid%src_address, regrid%dst_address, regrid%weights)
 
 !       nullify communication structures
         !if (associated(comm_before)) nullify(comm_before)
