@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.13 2003/04/30 07:45:13 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.14 2003/05/02 22:16:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,14 +70,24 @@ extern "C" {
                                          us_, ns_, Sn, Sd);
        }
 
-       void FTN(c_esmc_timegetcalendar)(ESMC_Time *ptr,
+       void FTN(c_esmc_timegetcalendarcopy)(ESMC_Time *ptr,
                                         ESMC_Calendar *calendar, int *status) {
            *status = (ptr)->ESMC_TimeGetCalendar(calendar);
        }
 
-       void FTN(c_esmc_timesetcalendar)(ESMC_Time *ptr,
+       void FTN(c_esmc_timegetcalendarptr)(ESMC_Time *ptr,
+                                        ESMC_Calendar **calendar, int *status) {
+           *status = (ptr)->ESMC_TimeGetCalendar(calendar);
+       }
+
+       void FTN(c_esmc_timesetcalendarptr)(ESMC_Time *ptr,
                                         ESMC_Calendar *calendar, int *status) {
            *status = (ptr)->ESMC_TimeSetCalendar(calendar);
+       }
+
+       void FTN(c_esmc_timesetcalendarptrptr)(ESMC_Time *ptr,
+                                        ESMC_Calendar **calendar, int *status) {
+           *status = (ptr)->ESMC_TimeSetCalendar(*calendar);
        }
 
        void FTN(c_esmc_timeissamecal)(ESMC_Time *ptr, ESMC_Time *time,

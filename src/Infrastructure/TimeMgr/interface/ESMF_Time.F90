@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.26 2003/04/30 22:00:26 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.27 2003/05/02 22:16:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,6 +95,10 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 
+      private ESMF_TimeGetCalendarCopy
+      private ESMF_TimeGetCalendarPtr
+      private ESMF_TimeSetCalendarPtr
+      private ESMF_TimeSetCalendarPtrPtr
       private ESMF_TimeGetDayOfYearDouble
       private ESMF_TimeGetDayOfYearInteger
       private ESMF_TimeGetDayOfYearTimeInt
@@ -130,13 +134,45 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.26 2003/04/30 22:00:26 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.27 2003/05/02 22:16:57 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_TimeGetCalendar
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGetCalendarCopy
+      module procedure ESMF_TimeGetCalendarPtr
+
+! !DESCRIPTION:
+!     This interface overloads the ESMF\_GetCalendar method
+!     for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_TimeSetCalendar
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeSetCalendarPtr
+      module procedure ESMF_TimeSetCalendarPtrPtr
+
+! !DESCRIPTION:
+!     This interface overloads the ESMF\_SetCalendar method
+!     for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       interface ESMF_TimeGetDayOfYear
@@ -580,10 +616,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGetCalendar - Get associated calendar
+! !IROUTINE: ESMF_TimeGetCalendarCopy - Get copy of associated calendar
 
 ! !INTERFACE:
-      subroutine ESMF_TimeGetCalendar(time, cal, rc)
+      subroutine ESMF_TimeGetCalendarCopy(time, cal, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(in) :: time
@@ -591,7 +627,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the associated {\tt Calendar}
+!     Get copy of the associated {\tt Calendar}
 !
 !     The arguments are:
 !     \begin{description}
@@ -607,19 +643,49 @@
 !     TMGn.n.n
 !EOP
 
-      call c_ESMC_TimeGetCalendar(time, cal, rc)
+      call c_ESMC_TimeGetCalendarCopy(time, cal, rc)
     
-      ! TODO: create overloaded ESMF_TimeGetCalendar() which gets calendar
-      !       pointer rather than copy
-
-      end subroutine ESMF_TimeGetCalendar
+      end subroutine ESMF_TimeGetCalendarCopy
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeSetCalendar - Set associated calendar
+! !IROUTINE: ESMF_TimeGetCalendarPtr - Get pointer to associated calendar
 
 ! !INTERFACE:
-      subroutine ESMF_TimeSetCalendar(time, cal, rc)
+      subroutine ESMF_TimeGetCalendarPtr(time, cal, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time
+      type(ESMF_Pointer), intent(out) :: cal
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get pointer to the associated {\tt Calendar}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The object instance to query
+!     \item[{cal}]
+!          Pointer to associated {\tt Calendar}
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+
+      call c_ESMC_TimeGetCalendarPtr(time, cal, rc)
+    
+      end subroutine ESMF_TimeGetCalendarPtr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeSetCalendarPtr - Set associated calendar
+
+! !INTERFACE:
+      subroutine ESMF_TimeSetCalendarPtr(time, cal, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(out) :: time
@@ -627,7 +693,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the associated {\tt Calendar}
+!     Set the associated {\tt Calendar} by passing its pointer
 !
 !     The arguments are:
 !     \begin{description}
@@ -643,9 +709,42 @@
 !     TMGn.n.n
 !EOP
 
-      call c_ESMC_TimeSetCalendar(time, cal, rc)
+      call c_ESMC_TimeSetCalendarPtr(time, cal, rc)
     
-      end subroutine ESMF_TimeSetCalendar
+      end subroutine ESMF_TimeSetCalendarPtr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeSetCalendarPtrPtr - Set associated calendar
+
+! !INTERFACE:
+      subroutine ESMF_TimeSetCalendarPtrPtr(time, cal, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Time), intent(out) :: time
+      type(ESMF_Pointer), intent(in) :: cal
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Set the associated {\tt Calendar} by passing the address of its pointer
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The object instance to set
+!     \item[{cal}]
+!          Associated {\tt Calendar} pointer
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+
+      call c_ESMC_TimeSetCalendarPtrPtr(time, cal, rc)
+    
+      end subroutine ESMF_TimeSetCalendarPtrPtr
 
 !------------------------------------------------------------------------------
 !BOP
