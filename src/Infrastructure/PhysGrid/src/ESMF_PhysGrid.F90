@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.51 2003/10/15 23:16:32 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.52 2003/10/16 23:08:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.51 2003/10/15 23:16:32 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.52 2003/10/16 23:08:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1295,7 +1295,11 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in) :: mask_array
+      ! for some reason the pgi compiler does not like intent(in)
+      ! on the next line.  it says the types do not match.
+      ! i will just take it out for now.   nsc 15oct03
+      !type(ESMF_Array), intent(in) :: mask_array
+      type(ESMF_Array) :: mask_array
                             ! array containing mask value for each cell
 
       type(ESMF_GridMaskKind), intent(in) :: &
