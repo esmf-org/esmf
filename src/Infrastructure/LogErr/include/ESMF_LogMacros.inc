@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.8 2004/05/12 21:34:30 cpboulder Exp $
+ $Id: ESMF_LogMacros.inc,v 1.9 2004/05/13 22:48:24 cpboulder Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,12 +18,17 @@
 
 #endif
 
-#ifndef __sgi__
+#include "ESMF_ErrConstants.inc"
+#include "ESMF_LogConstants.inc"
 
-#define ESMC_LogWrite(...) \
-ESMC_LogWrite(__LINE__,__FILE__,__VA_ARGS__)
+#define ESMF_LogWrite(msg,logtype) \
+ESMF_LogWrite(msg,logtype,__LINE__,__FILE__,ESMF_METHOD)
 
-#define ESMC_LogFoundError(rc,...) \
-ESMC_LogFoundError(rc,__LINE__,__FILE__,__VA_ARGS__)
+#define ESMF_LogFoundError(rc,msg,logtype) \
+ESMF_LogFoundError(rc,msg,logtype,__LINE__,__FILE__,ESMF_METHOD)
 
-#endif
+#define ESMC_LogWrite(msg,logtype) \
+ESMC_LogWrite(msg,logtype,__LINE__,__FILE__,ESMC_METHOD)
+
+#define ESMC_LogFoundError(rc,msg,logtype) \
+ESMC_LogFoundError(rc,msg,logtype,__LINE__,__FILE__,ESMC_METHOD)
