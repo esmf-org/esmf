@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F3Ex.F90,v 1.2 2003/10/20 20:13:55 cdeluca Exp $
+! $Id: ESMF_DELayout_F3Ex.F90,v 1.3 2003/12/03 23:18:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@ program ESMF_DELayout_FEx3
   type(ESMF_DELayout) :: layout
   integer, dimension(6) :: delist
   integer, dimension(2) :: layoutDims, layoutCommTypes
-  integer :: nx, ny, x, y, id, rc
+  integer :: nx, ny, x, y, id, rc, finalrc
   integer :: i, len, srcDEid
 
   real(ESMF_KIND_R8), dimension(:), pointer :: sArrayR8
@@ -50,6 +50,8 @@ program ESMF_DELayout_FEx3
   allocate(rArrayR4(20))
   allocate(sArrayI4(120))
   allocate(rArrayI4(20))
+
+  finalrc = ESMF_SUCCESS
 
   ! 2x3 DE layout
   layoutDims = (/ 2, 3 /)
@@ -72,28 +74,83 @@ program ESMF_DELayout_FEx3
 
   call ESMF_Initialize(rc)
 
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+
   ! create 2x3 layout of DEs in X-direction
   layout = ESMF_DELayoutCreate(delist, 2, layoutDims, layoutCommTypes, rc)
 
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+
   ! verify size of layout
   call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetSize(nx, ny) = ", nx, ny
 
   ! get our DE's position within the layout
   call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetDEPosition(x, y) = ", x, y
 
   ! get our DE id
   call ESMF_DELayoutGetDEid(layout, id, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "ESMF_DELayoutGetDEid(id) = ", id
 
   ! create ESMF_LocalArray containers for the data arrays
   sndArrayR8 = ESMF_LocalArrayCreate(sArrayR8, rc=rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   rcvArrayR8 = ESMF_LocalArrayCreate(rArrayR8, rc=rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   sndArrayR4 = ESMF_LocalArrayCreate(sArrayR4, rc=rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   rcvArrayR4 = ESMF_LocalArrayCreate(rArrayR4, rc=rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   sndArrayI4 = ESMF_LocalArrayCreate(sArrayI4, rc=rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   rcvArrayI4 = ESMF_LocalArrayCreate(rArrayI4, rc=rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
 
   ! root DE populates send array and sends it
   srcDEid = 2
@@ -113,34 +170,110 @@ program ESMF_DELayout_FEx3
   ! scatter naked F90 arrays
 
   call ESMF_DELayoutScatter(layout, sArrayR8, rArrayR8, len, srcDEid, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "DE ", id, " rArrayR8() = ", rArrayR8
 
   call ESMF_DELayoutScatter(layout, sArrayR4, rArrayR4, len, srcDEid, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "DE ", id, " rArrayR4() = ", rArrayR4
 
   call ESMF_DELayoutScatter(layout, sArrayI4, rArrayI4, len, srcDEid, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "DE ", id, " rArrayI4() = ", rArrayI4
 
   ! scatter ESMF local arrays
 
   call ESMF_DELayoutScatter(layout, sndArrayR8, rcvArrayR8, len, srcDEid, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "DE ", id, " rArrayR8() = ", rArrayR8
 
   call ESMF_DELayoutScatter(layout, sndArrayR4, rcvArrayR4, len, srcDEid, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "DE ", id, " rArrayR4() = ", rArrayR4
 
   call ESMF_DELayoutScatter(layout, sndArrayI4, rcvArrayI4, len, srcDEid, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   print *, "DE ", id, " rArrayI4() = ", rArrayI4
 
   ! clean up
   call ESMF_LocalArrayDestroy(sndArrayR8, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_LocalArrayDestroy(rcvArrayR8, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_LocalArrayDestroy(sndArrayR4, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_LocalArrayDestroy(rcvArrayR4, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_LocalArrayDestroy(sndArrayI4, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_LocalArrayDestroy(rcvArrayI4, rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
   call ESMF_DELayoutDestroy(layout, rc)
 
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+
   call ESMF_Finalize(rc)
+
+  if (rc.NE.ESMF_SUCCESS) then
+      finalrc = ESMF_FAILURE
+  end if
+
+   if (finalrc.EQ.ESMF_SUCCESS) then
+      print *, "PASS: ESMF_DELayout_FEx3.F90"
+   else
+       print *, "FAIL: ESMF_DELayout_FEx3.F90"
+   end if
+
 
 end program ESMF_DELayout_FEx3
