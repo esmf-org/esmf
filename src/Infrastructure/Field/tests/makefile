@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 2005/02/28 16:34:56 nscollins Exp $ 
+# $Id: makefile,v 1.31 2005/02/28 21:32:43 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -63,6 +63,11 @@ RUN_ESMF_FRouteUTest:
 	#-${MPIRUN} -np 32 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest24.stdout
 
 RUN_ESMF_FRouteUTestUNI:
-	echo "PASS: ESMF_FRouteUTest not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_FRouteUTest.stdout
+	echo "PASS: ESMF_FRouteUTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
 
+RUN_ESMF_FRoute4UTestUNI:
+	echo "PASS: ESMF_FRoute4UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute4UTest.stdout
+
+RUN_ESMF_FRoute8UTestUNI:
+	echo "PASS: ESMF_FRoute8UTest not set up to run on one processor." > $(ESMC_TESTDIR)/ESMF_FRoute8UTest.stdout
 
