@@ -1,4 +1,4 @@
-% $Id: ESMF.cbib,v 1.3 2004/08/03 14:34:46 nscollins Exp $
+% $Id: ESMF.cbib,v 1.4 2004/08/03 21:36:00 nscollins Exp $
 
 % abbreviations
 @String{BAMS = {Bull. Amer. Met. Soc.}}
@@ -11,6 +11,7 @@
 @misc{ESMFWEBSITE,
         title = "Earth System Modeling Framework",
         howpublished= "http://www.esmf.ucar.edu",
+        key = {ESMF Web Site},
         year = "2002"}
 
 @misc{bib:ESMFreqdoc,
@@ -41,14 +42,5 @@
 #include "../Infrastructure/Regrid/doc/Regrid.bib"
 #include "../Infrastructure/IO/doc/IO.bib"
 #include "../Infrastructure/TimeMgr/doc/TimeMgr.bib"
-
-
-
-
-
-
-
-
-
 
 
