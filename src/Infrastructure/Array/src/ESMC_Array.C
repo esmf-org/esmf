@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.10 2003/07/28 17:37:19 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.11 2003/07/29 16:39:13 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -866,13 +866,13 @@
 
          if (comp) {
              comp[ij].min = halo_widths[j][0];
-             comp[ij].max = halo_widths[j][0] + count;
+             comp[ij].max = count + halo_widths[j][0];
              comp[ij].stride = 1;
          }
 
          if (excl) {
              excl[i].min = halo_widths[j][0] + halo_widths[j][1];
-             excl[i].max = halo_widths[j][0] + halo_widths[j][1] + count;
+             excl[i].max = count - halo_widths[j][0];
              excl[i].stride = 1;
          }
        }
@@ -895,6 +895,7 @@
 // !ARGUMENTS:
       ESMC_DELayout *layout,     // in  - layout (temporarily)
       ESMC_AxisIndex *ai_global, // in  - do we need?  jw
+      int global_dimlengths[],   // in
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp) {         // in  - size of decomp array
@@ -917,7 +918,7 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
+      gsize = gsize * global_dimlengths[i];
       lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
     }
 
@@ -929,8 +930,8 @@
 
         // call layoutgather to fill this array
         fp0 = (float *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                          ai_comp, ai_total, fp);
+        layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids, 
+                                          size_decomp, ai_comp, ai_total, fp);
 
         // switch based on array rank
         switch (this->rank) {
@@ -945,7 +946,7 @@
               int lstart[2];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
+                gmax[i] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_total[i].min - ai_total[i].min + 1;
@@ -976,7 +977,7 @@
               int lstart[3];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
+                gmax[i] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_total[i].max - ai_total[i].min + 1;
@@ -1005,7 +1006,7 @@
               int lstart[4];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
+                gmax[i] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_total[i].min - ai_total[i].min + 1;
@@ -1048,8 +1049,8 @@
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                          ai_comp, ai_total, ip);
+        layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
+                                          size_decomp, ai_comp, ai_total, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -1064,7 +1065,7 @@
               int lstart[2];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
+                gmax[i] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_total[i].max - ai_total[i].min + 1;
@@ -1095,7 +1096,7 @@
               int lstart[3];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
+                gmax[i] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_total[i].max - ai_total[i].min + 1;
@@ -1124,7 +1125,7 @@
               int lstart[4];
               gmax[0] = 1;
               for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
+                gmax[i] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = ai_total[i].max - ai_total[i].min + 1;
@@ -1224,8 +1225,8 @@
 
         // call layoutgather to fill this array
         fp0 = (float *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                          ai_comp, ai_total, fp);
+        layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
+                                          size_decomp, ai_comp, ai_total, fp);
 
       break;
 
@@ -1237,8 +1238,8 @@
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                          ai_comp, ai_total, ip);
+        layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
+                                          size_decomp, ai_comp, ai_total, ip);
 
       break;
       default:
@@ -1316,12 +1317,12 @@
           fp0 = (float *)this->base_addr;
 
           // call something which will do a receive
-          layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                            ai_comp, ai_total, fp);
+          layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
+                                            size_decomp, ai_comp, ai_total, fp);
         } else {
           // call something which will do a send
-          layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                            ai_comp, ai_total, fp);
+          layout->ESMC_DELayoutGatherArrayF(fp0, global_dimlengths, decompids,
+                                            size_decomp, ai_comp, ai_total, fp);
         } 
 
       break;
@@ -1337,12 +1338,12 @@
 
           // call something which will do a receive
           ip0 = (int *)this->base_addr;
-          layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                            ai_comp, ai_total, ip);
+          layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
+                                            size_decomp, ai_comp, ai_total, ip);
         } else {
           // call something which will do a send
-          layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                            ai_comp, ai_total, ip);
+          layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, decompids,
+                                            size_decomp, ai_comp, ai_total, ip);
         }
       break;
       default:
@@ -1486,7 +1487,8 @@
 //
 // !ARGUMENTS:
       ESMC_DELayout *layout,     // in  - layout (temporarily)
-      ESMC_AxisIndex *ai_global, // in  - do we need?  jw
+      int global_start[],        // in  - array of global starting positions
+      int global_dimlengths[],   // in  - array of global dimensions
       int rank_trans[],          // in  - translation of old ranks to new
                                  //       Array
       int size_rank_trans,       // in  - size of rank_trans array
@@ -1514,7 +1516,7 @@
     int gsize=1;
     int lsize=1;
     for (i=0; i<rank; i++) {
-      gsize = gsize * ai_global[i].stride;  // jw?  needs to be size of global array
+      gsize = gsize * global_dimlengths[i];
       lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);  // jw?
     }
 
@@ -1531,8 +1533,9 @@
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, olddecompids, size_decomp, 
-                                          this->ai_comp, this->ai_comp, ip);
+        layout->ESMC_DELayoutGatherArrayI(ip0, global_dimlengths, olddecompids,
+                                          size_decomp, this->ai_comp,
+                                          this->ai_comp, ip);
 
         // switch based on array rank
         switch (this->rank) {
@@ -1548,14 +1551,12 @@
               gmax[rank_trans[0]-1] = 1;
               for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i]-1;
-                gmax[i_new] = ai_comp[i-1].max;  // jw?
+                gmax[i_new] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai_comp[i].max 
                         - RedistArray->ai_comp[i].min + 1;
-                lstart[i] = RedistArray->ai_comp[i].stride  // jw nasty -- this is
-                  // just here so it will compile
-                          + RedistArray->ai_comp[i].min;
+                lstart[i] = global_start[i] + RedistArray->ai_comp[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
@@ -1578,13 +1579,12 @@
               gmax[rank_trans[0]-1] = 1;
               for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i]-1;
-                gmax[i_new] = ai_total[i-1].max;  // jw?
+                gmax[i_new] = global_dimlengths[i-1];  
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai_total[i].max
                         - RedistArray->ai_total[i].min + 1;
-                lstart[i] = ai_global[i].min   //  jw? need to look at this
-                          + RedistArray->ai_total[i].min;
+                lstart[i] = global_start[i] + RedistArray->ai_total[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
@@ -1613,13 +1613,12 @@
               gmax[rank_trans[0]] = 1;
               for (i=1; i<this->rank; i++) {
                 int i_new = rank_trans[i];
-                gmax[i_new] = ai_total[i-1].max;
+                gmax[i_new] = global_dimlengths[i-1];
               }
               for (i=0; i<this->rank; i++) {
                 lmax[i] = RedistArray->ai_total[i].max
                         - RedistArray->ai_total[i].min + 1;
-                lstart[i] = ai_global[i].min  // jw need to look at this
-                          + RedistArray->ai_total[i].min;
+                lstart[i] = global_start[i] + RedistArray->ai_total[i].min;
               }
               int *ip2 = (int *)RedistArray->base_addr;
               int local, global;
