@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2004/03/24 15:58:34 jwolfe Exp $
+! $Id: user_model2.F90,v 1.4 2004/03/24 17:45:43 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -127,7 +127,7 @@
       horzCoordSystem = ESMF_CoordSystem_Cartesian
       coordOrder      = ESMF_CoordOrder_YXZ
 
-      call ESMF_DataMapInit(datamap, ESMF_INDEX_JI, rc=rc)
+      call ESMF_DataMapInit(datamap, ESMF_INDEX_IJ, rc=rc)
 
       grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
                                      countsPerDEDecomp1=countsPerDE1, &
