@@ -1,6 +1,6 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
-#  $Id: protex,v 1.6 2002/10/10 15:01:23 dasilva Exp $
+#  $Id: protex,v 1.7 2002/10/10 15:17:04 dasilva Exp $
 #
 #BOP
 #
@@ -254,6 +254,11 @@ LINE:
 #    ---------------------------------------------------------
      while ( <InputFile> ) {
         chop;     # strip record separator
+
+#       !PARAMETERS: really mean !ARGUMENTS:
+#       ------------------------------------
+        s/!PARAMETERS:/!ARGUMENTS:/g;
+
         @Fld = split(' ', $_, 9999);
 
 #       Straight quote
