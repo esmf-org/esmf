@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.4 2003/12/12 20:22:18 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.5 2004/01/15 15:45:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,6 +243,7 @@
 
       public ESMF_StateCreate, ESMF_StateDestroy
 
+      public ESMF_StateGetFromList
       public ESMF_StateAddData, ESMF_StateGetData
       !public ESMF_StateQueryData       ! returns ESMF type for this entry
 
@@ -272,7 +273,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.4 2003/12/12 20:22:18 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.5 2004/01/15 15:45:44 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2588,6 +2589,84 @@ end function
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetName
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGetFromList -- Get a State by name from an array of States
+!
+! !INTERFACE:
+      function ESMF_StateGetFromList(statelist, statename, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_State) :: ESMF_StateGetFromList
+!
+!
+! !ARGUMENTS:
+      type(ESMF_State), dimension(:), intent(in) :: statelist
+      character (len=*), intent(in) :: statename
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns the State from this array of {\tt State}s by name.
+!
+!  \begin{description}     
+!  \item[statelist]
+!    Fortran array of {\tt State}s to query.
+!   \item[statename]
+!    State Name to return.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status
+      integer :: nstates, i
+      type(ESMF_StateType), pointer :: stypep
+      character (len=ESMF_MAXSTR) :: tryname
+
+      ! assume failure until success assured
+      ESMF_StateGetFromList%statep => NULL()
+      status = ESMF_FAILURE
+      if (present(rc)) rc=ESMF_FAILURE
+   
+
+      nstates = size(statelist)
+      do i = 1, nstates
+  
+        stypep = statelist(i)%statep
+  
+        if (.not. associated(stypep)) then
+          print *, "uninitialized State in list, number", i
+          return
+        endif
+  
+        if (stypep%st .eq. ESMF_STATEINVALID) then
+          print *, "invalid State in list, number", i
+          return
+        endif
+  
+        call ESMF_GetName(stypep%base, tryname, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "cannot get name from State number", i, "in list"
+          return
+        endif
+  
+        if (statename .eq. tryname) then
+          ESMF_StateGetFromList%statep = stypep
+          if (present(rc)) rc=ESMF_SUCCESS
+          return
+        endif
+  
+      enddo
+
+      print *, "State with name", statename, "not found in list of States"
+
+      end function ESMF_StateGetFromList
 
 
 !------------------------------------------------------------------------------
