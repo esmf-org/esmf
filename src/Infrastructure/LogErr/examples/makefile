@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/04/15 20:39:18 svasquez Exp $ 
+# $Id: makefile,v 1.6 2003/06/12 18:08:09 jwolfe Exp $ 
 
 ALL: 
 
@@ -19,17 +19,23 @@ LOCDIR	  = src/Infrastructure/LogErr/examples
 TESTS_BUILD  = \
 	ESMF_TestErr \
 	ESMF_TestErr2 \
-	ESMF_TestErr3 
+	ESMF_TestErr3 \
+	ESMF_TestLog \
+	ESMF_TestLog2 \
 
 TESTS_RUN  = \
 	RUN_ESMF_TestErr \
 	RUN_ESMF_TestErr2 \
-	RUN_ESMF_TestErr3
+	RUN_ESMF_TestErr3 \
+	RUN_ESMF_TestLog \
+	RUN_ESMF_TestLog2 \
 
 TESTS_RUN_UNI  = \
 	RUN_ESMF_TestErrUNI \
 	RUN_ESMF_TestErr2UNI \
-	RUN_ESMF_TestErr3UNI
+	RUN_ESMF_TestErr3UNI \
+	RUN_ESMF_TestLogUNI \
+	RUN_ESMF_TestLog2UNI \
 
 TESTS_RM  = \
 	ESMF_TestErr.rm \
@@ -96,4 +102,34 @@ RUN_ESMF_TestErr3UNI:
 
 ESMF_TestErr3.rm:
 	echo "ESMF_TestErr3.rm target called here."
+
+ESMF_TestLog: ESMF_TestLog.o  chkopts
+	-${F90CXXLD} -o ESMF_TestLog ESMF_TestLog.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_TestLog.o
+
+RUN_ESMF_TestLog:
+	-@rm -f testlog stdlog.* logfile.* ESMF_TestLog.tmps
+	-${MPIRUN} -np 4 ESMF_TestLog > ESMF_TestLog.stdout
+
+RUN_ESMF_TestLogUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_TestLog.tmps
+	-${MPIRUN} -np 1 ESMF_TestLog > ESMF_TestLog.stdout
+
+ESMF_TestLog.rm:
+	echo "ESMF_TestLog.rm target called here."
+
+ESMF_TestLog2: ESMF_TestLog2.o  chkopts
+	-${F90CXXLD} -o ESMF_TestLog2 ESMF_TestLog2.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_TestLog2.o
+
+RUN_ESMF_TestLog2:
+	-@rm -f testlog stdlog.* logfile.* ESMF_TestLog2.tmps
+	-${MPIRUN} -np 4 ESMF_TestLog2 > ESMF_TestLog2.stdout
+
+RUN_ESMF_TestLog2UNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_TestLog2.tmps
+	-${MPIRUN} -np 1 ESMF_TestLog2 > ESMF_TestLog2.stdout
+
+ESMF_TestLog2.rm:
+	echo "ESMF_TestLog2.rm target called here."
 
