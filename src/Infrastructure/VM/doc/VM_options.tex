@@ -1,0 +1,19 @@
+% $Id: VM_options.tex,v 1.1 2004/05/17 11:29:50 theurich Exp $
+
+\subsubsection{ESMF\_BlockingFlag}
+
+{\sf DESCRIPTION:\\}
+General ESMF flag indicating blocking or non-blocking behavior.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_BLOCKING]
+         The called method will block until all (PET-)local operations are 
+         complete. After the return of a blocking method it is safe to modify
+         or use all participating local data.
+   \item [ESMF\_NONBLOCKING]
+         The called method will not block but return immediately after
+         initiating the requested operation. It is unsafe to modify
+         or use participating local data after the return of a non-blocking
+         method and before the associated {\tt ESMF\_Wait} call.
+\end{description}
