@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.10 2004/06/22 17:36:19 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.11 2004/08/20 15:41:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@
     end if
 !BOC
     ! LogWrite 
-    ret= ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
+    call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
 !EOC
     if (.NOT.ret) then
         finalrc = ESMF_FAILURE
