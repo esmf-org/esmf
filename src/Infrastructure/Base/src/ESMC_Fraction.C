@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.5 2004/11/19 00:27:11 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.6 2004/11/24 22:39:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.5 2004/11/19 00:27:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.6 2004/11/24 22:39:14 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -404,7 +404,23 @@
       return(ESMF_FAILURE);
     }
 
-    n = ((ESMF_KIND_I8) n * (ESMF_KIND_I8) denominator) / (ESMF_KIND_I8) d;
+    // TODO:  Consider making n/d of type ESMF_KIND_I8.
+    // used by ESMC_BaseTimeGet()
+
+    ESMF_KIND_I8 conversion = (ESMF_KIND_I8) w * denominator +
+          ((ESMF_KIND_I8) n * (ESMF_KIND_I8) denominator) / (ESMF_KIND_I8) d;
+    if (conversion < INT_MIN || conversion > INT_MAX) {
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For conversion=%lld out-of-range with respect to "
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
+                        conversion, INT_MIN, INT_MAX);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
+        return (ESMF_FAILURE);
+    }
+
+    // ok, set new values
+    w = 0;
+    n = conversion;
     d = denominator;
 
     return(ESMF_SUCCESS);
