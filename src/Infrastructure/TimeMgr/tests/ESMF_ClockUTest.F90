@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.88 2005/01/03 23:57:18 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.89 2005/01/07 00:27:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.88 2005/01/03 23:57:18 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.89 2005/01/07 00:27:53 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, MM, DD, YY, days, totalDays, secs, testResults
+      integer :: rc, H, M, MM, DD, YY, days, totalDays, secs, testResults
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -186,36 +186,39 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+      ! hours, minutes, seconds within the day tests
+      ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Verify the hour is set correctly
-      write(name, *) "Get StartTime Hours Test"
-      call ESMF_TimeGet(startTime, h=H, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or Hour not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(H.eq.18), &
+      ! Verify the hour is set correctly within the day
+      write(name, *) "Get StartTime Hours Within the Day Test"
+      call ESMF_TimeGet(startTime, dd=DD, h=H, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or day or hour not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13).and.(H.eq.18), &
                       name, failMsg, result, ESMF_SRCLINE)
+      print *, "hours = ", H
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      ! Verify the minutes is set correctly
-      write(name, *) "Get StartTime Minutes Test"
-      call ESMF_TimeGet(startTime, m=MM, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or minutes not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.1125), &
+      ! Verify the minutes is set correctly within the day
+      write(name, *) "Get StartTime Minutes Within the Day Test"
+      call ESMF_TimeGet(startTime, dd=DD, m=M, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or day or minutes not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13).and.(M.eq.1125), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! Minutes = 18 X 60 + 45 = 1125
-      print *, "minutes = ", MM
+      print *, "minutes = ", M
 
       ! ----------------------------------------------------------------------------
 
 
       !EX_UTest
-      ! Verify the seconds are set correctly
-      write(name, *) "Get StartTime seconds Test"
-      call ESMF_TimeGet(startTime, s=secs, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.67527), &
+      ! Verify the seconds are set correctly within the day
+      write(name, *) "Get StartTime seconds Within the Day Test"
+      call ESMF_TimeGet(startTime, dd=DD, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or day or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13).and.(secs.eq.67527), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! seconds = 1125 X 60 + 27 = 67527
 
@@ -224,37 +227,195 @@
 
 
       !EX_UTest
-      ! Verify the hours, minutes and seconds  are set correctly
-      write(name, *) "Get StartTime in hours, minutes & seconds Test"
-      call ESMF_TimeGet(startTime, h=H, m=MM, s=secs, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27).and.(H.eq.18).and.(MM.eq.45), &
+      ! Verify the hours, minutes and seconds are set correctly within the day
+      write(name, *) "Get StartTime in hours, minutes & seconds Within the Day Test"
+      call ESMF_TimeGet(startTime, dd=DD, h=H, m=M, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or day, hours, minutes or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13).and.(secs.eq.27) &
+                      .and.(H.eq.18).and.(M.eq.45), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
 
       !EX_UTest
-      ! Verify the hours and seconds are set correctly
-      write(name, *) "Get StartTime in hours, & seconds Test"
-      call ESMF_TimeGet(startTime, h=H,  s=secs, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.2727).and.(H.eq.18), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      ! Verify the hours and seconds are set correctly within the day
+      write(name, *) "Get StartTime in hours, & seconds Within the Day Test"
+      call ESMF_TimeGet(startTime, dd=DD, h=H, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or day, hour or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13).and.(secs.eq.2727) &
+                      .and.(H.eq.18), name, failMsg, result, ESMF_SRCLINE)
       ! Seconds = 60 X 45 + 27 = 2727
 
       ! ----------------------------------------------------------------------------
 
 
       !EX_UTest
-      ! Verify the minutes and seconds are set correctly
-      write(name, *) "Get StartTime in minutes, & seconds Test"
-      call ESMF_TimeGet(startTime, s=secs,  m=MM, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27).and.(MM.eq.1125), &
+      ! Verify the minutes and seconds are set correctly within the day
+      write(name, *) "Get StartTime in minutes, & seconds Within the Day Test"
+      call ESMF_TimeGet(startTime, s=secs, m=M, dd=DD, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or day, minutes, or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27) &
+                      .and.(M.eq.1125).and.(DD.eq.13), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! Minutes = 60 X 18 + 45 = 1125
 
+      ! ----------------------------------------------------------------------------
+      ! hours, minutes, seconds within the month tests
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify the hour is set correctly within the month
+      write(name, *) "Get StartTime Hours Within the Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, h=H, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or month or hour not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3).and.(H.eq.306), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Hours = 12 X 24 + 18 = 306
+      print *, "hours = ", H
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify the minutes is set correctly within the month
+      write(name, *) "Get StartTime Minutes Within the Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, m=M, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or month or minutes not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3).and.(M.eq.18405), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Minutes = 12 X 1440 + 18 X 60 + 45 = 18405
+      print *, "minutes = ", M
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the seconds are set correctly within the month
+      write(name, *) "Get StartTime seconds Within the Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or month or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3).and.(secs.eq.1104327), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! seconds = 18405 X 60 + 27 = 1104327
+
+      print *, "seconds = ", secs
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the hours, minutes and seconds are set correctly within the month
+      write(name, *) "Get StartTime in hours, minutes & seconds Within the Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, h=H, m=M, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or month, hours, minutes or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3).and.(secs.eq.27) &
+                      .and.(H.eq.306).and.(M.eq.45), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the hours and seconds are set correctly within the month
+      write(name, *) "Get StartTime in hours, & seconds Within the Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, h=H, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or month, hour or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3).and.(secs.eq.2727) &
+                      .and.(H.eq.306), name, failMsg, result, ESMF_SRCLINE)
+      ! Seconds = 60 X 45 + 27 = 2727
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the minutes and seconds are set correctly within the month
+      write(name, *) "Get StartTime in minutes, & seconds Within the Month Test"
+      call ESMF_TimeGet(startTime, s=secs, m=M, mm=MM, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or month, minutes, or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27) &
+                      .and.(M.eq.18405).and.(MM.eq.3), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Minutes = 12 X 1440 + 18 X 60 + 45 = 18405
+
+      ! ----------------------------------------------------------------------------
+      ! hours, minutes, seconds within the year tests
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify the hour is set correctly within the year
+      write(name, *) "Get StartTime Hours Within the Year Test"
+      call ESMF_TimeGet(startTime, yy=YY, h=H, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year or hour not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2003).and.(H.eq.1722), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Hours = (59+12) X 24 + 18 = 1722
+      print *, "hours = ", H
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify the minutes is set correctly within the year
+      write(name, *) "Get StartTime Minutes Within the Year Test"
+      call ESMF_TimeGet(startTime, yy=YY, m=M, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year or minutes not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2003).and.(M.eq.103365), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Minutes = (59+12) X 1440 + 18 X 60 + 45 = 103365
+      print *, "minutes = ", M
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the seconds are set correctly within the year
+      write(name, *) "Get StartTime seconds Within the Year Test"
+      call ESMF_TimeGet(startTime, yy=YY, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2003).and.(secs.eq.6201927), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! seconds = 103365 X 60 + 27 = 6201927
+
+      print *, "seconds = ", secs
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the hours, minutes and seconds are set correctly within the year
+      write(name, *) "Get StartTime in hours, minutes & seconds Within the Year Test"
+      call ESMF_TimeGet(startTime, yy=YY, h=H, m=M, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year, hours, minutes or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2003).and.(secs.eq.27) &
+                      .and.(H.eq.1722).and.(M.eq.45), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the hours and seconds are set correctly within the year
+      write(name, *) "Get StartTime in hours, & seconds Within the Year Test"
+      call ESMF_TimeGet(startTime, yy=YY, h=H, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year, hour or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2003).and.(secs.eq.2727) &
+                      .and.(H.eq.1722), name, failMsg, result, ESMF_SRCLINE)
+      ! Seconds = 60 X 45 + 27 = 2727
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      ! Verify the minutes and seconds are set correctly within the year
+      write(name, *) "Get StartTime in minutes, & seconds Within the Year Test"
+      call ESMF_TimeGet(startTime, s=secs, m=M, yy=YY, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or year, minutes, or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27) &
+                      .and.(M.eq.103365).and.(YY.eq.2003), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Minutes = (59+12) X 1440 + 18 X 60 + 45 = 103365
+
+      ! ----------------------------------------------------------------------------
+      ! end of hours, minutes, seconds within the year tests
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
