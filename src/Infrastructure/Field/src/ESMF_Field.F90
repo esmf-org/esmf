@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.71 2003/08/29 23:00:09 flanigan Exp $
+! $Id: ESMF_Field.F90,v 1.72 2003/08/29 23:04:06 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -222,7 +222,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.71 2003/08/29 23:00:09 flanigan Exp $'
+      '$Id: ESMF_Field.F90,v 1.72 2003/08/29 23:04:06 flanigan Exp $'
 
 !==============================================================================
 !
@@ -3954,8 +3954,8 @@
       integer, intent(out), optional :: rc              ! return code
 !
 ! !DESCRIPTION:
-!      Clips the src\_field physgrid box against the clip_field, i.e. returns
-!      a description of the area in clip_field which is necessary to cover the
+!      Clips the src\_field physgrid box against the clip\_field, i.e. returns
+!      a description of the area in clip\_field which is necessary to cover the
 !      desired area in src\_field.  This procedure is mostly an entry point;
 !      most of the work is done in the {\tt ESMF\_Grid} class.
 !
