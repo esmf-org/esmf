@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.15 2004/04/13 22:56:11 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.16 2004/04/14 16:35:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
+      use ESMF_DELayoutMod     ! TODO: get rid of this
       use ESMF_newDELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
@@ -93,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.15 2004/04/13 22:56:11 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.16 2004/04/14 16:35:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -327,10 +328,10 @@
       endif 
 
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(btypep%grid, delayout, status)
-      call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, delayout, &
-                            decompids, & global_dimlengths, local_maxlengths, &
-                            destinationDE, array, status)
+      call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
+      call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, &
+                            delayout, decompids, global_dimlengths, &
+                            local_maxlengths, destinationDE, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleGather: Array Gather returned failure"
         return
@@ -520,7 +521,7 @@
       enddo
 
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(btypep%grid, delayout, status)
+      call ESMF_GridGet(btypep%grid, delayout=delayout, rc=status)
       call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
       if(status .NE. ESMF_SUCCESS) then 
