@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_latex,v 1.6 2003/01/24 20:58:13 flanigan Exp $
+# $Id: do_latex,v 1.7 2003/07/24 18:36:44 cdeluca Exp $
 #
 #===============================================================================
 # do_latex
@@ -56,6 +56,8 @@ endif
 if (-r $1.bib) then
   cp $1.bib $1_$2doc.bib
   latex $1_$2doc.tex
+  latex $1_$2doc.tex
+  bibtex $1_$2doc
   latex $1_$2doc.tex
   bibtex $1_$2doc
   latex $1_$2doc.tex
