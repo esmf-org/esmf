@@ -1,0 +1,44 @@
+
+DESTEX =  \
+      Regrid_alg.tex Regrid_desc.tex Regrid_desrev.tex \
+      Regrid_fapi.tex Regrid_glos.tex Regrid_req.tex \
+      Regrid_syn.tex Regrid_desdoc.ctex
+
+# DESEPS = fieldclass.eps bundleclass.eps 
+
+FSRC = ../src/ESMF_Regrid.F90
+
+CSRC =
+
+all: doc
+
+
+doc: Regrid_desdoc.ps Regrid_desdoc.pdf Regrid_desdoc.html
+
+# design doc
+Regrid_desdoc.html: Regrid_desdoc.dvi
+	rm -f Regrid_desdoc/*.gif
+	do_l2h Regrid des
+	rm -f Regrid_desdoc.html
+	ln -s Regrid_desdoc/Regrid_desdoc.html .
+
+Regrid_desdoc.ps:  Regrid_desdoc.dvi
+	dvips -o Regrid_desdoc.ps Regrid_desdoc.dvi
+
+Regrid_desdoc.pdf:  Regrid_desdoc.dvi
+	dvipdf Regrid_desdoc.dvi Regrid_desdoc.pdf
+
+Regrid_desdoc.dvi: ${DESTEX} ${DESEPS} fsrc ccsrc
+	do_latex Regrid des
+
+# source files which gen input for design doc
+ccsrc: ${CSRC}
+	touch ccsrc
+
+fsrc:  ${FSRC}
+	do_fprotex Regrid ../src/ESMF_Regrid.F90
+	#do_fprotex Regridex ../examples/ESMF_RegridCreateEx.F90
+	touch fsrc
+
+clean:
+	rm -f *.dvi *.ps Regrid_desdoc/* fsrc ccsrc
