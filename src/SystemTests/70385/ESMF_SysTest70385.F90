@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.2 2003/02/21 22:03:36 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.3 2003/02/26 20:31:55 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -31,8 +31,8 @@
     implicit none
     
 !   Local variables
-    integer :: nx, ny, i, j, ni, nj, rc
-    integer, dimension(04) :: delist
+    integer :: nx, ny, i, j, k, ni, nj, rc
+    integer, dimension(12) :: delist
     integer :: timestep
     integer :: de_id
     integer :: i_max, j_max
@@ -41,6 +41,7 @@
     integer :: horz_coord_system, vert_coord_system
     integer :: status
     real :: x_min, x_max, y_min, y_max
+    real :: temp, temp1
     integer(ESMF_IKIND_I4), dimension(:,:), pointer :: idata, idata2, &
                                                        ldata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
@@ -65,13 +66,12 @@
 !
 
 !   Create a Layout for the Component
-!   delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
-    delist = (/ 0, 1, 2, 3 /)
-    layout1 = ESMF_LayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
+    layout1 = ESMF_LayoutCreate(3, 4, delist, ESMF_XFAST, rc)
 
     cname = "System Test #70385"
-!   comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, &
-!                                      ESMF_ATM, "/usr/local", rc=rc)
+    comp1 = ESMF_CompCreate(cname, layout=layout1, ctype=ESMF_GRIDCOMP, &
+                            mtype=ESMF_ATM, filepath="/usr/local", rc=rc)
 
     print *, "Comp Create finished, name = ", trim(cname)
 
@@ -82,20 +82,22 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-      call ESMF_CompInit(comp1, rc)
+      call ESMF_CompInitialize(comp1, rc)
+
+      print *, "Comp Init finished, name = ", trim(cname)
 
 !     The user creates a simple horizontal Grid internally by passing all
 !     necessary information through the CreateInternal argument list.
 
-      i_max = 80
-      j_max = 90
+      i_max = 30
+      j_max = 36
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       x_min = 0.0
-      x_max = 20.0
+      x_max = 15.0
       y_min = 0.0
-      y_max = 9.0
+      y_max = 12.0
       halo_width = 2
       gname = "test grid 1"
 
@@ -122,10 +124,18 @@
       allocate(idata(ni,nj))
       allocate(ldata(ni,nj))
 
-!     Set initial data values to DE id number
+!     Set initial data values over whole array to -1
       do j=1,nj
         do i=1,ni
-          ldata(i,j) = de_id
+          ldata(i,j) = -1
+        enddo
+      enddo
+
+!     Set initial data values over exclusive domain to the de identifier
+      call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
+      do j=index(2)%l,index(2)%r
+        do i=index(1)%l,index(1)%r
+          ldata(i,j) =de_id
         enddo
       enddo
 
@@ -133,8 +143,6 @@
 !     Data is type Integer, 2D.
       array1 = ESMF_ArrayCreate(ldata, ESMF_NO_COPY, rc)
       print *, "Array Create returned"
-
-      call ESMF_ArrayPrint(array1, "foo", rc);
 
 !     No deallocate() is needed for idata, it will be freed when the
 !     Array is destroyed.  TODO:  it seems delete need a 'delete data' 
@@ -159,7 +167,7 @@
 !
 
       timestep = 1
-!     call ESMF_CompRun(comp1, timestep, rc)
+      call ESMF_CompRun(comp1, rc)
 
 !     Call Field method to halo
       call ESMF_FieldHalo(field1, rc)
@@ -167,7 +175,6 @@
 !     Get a pointer to the data Array in the Field
       call ESMF_FieldGetData(field1, array2, rc=rc)
       print *, "data back from field"
-      call ESMF_ArrayPrint(array2, "foo", rc)
 
 !     Get a pointer to the start of the data
       call ESMF_ArrayGetData(array2, idata2, ESMF_NO_COPY, rc)
@@ -182,13 +189,37 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_CompFinalize(comp1, rc)
+!     First, kill some time on all processes
+      do i = 1,10000
+        call random_number(temp)
+        temp1 = sin(temp) * cos(temp)
+      enddo
+!     Then print out results, one process at a time -- other processes
+!     do busy work to keep output clean
+      do k = 0,size(delist)-1
+        if (de_id.eq.k) then
+          print *, "------------------------------------------------------"
+          write(*,*) 'de_id = ',de_id
+          do j = nj,1,-1
+            write(*,10) (ldata(i,j), i=1,ni)
+   10       format(20(1x,i2))
+          enddo
+          print *, "------------------------------------------------------"
+        else
+          do i = 1,10000
+            call random_number(temp)
+            temp1 = sin(temp) * cos(temp)
+          enddo
+        endif
+      enddo
+!     At the end, kill some time on all processes again before continuing
+!     TODO:  should be a Comm method to sync up all processes
+      do i = 1,10000
+        call random_number(temp)
+        temp1 = sin(temp) * cos(temp)
+      enddo
 
-      print *, "-----------------------------------------------------------------"
-      print *, "-----------------------------------------------------------------"
-      print *, "TODO"
-      print *, "-----------------------------------------------------------------"
-      print *, "-----------------------------------------------------------------"
+      call ESMF_CompFinalize(comp1, rc)
 
       print *, "Comp Finalize returned"
 
