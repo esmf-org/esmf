@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.12 2005/02/08 23:32:42 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.13 2005/02/08 23:39:35 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -217,10 +217,9 @@ getopts("d:b:", \%options);
 				print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT' did not build successfully. \n\n";
 			}
 		}
-		else{
-			print "The stdout files for the examples can be found at:\n";
-			print "$EX_DIR\n\n";
-		}
+
+		print "\n\nThe stdout files for the examples can be found at:\n";
+		print "$EX_DIR\n\n";
 	
 
 
