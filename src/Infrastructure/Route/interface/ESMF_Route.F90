@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.27 2003/08/14 21:59:26 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.28 2003/08/15 22:53:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,8 +37,6 @@
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod
-      use ESMF_ArrayBaseMod
-      use ESMF_ArrayExpandMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -88,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.27 2003/08/14 21:59:26 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.28 2003/08/15 22:53:48 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -551,8 +549,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      type(ESMF_Array), intent(in), optional :: srcarray
-      type(ESMF_Array), intent(in), optional :: dstarray
+      type(ESMF_LocalArray), intent(in), optional :: srcarray
+      type(ESMF_LocalArray), intent(in), optional :: dstarray
       integer, intent(out), optional :: rc            
 
 !
@@ -564,9 +562,9 @@
 !     \item[route] 
 !          Route to be executed.
 !     \item[{[srcarray]}]
-!          Local {\tt Array} containing data to be sent.
+!          {\tt LocalArray} containing data to be sent.
 !     \item[{[dstarray]}]
-!          Local {\tt Array} containing data to be received.
+!          {\tt LocalArray} containing data to be received.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
