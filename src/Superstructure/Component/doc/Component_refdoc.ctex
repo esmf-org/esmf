@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.27 2004/03/24 00:04:08 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.28 2004/05/13 14:25:48 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,6 +86,7 @@
 #endif
 
 \subsection{Class API: SetServices and Related Methods}
+\label{sec:GridSetServ}
 #ifdef STANDALONE
 \input{ESMF_GridCompSetServ_fapi}
 #elif defined(CONSTITUENT)
@@ -127,6 +128,7 @@
 #endif
 
 \subsection{Class API: SetServices and Related Methods}
+\label{sec:CplSetServ}
 #ifdef STANDALONE
 \input{ESMF_CplCompSetServ_fapi}
 #elif defined(CONSTITUENT)
