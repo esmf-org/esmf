@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.12 2003/05/02 20:30:43 flanigan Exp $ 
+# $Id: base_variables,v 1.13 2003/05/14 20:21:34 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -62,6 +62,7 @@ CXX_CLINKER		= mpcc_r -q64
 CXX_FLINKER		= mpcc_r -brtl -q64
 CXX_CCV			= unknown
 CXX_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
+CXX_SYS_LIBS            = -lC
 C_CXXF90LD		= ${CXX_CC}
 C_F90CXXLD		= ${CXX_CC}
 C_CXXF90LIBS		= -L.  \
