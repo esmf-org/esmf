@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.38 2003/04/01 16:07:55 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.39 2003/04/04 17:12:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.38 2003/04/01 16:07:55 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.39 2003/04/04 17:12:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -416,13 +416,12 @@
 ! !IROUTINE: ESMF_GridCreateInternal - Create a new Grid internally
 
 ! !INTERFACE:
-      function ESMF_GridCreateInternal(i_max, j_max, &
-                                       nDE_i, nDE_j, layout, &
+      function ESMF_GridCreateInternal(i_max, j_max, x_min, x_max, &
+                                       y_min, y_max, layout, &
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
-                                       halo_width, &
-                                       x_min, x_max, y_min, y_max, name, rc)
+                                       halo_width, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateInternal
@@ -430,9 +429,11 @@
 ! !ARGUMENTS:
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
-      integer, intent(in), optional :: nDE_i
-      integer, intent(in), optional :: nDE_j
-      type (ESMF_DELayout), intent(in), optional :: layout
+      real, intent(in) :: x_min
+      real, intent(in) :: x_max
+      real, intent(in) :: y_min
+      real, intent(in) :: y_max
+      type (ESMF_DELayout), intent(in) :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -440,10 +441,6 @@
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
       integer, intent(in), optional :: halo_width
-      real, intent(in), optional :: x_min
-      real, intent(in), optional :: x_max
-      real, intent(in), optional :: y_min
-      real, intent(in), optional :: y_max
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -458,10 +455,14 @@
 !          Number of grid increments in the i-direction.
 !     \item[[j\_max]]
 !          Number of grid increments in the j-direction.
-!     \item[[nDE\_i]]
-!          Number of DE's in 1st dir.
-!     \item[[nDE\_j]]
-!          Number of DE's in 2nd dir.
+!     \item[[x\_min]]
+!          Minimum physical coordinate in the x-direction.
+!     \item[[x\_max]]
+!          Maximum physical coordinate in the x-direction.
+!     \item[[y\_min]]
+!          Minimum physical coordinate in the y-direction.
+!     \item[[y\_max]]
+!          Maximum physical coordinate in the y-direction.
 !     \item[[layout]]
 !          DELayout of DE's.
 !     \item[[horz\_gridtype]]
@@ -476,14 +477,6 @@
 !          Integer specifier to denote horizontal coordinate system.
 !     \item[[vert\_coord\_system]]
 !          Integer specifier to denote vertical coordinate system.
-!     \item[[x\_min]]
-!          Minimum physical coordinate in the x-direction.
-!     \item[[x\_max]]
-!          Maximum physical coordinate in the x-direction.
-!     \item[[y\_min]]
-!          Minimum physical coordinate in the y-direction.
-!     \item[[y\_max]]
-!          Maximum physical coordinate in the y-direction.
 !     \item[[name]]
 !          {\tt Grid} name.
 !     \item[[rc]]
@@ -516,13 +509,12 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstruct(grid, i_max, j_max, &
-                              nDE_i, nDE_j, layout, &
+      call ESMF_GridConstruct(grid, i_max, j_max, x_min, x_max, y_min, y_max, &
+                              layout, &
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              halo_width, &
-                              x_min, x_max, y_min, y_max, name, status)
+                              halo_width, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
@@ -911,7 +903,7 @@
       subroutine ESMF_GridDestroy(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid) :: grid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -938,6 +930,18 @@
       endif
 
       call ESMF_DistGridDestroy(grid%ptr%distgrid, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridDestroy: distgrid destroy"
+        return
+      endif
+
+      deallocate(grid%ptr, stat=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridDestroy: Grid deallocate"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridDestroy
 
@@ -947,20 +951,22 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridConstructInternal(grid, i_max, j_max, &
-                                            nDE_i, nDE_j, layout, &
+                                            x_min, x_max, y_min, y_max, &
+                                            layout, &
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
-                                            halo_width, &
-                                            x_min, x_max, y_min, y_max, name, rc)
+                                            halo_width, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
-      integer, intent(in), optional :: nDE_i
-      integer, intent(in), optional :: nDE_j
-      type (ESMF_DELayout), intent(in), optional :: layout
+      real, intent(in) :: x_min
+      real, intent(in) :: x_max
+      real, intent(in) :: y_min
+      real, intent(in) :: y_max
+      type (ESMF_DELayout), intent(in) :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -968,10 +974,6 @@
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
       integer, intent(in), optional :: halo_width
-      real, intent(in), optional :: x_min
-      real, intent(in), optional :: x_max
-      real, intent(in), optional :: y_min
-      real, intent(in), optional :: y_max
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -991,10 +993,14 @@
 !          Number of grid increments in the i-direction.
 !     \item[[j\_max]]
 !          Number of grid increments in the j-direction.
-!     \item[[nDE\_i]]
-!          Number of DE's in 1st dir.
-!     \item[[nDE\_j]]
-!          Number of DE's in 2nd dir.
+!     \item[[x\_min]]
+!          Minimum physical coordinate in the x-direction.
+!     \item[[x\_max]]
+!          Maximum physical coordinate in the x-direction.
+!     \item[[y\_min]]
+!          Minimum physical coordinate in the y-direction.
+!     \item[[y\_max]]
+!          Maximum physical coordinate in the y-direction.
 !     \item[[layout]]
 !         DELayout of DE's.
 !     \item[[horz\_gridtype]]
@@ -1009,14 +1015,6 @@
 !          Integer specifier to denote horizontal coordinate system.
 !     \item[[vert\_coord\_system]]
 !          Integer specifier to denote vertical coordinate system.
-!     \item[[x\_min]]
-!          Minimum physical coordinate in the x-direction.
-!     \item[[x\_max]]
-!          Maximum physical coordinate in the x-direction.
-!     \item[[y\_min]]
-!          Minimum physical coordinate in the y-direction.
-!     \item[[y\_max]]
-!          Maximum physical coordinate in the y-direction.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1052,9 +1050,9 @@
       endif
 
 !     Create the DistGrid
-      grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
+      grid%distgrid = ESMF_DistGridCreate(i_max=i_max, j_max=j_max, &
                                           layout=layout, halo_width=halo_width, &
-                                          i_max=i_max, j_max=j_max, rc=status)
+                                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
         return

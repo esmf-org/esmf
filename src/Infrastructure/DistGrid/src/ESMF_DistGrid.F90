@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.37 2003/04/01 21:54:22 flanigan Exp $
+! $Id: ESMF_DistGrid.F90,v 1.38 2003/04/04 17:13:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.37 2003/04/01 21:54:22 flanigan Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.38 2003/04/04 17:13:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -302,19 +302,17 @@
 ! !IROUTINE: ESMF_DistGridCreateInternal - Create a new DistGrid internally
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateInternal(nDE_i, nDE_j, i_max, j_max, &
-                                           halo_width, layout, name, rc)
+      function ESMF_DistGridCreateInternal(i_max, j_max, layout, &
+                                           halo_width, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: nDE_i
-      integer, intent(in) :: nDE_j
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      type (ESMF_DELayout), intent(in) :: layout
       integer, intent(in), optional :: halo_width
-      type (ESMF_DELayout), intent(in), optional :: layout
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
@@ -325,20 +323,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[nDE\_i]] 
-!          Number of distributed elements (DE's) in the 1st direction.
-!     \item[[nDE\_j]] 
-!          Number of distributed elements (DE's) in the 2nd direction.
 !     \item[[i\_max]] 
 !          Global number of computation cells in the 1st direction.
 !     \item[[j\_max]] 
 !          Global number of computation cells in the 2nd direction.
+!     \item[[layout]]
+!          DELayout of DE's.
 !     \item[[halo\_width]] 
 !          Constant number of computation cells added to the decomposed
 !          axes for haloing (added to the total cells but not exclusive
 !          cells).
-!     \item[[layout]]
-!          DELayout of DE's.
 !     \item[[name]] 
 !          {\tt DistGrid} name.
 !     \item[[rc]] 
@@ -371,8 +365,8 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, i_max, &
-                                          j_max, halo_width, layout, name, rc)
+      call ESMF_DistGridConstructInternal(distgrid, i_max, j_max, layout, &
+                                          halo_width, name, rc)
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => distgrid
@@ -509,18 +503,15 @@
 ! !IROUTINE: ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, &
-                                                i_max, j_max, halo_width, &
-                                                layout, name, rc)
+      subroutine ESMF_DistGridConstructInternal(distgrid, i_max, j_max, &
+                                                layout, halo_width, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid 
-      integer, intent(in) :: nDE_i
-      integer, intent(in) :: nDE_j
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      type (ESMF_DELayout), intent(in) :: layout
       integer, intent(in), optional :: halo_width
-      type (ESMF_DELayout), intent(in), optional :: layout
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
@@ -536,14 +527,12 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Pointer to a {\tt DistGrid}.
-!     \item[[nDE\_i]] 
-!          Number of distributed elements (DE's) in the 1st direction.
-!     \item[[nDE\_j]] 
-!          Number of distributed elements (DE's) in the 2nd direction.
 !     \item[[i\_max]] 
 !          Global number of computation cells in the 1st direction.
 !     \item[[j\_max]] 
 !          Global number of computation cells in the 2nd direction.
+!     \item[[layout]]
+!          DELayout of DE's.
 !     \item[[halo\_width]] 
 !          Constant number of computation cells added to the decomposed
 !          axes for haloing (added to the total cells but not exclusive
@@ -562,10 +551,9 @@
       integer :: gsize_dir1
       integer :: gsize_dir2
       integer :: gsize
-      integer, dimension(:), allocatable :: PEList
       logical :: cover_domain_dir1
       logical :: cover_domain_dir2
-      integer :: i, lDE_i, lDE_j
+      integer :: i, nDE_i, nDE_j
       integer, dimension(ESMF_MAXGRIDDIM) :: gcell_dim
 
 !     Initialize return code
@@ -596,40 +584,20 @@
         return
       endif
 
-!     If a layout is passed in, set the distgrid layout to it.
-!     Otherwise create layout with specified decomposition.
-      if(present(layout)) then
-        call ESMF_DELayoutGetSize(layout, lDE_i, lDE_j, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
-          return
-        endif
-        distgrid%layout = layout
-      else
-        if(nDE_i.eq.0 .or. nDE_j.eq.0) then
-          print *, "ERROR in ESMF_DistGridConstructInternal: nDE_i or nDE_j"
-          return
-        endif
-        allocate(PEList(nDE_i*nDE_j))
-        do i = 1,nDE_i*nDE_j
-          PEList(i) = i - 1  ! TODO:  short-term fix to go to C++
-        enddo
-        distgrid%layout = ESMF_DELayoutCreate(nDE_i, nDE_j, PEList, &
-                                            ESMF_XFAST, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_DistGridConstructInternal: DELayout create"
-          return
-        endif
-        lDE_i = nDE_i
-        lDE_j = nDE_j
+!     set the distgrid layout to the specified layout
+      call ESMF_DELayoutGetSize(layout, nDE_i, nDE_j, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
+        return
       endif
+      distgrid%layout = layout
 
 !     Allocate resources based on number of DE's
-      allocate(distgrid%gcelltot_start(lDE_i*lDE_j), stat=status)
-      allocate(distgrid%gcellexc_start(lDE_i*lDE_j), stat=status)
-      allocate(distgrid%lcelltot_index(lDE_i*lDE_j,ESMF_MAXGRIDDIM), &
+      allocate(distgrid%gcelltot_start(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%gcellexc_start(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%lcelltot_index(nDE_i*nDE_j,ESMF_MAXGRIDDIM), &
                stat=status)
-      allocate(distgrid%lcellexc_index(lDE_i*lDE_j,ESMF_MAXGRIDDIM), &
+      allocate(distgrid%lcellexc_index(nDE_i*nDE_j,ESMF_MAXGRIDDIM), &
                stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
@@ -637,7 +605,7 @@
       endif
 
 !     Parse problem size
-      call ESMF_DistGridSetCounts(distgrid, lDE_i, lDE_j, i_max, j_max, &
+      call ESMF_DistGridSetCounts(distgrid, nDE_i, nDE_j, i_max, j_max, &
                                   status)
         
 !     Fill in DE derived type
