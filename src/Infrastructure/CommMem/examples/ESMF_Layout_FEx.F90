@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout_FEx.F90,v 1.1 2003/01/10 21:12:45 eschwab Exp $
+! $Id: ESMF_Layout_FEx.F90,v 1.2 2003/02/14 01:05:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@
 ! Uses data from Test 62501: row 5
 !
 ! on halem, run with
-! bsub -P "hp606" -q general -n 4 prun -n 2 -N 1 ./ESMC_LayoutFEx
+! bsub -P "hp606" -q general -n 4 prun -n 2 -N 1 ./ESMF_Layout_FEx
 ! to run 2 DEs (MPI processes) on one node
 !-----------------------------------------------------------------------------
 
