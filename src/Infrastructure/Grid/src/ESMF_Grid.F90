@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.66 2003/07/22 15:37:13 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.67 2003/07/22 15:46:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.66 2003/07/22 15:37:13 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.67 2003/07/22 15:46:12 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1143,6 +1143,7 @@
 
       integer :: status=ESMF_SUCCESS               ! Error status
       logical :: rcpresent=.FALSE.                 ! Return code present
+      integer :: i
       character (len = ESMF_MAXSTR) :: defaultname ! default grid name
 
 !     Initialize return code
@@ -1168,9 +1169,9 @@
       grid%vert_coord_system = ESMF_CoordSystem_Unknown
       grid%coord_order = ESMF_CoordOrder_Unknown
       grid%num_physgrids = 0
-      grid%periodic(1) = .FALSE.
-      grid%periodic(2) = .FALSE.
-      grid%periodic(3) = .FALSE.
+      do i=1,ESMF_MAXGRIDDIM
+        grid%periodic(i) = .FALSE.
+      enddo
       nullify(grid%physgrids)
 
       grid%distgrid = ESMF_DistGridCreate(name, rc)
