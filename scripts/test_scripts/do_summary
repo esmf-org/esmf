@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: do_summary,v 1.1 2004/03/12 22:56:06 nscollins Exp $
+# $Id: do_summary,v 1.2 2004/03/24 22:50:51 nscollins Exp $
 
 # which summary to say what seems to have build and run in the examples,
 # unit tests, and system tests
@@ -20,14 +20,14 @@ ex_stdout_count=`ls $exdir/*Ex.stdout    | wc -l`
 st_stdout_count=`ls $stdir/*STest.stdout | wc -l`
 
 # how many output files with PASS found
-ut_pass_count=`fgrep -l PASS $utdir/*UTest.stdout | wc -l`
-ex_pass_count=`fgrep -l PASS $exdir/*Ex.stdout | wc -l`
-st_pass_count=`fgrep -l PASS $utdir/*STest.stdout | wc -l`
+ut_pass_count=`fgrep -l " PASS " $utdir/*UTest.stdout | wc -l`
+ex_pass_count=`fgrep -l " PASS " $exdir/*Ex.stdout | wc -l`
+st_pass_count=`fgrep -l " PASS " $utdir/*STest.stdout | wc -l`
 
 # how many output files with FAIL found
-ut_fail_count=`fgrep -l FAIL $utdir/*UTest.stdout | wc -l`
-ex_fail_count=`fgrep -l FAIL $exdir/*Ex.stdout | wc -l`
-st_fail_count=`fgrep -l FAIL $utdir/*STest.stdout | wc -l`
+ut_fail_count=`fgrep -l " FAIL " $utdir/*UTest.stdout | wc -l`
+ex_fail_count=`fgrep -l " FAIL " $exdir/*Ex.stdout | wc -l`
+st_fail_count=`fgrep -l " FAIL " $utdir/*STest.stdout | wc -l`
 
 # and finally print it all out
 echo "Unit Test, Example, and System Test summary"
