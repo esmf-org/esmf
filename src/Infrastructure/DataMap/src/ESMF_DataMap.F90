@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.9 2004/02/18 18:03:33 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.10 2004/02/19 21:24:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.9 2004/02/18 18:03:33 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.10 2004/02/19 21:24:14 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -874,10 +874,10 @@ end function
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap  
       integer, intent(out), optional :: gridrank    
-      integer, dimension (:), intent(out), optional :: dimlist 
+      integer, dimension (:), intent(inout), optional :: dimlist 
       type(ESMF_RelLoc), intent(out), optional :: horizRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
-      integer, dimension(:), intent(out), optional :: counts
+      integer, dimension(:), intent(inout), optional :: counts
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
