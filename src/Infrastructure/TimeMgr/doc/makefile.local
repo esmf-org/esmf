@@ -112,12 +112,12 @@ ccsrc: ${CSRC}
 	do_chprotex Clock ../include/ESMC_Clock.h
 	do_chprotex Alarm ../include/ESMC_Alarm.h
 
-	do_ccprotex BaseTime ../include/ESMC_BaseTime.C
-	do_ccprotex TimeInterval ../include/ESMC_TimeInterval.C
-	do_ccprotex Time ../include/ESMC_Time.C
-	do_ccprotex Calendar ../include/ESMC_Calendar.C
-	do_ccprotex Clock ../include/ESMC_Clock.C
-	do_ccprotex Alarm ../include/ESMC_Alarm.C
+	do_ccprotex BaseTime ../src/ESMC_BaseTime.C
+	do_ccprotex TimeInterval ../src/ESMC_TimeInterval.C
+	do_ccprotex Time ../src/ESMC_Time.C
+	do_ccprotex Calendar ../src/ESMC_Calendar.C
+	do_ccprotex Clock ../src/ESMC_Clock.C
+	do_ccprotex Alarm ../src/ESMC_Alarm.C
 	touch ccsrc
 
 fsrc:  ${FSRC}
