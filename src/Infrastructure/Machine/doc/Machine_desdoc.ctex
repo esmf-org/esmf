@@ -1,4 +1,4 @@
-% $Id: Machine_desdoc.ctex,v 1.1 2003/04/04 22:42:21 flanigan Exp $
+% $Id: Machine_desdoc.ctex,v 1.2 2003/04/04 23:09:22 flanigan Exp $
 \documentclass[]{article}
 \usepackage{html}
 \usepackage[T1]{fontenc}
@@ -47,12 +47,12 @@
 
 \noindent{\bf Design Review} \\
 
-\begin{tabular}{r p{1.3in} p{2in}}
-{\bf Review Date:} & <Date> \\ \\
-{\bf Reviewers:}   & Reviewer           & <Institution> \\
-                   & Reviewer           & <Institution> \\
-                   & Reviewer           & <Institution>
-\end{tabular}
+% \begin{tabular}{r p{1.3in} p{2in}}
+% {\bf Review Date:} & <Date> \\ \\
+% {\bf Reviewers:}   & Reviewer           & <Institution> \\
+%                    & Reviewer           & <Institution> \\
+%                    & Reviewer           & <Institution>
+% \end{tabular}
 
 %\section{Glossary}
 \input{Machine_glos}
