@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.4 2003/04/08 20:04:44 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.5 2003/04/11 23:53:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.4 2003/04/08 20:04:44 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.5 2003/04/11 23:53:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -52,13 +52,19 @@
       ! temp variables for Get functions
       integer :: D
       double precision :: d_
+      integer :: YR, MM, DD, H, M
       integer(ESMF_IKIND_I8) :: S
       type(ESMF_TimeInterval) :: time_step
+      type(ESMF_Time) :: timeZero
+      type(ESMF_TimeInterval) :: time_diff
       integer(ESMF_IKIND_I8) :: advanceCount
 
       ! result code
       integer :: rc
 
+      !
+      ! initialization
+      !
 
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
@@ -80,9 +86,14 @@
       !
       ! time step clock from start time to stop time
       !
+
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
         call ESMF_ClockAdvance(clock, rc=rc)
       end do
+
+      !
+      ! examine clock
+      !
 
       ! get clock's time_step
       call ESMF_ClockGetTimeStep(clock, time_step, rc)
@@ -108,4 +119,16 @@
       call ESMF_ClockGetAdvanceCount(clock, advanceCount, rc)
       print *, "The clock was advanced ", advanceCount, " times."
   
+      ! calculate the difference between the start and stop times
+      time_diff = stopTime - startTime
+      call ESMF_TimeIntervalGet(time_diff, D=D, S=S, rc=rc)
+      print *, "Difference between start and stop times = ", D, " days, ", &
+                S, " seconds."
+
+      S = 0
+      call ESMF_TimeInit(timeZero, S=S, Sn=0, Sd=1, &
+                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      print *, "Time Zero = ", YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
+
       end program ESMF_ClockEx
