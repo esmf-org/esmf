@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.101 2004/10/29 17:16:48 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.102 2004/11/01 16:17:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.101 2004/10/29 17:16:48 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.102 2004/11/01 16:17:12 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -7983,7 +7983,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: DE, numDE1, numDE2, numDEs, npts
+      integer :: DE, numDE1, numDE2, numDEs, npts, count(2)
       integer :: i, i1, j
       real(ESMF_KIND_R8) :: start, stop, huge
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
@@ -7991,11 +7991,13 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      huge   = 999999.     !TODO: could be an ESMF constant -- OK for now
-      numDE1 = size(countsPerDEDim1)
-      numDE2 = size(countsPerDEDim2)
-      numDEs = numDE1*numDE2
-      npts   = 2**dimCount
+      huge     = 999999.     !TODO: could be an ESMF constant -- OK for now
+      numDE1   = size(countsPerDEDim1)
+      numDE2   = size(countsPerDEDim2)
+      numDEs   = numDE1*numDE2
+      npts     = 2**dimCount
+      count(1) = size(coord1)
+      count(2) = size(coord2)
 
       ! TODO: break out by rank?
       ! Assume the following starage for bounding boxes:
@@ -8023,8 +8025,8 @@
       do j = 1,numDE1
         start = minval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
         stop  = maxval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
-        if (j.ne.1     ) start = minval(coord1(i1+0:i1+1+countsPerDEDim1(j)))
-        if (j.ne.numDE1) stop  = maxval(coord1(i1+1:i1+2+countsPerDEDim1(j)))
+        if (i1.ge.1         ) start = minval(coord1(i1+0:i1+1+countsPerDEDim1(j)))
+        if (i1.le.count(1)-2) stop  = maxval(coord1(i1+1:i1+2+countsPerDEDim1(j)))
         if (countsPerDEDim1(j).eq.0) then
           start = -huge
           stop  = -huge
@@ -8047,8 +8049,8 @@
       do j = 1,numDE2
         start = minval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
         stop  = maxval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
-        if (j.ne.1     ) start = minval(coord2(i1+0:i1+1+countsPerDEDim2(j)))
-        if (j.ne.numDE2) stop  = maxval(coord2(i1+1:i1+2+countsPerDEDim2(j)))
+        if (i1.ge.1         ) start = minval(coord2(i1+0:i1+1+countsPerDEDim2(j)))
+        if (i1.le.count(2)-2) stop  = maxval(coord2(i1+1:i1+2+countsPerDEDim2(j)))
         if (countsPerDEDim2(j).eq.0) then
           start = -huge
           stop  = -huge
