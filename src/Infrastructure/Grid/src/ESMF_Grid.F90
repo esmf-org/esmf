@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.8 2002/11/21 23:02:28 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.9 2002/11/22 23:30:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
       use ESMF_ArrayMod       ! ESMF array class
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_DistGridMod    ! ESMF distributed grid class
+      use ESMF_IOMod          ! ESMF I/O class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       implicit none
 
@@ -56,57 +57,6 @@
       end type
 
 !------------------------------------------------------------------------------
-!     !  ESMF_PhysGridSpec
-!
-!     ! Definition for a PhysGridSpec class.
-
-      type ESMF_PhysGridSpec
-      sequence
-      private
-        
-        type (ESMF_Base) :: base         ! base class object
-        integer :: num_corners           ! number of corners for
-                                         ! each grid cell
-        integer :: num_faces             ! likely assume same as num_corners
-                                         ! but might specify storage of only
-                                         ! 2 of 4 faces, for example
-        integer :: num_metrics           ! a counter for the number of
-                                         ! metrics for this subgrid
-        integer :: num_lmasks            ! a counter for the number of
-                                         ! logical masks for this subgrid
-        integer :: num_mmasks            ! a counter for the number of
-                                         ! multiplicative masks for this
-                                         ! subgrid
-        integer :: num_region_ids        ! a counter for the number of
-                                         ! region identifiers for this
-                                         ! subgrid
-        real, dimension(:), pointer :: center_x   ! x-coord of center of
-                                                  ! each cell
-        real, dimension(:), pointer :: center_y   ! y-coord of center of
-                                                  ! each cell
-        real, dimension(:,:), pointer :: corner_x ! x-coord of each corner
-                                                  ! of each cell
-        real, dimension(:,:), pointer :: corner_y ! y-coord of each corner
-                                                  ! of each cell
-        real, dimension(:,:), pointer :: face_x   ! x-coord of each face
-                                                  ! center of each cell
-        real, dimension(:,:), pointer :: face_y   ! y-coord of each face
-                                                  ! center of each cell
-        real, dimension(:,:), pointer :: metrics  ! an array of defined metrics
-                                                  ! for each cell
-        character (len=ESMF_MAXSTR), dimension(:), pointer :: metric_names
-        logical, dimension(:,:), pointer :: lmask ! an array of defined logical
-                                                  ! masks for each cell
-        real, dimension(:,:), pointer :: mmask    ! an array of defined 
-                                                  ! multiplicative masks for
-                                                  ! each cell
-        integer, dimension(:,:), pointer :: region_id ! an array of defined
-                                                      ! region identifiers
-                                                      ! for each cell
-
-      end type
-
-!------------------------------------------------------------------------------
 !     !  ESMF_GridType
 !
 !     ! Definition for the Grid class.  A Grid
@@ -117,15 +67,14 @@
       private
 
         type (ESMF_Base) :: base                     ! base class object
-        type (ESMF_Status) :: gridstatus             ! uninitialized, init ok, etc
-        character (len=ESMF_MAXSTR) :: gridtype      ! identifier for type of grid
-        character (len=ESMF_MAXSTR) :: stagger       ! grid staggering
-        character (len=ESMF_MAXSTR) :: coord_system  ! physical coordinate system
-        character (len=ESMF_MAXSTR) :: coord_order   ! mapping of xyz to ijk
-!jw     integer :: gridtype                          ! TODO better as an enum?
-!jw     integer :: stagger                           ! TODO better as an enum?
-!jw     integer :: coord_system                      ! TODO better as an enum?
-!jw     integer :: coord_order                       ! TODO better as an enum?
+        type (ESMF_Status) :: gridstatus             ! uninitialized, init ok,
+                                                     ! etc
+        integer :: gridtype                          ! enum for type of grid
+        integer :: stagger                           ! enum for grid staggering
+        integer :: coord_system                      ! enum for physical
+                                                     ! coordinate system
+        integer :: coord_order                       ! enum for mapping of xyz 
+                                                     ! to ijk
         integer :: num_subgrids                      ! number of grid descriptors
                                                      ! necessary to support
                                                      ! staggering
@@ -189,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.8 2002/11/21 23:02:28 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.9 2002/11/22 23:30:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -201,15 +150,13 @@
       interface ESMF_GridCreate 
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridCreateNew
-!jw      module procedure ESMF_GridCreateEmpty
-!jw      module procedure ESMF_GridCreateInternal
-!jw      module procedure ESMF_GridCreateFile
-!jw      module procedure ESMF_GridCreateCopy
-!jw      module procedure ESMF_GridCreateCutout
-!jw      module procedure ESMF_GridCreateCoarsen
-!jw      module procedure ESMF_GridCreateRefine
-!jw      module procedure ESMF_GridCreateExchange
+         module procedure ESMF_GridCreateEmpty
+         module procedure ESMF_GridCreateInternal
+         module procedure ESMF_GridCreateRead
+         module procedure ESMF_GridCreateCopy
+         module procedure ESMF_GridCreateCutout
+         module procedure ESMF_GridCreateChangeResolution
+         module procedure ESMF_GridCreateExchange
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for Grid create
@@ -338,34 +285,26 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_GridCreateNew - Create a new Grid
+!     ESMF_GridCreateEmpty - Create a new Grid with no data
 
 ! !INTERFACE:
-      function ESMF_GridCreateNew(name, rc)
+      function ESMF_GridCreateEmpty(name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateNew
+      type(ESMF_Grid) :: ESMF_GridCreateEmpty
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc               
-
-!     integer, intent(in) :: arg1                        
-!     integer, intent(in) :: arg2                        
-!     character (len = *), intent(in), optional :: arg3  
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object and constructs its
-!     internals.  Return a pointer to a new {\tt Grid}.
+!     internals.  Return a pointer to the new {\tt Grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[[name]] 
 !          {\tt Grid} name.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -379,7 +318,7 @@
 
 !     Initialize pointers
       nullify(grid)
-      nullify(ESMF_GridCreateNew%ptr)
+      nullify(ESMF_GridCreateEmpty%ptr)
 
 !     Initialize return code  
       if(present(rc)) then
@@ -391,22 +330,496 @@
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateNew: Allocate"
+        print *, "ERROR in ESMF_GridCreateEmpty: Allocate"
         return
       endif
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_GridConstructNew(grid, name, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateNew: Grid construct"
+        print *, "ERROR in ESMF_GridCreateEmpty: Grid construct"
         return
       endif
 
 !     Set return values.
-      ESMF_GridCreateNew%ptr => grid
+      ESMF_GridCreateEmpty%ptr => grid
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateNew
+      end function ESMF_GridCreateEmpty
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridCreateInternal - Create a new Grid internally
+
+! !INTERFACE:
+      function ESMF_GridCreateInternal(name, gridtype, coord_system, &
+                                       x_min, x_max, y_min, y_max, i_max, &
+                                       j_max, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateInternal
+!
+! !ARGUMENTS:
+      character (len=*), intent(in) :: name
+      integer, intent(in), optional :: gridtype
+      integer, intent(in), optional :: coord_system
+      real, intent(in), optional :: x_min
+      real, intent(in), optional :: x_max
+      real, intent(in), optional :: y_min
+      real, intent(in), optional :: y_max
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt Grid} object, constructs its
+!     internals, and internally generates the Grid.  Return a pointer to
+!     the new {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[name]] 
+!          {\tt Grid} name.
+!     \item[[gridtype]] 
+!          Integer specifier to denote gridtype:
+!             gridtype=1   lat-lon
+!             TODO:  fill out
+!     \item[[coord_system]]
+!          Integer specifier to denote coordinate system:
+!             coord_system=1   spherical
+!             coord_system=2   Cartesian
+!             coord_system=3   cylindrical
+!     \item[[x_min]]
+!          Minimum physical coordinate in the x-direction.
+!     \item[[x_max]]
+!          Maximum physical coordinate in the x-direction.
+!     \item[[y_min]]
+!          Minimum physical coordinate in the y-direction.
+!     \item[[y_max]]
+!          Maximum physical coordinate in the y-direction.
+!     \item[[i_max]]
+!          Number of even-spaced grid increments in the i-direction.
+!     \item[[j_max]]
+!          Number of even-spaced grid increments in the j-direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateInternal%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateInternal%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridCreateRead - Create a new Grid read in from a file
+
+! !INTERFACE:
+      function ESMF_GridCreateRead(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateRead
+!
+! !ARGUMENTS:
+      character (len=*), intent(in) :: name
+      type(ESMF_IOSpec), intent(in) :: iospec   ! file specs
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt Grid} object, constructs its
+!     internals, and reads a {\tt Grid} in from a file.  Return a pointer to
+!     the new {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[name]] 
+!          {\tt Grid} name.
+!     \item[[iospec]] 
+!          File I/O specification.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateRead%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateRead: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateRead: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateRead%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateRead
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridCreateCopy - Create a new Grid by copying another Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateCopy(name, grid_in, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateCopy
+!
+! !ARGUMENTS:
+      character (len=*), intent(in) :: name
+      type(ESMF_Grid), intent(in) :: grid_in
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt Grid} object, constructs its
+!     internals, and copies attributes from another {\tt Grid}.  Return a
+!     pointer to the new {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[name]] 
+!          {\tt Grid} name.
+!     \item[[grid_in]] 
+!          {\tt Grid} to be copied.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateCopy%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateCopy: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateCopy: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateCopy%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateCopy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridCreateCutout - Create a new Grid as a subset of an existing
+!                             Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateCutout(name, grid_in, i_min, i_max, j_min, &
+                                     j_max, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateCutout
+!
+! !ARGUMENTS:
+      character (len=*), intent(in) :: name
+      type(ESMF_Grid), intent(in) :: grid_in
+      integer, intent(in) :: i_min                       
+      integer, intent(in) :: i_max                       
+      integer, intent(in) :: j_min                       
+      integer, intent(in) :: j_max                       
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt Grid} object, constructs its
+!     internals, and copies a region from an existing {\tt Grid}.
+!     Return a pointer to the new {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[name]] 
+!          {\tt Grid} name.
+!     \item[[grid_in]] 
+!          {\tt Grid} to be partially copied.
+!     \item[[i_min]] 
+!          Minimum global i-index for the region of the grid to be cutout.
+!     \item[[i_max]] 
+!          Maximum global i-index for the region of the grid to be cutout.
+!     \item[[j_min]] 
+!          Minimum global j-index for the region of the grid to be cutout.
+!     \item[[j_max]] 
+!          Maximum global j-index for the region of the grid to be cutout.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateCutout%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateCutout: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateCutout: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateCutout%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateCutout
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridCreateChangeResolution - Create a new Grid by coarsening or
+!                                       refining an existing Grid.
+
+! !INTERFACE:
+      function ESMF_GridCreateChangeResolution(name, grid_in, i_resolution, &
+                                               j_resolution, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateChangeResolution
+!
+! !ARGUMENTS:
+      character (len=*), intent(in) :: name
+      type(ESMF_Grid), intent(in) :: grid_in
+      integer, intent(in) :: i_resolution
+      integer, intent(in) :: j_resolution
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt Grid} object, constructs its
+!     internals, and creates a {\tt Grid} by either coarsening or refining an
+!     existing {\tt Grid}.  Return a pointer to the new {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[name]] 
+!          {\tt Grid} name.
+!     \item[[grid_in]] 
+!          Source {\tt Grid} to be coarsened or refined.
+!     \item[[i_resolution]] 
+!          Integer resolution factor in the i-direction.
+!     \item[[j_resolution]] 
+!          Integer resolution factor in the j-direction.
+!          Note:  The above arguments assume refinement by factor if positive
+!          and coarsening by absolute value of the factor if negative.  For 
+!          example, i_resolution=4 indicates the new {\tt Grid} will be four
+!          times as resolved in the i-direction as the source {\tt Grid},
+!          whereas j_resolution=-3 means the new {\tt Grid} will sample every
+!          third point in the j-direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateChangeResolution%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateChangeResolution: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateChangeResolution: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateChangeResolution%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateChangeResolution
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridCreateExchange - Create a new Grid from the intersection of
+!                               two existing grids
+
+! !INTERFACE:
+      function ESMF_GridCreateExchange(name, grid_in1, grid_in2, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateExchange
+!
+! !ARGUMENTS:
+      character (len=*), intent(in) :: name
+      type(ESMF_Grid), intent(in) :: grid_in1
+      type(ESMF_Grid), intent(in) :: grid_in2
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt Grid} object, constructs its
+!     internals, and creates a new {\tt Grid} from the intersection of two
+!     existing {\tt Grids}.  Return a pointer to the new {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[name]] 
+!          New {\tt Grid} name.
+!     \item[[grid_in]] 
+!          First source {\tt Grid}.
+!     \item[[grid_in]] 
+!          Second source {\tt Grid}.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateExchange%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateExchange: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateExchange: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateExchange%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateExchange
 
 !------------------------------------------------------------------------------
 !BOP
