@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.8 2003/10/22 03:33:42 eschwab Exp $
+// $Id: ESMC_ClockEx.C,v 1.9 2004/01/07 23:51:00 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,6 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 //
+//!EXAMPLE        String used by test script to count examples.
 //-----------------------------------------------------------------------------
 //BOP
 // !PROGRAM:  ESMC_ClockEx - Clock initialization and time-stepping
@@ -28,13 +29,16 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.8 2003/10/22 03:33:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.9 2004/01/07 23:51:00 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
  {
    // result code
    int rc;
+
+   //Set finalrc to success
+   int finalrc=ESMF_SUCCESS;
 
    // instantiate a clock
    ESMC_Clock *clock;
@@ -50,9 +54,17 @@
    // initialize calendar to be Gregorian type
    rc = gregorianCalendar.ESMC_CalendarSet(ESMC_CAL_GREGORIAN);
 
+   if (rc != ESMF_SUCCESS) {
+       finalrc = ESMF_FAILURE;
+   }
+
    // initialize time interval to 1 hour
    int H = 1;
    rc = timeStep.ESMC_TimeIntervalSet(0, 0, 0, 0, 0, 0, &H);
+
+   if (rc != ESMF_SUCCESS) {
+       finalrc = ESMF_FAILURE;
+   }
 
    // initialize start time to 3/27/2003
    int YR = 2003;
@@ -61,11 +73,21 @@
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                &gregorianCalendar);
 
+   if (rc != ESMF_SUCCESS) {
+       finalrc = ESMF_FAILURE;
+   }
+
+
    // initialize stop time to 3/29/2003
    YR = 2003; MM = 3; DD = 29;
    rc = stopTime.ESMC_TimeSet(&YR, 0, &MM, &DD, 0, 0, 0, 0, 0, 0, 0, 0, 
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                               &gregorianCalendar);
+
+   if (rc != ESMF_SUCCESS) {
+       finalrc = ESMF_FAILURE;
+   }
+
 
    // initialize the clock with the above values
    clock = ESMC_ClockCreate(7, "Clock 1", &timeStep, &startTime, &stopTime);
@@ -73,16 +95,42 @@
    // time step from start time to stop time
    while (!clock->ESMC_ClockIsStopTime(&rc)) {
      rc = clock->ESMC_ClockAdvance();
+
+     if (rc != ESMF_SUCCESS) {
+         finalrc = ESMF_FAILURE;
+     }
+
    }
 
    // get the number of times the clock was advanced
    ESMF_KIND_I8 advanceCount;
    rc = clock->ESMC_ClockGet(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, &advanceCount);
 
+
+   if (rc != ESMF_SUCCESS) {
+       finalrc = ESMF_FAILURE;
+   }
+
    cout << "The clock was advanced " << advanceCount << " times." << endl;
+   
+   // Test for the correct number of advance counts.
+   if (advanceCount != 48) {
+       finalrc = ESMF_FAILURE;
+   }
 
    rc = ESMC_ClockDestroy(clock);
 
-   return(ESMF_SUCCESS);
+   if (rc != ESMF_SUCCESS) {
+       finalrc = ESMF_FAILURE;
+   }
+
+   if (finalrc == ESMF_SUCCESS) {
+        cout << "PASS: ESMC_ClockEx.C" << endl;
+        return(ESMF_SUCCESS);
+   } 
+   else {
+        cout << "FAIL: ESMC_ClockEx.C" << endl;
+        return(ESMF_FAILURE);
+   }
 
  } // end ESMC_ClockEx
