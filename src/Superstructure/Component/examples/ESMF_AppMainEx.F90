@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.2 2003/02/04 20:19:23 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.3 2003/02/04 21:11:16 nscollins Exp $
 !
 ! Example code for a main program Application.  See ESMF_AppCompEx.F90
 !   for an example of an embeddable Application.
@@ -9,8 +9,8 @@
 !BOP
 !
 ! !DESCRIPTION:
-! Generic calls to Component routines.  See the other example files for
-!  more specific examples of Application, Gridded, and Coupler Components.
+! Example of a main program Application.  See also the following example
+!  for an Application which can be nested in a higher-level Application.
 !  Also see the Programming Model section of this document.
 !
 !
@@ -94,7 +94,7 @@
     finished = .false.
     timestep = 1
     endtime = 10
-    while (.not. finished) do
+    do while (.not. finished)
         call ESMF_CompRun(comp1, timestep, rc)
         call ESMF_CompRun(comp2, timestep, rc)
         call ESMF_CompRun(cpl, timestep, rc)

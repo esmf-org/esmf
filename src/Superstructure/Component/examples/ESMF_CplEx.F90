@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.2 2003/02/04 20:19:24 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.3 2003/02/04 21:11:16 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -36,7 +36,7 @@
  
     
     subroutine CPL_Init(comp, rc)
-        ESMF_Comp :: comp
+        type(ESMF_Comp) :: comp
         integer :: rc
 
 !     ! Local variables
@@ -57,7 +57,7 @@
 !   !
  
     subroutine CPL_Run(comp, timestep, rc)
-        ESMF_Comp :: comp(:)
+        type(ESMF_Comp) :: comp(:)
         integer :: timestep
         intger :: rc
 
@@ -75,7 +75,7 @@
 !   !
  
     subroutine CPL_Final(comp, rc)
-        ESMF_Comp :: comp
+        type(ESMF_Comp) :: comp
         integer :: rc
 
 !     ! Local variables

@@ -1,4 +1,4 @@
-// $Id: ESMC_AppCompEx.C,v 1.2 2003/02/04 20:19:24 nscollins Exp $
+// $Id: ESMC_AppCompEx.C,v 1.3 2003/02/04 21:11:17 nscollins Exp $
 //
 // Example code which creates an Application which can also
 // be embedded as a Component in another Application.
@@ -21,6 +21,7 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
+#include "ESMC_Layout.h"
 #include "ESMC_Comp.h"
 
 #include <stdio.h>

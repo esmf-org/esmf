@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.1 2003/02/03 17:09:49 nscollins Exp $
+// $Id: ESMC_GCompEx.C,v 1.2 2003/02/04 21:11:17 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -21,6 +21,7 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
+#include "ESMC_Layout.h"
 #include "ESMC_Comp.h"
 
 #include <stdio.h>

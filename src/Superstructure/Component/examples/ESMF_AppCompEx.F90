@@ -1,4 +1,4 @@
-! $Id: ESMF_AppCompEx.F90,v 1.2 2003/02/04 20:19:23 nscollins Exp $
+! $Id: ESMF_AppCompEx.F90,v 1.3 2003/02/04 21:11:15 nscollins Exp $
 !
 ! Example code for an embeddable Application.  See ESMF_AppMainEx.F90
 !   for an example of a main program Application.
@@ -26,6 +26,7 @@
     #include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by Comps
+    use ESMF_BaseMod
     use ESMF_IOMod
     use ESMF_LayoutMod
     use ESMF_CompMod
@@ -41,14 +42,14 @@
 !   !   init, run, and finalize routines to be registered.
  
     subroutine NATM_Init(comp, layout, rc)
-        ESMF_Comp :: comp
-        ESMF_Layout :: layout
+        type(ESMF_Comp) :: comp
+        type(ESMF_Layout) :: layout
         integer :: rc
 
 
-        ESMF_Comp :: comp1, comp2, cpl
-        ESMF_Layout :: layout1, layout2, layout3
-        ESMF_DElist :: delist1, delist2, delist3
+        type(ESMF_Comp) :: comp1, comp2, cpl
+        type(ESMF_Layout) :: layout1, layout2, layout3
+        integer :: i, delist1(16), delist2(16), delist3(2)
         character(len=ESMF_MAXSTR) :: cname
 
         print *, "Nested Comp Init starting"
@@ -111,13 +112,13 @@
  
     ! TODO: where does the internal context come from?
     subroutine NATM_Run(comp, timestep, rc)
-        ESMF_Comp :: comp
+        type(ESMF_Comp) :: comp
         integer :: timestep
         integer :: rc
 
         logical :: finished
-        integer :: internaltimestep, internaltimeend, starttime
-        ESMF_Comp :: comp1, comp2, cpl
+        integer :: internaltimestep, internalendtime, starttime
+        type(ESMF_Comp) :: comp1, comp2, cpl
 
         print *, "Nested Comp Run starting"
 
@@ -125,8 +126,8 @@
         starttime = 0
     
         internaltimestep = 1
-        internaltimeend = starttime + timestep
-        while (.not. finished) do
+        internalendtime = starttime + timestep
+        do while (.not. finished) 
             call ESMF_CompRun(comp1, internaltimestep, rc)
             call ESMF_CompRun(comp2, internaltimestep, rc)
             call ESMF_CompRun(cpl, internaltimestep, rc)
@@ -144,10 +145,10 @@
 !   !   up and flush any output, and then destroys them before returning.
  
     subroutine NATM_Final(comp, rc)
-        ESMF_Comp :: comp
+        type(ESMF_Comp) :: comp
         integer :: rc
 
-        ESMF_Comp :: comp1, comp2, cpl
+        type(ESMF_Comp) :: comp1, comp2, cpl
 
         print *, "Nested Comp Finalize starting"
         call ESMF_CompFinal(cpl, rc)
@@ -183,11 +184,11 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc
+    integer :: x, y, i, rc
     integer :: timestep, endtime
     integer, dimension(32) :: delist
     logical :: finished
-    character(ESMF_MAXSTR) :: cname
+    character(len=ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout
     type(ESMF_Comp) :: comp1, comp2, comp3, comp4
         
@@ -220,7 +221,7 @@
     finished = .false.
     timestep = 1
     endtime = 10
-    while (.not. finished) do
+    do while (.not. finished)
         call ESMF_CompRun(comp1, timestep, rc)
         print *, "Driver Comp Run returned"
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompEx.F90,v 1.2 2003/02/04 20:19:23 nscollins Exp $
+! $Id: ESMF_CompEx.F90,v 1.3 2003/02/04 21:11:16 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -60,7 +60,7 @@
     finished = .false.
     timestep = 1
     endtime = 10
-    while (.not. finished) do
+    do while (.not. finished) 
         call ESMF_CompRun(comp1, timestep, rc)
         print *, "Comp Run returned"
    
