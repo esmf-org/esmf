@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.8 2003/07/09 22:46:38 jwolfe Exp $
+// $Id: ESMC_Base.C,v 1.9 2003/09/04 19:38:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.8 2003/07/09 22:46:38 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.9 2003/09/04 19:38:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -355,6 +355,32 @@ static int globalCount = 0;
      if (min) *min = ai->min;
      if (max) *max = ai->max;
      if (stride) *stride = ai->stride;
+
+     return ESMF_SUCCESS;
+};
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AxisIndexPrint - Print an AxisIndex object
+//
+// !INTERFACE:
+    int ESMC_AxisIndexPrint(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+     ESMC_AxisIndex *ai) {
+// 
+// !DESCRIPTION:
+//     Print values from an AxisIndex object.
+//
+//EOP
+
+     if (ai == NULL) 
+        printf("Empty (NULL) AxisIndex pointer\n");
+
+     printf("min=%d, max=%d, stride=%d\n", ai->min, ai->max, ai->stride);
 
      return ESMF_SUCCESS;
 };
