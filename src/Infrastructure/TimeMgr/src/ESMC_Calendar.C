@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.61 2004/05/18 11:06:07 nscollins Exp $
+// $Id: ESMC_Calendar.C,v 1.62 2004/05/18 21:57:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.61 2004/05/18 11:06:07 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.62 2004/05/18 21:57:30 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -89,8 +89,7 @@ int ESMC_Calendar::count=0;
  #define ESMC_METHOD "ESMC_CalendarInitialize()"
 
   int rc = ESMC_CalendarSetDefault(calendarType);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_CalendarSetDefault() failed.",
-                                     ESMC_LOG_ERROR);
+  ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
   return(rc);
 
  } // end ESMC_CalendarInitialize
@@ -167,7 +166,7 @@ int ESMC_Calendar::count=0;
       calendar = new ESMC_Calendar;
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
+      //TODO: ESMC_LogDefault.ESMC_LogAllocError(&rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -198,15 +197,13 @@ int ESMC_Calendar::count=0;
                                             calendarType);
 
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                               "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
-      if (rc != ESMC_NULL_POINTER) *rc = returnCode;
+                                              ESMF_ERR_PASSTHRU, rc)) {
       return(calendar);
     }
 
     returnCode = calendar->ESMC_CalendarValidate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
-    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
+                                          ESMF_ERR_PASSTHRU, rc);
 
     return(calendar);
 
@@ -264,7 +261,7 @@ int ESMC_Calendar::count=0;
       *internalCal = new ESMC_Calendar;
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr(&returnCode);
       return(ESMF_FAILURE);
     }
 
@@ -277,13 +274,13 @@ int ESMC_Calendar::count=0;
                                                  (*internalCal)->name, 
                                                  calendarType);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                               "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
+                                              ESMF_ERR_PASSTHRU, &returnCode)) {
       return(returnCode);
     }
 
     returnCode = (*internalCal)->ESMC_CalendarValidate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
+                                          ESMF_ERR_PASSTHRU, &returnCode);
     return(returnCode);
 
  } // end ESMC_CalendarCreate (internal)
@@ -328,7 +325,7 @@ int ESMC_Calendar::count=0;
       calendar = new ESMC_Calendar;
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr(rc);
       return(ESMC_NULL_POINTER);
     }
 
@@ -360,16 +357,12 @@ int ESMC_Calendar::count=0;
                                             secondsPerDay, daysPerYear,
                                             daysPerYearDn, daysPerYearDd);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                               "ESMC_CalendarSet() failed.", ESMC_LOG_ERROR)) {
-      if (rc != ESMC_NULL_POINTER) *rc = returnCode;
+                                              ESMF_ERR_PASSTHRU, rc)) {
       return(calendar);
     }
 
     returnCode = calendar->ESMC_CalendarValidate();
-    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
-    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
-
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
     return(calendar);
 
  } // end ESMC_CalendarCreate (custom)
@@ -415,15 +408,13 @@ int ESMC_Calendar::count=0;
       calendarCopy = new ESMC_Calendar(*calendar);
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr(rc);
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendarCopy->ESMC_CalendarValidate();
-    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                            "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR);
-    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
-
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
+                            
     return(calendarCopy);     
 
  } // end ESMC_CalendarCreate (copy)
@@ -488,8 +479,7 @@ int ESMC_Calendar::count=0;
   }
 
   int rc = (*calendar)->ESMC_CalendarValidate();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
-                         "ESMC_CalendarValidate() failed.", ESMC_LOG_ERROR)) {
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
     return(rc);
   }
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.39 2004/05/18 11:06:06 nscollins Exp $
+// $Id: ESMC_Alarm.C,v 1.40 2004/05/18 21:57:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.39 2004/05/18 11:06:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.40 2004/05/18 21:57:29 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -108,7 +108,7 @@ int ESMC_Alarm::count=0;
       alarm = new ESMC_Alarm;
     }
     catch (...) {
-      // TODO:  ESMC_LogDefault.ESMC_LogAllocErr();
+      // TODO:  ESMC_LogDefault.ESMC_LogAllocErr(rc);
       return(ESMC_NULL_POINTER);
     }
     
@@ -191,9 +191,7 @@ int ESMC_Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     returnCode = alarm->ESMC_AlarmValidate();
-    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                               "ESMC_AlarmValidate() failed.", ESMC_LOG_ERROR);
-    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
+    ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode, ESMF_ERR_PASSTHRU, rc);
 
     // add this new valid alarm to the given clock
     if (returnCode == ESMF_SUCCESS) {
@@ -245,15 +243,13 @@ int ESMC_Alarm::count=0;
       alarmCopy = new ESMC_Alarm(*alarm);
     }
     catch (...) {
-      //TODO: ESMC_LogDefault.ESMC_LogAllocErr();
+      //TODO: ESMC_LogDefault.ESMC_LogAllocErr(rc);
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = alarmCopy->ESMC_AlarmValidate();
     ESMC_LogDefault.ESMC_LogMsgFoundError(returnCode,
-                               "ESMC_AlarmValidate() failed.", ESMC_LOG_ERROR);
-    if (rc != ESMC_NULL_POINTER) *rc = returnCode;
-
+                                          ESMF_ERR_PASSTHRU, rc);
     return(alarmCopy);     
 
  } // end ESMC_AlarmCreate (copy)
@@ -382,8 +378,7 @@ int ESMC_Alarm::count=0;
     //        this->ringTime > (passed in) ringTime
 
     rc = ESMC_AlarmValidate();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_AlarmValidate() failed.",
-                                           ESMC_LOG_ERROR)) {
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc)) {
       // restore original alarm values
       *this = saveAlarm;
     }
@@ -1268,8 +1263,7 @@ int ESMC_Alarm::count=0;
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, &s);
 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, "ESMC_TimeIntervalSet() failed.",
-                                       ESMC_LOG_ERROR); 
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
 
  } // end ESMC_Alarm
 
