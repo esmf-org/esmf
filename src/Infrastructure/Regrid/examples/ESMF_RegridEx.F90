@@ -1,43 +1,49 @@
-! $Id: ESMF_RegridEx.F90,v 1.1 2004/06/18 10:54:13 nscollins Exp $
+! $Id: ESMF_RegridEx.F90,v 1.2 2004/06/21 09:46:25 nscollins Exp $
 !
-! Example/test code which regrids data.
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+    program ESMF_RegridEx
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
-!-------------------------------------------------------------------------
-
-!BOP
+!==============================================================================
+!BOC
+! !PROGRAM: ESMF_RegridEx - Using the Regridding methods
 !
 ! !DESCRIPTION:
-! See the following code fragments for examples of how to call
-!   Regrid on a Field.
-! Also see the Programming Model section of this document.
 !
-!
-!\begin{verbatim}
-
-!   ! Example program showing various ways to call the communications
-!   ! routines on a Field object
-    program ESMF_RegridUseEx
+! This program shows examples of using Regrid on Field data
+!-----------------------------------------------------------------------------
 
     ! ESMF Framework module
     use ESMF_Mod
 
     implicit none
     
-!   ! Local variables
-    integer :: x, y, rc, mycell, finalrc, numdes
-    integer :: i, j
+    ! Local variables
+    type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
-    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_RouteHandle) :: regrid_rh
     type(ESMF_Array) :: arraya, arrayb
-    type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout1, layout2
+    integer :: rc
+!EOC
+
+    integer :: x, y, mycell, finalrc, numdes
+    integer :: i, j
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_FieldDataMap) :: datamap
     type(ESMF_VM) :: vm
-    type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh
     character (len = ESMF_MAXSTR) :: fname
     type(ESMF_IOSpec) :: iospec
-    type(ESMF_Field) :: field1, field2, field3, field4
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
@@ -103,27 +109,42 @@
     ! fields all ready to go
 
 
-!-------------------------------------------------------------------------
-!   ! Example 1:
-!   !
-!   !  Calling Field Regrid
-
-
+!BOE
+!\subsubsection{Precomputing and Executing a Regrid}
+      
+!  The user has already created an {\tt ESMF\_Grid}, an
+!  {\tt ESMF\_Array} with data, and put them together in an {\tt ESMF\_Field}.
+!  An {\tt ESMF\_RouteHandle} is created and the data movement needed to
+!  execute the regrid is stored with that handle by the store method. 
+!  To actually execute the operation, the source and destination data
+!  objects must be supplied, along with the same {\tt ESMF\_RouteHandle}.
+!EOE
+      
+!BOC
     regrid_rh = ESMF_RouteHandleCreate(rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRegridStore(field1, field2, layout1, &
                                routehandle=regrid_rh, &
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_RouteHandleDestroy(redist_rh)
+!BOC
+    call ESMF_RouteHandleDestroy(regrid_rh)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Regrid example 3 returned"
@@ -152,7 +173,7 @@
 
     call ESMF_Finalize(rc=rc)
 
-    end program ESMF_RegridUseEx
+    end program ESMF_RegridEx
+
     
-!\end{verbatim}
     
