@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.213 2005/01/04 00:49:02 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.214 2005/01/05 16:54:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.213 2005/01/04 00:49:02 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.214 2005/01/05 16:54:33 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -355,9 +355,9 @@
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
-!     \item given array of coordinate increments or spacings, assuming 0 is 
-!        the minimum or starting coordinate (optional argument {delta});
-!     \item given array of coordinates (optional argument {coords}).
+!       \item given array of coordinate increments or spacings, assuming 0 is 
+!          the minimum or starting coordinate (optional argument {\tt delta});
+!       \item given array of coordinates (optional argument {\tt coord}).
 !     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and an error code returned.
@@ -1183,12 +1183,12 @@
 !          or equal to the number of DE's along the first axis of the
 !          attached {\tt delayout}.  The sum of this array must equal exactly
 !          the number of grid cells along related grid axis, which is the
-!          first axis by default but can also be set by the [{[decompIds]}]
+!          first axis by default but can also be set by the {\tt decompIds}
 !          argument in this call.
 !     \item[{[countsPerDEDim2]}]
 !          Array denoting the number of grid cells per DE in the second
 !          decomposition axis.  Please see the description of
-!          [{[countsPerDEDim1]}] above for more details
+!          {\tt countsPerDEDim1} above for more details
 !     \item[{[decompIds]}]
 !          Integer array identifying which {\tt grid} axes are decomposed.
 !          This array describes the relationship between the {\tt grid} and the
@@ -1196,18 +1196,18 @@
 !          information for the corresponding grid axis.  The following is a
 !          list of valid values and the meaning of each:
 !          \begin{description}
-!            \item 0   the grid axis is not distributed;
-!            \item 1   the grid axis is distributed by the first decomposition
-!                      axis in the {\tt delayout};
-!            \item 2   the grid axis is distributed by the second decomposition
-!                      axis in the {\tt delayout}.
+!            \item 0 \  the grid axis is not distributed;
+!            \item 1 \  the grid axis is distributed by the first 
+!                       decomposition axis in the {\tt delayout};
+!            \item 2 \  the grid axis is distributed by the second 
+!                       decomposition axis in the {\tt delayout}.
 !          \end{description}
 !          The number of array elements should be greater or equal to the number
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
 !          distributed by the second decomposition axis, and the third grid axis
 !          (if applicable) is not distributed.  The relationship between data
-!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and {\tt grid}
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and grid
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[rc]}]
@@ -1279,7 +1279,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridDistributeVect"
 !BOP
-! !IROUTINE: ESMF_GridDistribute - Distribute a Grid stored as a vector 
+! !IROUTINE: ESMF_GridDistribute - Distribute a Grid as an arbitrary vector 
 
 ! !INTERFACE:
      ! Private name; call using ESMF_GridDistribute()
@@ -1307,7 +1307,7 @@
 !          Number of grid cells to be distributed to this DE.
 !     \item[myIndices]
 !          Array of grid indices to be distributed to this DE, as (i,j) pairs.
-!          The size of this array must be at least [myCount] in the first
+!          The size of this array must be at least {\tt myCount} in the first
 !          dimension and 2 in the second.
 !     \item[{[decompIds]}]
 !          Integer array identifying which {\tt grid} axes are decomposed.
@@ -1316,18 +1316,18 @@
 !          information for the corresponding grid axis.  The following is a
 !          list of valid values and the meaning of each:
 !          \begin{description}
-!            \item 0   the grid axis is not distributed;
-!            \item 1   the grid axis is distributed by the first decomposition
-!                      axis in the {\tt delayout};
-!            \item 2   the grid axis is distributed by the second decomposition
-!                      axis in the {\tt delayout}.
+!            \item 0 \  the grid axis is not distributed;
+!            \item 1 \  the grid axis is distributed by the first 
+!                       decomposition axis in the {\tt delayout};
+!            \item 2 \  the grid axis is distributed by the second 
+!                       decomposition axis in the {\tt delayout}.
 !          \end{description}
 !          The number of array elements should be greater or equal to the number
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
 !          distributed by the second decomposition axis, and the third grid axis
 !          (if applicable) is not distributed.  The relationship between data
-!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and {\tt grid}
+!          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and grid
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
 !     \item[{[rc]}]
@@ -3052,8 +3052,8 @@
 !          locations to be translated.
 !     \item[{[local1D]}]
 !          One-dimensional array of local identifiers for the return of the
-!          translation.  This array must be the same size as [{[global1D]}],
-!          and must be present if [{[global1D]}] is present.  If either of
+!          translation.  This array must be the same size as {\tt global1D},
+!          and must be present if {\tt global1D} is present.  If either of
 !          these conditions is not met, an error is issued.
 !     \item[{[global2D]}]
 !          Two-dimensional array of global identifiers to be translated.
@@ -3064,16 +3064,18 @@
 !          (currently any two dimensions of a three-dimensional grid can be
 !          distributed).  So to translate three sets of global indices to
 !          local indexing,
-!                [{[global2D(1,1)]}] = index1(1)
-!                [{[global2D(1,2)]}] = index1(2)
-!                [{[global2D(2,1)]}] = index2(1)
-!                [{[global2D(2,2)]}] = index2(2)
-!                [{[global2D(3,1)]}] = index3(1)
-!                [{[global2D(3,2)]}] = index3(2)
+!          \begin{description}
+!            \item {\tt global2D(1,1)} = index1(1)
+!            \item {\tt global2D(1,2)} = index1(2)
+!            \item {\tt global2D(2,1)} = index2(1)
+!            \item {\tt global2D(2,2)} = index2(2)
+!            \item {\tt global2D(3,1)} = index3(1)
+!            \item {\tt global2D(3,2)} = index3(2)
+!          \end{description}
 !     \item[{[local2D]}]
 !          Two-dimensional array of local identifiers for the return of the
-!          translation.  This array must be the same size as [{[global2D]}],
-!          and must be present if [{[global2D]}] is present.  If either of
+!          translation.  This array must be the same size as {\tt global2D},
+!          and must be present if {\tt global2D} is present.  If either of
 !          these conditions is not met, an error is issued.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3197,8 +3199,8 @@
 !          locations to be translated.
 !     \item[{[global1D]}]
 !          One-dimensional array of global identifiers for the return of the
-!          translation.  This array must be the same size as [{[local1D]}],
-!          and must be present if [{[local1D]}] is present.  If either of
+!          translation.  This array must be the same size as {\tt local1D},
+!          and must be present if {\tt local1D} is present.  If either of
 !          these conditions is not met, an error is issued.
 !     \item[{[local2D]}]
 !          Two-dimensional array of local identifiers to be translated.
@@ -3209,16 +3211,18 @@
 !          (currently any two dimensions of a three-dimensional grid can be
 !          distributed).  So to translate three sets of local indices to
 !          global indexing,
-!                [{[local2D(1,1)]}] = index1(1)
-!                [{[local2D(1,2)]}] = index1(2)
-!                [{[local2D(2,1)]}] = index2(1)
-!                [{[local2D(2,2)]}] = index2(2)
-!                [{[local2D(3,1)]}] = index3(1)
-!                [{[local2D(3,2)]}] = index3(2)
+!          \begin{description}
+!            \item {\tt local2D(1,1)} = index1(1)
+!            \item {\tt local2D(1,2)} = index1(2)
+!            \item {\tt local2D(2,1)} = index2(1)
+!            \item {\tt local2D(2,2)} = index2(2)
+!            \item {\tt local2D(3,1)} = index3(1)
+!            \item {\tt local2D(3,2)} = index3(2)
+!          \end{description}
 !     \item[{[global2D]}]
 !          Two-dimensional array of global identifiers for the return of the
-!          translation.  This array must be the same size as [{[local2D]}],
-!          and must be present if [{[local2D]}] is present.  If either of
+!          translation.  This array must be the same size as {\tt local2D},
+!          and must be present if {\tt local2D} is present.  If either of
 !          these conditions is not met, an error is issued.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3409,10 +3413,11 @@
 !
 ! !DESCRIPTION:
 !     Sets information for the {\tt grid} that may not have been included at
-!     {\tt grid} creation.  WARNING:  This routine does not automatically
-!     regenerate the {\tt grid} when used to reset its values, some of which may
-!     significantly alter it.  Therefore this routine may only be used prior to
-!     the {\tt ESMF\_GridDistribute} call.
+!     {\tt grid} creation.
+!     WARNING:  This routine does not automatically regenerate the {\tt grid}
+!               when used to reset its values, some of which may significantly
+!               alter the existing {\tt grid}.  Therefore this routine may only
+!               be used prior to the {\tt ESMF\_GridDistribute()} call.
 !
 !     The arguments are:
 !     \begin{description}

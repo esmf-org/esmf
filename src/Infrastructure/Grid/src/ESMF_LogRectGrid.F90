@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.131 2005/01/03 23:33:05 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.132 2005/01/05 16:56:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.131 2005/01/03 23:33:05 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.132 2005/01/05 16:56:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -320,7 +320,7 @@
 !     This routine generates {\tt ESMF\_Grid} coordinates from the following
 !     set of arguments:
 !     \begin{description}
-!       \item given arrays of coordinates (arguments [coords1] and [coords2]).
+!       \item given arrays of coordinates (arguments {\tt coord1} and {\tt coord2}).
 !     \end{description}
 !
 !     The arguments are:
@@ -434,7 +434,8 @@
 !     following set of arguments:
 !     \begin{description}
 !       \item given array of minimum coordinates and arrays of deltas 
-!             (arguments [minGlobalCoordPerDim], [delta1] and [delta2]).
+!             (arguments {\tt minGlobalCoordPerDim}, {\tt delta1} and
+!             {\tt delta2}).
 !     \end{description}
 !
 !     The arguments are:
@@ -555,10 +556,10 @@
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
-!       \item given min, max, and count (arguments [minGlobalCoordPerDim], 
-!             [{[maxGlobalCoordPerDim]}], and [counts]);
-!       \item given min, delta, and count (arguments [minGlobalCoordPerDim], 
-!             [{[deltaPerDim]}], and [counts]).
+!       \item given min, max, and count (arguments {\tt minGlobalCoordPerDim}, 
+!             {\tt maxGlobalCoordPerDim}, and {\tt counts});
+!       \item given min, delta, and count (arguments {\tt minGlobalCoordPerDim}, 
+!             {\tt deltaPerDim}, and {\tt counts}).
 !     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and the program is terminated.
@@ -677,7 +678,8 @@
 !     This routine generates {\tt ESMF\_Grid} coordinates from the following
 !     set of arguments:
 !     \begin{description}
-!       \item given arrays of coordinates (arguments [coords1] and [coords2]).
+!       \item given arrays of coordinates (arguments {\tt coord1} and
+!             {\tt coord2}).
 !     \end{description}
 !
 !     The arguments are:
@@ -779,8 +781,8 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internal derived types, and internally generates the {\tt ESMF\_Grid}.  Returns a
-!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     internal derived types, and internally generates the {\tt ESMF\_Grid}.
+!     Returns a pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
 !     \begin{description}
 !       \item logically rectangular;
@@ -791,7 +793,8 @@
 !     set of arguments:
 !     \begin{description}
 !       \item given array of minimum coordinates and arrays of deltas
-!             (arguments [minGlobalCoordPerDim], [delta1] and [delta2]).
+!             (arguments {\tt minGlobalCoordPerDim}, {\tt delta1} and
+!             {\tt delta2}).
 !     \end{description}
 !
 !     The arguments are:
@@ -912,10 +915,10 @@
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
-!       \item given min, max, and count (arguments [minGlobalCoordPerDim], 
-!             [{[maxGlobalCoordPerDim]}], and [counts]);
-!       \item given min, delta, and count (arguments [minGlobalCoordPerDim], 
-!             [{[deltaPerDim]}], and [counts]).
+!       \item given min, max, and count (arguments {\tt minGlobalCoordPerDim}, 
+!             {\tt maxGlobalCoordPerDim}, and {\tt counts});
+!       \item given min, delta, and count (arguments {\tt minGlobalCoordPerDim}, 
+!             {\tt deltaPerDim}, and {\tt counts}).
 !     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and the program is terminated.
@@ -1027,9 +1030,9 @@
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:                 
 !     \begin{enumerate}
-!       \item given min and array of deltas (arguments [{[minGlobalCoord]}]
-!             and [{[delta]}]);
-!       \item given array of coordinates (argument [[{coord]}]).
+!       \item given min and array of deltas (optional arguments
+!             {\tt minGlobalCoord} and {\tt delta});
+!       \item given array of coordinates (optional argument {\tt coord}).
 !     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and the program is terminated.

@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.14 2005/01/03 23:36:50 jwolfe Exp $
+% $Id: Grid_options.tex,v 1.15 2005/01/05 16:54:04 jwolfe Exp $
 
 
  \subsubsection{ESMF\_CoordOrder}
@@ -110,7 +110,7 @@
           Arakawa A staggering, where all fields, including velocities, are
           located at cell centers.  A grid created with this staggering can
           only be used to create {\tt ESMF\_Fields} with the following
-          horzRellocs (horizontal relative locations):
+          horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
           \end{description}
@@ -119,7 +119,7 @@
           Arakawa B staggering, where both the U and V velocities are located at
           each cell's NorthEast corner.  A grid created with this staggering can
           only be used to create {\tt ESMF\_Fields} with the following
-          horzRellocs (horizontal relative locations):
+          horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_NECORNER
@@ -129,7 +129,7 @@
           Arakawa B staggering, where both the U and V velocities are located at
           each cell's NorthWest corner.  A grid created with this staggering can
           only be used to create {\tt ESMF\_Fields} with the following
-          horzRellocs (horizontal relative locations):
+          horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_NWCORNER
@@ -139,7 +139,7 @@
           Arakawa B staggering, where both the U and V velocities are located at
           each cell's SouthEast corner.  A grid created with this staggering can
           only be used to create {\tt ESMF\_Fields} with the following
-          horzRellocs (horizontal relative locations):
+          horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_SECORNER
@@ -149,7 +149,7 @@
           Arakawa B staggering, where both the U and V velocities are located at
           each cell's SouthWest corner.  A grid created with this staggering can
           only be used to create {\tt ESMF\_Fields} with the following
-          horzRellocs (horizontal relative locations):
+          horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_SWCORNER
@@ -159,7 +159,7 @@
           Arakawa C staggering, where the U velocity is located at the East face
           and the V velocity is located at the North face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_NFACE
@@ -170,7 +170,7 @@
           Arakawa C staggering, where the U velocity is located at the West face
           and the V velocity is located at the North face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_NFACE
@@ -181,7 +181,7 @@
           Arakawa C staggering, where the U velocity is located at the East face
           and the V velocity is located at the South face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_SFACE
@@ -192,7 +192,7 @@
           Arakawa C staggering, where the U velocity is located at the West face
           and the V velocity is located at the South face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_SFACE
@@ -203,7 +203,7 @@
           Arakawa D staggering, where the U velocity is located at the North face
           and the V velocity is located at the East face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_NFACE
@@ -214,7 +214,7 @@
           Arakawa D staggering, where the U velocity is located at the North face
           and the V velocity is located at the West face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_NFACE
@@ -225,7 +225,7 @@
           Arakawa D staggering, where the U velocity is located at the South face
           and the V velocity is located at the East face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_SFACE
@@ -236,7 +236,7 @@
           Arakawa D staggering, where the U velocity is located at the South face
           and the V velocity is located at the West face.  A grid created with
           this staggering can only be used to create {\tt ESMF\_Fields} with the
-          following horzRellocs (horizontal relative locations):
+          following horizontal {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CENTER
             \item ESMF\_CELL\_SFACE
@@ -384,8 +384,8 @@
     \item [ESMF\_GRID\_VERT\_STAGGER\_BOTTOM]
           Vertical velocity or pressure gradient is located at the bottom vertical 
           face of the cell.  A grid created with this staggering will only accept
-          {\tt ESMF\_Fields} with the following vertRellocs (vertical relative
-          locations):
+          {\tt ESMF\_Fields} with the following vertical {\tt ESMF\_RelLocs}
+          (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CELL
             \item ESMF\_CELL\_BOTFACE
@@ -394,7 +394,7 @@
     \item [ESMF\_GRID\_VERT\_STAGGER\_CENTER] 
           Vertical velocity or pressure gradient is located at vertical midpoints.
           A grid created with this staggering will only accept {\tt ESMF\_Fields}
-          with the following vertRellocs (vertical relative locations):
+          with the following vertical {\tt ESMF\_RelLocs} (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CELL
           \end{description}
@@ -402,8 +402,8 @@
     \item [ESMF\_GRID\_VERT\_STAGGER\_TOP]
           Vertical velocity or pressure gradient is located at the top vertical 
           face of the cell.  A grid created with this staggering will only accept
-          {\tt ESMF\_Fields} with the following vertRellocs (vertical relative
-          locations):
+          {\tt ESMF\_Fields} with the following vertical {\tt ESMF\_RelLocs}
+          (relative locations):
           \begin{description}
             \item ESMF\_CELL\_CELL
             \item ESMF\_CELL\_TOPFACE
