@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.2 2003/11/27 00:02:36 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.3 2003/12/03 22:23:59 svasquez Exp $
 !
 ! Example code for creating States.
 
@@ -22,11 +22,12 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc
+    integer :: x, y, rc, finalrc
     character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
     type(ESMF_Field) :: field1
     type(ESMF_Bundle) :: bundle1, bundle2
     type(ESMF_State) :: state1, state2, state3, state4
+    finalrc = ESMF_SUCCESS
         
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -39,6 +40,11 @@
 !   ! This will probably be called from inside the Component Init code
     compname = "Atmosphere"
     state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "State Create returned, name = ", trim(compname)
 
     ! Data would be added here and the State reused inside the run
@@ -56,21 +62,46 @@
 
     compname = "Ocean"
     state2 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "State Create returned, name = ", trim(compname)
 
     bundlename = "Temperature"
     bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "Bundle Create returned", rc
 
     call ESMF_StateAddData(state2, bundle1, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "StateAddData returned", rc
     
     ! Loop here, updating Bundle contents each time step
 
     call ESMF_StateDestroy(state2, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "State Destroy returned", rc
 
     call ESMF_BundleDestroy(bundle1, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "Bundle Destroy returned", rc
 
     print *, "State Example 2 finished"
@@ -91,14 +122,29 @@
     ! The producing Component creates the menu of data items available.
     compname = "Ocean"
     state3 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind"
     call ESMF_StateAddData(state3, dataname, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "StateAddData returned", rc, " name = ", trim(dataname)
     
     dataname = "Humidity"
     call ESMF_StateAddData(state3, dataname, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "StateAddData returned", rc, " name = ", trim(dataname)
     
     ! See next example for how this is used.
@@ -118,6 +164,11 @@
 
     dataname = "Downward wind"
     call ESMF_StateSetNeeded(state3, dataname, ESMF_STATEDATAISNEEDED, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "StateSetNeeded returned", rc
     
 !-------------------------------------------------------------------------
@@ -133,19 +184,39 @@
     dataname = "Downward wind"
     if (ESMF_StateIsNeeded(state3, dataname, rc)) then
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+
       print *, "Data marked as needed", trim(dataname)
 
       bundlename = dataname
       bundle2 = ESMF_BundleCreate(bundlename, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+         finalrc = ESMF_FAILURE
+      end if
+
       print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
       
       call ESMF_StateAddData(state3, bundle2, rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+         finalrc = ESMF_FAILURE
+      end if
+
       print *, "StateAddData returned", rc
     else
       print *, "Data marked as not needed", trim(statename)
     endif
     
     call ESMF_StateDestroy(state3, rc)
+
+    if (rc.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
     print *, "State Destroy returned", rc
 
     print *, "State Example 5 finished"
@@ -156,6 +227,13 @@
 !   !  exchange between Components and Couplers.  Also "Required for 
 !   !  Restart".
 !-------------------------------------------------------------------------
+
+
+    if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_StateExample.F90"
+    else
+        print *, "FAIL: ESMF_StateExample.F90"
+    end if
 
 
     end program ESMF_StateExample
