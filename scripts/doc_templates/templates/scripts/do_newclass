@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.6 2003/02/28 01:03:13 eschwab Exp $
+# $Id: do_newclass,v 1.7 2003/02/28 04:21:45 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -71,6 +71,7 @@ endif
         cat $DOCT_DIR/ESMC_class.h | \
         sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
            > ../include/ESMC_$class.h
+      endif
 
       if(!(-r ../tests/ESMC_${class}Test.C)) then
         cat $DOCT_DIR/ESMC_classTest.C | \
@@ -82,4 +83,3 @@ endif
     echo "Valid options are: [ c | f]"
     exit
   endsw
-endif
