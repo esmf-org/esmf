@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.18 2004/06/21 19:38:34 theurich Exp $
+! $Id: FlowSolverMod.F90,v 1.19 2004/07/27 16:33:49 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -169,7 +169,6 @@
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
       integer :: counts(2)
-      integer :: myde, halo_width
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
                        printout, sieobs, nobsdesc, iobs_min, iobs_max, &

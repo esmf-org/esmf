@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.21 2004/06/22 16:35:39 jwolfe Exp $
+! $Id: CoupledFlowDemo.F90,v 1.22 2004/07/27 16:33:49 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -134,9 +134,7 @@
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
     real(ESMF_KIND_R8) :: mincoords(ESMF_MAXGRIDDIM), maxcoords(ESMF_MAXGRIDDIM)
     integer :: counts(ESMF_MAXGRIDDIM)
-    type(ESMF_GridType) :: horz_gridtype
     type(ESMF_GridHorzStagger) :: horz_stagger
-    type(ESMF_CoordSystem) :: horz_coord_system
     type(ESMF_VM) :: vm
     integer :: halo_width = 1
 

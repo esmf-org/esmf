@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.15 2004/06/15 13:34:41 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.16 2004/07/27 16:33:49 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -109,9 +109,6 @@
 !EOPI
 
 !   ! Local variables
-    type(ESMF_State) :: flowstates, injectstates
-    type(ESMF_State) :: toflow, fromflow
-    type(ESMF_State) :: toinject, frominject
     type(ESMF_Field) :: src_field, dst_field
     type(ESMF_VM) :: vm
     type(ESMF_DELayout) :: cpllayout
@@ -193,8 +190,6 @@
 
       ! Local variables
         type(ESMF_Field) :: srcfield, dstfield
-        type(ESMF_Array) :: srcarray, dstarray
-        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
         type(ESMF_RouteHandle) :: routehandle
       
         character(len=ESMF_MAXSTR) :: statename
