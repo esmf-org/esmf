@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.19 2004/12/22 21:52:19 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.20 2005/01/12 23:10:24 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,7 +48,6 @@
 !BOC
     ! Initialize ESMF to initialize the default log
     call ESMF_Initialize(rc=rc1,defaultlogtype=ESMF_LOG_MULTI)
-    call ESMF_Initialize(rc=rc1)
 !EOC
     if (rc1.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE

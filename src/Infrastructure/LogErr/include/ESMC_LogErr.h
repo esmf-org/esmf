@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.51 2005/01/11 23:14:48 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.52 2005/01/12 23:10:24 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,6 @@
 
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
-#include "ESMC_VM.h"
 
 enum ESMC_MsgType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
 enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2};
@@ -70,8 +69,6 @@ private:
     int stream;
 
     int max_elements;
-    
-    ESMC_VM  *ESMC_LogVM;
     
     int *pet_number;
 		
