@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/04/29 16:19:51 svasquez Exp $
+# $Id: makefile,v 1.5 2003/05/07 20:07:34 nscollins Exp $
 
 ALL:  tests
 
@@ -47,7 +47,7 @@ include ${ESMF_DIR}/makefile
 DIRS	  = 
 
 $(ESMC_TESTDIR)/ESMF_ConfigUTest: chkopts ESMF_ConfigUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_ConfigUTest ESMF_ConfigUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_ConfigUTest ESMF_ConfigUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_ConfigUTest.o
 
 RUN_ESMF_ConfigUTest:
@@ -63,7 +63,7 @@ ESMF_ConfigUTest.rm:
 
 
 $(ESMC_TESTDIR)/ESMC_ConfigUTest: chkopts ESMC_ConfigUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ConfigUTest ESMC_ConfigUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMC_ConfigUTest ESMC_ConfigUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ConfigUTest.o
 
 RUN_ESMC_ConfigUTest:
