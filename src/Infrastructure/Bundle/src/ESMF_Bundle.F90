@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.24 2004/03/03 18:15:58 jwolfe Exp $
+! $Id: ESMF_Bundle.F90,v 1.25 2004/03/05 16:44:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1813,7 +1813,7 @@ end function
 !           An array of character strings where each {\tt ESMF\_Field} name
 !           is returned. 
 !
-!     \item [{[namelist]}]
+!     \item [{[namecount]}]
 !           A count of how many {\tt ESMF\_Field} names were returned.  Same as
 !           the number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
 !
