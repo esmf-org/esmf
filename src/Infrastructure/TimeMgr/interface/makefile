@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2004/02/13 15:37:58 nscollins Exp $ 
+# $Id: makefile,v 1.19 2004/03/10 03:03:24 eschwab Exp $ 
 
 ALL: build_here 
 
@@ -8,9 +8,11 @@ SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
             ESMC_Calendar_F.C ESMC_TimeInterval_F.C ESMC_Time_F.C \
             ESMC_Alarm_F.C ESMC_Clock_F.C
 
-SOURCEF	  = ESMF_Fraction.F90 ESMF_BaseTime.F90 \
-            ESMF_Calendar.F90 ESMF_TimeInterval.F90 ESMF_Time.F90 \
-            ESMF_AlarmType.F90 ESMF_ClockType.F90 ESMF_Alarm.F90 ESMF_Clock.F90
+SOURCEF	  = ESMF_Fraction.F90 ESMF_BaseTime.F90 ESMF_Calendar.F90 \
+            ESMF_TimeType.F90 ESMF_TimeIntervalType.F90 \
+            ESMF_Time.F90 ESMF_TimeInterval.F90 \
+            ESMF_AlarmType.F90 ESMF_ClockType.F90 \
+            ESMF_Alarm.F90 ESMF_Clock.F90
 SOURCEH	  = 
 STOREH    = ESMF_TimeMgr.inc
 
@@ -50,10 +52,10 @@ ESMF_BaseTime.o:	makefile
 
 ESMF_Calendar.o:	ESMF_BaseTime.o makefile
 
-ESMF_TimeInterval.o:	ESMF_Fraction.o \
-			ESMF_BaseTime.o ESMF_Calendar.o makefile
+ESMF_TimeInterval.o:	ESMF_TimeIntervalType.o ESMF_Fraction.o \
+			ESMF_BaseTime.o ESMF_Time.o ESMF_Calendar.o makefile
 
-ESMF_Time.o:	ESMF_BaseTime.o ESMF_TimeInterval.o makefile
+ESMF_Time.o:	ESMF_TimeType.o ESMF_BaseTime.o ESMF_TimeInterval.o makefile
 
 ESMF_Alarm.o:	ESMF_TimeInterval.o ESMF_Time.o \
 		ESMF_AlarmType.o ESMF_ClockType.o \
