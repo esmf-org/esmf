@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.39 2004/01/28 00:34:44 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.40 2004/01/29 19:04:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,6 +43,10 @@
 // WARNING:  the values of these enums MUST match the values defined
 //  in ../interface/ESMF_Base.F90
 
+// general logical value - MUST MATCH F90
+enum ESMC_Logical { ESMF_TRUE=1,
+                    ESMF_FALSE };
+
 // ESMF class states
 enum ESMC_Status { ESMF_STATE_UNINIT=1,
                    ESMF_STATE_READY,
@@ -86,10 +90,6 @@ enum ESMC_DataKind { ESMF_I1=1,
   typedef float     ESMF_KIND_R4;
 #endif
 
-// general logical value - MUST MATCH F90
-enum ESMC_Logical { ESMF_TRUE=1,
-                    ESMF_FALSE };
-
 // max/min macros if they don't already exist
 #ifndef MAX
 #define MAX(a,b)  (((a)>(b))?(a):(b))
@@ -99,8 +99,8 @@ enum ESMC_Logical { ESMF_TRUE=1,
 #endif
 
 // union to hold a value of any type
-struct ESMC_DataValue {
-  //private:
+class ESMC_DataValue {
+  public:
     ESMC_DataType dt;
     int items;         // number of items (NOT byte count) only for pointers
     union {            // overload pointers to conserve space 
@@ -108,12 +108,14 @@ struct ESMC_DataValue {
       int    *vip;              // pointer to integer list, or
       double  vr;               // double (real), or
       double *vrp;              // pointer to double (real) list, or
-      bool    vl;               // boolean (logical), or
-      bool   *vlp;              // pointer to boolean (logical) list, or
+      ESMC_Logical    vl;       // boolean (logical), or
+      ESMC_Logical   *vlp;      // pointer to boolean (logical) list, or
       char   *vcp;              // pointer to a character string, or
       void   *voidp;            // cannot be dereferenced, but generic.
       // ESMC_Array *ap,        // pointer to an ESMC_Array object (someday?)
     };
+
+    int ESMC_Print(void);
 };
 
 
@@ -169,7 +171,7 @@ class ESMC_Base
   private:
     int attrCount;              // number of attributes in use in list
     int attrAlloc;              // number of attributes currently allocated
-    ESMC_Attribute *attr;       // attribute list
+    ESMC_Attribute *attrList;   // attribute list
 
 // !PUBLIC MEMBER FUNCTIONS:
   
@@ -292,6 +294,9 @@ void  FTN(esmf_ctof90string)(char *src, char *dst, int *rc,
 int ESMC_DataKindSize(ESMC_DataKind dk);
 // return a static string name for various enums
 const char *ESMC_StatusString(ESMC_Status stat);
+const char *ESMC_DataTypeString(ESMC_DataType dt);
+const char *ESMC_DataKindString(ESMC_DataKind dk);
+const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);

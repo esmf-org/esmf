@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.21 2004/01/28 23:54:03 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.22 2004/01/29 19:04:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.21 2004/01/28 23:54:03 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.22 2004/01/29 19:04:43 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -140,8 +140,8 @@ static int globalCount = 0;
 
   printf("  %d Attributes:\n", attrCount);
   for (i=0; i<attrCount; i++) {
-      printf(" Attr %d: \n");
-      // TODO:  add attr value print here
+      printf(" Attr %d: %s, ", i, attrList[i].attrName);
+      attrList[i].attrValue.ESMC_Print();
   }
                          
   return ESMF_SUCCESS;
@@ -764,6 +764,86 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DataTypeString - Return fixed char string for printing
+//
+// !INTERFACE:
+    const char *ESMC_DataTypeString(
+//
+// !RETURN VALUE:
+//  const char * to string name of value
+// 
+// !ARGUMENTS:
+    ESMC_DataType dt) {       // in - a datatype value
+
+    switch (dt) {
+      case ESMF_DATA_INTEGER:      return  "Integer";
+      case ESMF_DATA_REAL:         return  "Real";
+      case ESMF_DATA_LOGICAL:      return  "Logical";
+      case ESMF_DATA_CHARACTER:    return  "Character";
+      default:
+         fprintf(stderr, "Unknown DataType in ESMC_DataTypeString()\n");
+         return NULL;
+    }
+
+    /* not reached */
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DataKindString - Return fixed char string for printing
+//
+// !INTERFACE:
+    const char *ESMC_DataKindString(
+//
+// !RETURN VALUE:
+//  const char * to string name of value
+// 
+// !ARGUMENTS:
+    ESMC_DataKind dk) {       // in - a datakind value
+
+    switch (dk) {
+      case ESMF_I1:      return  "Integer*1";
+      case ESMF_I2:      return  "Integer*2";
+      case ESMF_I4:      return  "Integer*4";
+      case ESMF_I8:      return  "Integer*8";
+      case ESMF_R4:      return  "Real*4";
+      case ESMF_R8:      return  "Real*8";
+      case ESMF_C8:      return  "Complex*8";
+      case ESMF_C16:     return  "Complex*16";
+      default:
+         fprintf(stderr, "Unknown DataKind in ESMC_DataKindString()\n");
+         return NULL;
+    }
+
+    /* not reached */
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LogicalString - Return fixed char string for printing
+//
+// !INTERFACE:
+    const char *ESMC_LogicalString(
+//
+// !RETURN VALUE:
+//  const char * to string name of value
+// 
+// !ARGUMENTS:
+    ESMC_Logical tf) {       // in - a logical value
+
+    switch (tf) {
+      case ESMF_TRUE:      return  "True";
+      case ESMF_FALSE:     return  "False";
+      default:
+         fprintf(stderr, "Unknown Logical in ESMC_LogicalString()\n");
+         return NULL;
+    }
+
+    /* not reached */
+}
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
@@ -1033,10 +1113,10 @@ extern "C" {
   if ((attrCount + adding) <= attrAlloc) 
       return ESMF_SUCCESS;
 
-  saveme = (void *)attr;
-  attr = (ESMC_Attribute *)realloc((void *)attr, 
+  saveme = (void *)attrList;
+  attrList = (ESMC_Attribute *)realloc((void *)attrList, 
                            (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute));
-  if (attr == NULL) {
+  if (attrList == NULL) {
       free(saveme);   // although at this point, the heap is probably boffed
       return ESMF_FAILURE;
   }
@@ -1074,7 +1154,7 @@ extern "C" {
 
   // first, see if you are replacing an existing attribute
   for (i=0; i<attrCount; i++) {
-      if (strcmp(attr->attrName, attr[i].attrName))
+      if (strcmp(attr->attrName, attrList[i].attrName))
           continue;
 
       // FIXME: we might want an explicit flag saying that this is what
@@ -1083,7 +1163,7 @@ extern "C" {
       // if you get here, you found a match.  replace previous copy.
       // FIXME - if length > 1, you have to delete the pointer contents first
       // otherwise, memory leaks here.
-      attr[i].attrValue = attr->attrValue;        // struct contents copy
+      attrList[i].attrValue = attr->attrValue;        // struct contents copy
       return ESMF_SUCCESS;
   }   
 
@@ -1092,8 +1172,8 @@ extern "C" {
   if (rc != ESMF_SUCCESS)
       return rc;
   
-  strcpy(attr[attrCount].attrName, attr->attrName);
-  attr[attrCount].attrValue = attr->attrValue;      // struct contents copy
+  strcpy(attrList[attrCount].attrName, attr->attrName);
+  attrList[attrCount].attrValue = attr->attrValue;      // struct contents copy
   attrCount++;
   return ESMF_SUCCESS;
 
@@ -1125,11 +1205,11 @@ extern "C" {
   }
 
   for (i=0; i<attrCount; i++) {
-      if (strcmp(attr->attrName, attr[i].attrName))
+      if (strcmp(attr->attrName, attrList[i].attrName))
           continue;
 
       // if you get here, you found a match.  struct contents copy.
-      attr->attrValue = attr[i].attrValue;
+      attr->attrValue = attrList[i].attrValue;
       return ESMF_SUCCESS;
   }   
 
@@ -1198,9 +1278,9 @@ extern "C" {
       return ESMF_FAILURE;
   }
 
-  if (name) strcpy(name, attr[number].attrName);
-  if (type) *type = attr[number].attrValue.dt;
-  if (value) *value = attr[number].attrValue;      // struct contents copy
+  if (name) strcpy(name, attrList[number].attrName);
+  if (type) *type = attrList[number].attrValue.dt;
+  if (value) *value = attrList[number].attrValue;      // struct contents copy
 
   return ESMF_SUCCESS;
 
@@ -1333,6 +1413,57 @@ extern "C" {
 
 }  // end ESMC_AttributeCopyAll
 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DataValue::ESMC_Print - print the DataValue contents
+//
+// !INTERFACE:
+      int ESMC_DataValue::ESMC_Print(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      void) {                    // could add options at some point
+// 
+// !DESCRIPTION:
+//     Print the contents of a DataValue object
+//     Set the same attribute on multiple objects in one call
+//
+//EOP
+
+  printf("type %s", ESMC_DataTypeString(dt));
+
+  if (items <= 0) 
+      printf("\n");
+
+  if (items == 1) {
+      printf(", value: ");
+      switch (dt) {
+        case ESMF_DATA_INTEGER:   printf("%d\n", vi); break;
+        case ESMF_DATA_REAL:      printf("%g\n", vr); break; 
+        case ESMF_DATA_LOGICAL:   printf("%s\n", ESMC_LogicalString(vl)); break;
+        case ESMF_DATA_CHARACTER: printf("%s\n", vcp); break;
+        default:  printf(" unknown\n"); return ESMF_FAILURE;
+      }
+  }
+
+  if (items > 1) {  // yes, redundant test - this is all that's possible now 
+      printf(", %d items, values: ", items);
+      for (int i=0; i<items; i++) {
+          switch (dt) {
+            case ESMF_DATA_INTEGER: printf(" item %d: %d\n", i, vip[i]); break;
+            case ESMF_DATA_REAL:    printf(" item %d: %g\n", i, vrp[i]); break; 
+            case ESMF_DATA_LOGICAL: printf(" item %d: %s\n", 
+                                          i, ESMC_LogicalString(vlp[i])); break;
+            default:  printf(" unknown\n"); return ESMF_FAILURE;
+          }
+      }
+  }
+  return ESMF_SUCCESS;
+
+}  // end ESMC_Print
+
 
 //-----------------------------------------------------------------------------
 // ESMC_Base class utility functions, not methods, since they operate on
@@ -1411,7 +1542,7 @@ extern "C" {
 
   attrCount = 0;
   attrAlloc = 0;
-  attr = ESMC_NULL_POINTER;
+  attrList = ESMC_NULL_POINTER;
 
   ID = ++globalCount;
   refCount = 1;
@@ -1455,7 +1586,7 @@ extern "C" {
 
   attrCount = 0;
   attrAlloc = 0;
-  attr = ESMC_NULL_POINTER;
+  attrList = ESMC_NULL_POINTER;
   if (nattrs > 0) {
       if (ESMC_AttributeAlloc(nattrs) != ESMF_SUCCESS) {
           baseStatus = ESMF_STATE_INVALID;   // can't return err, but can
@@ -1486,7 +1617,7 @@ extern "C" {
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
   baseStatus = ESMF_STATE_INVALID;
-  if (attr) delete (attr);
+  if (attrList) delete (attrList);
 
   // if we have to support reference counts someday,
   // if (refCount > 0) do something;
