@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.39 2003/04/29 16:17:41 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.40 2003/04/30 21:12:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.39 2003/04/29 16:17:41 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.40 2003/04/30 21:12:48 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1151,9 +1151,10 @@ end function
             dataitem%otype = ESMF_STATEBUNDLE
             dataitem%datap%bp = bundles(i)
         
-            dataitem%needed = ESMF_STATEDATAISNEEDED
-            dataitem%ready = ESMF_STATEDATAREADYTOREAD
-            dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            ! Don't change flags of existing entry
+            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%ready = ESMF_STATEDATAREADYTOREAD
+            !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
 
         ! and now the same for each field in the bundle
@@ -1551,9 +1552,11 @@ end function
             dataitem%otype = ESMF_STATEFIELD
             dataitem%datap%fp = fields(i)
         
-            dataitem%needed = ESMF_STATEDATAISNEEDED
-            dataitem%ready = ESMF_STATEDATAREADYTOREAD
-            dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            ! If we're replacing an existing item, then we shouldn't
+            !  alter existing settings on the data state.
+            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%ready = ESMF_STATEDATAREADYTOREAD
+            !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
       enddo
 
@@ -1792,9 +1795,10 @@ end function
             dataitem%otype = ESMF_STATEARRAY
             dataitem%datap%ap = arrays(i)
         
-            dataitem%needed = ESMF_STATEDATAISNEEDED
-            dataitem%ready = ESMF_STATEDATAREADYTOREAD
-            dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            ! don't update flags on existing entry
+            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%ready = ESMF_STATEDATAREADYTOREAD
+            !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
       enddo
 
@@ -2017,9 +2021,10 @@ end function
             dataitem%otype = ESMF_STATESTATE
             dataitem%datap%spp => states(i)%statep
         
-            dataitem%needed = ESMF_STATEDATAISNEEDED
-            dataitem%ready = ESMF_STATEDATAREADYTOREAD
-            dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            ! don't update flags on existing entry
+            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%ready = ESMF_STATEDATAREADYTOREAD
+            !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
       enddo
 
