@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.45 2004/03/23 18:02:06 nscollins Exp $
+#  $Id: common.mk,v 1.46 2004/03/23 18:16:58 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -886,8 +886,8 @@ tree: $(ACTION)
 
 
 .cpp.o:
-	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" > $(basename $@).F90
-	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $(basename $@).F90
+	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" > $(dir $<)$(basename $@).F90
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $(dir $<)$(basename $@).F90
 
 
 #-------------------------------------------------------------------------------
