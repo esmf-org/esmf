@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.30 2004/10/05 16:04:42 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.31 2004/12/01 21:38:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.30 2004/10/05 16:04:42 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.31 2004/12/01 21:38:59 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -141,23 +141,23 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       ! Add Vert Height Test
-      !NEX_UTest
-      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
-                                  rc=status)
-      write(failMsg, *) "Did not returned ESMF_SUCCESS"
-      write(name, *) "Add Vert Height Grid Test"
-      call ESMF_Test((status.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !N-E-X_UTest
+      !call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
+      !                            rc=status)
+      !write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      !write(name, *) "Add Vert Height Grid Test"
+      !call ESMF_Test((status.eq.ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! Grid Distribute Test
-      !NEX_UTest
-      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
-
-      write(failMsg, *) "Did not returned ESMF_SUCCESS"
-      write(name, *) "Grid Distribute Test"
-      call ESMF_Test((status.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !N-E-X_UTest
+      !call ESMF_GridDistribute(grid, delayout=layout, rc=status)
+      !
+      !write(failMsg, *) "Did not returned ESMF_SUCCESS"
+      !write(name, *) "Grid Distribute Test"
+      !call ESMF_Test((status.eq.ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest 
