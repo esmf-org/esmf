@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2005/02/28 16:34:57 nscollins Exp $
+# $Id: makefile,v 1.17 2005/02/28 21:52:00 svasquez Exp $
 
 ALL:  build_tests
  
@@ -46,7 +46,7 @@ RUN_ESMF_Regrid1UTest:
 	-${MPIRUN} -np 8 $(ESMF_TESTDIR)/ESMF_Regrid1UTest > $(ESMF_TESTDIR)/ESMF_Regrid1UTest.stdout
 
 RUN_ESMF_RegridUTestUNI:
-	echo "PASS: ESMF_RegridUTest not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_RegridUTest.stdout
+	echo "PASS: ESMF_RegridUTest not set up to run on one processor." > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
 
 RUN_ESMF_Regrid1UTestUNI:
 	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_Regrid1UTest > $(ESMF_TESTDIR)/ESMF_Regrid1UTest.stdout
