@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.25 2004/05/27 14:52:55 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.26 2004/06/03 21:54:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.25 2004/05/27 14:52:55 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.26 2004/06/03 21:54:59 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -204,7 +204,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGather"
 !BOP
-! !IROUTINE: ESMF_BundleGather - Data Gather operation on a Bundle
+! !IROUTINE: ESMF_BundleGather - Data gather operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleGather(bundle, destinationDE, array, blocking, &
@@ -289,7 +289,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHalo"
 !BOP
-! !IROUTINE: ESMF_BundleHalo - Execute a Data Halo operation on a Bundle
+! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleHalo(bundle, routehandle, blocking, commhandle, rc)
@@ -482,7 +482,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedist"
 !BOP
-! !IROUTINE: ESMF_BundleRedist - Data Redistribution operation on a Bundle
+! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleRedist(srcBundle, dstBundle, &
@@ -605,7 +605,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedistStore"
 !BOP
-! !IROUTINE: ESMF_BundleRedistStore - Data Redistribution operation on a Bundle
+! !IROUTINE: ESMF_BundleRedistStore - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentDElayout, &
@@ -785,7 +785,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRegrid"
 !BOP
-! !IROUTINE: ESMF_BundleRegrid - Execute a Regrid operation on a Bundle
+! !IROUTINE: ESMF_BundleRegrid - Execute a regrid operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleRegrid(srcbundle, dstbundle, routehandle, &
@@ -904,7 +904,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRegridStore"
 !BOP
-! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
+! !IROUTINE: ESMF_BundleRegridStore - Precompute regrid operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentDElayout, &
@@ -975,7 +975,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleScatter"
 !BOP
-! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
+! !IROUTINE: ESMF_BundleScatter - Data scatter operation on a Bundle
 
 ! !INTERFACE:
       subroutine ESMF_BundleScatter(array, sourceDE, bundle, blocking, commhandle, rc)
