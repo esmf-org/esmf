@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.31 2003/08/05 16:18:21 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.32 2003/08/05 20:17:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.31 2003/08/05 16:18:21 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.32 2003/08/05 20:17:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -221,6 +221,7 @@
         {
           // implementation of efficient intersection calculation from
           // thesis by Ramaswamy
+          int r1, r2;
           int xp1_right  = xpacket1->offset + xpacket1->contig_length - 1;
           int xp2_right  = xpacket2->offset + xpacket2->contig_length - 1;
           int intersect1 = (xpacket2->offset - xp1_right + xpacket1->stride[0]-1)
@@ -245,12 +246,17 @@
             this->contig_length = L1_right - this->offset + 1;
           else
             this->contig_length = L2_right - this->offset + 1;
-          if (xpacket1->rep_count[0]-i1 <= xpacket2->rep_count[0]-i2) 
-            this->rep_count[0] = xpacket1->rep_count[0]-i1;
-          else
-            this->rep_count[0] = xpacket2->rep_count[0]-i2;
+
+          // take the abs value of overlap rep counts, and pick
+          // the smaller positive one. 
+          r1 = xpacket1->rep_count[0] - i1;
+          //if (r1 < 0) r1 = -r1;
+          r2 = xpacket2->rep_count[0] - i2;
+          //if (r2 < 0) r2 = -r2;
+          this->rep_count[0] = (r1 < r2) ? r1 : r2;
+
           // for now, just check here for a real intersection
-          if (this->contig_length < 0) {
+          if ((this->contig_length <= 0) || (this->rep_count[0] <= 0)) {
             this->offset = 0;
             this->contig_length = 0;
             this->rep_count[0] = 0;
