@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.71 2004/04/05 17:32:47 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.72 2004/04/08 20:55:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -335,14 +335,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.71 2004/04/05 17:32:47 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.72 2004/04/08 20:55:18 nscollins Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_PhysGridCreate
 
@@ -360,11 +360,11 @@
 !     This interface provides a single entry point for {\tt ESMF\_PhysGrid} 
 !     create methods.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !INTERFACE:
 !      interface ESMF_PhysGridSearchBboxSpherical
 !
@@ -377,10 +377,10 @@
 !!     search a grid for point(s) using a simple bounding box search
 !!     in spherical coordinates.
 !!
-!!EOP
+!!EOPI
 !      end interface 
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !INTERFACE:
 !      interface ESMF_PhysGridSearchGeneralSpherical
 !
@@ -393,10 +393,10 @@
 !!     search a grid for point(s) using a general (cross-product) search
 !!     in spherical coordinates.
 !!
-!!EOP
+!!EOPI
 !      end interface 
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !INTERFACE:
 !      interface ESMF_PhysGridSearchBboxCartesian
 !
@@ -409,10 +409,10 @@
 !!     search a grid for point(s) using a simple bounding box search
 !!     in Cartesian coordinates.
 !!
-!!EOP
+!!EOPI
 !      end interface 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface operator (==)
 
@@ -426,11 +426,11 @@
 !     ESMF region kind, mask kind and orientation data types.  It is 
 !     provided for easy comparisons of these types with defined values.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface operator (/=)
 
@@ -444,7 +444,7 @@
 !     ESMF region kind, mask kind and orientation data types.  It is 
 !     provided for easy comparisons of these types with defined values.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
@@ -457,7 +457,7 @@
 ! This section includes the PhysGrid Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridCreateNew - Create a new PhysGrid
 
 ! !INTERFACE:
@@ -504,7 +504,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
       integer :: status                              ! Error status
@@ -582,7 +582,7 @@
       end function ESMF_PhysGridCreateNew
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridDestroy - Free resources associated with a PhysGrid 
 
 ! !INTERFACE:
@@ -604,7 +604,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                              ! Error status
@@ -623,7 +623,7 @@
       end subroutine ESMF_PhysGridDestroy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridSet - Sets value of selected PhysGrid quantities.
 
 ! !INTERFACE:
@@ -658,7 +658,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -693,7 +693,7 @@
       end subroutine ESMF_PhysGridSet
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridGet - Retrieves selected internal PhysGrid quantities.
 
 ! !INTERFACE:
@@ -736,7 +736,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -768,7 +768,7 @@
       end subroutine ESMF_PhysGridGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridSetCoord - Adds a physical coordinate to a PhysGrid
 
 ! !INTERFACE:
@@ -800,7 +800,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: idim, n
@@ -850,7 +850,7 @@
       end subroutine ESMF_PhysGridSetCoord
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridGetCoord - Gets a physical coordinate from a PhysGrid
 
 ! !INTERFACE:
@@ -886,7 +886,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: idim, n
@@ -943,7 +943,7 @@
       end subroutine ESMF_PhysGridGetCoord
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridGetLocations - Gets locations from a PhysGrid
 
 ! !INTERFACE:
@@ -981,7 +981,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n
@@ -1025,7 +1025,7 @@
       end subroutine ESMF_PhysGridGetLocations
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridSetLocations - Sets grid regions from input array.
 
 ! !INTERFACE:
@@ -1064,7 +1064,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n
@@ -1113,7 +1113,7 @@
       end subroutine ESMF_PhysGridSetLocations
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridSetRegions - Sets grid regions from input array.
 
 ! !INTERFACE:
@@ -1180,7 +1180,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n
@@ -1253,7 +1253,7 @@
       end subroutine ESMF_PhysGridSetRegions
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridGetRegions - Gets region information from a PhysGrid
 
 ! !INTERFACE:
@@ -1328,7 +1328,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n
@@ -1408,7 +1408,7 @@
       end subroutine ESMF_PhysGridGetRegions
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridSetMask - Sets grid mask from input array.
 
 ! !INTERFACE:
@@ -1458,7 +1458,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n, numMaskOld, numMaskNew
@@ -1551,7 +1551,7 @@
       end subroutine ESMF_PhysGridSetMask
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridGetMask - Gets grid mask from PhysGrid object.
 
 ! !INTERFACE:
@@ -1591,7 +1591,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n
@@ -1662,7 +1662,7 @@
       end subroutine ESMF_PhysGridGetMask
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridSetMetric - Sets grid metric from input array.
 
 ! !INTERFACE:
@@ -1702,7 +1702,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: n, numMetricOld, numMetricNew
@@ -1792,7 +1792,7 @@
       end subroutine ESMF_PhysGridSetMetric
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridGetMetric - Gets grid metric from PhysGrid object.
 
 ! !INTERFACE:
@@ -1832,7 +1832,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, n
@@ -1904,7 +1904,7 @@
       end subroutine ESMF_PhysGridGetMetric
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridValidate - Check internal consistency of a PhysGrid
 
 ! !INTERFACE:
@@ -1928,7 +1928,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
 !
@@ -1937,7 +1937,7 @@
       end subroutine ESMF_PhysGridValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridPrint - Print the contents of a PhysGrid
 
 ! !INTERFACE:
@@ -1962,7 +1962,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
       integer :: i
 
@@ -1992,7 +1992,7 @@
       end subroutine ESMF_PhysGridPrint
 
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !IROUTINE: ESMF_PhysGridSearchBboxSphericalPoint - Search grid for a point
 !
 !! !INTERFACE:
@@ -2043,7 +2043,7 @@
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
 !!
-!!EOP
+!!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !!
@@ -2155,7 +2155,7 @@
 !      end subroutine ESMF_PhysGridSearchBboxSphericalPoint
 !
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !IROUTINE: ESMF_PhysGridSearchBboxCartesianPoint - Search grid for a point
 !
 !! !INTERFACE:
@@ -2206,7 +2206,7 @@
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
 !!
-!!EOP
+!!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !!
@@ -2301,7 +2301,7 @@
 !      end subroutine ESMF_PhysGridSearchBboxCartesianPoint
 !
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !IROUTINE: ESMF_PhysGridSearchGeneralSphericalPoint - Search grid for a point
 !
 !! !INTERFACE:
@@ -2351,7 +2351,7 @@
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
 !!
-!!EOP
+!!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !!
@@ -2478,7 +2478,7 @@
 !      end subroutine ESMF_PhysGridSearchGeneralSphericalPoint
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridPointInCell - Checks whether cell contains point
 !
 ! !INTERFACE:
@@ -2521,7 +2521,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !
@@ -2633,7 +2633,7 @@
       end function ESMF_PhysGridPointInCell
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridCompDistSpherical - compute distance spherical coords
 !
 ! !INTERFACE:
@@ -2675,7 +2675,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !
@@ -2719,7 +2719,7 @@
       end function ESMF_PhysGridCompDistSpherical
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridCompDistCartesian - Distance in Cartesian coords
 !
 ! !INTERFACE:
@@ -2749,7 +2749,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
 !
@@ -2764,7 +2764,7 @@
       end function ESMF_PhysGridCompDistCartesian
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridMaskTypeEqual - equality of PhysGrid mask types
 !
 ! !INTERFACE:
@@ -2789,7 +2789,7 @@
 !          Two mask types to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridMaskTypeEqual = (GridMaskType1%maskType == &
@@ -2798,7 +2798,7 @@
       end function ESMF_GridMaskTypeEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridMaskTypeNotEqual - non-equality of PhysGrid mask types
 !
 ! !INTERFACE:
@@ -2823,7 +2823,7 @@
 !          Two kinds of PhysGrid mask types to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridMaskTypeNotEqual = (GridMaskType1%maskType /= &
@@ -2832,7 +2832,7 @@
       end function ESMF_GridMaskTypeNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegionTypeEqual - equality of PhysGrid region kinds
 !
 ! !INTERFACE:
@@ -2857,7 +2857,7 @@
 !          Two region types to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_RegionTypeEqual = (RegionType1%regionType == &
@@ -2866,7 +2866,7 @@
       end function ESMF_RegionTypeEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegionTypeNotEqual - non-equality of PhysGrid region kinds
 !
 ! !INTERFACE:
@@ -2891,7 +2891,7 @@
 !          Two kinds of PhysGrid regions to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_RegionTypeNotEqual = (RegionType1%regionType /= &
@@ -2900,7 +2900,7 @@
       end function ESMF_RegionTypeNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridOrientEqual - equality of PhysGrid orientation
 !
 ! !INTERFACE:
@@ -2925,7 +2925,7 @@
 !          Two orientation types to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_PhysGridOrientEqual = (Orientation1%orientation == &
@@ -2934,7 +2934,7 @@
       end function ESMF_PhysGridOrientEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_PhysGridOrientNotEqual - non-equality of PhysGrid orientations
 !
 ! !INTERFACE:
@@ -2959,7 +2959,7 @@
 !          Two PhysGrid orientations to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_PhysGridOrientNotEqual = (Orientation1%orientation /= &
