@@ -1,4 +1,4 @@
-% $Id: Field_desdoc.ctex,v 1.2 2003/03/11 04:15:01 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.1 2003/03/11 04:15:02 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,7 +13,7 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Fields and Bundles Design}
+\newcommand{\mytitle}{Fields and Bundles Reference}
 \newcommand{\myauthors}{Nancy Collins}
 #endif
 

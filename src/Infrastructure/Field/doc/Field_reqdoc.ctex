@@ -1,4 +1,4 @@
-% $Id: Field_reqdoc.ctex,v 1.1 2003/03/10 21:54:20 cdeluca Exp $
+% $Id: Field_reqdoc.ctex,v 1.2 2003/03/11 04:15:02 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -62,9 +62,9 @@
 
 \section{Authors, target codes and review team}
 #ifdef STANDALONE
-\input{Fields_auth}
+\input{Field_auth}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Fields/doc/Fields_auth}
+\input{../Infrastructure/Field/doc/Field_auth}
 #endif
 
 #ifdef STANDALONE
@@ -74,26 +74,26 @@
 
 %\section{\longname background}
 #ifdef STANDALONE
-\input{Fields_background}
+\input{Field_background}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Fields/doc/Fields_background}
+\input{../Infrastructure/Field/doc/Field_background}
 #endif
 
 #ifdef STANDALONE
 \section{\longname terms}
-\input{Fields_terms}
+\input{Field_terms}
 #endif
 
 \section{Field summary of requirements}
 #ifdef STANDALONE
-%\input{Fields_sumreq}
+%\input{Field_sumreq}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Fields/doc/Fields_sumreq}
+%\input{../Infrastructure/Field/doc/Field_sumreq}
 #endif
 
 #ifdef STANDALONE
 \section{\longname Abbreviations}
-\input{Fields_abbr}
+\input{Field_abbr}
 
 \section{Document Organization and Conventions}
 \input{../../../../scripts/doc_templates/templates/conv_reqdoc}
@@ -114,14 +114,14 @@
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 #ifdef STANDALONE
-\input{Fields_req}
+\input{Field_req}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Fields/doc/Fields_req}
+\input{../Infrastructure/Field/doc/Field_req}
 #endif
 
 #ifdef STANDALONE
 %\section*{Glossary}
-%\input{Fields_glos}
+%\input{Field_glos}
 %\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
@@ -133,3 +133,7 @@
 #ifdef STANDALONE
 \end{document}
 #endif
+
+
+
+
