@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.1 2002/10/04 17:36:30 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.2 2002/10/23 21:19:07 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF PhysGrid module
@@ -25,6 +25,7 @@
 !
 !
 !-------------------------------------------------------------------------
+#include "ESMF_Macros.inc"
 !
 ! module definition
 
@@ -122,7 +123,7 @@
 ! !ARGUMENTS:
       integer, intent(in) :: gridtype              ! good luck
       integer, intent(in) :: dimcount              ! 2d, 3d, etc
-      integer, dimension (1:ESMF_MaxDim), intent(in) :: dimlist  ! grid dims
+      integer, dimension (1:ESMF_MAXDIM), intent(in) :: dimlist  ! grid dims
       integer, intent(out), optional :: rc                 ! return code
 !
 ! !DESCRIPTION:
