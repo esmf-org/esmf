@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.19 2004/01/07 18:54:30 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.20 2004/01/21 00:47:37 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,6 +44,8 @@
       integer(ESMF_KIND_I8) :: YRl, Dl, Sl
       type(ESMF_Calendar) :: cal
       integer :: dayOfYear, dayOfWeek, dayOfMonth
+      real(ESMF_KIND_R8) :: dayOfYear_real
+      type(ESMF_TimeInterval) :: dayOfYear_interval
 !\end{verbatim}
 !EOP
 
@@ -213,7 +215,23 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "time1 day of the year = ", dayOfYear
+      print *, "time1 day of the year (integer) = ", dayOfYear
+!\end{verbatim}
+!EOP
+
+!BOP
+!\begin{verbatim}
+      call ESMF_TimeGet(time1, dayOfYear_r8=dayOfYear_real, rc=rc)
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+      print *, "time1 day of the year (real) = ", dayOfYear_real
 
       call ESMF_TimeGet(time1, dayOfWeek=dayOfWeek, rc=rc)
 !\end{verbatim}
