@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.73 2004/09/20 15:21:19 nscollins Exp $
+#  $Id: common.mk,v 1.74 2004/09/22 22:28:11 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -380,7 +380,7 @@ libf:${LIBNAME}(${OBJSF})
 
 # Build all of ESMF from the top.  This target can be called from any
 # subdir and it will go up to the top dir and build from there.
-build_libs: chk_dir include
+build_libs: chk_dir include cppfiles
 	cd $(ESMF_TOP_DIR) ;\
 	${MAKE} ACTION=vpathlib tree shared
 
