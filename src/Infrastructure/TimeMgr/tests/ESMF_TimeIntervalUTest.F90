@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.5 2004/01/29 04:45:46 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.6 2004/02/06 03:50:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.5 2004/01/29 04:45:46 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.6 2004/02/06 03:50:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -109,6 +109,40 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, d=70000, rc=rc)
+      write(name, *) "Time Step initialization with days = 70000  Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
+      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
+      write(name, *) "Print Absolute Time Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) "Days should = 70000."
+      write(name, *) "Get Time Step in days Test"
+      call ESMF_TimeIntervalGet(timeStep, d=days, rc=rc)
+      call ESMF_Test((days.eq.70000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      print *, " Days = ", days
+
+
+      ! ----------------------------------------------------------------------------
+
 #ifdef ESMF_EXHAUSTIVE
 
 
@@ -175,42 +209,6 @@
       print *, " Days = ", days
 
      ! ----------------------------------------------------------------------------
-
-
-      !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
-      call ESMF_TimeIntervalSet(timeStep, d=70000, rc=rc)
-      write(name, *) "Time Step initialization with days = 70000  Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-      ! ----------------------------------------------------------------------------
-
-
-      !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
-      absoluteTime=ESMF_TimeIntervalAbsValue(timeStep)
-      call ESMF_TimeIntervalPrint(absoluteTime, rc=rc)
-      write(name, *) "Print Absolute Time Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-
-      ! ----------------------------------------------------------------------------
-
-      !EX_UTest
-      write(failMsg, *) "Days should = 70000."
-      write(name, *) "Get Time Step in days Test"
-      call ESMF_TimeIntervalGet(timeStep, d=days, rc=rc)
-      call ESMF_Test((days.eq.70000), &
-                      name, failMsg, result, ESMF_SRCLINE)
-
-
-      print *, " Days = ", days
-
-
-      ! ----------------------------------------------------------------------------
-
 
       !EX_UTest
       days2=70000

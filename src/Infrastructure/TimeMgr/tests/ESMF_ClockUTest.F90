@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.60 2004/01/30 23:20:25 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.61 2004/02/06 03:50:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.60 2004/01/30 23:20:25 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.61 2004/02/06 03:50:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1109,11 +1109,9 @@
       
        print *, " Sync Time year = ", YY
        print *, " Get Sync Time rc  = ", rc
+
       ! ----------------------------------------------------------------------------
-
-#ifdef ESMF_EXHAUSTIVE
-
-      !EX_UTest
+      !NEX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=1, &
                                         calendar=gregorianCalendar, rc=rc)
@@ -1124,7 +1122,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       call ESMF_TimeSet(stopTime, yy=100, mm=1, dd=1, &
                                 calendar=gregorianCalendar, rc=rc)
@@ -1136,7 +1134,7 @@
       ! ----------------------------------------------------------------------------
 
 
-      !EX_UTest
+      !NEX_UTest
       ! Test Setting Time Interval
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Time Interval to 73049 days Test"
@@ -1148,6 +1146,7 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Test Incrementing Time by Time Interval
       write(failMsg, *) " startTime not equal to stopTime"
       write(name, *) "Incrementing starttime by 73049 days Test"
@@ -1156,6 +1155,9 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_TimePrint(startTime, rc=rc)
+
+
+#ifdef ESMF_EXHAUSTIVE
 
       ! ----------------------------------------------------------------------------
 
