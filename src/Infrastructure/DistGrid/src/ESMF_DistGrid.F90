@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.102 2004/03/19 23:32:13 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.103 2004/03/23 17:54:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2293,7 +2293,6 @@
           enddo
         endif
         do i = 1, size(local1D)
-          print *, "converting local to global", i, global1D(i), local1D(i)
           global1D(i) = local1D(i) + base
         enddo
       endif
