@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.42 2004/05/05 20:30:48 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.43 2004/05/07 16:30:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.42 2004/05/05 20:30:48 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.43 2004/05/07 16:30:58 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -205,7 +205,7 @@ void ESMC_TimeStamp(
     gettimeofday(&tv,NULL);
     ti=*localtime((const time_t*)&tv.tv_sec);
     *y=ti.tm_year+1900;
-    *mn=ti.tm_mon;
+    *mn=ti.tm_mon+1;
     *d=ti.tm_mday;
     *h=ti.tm_hour;
     *m=ti.tm_min;
