@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.8 2004/12/18 16:53:20 nscollins Exp $
+# $Id: makefile,v 1.9 2005/02/02 20:52:09 jwolfe Exp $
 
-ALL: tree_build_demo
+ALL: tree_build_demos
 
-run:  tree_run_demo
+run:  tree_run_demos
 
 CFLAGS    =
 FFLAGS    =
@@ -16,7 +16,7 @@ LIBBASE	  =
 LOCDIR	  = src/demo/coupled_flow/src
 
 
-DEMO_BUILD    = $(ESMC_TESTDIR)/CoupledFlowApp
+DEMOS_BUILD    = $(ESMC_TESTDIR)/CoupledFlowApp
 
 # Object files other than main that the
 # system tests executable will depend on.
@@ -26,11 +26,11 @@ DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
                 FlowSolverMod.o InjectorMod.o CouplerMod.o \
                 CoupledFlowApp.o
 
-DEMO_RUN      = RUN_CoupledFlowApp  
+DEMOS_RUN      = RUN_CoupledFlowApp  
 
-DEMO_RUN_UNI  = RUN_CoupledFlowAppUNI
+DEMOS_RUN_UNI  = RUN_CoupledFlowAppUNI
 
-DEMO_RM       = ESMF_CoupledFlowApp.rm
+DEMOS_RM       = ESMF_CoupledFlowApp.rm
 
 FlowSolverMod.o:: FlowArraysMod.o
 
