@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.5 2004/05/10 15:48:29 nscollins Exp $
+// $Id: ESMC.h,v 1.6 2004/10/26 23:13:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 #include "ESMC_ArrayDataMap.h"
 
 // vm and layout
-#include "vmachine.h"
+#include "ESMC_VMKernel.h"
 #include "ESMC_VM.h"
 #include "ESMC_DELayout.h"
 // #include "ESMC_Machine.h"
