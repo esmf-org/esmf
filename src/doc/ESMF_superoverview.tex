@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.21 2004/12/30 19:16:01 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.22 2004/12/30 19:54:52 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -167,6 +167,16 @@ a simple coupled sequential
 application, and Figure \ref{fig:concurrent} shows a possible 
 configuration for the same application running in a concurrent mode.
 
+Parent Components can select if and when to wait for concurrently
+executing child Components, synchronizing only when required.
+
+It is possible for ESMF applications to contain some component sets
+that are executing sequentially and others that are executing concurrently.
+We might have, for example, atmosphere and land components created
+on the same subset of PETs, ocean and sea ice components created on
+the remainder of PETs, and a Coupler created across all the PETs in
+the application.
+
 \begin{center}
 \begin{figure}
 \caption{Schematic of the run method of a coupled application, with an
@@ -194,16 +204,6 @@ the ``Ocean'' Gridded Component is distributed over six PETs.}
 \scalebox{1.0}{\includegraphics{ESMF_concurrent.eps}}
 \end{figure}
 \end{center}
-
-Parent Components can select if and when to wait for concurrently
-executing child Components, synchronizing only when required.
-
-It is possible for ESMF applications to contain some component sets
-that are executing sequentially and others that are executing concurrently.
-We might have, for example, atmosphere and land components created
-on the same subset of PETs, ocean and sea ice components created on
-the remainder of PETs, and a Coupler created across all the PETs in
-the application.
 
 \subsection{Intracomponent Communication}
 \label{sec:localcomm}
