@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.16 2004/04/05 20:38:24 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.17 2004/04/08 16:38:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.16 2004/04/05 20:38:24 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.17 2004/04/08 16:38:16 nscollins Exp $'
 
 !==============================================================================
 
@@ -173,6 +173,8 @@
                                                      dstLocalCoordY
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstLocalCornerX, &
                                                        dstLocalCornerY
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp3d
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: temp2d
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_Array) :: srcMaskArray
       type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray, &
@@ -353,10 +355,16 @@
                                     srcGatheredCoordY, status)
       ! TODO: move this loop to a Route routine?
       do i = 1,nC
-        call ESMF_RouteRunF90PtrR832D(tempRoute, srcLocalCornerX(nC,1,1), &
-                                      srcGatheredCornerX(nC,1), status)
-        call ESMF_RouteRunF90PtrR832D(tempRoute, srcLocalCornerY(nC,1,1), &
-                                      srcGatheredCornerY(nC,1), status)
+        temp3d = srcLocalCornerX(nC,1,1)
+        temp2d = srcGatheredCornerX(nC,1)
+        call ESMF_RouteRunF90PtrR832D(tempRoute, temp3d, temp2d, status)
+        !call ESMF_RouteRunF90PtrR832D(tempRoute, srcLocalCornerX(nC,1,1), &
+        !                              srcGatheredCornerX(nC,1), status)
+        temp3d = srcLocalCornerY(nC,1,1)
+        temp2d = srcGatheredCornerY(nC,1)
+        call ESMF_RouteRunF90PtrR832D(tempRoute, temp3d, temp2d, status)
+        !call ESMF_RouteRunF90PtrR832D(tempRoute, srcLocalCornerY(nC,1,1), &
+        !                              srcGatheredCornerY(nC,1), status)
       enddo
       call ESMF_RouteRunF90PtrI421D(tempRoute, srcLocalMask, &
                                     srcGatheredMask, status)
