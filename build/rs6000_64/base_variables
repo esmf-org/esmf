@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.17 2003/06/17 21:24:47 jwolfe Exp $ 
+# $Id: base_variables,v 1.18 2003/06/27 18:13:26 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -20,6 +20,7 @@ NO_AUTO_PARALLEL	= -qsmp=noauto
 NO_INLINING		= -Q
 NO_LINE_DIRECTIVES	= -P
 REAL8			= -qrealsize=8
+RESTRICTED_POINTERS     = -qkeyword=restrict
 STRICT			= -qstrict
 FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
