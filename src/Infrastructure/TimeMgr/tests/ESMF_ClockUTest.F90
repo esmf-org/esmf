@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.21 2003/06/05 21:24:36 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.22 2003/06/05 22:13:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.21 2003/06/05 21:24:36 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.22 2003/06/05 22:13:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -325,11 +325,11 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
- 
+      !NEX_UTest
       write(name, *) "ClockIsStopTime Test"
       bool = ESMF_ClockIsStopTime(clock, rc)
-      !call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(bool.eq."F")), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(.not.bool)), &
+                      name, failMsg, result, ESMF_SRCLINE)
       print *, "bool = ", bool
 
 
@@ -338,15 +338,15 @@
       !NEX_UTest
       ! time step from start time to stop time
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
-        write(name, *) "Clock Advance Test"
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
         call ESMF_ClockPrint(clock, rc=rc)
       end do
- 
-      bool = ESMF_ClockIsStopTime(clock1, rc)
+
+      bool = ESMF_ClockIsStopTime(clock, rc)
       print *, "bool = ", bool
+      write(name, *) "Clock Advance Test"
+      call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! print out ending clock state
       call ESMF_ClockPrint(clock, rc=rc)
