@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.55 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.56 2004/10/05 22:59:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.55 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.56 2004/10/05 22:59:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -525,16 +525,19 @@
 ! !IROUTINE: ESMF_RoutePrecomputeDomList - Precompute communication paths
 
 ! !INTERFACE:
-      subroutine ESMF_RoutePrecomputeDomList(route, rank, my_DE, &
-                                 sendDomainList, recvDomainList, rc)
+      subroutine ESMF_RoutePrecomputeDomList(route, rank, myDE, &
+                                             sendDomainList, recvDomainList, &
+                                             hasSrcData, hasDstData, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
-      integer, intent(in) :: rank
-      integer, intent(in) :: my_DE
-      type(ESMF_DomainList) :: sendDomainList
-      type(ESMF_DomainList) :: recvDomainList
-      integer, intent(out), optional :: rc
+      type(ESMF_Route),      intent(in   ) :: route
+      integer,               intent(in   ) :: rank
+      integer,               intent(in   ) :: myDE
+      type(ESMF_DomainList), intent(inout) :: sendDomainList
+      type(ESMF_DomainList), intent(inout) :: recvDomainList
+      logical,               intent(in   ), optional :: hasSrcData
+      logical,               intent(in   ), optional :: hasDstData
+      integer,               intent(  out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -548,7 +551,7 @@
 !          {\tt ESMF\_Route} to associate this information with.
 !     \item[rank]
 !          Data rank.
-!     \item[my_DE]
+!     \item[myDE]
 !          The ID of the local DE.
 !     \item[sendDomainList]
 !          An {\tt ESMF\_DomainList} which contains a list of rectangular
@@ -564,60 +567,86 @@
 !
 !EOPI
 
-        ! local variables
-        integer :: status                  ! local error status
-        integer :: i,j                     ! counters
-        logical :: rcpresent               ! did user specify rc?
+      ! local variables
+      integer :: localrc                 ! local error status
+      integer :: i, j                    ! counters
+      logical :: hasDstDataUse, hasSrcDataUse
+      type(ESMF_Logical) :: hasDstDataX, hasSrcDataX
 
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+      hasDstDataUse = .true.
+      hasDstDataX   = ESMF_TRUE
+      if (present(hasDstData)) then
+        hasDstDataUse = hasDstData
+        if (.not.(hasDstData)) hasDstDataX = ESMF_FALSE
+      endif
+      hasSrcDataUse = .true.
+      hasSrcDataX   = ESMF_TRUE
+      if (present(hasSrcData)) then
+        hasSrcDataUse = hasSrcData
+        if (.not.(hasSrcData)) hasSrcDataX = ESMF_FALSE
+      endif
 
-        ! Translate AxisIndices from F90 to C++
-        do i = 1, recvDomainList%num_domains
+      ! Translate AxisIndices from F90 to C++
+      if (hasDstDataUse) then
+        do i   = 1, recvDomainList%num_domains
           do j = 1, recvDomainList%domains(i)%rank
-            recvDomainList%domains(i)%ai(j)%min = recvDomainList%domains(i)%ai(j)%min - 1
-            recvDomainList%domains(i)%ai(j)%max = recvDomainList%domains(i)%ai(j)%max - 1
+            recvDomainList%domains(i)%ai(j)%min = &
+                           recvDomainList%domains(i)%ai(j)%min - 1
+            recvDomainList%domains(i)%ai(j)%max = &
+                           recvDomainList%domains(i)%ai(j)%max - 1
           enddo
         enddo
-        do i = 1, sendDomainList%num_domains
+      endif
+
+      if (hasSrcDataUse) then
+        do i   = 1, sendDomainList%num_domains
           do j = 1, sendDomainList%domains(i)%rank
-            sendDomainList%domains(i)%ai(j)%min = sendDomainList%domains(i)%ai(j)%min - 1
-            sendDomainList%domains(i)%ai(j)%max = sendDomainList%domains(i)%ai(j)%max - 1
+            sendDomainList%domains(i)%ai(j)%min = &
+                           sendDomainList%domains(i)%ai(j)%min - 1
+            sendDomainList%domains(i)%ai(j)%max = &
+                           sendDomainList%domains(i)%ai(j)%max - 1
           enddo
         enddo
+      endif
 
-        ! Call C++  code
-        call c_ESMC_RoutePrecomputeDomList(route, rank, my_DE, &
-                               sendDomainList, recvDomainList, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route PrecomputeDomainList error"
-          ! don't return before adding 1 back to AIs
-        endif
+      ! Call C++  code
+      call c_ESMC_RoutePrecomputeDomList(route, rank, myDE, &
+                                         sendDomainList, recvDomainList, &
+                                         hasSrcDataX, hasDstDataX, localrc)
+      if (localrc .ne. ESMF_SUCCESS) then  
+        print *, "Route PrecomputeDomainList error"
+        ! don't return before adding 1 back to AIs
+      endif
 
-        ! Translate AxisIndices back to F90 from C++
-        do i = 1, recvDomainList%num_domains
+      ! Translate AxisIndices back to F90 from C++
+      if (hasDstDataUse) then
+        do i   = 1, recvDomainList%num_domains
           do j = 1, recvDomainList%domains(i)%rank
-            recvDomainList%domains(i)%ai(j)%min = recvDomainList%domains(i)%ai(j)%min + 1
-            recvDomainList%domains(i)%ai(j)%max = recvDomainList%domains(i)%ai(j)%max + 1
+            recvDomainList%domains(i)%ai(j)%min = &
+                           recvDomainList%domains(i)%ai(j)%min + 1
+            recvDomainList%domains(i)%ai(j)%max = &
+                           recvDomainList%domains(i)%ai(j)%max + 1
           enddo
         enddo
-        do i = 1, sendDomainList%num_domains
+      endif
+
+      if (hasSrcDataUse) then
+        do i   = 1, sendDomainList%num_domains
           do j = 1, sendDomainList%domains(i)%rank
-            sendDomainList%domains(i)%ai(j)%min = sendDomainList%domains(i)%ai(j)%min + 1
-            sendDomainList%domains(i)%ai(j)%max = sendDomainList%domains(i)%ai(j)%max + 1
+            sendDomainList%domains(i)%ai(j)%min = &
+                           sendDomainList%domains(i)%ai(j)%min + 1
+            sendDomainList%domains(i)%ai(j)%max = &
+                           sendDomainList%domains(i)%ai(j)%max + 1
           enddo
         enddo
+      endif
 
-        if (rcpresent) rc = status
+      if (present(rc)) rc = localrc
 
-        end subroutine ESMF_RoutePrecomputeDomList
+      end subroutine ESMF_RoutePrecomputeDomList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1269,7 +1298,7 @@
 ! !IROUTINE: ESMF_RouteRun - Execute the communications the Route represents
 
 ! !INTERFACE:
-      subroutine ESMF_RouteRun(route, srcarray, dstarray, rc)
+      subroutine ESMF_RouteRun(route, srcArray, dstArray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1368,7 +1397,19 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+        if (associated(srcarray)) then
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+          else
+            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_I4, status)
+          endif
+        else
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_I4, status)
+          else
+            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_I4, status)
+          endif
+        endif
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1425,7 +1466,19 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+        if (associated(srcarray)) then
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_I4, status)
+          else
+            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_I4, status)
+          endif
+        else
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_I4, status)
+          else
+            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_I4, status)
+          endif
+        endif
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1482,7 +1535,19 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+        if (associated(srcarray)) then
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+          else
+            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_R8, status)
+          endif
+        else
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_R8, status)
+          else
+            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_R8, status)
+          endif
+        endif
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1539,7 +1604,19 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+        if (associated(srcarray)) then
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+          else
+            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_R8, status)
+          endif
+        else
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_R8, status)
+          else
+            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_R8, status)
+          endif
+        endif
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1596,7 +1673,19 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+        if (associated(srcarray)) then
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, srcarray, dstarray, ESMF_R8, status)
+          else
+            call c_ESMC_RouteRunNA(route, srcarray, 0, ESMF_R8, status)
+          endif
+        else
+          if (associated(dstarray)) then
+            call c_ESMC_RouteRunNA(route, 0, dstarray, ESMF_R8, status)
+          else
+            call c_ESMC_RouteRunNA(route, 0, 0, ESMF_R8, status)
+          endif
+        endif
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
