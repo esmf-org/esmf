@@ -1,4 +1,4 @@
-//$Id: ESMC_ErrMsgs.C,v 1.2 2004/05/17 19:24:13 eschwab Exp $
+//$Id: ESMC_ErrMsgs.C,v 1.3 2004/05/18 19:52:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,6 +12,8 @@
 //
 // Array of general error message strings, as generic as possible, to allow
 // prepending or appending with user strings.
+
+#define ESMC_MAX_ERRORS 1000
 
 static const char *errMsg[] = {
 
