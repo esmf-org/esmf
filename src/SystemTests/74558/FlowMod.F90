@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.13 2003/08/01 22:03:53 nscollins Exp $
+! $Id: FlowMod.F90,v 1.14 2003/08/29 05:37:00 eschwab Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -343,7 +343,7 @@
 !
 ! initialize timestep
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
@@ -383,7 +383,7 @@
 ! 
 ! Get timestep from clock
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
@@ -924,7 +924,7 @@
       call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
       ! Frame number from computation
-      call ESMF_ClockGetAdvanceCount(clock, frame, rc)
+      call ESMF_ClockGet(clock, advanceCount=frame, rc=rc)
 
       ! call ESMF_StateGetData(import_state, "U", field_u, rc)
       call ESMF_FieldAllGather(field_u, array2, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.15 2003/08/05 21:20:18 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.16 2003/08/29 05:36:23 eschwab Exp $
 !
 ! System test code #62503
 
@@ -139,18 +139,18 @@
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 6 hours
-      call ESMF_TimeIntervalSet(timeStep, h_i4=6, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
 
       ! initialize start time to 3/28/2003
-      call ESMF_TimeSet(startTime, yr_i4=2003, mm_i4=5, dd_i4=1, &
+      call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 3/29/2003
-      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=5, dd_i4=2, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=5, dd=2, &
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
-      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
 
 
  
