@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/04/11 16:40:46 eschwab Exp $ 
+# $Id: makefile,v 1.6 2003/04/15 20:49:51 svasquez Exp $ 
 
 ALL:  examples
 
@@ -31,7 +31,7 @@ ESMF_TimeMgrDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_ClockEx: ESMF_ClockEx.o  chkopts
-	${SL_F_LINKER} -g -o ESMF_ClockEx ESMF_ClockEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${SL_F_LINKER} -g -o ESMF_ClockEx ESMF_ClockEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_ClockEx.o
 
 RUN_ESMF_ClockEx:
@@ -42,7 +42,7 @@ ESMF_ClockEx.rm:
 	echo "ESMF_ClockEx.rm target called here."
 
 ESMC_ClockEx: ESMC_ClockEx.o  chkopts
-	${SL_C_LINKER} -g -o ESMC_ClockEx ESMC_ClockEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-${SL_C_LINKER} -g -o ESMC_ClockEx ESMC_ClockEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ClockEx.o
 
 RUN_ESMC_ClockEx:
