@@ -1,4 +1,4 @@
-// $Id: ESMC_Types.h,v 1.2 2002/10/15 03:30:13 eschwab Exp $
+// $Id: ESMC_Types.h,v 1.3 2002/10/28 23:34:13 nscollins Exp $
 //
 // < Something here from legal about the status of the code, like:
 //  This code developed by NASA/NCAR/ESMC whatever, and is covered by
@@ -10,6 +10,8 @@
 #ifndef ESMF_TYPE_H
 #define ESMF_TYPE_H
 
+#include <stdio.h>
+#include "ESMC.h"
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -21,9 +23,18 @@
 //
 //-------------------------------------------------------------------------
 
+#ifndef ESMF_HAS_INT64
 #define int64  long long
+// why not typedef long long int64?
+#endif
+#ifndef ESMF_HAS_UINT64
 #define uint64 unsigned long long
+#endif
+#ifndef ESMF_HAS_INT32
 #define int32  long
+#endif
+#ifndef ESMF_HAS_UINT32
 #define uint32 unsigned long
+#endif
 
 #endif // ESMF_TYPE_H
