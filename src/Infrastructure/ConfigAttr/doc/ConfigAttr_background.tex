@@ -1,4 +1,4 @@
-% $Id: ConfigAttr_background.tex,v 1.3 2002/06/10 15:57:10 cnh Exp $
+% $Id: ConfigAttr_background.tex,v 1.4 2002/06/10 16:38:06 cnh Exp $
 
 \section{Background}
 As part of their state Earth system models need to maintain ad-hoc sets of
@@ -15,6 +15,11 @@ The configuration attributes element of ESMF will enable
 these parameters or {\bf attributes} to be recorded and provided services
 for setting attributes from human readbale text files and for saving attributes
 to persistent storage in appropriate formats.
+
+Providing a standard service for configuration attributes will enable ESMF
+to provide enhanced inteoperability capabilities. In particular the
+{\bf attributes} facility will allow components to auotmatically
+share attribute settings.
 
 \subsection{Location}
 
@@ -40,8 +45,9 @@ top of ESMF.
  Property sheets used in many component based programming environments, for example
 the property sheet notion  systems like Visual C++ (see the {\bf CPropertySheet} and
 {\bf CPropertyPage} MFC classes), .NET and J2SE (see {\bf java.beans} class), have parallels with the concepts that need to 
-be supported here. All the ESMF applications already contain services of this nature with widely 
-varying degress of spohistication (see for exmple MOM documentation, MITgcm documentation, CCSM documentation). The 
+be supported here. All the ESMF JMC codes contain services of this nature with widely 
+varying degress of spohistication (see for exmple MOM documentation, MITgcm documentation, CCSM documentation). 
+In most cases the existing ESMF JMC codes use the Fortran NAMELIST facility. The 
 widely used dot files and dot subdirectories used for all manner of application configuration on UNIX 
 platforms also perform similar roles (see for example the {\bf pine} mail reader
 documentation or the {\bf OpenSSH} package documentation) to some of the functions envisaged here, as does the Windows 

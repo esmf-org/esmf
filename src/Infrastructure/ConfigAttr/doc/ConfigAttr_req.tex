@@ -1,56 +1,127 @@
-% $Id: ConfigAttr_req.tex,v 1.1 2002/03/14 05:11:12 cnh Exp $
+% $Id: ConfigAttr_req.tex,v 1.2 2002/06/10 16:38:07 cnh Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
 %===============================================================================
 %===============================================================================
-\req{<Requirement>}
+\req{A human friendly format for parameter specification should be provided}
 %-------------------------------------------------------------------------------
 
-<Description>
 
-\sreq{<Subrequirement>}
+\sreq{Text files specifying parameters should allow comments}
 
-<Description>
+A simple form of # at the beginning of a comment line
+should suffice.
 
 \begin{reqlist}
 {\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
+{\bf Source:} MITgcm \\
 {\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
 {\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
 {\bf Notes:} <Background, comments on design, implementation, etc.> 
 \end{reqlist}
 
-%===============================================================================
-% Or requirements may be itemized under a subtopic:
-%===============================================================================
-%===============================================================================
-\req{<Requirement>}
-%-------------------------------------------------------------------------------
-
-<Description>
-
-\sreq{<Subrequirement>}
-
-<Description>
-
-\ssreq{Subsubrequirement} 
-
-<Description>
+\sreq{Text file parsing errors should at the least provide}
+file name, line of file, meaningful error message logged in an easy
+to find location
 
 \begin{reqlist}
 {\bf Priority:} <Priority 1-3> \\
-{\bf Source:} <JMC Code (required, desired)> \\
+{\bf Source:} MITgcm \\
 {\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
 {\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
 {\bf Notes:} <Background, comments on design, implementation, etc.> 
 \end{reqlist}
 
+\sreq{Text file syntax should be backwards compatible with NAMELIST formats.}
+The existing NAMELIST formats used by the JMC codes need to be parseable
+as Configuration Attributes. This could be through conversion or through
+a CA format that only extends the NAMELIST format i.e. that includes the
+NAMELIST format as a subset.
+The full CA format does not need to be compatible with the NAMELIST standard.
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
 
+\req{Attributes can be sub-classified}
 
+A system for grouping attributes into sub-categories within an ESMF application
+would be useful. 
 
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
 
+\req{Attributes can be optional and could be introduced at runtime}
+There should be no need to specify all attributes. It should also be possible
+to introduce a new attribute e.g. {\it fred=7} without having to
+modify the attribute parser code.The Fortran NAMELIST requires that all
+attributes be listed in the parsing routine. This should not be mandatory in CA.
 
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
 
+\req{A system for defaults and overrides should be supported}
+It should be possible to have a set of default attribute settings and
+only require overrides to be specified.
 
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
 
+\req{A system that is compatible with unique naming should be devised}
+For example it should be possible to refer to an attribute with a
+name such as {\it gov.gfdl.mom4.timestepping.deltat}. It should
+be possible to determine whether the name matches uniquely or has
+multiple matches (e.g. for the above example an application
+with an ensemble of mom4 components would have multiple matches).
+
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
+
+\req{Components should be able to query the attributes of other components}
+This will be the main benefit of CA to ESMF.
+
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
+
+\req{Components should be able to set attributes to be writable by other components}
+Queries will be red-only, however it could also be useful to ultimately allow 
+one component to set a value of another components attributes. For example in
+ensemble simulations or computational steering a {\it driver} component could
+control other components.
+
+\begin{reqlist}
+{\bf Priority:} <Priority 1-3> \\
+{\bf Source:} MITgcm \\
+{\bf Status:} <Proposed, Approved-1, Approved-2, Rejected, Implemented, Verified> \\
+{\bf Verification:} <e.g., Code inspection, Unit test, System test> \\
+{\bf Notes:} <Background, comments on design, implementation, etc.> 
+\end{reqlist}
