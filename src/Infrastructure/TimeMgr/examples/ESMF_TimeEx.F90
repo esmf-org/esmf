@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.30 2004/06/11 00:24:47 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.31 2004/06/11 20:00:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
       ! instantiate a time interval
       type(ESMF_TimeInterval) :: timeinterval1
 
-      ! local variables for Get functions
+      ! local variables for Get methods
       integer :: YY, MM, DD, H, M, S
 
       ! return code

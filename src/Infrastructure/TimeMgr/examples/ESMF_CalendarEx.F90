@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.27 2004/06/11 00:25:22 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.28 2004/06/11 20:00:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
       type(ESMF_Calendar) :: gregorianCalendar
       type(ESMF_Calendar) :: julianDayCalendar
 
-      ! local variables for Get functions
+      ! local variables for Get methods
       integer(ESMF_KIND_I8) :: dl
       type(ESMF_Time) :: time
       type(ESMF_CalendarType) :: calType
