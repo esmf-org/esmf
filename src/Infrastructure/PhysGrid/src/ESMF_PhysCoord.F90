@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.8 2004/02/19 20:54:37 nscollins Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.9 2004/03/22 21:57:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,11 +48,11 @@
 
 !------------------------------------------------------------------------------
 !
-!     ! ESMF_CoordKind
+!     ! ESMF_CoordType
 !
 !     ! An enum for identifying a type of coordinate
 
-      type ESMF_CoordKind
+      type ESMF_CoordType
       sequence
 !      private
         integer :: kind
@@ -67,7 +67,7 @@
 !      private
 
          type (ESMF_Base) :: base   ! contains coordinate name 
-         type (ESMF_CoordKind) :: kind
+         type (ESMF_CoordType) :: kind
                                     ! type of coordinate
          character (len=ESMF_MAXSTR) :: units
                                     ! units of coord (eg 'degrees')
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 
-      public ESMF_PhysCoord, ESMF_PhysCoordType, ESMF_CoordSystem, ESMF_CoordKind
+      public ESMF_PhysCoord, ESMF_PhysCoordType, ESMF_CoordSystem, ESMF_CoordType
 
 !------------------------------------------------------------------------------
 !
@@ -196,34 +196,34 @@
       !   Hybrid      = hybrid vertical coordinates
       !   Lagrangian  = Lagrangian coordinates
 
-      type (ESMF_CoordKind), parameter, public :: &! coord kinds
-         ESMF_CoordKind_Unknown     = ESMF_CoordKind( 1), &
-         ESMF_CoordKind_User        = ESMF_CoordKind( 2), &
-         ESMF_CoordKind_Lat         = ESMF_CoordKind( 3), &
-         ESMF_CoordKind_Lon         = ESMF_CoordKind( 4), &
-         ESMF_CoordKind_Radius      = ESMF_CoordKind( 5), &
-         ESMF_CoordKind_X           = ESMF_CoordKind( 6), &
-         ESMF_CoordKind_Y           = ESMF_CoordKind( 7), &
-         ESMF_CoordKind_Z           = ESMF_CoordKind( 8), &
-         ESMF_CoordKind_Fourier     = ESMF_CoordKind( 9), &
-         ESMF_CoordKind_Legendre    = ESMF_CoordKind(10), &
-         ESMF_CoordKind_Azimuth     = ESMF_CoordKind(11), &
-         ESMF_CoordKind_Depth       = ESMF_CoordKind(12), &
-         ESMF_CoordKind_Height      = ESMF_CoordKind(13), &
-         ESMF_CoordKind_Pressure    = ESMF_CoordKind(14), &
-         ESMF_CoordKind_Sigma       = ESMF_CoordKind(15), &
-         ESMF_CoordKind_Theta       = ESMF_CoordKind(16), &
-         ESMF_CoordKind_Eta         = ESMF_CoordKind(17), &
-         ESMF_CoordKind_Isopycnal   = ESMF_CoordKind(18), &
-         ESMF_CoordKind_Hybrid      = ESMF_CoordKind(19), &
-         ESMF_CoordKind_Lagrangian  = ESMF_CoordKind(20)
+      type (ESMF_CoordType), parameter, public :: &! coord kinds
+         ESMF_CoordType_Unknown     = ESMF_CoordType( 1), &
+         ESMF_CoordType_User        = ESMF_CoordType( 2), &
+         ESMF_CoordType_Lat         = ESMF_CoordType( 3), &
+         ESMF_CoordType_Lon         = ESMF_CoordType( 4), &
+         ESMF_CoordType_Radius      = ESMF_CoordType( 5), &
+         ESMF_CoordType_X           = ESMF_CoordType( 6), &
+         ESMF_CoordType_Y           = ESMF_CoordType( 7), &
+         ESMF_CoordType_Z           = ESMF_CoordType( 8), &
+         ESMF_CoordType_Fourier     = ESMF_CoordType( 9), &
+         ESMF_CoordType_Legendre    = ESMF_CoordType(10), &
+         ESMF_CoordType_Azimuth     = ESMF_CoordType(11), &
+         ESMF_CoordType_Depth       = ESMF_CoordType(12), &
+         ESMF_CoordType_Height      = ESMF_CoordType(13), &
+         ESMF_CoordType_Pressure    = ESMF_CoordType(14), &
+         ESMF_CoordType_Sigma       = ESMF_CoordType(15), &
+         ESMF_CoordType_Theta       = ESMF_CoordType(16), &
+         ESMF_CoordType_Eta         = ESMF_CoordType(17), &
+         ESMF_CoordType_Isopycnal   = ESMF_CoordType(18), &
+         ESMF_CoordType_Hybrid      = ESMF_CoordType(19), &
+         ESMF_CoordType_Lagrangian  = ESMF_CoordType(20)
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.8 2004/02/19 20:54:37 nscollins Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.9 2004/03/22 21:57:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -238,7 +238,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_CoordSystemEqual
-         module procedure ESMF_CoordKindEqual
+         module procedure ESMF_CoordTypeEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
@@ -255,7 +255,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_CoordSystemNotEqual
-         module procedure ESMF_CoordKindNotEqual
+         module procedure ESMF_CoordTypeNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -279,7 +279,7 @@
 ! !IROUTINE: ESMF_PhysCoordCreate - One stop interface for creating new coord
 
 ! !INTERFACE:
-      function ESMF_PhysCoordCreate(coordKind, name, units,       &
+      function ESMF_PhysCoordCreate(coordType, name, units,       &
                                     aligned, equalSpaced, cyclic, &
                                     minVal, maxVal, originOffset, &
                                     rc)
@@ -289,8 +289,8 @@
 !
 ! !ARGUMENTS:
 
-      type (ESMF_CoordKind), intent(in) :: &
-         coordKind                    ! type of coordinate being created
+      type (ESMF_CoordType), intent(in) :: &
+         coordType                    ! type of coordinate being created
 
       character (len=ESMF_MAXSTR), intent(in), optional :: &
          name                         ! name of coordinate axis (eg 'latitude')
@@ -319,9 +319,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[coordKind]
+!     \item[coordType]
 !          Type of coordinate being defined.  These must be one of
-!          the supported ESMF\_CoordKind values to allow the framework
+!          the supported ESMF\_CoordType values to allow the framework
 !          to treat certain coordinates correctly (e.g. special treatment
 !          of longitude near multi-valued boundary).
 !     \item[{[name]}]
@@ -376,7 +376,7 @@
         return
       endif
 
-      physCoord%kind = coordKind
+      physCoord%kind = coordType
 
       call ESMF_BaseCreate(physCoord%base, "PhysCoord", name, 0, status)
       if(status /= ESMF_SUCCESS) then
@@ -497,7 +497,7 @@
 ! !IROUTINE: ESMF_PhysCoordSet - Sets attributes of a physical coordinate
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordSet(physCoord, coordKind, name, units, &
+      subroutine ESMF_PhysCoordSet(physCoord, coordType, name, units, &
                                     aligned, equalSpaced, cyclic,     &
                                     minVal, maxVal, originOffset,     &
                                     rc)
@@ -508,8 +508,8 @@
          physCoord                    ! PhysCoord object for which attributes
                                       ! are to be assigned
 
-      type(ESMF_CoordKind), intent(in), optional :: &
-         coordKind                    ! type of ESMF coordinate
+      type(ESMF_CoordType), intent(in), optional :: &
+         coordType                    ! type of ESMF coordinate
                                       ! overrides kind defined during creation
 
       character (len=ESMF_MAXSTR), intent(in), optional :: &
@@ -538,7 +538,7 @@
 !          The {\tt ESMF\_PhysCoord} object for which attributes are
 !          to be set.
 !     \item[{[coord\_kind]}]
-!          Standard ESMF\_CoordKind specifying the type of coordinate.
+!          Standard ESMF\_CoordType specifying the type of coordinate.
 !          This value would reset the kind defined when coordinate was created.
 !     \item[{[name]}]
 !          Name to use for this coordinate.  Generally, these should
@@ -586,8 +586,8 @@
         return
       endif
 
-      if (present(coordKind)) then
-         physCoord%ptr%kind = coordKind
+      if (present(coordType)) then
+         physCoord%ptr%kind = coordType
       endif
       
       if (present(name)) then
@@ -636,7 +636,7 @@
 ! !IROUTINE: ESMF_PhysCoordGet - Retrieves attributes of physical coordinate
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordGet(physCoord, coordKind, name, units, rc)
+      subroutine ESMF_PhysCoordGet(physCoord, coordType, name, units, rc)
 !
 ! !ARGUMENTS:
 
@@ -644,8 +644,8 @@
          physCoord                    ! PhysCoord object for which attributes
                                       ! are to be retrieved
 
-      type(ESMF_CoordKind), intent(out), optional :: &
-         coordKind                    ! type of ESMF coordinate
+      type(ESMF_CoordType), intent(out), optional :: &
+         coordType                    ! type of ESMF coordinate
 
       character (len=ESMF_MAXSTR), intent(out), optional :: &
          name,                       &! name of coordinate axis (eg 'latitude')
@@ -664,8 +664,8 @@
 !     \item[physCoord]
 !          The {\tt ESMF\_PhysCoord} object for which attributes are
 !          to be set.
-!     \item[{[coordKind]}]
-!          Standard ESMF\_CoordKind specifying the type of coordinate.
+!     \item[{[coordType]}]
+!          Standard ESMF\_CoordType specifying the type of coordinate.
 !     \item[{[name]}]
 !          Name assigned to this coordinate.
 !     \item[{[units]}]
@@ -695,8 +695,8 @@
       endif
 
 !     Get coordinate kind if requested.
-      if (present(coordKind)) then
-         coordKind = physCoord%ptr%kind
+      if (present(coordType)) then
+         coordType = physCoord%ptr%kind
       endif
       
 !     Get name from base object if requested
@@ -996,7 +996,7 @@
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
-      type(ESMF_CoordKind) :: coordKind              ! kind of coord
+      type(ESMF_CoordType) :: coordType              ! kind of coord
       character (len=ESMF_MAXSTR) :: units           ! units of coord
       real (ESMF_KIND_R8) :: i, minlon, maxlon, pi   
                                 ! for treating double-value issue in longitude
@@ -1025,12 +1025,12 @@
 !     If not in range but axis is longitude, check for longitude range problems.
       if (.not. ESMF_PhysCoordPointInRange) then
          call ESMF_PhysCoordGet(physCoord, &
-                                coordKind=coordKind, units=units, rc=status)
+                                coordType=coordType, units=units, rc=status)
          if (status /= ESMF_SUCCESS) then
             print *,'ERROR in PhysCoordPointInRange: Get coord failed'
          endif
          
-         if (coordKind == ESMF_CoordKind_Lon) then
+         if (coordType == ESMF_CoordType_Lon) then
 
             minlon = physCoord%ptr%minVal
             maxlon = physCoord%ptr%maxVal
@@ -1211,19 +1211,19 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CoordKindEqual - determines equality of coord kinds
+! !IROUTINE: ESMF_CoordTypeEqual - determines equality of coord kinds
 !
 ! !INTERFACE:
-      function ESMF_CoordKindEqual(CoordKind1, CoordKind2)
+      function ESMF_CoordTypeEqual(CoordType1, CoordType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_CoordKindEqual
+      logical :: ESMF_CoordTypeEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_CoordKind), intent(in) :: &
-         CoordKind1,      &! Two coordinate Kinds to compare for
-         CoordKind2        ! equality
+      type (ESMF_CoordType), intent(in) :: &
+         CoordType1,      &! Two coordinate Kinds to compare for
+         CoordType2        ! equality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF Coordinate Kind types to see if 
@@ -1231,32 +1231,32 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[CoordKind1, CoordKind2]
+!     \item[CoordType1, CoordType2]
 !          Two coordinate kinds to compare for equality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_CoordKindEqual = (CoordKind1%kind == CoordKind2%kind)
+      ESMF_CoordTypeEqual = (CoordType1%kind == CoordType2%kind)
 
-      end function ESMF_CoordKindEqual
+      end function ESMF_CoordTypeEqual
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CoordKindNotEqual - non-equality of coord kinds
+! !IROUTINE: ESMF_CoordTypeNotEqual - non-equality of coord kinds
 !
 ! !INTERFACE:
-      function ESMF_CoordKindNotEqual(CoordKind1, CoordKind2)
+      function ESMF_CoordTypeNotEqual(CoordType1, CoordType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_CoordKindNotEqual
+      logical :: ESMF_CoordTypeNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_CoordKind), intent(in) :: &
-         CoordKind1,      &! Two coordinate Kinds to compare for 
-         CoordKind2        ! inequality
+      type (ESMF_CoordType), intent(in) :: &
+         CoordType1,      &! Two coordinate Kinds to compare for 
+         CoordType2        ! inequality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF Coordinate Kind types to see if 
@@ -1264,16 +1264,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[CoordKind1, CoordKind2]
+!     \item[CoordType1, CoordType2]
 !          Two coordinate kinds to compare for inequality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_CoordKindNotEqual = (CoordKind1%kind /= CoordKind2%kind)
+      ESMF_CoordTypeNotEqual = (CoordType1%kind /= CoordType2%kind)
 
-      end function ESMF_CoordKindNotEqual
+      end function ESMF_CoordTypeNotEqual
 
 !------------------------------------------------------------------------------
 

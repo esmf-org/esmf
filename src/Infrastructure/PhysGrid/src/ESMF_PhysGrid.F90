@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.68 2004/03/22 21:03:45 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.69 2004/03/22 21:57:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,15 +80,15 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_RegionKind
+!     ! ESMF_RegionType
 !
 !     ! Type to specify kind of region for defined PhysGrid regions.
 !     !  See the public parameters declared below for the possible valid
 !     !  values for this.  (They include polygons and ellipses/ellipsii.)
 
-      type ESMF_RegionKind
+      type ESMF_RegionType
       sequence
-        integer :: regionKind
+        integer :: regionType
       end type
 
 !------------------------------------------------------------------------------
@@ -102,7 +102,7 @@
 !      private
         type (ESMF_Base) :: base  ! ESMF Base class object
 
-        type (ESMF_RegionKind) :: regionType
+        type (ESMF_RegionType) :: regionType
                                   ! what kind of region          
 
         integer :: numVertices    ! number of vertices for a polygonal region;
@@ -246,7 +246,7 @@
       ! These are public primarily for use by the Grid module and
       ! are not meant to be directly accessible to users.
       public ESMF_PhysLocation
-      public ESMF_RegionKind
+      public ESMF_RegionType
       public ESMF_PhysRegion
       public ESMF_GridMaskType
       public ESMF_GridMask
@@ -314,10 +314,10 @@
       !   Polygonal   = polygons defined by vertex coordinates
       !   Elliptical  = ellipse centered on grid point, defined by two params
 
-      type (ESMF_RegionKind), parameter, public :: &! types of PhysGrid regions
-         ESMF_RegionKind_Unknown      = ESMF_RegionKind( 0), &
-         ESMF_RegionKind_Polygon      = ESMF_RegionKind( 1), &
-         ESMF_RegionKind_Ellipse      = ESMF_RegionKind( 2)
+      type (ESMF_RegionType), parameter, public :: &! types of PhysGrid regions
+         ESMF_RegionType_Unknown      = ESMF_RegionType( 0), &
+         ESMF_RegionType_Polygon      = ESMF_RegionType( 1), &
+         ESMF_RegionType_Ellipse      = ESMF_RegionType( 2)
 
       ! Supported ESMF PhysGrid Mask Types
       !   Unknown   = unknown or undefined mask type
@@ -336,7 +336,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.68 2004/03/22 21:03:45 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.69 2004/03/22 21:57:32 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -419,7 +419,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridMaskTypeEqual
-         module procedure ESMF_RegionKindEqual
+         module procedure ESMF_RegionTypeEqual
          module procedure ESMF_PhysGridOrientEqual
 
 ! !DESCRIPTION:
@@ -437,7 +437,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridMaskTypeNotEqual
-         module procedure ESMF_RegionKindNotEqual
+         module procedure ESMF_RegionTypeNotEqual
          module procedure ESMF_PhysGridOrientNotEqual
 
 ! !DESCRIPTION:
@@ -1126,7 +1126,7 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_RegionKind), intent(in) :: &
+      type(ESMF_RegionType), intent(in) :: &
          regionType           ! type of region (polygonal, elliptical)
 
       character(*), intent(in), optional :: name ! name to assign to regions
@@ -1156,7 +1156,7 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} for which regions are to be added.
 !     \item[regionType]
-!          {\tt ESMF\_RegionKind} denoting the type of region (e.g. polygonal,
+!          {\tt ESMF\_RegionType} denoting the type of region (e.g. polygonal,
 !          elliptical)
 !     \item[{[name]}]
 !          Optional name to assign to the regions.
@@ -1220,11 +1220,11 @@
 !
 !     set region arrays depending on type of region
 !
-      if (regionType == ESMF_RegionKind_Polygon) then
+      if (regionType == ESMF_RegionType_Polygon) then
         physgrid%ptr%regions%numVertices = numVertices
         physgrid%ptr%regions%vertices => vertexArray
 
-      else if (regionType == ESMF_RegionKind_Ellipse) then
+      else if (regionType == ESMF_RegionType_Ellipse) then
         physgrid%ptr%regions%ellipse = ellipseArray
 
       else
@@ -1235,10 +1235,10 @@
 !
 !     define bounding box for each region to aid in future searches
 !
-      if (regionType == ESMF_RegionKind_Polygon) then
+      if (regionType == ESMF_RegionType_Polygon) then
          !TODO: create bbox array for polygons
 
-      else if (regionType == ESMF_RegionKind_Ellipse) then
+      else if (regionType == ESMF_RegionType_Ellipse) then
          !TODO: define bounding box for elliptical region
 
       else
@@ -1266,7 +1266,7 @@
 
       type(ESMF_PhysGrid), intent(in) :: physgrid
 
-      type(ESMF_RegionKind), intent(inout), optional :: &
+      type(ESMF_RegionType), intent(inout), optional :: &
          regionType           ! type of region (polygonal, elliptical)
 
       character(*), intent(inout), optional :: name ! name to assign to regions
@@ -1300,7 +1300,7 @@
 !     \item[physgrid]
 !          {\tt ESMF\_PhysGrid} holding regions to be queried.
 !     \item[{[regionType]}]
-!          {\tt ESMF\_RegionKind} denoting the type of region (e.g. polygonal,
+!          {\tt ESMF\_RegionType} denoting the type of region (e.g. polygonal,
 !          elliptical)
 !     \item[{[name]}]
 !          Name assigned to the regions.
@@ -1358,7 +1358,7 @@
 !     if number of vertices requested, get it
 !
       if (present(numVertices)) then
-         if (physgrid%ptr%regions%regionType == ESMF_RegionKind_Polygon) then
+         if (physgrid%ptr%regions%regionType == ESMF_RegionType_Polygon) then
             numVertices = physgrid%ptr%regions%numVertices
          else
             print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
@@ -1369,7 +1369,7 @@
 !     if vertex coordinates requested, get them
 !
       if (present(vertexArray)) then
-         if (physgrid%ptr%regions%regionType == ESMF_RegionKind_Polygon) then
+         if (physgrid%ptr%regions%regionType == ESMF_RegionType_Polygon) then
             !TODO: consistency check for array sizes, shapes
             !TODO: return pointer or copy array?
             vertexArray = physgrid%ptr%regions%vertices
@@ -1382,7 +1382,7 @@
 !     if ellipses requested, get them
 !
       if (present(ellipseArray)) then
-         if (physgrid%ptr%regions%regionType == ESMF_RegionKind_Ellipse) then
+         if (physgrid%ptr%regions%regionType == ESMF_RegionType_Ellipse) then
             !TODO: consistency check for array sizes, shapes
             !TODO: return pointer or copy array?
             ellipseArray = physgrid%ptr%regions%ellipse
@@ -2832,19 +2832,19 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegionKindEqual - equality of PhysGrid region kinds
+! !IROUTINE: ESMF_RegionTypeEqual - equality of PhysGrid region kinds
 !
 ! !INTERFACE:
-      function ESMF_RegionKindEqual(RegionKind1, RegionKind2)
+      function ESMF_RegionTypeEqual(RegionType1, RegionType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_RegionKindEqual
+      logical :: ESMF_RegionTypeEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_RegionKind), intent(in) :: &
-         RegionKind1,      &! Two region types to compare for
-         RegionKind2        ! equality
+      type (ESMF_RegionType), intent(in) :: &
+         RegionType1,      &! Two region types to compare for
+         RegionType2        ! equality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid region types to see if
@@ -2852,33 +2852,33 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[RegionKind1, RegionKind2]
+!     \item[RegionType1, RegionType2]
 !          Two region types to compare for equality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_RegionKindEqual = (RegionKind1%regionKind == &
-                              RegionKind2%regionKind)
+      ESMF_RegionTypeEqual = (RegionType1%regionType == &
+                              RegionType2%regionType)
 
-      end function ESMF_RegionKindEqual
+      end function ESMF_RegionTypeEqual
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegionKindNotEqual - non-equality of PhysGrid region kinds
+! !IROUTINE: ESMF_RegionTypeNotEqual - non-equality of PhysGrid region kinds
 !
 ! !INTERFACE:
-      function ESMF_RegionKindNotEqual(RegionKind1, RegionKind2)
+      function ESMF_RegionTypeNotEqual(RegionType1, RegionType2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_RegionKindNotEqual
+      logical :: ESMF_RegionTypeNotEqual
 
 ! !ARGUMENTS:
 
-      type (ESMF_RegionKind), intent(in) :: &
-         RegionKind1,      &! Two PhysGrid region types to compare for
-         RegionKind2        ! inequality
+      type (ESMF_RegionType), intent(in) :: &
+         RegionType1,      &! Two PhysGrid region types to compare for
+         RegionType2        ! inequality
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid region types to see if
@@ -2886,17 +2886,17 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[RegionKind1, RegionKind2]
+!     \item[RegionType1, RegionType2]
 !          Two kinds of PhysGrid regions to compare for inequality
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_RegionKindNotEqual = (RegionKind1%regionKind /= &
-                                 RegionKind2%regionKind)
+      ESMF_RegionTypeNotEqual = (RegionType1%regionType /= &
+                                 RegionType2%regionType)
 
-      end function ESMF_RegionKindNotEqual
+      end function ESMF_RegionTypeNotEqual
 
 !------------------------------------------------------------------------------
 !BOP

@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.46 2004/03/22 21:03:44 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.47 2004/03/22 21:57:31 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2412,7 +2412,7 @@
       real(ESMF_KIND_R8), dimension(dimCount) :: localMin, localMax
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
       type(ESMF_CoordSystem) :: coordSystem
-      type(ESMF_CoordKind), dimension(dimCount) :: coordKind
+      type(ESMF_CoordType), dimension(dimCount) :: coordType
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid) :: physGrid
@@ -2541,8 +2541,8 @@
           coordSystem         = ESMF_CoordSystem_Spherical
           coordNames(1)       = 'latitude'
           coordNames(2)       = 'longitude'
-          coordKind(1)        = ESMF_CoordKind_Lat
-          coordKind(2)        = ESMF_CoordKind_Lon
+          coordType(1)        = ESMF_CoordType_Lat
+          coordType(2)        = ESMF_CoordType_Lon
           coordUnits(:)       = 'degrees'
           coordAligned(:)     = .true.
           coordEqualSpaced(:) = .false.
@@ -2554,8 +2554,8 @@
           coordSystem         = ESMF_CoordSystem_Cartesian
           coordNames(1)       = 'x'
           coordNames(2)       = 'y'
-          coordKind(1)        = ESMF_CoordKind_X
-          coordKind(2)        = ESMF_CoordKind_Y
+          coordType(1)        = ESMF_CoordType_X
+          coordType(2)        = ESMF_CoordType_Y
           coordUnits(:)       = ''
           coordAligned(:)     = .true.
           coordEqualSpaced(:) = .false.
@@ -2572,7 +2572,7 @@
                                      coordSystem, rc=status)
 
       do i = 1,dimCount
-        tempCoord = ESMF_PhysCoordCreate(coordKind(i), coordNames(i), &
+        tempCoord = ESMF_PhysCoordCreate(coordType(i), coordNames(i), &
                                          coordUnits(i), &
                                          coordAligned(i), coordEqualSpaced(i), &
                                          coordCyclic(i), localMin(i), &
@@ -2689,7 +2689,7 @@
       integer, dimension(:), allocatable :: cellType
       real(ESMF_KIND_R8) :: localMinCoord, localMaxCoord
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse
-      type(ESMF_CoordKind) :: coordKind
+      type(ESMF_CoordType) :: coordType
       type(ESMF_DELayout) :: layout
       type(ESMF_PhysCoord) :: tempCoord
       type(ESMF_Grid) :: gridp
@@ -2772,7 +2772,7 @@
         ! ESMF_CoordSystem_Depth
         coordSystem      = ESMF_CoordSystem_Depth
         coordName        = 'depth'
-        coordKind        = ESMF_CoordKind_Depth
+        coordType        = ESMF_CoordType_Depth
         coordUnit        = ''
         coordAligned     = .true.
         coordEqualSpaced = .true.
@@ -2782,7 +2782,7 @@
         ! ESMF_CoordSystem_Height
         coordSystem      = ESMF_CoordSystem_Height
         coordName        = 'height'
-        coordKind        = ESMF_CoordKind_Height
+        coordType        = ESMF_CoordType_Height
         coordUnit        = ''
         coordAligned     = .true.
         coordEqualSpaced = .true.
@@ -2797,7 +2797,7 @@
       physGrid = ESMF_PhysGridCreate(1, relloc, physGridName, coordSystem, &
                                      rc=status)
 
-      tempCoord = ESMF_PhysCoordCreate(coordKind, name=coordName, &
+      tempCoord = ESMF_PhysCoordCreate(coordType, name=coordName, &
                                        units=coordUnit, &
                                        aligned=coordAligned, &
                                        equalSpaced=coordEqualSpaced, &
