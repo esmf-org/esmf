@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.14 2002/05/12 00:58:43 tcraig Exp $
+% $Id: DistGrid_req.tex,v 1.15 2002/05/13 16:54:08 pwjones Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -61,7 +61,7 @@ ESMF permits 2D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL \\
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
 \item[Status]
 \item[Verification]
 \item[Notes] should NOT be treated as a special case of 3D!
@@ -83,6 +83,7 @@ etc).
   The decomposition is blockwise in X-Y for physics and blockwise in 
   Y-Z for dynamics.  \\
   CCSM-CPL: (XY) \\
+  POP (XY), CICE (XY)
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -95,7 +96,7 @@ distributed along a single axis of distribution.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL \\
+\item[Source] CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL, POP \\
 \item[Status]
 \item[Verification]
 \item[Notes] i.e given a 2D decompsition in \texttt{(i,j)}, it must be
@@ -125,7 +126,7 @@ each point in the domain to one PE for computation.
 \begin{reqlist}
 \item[Priority] 
 \item[Source] Requirements for specific flags to control the
-  decomposition must be added here. CAM-EUL, CLM, CCSM-CPL 
+  decomposition must be added here. CAM-EUL, CLM, CCSM-CPL, POP, CICE 
 \item[Status]
 \item[Verification]
 \item[Notes] in multi-threaded applications, the PE assignment is done
@@ -154,7 +155,7 @@ extents.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL 
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE 
 \item[Status]
 \item[Verification]
 \item[Notes] WS:  there will there be a fairly wide spectrum 
@@ -174,7 +175,7 @@ domains are assigned to no PE.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] 
+\item[Source] POP, CICE 
 \item[Status]
 \item[Verification]
 \item[Notes] possibly useful in an ocean model when a decomposition
@@ -193,7 +194,7 @@ synchronization of computational domains across a distributed grid.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -214,7 +215,7 @@ specify this as input information for grid topology generation.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] it is natural to treat this as a \textbf{DistGrid}
@@ -234,7 +235,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -247,7 +248,7 @@ computational domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -260,7 +261,7 @@ decomposition of all the computational domains in the \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority] 
-\item[Source] CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -273,7 +274,7 @@ domains associated with each PE of a  \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority] 
-\item[Source] CCSM-CPL
+\item[Source] CCSM-CPL, POP
 \item[Status]
 \item[Verification]
 \item[Notes] Besides being able to retrieve one's own domain
@@ -290,7 +291,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -303,7 +304,7 @@ data domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -316,7 +317,7 @@ decomposition of all the data domains in the \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CCSM-CPL
+\item[Source] CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -330,7 +331,7 @@ globally-conformant indices.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] 
+\item[Source] POP, CICE 
 \item[Status]
 \item[Verification]
 \item[Notes] It is possible (using array lower bound specifications)
@@ -348,7 +349,7 @@ domains associated with each PE of a  \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CCSM-CPL
+\item[Source] CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] Besides being able to retrieve one's own domain
@@ -365,7 +366,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CCSM-CPL
+\item[Source] CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] CAM-FV: the size of the global domain is known
@@ -379,7 +380,7 @@ domain domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CCSM-CPL
+\item[Source] CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] CAM-FV: the size of the global domain begin and end
@@ -413,7 +414,7 @@ distributed grid.
 
 \begin{reqlist}
 \item[Priority] 
-\item[Source] CCSM-CPL
+\item[Source] CCSM-CPL, POP
 \item[Status]
 \item[Verification]
 \item[Notes] WS: which PE is it on and (optionally?) what 
@@ -445,7 +446,7 @@ global domain.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -465,12 +466,19 @@ global domain are identically decomposed.
 \item[Notes]
 \end{reqlist}
 
-
 \sreq{Equality of PE assignment}
 
 It shall be possible to state if two distributed grids with identical
 domain decompositions assign their computational domains to the
 identical sequence of PEs.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source] CCSM-CPL, POP, CICE
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \req{Halo update} \label{DG:halo}
 
@@ -495,7 +503,7 @@ data transfer is complete when the call returns.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] doesn't necessarily need separate call, same as unblocked
@@ -522,7 +530,7 @@ ESMF shall provide methods to declare halo points valid or invalid
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] 
+\item[Source] POP (desired), CICE (desired) 
 \item[Status]
 \item[Verification]
 \item[Notes] This feature can be used to detect when to perform a halo
@@ -576,7 +584,7 @@ data transfer is complete when the call returns.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] doesn't necessarily need separate call, same as unblocked
@@ -643,7 +651,7 @@ either axis.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), POP
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -682,7 +690,7 @@ distribution for aggregate data transfer.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] Note that all arrays in a bundle must share the same
@@ -704,7 +712,7 @@ a distributed grid.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -717,7 +725,7 @@ to a bundle.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, POP
 \item[Status]
 \item[Verification]
 \item[Notes] Mix-and-match data types allowed? Could be tricky... if
@@ -758,7 +766,7 @@ integer array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -772,7 +780,7 @@ floating-point or complex array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -786,7 +794,7 @@ omits an arbitrary list of array locations from the sum.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source]
+\item[Source] POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes] Not the same mask as in Req.~\ref{DG:masklayout}.
@@ -799,7 +807,7 @@ floating-point or complex array along either axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV (2D decomposition), NSIPP, CAM-EUL, CLM, CCSM-CPL, POP
 \item[Status]
 \item[Verification]
 \item[Notes] required for computing zonal means.
@@ -902,7 +910,7 @@ distributed integer or FP array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -916,7 +924,7 @@ retrievable.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -930,7 +938,7 @@ distributed integer or FP array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -944,7 +952,7 @@ retrievable.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL
+\item[Source] CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -985,6 +993,14 @@ ESMF will support a \bgrid stencil: where the vector component array
 locations $u_{ij}$ and $v_{ij}$ are located at the NE cell corner
 $(i+\frac12,j+\frac12)$. Both NE and SW flavors are supported.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] POP, CICE
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{\cgrid}
 
 ESMF will support a \cgrid stencil: where the vector component array
@@ -994,7 +1010,7 @@ flavors are supported.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, POP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -1030,7 +1046,23 @@ also some points on the vector stencil may be redundant.
 
 (figure)
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] POP, CICE
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{Vector component reversal}
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] POP, CICE
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \sreq{Redundancy enforcement}
 
@@ -1039,11 +1071,27 @@ for a single physical location. While these points are redundant, the
 data there may diverge because of FP roundoff error. ESMF will provide
 methods to enforce exact redundancy.
 
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] POP, CICE
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
+
 \sreq{Validity of grid}
 
 It must be possible to check if the grid and fold are conformant:
 for instance, a southern fold with a \bgrid~ stencil needs an extra
 vector row at the southern edge.
+
+\begin{reqlist}
+\item[Priority] 1
+\item[Source] POP, CICE
+\item[Status]
+\item[Verification]
+\item[Notes]
+\end{reqlist}
 
 \req{Cubed-sphere grid}
 
@@ -1115,10 +1163,12 @@ discussions on these grids.
 
 \begin{reqlist}
 \item[Priority] 3
-\item[Source] FV
+\item[Source] FV, POP, CICE
 \item[Status]
 \item[Verification]
-\item[Notes] Envisioned for FV, but not a milestone.
+\item[Notes] Envisioned for FV, but not a milestone.  POP, CICE
+             currently funded to do this under CSU SciDAC effort
+             but ESMF involvement will occur in future.
 \end{reqlist}
 
 \req{Reduced grids}
