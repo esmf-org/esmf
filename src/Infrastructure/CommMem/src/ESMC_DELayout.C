@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.24 2003/04/14 21:44:50 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.25 2003/04/14 21:59:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.24 2003/04/14 21:44:50 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.25 2003/04/14 21:59:44 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -588,7 +588,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 //
 // !ARGUMENTS:
       int *delist,                // in - array of DE indices
-      int ndim,                   // in - number of dimensions
+      int indim,                  // in - number of dimensions
       int *lengths,               // in - number of DEs in each dimension
       ESMC_CommType *commtypes) { // in - array of communication types
 //
@@ -616,7 +616,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 
   // do some error checks
   userwants = 1;
-  for(i=0; i<ndim; i++)  
+  for(i=0; i<indim; i++)  
     userwants *= lengths[i];
    
   if (userwants > nDEs) {
@@ -631,12 +631,12 @@ cout << "ESMC_DELayoutDestroy() successful\n";
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
 
   nDEs = 1;
-  for (i=0; i<ndim; i++) {
+  for (i=0; i<indim; i++) {
       this->length[i] = lengths[i];
       this->commType[i] = commtypes[i];
       nDEs *= lengths[i];
   }
-  for (i=ndim; i<ESMF_MAXDECOMPDIM; i++) {
+  for (i=indim; i<ESMF_MAXDECOMPDIM; i++) {
       this->length[i] = 1;
       this->commType[i] = ESMC_COMMTYPE_SHR;
   }
@@ -651,7 +651,7 @@ cout << "ESMC_DELayoutDestroy() successful\n";
   // construct 3D array of ESMC_DE's
   //
 
-  this->ndim=ndim;
+  this->ndim=indim;
   nx=length[0];
   ny=length[1];
   nz=length[2];
@@ -968,8 +968,6 @@ cout << "ESMC_DELayoutDestroy() successful\n";
 //      involved in this layout.
 //
 //EOPI
-
-  int nDEs;
 
   comm.ESMC_CommGetNumDEs(&nDEs);
 
@@ -1442,8 +1440,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    int error return code
 //
 // !ARGUMENTS:
-      int childdeid,          // in - DE ID in child layout
-      ESMC_DELayout *parent,  // in - Parent layout which child was created from
+      int childdeid,           // in - DE ID in child layout
+      ESMC_DELayout *inparent, // in - Parent which child was created from
       int *parentdeid) const { // out - DE ID in parent layout
 //
 // !DESCRIPTION:
@@ -1454,7 +1452,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  
 
-  return this->ESMC_DELayoutGetSameDEID(childdeid, parent, parentdeid);
+  return this->ESMC_DELayoutGetSameDEID(childdeid, inparent, parentdeid);
 
  } // end ESMC_DELayoutGetParentDEID
 
