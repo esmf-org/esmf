@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.13 2003/03/18 18:00:14 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.14 2003/03/21 18:51:32 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.13 2003/03/18 18:00:14 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.14 2003/03/21 18:51:32 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -239,6 +239,12 @@
             this->num[0] = xpacket1->num[0]-i1;
           else
             this->num[0] = xpacket2->num[0]-i2;
+          // for now, just check here for a real intersection
+          if (this->left > this->right) {
+            this->left = 0;
+            this->right = 0;
+            this->num[0] = 0;
+          }
         }
       break;
       case 3:
