@@ -1,11 +1,4 @@
-# $Id: common_variables,v 1.23 2003/04/07 16:39:18 flanigan Exp $ 
-#
-# LDIR (defined from $ESMF_DIR) determines the libraries that are linked.
-# PDIR (defined from $ESMF_DIR) determines where the libraries are built.
-# LDIR and PDIR will usually be identical.
-#
-#    If you change PDIR in your makefile you MUST put it after the
-#    include line
+# $Id: common_variables,v 1.24 2003/04/07 21:36:46 flanigan Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -23,20 +16,21 @@
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #
 
-ESMF_BUILD	= ${ESMF_TOP_DIR}
-LDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
-ESMC_MODDIR     = ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
-ESMF_INCDIR     = $(ESMF_TOP_DIR)/src/include
+ESMF_BUILD	= $(ESMF_TOP_DIR)
 
 
-ESMF_LDIR     = ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
-ESMF_MDIR     = ${ESMF_TOP_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
-ESMF_IDIR     = $(ESMF_TOP_DIR)/src/include
+LDIR		= $(ESMF_BUILD)/lib/lib$(BOPT)/$(ESMF_ARCH)
+ESMC_MODDIR     = $(ESMF_BUILD)/mod/mod$(BOPT)/$(ESMF_ARCH)
+#ESMF_INCDIR     = $(ESMF_BUILD)/src/include
+
+ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(BOPT)/$(ESMF_ARCH)
+ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${BOPT}/$(ESMF_ARCH)
+ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
 ESMC_OBJDIR	= ${ESMC_MODDIR}
-ESMC_TESTDIR	= ${ESMF_TOP_DIR}/test/test${BOPT}/${ESMF_ARCH}
+ESMC_TESTDIR	= $(ESMF_BUILD)/test/test${BOPT}/${ESMF_ARCH}
 ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD_DIR)/doc
 
@@ -47,8 +41,8 @@ F_PROTEX        = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_fpr
 
 DO_LATEX	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_latex
 DO_L2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
-PDIR		= ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
-LIBNAME		= ${PDIR}/${LIBBASE}.a
+
+LIBNAME		= $(ESMF_LIBDIR)/${LIBBASE}.a
 SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
 
@@ -56,7 +50,8 @@ DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts//test_scripts/do_ut_results
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
-		  -I${ESMF_TOP_DIR}/src/include \
+		  -I$(ESMF_BUILD)/src/include \
+		  -I$(ESMF_TOP_DIR)/src/include \
 		  -I/usr/local/include \
 		  -I${ESMF_BUILD_DIR}/${ESMF_ARCH} \
 		  -I${ESMF_TOP_DIR}/include \

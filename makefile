@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2003/04/04 22:42:14 flanigan Exp $
+# $Id: makefile,v 1.22 2003/04/07 21:36:44 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -25,10 +25,6 @@ include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
 
 CLEANDIRS = $(LDIR) $(ESMC_MODDIR) doc
 CLOBBERDIRS = lib mod test 
-
-
-build_libs:
-	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
 
 
 #-------------------------------------------------------------------------------
@@ -114,7 +110,7 @@ build_c:
 	-@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=libfast tree 
 	-@cd ${ESMF_TOP_DIR}/interface/F; \
 	${OMAKE} BOPT=${BOPT} ESMF_DIR=${ESMF_TOP_DIR} ESMF_ARCH=${ESMF_ARCH} 
-	${RANLIB} ${PDIR}/*.a
+	${RANLIB} $(ESMF_LIBDIR)/*.a
 	-@echo "Completed building libraries"
 	-@echo "========================================="
 
@@ -130,7 +126,7 @@ build_fortran:
 	-@cd interface/F90; \
 	  ${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} libf clean 
 	-@mv ${ESMF_TOP_DIR}/interface/F90/*.mod ${ESMC_MODDIR}
-	${RANLIB} ${PDIR}/*.a
+	${RANLIB} $(ESMF_LIBDIR)/*.a
 	-@echo "Completed compiling Fortran source"
 	-@echo "========================================="
 
@@ -184,11 +180,11 @@ test_f90: info chkopts chkdir_tests
 
 # Ranlib on the libraries
 ranlib:
-	${RANLIB} ${PDIR}/*.a
+	${RANLIB} $(ESMF_LIBDIR)/*.a
 
 # Deletes ESMF libraries
 deletelibs: chkopts_basic
-	-${RM} -f ${PDIR}/*
+	-${RM} -f $(ESMF_LIBDIR)/*
 
 # ------------------------------------------------------------------
 # All remaining actions are intended for ESMF developers only.
@@ -205,8 +201,8 @@ SCRIPTS    =
 
 install:
 	-@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
-	cp ${PDIR}/libesmf.a ${ESMF_LIB_INSTALL} ; \
-	cp ${PDIR}/libmpiuni.a ${ESMF_LIB_INSTALL} ; \
+	cp $(ESMF_LIBDIR)/libesmf.a ${ESMF_LIB_INSTALL} ; \
+	cp $(ESMF_LIBDIR)/libmpiuni.a ${ESMF_LIB_INSTALL} ; \
 	fi
 	-if [ "${ESMF_MOD_INSTALL}" != "" ] ; then \
 	cp ${ESMC_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \

@@ -1,4 +1,4 @@
-# $Id: common,v 1.32 2003/04/07 17:18:13 svasquez Exp $ 
+# $Id: common,v 1.33 2003/04/07 21:36:45 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -9,8 +9,8 @@ chk_dir:
 	  echo "You must use the make variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
 	  echo "For example, use: make BOPT=g ex1"; \
           echo "Remove all .o files and rerun make with appropriate BOPT"; false; fi
-	-@if [ ! -d ${PDIR} ]; then \
-	  echo Making directory ${PDIR} for library; mkdir -p ${PDIR} ; fi
+	-@if [ ! -d $(ESMF_LIBDIR) ]; then \
+	  echo Making directory $(ESMF_LIBDIR) for library; mkdir -p $(ESMF_LIBDIR) ; fi
 	-@if [ ! -d ${ESMC_MODDIR} ]; then \
 	  echo Making directory ${ESMC_MODDIR} for *.mod files; mkdir -p ${ESMC_MODDIR} ; fi
 
@@ -21,6 +21,11 @@ chkdir_doc:
 chkdir_tests:
 	-@if [ ! -d ${ESMC_TESTDIR} ]; then \
 	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
+
+chkdir_include:
+	-@if [ ! -d $(ESMF_BUILD)/src/include ]; then \
+	  echo Making directory $(ESMF_BUILD)/src/include for test output; mkdir -p $(ESMF_BUILD)/src/include ; fi
+
 
 
 #-------------------------------------------------------------------------------
@@ -41,12 +46,17 @@ VPATH = ${ESMF_TOP_DIR}/${LOCDIR}:${ESMF_TOP_DIR}/include
 libc:${LIBNAME}(${OBJSC})
 libf:${LIBNAME}(${OBJSF})
 
-storeh:
+storeh: chkdir_include
 	for hfile in ${STOREH} foo ; do \
 	  if [ $$hfile != "foo" ]; then \
-	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile ${ESMF_TOP_DIR}/src/include ; \
+	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile $(ESMF_BUILD)/src/include ; \
 	  fi ; \
 	done
+
+
+# Builds library.
+build_libs: chk_dir
+	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
 
 # Builds library
 vpathlib:
@@ -54,13 +64,13 @@ vpathlib:
 
 # Builds library
 lib:: chk_dir ${SOURCE}
-	@if [ "${STOREH}" != "" ] ; then \
-	   ${OMAKE} -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} storeh; fi
-	@if [ "${SOURCEC}" != "" ] ; then \
-	   ${OMAKE} -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libc; fi
-	@if [ "${SOURCEF}" != "" ] ; then \
-		${OMAKE} -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libf; fi
-	@if [ "${OBJS}" != " " ] ; then \
+	if [ "${STOREH}" != "" ] ; then \
+	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} storeh; fi
+	if [ "${SOURCEC}" != "" ] ; then \
+	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libc; fi
+	if [ "${SOURCEF}" != "" ] ; then \
+		$(MAKE) -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libf; fi
+	if [ "${OBJS}" != " " ] ; then \
 		${RANLIB}  ${LIBNAME}; \
 		${RM} -f ${OBJS}; \
 	fi

@@ -1,4 +1,4 @@
-# $Id: common_O,v 1.7 2002/09/18 20:50:27 jwolfe Exp $ 
+# $Id: common_O,v 1.8 2003/04/07 21:36:45 flanigan Exp $ 
 
 CC	       = ${C_CC}
 CXX            = ${CXX_CC}
@@ -11,10 +11,10 @@ F90CXXLD       = ${C_F90CXXLD}
 FLINKER	       = ${C_FLINKER} 
 
 # C++ <=> F90 
-F90CXXLD       = ${C_F90CXXLD} -L${PDIR}
+F90CXXLD       = ${C_F90CXXLD} -L$(ESMF_LIBDIR)
 F90CXXLIBS     = ${C_F90CXXLIBS}
 
-CXXF90LD       = ${C_CXXF90LD} -L${PDIR}
+CXXF90LD       = ${C_CXXF90LD} -L$(ESMF_LIBDIR)
 CXXF90LIBS     = ${C_CXXF90LIBS}
 CXXSO          = ${C_CXXSO}
 CXXSOLIBS      = ${C_CXXSOLIBS}
