@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.10 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_Fraction.F90,v 1.11 2004/12/17 22:35:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,7 +54,8 @@
       type ESMF_Fraction
       sequence
       private
-        integer :: numerator    ! Integer fraction (exact) n/d; numerator
+        integer :: whole        ! Integer (whole) seconds (signed)
+        integer :: numerator    ! Integer fraction (exact) n/d; numerator (signed)
         integer :: denominator  ! Integer fraction (exact) n/d; denominator
       end type
 !
@@ -72,7 +73,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Fraction.F90,v 1.10 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_Fraction.F90,v 1.11 2004/12/17 22:35:44 eschwab Exp $'
 
 !==============================================================================
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.78 2004/11/24 22:44:01 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.79 2004/12/17 22:35:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.78 2004/11/24 22:44:01 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.79 2004/12/17 22:35:45 eschwab Exp $'
 
 !==============================================================================
 !
@@ -492,8 +492,8 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ms_r8
       real(ESMF_KIND_R8),      intent(out), optional :: us_r8
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8
-      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented 
-      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       integer,                 intent(out), optional :: timeZone
@@ -516,7 +516,7 @@
 !     values are converted internally from integers.  For example, if a time
 !     value is 5 and 3/8 seconds (s=5, sN=3, sD=8), and you want to get it as
 !     floating point seconds, you would get 5.375 (s\_r8=5.375).
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time is defined to be 2:00 am on a particular date, then
@@ -553,7 +553,7 @@
 !     For dayOfYear\_r8, gets the day of the year the given {\tt ESMF\_Time}
 !     instant falls on.  See range discusion in argument list below.
 !     Return as floating point value; fractional part represents the time of
-!     day.  (Fractions and reals not implemented yet).
+!     day.  (Reals not implemented yet).
 !
 !     For dayOfYear\_intvl, gets the day of the year the given {\tt ESMF\_Time}
 !     instant falls on.  Return as an {\tt ESMF\_TimeInterval}.
@@ -843,9 +843,9 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: m
       integer(ESMF_KIND_I4),   intent(in),  optional :: s
       integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns
       real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
@@ -853,8 +853,8 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       type(ESMF_Calendar),     intent(in),  optional :: calendar
       type(ESMF_CalendarType), intent(in),  optional :: calendarType
       integer,                 intent(in),  optional :: timeZone ! not implemented
@@ -900,7 +900,7 @@
 !     The smallest resolution will be nanoseconds (denominator), as per Time
 !     Manager requirement TMG3.1.  Anything smaller will be truncated.  For
 !     example, pi would be represented as s=3, sN=141592654, sD=1000000000.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.69 2004/11/24 22:44:02 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.70 2004/12/17 22:35:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.69 2004/11/24 22:44:02 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.70 2004/12/17 22:35:46 eschwab Exp $'
 
 !==============================================================================
 !
@@ -967,9 +967,9 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: m
       integer(ESMF_KIND_I4),   intent(out), optional :: s
       integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms
+      integer(ESMF_KIND_I4),   intent(out), optional :: us
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns
       real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
@@ -977,8 +977,8 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
@@ -993,7 +993,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally from integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time interval is defined to be one day, then
@@ -1160,9 +1160,9 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: m
       integer(ESMF_KIND_I4),   intent(out), optional :: s
       integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms
+      integer(ESMF_KIND_I4),   intent(out), optional :: us
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns
       real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
@@ -1170,8 +1170,8 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
@@ -1187,7 +1187,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally from integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time interval is defined to be one day, then
@@ -1361,9 +1361,9 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: m
       integer(ESMF_KIND_I4),   intent(out), optional :: s
       integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms
+      integer(ESMF_KIND_I4),   intent(out), optional :: us
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns
       real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
@@ -1371,8 +1371,8 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
@@ -1388,7 +1388,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally from integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time interval is defined to be one day, then
@@ -1564,9 +1564,9 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: m
       integer(ESMF_KIND_I4),   intent(out), optional :: s
       integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms
+      integer(ESMF_KIND_I4),   intent(out), optional :: us
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns
       real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
@@ -1574,8 +1574,8 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
@@ -1591,7 +1591,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally from integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time interval is defined to be one day, then
@@ -1884,9 +1884,9 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: m
       integer(ESMF_KIND_I4),   intent(in),  optional :: s
       integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns
       real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
@@ -1894,8 +1894,8 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1905,7 +1905,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally to integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Ranges are limited only by machine word size.  Numeric defaults are 0,
 !     except for sD, which is 1.
@@ -2006,9 +2006,9 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: m
       integer(ESMF_KIND_I4),   intent(in),  optional :: s
       integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns
       real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
@@ -2016,8 +2016,8 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       type(ESMF_Time),         intent(in)            :: startTime
       integer,                 intent(out), optional :: rc
 
@@ -2028,7 +2028,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally to integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Ranges are limited only by machine word size.  Numeric defaults are 0,
 !     except for sD, which is 1.
@@ -2135,9 +2135,9 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: m
       integer(ESMF_KIND_I4),   intent(in),  optional :: s
       integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns
       real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
@@ -2145,8 +2145,8 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       type(ESMF_Calendar),     intent(in)            :: calendar
       integer,                 intent(out), optional :: rc
 
@@ -2157,7 +2157,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally to integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Ranges are limited only by machine word size.  Numeric defaults are 0,
 !     except for sD, which is 1.
@@ -2269,9 +2269,9 @@
       integer(ESMF_KIND_I4),   intent(in),  optional :: m
       integer(ESMF_KIND_I4),   intent(in),  optional :: s
       integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns
       real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
@@ -2279,8 +2279,8 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD
       type(ESMF_CalendarType), intent(in)            :: calendarType
       integer,                 intent(out), optional :: rc
 
@@ -2291,7 +2291,7 @@
 !     The ESMF Time Manager represents and manipulates time internally with
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally to integers.
-!     (Fractions and reals not implemented yet).
+!     (Reals not implemented yet).
 !
 !     Ranges are limited only by machine word size.  Numeric defaults are 0,
 !     except for sD, which is 1.
