@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.8 2003/11/06 16:41:39 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.9 2004/01/20 23:10:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,6 +40,7 @@
       use ESMF_DataMapMod
       use ESMF_DELayoutMod
       use ESMF_GridMod
+      use ESMF_GridTypesMod
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
       use ESMF_RouteMod
