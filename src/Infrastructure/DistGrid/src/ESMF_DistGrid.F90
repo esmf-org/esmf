@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.3 2002/11/01 18:40:49 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.4 2002/11/03 19:43:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,29 +51,29 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_Base    ! ESMF base class
+!      use ESMF_Base    ! ESMF base class
 !     use ESMF_XXXMod  < if needed >
       implicit none
 !
 ! !PRIVATE TYPES:
       private
 
-      type ESMF_DistGridConfig
-      private
-      sequence
+!      type ESMF_DistGridConfig
+!      private
+!      sequence
 !       < insert resource items here >
-      end type
+!      end type
 
       type ESMF_DistGrid
       private
       sequence
-        type (ESMF_Base) :: base
+!        type (ESMF_Base) :: base
         integer :: basestate
 !       < insert other class members here >
       end type
 
 ! !PUBLIC TYPES:
-      public ESMF_DistGridConfig
+!      public ESMF_DistGridConfig
       public ESMF_DistGrid
 
 
@@ -96,8 +96,8 @@
 
     public ESMF_DistGridGetconfig
     public ESMF_DistGridSetconfig
-    public ESMF_DistGridGet<Value>
-    public ESMF_DistGridSet<Value>
+    public ESMF_DistGridGet
+    public ESMF_DistGridSet
  
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
@@ -111,7 +111,8 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_DistGrid.F90,v 1.3 2002/11/01 18:40:49 jwolfe Exp $
+      character(*), parameter, private :: &
+      version = '$Id: ESMF_DistGrid.F90,v 1.4 2002/11/03 19:43:00 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
@@ -129,8 +130,6 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridCreateNew
-         module procedure ESMF_DistGridCreateCopy
-         module procedure ESMF_DistGridCreateRemap
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -305,7 +304,7 @@
 !      via interface blocks.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -321,7 +320,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), intent(in) :: distgrid
-      type(ESMF_DistGridConfig), intent(out) :: config    ! resources
+      integer, intent(out) :: config    ! resources
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -329,7 +328,7 @@
 !     Returns the set of resources the DistGrid object was configured with.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -345,7 +344,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), intent(in) :: distgrid
-      type(ESMF_DistGridConfig), intent(in) :: config    ! resources
+      integer, intent(in) :: config    ! resources
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -353,7 +352,7 @@
 !     Configures the DistGrid object with set of resources given.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -362,14 +361,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DistGridGet<Value> - get <Value> for a DistGrid
+! !IROUTINE: ESMF_DistGridGet - get <Value> for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGet<Value>(distgrid, value, rc)
+      subroutine ESMF_DistGridGet(distgrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), intent(in) :: distgrid
-      <value type>, intent(out) :: value
+      integer, intent(out) :: value
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -383,18 +382,18 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_DistGridGet<Value>
+      end subroutine ESMF_DistGridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DistGridSet<Value> - set <Value> for a DistGrid
+! !IROUTINE: ESMF_DistGridSet - set <Value> for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSet<Value>(distgrid, value, rc)
+      subroutine ESMF_DistGridSet(distgrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), intent(in) :: distgrid
-      <value type>, intent(in) :: value
+      integer, intent(in) :: value
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -408,18 +407,18 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_DistGridSet<Value>
+      end subroutine ESMF_DistGridSet
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_DistGridValidate - internal consistency check for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridValidate(distgrid, options, rc)
+      subroutine ESMF_DistGridValidate(distgrid, opt, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), intent(in) :: distgrid        ! distgrid to be checked
-      character (len=*), intent(in) :: options         ! validate options
+      character (len=*), intent(in) :: opt         ! validate options
       integer, intent(out), optional :: rc             ! return code
 !
 ! !DESCRIPTION:
@@ -433,7 +432,7 @@
 !
 !  code goes here
 !
-      end function ESMF_DistGridValidate
+      end subroutine ESMF_DistGridValidate
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.3 2002/11/01 19:54:26 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.4 2002/11/03 19:43:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,31 +40,30 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_Base    ! ESMF base class
+!     use ESMF_Base    ! ESMF base class
 !     use ESMF_XXXMod  < if needed >
       implicit none
 !
 ! !PRIVATE TYPES:
       private
 
-      type ESMF_PhysGridConfig
-      private
-      sequence
+!      type ESMF_PhysGridConfig
+!      private
+!      sequence
 !       < insert resource items here >
-      end type
+!      end type
 
       type ESMF_PhysGrid
       private
       sequence
-        type (ESMF_Base) :: base
-        integer :: basestate
+!        type (ESMF_Base) :: base
+         integer :: basestate
 !       < insert other class members here >
       end type
 
 ! !PUBLIC TYPES:
-      public ESMF_PhysGridConfig
+!      public ESMF_PhysGridConfig
       public ESMF_PhysGrid
-
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -83,10 +82,10 @@
 ! the following routine applies to a shallow class
     public ESMF_PhysGridInit                   ! (shallow class)
 
-    public ESMF_PhysGridGetconfig
-    public ESMF_PhysGridSetconfig
-    public ESMF_PhysGridGet<Value>
-    public ESMF_PhysGridSet<Value>
+    public ESMF_PhysGridGetConfig
+    public ESMF_PhysGridSetConfig
+    public ESMF_PhysGridGet
+    public ESMF_PhysGridSet
  
     public ESMF_PhysGridValidate
     public ESMF_PhysGridPrint
@@ -100,15 +99,9 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_PhysGrid.F90,v 1.3 2002/11/01 19:54:26 jwolfe Exp $
+      character(*), parameter, private :: &
+      version = '$Id: ESMF_PhysGrid.F90,v 1.4 2002/11/03 19:43:00 cdeluca Exp $'
 !------------------------------------------------------------------------------
-
-! interface blocks for functions which are going to have a single
-! name for ease-of-use, but internally will be implemented as separate
-! subprograms.  the non-optional parts of the argument lists must be 
-! distinguishable for this to work.  the following example is appropriate
-! for deep classes; shallow objects will only have init routines and
-! no creates.
 !
 !BOP
 ! !IROUTINE: ESMF_PhysGridCreate - Generic interface to create a new PhysGrid object
@@ -118,8 +111,8 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PhysGridCreateNew
-         module procedure ESMF_PhysGridCreateCopy
-         module procedure ESMF_PhysGridCreateRemap
+!         module procedure ESMF_PhysGridCreateCopy
+!         module procedure ESMF_PhysGridCreateRemap
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -249,9 +242,8 @@
       subroutine ESMF_PhysGridDestruct(physgrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid     ! PhysGrid to be dismantled
+      type(ESMF_PhysGrid), intent(in) :: physgrid   ! PhysGrid to be dismantled
       integer, intent(out), optional :: rc          ! return code
-
 !
 ! !DESCRIPTION:
 !      ESMF routine which deallocates any space allocated by
@@ -291,7 +283,7 @@
 !      via interface blocks.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -307,7 +299,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      type(ESMF_PhysGridConfig), intent(out) :: config    ! resources
+      integer, intent(out) :: config    ! resources
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -315,7 +307,7 @@
 !     Returns the set of resources the PhysGrid object was configured with.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -331,15 +323,15 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      type(ESMF_PhysGridConfig), intent(in) :: config    ! resources
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(in) :: config    ! resources
+      integer, intent(out), optional :: rc         
 
 !
 ! !DESCRIPTION:
 !     Configures the PhysGrid object with set of resources given.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -348,15 +340,15 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridGet<Value> - get <Value> for a PhysGrid
+! !IROUTINE: ESMF_PhysGridGet - get <Value> for a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGet<Value>(physgrid, value, rc)
+      subroutine ESMF_PhysGridGet(physgrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      <value type>, intent(out) :: value
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(out) :: value          ! change integer to value data type
+      integer, intent(out), optional :: rc   ! return code
 
 !
 ! !DESCRIPTION:
@@ -364,24 +356,24 @@
 !     Can be multiple routines, one per value
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
 !
-      end subroutine ESMF_PhysGridGet<Value>
+      end subroutine ESMF_PhysGridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridSet<Value> - set <Value> for a PhysGrid
+! !IROUTINE: ESMF_PhysGridSet - set <Value> for a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSet<Value>(physgrid, value, rc)
+      subroutine ESMF_PhysGridSet(physgrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      <value type>, intent(in) :: value
-      integer, intent(out), optional :: rc              ! return code
+      integer, intent(in) :: value         ! change integer to value data type
+      integer, intent(out), optional :: rc ! return code
 
 !
 ! !DESCRIPTION:
@@ -394,19 +386,19 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_PhysGridSet<Value>
+      end subroutine ESMF_PhysGridSet
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_PhysGridValidate - internal consistency check for a PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridValidate(physgrid, options, rc)
+      subroutine ESMF_PhysGridValidate(physgrid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid        ! physgrid to be checked
-      character (len=*), intent(in) :: options         ! validate options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_PhysGrid), intent(in) :: physgrid    ! physgrid to be checked
+      character (len=*), intent(in) :: opt           ! validate options
+      integer, intent(out), optional :: rc           ! return code
 !
 ! !DESCRIPTION:
 !      Validates that a PhysGrid is internally consistent.
@@ -419,7 +411,7 @@
 !
 !  code goes here
 !
-      end function ESMF_PhysGridValidate
+      end subroutine ESMF_PhysGridValidate
 
 
 !------------------------------------------------------------------------------
@@ -430,7 +422,7 @@
       subroutine ESMF_PhysGridPrint(physgrid, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysGrid), intent(in) :: physgrid        ! physgrid to be printed
+      type(ESMF_PhysGrid), intent(in) :: physgrid      ! physgrid to be printed
       character (len=*), intent(in) :: options         ! print options
       integer, intent(out), optional :: rc             ! return code
 !

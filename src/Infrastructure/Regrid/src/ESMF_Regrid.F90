@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.1 2002/11/01 19:59:58 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.2 2002/11/03 19:43:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,8 +10,6 @@
 !
 ! ESMF Regrid Module
 !
-! (all lines below between the !BOP and !EOP markers will be included in 
-!  the automated document processing.)
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -40,29 +38,29 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_Base    ! ESMF base class
+!      use ESMF_Base    ! ESMF base class
 !     use ESMF_XXXMod  < if needed >
       implicit none
 !
 ! !PRIVATE TYPES:
       private
 
-      type ESMF_RegridConfig
-      private
-      sequence
+!      type ESMF_RegridConfig
+!      private
+!      sequence
 !       < insert resource items here >
-      end type
+!      end type
 
       type ESMF_Regrid
       private
       sequence
-        type (ESMF_Base) :: base
+!        type (ESMF_Base) :: base
         integer :: basestate
 !       < insert other class members here >
       end type
 
 ! !PUBLIC TYPES:
-      public ESMF_RegridConfig
+!      public ESMF_RegridConfig
       public ESMF_Regrid
 
 
@@ -85,8 +83,8 @@
 
     public ESMF_RegridGetconfig
     public ESMF_RegridSetconfig
-    public ESMF_RegridGet<Value>
-    public ESMF_RegridSet<Value>
+    public ESMF_RegridGet
+    public ESMF_RegridSet
  
     public ESMF_RegridValidate
     public ESMF_RegridPrint
@@ -100,15 +98,9 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_Regrid.F90,v 1.1 2002/11/01 19:59:58 jwolfe Exp $
+      character(*), parameter, private :: &
+      version = '$Id: ESMF_Regrid.F90,v 1.2 2002/11/03 19:43:00 cdeluca Exp $'
 !------------------------------------------------------------------------------
-
-! interface blocks for functions which are going to have a single
-! name for ease-of-use, but internally will be implemented as separate
-! subprograms.  the non-optional parts of the argument lists must be 
-! distinguishable for this to work.  the following example is appropriate
-! for deep classes; shallow objects will only have init routines and
-! no creates.
 !
 !BOP
 ! !IROUTINE: ESMF_RegridCreate - Generic interface to create a new Regrid object
@@ -118,8 +110,6 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_RegridCreateNew
-         module procedure ESMF_RegridCreateCopy
-         module procedure ESMF_RegridCreateRemap
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -204,7 +194,7 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -234,7 +224,7 @@
 !      ESMF_RegridConstruct.  Define for deep classes only.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS: 
 
 !
 !  code goes here
@@ -243,7 +233,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridDestruct - release resources associated w/a Regrid
+! !IROUTINE: ESMF_RegridDestruct - Release resources associated with Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridDestruct(regrid, rc)
@@ -261,7 +251,7 @@
 !      ESMF_RegridDestruct.  Define for deep classes only.
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
+! !REQUIREMENTS
 
 !
 !  code goes here
@@ -270,7 +260,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridInit - initialize a Regrid object
+! !IROUTINE: ESMF_RegridInit - Initialize a Regrid object
 
 ! !INTERFACE:
       subroutine ESMF_RegridInit(regrid, arg1, arg2, arg3, rc)
@@ -300,14 +290,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridGetConfig - get configuration information from a Regrid
+! !IROUTINE: ESMF_RegridGetConfig - Get configuration information from a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridGetConfig(regrid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
-      type(ESMF_RegridConfig), intent(out) :: config    ! resources
+      integer, intent(out) :: config    ! resources
       integer, intent(out), optional :: rc               ! return code
 
 !
@@ -324,14 +314,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridSetConfig - set configuration information for a Regrid
+! !IROUTINE: ESMF_RegridSetConfig - Set configuration information for a Regrid
 
 ! !INTERFACE:
       subroutine ESMF_RegridSetConfig(regrid, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
-      type(ESMF_RegridConfig), intent(in) :: config    ! resources
+      integer, intent(in) :: config    ! resources
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -348,14 +338,14 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridGet<Value> - get <Value> for a Regrid
+! !IROUTINE: ESMF_RegridGet - get <Value> for a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridGet<Value>(regrid, value, rc)
+      subroutine ESMF_RegridGet(regrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
-      <value type>, intent(out) :: value
+      integer, intent(out) :: value
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -369,18 +359,18 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_RegridGet<Value>
+      end subroutine ESMF_RegridGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridSet<Value> - set <Value> for a Regrid
+! !IROUTINE: ESMF_RegridSet - set <Value> for a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridSet<Value>(regrid, value, rc)
+      subroutine ESMF_RegridSet(regrid, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Regrid), intent(in) :: regrid
-      <value type>, intent(in) :: value
+      integer, intent(in) :: value
       integer, intent(out), optional :: rc              ! return code
 
 !
@@ -389,12 +379,11 @@
 !     Can be multiple routines, one per value
 !
 !EOP
-! !REQUIREMENTS: developer's guide for classes
-
+! !REQUIREMENTS: 
 !
 !  code goes here
 !
-      end subroutine ESMF_RegridSet<Value>
+      end subroutine ESMF_RegridSet
 
 !------------------------------------------------------------------------------
 !BOP
@@ -419,8 +408,7 @@
 !
 !  code goes here
 !
-      end function ESMF_RegridValidate
-
+      end subroutine ESMF_RegridValidate
 
 !------------------------------------------------------------------------------
 !BOP
