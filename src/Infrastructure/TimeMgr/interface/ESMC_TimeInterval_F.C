@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.13 2003/04/28 23:14:51 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.14 2003/05/07 16:23:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,9 +78,9 @@ extern "C" {
            *timeIntervalAbsValue = (ptr)->ESMC_TimeIntervalAbsValue();
        }
 
-       void FTN(c_esmc_timeintervalnegabsval)(ESMC_TimeInterval *ptr,
-                                    ESMC_TimeInterval *timeIntervalNegAbsVal) {
-           *timeIntervalNegAbsVal = (ptr)->ESMC_TimeIntervalNegAbsVal();
+       void FTN(c_esmc_timeintervalnegabsvalue)(ESMC_TimeInterval *ptr,
+                                  ESMC_TimeInterval *timeIntervalNegAbsValue) {
+           *timeIntervalNegAbsValue = (ptr)->ESMC_TimeIntervalNegAbsValue();
        }
 
        void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeInterval1,
