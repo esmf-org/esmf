@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.3 2004/02/13 18:08:36 jwolfe Exp $
+! $Id: CouplerMod.F90,v 1.4 2004/03/04 18:11:39 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -22,6 +22,9 @@
     ! Public entry point 
     public Coupler_register
         
+    ! module global, not public
+    type(ESMF_RouteHandle), save :: rh_Flow_to_Inject, rh_Inject_to_Flow
+
     contains
 
 !-------------------------------------------------------------------------
@@ -63,9 +66,23 @@
 
       ! Local variables
       character (len=ESMF_MAXSTR) :: statename
+      type(ESMF_Field) :: srcfield, dstfield
+      type(ESMF_DELayout) :: cpllayout
 
       print *, "Coupler Init starting"
 
+      ! Extract a field from each of the import and export states and use 
+      ! them as template for precomputing the data transfer pattern needed
+      ! for redistribution during the run phase.
+
+      call ESMF_StateGetField(importstate, "SIE", srcfield, rc=rc)
+      call ESMF_StateGetField(exportstate, "SIE", dstfield, rc=rc)
+     
+      ! Get layout from coupler component
+      call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+
+      ! Now see which way we're going so we set the correct fields needed
+      ! and compute the right routehandle
       call ESMF_StateGetName(importstate, statename, rc)
       if (trim(statename) .eq. "FlowSolver Feedback") then
 
@@ -73,6 +90,10 @@
         call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+
+        ! Precompute and return a routehandle which identifies this operation
+        call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
+                                   rh_Flow_to_Inject, rc=rc)
 
       endif
 
@@ -82,6 +103,10 @@
         call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
         call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+
+        ! Precompute and return a routehandle which identifies this operation
+        call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
+                                   rh_Inject_to_Flow, rc=rc)
 
       endif
 
@@ -155,12 +180,19 @@
          endif
 
          !print *, "processing field ", trim(datanames(i)), " as needed"
-         call ESMF_StateGetData(importstate, datanames(i), srcfield, rc=status)
-         call ESMF_StateGetData(exportstate, datanames(i), dstfield, rc=status)
+         call ESMF_StateGetField(importstate, datanames(i), srcfield, rc=status)
+         call ESMF_StateGetField(exportstate, datanames(i), dstfield, rc=status)
 
          ! These are fields on different layouts - call Redist to rearrange
-         !  the data using the Comm routines.
-         call ESMF_FieldRedist(srcfield, dstfield, cpllayout, rc=status)
+         !  the data using the Comm routines.  The handle identifies which
+         !  precomputed pattern to use
+         if (injecttoflow)  then
+            call ESMF_FieldRedist(srcfield, dstfield, cpllayout, &
+                                  rh_Inject_to_Flow, rc=status)
+         else
+            call ESMF_FieldRedist(srcfield, dstfield, cpllayout, &
+                                  rh_Flow_to_Inject, rc=status)
+         endif
 
          ! TODO: why is this commented out?
          !call ESMF_FieldHalo(dstfield, rc) 
@@ -186,7 +218,9 @@
 
         print *, "Coupler Final starting"
   
-        ! Nothing to do here.
+        ! Release the Redist space in the framework
+        call ESMF_FieldRedistRelease(rh_Flow_to_Inject, rc)
+        call ESMF_FieldRedistRelease(rh_Inject_to_Flow, rc)
     
         print *, "Coupler Final returning"
 
