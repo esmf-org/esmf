@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.6 2003/02/13 23:06:46 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.7 2003/02/21 05:19:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,12 +52,6 @@
 // class ESMC_CommConfig;
  class ESMC_Comm;
 
-// TODO: ?? bring in from outside program (cmd args, cfg file, etc.)
-// num threads per proc
- #define ESMC_COMM_NTHREADS 1
-// num procs
- #define ESMC_COMM_NPROCS 2
-
  enum ESMC_Type_e {ESMC_INT=0, ESMC_LONG, ESMC_FLOAT, ESMC_DOUBLE};
  #define ESMC_COMM_TYPES 4
 
@@ -80,9 +74,7 @@
    private:
  //  < insert class members here >  corresponds to type ESMF_Comm members
  //                                 in F90 modules
-     int numDEs;          // number of DEs in communication group
      ESMC_DE *DE;         // this DE we're communicating on behalf of
-     int *threadCount;    // count threads in a barrier
 
      // ESMC-to-MPI type maps
      int ESMC_TypeToMPI[ESMC_COMM_TYPES];
@@ -91,24 +83,49 @@
      void *ESMC_Request; // linked list of requests
      void *ESMC_Status;  // linked list of statuses
 
-     // flag to prevent double finalization via destructor
-     static bool commFinal;
+     // shared memory variables: single instance visible to all threads in proc
 
+     static int numDEs;          // number of DEs in communication group
+
+     // DE type configuration TODO: get from config file ?
+     static int nThreadsPerProc;
+     static int nProcs;
+
+     // local inter-thread message buffer TODO: beginnings of memory mgmt ?
+     //                                         get from config file ?
+     static void *lbuf;
+     static int lbufSize;
+     static ESMC_Type_e lbufType;
+
+     // local inter-thread communication variables
      static pthread_mutex_t bufMutex;
+     static pthread_mutex_t finalMutex;
      static pthread_mutex_t initMutex;
      static pthread_cond_t initCV;
      static pthread_mutex_t barrierMutex;
      static pthread_cond_t barrierCV;
      static pthread_cond_t mainProcBarrierCV;
+     static int *threadCount;    // count threads in a barrier
      static int threadCountA;
      static int threadCountB;
      static bool lbufCleared;
+
+     // shared memory MPI rank of this node used by threads to calculate
+     // unique DE id
+     static int nodeRank;
+
+     // flag to prevent double finalization via destructor
+     static bool commFinal;
 
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
-    int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de);
+    int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de); // TODO: 
+                                        // supports Layout.comm.CommInit, F90
+    int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de, 
+                      int nthreadsperproc, int nprocs,
+                      int lbufsize, ESMC_Type_e lbuftype); // TODO: config file
     int ESMC_CommFinal(void);
 
  // optional configuration methods
@@ -118,6 +135,7 @@
  // accessor methods for class members
 //    int ESMC_CommGet<Value>(<value type> *value) const;
 //    int ESMC_CommSet<Value>(<value type>  value);
+    int ESMC_CommGetDEIDs(ESMC_DE *de) const;
     int ESMC_CommGetNumDEs(int *ndes) const;
     
  // required methods inherited and overridden from the ESMC_Base class
@@ -126,7 +144,9 @@
 
  // native C++ constructors/destructors
 	ESMC_Comm(void);
-	ESMC_Comm(int *argc, char **argv[], ESMC_DE *de);
+    ESMC_Comm(int *argc, char **argv[], ESMC_DE *de, 
+              int nthreadsperproc, int nprocs,
+              int lbufsize, ESMC_Type_e lbuftype);
 	~ESMC_Comm(void);
   
  // < declare the rest of the public interface methods here >

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.9 2003/02/18 15:04:33 nscollins Exp $
+// $Id: ESMC_Comm.C,v 1.10 2003/02/21 05:19:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,54 +33,93 @@
  // associated class definition file
  #include <ESMC_Comm.h>
 
-// shared memory buffers TODO:  bring into class as pointers ??
-
-// shared memory local buffer for intra-node pthreads communications
-int lbuf[ESMC_COMM_NTHREADS * 3];
-
-// shared memory global receive buffer for inter-node MPI communications
-int gbuf[ESMC_COMM_NPROCS * ESMC_COMM_NTHREADS * 3];
-
-// shared memory MPI rank of this node used by threads to calculate unique DE id
-int nodeRank=-1;
-
-// shared memory thread id array
-pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
-
-//extern int *lbuf;
-//extern int *gbuf;
-//extern int nodeRank;
-//extern pthread_t ESMC_Comm_tid[];
-
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.9 2003/02/18 15:04:33 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.10 2003/02/21 05:19:05 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
+
+pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with 
+                              //  application main(), which needs it before
+                              //  a ESMC_Comm is instantiated
+                             // TODO: defined here so F90 program main doesn't
+                             //   need to (yet) (avoids F90 unresolved link err)
+                             // main() allocates to nThreadsPerProc size,
+                             //   which must be same as that passed into Init()
+                             // TODO: validate size match ?
+                             // TODO: make class static? but would then need to
+                             // instantiate ESMC_Comm first thing in main()
+                             // how to do on F90 side ?
 
 // Initialize class statics
 
- // finalization flag
- bool ESMC_Comm::commFinal = false;
+ int ESMC_Comm::numDEs = 0;
 
+ // default minimal DE type configuration
+ int ESMC_Comm::nThreadsPerProc = 1;
+ int ESMC_Comm::nProcs = 2;
+
+ // initialize local inter-thread buffer TODO: beginnings of memory mgmt ?
+ void *ESMC_Comm::lbuf = 0;
+ int  ESMC_Comm::lbufSize = 4096;              // TODO:  from config file ?
+ ESMC_Type_e ESMC_Comm::lbufType = ESMC_INT;   // TODO: from config file ?
+
+ // initialize inter-thread comm variables
  pthread_mutex_t ESMC_Comm::bufMutex = PTHREAD_MUTEX_INITIALIZER;
+ pthread_mutex_t ESMC_Comm::finalMutex = PTHREAD_MUTEX_INITIALIZER;
  pthread_mutex_t ESMC_Comm::initMutex = PTHREAD_MUTEX_INITIALIZER;
  pthread_cond_t ESMC_Comm::initCV = PTHREAD_COND_INITIALIZER;
  pthread_mutex_t ESMC_Comm::barrierMutex = PTHREAD_MUTEX_INITIALIZER;
  pthread_cond_t ESMC_Comm::barrierCV = PTHREAD_COND_INITIALIZER;
  pthread_cond_t ESMC_Comm::mainProcBarrierCV = PTHREAD_COND_INITIALIZER;
+ int *ESMC_Comm::threadCount = &threadCountA;
  int ESMC_Comm::threadCountA = 0;
  int ESMC_Comm::threadCountB = 0;
  bool ESMC_Comm::lbufCleared = false;
 
+ // initialize node rank to unknown
+ int ESMC_Comm::nodeRank = -1;
+
+ // finalization flag
+ bool ESMC_Comm::commFinal = false;
+
+//
 // This section includes all the Comm routines
 //
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CommInit - initializes a Comm object with default values
 //
+// !INTERFACE:
+      int ESMC_Comm::ESMC_CommInit(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *argc,              // in - from main invocation
+      char **argv[],          // in - from main invocation
+      ESMC_DE *de) {          // in - DE we're communicating on behalf of
+//
+// !DESCRIPTION:
+//      ESMF routine which only initializes Comm values; it does not
+//      allocate any resources.  Define for shallow classes only.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  //  initialize with default configuration values TODO: ??
+  ESMC_CommInit(argc, argv, de, nThreadsPerProc, nProcs, lbufSize, lbufType);
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_CommInit
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -93,9 +132,13 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //    int error return code
 //
 // !ARGUMENTS:
-      int *argc,            // in - from main invocation
-      char **argv[],        // in - from main invocation
-      ESMC_DE *de) {        // in - DE we're communicating on behalf of
+      int *argc,              // in - from main invocation
+      char **argv[],          // in - from main invocation
+      ESMC_DE *de,            // in - DE we're communicating on behalf of
+      int nthreadsperproc,    // in - number of threads per process
+      int nprocs,             // in - number of processes
+      int lbufsize,           // in - number of local message buffer elements
+      ESMC_Type_e lbuftype) { // in - type of local message buffer elements
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes Comm values; it does not
@@ -107,12 +150,82 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
   // save DE pointer
   DE = de;
 
-  // TODO:  coordinate with other DEs to determine group size ??
-  numDEs = ESMC_COMM_NTHREADS * ESMC_COMM_NPROCS;
+  // initialize class statics TODO: use pthread_once() ??
+
+  pthread_mutex_lock(&initMutex);
+
+    nThreadsPerProc = nthreadsperproc;
+    nProcs = nprocs;
+    lbufSize = lbufsize;
+    lbufType = lbuftype;
+
+    // allocate local message buffer
+    if (lbuf == 0) {
+      switch (lbufType)
+      {
+        case ESMC_INT:
+          try {
+            lbuf = new int[lbufSize];
+          }
+          //  catch (bad_alloc) {
+          // TODO: use when IBM supports it (blackforest doesn't)
+          catch (...) {
+          // TODO:  call ESMF log/err handler
+            cerr << "ESMC_Comm() lbuf int memory allocation failed\n";
+            return(ESMF_FAILURE);
+          }
+          break;
+        case ESMC_LONG:
+          try {
+            lbuf = new long[lbufSize];
+          }
+          //  catch (bad_alloc) {
+          // TODO: use when IBM supports it (blackforest doesn't)
+          catch (...) {
+          // TODO:  call ESMF log/err handler
+            cerr << "ESMC_Comm() lbuf long memory allocation failed\n";
+            return(ESMF_FAILURE);
+          }
+          break;
+        case ESMC_FLOAT:
+          try {
+            lbuf = new float[lbufSize];
+          }
+          //  catch (bad_alloc) {
+          // TODO: use when IBM supports it (blackforest doesn't)
+          catch (...) {
+          // TODO:  call ESMF log/err handler
+            cerr << "ESMC_Comm() lbuf float memory allocation failed\n";
+            return(ESMF_FAILURE);
+          }
+          break;
+        case ESMC_DOUBLE:
+          try {
+            lbuf = new double[lbufSize];
+          }
+          //  catch (bad_alloc) {
+          // TODO: use when IBM supports it (blackforest doesn't)
+          catch (...) {
+          // TODO:  call ESMF log/err handler
+            cerr << "ESMC_Comm() lbuf double memory allocation failed\n";
+            return(ESMF_FAILURE);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    // TODO:  coordinate with other DEs to determine group size ??
+    numDEs = nThreadsPerProc * nProcs;
+
+  pthread_mutex_unlock(&initMutex);
 
   if (DE->deType == ESMC_PROCESS) {
     int initialized;
 
+    //   TODO: MPI_Init needs to be called at Component Create level without
+    //   exposing Comm ?
     MPI_Initialized(&initialized);
     if (!initialized) {
       MPI_Init(argc, argv);
@@ -120,11 +233,15 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
       // log error
     }
 
+    // TODO: getting of DE and PE info below should move to machine model ??
+    //  But then encapsulation of MPI splits across two classes:
+    //   Comm and Machine, which could be ok
+
     // get size of DE process group
     // MPI_Comm_size(MPI_COMM_WORLD, &numDEs);
 
     // get my unique DE process group ID
-    MPI_Comm_rank(MPI_COMM_WORLD, &(DE->pID));
+    MPI_Comm_rank(MPI_COMM_WORLD, &(DE->pID));  // TODO same as MPI rank for now
     //cout << "pID = " << DE->pID << "\n";
 
     // share it with all sub-threads to calculate unique DE ids
@@ -143,24 +260,36 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
     ESMC_OpToMPI[ESMC_SUM] = MPI_SUM;
     //ESMC_OpToMPI[ESMC_MIN] = MPI_MIN;
     //ESMC_OpToMPI[ESMC_MAX] = MPI_MAX;
-  }
+
+  } // end ESMC_PROCESS
 
   // determine thread index
-  pthread_t mytid = pthread_self();
-  for(int i=0; i<ESMC_COMM_NTHREADS; i++) {
-    if (mytid == ESMC_Comm_tid[i]) {
-      DE->tID = i;
-//cout << "tid, i = " << ESMC_Comm_tid[i] << ", " << i << endl;
-      break;
-    }
-  }
+  DE->tID = 0; // for nThreadsPerProc = 1, default to main thread index
+  if (nThreadsPerProc > 1) {
+    pthread_mutex_lock(&initMutex);
+      pthread_t mytid = pthread_self();
+      for(int i=1; i<nThreadsPerProc; i++) { // start at 1st real thread
+        if (ESMC_Comm_tid == 0) {
+          // TODO: LogErr
+          cout << "ESMC_CommInit: ESMC_Comm_tid not allocated by main()"
+               << endl;
+          return(ESMF_FAILURE);
+        }
+        if (pthread_equal(mytid, ESMC_Comm_tid[i])) {
+          DE->tID = i;
+    //cout << "tid, i = " << ESMC_Comm_tid[i] << ", " << i << endl;
+          break;
+        }
+      }
+    pthread_mutex_unlock(&initMutex);
+  } // end if nThreadsPerProc > 1
 
   // calculate unique DE id across all nodes and threads/processes
   pthread_mutex_lock(&initMutex);
     while(nodeRank < 0) {
         pthread_cond_wait(&initCV, &initMutex);
     }
-    DE->esmfID = nodeRank * ESMC_COMM_NTHREADS + DE->tID;
+    DE->esmfID = nodeRank * nThreadsPerProc + DE->tID;
   pthread_mutex_unlock(&initMutex);
 
   return(ESMF_SUCCESS);
@@ -187,11 +316,13 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-  if (!commFinal) {
-cout << "ESMC_CommFinal DE = " << DE << endl;
-    if (DE->deType == ESMC_PROCESS) MPI_Finalize();
-    commFinal = true;
-  }
+  pthread_mutex_lock(&finalMutex);
+    if (!commFinal) {
+  //cout << "ESMC_CommFinal DE = " << DE << endl;
+      if (DE->deType == ESMC_PROCESS) MPI_Finalize();
+      commFinal = true;
+    }
+  pthread_mutex_unlock(&finalMutex);
 
   return(ESMF_SUCCESS);
 
@@ -319,6 +450,7 @@ cout << "ESMC_CommFinal DE = " << DE << endl;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+  // TODO: mutex protect if numDEs changes during run time?
   *ndes = numDEs;
 
   return(ESMF_SUCCESS);
@@ -396,9 +528,7 @@ cout << "ESMC_CommFinal DE = " << DE << endl;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-cout << "ESMC_Comm(void) constructor invoked\n";
-
-  threadCount = &threadCountA;
+//cout << "ESMC_Comm(void) constructor invoked\n";
 
  } // end ESMC_Comm
 
@@ -413,9 +543,13 @@ cout << "ESMC_Comm(void) constructor invoked\n";
 //    none
 //
 // !ARGUMENTS:
-      int *argc,            // in
-      char **argv[],        // in
-      ESMC_DE *de) {        // in
+      int *argc,              // in - from main invocation
+      char **argv[],          // in - from main invocation
+      ESMC_DE *de,            // in - DE we're communicating on behalf of
+      int nthreadsperproc,    // in - number of threads per process
+      int nprocs,             // in - number of processes
+      int lbufsize,           // in - number of local message buffer elements
+      ESMC_Type_e lbuftype) { // in - type of local message buffer elements
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization
@@ -424,9 +558,8 @@ cout << "ESMC_Comm(void) constructor invoked\n";
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-cout << "ESMC_Comm(argc, argv, de) constructor invoked\n";
-  ESMC_Comm();
-  ESMC_CommInit(argc, argv,de);
+//cout << "ESMC_Comm(argc, argv, de, nthreadsperproc, nprocs, lbufsize, lbuftype) constructor invoked\n";
+  ESMC_CommInit(argc, argv, de, nthreadsperproc, nprocs, lbufsize, lbuftype);
 
  } // end ESMC_Comm
 
@@ -449,8 +582,11 @@ cout << "ESMC_Comm(argc, argv, de) constructor invoked\n";
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-cout << "~ESMC_Comm() invoked\n";
-  if (!commFinal) ESMC_CommFinal();
+//cout << "~ESMC_Comm() invoked\n";
+    if (!commFinal) {  // don't mutex lock -- will be done in ESMC_CommFinal()
+                       //  besides, single integer type reference is atomic
+      ESMC_CommFinal();
+    }
 
  } // end ~ESMC_Comm
 
@@ -525,28 +661,33 @@ cout << "~ESMC_Comm() invoked\n";
 
   //  TODO:  ??  need to reset thread_count to zero after or before
 
-static int count = 0;
+//static int count = 0;
 
   pthread_mutex_lock(&barrierMutex);
 
-count++;
+//count++;
 //cout << "count = " << count << endl;
 
+//cout << "entered Barrier, threadCount = " << *threadCount << endl;
+
     // if this counter still in use by previous barrier, switch to partner
-    if (*threadCount >= ESMC_COMM_NTHREADS) {
+    if (*threadCount >= nThreadsPerProc) {
+//cout << "Barrier switching threadCount" << endl;
        threadCount = (threadCount == &threadCountA) ?
                       &threadCountB : &threadCountA;
     }
     // count how many threads (DEs) have entered the barrier
     (*threadCount)++;
+//cout << "threadCount = " << *threadCount << endl;
 
     // inform main process/thread that all sub-threads are done
-    if (*threadCount == ESMC_COMM_NTHREADS-1) {
+    if (*threadCount == nThreadsPerProc-1) {
+//cout << "HERE1" << endl;
       pthread_cond_broadcast(&mainProcBarrierCV);
     }
 
     // when last thread (DE) has entered, reset for next barrier, and inform all
-    if (*threadCount == ESMC_COMM_NTHREADS) {
+    if (*threadCount == nThreadsPerProc) {
 #if 0
 if (count == 4 || count == 8) {
 for(int i=0; i<12; i++) cout << rbuf[i] << " ";
@@ -568,7 +709,10 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       // wait until all DEs have entered the barrier
 
       // use while loop to guard against spurious/erroneous wake-ups
-      while (*threadCount < ESMC_COMM_NTHREADS) {
+      while (*threadCount < nThreadsPerProc) {
+//cout << "threadCount ptr = " << threadCount << endl;
+//cout << "threadCountA ptr = " << &threadCountA << endl;
+//cout << "threadCountB ptr = " << &threadCountB << endl;
         pthread_cond_wait(&barrierCV, &barrierMutex);
 //cout << "threadCount = " << *threadCount << endl;
       }
@@ -686,7 +830,8 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   switch (type)
   {
     case ESMC_INT:
-      // copy sbuf to our local lbuf slot
+      // copy sbuf to our lbuf slot (don't need to mutex protect since
+      //   we're writing to our own unique thread-specific slot)
       //  TODO:  use memcpy for speed ??
       int *myslot = &(lbuf[displs[DE->tID]]);  // start of our slot
       int *data = (int *)sbuf;                 // start of send data
@@ -706,26 +851,27 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 
     pthread_mutex_lock(&barrierMutex);
 
-cout << "entered process barrier, threadCount = " << *threadCount << "\n";
+//cout << "entered process barrier, threadCount = " << *threadCount << "\n";
 
       // if this counter still in use by previous barrier, switch to partner
-      if (*threadCount >= ESMC_COMM_NTHREADS) {
+      if (*threadCount >= nThreadsPerProc) {
+//cout << "switching threadCount" << endl;
          threadCount = (threadCount == &threadCountA) ?
                         &threadCountB : &threadCountA;
       }
 
       // use while loop to guard against spurious/erroneous wake-ups
-      while (*threadCount < ESMC_COMM_NTHREADS-1) {
-cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
+      while (*threadCount < nThreadsPerProc-1) {
+//cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
         pthread_cond_wait(&mainProcBarrierCV, &barrierMutex);
-cout << "main wokeup with threadCount = " << *threadCount << endl;
+//cout << "main wokeup with threadCount = " << *threadCount << endl;
       }
 
     pthread_mutex_unlock(&barrierMutex);
 
     // then exchange data with other nodes
-    MPI_Allgatherv(lbuf, num*ESMC_COMM_NTHREADS, ESMC_TypeToMPI[type],
-                   gbuf, num*ESMC_COMM_NTHREADS, ESMC_TypeToMPI[type],
+    MPI_Allgatherv(lbuf, num*nThreadsPerProc, ESMC_TypeToMPI[type],
+                   rbuf, num*nThreadsPerProc, ESMC_TypeToMPI[type],
                    MPI_COMM_WORLD);
 
   } // end if ESMC_PROCESS
@@ -763,16 +909,17 @@ cout << "main wokeup with threadCount = " << *threadCount << endl;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-cout << "entered ESMC_CommAllGather(), tidx = " << DE->tID << endl;
+//cout << "entered ESMC_CommAllGather(), tidx = " << DE->tID << endl;
 
   // copy our data into common buffer
   switch (type)
   {
     case ESMC_INT:
-      // copy sbuf to our rbuf slot
+      // copy sbuf to our lbuf slot (don't need to mutex protect since
+      //   we're writing to our own unique thread-specific slot)
       //  TODO:  use memcpy for speed ??
       for (int i=0; i<num; i++) {
-        ((int *)rbuf)[(DE->tID)*num + i] = ((int *)sbuf)[i];
+        ((int *)lbuf)[(DE->tID)*num + i] = ((int *)sbuf)[i];
       }
       break;
 
@@ -782,34 +929,41 @@ cout << "entered ESMC_CommAllGather(), tidx = " << DE->tID << endl;
 
   if (DE->deType == ESMC_PROCESS) {
     // gather local node's thread data first by simply waiting
-    //   for them to finish copying their data to the rbuf
+    //   for them to finish copying their data to the lbuf
 
     pthread_mutex_lock(&barrierMutex);
 
-cout << "entered process barrier, threadCount = " << *threadCount << "\n";
+//cout << "entered process barrier, threadCount = " << *threadCount << "\n";
 
       // if this counter still in use by previous barrier, switch to partner
-      if (*threadCount >= ESMC_COMM_NTHREADS) {
+      if (*threadCount >= nThreadsPerProc) {
+//cout << "AllGather switching threadCount" << endl;
          threadCount = (threadCount == &threadCountA) ?
                         &threadCountB : &threadCountA;
       }
 
       // use while loop to guard against spurious/erroneous wake-ups
-      while (*threadCount < ESMC_COMM_NTHREADS-1) {
-cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
+      while (*threadCount < nThreadsPerProc-1) {
+//cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
         pthread_cond_wait(&mainProcBarrierCV, &barrierMutex);
-cout << "main wokeup with threadCount = " << *threadCount << endl;
+//cout << "main wokeup with threadCount = " << *threadCount << endl;
       }
 
     pthread_mutex_unlock(&barrierMutex);
 
     // then exchange data with other nodes
-    MPI_Allgather(lbuf, num*ESMC_COMM_NTHREADS, ESMC_TypeToMPI[type],
-                  gbuf, num*ESMC_COMM_NTHREADS, ESMC_TypeToMPI[type],
+int nMPIprocs;
+MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
+//cout << "number of MPI procs = " << nMPIprocs << endl;
+//sleep(60);
+    MPI_Allgather(lbuf, num*nThreadsPerProc, ESMC_TypeToMPI[type],
+                  rbuf, num*nThreadsPerProc, ESMC_TypeToMPI[type],
                   MPI_COMM_WORLD);
-  }
+//cout << "MPI_Allgather() complete" << endl;
+  }  // end if ESMC_PROCESS
 
 //cout << "ESMC_CommAllGather(), final barrier, tidx = " << DE->tID << endl;
+//cout << "ESMC_CommAllGather(), threadCount = " << *threadCount << endl;
 
   // wait for all threads to finish copying their data
   ESMC_CommBarrier();
@@ -874,7 +1028,7 @@ cout << "main wokeup with threadCount = " << *threadCount << endl;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-cout << "entered ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
+//cout << "entered ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
 
   switch (op)
   {
@@ -884,14 +1038,14 @@ cout << "entered ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
     {
       case ESMC_INT:
         pthread_mutex_lock(&bufMutex);
-        if(!lbufCleared) {
-          memset(lbuf, 0, num*sizeof(int)); // 1st DE in clears lbuf
-          lbufCleared = true;
-        }
-        // add our sbuf to lbuf slot
-        for (int i=0; i<num; i++) {
-          ((int *)lbuf)[i] += ((int *)sbuf)[i];
-        }
+          if(!lbufCleared) {
+            memset(lbuf, 0, num*sizeof(int)); // 1st DE in clears lbuf
+            lbufCleared = true;
+          }
+          // add our sbuf to first lbuf slot
+          for (int i=0; i<num; i++) {
+            ((int *)lbuf)[0] += ((int *)sbuf)[i];
+          }
         pthread_mutex_unlock(&bufMutex);
         break;
   
@@ -911,16 +1065,17 @@ cout << "entered ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
 //cout << "entered process barrier, threadCount = " << *threadCount << "\n";
 
       // if this counter still in use by previous barrier, switch to partner
-      if (*threadCount >= ESMC_COMM_NTHREADS) {
+      if (*threadCount >= nThreadsPerProc) {
+//cout << "AllReduce switching threadCount" << endl;
          threadCount = (threadCount == &threadCountA) ?
                         &threadCountB : &threadCountA;
       }
 
       // use while loop to guard against spurious/erroneous wake-ups
-      while (*threadCount < ESMC_COMM_NTHREADS-1) {
-cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
+      while (*threadCount < nThreadsPerProc-1) {
+//cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
         pthread_cond_wait(&mainProcBarrierCV, &barrierMutex);
-cout << "main wokeup with threadCount = " << *threadCount << endl;
+//cout << "main wokeup with threadCount = " << *threadCount << endl;
       }
 
     pthread_mutex_unlock(&barrierMutex);
@@ -938,7 +1093,11 @@ cout << "main wokeup with threadCount = " << *threadCount << endl;
   ESMC_CommBarrier();
 
   // reset result buffer cleared flag
-  lbufCleared = false;
+  pthread_mutex_lock(&bufMutex);
+    if (lbufCleared) lbufCleared = false;  // 1st thread in clears it
+                                           // TODO: potential race problem
+                                           //  if threads get way out of sync ?
+  pthread_mutex_unlock(&bufMutex);
 
 //cout << "leaving ESMC_CommAllReduce(), tidx = " << DE->tID << endl;
 
