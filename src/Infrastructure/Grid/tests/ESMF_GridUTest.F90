@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.42 2004/07/27 16:21:24 nscollins Exp $
+! $Id: ESMF_GridUTest.F90,v 1.43 2004/08/03 20:26:36 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,12 +37,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.42 2004/07/27 16:21:24 nscollins Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.43 2004/08/03 20:26:36 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
-
+      integer :: attribute, attribute1, attribute2, att_count
+      real :: attribute3, attribute4
+      type(ESMF_DataType) :: att_datatype
+      type(ESMF_DataKind) :: att_datakind
       ! individual test result code
       integer :: rc
 
@@ -220,8 +223,6 @@
 
 
       !EX_UTest
-
-
       ! Test destroy subroutine
       call  ESMF_GridDestroy(grid, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -233,8 +234,6 @@
       !----------------------------------------------------------------------
 
       !EX_UTest
-
-
       ! Test creation of empty grid
       grid1 =  ESMF_GridCreate(rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -255,7 +254,6 @@
 
       !------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Test getting the name from an empty Grid
       call ESMF_GridGet(grid1, name=gname, rc=rc)
@@ -266,7 +264,6 @@
 
       !------------------------------------------------------------------------
 
-
       !EX_UTest
       ! Verify the name from an empty Grid is correct
       write(failMsg, *) "Returned wrong name"
@@ -274,6 +271,183 @@
       call ESMF_Test((gname.eq."GRID_ONE"), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, "gname= ", gname
+
+      !-------------------------------------------------------------------------------
+      !  Get Attribute count from a Grid
+      !EX_UTest
+       write(failMsg, *) "Did not return ESMF_SUCCESS" 
+       write(name, *) "Get Attribute from a Grid Test"
+       call ESMF_GridGetAttributeCount(grid1, attribute, rc=rc)
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+      !-------------------------------------------------------------------------------
+      !  Verify Attribute count from a Grid
+      !EX_UTest
+       write(failMsg, *) "Attribute count is incorrect" 
+       write(name, *) "Verify Attribute count from a Grid Test"
+       call ESMF_Test((attribute.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set Attributes in a empty Grid 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting Attributes in a Grid Test"
+      call ESMF_GridSetAttribute(grid1, "test_attribute", 123456789, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+     !-------------------------------------------------------------------------------
+     !
+     !  Set an Attribute in a Grid
+     !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set an Attribute in a Grid Test"
+      call ESMF_GridSetAttribute(grid1, "test_attribute", 123456789, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !-------------------------------------------------------------------------------
+     !
+     !  Set an Attribute in a Grid
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set an Attribute in a Grid Test"
+      call ESMF_GridSetAttribute(grid1, "test_attribute1", 0, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+     !-------------------------------------------------------------------------------
+     !
+     !  Set an Attribute in an Grid
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set an Attribute in a Grid Test"
+      call ESMF_GridSetAttribute(grid1, "test_attribute2", 0.0, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !-------------------------------------------------------------------------------
+
+     !   
+     !  Set an Attribute in a Grid
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS" 
+      write(name, *) "Set an Attribute in a Grid Test"
+      call ESMF_GridSetAttribute(grid1, "test_attribute3", 6789, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+     !-------------------------------------------------------------------------------
+     !   
+     !  Set an Attribute in a Grid
+     !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set an Attribute in a Grid Test"
+      call ESMF_GridSetAttribute(grid1, "test_attribute4", 5.87, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+     !-------------------------------------------------------------------------------
+     !   
+     !  Get Attribute count from a Grid
+     !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS" 
+      write(name, *) "Get an Attribute from a Grid Test"
+      call ESMF_GridGetAttributeCount(grid1, attribute, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !-------------------------------------------------------------------------------
+      !   
+      !  Verify Attribute count from a Grid
+      !EX_UTest
+      write(failMsg, *) "Attribute count is incorrect" 
+      write(name, *) "Verify Attribute count from a Grid Test"
+      call ESMF_Test((attribute.eq.5), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !
+      !  Get an Attribute from a Grid
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get an Attribute from a Grid Test"
+      call ESMF_GridGetAttribute(grid1, "test_attribute", attribute, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !
+      !  Verify the value of the Attribute
+      !EX_UTest
+      write(failMsg, *) "Attribute value is wrong"
+      write(name, *) "Verify Attribute value from a Grid Test"
+      call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !
+      !  Get an Attribute from a Grid
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get an Attribute from a Grid Test"
+      call ESMF_GridGetAttribute(grid1, "test_attribute", attribute, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+      !
+      !  Verify the value of the Attribute
+      !EX_UTest
+      write(failMsg, *) "Attribute value is wrong"
+      write(name, *) "Verify Attribute value from a Grid Test"
+      call ESMF_Test((attribute.eq.123456789), name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !
+      !  Get Attribute Info from a Grid Test
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Get Attribute Info from a Grid Test"
+      call ESMF_GridGetAttributeInfo(grid1, "test_attribute", datatype=att_datatype, &
+                                      datakind=att_datakind, count=att_count, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+      !-------------------------------------------------------------------------------
+      !
+      !  Verify datatype of Attribute
+      !EX_UTest
+       write(failMsg, *) "Attribute datatype is wrong"
+       write(name, *) "Verify Attribute datatype from a Grid Test"
+       call ESMF_Test((att_datatype.eq.ESMF_DATA_INTEGER), name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !
+      !  Verify datakind of Attribute
+      !EX_UTest
+       write(failMsg, *) "Attribute datakind is wrong"
+       write(name, *) "Verify Attribute datakind from a Grid Test"
+       call ESMF_Test((att_datakind.eq.ESMF_I4), name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !
+      !  Verify count of Attribute
+       !EX_UTest
+       write(failMsg, *) "Attribute count is wrong"
+       write(name, *) "Verify Attribute count from a Grid Test"
+       call ESMF_Test((att_count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+ 
+      !-------------------------------------------------------------------------------
+      !
+      !  Get an Attribute from Grid with wrong data type
+       !EX_UTest
+       write(failMsg, *) "Should not return ESMF_SUCCESS"
+       write(name, *) "Get a Wrong Data type Attribute from a Grid Test"
+       call ESMF_GridGetAttribute(grid1, "test_attribute4", attribute, rc=rc)
+       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+      !-------------------------------------------------------------------------------
+      !
+      !EX_UTest
+      ! Test destroy subroutine
+      call  ESMF_GridDestroy(grid1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Destroying a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
+
+
+
 
 #endif
 
