@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.9 2003/02/11 16:40:21 jwolfe Exp $
+// $Id: ESMC_Layout.C,v 1.10 2003/02/13 23:06:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.9 2003/02/11 16:40:21 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.10 2003/02/13 23:06:47 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1015,6 +1015,42 @@ cout << "~ESMC_Layout() invoked\n";
   ESMC_LayoutDestruct();
 
  } // end ~ESMC_Layout
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LayoutAllGatherVI - Perform MPI-like Allgatherv of equally-sized integer data arrays across a layout
+//
+// !INTERFACE:
+      int ESMC_Layout::ESMC_LayoutAllGatherVI(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *sndArray,           // in  - integer send data array
+      int  sndLen,             // in  - length of send data array
+      int *rcvArray,           // out - gathered data array
+      int *rcvLen,             // in  - array of receive data array lengths
+      int *rcvDispls) {        // in  - array of rcvArray displacements
+//
+// !DESCRIPTION:
+//    Perform MPI-like Allgatherv of integer data arrays
+//    across all DEs in a layout
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+  // perform Allgatherv operation across all DEs in the layout
+  int rc;
+  rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
+                                ESMC_INT);
+  if (rc != ESMF_SUCCESS) {
+    cout << "ESMC_LayoutAllGatherVI() error" << endl;
+  }
+
+  return(rc);
+
+ } // end ESMC_LayoutAllGatherVI
 
 //-----------------------------------------------------------------------------
 //BOP

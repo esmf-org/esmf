@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.5 2003/01/10 00:53:42 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.6 2003/02/13 23:06:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,6 +143,8 @@
     int ESMC_CommScatter(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
                          ESMC_DE *root);
     int ESMC_CommAllGather(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
+    int ESMC_CommAllGatherV(void *sbuf, int slen, void *rbuf, int *rlen,
+                            int *rdispls, ESMC_Type_e type);
     int ESMC_CommAlltoAll(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
     int ESMC_CommAllReduce(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
                            ESMC_Op_e op);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.7 2003/01/10 00:52:40 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.8 2003/02/13 23:06:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.7 2003/01/10 00:52:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.8 2003/02/13 23:06:48 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -650,6 +650,96 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   return(ESMF_SUCCESS);
 
  } // end ESMC_CommScatter
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CommAllGatherV - All DEs to All DEs Gather vectors
+//
+// !INTERFACE:
+      int ESMC_Comm::ESMC_CommAllGatherV(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *sbuf,
+      int slen,
+      void *rbuf,
+      int *rlen,
+      int *rdispls,
+      ESMC_Type_e type) {
+//
+// !DESCRIPTION:
+//      
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+cout << "entered ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
+
+    MPI_Allgatherv(sbuf, slen, ESMC_TypeToMPI[type],
+                   rbuf, rlen, rdispls, ESMC_TypeToMPI[type],
+                   MPI_COMM_WORLD);
+
+#if 0
+  // copy our data into common buffer
+  switch (type)
+  {
+    case ESMC_INT:
+      // copy sbuf to our local lbuf slot
+      //  TODO:  use memcpy for speed ??
+      int *myslot = &(lbuf[displs[DE->tID]]);  // start of our slot
+      int *data = (int *)sbuf;                 // start of send data
+      for (int i=0; i<num; i++) {
+        *myslot++ = *data++;
+        //((int *)lbuf)[displs[DE->tID] + i] = ((int *)sbuf)[i];
+      }
+      break;
+
+    default:
+      break;
+  }
+
+  if (DE->deType == ESMC_PROCESS) {
+    // gather local node's thread data first by simply waiting
+    //   for them to finish copying their data to the rbuf
+
+    pthread_mutex_lock(&barrierMutex);
+
+cout << "entered process barrier, threadCount = " << *threadCount << "\n";
+
+      // if this counter still in use by previous barrier, switch to partner
+      if (*threadCount >= ESMC_COMM_NTHREADS) {
+         threadCount = (threadCount == &threadCountA) ?
+                        &threadCountB : &threadCountA;
+      }
+
+      // use while loop to guard against spurious/erroneous wake-ups
+      while (*threadCount < ESMC_COMM_NTHREADS-1) {
+cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
+        pthread_cond_wait(&mainProcBarrierCV, &barrierMutex);
+cout << "main wokeup with threadCount = " << *threadCount << endl;
+      }
+
+    pthread_mutex_unlock(&barrierMutex);
+
+    // then exchange data with other nodes
+    MPI_Allgatherv(lbuf, num*ESMC_COMM_NTHREADS, ESMC_TypeToMPI[type],
+                   gbuf, num*ESMC_COMM_NTHREADS, ESMC_TypeToMPI[type],
+                   MPI_COMM_WORLD);
+
+  } // end if ESMC_PROCESS
+
+cout << "ESMC_CommAllGatherV(), final barrier, tidx = " << DE->tID << endl;
+
+  // wait for all threads to finish copying their data
+  ESMC_CommBarrier();
+#endif
+
+cout << "leaving ESMC_CommAllGatherV(), tidx = " << DE->tID << endl;
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_CommAllGatherV
 
 //-----------------------------------------------------------------------------
 //BOP

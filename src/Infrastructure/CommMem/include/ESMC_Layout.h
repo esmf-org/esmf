@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.h,v 1.6 2003/02/11 16:40:43 jwolfe Exp $
+// $Id: ESMC_Layout.h,v 1.7 2003/02/13 23:06:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,6 +129,8 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 	~ESMC_Layout(void);
   
  // < declare the rest of the public interface methods here >
+    int ESMC_LayoutAllGatherVI(int *sndArray, int  sndLen, 
+                               int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_LayoutAllReduce(int *dataArray, int *result, int arrayLen,
                              ESMC_Op_e op);
   
