@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockType.F90,v 1.1 2003/10/22 01:10:40 eschwab Exp $
+! $Id: ESMF_ClockType.F90,v 1.2 2004/02/18 01:42:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
+#include <ESMF_TimeMgr.inc>
 
 !===============================================================================
 !BOPI
@@ -50,7 +51,12 @@
       type ESMF_Clock
       sequence
       private
-        type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+        ! opaque pointer to the C++ class data
+        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER 
+#else
+        type(ESMF_Pointer) :: this
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -63,7 +69,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ClockType.F90,v 1.1 2003/10/22 01:10:40 eschwab Exp $'
+      '$Id: ESMF_ClockType.F90,v 1.2 2004/02/18 01:42:50 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       end module ESMF_ClockTypeMod

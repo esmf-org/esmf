@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.53 2004/02/13 01:02:05 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.54 2004/02/18 01:42:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -83,7 +83,12 @@
       type ESMF_Calendar
       sequence
       private
-        type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+        ! opaque pointer to the C++ class data
+        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER 
+#else
+        type(ESMF_Pointer) :: this
+#endif
       end type
 !
 !------------------------------------------------------------------------------
@@ -115,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.53 2004/02/13 01:02:05 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.54 2004/02/18 01:42:50 eschwab Exp $'
 
 !==============================================================================
 ! 
