@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.31 2003/06/19 19:51:53 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.32 2003/06/27 17:51:03 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,11 +27,11 @@
 ! !MODULE: ESMF_FieldMod - Combine physical field metadata, data and grid
 !
 ! !DESCRIPTION:
-! The code in this file implements the {\tt Field} class, which represents a
-! single scalar or vector field.  {\tt Field}s associate a metadata description 
-! expressed as a set of {\tt Attributes} with a data {\tt Array}, {\tt Grid}, 
-! and I/O specification, or {\tt IOSpec}.  A {\tt DataMap} describes the 
-! relationship of the {\tt Array} to the {\tt Grid}.  
+! The code in this file implements the {\tt ESMF\_Field} class, which represents a
+! single scalar or vector field.  {\tt ESMF\_Field}s associate a metadata description 
+! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, {\tt ESMF\_Grid}, 
+! and I/O specification, or {\tt ESMF\_IOSpec}.  A {\tt ESMF\_DataMap} describes the 
+! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90 and a corresponding
 ! C++ interface is provided for access.
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.31 2003/06/19 19:51:53 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.32 2003/06/27 17:51:03 rstaufer Exp $'
 
 !==============================================================================
 !
@@ -233,7 +233,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a complete
-!     {\tt Field}.  These method all contain a Grid and Data.  The variations
+!     {\tt ESMF\_Field}.  These method all contain a {\tt ESMF\_Grid} and {\tt ESMF\_Data}.  The variations
 !     allow the user to specify the data using either a Fortran array or 
 !     an {\tt ESMF\_Array}.
 !    
@@ -255,8 +255,8 @@
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
-!     a {\tt Field} without allocating or referencing any associated data.
-!     The variations allow a {\tt Grid} to be specified or not, and for
+!     a {\tt ESMF\_Field} without allocating or referencing any associated data.
+!     The variations allow a {\tt ESMF\_Grid} to be specified or not, and for
 !     the data description to be specified or not.
  
 !EOP
@@ -275,7 +275,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that construct a 
-!     complete {\tt Field}.
+!     complete {\tt ESMF\_Field}.
  
 !EOPI
       end interface
@@ -293,7 +293,7 @@
         module procedure ESMF_FieldConstructNoGridArray  
 
 ! !DESCRIPTION:
-!     This interface provides an entry point for {\tt Field} construction 
+!     This interface provides an entry point for {\tt ESMF\_Field} construction 
 !     methods that do not allocate or reference any associated data.
  
 !EOPI
@@ -313,7 +313,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
-!     data to a {\tt Field}.
+!     data to a {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -331,7 +331,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that detach
-!     data from a {\tt Field}.
+!     data from a {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -350,7 +350,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
-!     attributes to a {\tt Field}.
+!     attributes to a {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -369,7 +369,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that retrieve
-!     attributes from a {\tt Field}.
+!     attributes from a {\tt ESMF\_Field}.
  
 !EOP
       end interface
@@ -408,22 +408,22 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Create a {\tt Field} and allocate space internally for a
-!     gridded {\tt Array}.  Return a new {\tt Field}.
+!     Create a {\tt ESMF\_Field} and allocate space internally for a
+!     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
-!           Data specification. 
+!           {\tt ESMF\_Data} specification. 
 !     \item [{[allocflag]}]
 !           Whether to allocate space for the array.  Default is
 !           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -497,11 +497,11 @@
 !
 ! !DESCRIPTION:
 !     This version of creation assumes the data exists already and is being
-!     passed in through an {\tt Array}.  
+!     passed in through an {\tt ESMF\_Array}.  
 ! 
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Includes data specification and allocated memory. 
 !     \item [{[copyflag]}]
@@ -511,7 +511,7 @@
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -584,18 +584,18 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Creates a {\tt Field} in its entirety except for the assignment
+!     Creates a {\tt ESMF\_Field} in its entirety except for the assignment
 !     or allocation of an associated raw data buffer.
 !
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -665,16 +665,16 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     This version of {\tt ESMF\_FieldCreate} builds a {\tt Field} 
-!     and depends on a later call to add an {\tt Array} to it.  
+!     This version of {\tt ESMF\_FieldCreate} builds a {\tt ESMF\_Field} 
+!     and depends on a later call to add an {\tt ESMF\_Array} to it.  
 !
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -741,8 +741,8 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt Field} 
-!     and depends on later calls to add a {\tt Grid} and {\tt Array} to 
+!     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
+!     and depends on later calls to add a {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
 !     it.  
 !
 !     \begin{description}
@@ -816,9 +816,9 @@
 !
 ! !DESCRIPTION:
 !
-!     Remaps data between an existing {\tt Grid} on a source {\tt Field}
-!     and a new {\tt Grid}.  The {\tt Grid} is referenced by the 
-!     new {\tt Field}.  Data is copied.
+!     Remaps data between an existing {\tt ESMF\_Grid} on a source {\tt ESMF\_Field}
+!     and a new {\tt ESMF\_Grid}.  The {\tt ESMF\_Grid} is referenced by the 
+!     new {\tt ESMF\_Field}.  Data is copied.
 !
 ! !REQUIREMENTS: FLD1.1.5, FLD1.5.1, FLD1.6.1
 !EOP
@@ -867,11 +867,11 @@
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with the {\tt Field}.
+!     Releases all resources associated with the {\tt ESMF\_Field}.
 ! 
 !     \begin{description}
 !     \item [field]
-!           Pointer to a {\tt Field} object.
+!           Pointer to a {\tt ESMF\_Field} object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -945,14 +945,14 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs all {\tt Field} internals, including the allocation
-!     of a data {\tt Array}.  
+!     Constructs all {\tt ESMF\_Field} internals, including the allocation
+!     of a data {\tt ESMF\_Array}.  
 !
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt Field} object.
+!           Pointer to a {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[allocflag]}]
@@ -961,9 +961,9 @@
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
-!           {\tt Field} name. 
+!           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
 !           I/O specification. 
 !     \item [{[rc]}] 
@@ -1046,22 +1046,22 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs all {\tt Field} internals, including the allocation
-!     of a data {\tt Array}.  
+!     Constructs all {\tt ESMF\_Field} internals, including the allocation
+!     of a data {\tt ESMF\_Array}.  
 !
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt Field} object.
+!           Pointer to a {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Data. 
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
-!           {\tt Field} name. 
+!           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
 !           I/O specification. 
 !     \item [{[rc]}] 
@@ -1129,22 +1129,22 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs all {\tt Field} internals except for the assignment of 
+!     Constructs all {\tt ESMF\_Field} internals except for the assignment of 
 !     an associated data buffer.
 !
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt Field} object.
+!           Pointer to a {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
-!           {\tt Field} name. 
+!           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
 !           I/O specification. 
 !     \item [{[rc]}] 
@@ -1227,19 +1227,19 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs a {\tt Field} except for its internal data {\tt Array}.
+!     Constructs a {\tt ESMF\_Field} except for its internal data {\tt ESMF\_Array}.
 !
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt Field} object.
+!           Pointer to a {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt Grid} object. 
+!           Pointer to a {\tt ESMF\_Grid} object. 
 !     \item [{[relloc]}] 
 !           Relative location of data per grid cell/vertex. 
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt Grid}.
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
-!           {\tt Field} name. 
+!           {\tt ESMF\_Field} name. 
 !     \item [{[iospec]}] 
 !           I/O specification. 
 !     \item [{[rc]}] 
@@ -1302,8 +1302,8 @@
 !
 ! !DESCRIPTION:
 ! 
-!     Constructs {\tt Field} internals except those related to {\tt Grid} 
-!     and {\tt Data}.
+!     Constructs {\tt ESMF\_Field} internals except those related to {\tt ESMF\_Grid} 
+!     and {\tt ESMF\_Data}.
 !
 ! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 !EOPI
@@ -1358,11 +1358,11 @@
       integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
-!     Releases all resources except the {\tt Field} itself.
+!     Releases all resources except the {\tt ESMF\_Field} itself.
 !
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt Field} object.
+!           Pointer to a {\tt ESMF\_Field} object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -1413,8 +1413,8 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Associates a data buffer with a {\tt Field} and sets a flag in 
-!     the {\tt Field} indicating that data is present.  
+!     Associates a data buffer with a {\tt ESMF\_Field} and sets a flag in 
+!     the {\tt ESMF\_Field} indicating that data is present.  
 !
 ! !REQUIREMENTS: FLD1.6.5
 !EOP
@@ -1435,8 +1435,8 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!     Associates an {\tt Array} with a Field and sets a flag in the 
-!     {\tt Field} indicating that data is present.
+!     Associates an {\tt ESMF\_Array} with a {\tt ESMF\_Field} and sets a flag in the 
+!     {\tt ESMF\_Field} indicating that data is present.
 !
 ! !REQUIREMENTS: FLD1.6.5
 !EOP
@@ -1458,8 +1458,8 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!     Associates an {\tt Array} and a {\tt Grid} with a Field and sets a 
-!     flag in the {\tt Field} indicating that data is present.
+!     Associates an {\tt ESMF\_Array} and a {\tt ESMF\_Grid} with a {\tt ESMF\_Field} and sets a 
+!     flag in the {\tt ESMF\_Field} indicating that data is present.
 !
 ! !REQUIREMENTS: FLD1.6.5
 !EOP
@@ -1480,8 +1480,8 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
-!     Returns a pointer to the {\tt Field}'s data buffer and marks the 
-!     {\tt Field} as not having any associated data.
+!     Returns a pointer to the {\tt ESMF\_Field}'s data buffer and marks the 
+!     {\tt ESMF\_Field} as not having any associated data.
 !
 ! !REQUIREMENTS: FLD1.6.5
 !EOP
@@ -1505,8 +1505,8 @@
       integer, intent(out), optional :: rc              ! return code
 !
 ! !DESCRIPTION:
-!     Returns a pointer to the {\tt Field}'s {\tt Array} and marks the 
-!     {\tt Field} as not having any associated data.
+!     Returns a pointer to the {\tt ESMF\_Field}'s {\tt ESMF\_Array} and marks the 
+!     {\tt ESMF\_Field} as not having any associated data.
 !
 ! !REQUIREMENTS: FLD1.6.5
 !EOP
@@ -1590,12 +1590,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt Field}.
+!      Returns an integer attribute from a {\tt ESMF\_Field}.
 !
 ! 
 !     \begin{description}
 !     \item [field]
-!           A {\tt Field} object.
+!           A {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1644,7 +1644,7 @@
        integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Returns whether a {\tt Field} has a grid, array, or buffer 
+!      Returns whether a {\tt ESMF\_Field} has a grid, array, or buffer 
 !      associated with it.
 !
 ! !REQUIREMENTS: FLD1.6.2, FLD1.1.3
@@ -1669,7 +1669,7 @@
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Returns a reference to the Grid associated with this Field.
+!      Returns a reference to the {\t ESMF\_Grid} associated with this {\tt ESMF\_Field}.
 !
 ! !REQUIREMENTS: FLD1.6.2
 !EOP
@@ -1716,7 +1716,7 @@
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!     Return global {\tt Grid} information. 
+!     Return global {\tt ESMF\_Grid} information. 
 !
 ! !REQUIREMENTS: FLD1.7.2
 !EOP
@@ -1743,7 +1743,7 @@
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Get {\tt Grid} information specific to the local {\tt DE}.
+!      Get {\tt ESMF\_Grid} information specific to the local {\tt ESMF\_DE}.
 !
 ! !REQUIREMENTS: FLD1.7.2
 !EOP
@@ -1769,7 +1769,7 @@
 
 !
 ! !DESCRIPTION:
-!     Get data either in {\tt Array} or buffer form.
+!     Get data either in {\tt ESMF\_Array} or buffer form.
 
 !
 ! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
@@ -1854,7 +1854,7 @@
 
 !
 ! !DESCRIPTION:
-!     Retrieve global {\tt Field} data information.
+!     Retrieve global {\tt ESMF\_Field} data information.
 
 !
 ! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
@@ -1883,8 +1883,8 @@
 
 !
 ! !DESCRIPTION:
-!     Retrieve {\tt Field} data information specific to the local
-!     {\tt DE}.
+!     Retrieve {\tt ESMF\_Field} data information specific to the local
+!     {\tt ESMF\_DE}.
 !
 ! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 !EOP
@@ -1962,8 +1962,8 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt Grid} routines to perform a Reduction operation over the data
-!       in a {\tt Field}.
+!     Call {\tt ESMF\_Grid} routines to perform a Reduction operation over the data
+!       in a {\tt ESMF\_Field}.
 !
 !     \begin{description}
 !     \item [field] 
@@ -2020,13 +2020,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt Grid} routines to perform a AllGather operation over the data
-!     in a {\tt Field}.  If the Field is decomposed over N DEs, this routine
-!     returns a copy of the entire collected data Array on each of the N DEs.
+!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_AllGather} operation over the data
+!     in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is decomposed over N {\tt ESMF\_DE}s, this routine
+!     returns a copy of the entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
 !
 !     \begin{description}
 !     \item [field] 
-!           Field containing data to be gathered.
+!           {\tt ESMF\_Field} containing data to be gathered.
 !     \item [array] 
 !           Newly created array containing the collected data.
 !           It is the size of the entire undecomposed grid.
@@ -2121,20 +2121,20 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt Grid} routines to perform a Gather operation over the data
-!     in a {\tt Field}.  If the Field is decomposed over N DEs, this routine
-!     returns a copy of the entire collected data Array on the specified
-!     destination DE number.  On all other DEs, there is no return Array.
+!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Gather} operation over the data
+!     in a {\tt ESMF\_Field}.  If the {\tt ESMF\_Field} is decomposed over N {\tt ESMF\_DE}s, this routine
+!     returns a copy of the entire collected data {\tt ESMF\_Array} on the specified
+!     destination {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return {\tt ESMF\_Array}.
 !
 !     \begin{description}
 !     \item [field] 
-!           Field containing data to be gathered.
+!           {\tt ESMF\_Field} containing data to be gathered.
 !     \item [destination\_de] 
-!           Destination DE number where the Gathered Array is to be returned.
+!           Destination {\tt ESMF\_DE} number where the Gathered Array is to be returned.
 !     \item [array] 
 !           Newly created array containing the collected data on the
-!           specified DE.  It is the size of the entire undecomposed grid.
-!           On all other DEs this return is an invalid object.
+!           specified {\tt ESMF\_DE}.  It is the size of the entire undecomposed grid.
+!           On all other {\tt ESMF\_DE}s this return is an invalid object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2227,23 +2227,23 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt Grid} routines to perform a Scatter operation over the data
-!     in an {\tt Array}, returning it as the data array in a {\tt Field}.  
-!     If the Field is decomposed over N DEs, this routine
-!     takes a single array on the specified DE and returns a decomposed copy
-!     on each of the N DEs, as the Array associated with the given empty Field.
+!     Call {\tt ESMF\_Grid} routines to perform a Scatter operation over the data
+!     in an {\tt ESMF\_Array}, returning it as the data array in a {\tt ESMF\_Field}.  
+!     If the Field is decomposed over N {\tt ESMF\_DE}s, this routine
+!     takes a single array on the specified {\tt ESMF\_DE} and returns a decomposed copy
+!     on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Field}.
 !
 !     \begin{description}
 !     \item [array] 
-!           Input Array containing the collected data.
+!           Input {\tt ESMF\_Array} containing the collected data.
 !           It must be the size of the entire undecomposed grid.
 !     \item [source\_de]
-!           Integer DE number where the data to be Scattered is located.  The
-!           {\tt Array} input is ignored on all other DEs.
+!           Integer {\tt ESMF\_DE} number where the data to be Scattered is located.  The
+!           {\tt ESMF\_Array} input is ignored on all other ESMF\_DE}s.
 !     \item [field] 
-!           Empty Field containing Grid which will correspond to the data 
+!           Empty Field containing {\tt ESMF\_Grid} which will correspond to the data 
 !           in the array which will be scattered.  When this routine returns
-!           each Field will contain a valid data array containing the 
+!           each {\tt ESMF\_Field} will contain a valid data array containing the 
 !           subset of the decomposed data.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2314,13 +2314,13 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt Grid} routines to perform a Halo operation over the data
-!     in a {\tt Field}.  This routine updates the data inside the {\tt Field}
+!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Halo} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine updates the data inside the {\tt ESMF\_Field}
 !     so there is no separate return argument.
 !
 !     \begin{description}
 !     \item [field] 
-!           Field containing data to be haloed.
+!           {\tt ESMF\_Field} containing data to be haloed.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2436,16 +2436,16 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call {\tt Grid} routines to perform a Regrid operation over the data
-!     in a {\tt Field}.  This routine reads the source field and leaves the
-!     data untouched.  It reads the Grid from the destination field and
+!     Call {\tt ESMF\_Grid} routines to perform a {\tt ESMF\_Regrid} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves the
+!     data untouched.  It reads the {\tt ESMF\_Grid} from the destination field and
 !     updates the array data in the destination.
 !
 !     \begin{description}
 !     \item [srcfield] 
-!           Field containing source data.
+!           {\tt ESMF\_Field} containing source data.
 !     \item [dstfield] 
-!           Field containing destination grid.
+!           {\tt ESMF\_Field} containing destination grid.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2519,20 +2519,20 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Call routines to perform a Route operation over the data
-!     in a {\tt Field}.  This routine reads the source field and leaves the
-!     data untouched.  It reads the Grid from the destination field and
+!     Call routines to perform a {\tt ESMF\_Route} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves the
+!     data untouched.  It reads the {\t ESMF\_Grid} from the destination field and
 !     updates the array data in the destination.
 !
 !     \begin{description}
 !     \item [srcfield] 
-!           Field containing source data.
+!           {\tt ESMF\_Field} containing source data.
 !     \item [dstfield] 
-!           Field containing destination grid.
+!           {\tt ESMF\_Field} containing destination grid.
 !     \item [parentlayout] 
-!           Layout which encompasses both Fields, most commonly the layout
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, most commonly the layout
 !           of the Coupler if the route is inter-component, but could 
-!           also be the individual layout for a component if the Route 
+!           also be the individual layout for a component if the {\tt ESMF\_Route} 
 !           is intra-component.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2743,9 +2743,9 @@
       integer, intent(out), optional :: rc             ! return code
 !
 ! !DESCRIPTION:
-!      Used only with the version of FieldCreate which creates an empty 
-!      Field and allows the Grid to be specified later.  Otherwise it is 
-!      an error to try to change the Grid associated with a Field.
+!      Used only with the version of {\tt ESMF\_FieldCreate} which creates an empty 
+!      {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  Otherwise it is 
+!      an error to try to change the {\tt ESMF\_Grid} associated with a {\tt ESMF\_Field}.
 !
 ! !REQUIREMENTS: FLD1.1.3
 !EOP
@@ -2770,8 +2770,8 @@
       integer, intent(out), optional :: rc            ! return code
 !
 ! !DESCRIPTION:
-!      Allows specified data values associated with a Field to be set 
-!      through the Field interface instead of detaching data and setting 
+!      Allows specified data values associated with a {\tt ESMF\_Field} to be set 
+!      through the {\tt ESMF\_Field} interface instead of detaching data and setting 
 !      it outside the framework.
 !
 ! !REQUIREMENTS: FLD1.6.7
@@ -2795,8 +2795,8 @@
       integer, intent(out), optional :: rc       ! return code
 !
 ! !DESCRIPTION:
-!     Used to set the ordering of a Field.  If an initialized {\tt DataMap}
-!     and associated data are already in the {\tt Field}, the data will be 
+!     Used to set the ordering of a {\tt ESMF\_Field}.  If an initialized {\tt ESMF\_DataMap}
+!     and associated data are already in the {\tt ESMF\_Field}, the data will be 
 !     reordered according to the new speciification.
 !
 ! !REQUIREMENTS: FLD1.2
@@ -2822,12 +2822,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt Field}.
+!      Returns an integer attribute from a {\tt ESMF\_Field}.
 !
 ! 
 !     \begin{description}
 !     \item [field]
-!           A {\tt Field} object.
+!           A {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -2879,7 +2879,7 @@
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Routine to validate the internal state of a {\tt Field}.
+!     Routine to validate the internal state of a {\tt ESMF\_Field}.
 !
 ! !REQUIREMENTS:  FLD4.1
 !EOP
@@ -3036,7 +3036,7 @@
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Field from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_Field} from the last call to Checkpoint.
 !
 ! !REQUIREMENTS: FLD1.6.8
 !EOP
@@ -3105,8 +3105,8 @@
 !
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
-!      This includes creating the Grid associated with this Field.
-!      To share a single Grid betwen multiple Fields, see the FieldCreate calls.
+!      This includes creating the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Field}.
+!      To share a single {\tt ESMF\_Grid} betwen multiple {\tt ESMF\_Field}s, see the {\tt ESMF\_FieldCreate} calls.
 !
 !
 ! !REQUIREMENTS: 
