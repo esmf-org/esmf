@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.19 2003/04/04 23:21:40 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.20 2003/04/05 00:08:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,12 +33,14 @@
 
  // associated class definition file
  #include <ESMC_DELayout.h>
+
 #define ESMF_MPI_TAG 1
+
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.19 2003/04/04 23:21:40 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.20 2003/04/05 00:08:03 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -397,10 +399,10 @@
     return(ESMF_FAILURE);
   }
 
-  this->length = new int[3];
+  this->length = new int[ESMF_MAXDECOMPDIM];
   this->length[0] = nDEs;
-  this->length[1] = 1;
-  this->length[2] = 1;
+  for (i=1; i<ESMF_MAXDECOMPDIM; i++)
+      this->length[i] = 1;
 
   ESMC_PE *pe;
   for (i=0; i<nDEs; i++) {
@@ -417,7 +419,13 @@
   MPI_Comm_group(MPI_COMM_WORLD, &mpigroup);
   MPI_Comm_create(MPI_COMM_WORLD, mpigroup, &decomm.mpicomm);
 
+  // TODO: revisit this, but for now make the default commtype MPI
+  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
+  for (i=0; i<ESMF_MAXDECOMPDIM; i++)
+      this->commType[i] = ESMC_COMMTYPE_SHR;
+
     //cout << "ESMC_DELayoutConstruct() successful\n";
+  this->ESMC_DELayoutPrint();
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutConstruct
@@ -452,26 +460,34 @@
 //
 //EOP
 
-  int ii, nx, ny;
+  int ii, nx, ny, nz;
   this->ndim=ndim;
   this->nDEs=1;
 
+  // Initialize comm, PE, DE, Machine
+  ESMC_DELayoutInit();
+
+  this->length = new int[ESMF_MAXDECOMPDIM];
+  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
   for(ii=0; ii<ndim; ii++) {
     this->commType[ii]=commtypes[ii];
     this->length[ii]=lengths[ii];
     this->nDEs*=this->length[ii];
   }
+  for(ii=ndim; ii<ESMF_MAXDECOMPDIM; ii++) {
+    this->commType[ii]=ESMC_COMMTYPE_SHR;
+    this->length[ii]=1;
+   }
 
-  nx=lengths[0];
-  ny=lengths[1];
+  // now you can use all the dims, regardless of what ndim is.
+  nx=length[0];
+  ny=length[1];
+  nz=length[2];
 
-  // Initialize comm, PE, DE, Machine
-  ESMC_DELayoutInit();
-
-  // construct 2D array of ESMC_DE's
+  // construct 3D array of ESMC_DE's
 
   try {
-    // construct 2D array of ESMC_DE's
+    // construct 3D array of ESMC_DE's
 
     // first, create array of (nx) pointers to ESMC_DE pointers
     layout = new ESMC_DE**[nx];
@@ -480,9 +496,8 @@
     for (int i=0; i<nx; i++) {
       layout[i] = new ESMC_DE*[ny];
       // finally allocate a Z array of ESMC_DE's for each y pointer
-      // only 1 long, since this version of Construct is 2D
       for (int j=0; j<ny; j++) {
-        layout[i][j] = new ESMC_DE[1];
+        layout[i][j] = new ESMC_DE[nz];
       }
     }
   }
@@ -591,20 +606,40 @@
 //EOP
 // !REQUIREMENTS:  
 
-  int nx, ny;
-  int maxdim = 3;  
+  int nx, ny, nz;
+  int i, j;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
+
+  // make space for the lists
+  this->length = new int[ESMF_MAXDECOMPDIM];
+  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
+
+  nDEs = 1;
+  for (i=0; i<ndim; i++) {
+      this->length[i] = lengths[i];
+      this->commType[i] = commtypes[i];
+      nDEs *= lengths[i];
+  }
+  for (i=ndim; i<ESMF_MAXDECOMPDIM; i++) {
+      this->length[i] = 1;
+      this->commType[i] = ESMC_COMMTYPE_SHR;
+  }
+
+  // now all the lengths and commtypes are initialized, regardless of
+  // what ndim is.
 
   //
   // construct 2D array of ESMC_DE's
   //
 
   this->ndim=ndim;
-  nx=lengths[0];
-  ny=lengths[1];
+  nx=length[0];
+  ny=length[1];
+  nz=length[2];
 
+  // TODO: from here down, it's hardcoded for 2d only
   try {
     // construct 2D array of ESMC_DE's
 
@@ -612,12 +647,12 @@
     layout = new ESMC_DE**[nx];
 
     // then allocate an array of (ny) ESMC_DE pointers for each x pointer
-    for (int i=0; i<nx; i++) {
+    for (i=0; i<nx; i++) {
       layout[i] = new ESMC_DE*[ny];
       // finally allocate a Z array of ESMC_DE's for each y pointer
       // only 1 long, since this version of Construct is 2D
       for (int j=0; j<ny; j++) {
-        layout[i][j] = new ESMC_DE[1];
+        layout[i][j] = new ESMC_DE[nz];
       }
     }
   }
@@ -627,15 +662,6 @@
     return(ESMF_FAILURE);
   }
 
-  // make space for the lists
-  this->commType = new ESMC_CommType[maxdim];
-  this->length = new int[maxdim];
-
-  this->length[0] = nx;
-  this->length[1] = ny;
-  this->length[2] = 1;
-
-  nDEs = length[0] * length[1];
   //deList = delist;
   commHint = ESMC_XFAST;
 
@@ -647,7 +673,7 @@
   // by fastest communication affinity (e.g. node, thread, process)
   //
   int ni, nj;  // loop limits
-  int i, j;    // i outer loop, j inner loop (fastest)
+               // i outer loop, j inner loop (fastest)
   int *x, *y;  // layout coordinates to loop through
   switch (commHint)
   {
@@ -673,6 +699,7 @@
 //cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
 //cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
         layout[*x][*y][0].ESMC_DESetESMFID(delist[DEix++]);
+        //layout[*x][*y][0].ESMC_DESetPEID(delist[DEix++]);
     }
   }
 
@@ -708,15 +735,25 @@
 //EOP
 // !REQUIREMENTS:  
 
+  int nx, ny, nz;
+  int i;
+
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
 
   this->ndim = ndim;
   
-  length[0] = lengths[0];
-  length[1] = lengths[1];
-  length[2] = lengths[2];
-  nDEs = length[0] * length[1] * length[2];
+  this->length = new int[ESMF_MAXDECOMPDIM];
+  this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
+
+  nDEs = 1;
+  for (i=0; i<ndim; i++) {
+    this->length[i] = lengths[i];
+    nDEs *= lengths[i];
+  }
+  for(i=ndim; i<ESMF_MAXDECOMPDIM; i++)
+    this->length[i] = 1;
+
   peList = pelist;
   commHint = ESMC_XFAST;
 
@@ -728,11 +765,11 @@
   try {
     // construct 2D array of ESMC_DE's
 
-    // first, create array of (lenth[0]) pointers to ESMC_DE pointers
+    // first, create array of (length[0]) pointers to ESMC_DE pointers
     layout = new ESMC_DE**[length[0]];
 
     // then allocate an array of (length[1]) ESMC_DE pointers for each x pointer
-    for (int i=0; i<length[0]; i++) {
+    for (i=0; i<length[0]; i++) {
       layout[i] = new ESMC_DE*[length[1]];
       // finally allocate an array of ESMC_DE's for each y pointer
       for (int j=0; j<length[1]; j++) {
@@ -759,7 +796,7 @@
   
 
   // then allocate an array of (length[1]) ESMC_DE pointers for each x pointer
-  for (int i=0; i<length[0]; i++) {
+  for (i=0; i<length[0]; i++) {
     if ((layout[i] = new (nothrow) ESMC_DE*[length[1]]) == 0) {
   // TODO:  call ESMF log/err handler
       cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
@@ -767,7 +804,7 @@
     }
 
     // finally allocate an array of (length[2]) ESMC_DE's for each y pointer
-    for (int j=0; j<lenth[1]; j++) {
+    for (int j=0; j<length[1]; j++) {
       if ((layout[i][j] = new (nothrow) ESMC_DE[length[2]]) == 0) {
     // TODO:  call ESMF log/err handler
         cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
@@ -781,7 +818,7 @@
 
   // assign PE's to DE's in layout according to communication hint
   int ni, nj, nk;
-  int i, j, k;
+  int j, k;
   int *x, *y, *z;
   switch (commHint)
   {
