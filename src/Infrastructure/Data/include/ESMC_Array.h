@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.7 2002/12/09 23:16:40 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.8 2002/12/12 23:50:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,8 +53,10 @@ class ESMC_ArrayConfig {
 };
 
 // private static data - address of fortran callback funcs
+extern "C" {
 static void (*allocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
 static void (*deallocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = 0;
+}
 
 
 // class declaration type
