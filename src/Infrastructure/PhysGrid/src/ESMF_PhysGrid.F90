@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.63 2004/02/19 20:55:39 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.64 2004/02/19 22:31:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -337,7 +337,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.63 2004/02/19 20:55:39 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.64 2004/02/19 22:31:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1484,7 +1484,6 @@
 !     if first mask, allocate mask array
 !
       if (numMaskNew == 1) then
-print *, "first mask"
          allocate(physgrid%ptr%masks(1), stat=status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysGridSetMask: mask allocate"
@@ -1494,7 +1493,6 @@ print *, "first mask"
 !     if not first mask, resize mask array to make room for new mask
 !
       else
-print *, "mask", numMaskNew
          allocate(tempMask(numMaskOld), stat=status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysGridSetMask: tempMask allocate"
@@ -1538,14 +1536,12 @@ print *, "mask", numMaskNew
       if (present(id)) id = numMaskNew
       physgrid%ptr%numMasks = numMaskNew
 
-print *, "ready to call Base Create, name=", name
       call ESMF_BaseCreate(physgrid%ptr%masks(numMaskNew)%base, &
                                             "PhysGridMask", name, 0, status)
       if(status /= ESMF_SUCCESS) then
          print *, "ERROR in ESMF_PhysGridCreate: Mask BaseCreate"
          return
       endif
-print *, "returned"
 
       physgrid%ptr%masks(numMaskNew)%maskType = maskType
       physgrid%ptr%masks(numMaskNew)%data = maskArray
