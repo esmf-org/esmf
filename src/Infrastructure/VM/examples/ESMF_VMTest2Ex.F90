@@ -1,13 +1,14 @@
 ! Simple ESMF application demonstrating VM features
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+! \subsubsection{VM\_Get MPI Communicator Example}
+!
 ! The following example code shows how to obtain the MPI intra-communicator
 ! out of a VM object. In order not to interfer with ESMF communication a
 ! duplicate communicator is created before used in user-level MPI calls.
 !
-!EOP
+!EOE
 !
 
 program ESMF_VMTest2Ex

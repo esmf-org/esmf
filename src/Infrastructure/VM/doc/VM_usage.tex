@@ -1,4 +1,4 @@
-% $Id: VM_usage.tex,v 1.6 2004/06/09 14:00:03 theurich Exp $
+% $Id: VM_usage.tex,v 1.7 2004/06/11 15:04:31 theurich Exp $
 
 The concept of the ESMF virtual machine (VM) is so fundamental to the framework, that every ESMF application uses it. Even in the simplest case, that of an ESMF main program without any components, a global default VM is being created during the {\tt ESMF\_Initialize()} call and removed during {\tt ESMF\_Finalize()}.
 
@@ -14,6 +14,3 @@ On the children side of the creation process each child may set key properties o
 %      child sets its VM properties.
 
 After a child component was created by the parent it may be entered via one of the registered {\tt Initialize} / {\tt Run} / {\tt Finalize} entry points. Each time a component is entered through these methods the associated component routine will start running in the context of its own VM. The user code may gain access to the VM of its context by querying the active component object. Once obtained the VM may be used in query and communication calls, and --- creating a hierarchy of components --- to create child components.
- 
-
-\subsubsection{Examples}

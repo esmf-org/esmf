@@ -1,17 +1,19 @@
 ! Simple ESMF application demonstrating VM features
 !
-!BOP
+!BOE
 !
-! !DESCRIPTION:
+! \subsubsection{VM Default Basics Example}
+!
 ! This example demonstrates the simplest ESMF application, consisting of only a 
-! main program without any components. The global default VM is obtained through
-! the framwork initialization call and then used in several VM query calls.
+! main program without any components. The global default VM, which is 
+! automatically created during the {\tt ESMF\_Initialize()} call, is obtained
+! and then used in its print method and several VM query calls.
 !
-!EOP
+!EOE
 !
 !BOC
 
-program ESMF_VMTest1Ex
+program ESMF_VMDefaultBasicsEx
 
   use ESMF_Mod
   
