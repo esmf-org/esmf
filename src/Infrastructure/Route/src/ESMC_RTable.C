@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.6 2003/03/12 18:21:46 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.7 2003/03/12 21:42:48 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.6 2003/03/12 18:21:46 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.7 2003/03/12 21:42:48 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -205,6 +205,34 @@
 //
 
 // } // end ESMC_RTableGet<Value>
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RTableSetEntry - set entry for a RTable
+//
+// !INTERFACE:
+      int ESMC_RTable::ESMC_RTableSetEntry(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+       int dst_de,         // in  -
+       void *base_addr,    // in  -
+       ESMC_XPacket *xp) { // in -
+//
+// !DESCRIPTION:
+//     Sets an RTable entry with the given value.
+//     Can be multiple routines, one per value
+//
+//EOP
+// !REQUIREMENTS:  
+
+//
+//  code goes here
+//
+
+ } // end ESMC_RTableSetEntry
 
 //-----------------------------------------------------------------------------
 //BOP
