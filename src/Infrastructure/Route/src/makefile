@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/25 00:18:26 flanigan Exp $
+# $Id: makefile,v 1.5 2003/03/31 20:03:50 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -6,7 +6,7 @@ ALL: lib
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
 #  from the upper level makefile if possible.
-CFLAGS    =
+CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.29 2003/03/24 22:56:15 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.30 2003/03/31 20:03:48 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.29 2003/03/24 22:56:15 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.30 2003/03/31 20:03:48 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -461,9 +461,9 @@
                 //  srccount and rcvcount are the byte counts.  they are 0
                 //    if there is nothing to send or receive, respectively.
 
-                rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
-                                                   srccount, rcvcount, 
-                                                   theirdeid, theirdeid);
+                rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem, srccount, 
+						   rcvcount, theirdeid, 
+						   theirdeid, ESMC_FLOAT);
             }
         }
 

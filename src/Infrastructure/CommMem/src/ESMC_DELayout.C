@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.11 2003/03/28 17:52:18 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.12 2003/03/31 20:03:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.11 2003/03/28 17:52:18 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.12 2003/03/31 20:03:43 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -68,7 +68,6 @@
 //      PEList
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
   ESMC_DELayout *layout;
 
@@ -335,6 +334,7 @@
   //  threads
   //
   int i;
+  MPI_Group mpigroup;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -428,6 +428,10 @@
 
     //layout[i][0][0].ESMC_DEPrint();
   }
+
+  // TODO: create true child communicators 
+  MPI_Comm_group(MPI_COMM_WORLD, &mpigroup);
+  MPI_Comm_create(MPI_COMM_WORLD, mpigroup, decomm.mpicomm);
 
     //cout << "ESMC_DELayoutConstruct() successful\n";
   return(ESMF_SUCCESS);
@@ -847,7 +851,6 @@
 //      ESMC\_DELayoutDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -1566,32 +1569,36 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       void *rbuf,               // in  - receive array
       int snum,                 // in  - send array length
       int rnum,                 // in  - receive array length
-      int sde_index,            // in  - send de
-      int rde_index) {          // in  - receive de
+      int sde_index,            // in  - send de index
+      int rde_index,            // in  - receive de index
+      ESMC_Datatype type) {     // in  - datatype of buffers
 
 //
 // !DESCRIPTION:
-//    Performs an MPI-like send and receive data transfer.
+//    Performs a send and receive data transfer between {\tt DEs}
+//    on a single {\tt DELayout}.
 //
 //EOP
 
-  int rc;
+  int rc, mpidatatype;
   MPI_Status status;
+
+  mpidatatype = comm.ESMC_DatatypeToMPI[type];
 
   // If we're both sending and receiving from our own process,
   // then do a straight memory copy and don't call message passing.
   if (rde_index == sde_index) {
      if (snum != rnum) { 
-        printf("sending bytes != receiving bytes in CommSendRecv\n");
+        printf("sending bytes != receiving bytes in DELayoutSendRecv\n");
         return ESMF_FAILURE;
      }
      memcpy(rbuf, sbuf, snum*sizeof(float));
      rc = ESMF_SUCCESS;
     
   } else {
-      if (MPI_Sendrecv(sbuf, snum, MPI_FLOAT, rde_index, ESMF_MPI_TAG,
-		       rbuf, rnum, MPI_FLOAT, sde_index, MPI_ANY_TAG,
-		       MPI_COMM_WORLD, &status) == MPI_SUCCESS) {
+      if (MPI_Sendrecv(sbuf, snum, mpidatatype, rde_index, ESMF_MPI_TAG, 
+		       rbuf, rnum, mpidatatype, sde_index, MPI_ANY_TAG, 
+		       decomm.mpicomm, &status) == MPI_SUCCESS) {
         rc = ESMF_SUCCESS;
       }
       else {
@@ -1603,6 +1610,46 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return(rc);
 
  } // end ESMC_DELayoutSendRecv
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutBcast - broadcast from a root DE to an entire layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutBcast(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:  
+      void *buf,                // in  - buffer     
+      int num,                  // in  - buffer length
+      int rootde_index,         // in  - index of root de
+      ESMC_Datatype type) {     // in  - data type of buffer
+
+//
+// !DESCRIPTION:
+//    Broadcasts data from a root {\tt DE} to all other {\tt DE}s in
+//    the {\tt DELayout}.  
+//
+//EOP
+
+  int rc, mpidatatype;
+  MPI_Status status;
+
+  mpidatatype = comm.ESMC_DatatypeToMPI[type];
+
+  if (MPI_Bcast(buf, num, mpidatatype, rootde_index, 
+                decomm.mpicomm) == MPI_SUCCESS) {
+    rc = ESMF_SUCCESS;
+  }
+  else {
+    printf("Failure in MPI_Bcast \n");
+    return ESMF_FAILURE;
+  }
+  return(rc);
+
+ } // end ESMC_DELayoutBcast
 
 //-----------------------------------------------------------------------------
 //BOP

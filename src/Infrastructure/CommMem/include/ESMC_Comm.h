@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.14 2003/03/27 20:41:13 cdeluca Exp $
+// $Id: ESMC_Comm.h,v 1.15 2003/03/31 20:03:38 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,8 +52,8 @@
 // class ESMC_CommConfig;
  class ESMC_Comm;
 
- enum ESMC_Type {ESMC_INT=0, ESMC_LONG, ESMC_FLOAT, ESMC_DOUBLE};
- #define ESMC_COMM_TYPES 4
+ enum ESMC_Datatype {ESMC_INT=0, ESMC_LONG, ESMC_FLOAT, ESMC_DOUBLE};
+ #define ESMC_NUM_DATATYPES 4
 
  enum ESMC_Op {ESMC_SUM=0, ESMC_MIN, ESMC_MAX};
  #define ESMC_OP_TYPES 3
@@ -76,10 +76,6 @@
  //                                 in F90 modules
      ESMC_DE *DE;         // this DE we're communicating on behalf of
 
-     // ESMC-to-MPI type maps
-     int ESMC_TypeToMPI[ESMC_COMM_TYPES];
-     int ESMC_OpToMPI[ESMC_OP_TYPES];
-
      void *ESMC_Request; // linked list of requests
      void *ESMC_Status;  // linked list of statuses
 
@@ -95,7 +91,7 @@
      //                                         get from config file ?
      static void *lbuf;
      static int lbufSize;
-     static ESMC_Type lbufType;
+     static ESMC_Datatype lbufType;
 
      // local inter-thread communication variables
      static pthread_mutex_t bufMutex;
@@ -125,7 +121,7 @@
                                         // supports DELayout.comm.CommInit, F90
     int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de, 
                       int nthreadsperproc, int nprocs,
-                      int lbufsize, ESMC_Type lbuftype); // TODO: config file
+                      int lbufsize, ESMC_Datatype lbuftype); // TODO: config file
     int ESMC_CommFinal(void);
 
  // optional configuration methods
@@ -142,31 +138,34 @@
     int ESMC_CommValidate(void) const;
     int ESMC_CommPrint(void) const;
 
+// conversion to MPI types
+    int ESMC_DatatypeToMPI[ESMC_NUM_DATATYPES];
+    int ESMC_OpToMPI[ESMC_OP_TYPES];
+
  // native C++ constructors/destructors
 	ESMC_Comm(void);
     ESMC_Comm(int *argc, char **argv[], ESMC_DE *de, 
               int nthreadsperproc, int nprocs,
-              int lbufsize, ESMC_Type lbuftype);
+              int lbufsize, ESMC_Datatype lbuftype);
 	~ESMC_Comm(void);
   
  // < declare the rest of the public interface methods here >
     // point-to-point
-    int ESMC_CommIsend(void *buf, int num, ESMC_Type type, ESMC_DE *dest,
+    int ESMC_CommIsend(void *buf, int num, ESMC_Datatype type, ESMC_DE *dest,
                        int tag, int *request);
-    int ESMC_CommIrecv(void *buf, int num, ESMC_Type type, ESMC_DE *source,
+    int ESMC_CommIrecv(void *buf, int num, ESMC_Datatype type, ESMC_DE *source,
                        int tag, int *request);
     int ESMC_CommWait(int *request, int *status);
 
     // collectives
     int ESMC_CommBarrier(void);
-    int ESMC_CommBcast(void *buf, int num, ESMC_Type type, ESMC_DE *root);
-    int ESMC_CommScatter(void *sbuf, void *rbuf, int num, ESMC_Type type,
+    int ESMC_CommScatter(void *sbuf, void *rbuf, int num, ESMC_Datatype type,
                          ESMC_DE *root);
-    int ESMC_CommAllGather(void *sbuf, void *rbuf, int num, ESMC_Type type);
+    int ESMC_CommAllGather(void *sbuf, void *rbuf, int num, ESMC_Datatype type);
     int ESMC_CommAllGatherV(void *sbuf, int slen, void *rbuf, int *rlen,
-                            int *rdispls, ESMC_Type type);
-    int ESMC_CommAlltoAll(void *sbuf, void *rbuf, int num, ESMC_Type type);
-    int ESMC_CommAllReduce(void *sbuf, void *rbuf, int num, ESMC_Type type,
+                            int *rdispls, ESMC_Datatype type);
+    int ESMC_CommAlltoAll(void *sbuf, void *rbuf, int num, ESMC_Datatype type);
+    int ESMC_CommAllReduce(void *sbuf, void *rbuf, int num, ESMC_Datatype type,
                            ESMC_Op op);
   
 // !PRIVATE MEMBER FUNCTIONS:

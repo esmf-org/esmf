@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.12 2003/03/27 20:41:20 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.13 2003/03/31 20:03:39 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -130,12 +130,18 @@ extern "C" {
                                                   (ESMC_Op) *op);
        }
 
-       void FTN(c_esmc_delayoutsendrecv)(ESMC_DELayout **ptr, void *sarray,
-                                 void *rarray, int *sarraylen, int *rarraylen,
-                                 int *sde, int *rde, int *status) {
-           *status = (*ptr)->ESMC_DELayoutSendRecv(sarray, rarray, *sarraylen,
-                                 *rarraylen, *sde, *rde);
+       void FTN(c_esmc_delayoutsendrecv)(ESMC_DELayout **ptr, void *sbuf,
+                                 void *rbuf, int *snum, int *rnum, int *sde_index, 
+				 int *rde_index, ESMC_Datatype *type, int *status) {
+           *status = (*ptr)->ESMC_DELayoutSendRecv(sbuf, rbuf, *snum, *rnum, 
+                                 *sde_index, *rde_index, *type);
        }
+
+       void FTN(c_esmc_delayoutbcast)(ESMC_DELayout **ptr, void *buf, int *num, 
+                                 int *rootde_index, ESMC_Datatype *type, int *status) {
+           *status = (*ptr)->ESMC_DELayoutBcast(buf, *num, *rootde_index, *type);
+       }
+
        void FTN(c_esmc_delayoutallgathervi)(ESMC_DELayout **ptr,
                                  int *sndarray, int *slen, 
                                  int *rcvarray, int *rlen, int *rcvdispls, 

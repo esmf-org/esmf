@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.9 2003/03/27 20:41:14 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.10 2003/03/31 20:03:39 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@
  #include <ESMC_PEList.h>  
  #include <ESMC_DE.h>  
  #include <ESMC_Comm.h>  
+ #include <mpi.h>
 
 // !PUBLIC TYPES:
 // class ESMC_DELayoutConfig;
@@ -60,6 +61,11 @@
  //   < insert resource items here >
  //};
 
+  class ESMC_DEComm {
+    public: 
+      MPI_Comm *mpicomm;      // MPI communicator for this set of DEs
+  };
+
 // hint type about the most performance critical communication direction
 enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
@@ -69,22 +75,23 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
    private:
  //  < insert class members here >  corresponds to type ESMF_DELayout members
  //                                 in F90 modules
-    ESMC_DE ***layout;     // 3D topology (3D array) of DE's -- aligns
-                           //   with (maps to) a Distributed Grid
-    int nxDELayout;          // number of DE's laid out in the x-direction
-    int nyDELayout;          // number of DE's laid out in the y-direction
-    int nzDELayout;          // number of DE's laid out in the z-direction
-    int nDEs;              // total number of DE's in layout
-    ESMC_PEList *peList;   // PE list on which the layout maps. 
-    ESMC_CommHint_e commHint;  // hint about direction of the most performance
-                               //   critical (frequent and/or voluminous)
-                               //   communication direction: x, y or z
+    ESMC_DE ***layout;        // Topology of DE's -- aligns
+                              //   with (maps to) a Distributed Grid
+    int nxDELayout;           // number of DE's laid out in the x-direction
+    int nyDELayout;           // number of DE's laid out in the y-direction
+    int nzDELayout;           // number of DE's laid out in the z-direction
+    int nDEs;                 // total number of DE's in layout
+    ESMC_PEList *peList;      // PE list on which the layout maps. 
+    ESMC_CommHint_e commHint; // hint about direction of the most performance
+                              //   critical (frequent and/or voluminous)
+                              //   communication direction: x, y or z
 
-                      // TODO: should these really be part of DELayout, or 
-                      //       standalone ?
-    ESMC_DE myDE;     // the DE on which this DELayout copy (instance) resides
-    ESMC_PE myPE;     // the PE on which this DELayout copy (instance) resides
-    ESMC_Comm comm;   // comm object for this DE (TODO: make property of DE ? )
+                              // TODO: should these really be part of DELayout, or 
+                              //       standalone ?
+    ESMC_DE myDE;             // the DE on which this DELayout copy (instance) resides
+    ESMC_PE myPE;             // the PE on which this DELayout copy (instance) resides
+    ESMC_Comm comm;           // comm object for this DE (TODO: make property of DE ? )
+    ESMC_DEComm decomm;      // Communicator for set of DEs in this layout 
     ESMC_Machine Mach;// machine model for this layout
                       //  (TODO: make property of DE or PE ? heterogenous PEs)
 
@@ -110,10 +117,6 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     int ESMC_DELayoutDestruct(void);           // internal only, deep class
     int ESMC_DELayoutInit(void);
 
- // optional configuration methods
-//    int ESMC_DELayoutGetConfig(ESMC_DELayoutConfig *config) const;
-//    int ESMC_DELayoutSetConfig(const ESMC_DELayoutConfig *config);
-
  // accessor methods for class members
 //    int ESMC_DELayoutGet<Value>(<value type> *value) const;
 //    int ESMC_DELayoutSet<Value>(<value type>  value);
@@ -122,9 +125,10 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     int ESMC_DELayoutGetSize(int *nx, int *ny, int *nz) const;
     int ESMC_DELayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
     int ESMC_DELayoutGetDEPosition(int *x, int *y) const;
-    int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
-    int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;
     int ESMC_DELayoutGetDEID(int *deid) const;
+    int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
+    
+    int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;
     int ESMC_DELayoutSetAxisIndex(int global_counts[], int size_gcount,
                                 int decompids[], int size_decomp,
                                 ESMC_AxisIndex *AIPtr);
@@ -150,8 +154,10 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 				 int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_DELayoutAllReduce(int *dataArray, int *result, int arrayLen,
 			       ESMC_Op op);
-    int ESMC_DELayoutSendRecv(void *sarray, void *rarray, int sarraylen, 
-			      int rarryalen, int sde, int rde);
+    int ESMC_DELayoutSendRecv(void *sbuf, void *rbuf, int snum, int rnum, 
+			      int sde_index, int rde_index, ESMC_Datatype type);
+    int ESMC_DELayoutBcast(void *buf, int num, int rootde_index, 
+			   ESMC_Datatype type);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

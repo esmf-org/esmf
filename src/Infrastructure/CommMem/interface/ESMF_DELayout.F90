@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.8 2003/03/24 17:09:26 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.9 2003/03/31 20:03:40 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,6 +43,9 @@
                             ESMF_ZFAST=3
 
       integer, parameter :: ESMF_SUM=0, ESMF_MIN=1, ESMF_MAX=2
+
+      integer, parameter :: ESMF_INT=0, ESMF_LONG=1, ESMF_FLOAT=2, &
+                            ESMF_DOUBLE=3
 
 ! exclusivity type used for allocating DEs within a layout to sub-layouts
 ! TODO:  move to ESMF_DE.F90 when created, to be symmetrical with C++ ?
@@ -93,6 +96,8 @@
  
       public ESMF_DELayoutPrint
 
+      public ESMF_DELayoutSendRecv
+      public ESMF_DELayoutBcast
       public ESMF_DELayoutAllReduce
       public ESMF_DELayoutAllGatherVI
 !EOP
@@ -100,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.8 2003/03/24 17:09:26 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.9 2003/03/31 20:03:40 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1121,15 +1126,15 @@
 !BOP
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutSendRecv(layout, sArray, rArray, sarrayLen, &
-                                      rarrayLen, sDE, rDE, rc)
+      subroutine ESMF_DELayoutSendRecv(layout, sarray, rarray, snum, &
+                                      	rnum, sde_index, rde_index, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(4), intent(in) :: sArray(:), rArray(:)
-      integer, intent(in) :: sarrayLen
-      integer, intent(in) :: rarrayLen
-      integer, intent(in) :: sDE, rDE
+      real(4), intent(in) :: sarray(:), rarray(:)
+      integer, intent(in) :: snum
+      integer, intent(in) :: rnum
+      integer, intent(in) :: sde_index, rde_index
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1150,8 +1155,8 @@
       endif
 
 !     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutSendRecv(layout, sArray, rArray, sarrayLen, & 
-                                      rarrayLen, sDE, rDE, rc)
+      call c_ESMC_DELayoutSendRecv(layout, sarray, rarray, snum, & 
+        rnum, sde_index, rde_index, ESMF_FLOAT, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutSendRecv error"
         return
@@ -1159,7 +1164,52 @@
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_DELayoutSendRecv
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutBcast(layout, array, num, &
+                                    rootde_index, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real(4), intent(in) :: array
+      integer, intent(in) :: num
+      integer, intent(in) :: rootde_index
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Broadcasts data from a root {\tt DE} to all other {\tt DE}s in
+!     the {\tt DELayout}.
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutBcast(layout, array, num, rootde_index, &
+			        ESMF_FLOAT, rc)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutBcast error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutBcast
 
 !------------------------------------------------------------------------------
 !BOP
