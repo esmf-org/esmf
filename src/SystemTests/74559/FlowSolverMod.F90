@@ -1,70 +1,16 @@
-! $Id: FlowSolverMod.F90,v 1.11 2003/05/10 18:29:09 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.12 2003/05/27 17:18:39 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
 !BOP
 !
-! !MODULE: FlowSolverMod.F90 - Source file for Flow Solver Component
-!
 ! !DESCRIPTION:
-!  This component does a finite difference solution of the PDE's for
-!  semi-compressible fluid flow.  It uses an explicit solution
-!  method on a staggered mesh with velocities and momentum located at cell
-!  faces and other physical quantities at cell centers.  The component
-!  assumes a logically rectangular two-dimensional cartesian mesh with
-!  constant cell spacing.  It also employs a donor-cell advection scheme.
-!  Although the algorithm is general, the boundary conditions are coded to
-!  assume constant inflow on the left, outflow on the right, and free-slip
-!  insulated boundaries on the top and bottom.  This component will allow
-!  the user to construct flow obstacles with different energies, and it
-!  accepts a second inflow from the bottom boundary that can be controlled
-!  by a second component.  For material properties, this component uses an
-!  ideal gas equation of state, and assumes constant ratio of specific
-!  heats, thermal conductivity, and specific heat capacity.  There is no
-!  system of units assumed by the component -- it is up to the user to
-!  ensure dimensional consistency.
+!  Solves semi-compressible flow with energy PDE's.  Uses an explicit
+!  solution method on a staggered mesh with velocities and momentum 
+!  located at cell faces and other physical quantities at cell centers.
+!  Employs a donor-cell advection scheme.
 !
-! {\small Semi-compressible flow equations
-!
-!$\frac{\partial \rho}{\partial t} + \frac{\partial \rho u}{\partial x}
-!+ \frac{\partial \rho v}{\partial y} = 0 $
-!
-!$\frac{\partial \rho u}{\partial t} + \frac{\partial \rho u^{2}}{\partial x} 
-!+ \frac{\partial \rho u v}{\partial y} = - \frac{\partial(p + q)}{\partial x}$
-!
-!$\frac{\partial \rho v}{\partial t} + \frac{\partial \rho u v}{\partial x} 
-!+ \frac{\partial \rho v^{2}}{\partial y} = - \frac{\partial(p + q)}{\partial y}$
-!
-!$\frac{\partial p I}{\partial t} + \frac{\partial \rho u I}{\partial x} +
-!\frac{\partial \rho v I}{\partial y} = -(p + q)\left(\frac{\partial u}
-!{\partial x} + \frac{\partial v}{\partial y}\right) + \frac{k}{b}\left(
-!\frac{\partial^{2}I}{\partial x^{2}} + \frac{\partial^{2}I}{\partial y^{2}}\right)$
-!
-!$p = (\gamma - 1)\rho I$
-!
-!$q = -q_{o}\rho u_{in}(dx^{2} + dy^{2})^{1/2} \left(\frac{\partial u}
-!{\partial x} + \frac{\partial v}{\partial y}\right)$
-!
-!$if q < 0 set q = 0$
-!
-!Where
-!\begin{tabular}{ll}
-!$\rho$ & density \\
-!$t$ & time \\
-!$u$ & x-component of velocity \\
-!$v$ & y-component of velocity\\
-!$p$ & pressure\\
-!$q$ & artificial velocity\\
-!$I$ & standard internal energy\\
-!$\gamma$ & ratio of specific heats\\
-!$k$ & thermal conductivity\\
-!$b$ & specific heat capacity\\
-!$q_{o}$ & artificial viscosity coefficient, dimensionless\\
-!$u_{in}$ & inflow velocity (representative velocity)\\
-!\end{tabular}}
-!
-!
-!EOP
+!\begin{verbatim}
 
       module FlowSolverMod
 !
@@ -82,7 +28,7 @@
       contains
 
 !-------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowSolver_register - Registers the init, run, and finalize routines.
 
 ! !INTERFACE:
@@ -104,7 +50,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -114,8 +60,7 @@
 !
 ! Register the callback routines.
 !
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init1, 1, rc)
-      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init2, 2, rc)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, Flow_Init, 0, rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
       call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, Flow_Final, 0, rc)
 
@@ -126,18 +71,18 @@
       end subroutine FlowSolver_register
 
 !-------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: Flow_Init1 - Initialization routine
+!BOP
+! !IROUTINE: Flow_Init - Initialization routine
 
 ! !INTERFACE:
-      subroutine Flow_Init1(gcomp, import_state, export_state, clock, rc)
+      subroutine Flow_Init(gcomp, import_state, export_state, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out) :: rc
+      integer, optional, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     This subroutine is the registered init routine.  It reads input,
@@ -146,105 +91,50 @@
 !     \begin{description}
 !     \item [gcomp]
 !           Pointer to a {\tt Gridded Component} object.
-!     \item [import\_state]
+!     \item [import_state]
 !           Pointer to a {\tt State} object containing the import list.
-!     \item [export\_state]
+!     \item [export_state]
 !           Pointer to a {\tt State} object containing the export list.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
-!     \item [rc]
+!     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
+      integer :: status
+      logical :: rcpresent
       integer :: i, j
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords, global_max_coords
-      real :: x_min, x_max, y_min, y_max
-      integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
+      real(kind=ESMF_IKIND_R4) :: x_min, x_max, y_min, y_max
       integer :: i_max, j_max
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
-      namelist /input/ uin, rhoin, siein, &
+      namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
+                       uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
                        printout, sieobs, nobsdesc, iobs_min, iobs_max, &
                        jobs_min, jobs_max, iflo_min, iflo_max
-!BOP
 !
-! !DESCRIPTION:
-! \subsubsection{Namelist Input Parameters for Flowsolver:}
-!     The following variables must be input to the FlowSolver Component to run.
-!     They are located in a file called "coupled\_flow\_input."
+! Set initial values
 !
-!     The variables are:
-!     \begin{description}
-!     \item [uin]
-!           Inflow velocity at left boundary.
-!     \item [rhoin]
-!           Inflow density at left boundary.
-!     \item [siein]
-!           Inflow specific internal energy at left boundary.
-!     \item [gamma]
-!           Ratio of specific heats for the fluid (assumed constant).
-!     \item [akb]
-!           Thermal conductivity over specific heat capacity (assumed
-!           constant).
-!     \item [q0]
-!           Dimensionless linear artificial viscosity coefficient
-!           (should be between 0.1 and 0.2).
-!     \item [u0]
-!           Initial velocity in the first grid direction.
-!     \item [v0]
-!           Initial velocity in the second grid direction.
-!     \item [sie0]
-!           Initial specific internal energy.
-!     \item [rho0]
-!           Initial density.
-!     \item [printout]
-!           Number of cycles between graphical output files.
-!     \item [sieobs]
-!           Specific internal energy of the obstacles.
-!     \item [nobsdesc]
-!           Number of obstacle descriptors.  Each descriptor defines a
-!           block of cells that will serve as an obstacle and not allow
-!           fluid flow.
-!     \item [iobs\_min]
-!           Minimum global cell number in the first grid direction defining
-!           a block of cells to be an obstacle.  Must be [nobsdesc] number
-!           of these.
-!     \item [iobs\_max]
-!           Maximum global cell number in the first grid direction defining
-!           a block of cells to be an obstacle.  Must be [nobsdesc] number
-!           of these.
-!     \item [jobs\_min]
-!           Minimum global cell number in the second grid direction defining
-!           a block of cells to be an obstacle.  Must be [nobsdesc] number
-!           of these.
-!     \item [jobs\_max]
-!           Maximum global cell number in the second grid direction defining
-!           a block of cells to be an obstacle.  Must be [nobsdesc] number
-!           of these.
-!     \item [iflo\_min]
-!           Minimum global grid cell number for the second inflow along the
-!           bottom boundary.
-!     \item [iflo\_max]
-!           Maximum global grid cell number for the second inflow along the
-!           bottom boundary.
-!     \end{description}
-!
-!EOP
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
 !
 ! Initialize return code
 !
-      rc = ESMF_FAILURE
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
 !
 ! Read in input file
 !
@@ -252,29 +142,48 @@
       read(10, input, end=20)
    20 continue
 !
-! Query component for information.
+! Calculate some other quantities
 !
-      call ESMF_GridCompGet(gcomp, layout=layout, grid=grid, rc=rc)
-
-      call ESMF_GridGet(grid, global_nmax=global_nmax, &
-                              global_min_coords=global_min_coords, &
-                              global_max_coords=global_max_coords, rc=rc)
-!
-! Extract and calculate some other quantities
-!
-      i_max = global_nmax(1)
-      j_max = global_nmax(2)
-      x_min = global_min_coords(1)
-      y_min = global_min_coords(2)
-      x_max = global_max_coords(1)
-      y_max = global_max_coords(2)
       dx = (x_max - x_min)/i_max      ! Should be calls to PhysGrid eventually
       dy = (y_max - y_min)/j_max
 !
+! Query component for information.
+!
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+!
+! Create the Grid
+!
+      horz_gridtype = ESMF_GridType_XY
+      horz_stagger = ESMF_GridStagger_C
+      horz_coord_system = ESMF_CoordSystem_Cartesian
+      halo_width = 1
+
+      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layout, &
+                             horz_gridtype=horz_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             halo_width=halo_width, &
+                             name="source grid", rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Flow_init:  grid create"
+        return
+      endif
+!
+! Set the Grid in the gridded Component
+!
+      call  ESMF_GridCompSet(gcomp, grid=grid, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Flow_init:  grid comp set"
+        return
+      endif
+!
 ! Initialize the data
 !
-      call FlowInit(gcomp, clock, rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowInit(gcomp, clock, status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_init:  flowinit"
         return
       endif
@@ -302,83 +211,12 @@
       call ESMF_StateAddData(export_state, "Q", rc)
       call ESMF_StateAddData(export_state, "FLAG", rc)
 
-      rc = ESMF_SUCCESS
+      if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine Flow_Init1
-
-!-------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: Flow_Init2 - Initialization routine, second phase
-
-! !INTERFACE:
-      subroutine Flow_Init2(gcomp, import_state, export_state, clock, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: import_state
-      type(ESMF_State) :: export_state
-      type(ESMF_Clock) :: clock
-      integer, intent(out) :: rc
-!
-! !DESCRIPTION:
-!     This subroutine is the second phase of the init routine.
-!     It sets the export fields in the export state for what's required.
-!     \begin{description}
-!     \item [gcomp]
-!           Pointer to a {\tt Gridded Component} object.
-!     \item [import\_state]
-!           Pointer to a {\tt State} object containing the import list.
-!     \item [export\_state]
-!           Pointer to a {\tt State} object containing the export list.
-!     \item [clock]
-!           Pointer to a {\tt Clock} object.
-!     \item [rc]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOPI
-!
-! Local variables
-!
-      integer :: i, datacount
-      character(len=ESMF_MAXSTR), dimension(7) :: datanames
-      type(ESMF_Field) :: thisfield
-!
-! Initialize return code
-!
-      rc = ESMF_FAILURE
-      datacount = 7
-      datanames(1) = "SIE"
-      datanames(2) = "U"
-      datanames(3) = "V"
-      datanames(4) = "RHO"
-      datanames(5) = "P"
-      datanames(6) = "Q"
-      datanames(7) = "FLAG"
-
-      !
-      ! Update export state with needed fields
-      !
-      do i=1, datacount
-
-        ! check isneeded flag here
-        if (.not. ESMF_StateIsNeeded(export_state, datanames(i), rc)) then 
-           cycle
-        endif
-
-        ! Set export data in export state
-        call ESMF_StateGetData(import_state, datanames(i), thisfield, rc=rc)
-        call ESMF_StateAddData(export_state, thisfield, rc=rc)
-
-      enddo
-
-      rc = ESMF_SUCCESS
-
-      end subroutine Flow_Init2
+      end subroutine Flow_Init
 
 !-------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowInit - Initializes data for the FlowSolver.
 
 ! !INTERFACE:
@@ -402,7 +240,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -658,21 +496,13 @@
       endif
       dt = s_
       write(*,*) 'dt = ', dt
-! 
-! Check initial data for stability
-!
-      call FlowStability(status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in FlowSolve: flow stability"
-        return
-      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine FlowInit
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowSolve - Run routine for this component, solves PDE's
 
 ! !INTERFACE:
@@ -683,33 +513,26 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out) :: rc
+      integer, optional, intent(out) :: rc
 !
 ! !DESCRIPTION:
 !     The FlowSolve subroutine is the registered "run" routine for the
 !     FlowSolver.  It calls all other necessary routines for the FlowSolver
 !     algorithm and checks the output interval.
 !     \begin{description}
-!     \item [gcomp]
+!     \item [ccomp]
 !           Pointer to a {\tt Gridded Component} object.
-!     \item [import\_state]
-!           An {\tt ESMF\_State} object containing data obtained from other
-!           components.
-!     \item [export\_state]
-!           An {\tt ESMF\_State} object containing data needed by other
-!           components.
-!     \item [clock]
-!           An {\tt ESMF\_Clock} object containing the current time,
-!           time step, and stop time.
-!     \item [rc]
+!     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
+      integer :: status
+      logical :: rcpresent
       integer :: i, j
       integer :: counter = 0
       integer :: print_count = 0
@@ -729,7 +552,15 @@
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+!
+! Initialize return code
+!
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
 !
 ! Increment counter
 !
@@ -737,13 +568,13 @@
 ! 
 ! Get timestep from clock
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call ESMF_ClockGetTimeStep(clock, time_step, status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
       endif
@@ -770,67 +601,79 @@
 !
 ! calculate RHOU's and RHOV's (momentum)
 !
-      call FlowRhoVel(rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowRhoVel(status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrhovel"
         return
       endif
 !    
 ! calculate RHOI's (energy)
 !
-      call FlowRhoI(rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowRhoI(status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrhoi"
         return
       endif
 !    
 ! determine new densities and internal energies
 !
-      call FlowRho(rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowRho(status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowrho"
         return
       endif
 !
 !  update velocities
 !
-      call FlowVel(rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowVel(status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: flowvel"
         return
       endif
 !
 !  new pressures and viscosities
 !
-      call FlowState(rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowState(status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve"
         return
       endif
-!
-!  put needed data in export state
-!
+      ! Debug
+      call ESMF_StateAddData(export_state, field_sie, rc=status)
+      call ESMF_StateAddData(export_state, field_u, rc=status)
+      call ESMF_StateAddData(export_state, field_v, rc=status)
+      call ESMF_StateAddData(export_state, field_rho, rc=status)
+      call ESMF_StateAddData(export_state, field_flag, rc=status)
+      !
+      ! Update export state with needed fields
+      !
       do i=1, datacount
+
+          ! check isneeded flag here
           if (.not. ESMF_StateIsNeeded(export_state, datanames(i), rc)) then 
               cycle
           endif
-          call ESMF_StateGetData(import_state, datanames(i), thisfield, rc=rc)
-          call ESMF_StateAddData(export_state, thisfield, rc=rc)
+
+          ! Set export data in export state
+          call ESMF_StateGetData(import_state, datanames(i), thisfield, rc=status)
+          call ESMF_StateAddData(export_state, thisfield, rc=status)
+
         enddo
+
 !
 ! Print graphics every printout steps
 !
       if(mod(counter, printout) .eq. 0) then
         print_count = print_count + 1
-        call FlowPrint(gcomp, clock, print_count, rc)
+        call FlowPrint(gcomp, clock, print_count, status)
       endif
 
-      rc = ESMF_SUCCESS
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine FlowSolve
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowRhoVel - Calculate momentum arrays RHOU and RHOV.
 
 ! !INTERFACE:
@@ -848,7 +691,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -908,24 +751,11 @@
 !
 ! Update RHOU with Halo
 !
-!BOP
-!
-! !DESCRIPTION:
-! \subsubsection{Example of FieldHalo Usage:}
-!
-!     The following piece of code provides an example of Haloing the data in a
-!     Field.  Currently the FieldHalo routine assumes the entire Halo is updated
-!     completely; i.e. the user cannot specify halo width or side separately.
-!     FieldHalo uses the Route object to transfer data from the exclusive
-!     computational domain of one DE to the Halo region of another.
-!\begin{verbatim}
       call ESMF_FieldHalo(field_rhou, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhou halo"
         return
       endif
-!\end{verbatim}
-!EOP
 
       do j = jmin, jmax
         do i = imin, imax
@@ -972,7 +802,7 @@
       end subroutine FlowRhoVel
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowRhoI - Calculate heat energy array RHOI.
 
 ! !INTERFACE:
@@ -990,7 +820,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -1092,7 +922,7 @@
       end subroutine FlowRhoI
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowRho - Calculate density and standard energy arrays RHO and SIE.
 
 ! !INTERFACE:
@@ -1110,7 +940,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -1214,7 +1044,7 @@
       end subroutine FlowRho
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowVel - Calculates the velocity arrays U and V.
 
 ! !INTERFACE:
@@ -1232,7 +1062,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -1377,7 +1207,7 @@
       end subroutine FlowVel
 
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowState - Calculates the state arrays for pressure and viscosity.
 
 ! !INTERFACE:
@@ -1396,7 +1226,7 @@
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -1468,84 +1298,7 @@
       end subroutine FlowState
 
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: FlowStability - Checks current data for instabilities
-
-! !INTERFACE:
-      subroutine FlowStability(rc)
-!
-! !ARGUMENTS:
-      integer, optional, intent(out) :: rc
-!
-! !DESCRIPTION:
-!     The FlowStability routine compares the current data against stability
-!     criteria for the courant number, viscosity, and mach number.
-!     \begin{description}
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOPI
-!
-! Local variables
-!
-      integer :: status
-      logical :: rcpresent
-      real :: scale, c
-!
-! Set initial values
-!
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-!
-! Check courant limit with inflow
-!
-      scale = sqrt(dx**2 + dy**2)
-      if(uin*dt/scale.ge.0.20) then
-        print *, "Courant limit exceeded by inflow conditions"
-        print *, "Please decrease uin, decrease dt, or increase dx and dy ", &
-                 "and try again."
-        return
-      endif
-!
-! Check viscosity term
-!
-      if(q0*rhoin*uin/scale.ge.0.20) then
-        print *, "Viscosity limit exceeded by inflow conditions"
-        print *, "Please decrease q0, decrease rhoin, decrease uin, or ", &
-                 "increase dx and dy and try again."
-        return
-      endif
-!
-! Check mach number
-!
-      if(gamma.le.1.0) then
-        print *, "Gamma must be greater than 1.0"
-        print *, "Please change gamma and try again."
-        return
-      endif
-      c = sqrt(gamma*(gamma-1.0)*siein)
-      if(uin/c.ge.1.50) then
-        print *, "Mach number limit exceeded by inflow conditions"
-        print *, "Please decrease uin, decrease gamma, or increase siein ", &
-                 "and try again."
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine FlowStability
-
-!------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: FlowPrint - Print out the SIE, U, and V arrays.
 
 ! !INTERFACE:
@@ -1566,14 +1319,14 @@
 !           Pointer to a {\tt Gridded Component} object.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
-!     \item [file\_no]
+!     \item [file_no]
 !           File number for output files, 999 max.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
 !
-!EOPI
+!EOP
 !
 ! Local variables
 !
@@ -1640,18 +1393,6 @@
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         endif
         call ESMF_ArrayDestroy(outarray, status)
-
-        do j = jmin, jmax
-          do i = imin, imax
-            de(i,j) = de_id
-          enddo
-        enddo
-        call ESMF_FieldAllGather(field_de, outarray, status)
-        if (de_id .eq. 0) then
-          write(filename, 20)  "DE", file_no
-          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
-        endif
-        call ESMF_ArrayDestroy(outarray, status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1661,7 +1402,7 @@
       end subroutine FlowPrint
 
 !----------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: Flow_Final - Deallocates all arrays.
 
 ! !INTERFACE:
@@ -1672,45 +1413,58 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out) :: rc
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     The Flow\_Final routine is the registered finalize routine for the
+!     The Flow_Final routine is the registered finalize routine for the
 !     FlowSolver.  It deallocates the memory allocated during the init
 !     process.
 !     \begin{description}
 !     \item [gcomp]
 !           Pointer to a {\tt Gridded Component} object.
-!     \item [import\_state]
+!     \item [import_state]
 !           Pointer to a {\tt State} object containing the import list.
-!     \item [export\_state]
+!     \item [export_state]
 !           Pointer to a {\tt State} object containing the export list.
 !     \item [clock]
 !           Pointer to a {\tt Clock} object.
-!     \item [rc]
+!     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}
 !
-!EOPI
-
+!EOP
+!
+! Local variables
+!
+      integer :: status
+      logical :: rcpresent
 !
 ! Set initial values
 !
-      rc = ESMF_FAILURE
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+!
+! Initialize return code
+!
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 !
 ! Deallocate arrays
 !
-      call FlowArraysDealloc(rc)
-      if(rc .NE. ESMF_SUCCESS) then
+      call FlowArraysDealloc(status)
+      if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_Final"
         return
       endif
 
-      rc = ESMF_SUCCESS
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine Flow_Final
 
 !------------------------------------------------------------------------------
     end module FlowSolverMod
+!\end{verbatim}
     
