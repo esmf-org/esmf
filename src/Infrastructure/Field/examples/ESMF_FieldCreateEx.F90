@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.13 2004/02/13 17:25:51 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.14 2004/02/13 19:09:50 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -12,7 +12,7 @@
 ! See the following code fragments for examples of how to create new Fields.  
 ! Also see the Programming Model section of this document.
 !
-!EOC
+!EOP
 !BOC
 !   ! Example program showing various ways to create a Field object
     program ESMF_FieldCreateEx
@@ -27,11 +27,13 @@
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DataMap) :: datamap
+    type(ESMF_DELayout) :: layout
     type(ESMF_RelLoc) :: relativelocation
     character (len = ESMF_MAXSTR) :: fname
     type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field1, field2, field3, field4
-    real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real (ESMF_KIND_R8), dimension(2) :: origin
 !EOC
     integer :: finalrc       
 !   !Set finalrc to success
@@ -47,33 +49,28 @@
 !   !  associates the data with the Grid.  The data is referenced
 !   !  by default.  The DataMap is created with defaults.
  
-    grid = ESMF_GridCreate(name="atmgrid", rc=rc)
+    layout = ESMF_DELayoutCreate(rc=rc)
+    origin = (/ 0.0, 0.0 /)
+    grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), origin, &
+                                         layout=layout, name="atmgrid", rc=rc)
     allocate(f90ptr1(10,20))
     arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     call ESMF_ArrayPrint(arraya, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     field1 = ESMF_FieldCreate(grid, arraya, &
                          horizRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 !EOP
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     call ESMF_FieldGetName(field1, fname, rc)
     print *, "Field example 1 returned, name = ", trim(fname)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !-------------------------------------------------------------------------
 !   ! Example 2:
@@ -83,17 +80,13 @@
 
     call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     field2 = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
     print *, "Field example 2 returned"
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !-------------------------------------------------------------------------
 !   ! Example 3:
@@ -105,23 +98,17 @@
 
     call ESMF_FieldDetachData(field1, array=arraya, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     allocate(f90ptr2(30,15))
     arrayb = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
     call ESMF_FieldAttachData(field1, array=arrayb, rc=rc)
     print *, "Field example 3 returned"
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !-------------------------------------------------------------------------
 !   ! Example 4:
@@ -131,25 +118,19 @@
 
      field3 = ESMF_FieldCreateNoData("precip", rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !
 !    ! At some later time, associate a Grid with this Field
      call ESMF_FieldSetGrid(field3, grid, rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !    ! ...and associate a data Array.
 !    call ESMF_FieldAttachArray(field3, arraya, rc=rc)
      print *, "Field example 4 returned"
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !-------------------------------------------------------------------------
 !   ! Example 5:
@@ -158,41 +139,29 @@
      call ESMF_FieldGetLocalGridInfo(field3, ncell=mycell, rc=rc)
      print *, "Field example 5 returned"
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-	finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
      call ESMF_FieldDestroy(field1, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
      call ESMF_FieldDestroy(field2, rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
      call ESMF_FieldDestroy(field3,rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
      !call ESMF_FieldDestroy(field4,rc=rc)
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 !-------------------------------------------------------------------------
      call ESMF_Finalize(rc)
 !-------------------------------------------------------------------------
 !EOC
-    if (rc.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     if (finalrc.EQ.ESMF_SUCCESS) then
 	print *, "PASS: ESMF_FieldCreateEx.F90"
