@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.3 2004/02/10 00:06:38 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.4 2004/02/19 21:26:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.3 2004/02/10 00:06:38 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.4 2004/02/19 21:26:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -652,8 +652,8 @@
 
       ! set up things we need to find a cached route or precompute one
       call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
-                                       totalindex=dst_AI, compindex=src_AI, &
-                                       rc=status)       
+                                       ftypep%mapping, totalindex=dst_AI, &
+                                       compindex=src_AI, rc=status)       
 
       ! translate AI's into global numbering
       call ESMF_GridLocalToGlobalIndex(ftypep%grid, localAI2D=dst_AI, &
@@ -1087,8 +1087,8 @@
                             globalCellCountPerDim=src_global_count, &
                             globalStartPerDEPerDim=src_global_start, rc=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
-                                           stypep%grid, src_AI_tot, &
-                                           src_AI_exc, rc=rc)
+                                           stypep%grid, stypep%mapping, &
+                                           src_AI_tot, src_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
                                            globalAI2D=gl_src_AI_tot, rc=rc)
@@ -1113,8 +1113,8 @@
                             globalCellCountPerDim=dst_global_count, &
                             globalStartPerDEPerDim=dst_global_start, rc=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
-                                           dtypep%grid, dst_AI_tot, &
-                                           dst_AI_exc, rc=rc)
+                                           dtypep%grid, dtypep%mapping, &
+                                           dst_AI_tot, dst_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
                                            globalAI2D=gl_dst_AI_tot, rc=rc)
@@ -1385,8 +1385,8 @@
                             globalCellCountPerDim=src_global_count, &
                             globalStartPerDEPerDim=src_global_start, rc=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
-                                           stypep%grid, src_AI_tot, &
-                                           src_AI_exc, rc=rc)
+                                           stypep%grid, stypep%mapping, &
+                                           src_AI_tot, src_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
                                            globalAI2D=gl_src_AI_tot, rc=rc)
@@ -1411,8 +1411,8 @@
                             globalCellCountPerDim=dst_global_count, &
                             globalStartPerDEPerDim=dst_global_start, rc=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
-                                           dtypep%grid, dst_AI_tot, &
-                                           dst_AI_exc, rc=rc)
+                                           dtypep%grid, dtypep%mapping, &
+                                           dst_AI_tot, dst_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
                                            globalAI2D=gl_dst_AI_tot, rc=rc)

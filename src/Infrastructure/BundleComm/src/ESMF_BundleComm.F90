@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.1 2004/01/26 17:43:59 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.2 2004/02/19 21:23:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.1 2004/01/26 17:43:59 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.2 2004/02/19 21:23:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -873,8 +873,8 @@
           allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%flist(1)%ftypep%localfield%localdata, &
-                                           stypep%grid, src_AI_tot, &
-                                           src_AI_exc, rc=rc)
+                                           stypep%grid, stypep%flist(1)%ftypep%mapping, &
+                                           src_AI_tot, src_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
                                            globalAI2D=gl_src_AI_tot, rc=rc)
@@ -897,8 +897,8 @@
           allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%flist(1)%ftypep%localfield%localdata, &
-                                           dtypep%grid, dst_AI_tot, &
-                                           dst_AI_exc, rc=rc)
+                                           dtypep%grid, dtypep%flist(1)%ftypep%mapping, &
+                                           dst_AI_tot, dst_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
                                            globalAI2D=gl_dst_AI_tot, rc=rc)
@@ -1164,8 +1164,8 @@
           allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%flist(1)%ftypep%localfield%localdata, &
-                                           stypep%grid, src_AI_tot, &
-                                           src_AI_exc, rc=rc)
+                                           stypep%grid, stypep%flist(1)%ftypep%mapping, &
+                                           src_AI_tot, src_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
                                            globalAI2D=gl_src_AI_tot, rc=rc)
@@ -1188,8 +1188,8 @@
           allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%flist(1)%ftypep%localfield%localdata, &
-                                           dtypep%grid, dst_AI_tot, &
-                                           dst_AI_exc, rc=rc)
+                                           dtypep%grid, dtypep%flist(1)%ftypep%mapping, &
+                                           dst_AI_tot, dst_AI_exc, rc=rc)
           ! translate the AI's to global index
           call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
                                            globalAI2D=gl_dst_AI_tot, rc=rc)
