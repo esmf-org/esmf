@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/10/14 17:00:53 nscollins Exp $
+# $Id: makefile,v 1.1 2004/10/14 17:00:54 nscollins Exp $
 
 all: demo
 
