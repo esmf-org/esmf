@@ -156,10 +156,10 @@
       ! local and global information, for both the total number of cells 
       ! including the boundary regions, and the computational cells 
       ! (where each cell belongs to one and only one DE).
-        type (ESMF_DistGridLocal) :: myDETotal 
-        type (ESMF_DistGridLocal) :: myDEComp 
-        type (ESMF_DistGridGlobal) :: globalTotal
-        type (ESMF_DistGridGlobal) :: globalComp
+        type (ESMF_DistGridLocal), target :: myDETotal 
+        type (ESMF_DistGridLocal), target :: myDEComp 
+        type (ESMF_DistGridGlobal), target :: globalTotal
+        type (ESMF_DistGridGlobal), target :: globalComp
 
       end type
 
@@ -209,7 +209,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.86 2004/01/08 23:37:17 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.87 2004/01/21 18:18:32 jwolfe Exp $'
 
 !==============================================================================
 !
