@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.9 2005/01/12 22:49:46 nscollins Exp $
+! $Id: FlowArraysMod.F90,v 1.10 2005/02/28 16:40:44 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -34,11 +34,12 @@
 ! Fields
 !
       public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-                field_rhov, field_p, field_q, field_flag, field_de
+                field_rhov, field_p, field_q, field_flag, field_de, halohandle
 
       type(ESMF_Field), save :: field_sie, field_u, field_v, field_rho, field_rhoi, &
                                 field_rhou, field_rhov, field_p, field_q, field_flag, &
                                 field_de
+      type(ESMF_RouteHandle), save :: halohandle
 !
 ! scalars here
 !

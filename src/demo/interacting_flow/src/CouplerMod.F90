@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.1 2004/10/14 17:00:55 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.2 2005/02/28 16:40:44 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -115,7 +115,6 @@
 !   ! Local variables
     type(ESMF_Field) :: src_field, dst_field
     type(ESMF_VM) :: vm
-    type(ESMF_DELayout) :: cpllayout
     character(ESMF_MAXSTR) :: statename
 
     print *, "Coupler Init starting"
@@ -125,9 +124,8 @@
     ! (this makes some eager error-checking compilers happy.)
     rc = ESMF_FAILURE
 
-    ! Get VM from coupler component and create default delayout
+    ! Get VM from coupler component to use in data redistribution
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-    cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
 
     call ESMF_StateGet(importState, name=statename, rc=rc)
     call ESMF_StateGetField(importState, "SIE", src_field, rc=rc)
@@ -140,7 +138,7 @@
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
       fromFlow_rh = ESMF_RouteHandleCreate(rc)
-      call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
+      call ESMF_FieldRedistStore(src_field, dst_field, vm, &
                                  fromFlow_rh, rc=rc)
       
     endif
@@ -152,7 +150,7 @@
       call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
       fromInject_rh = ESMF_RouteHandleCreate(rc)
-      call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
+      call ESMF_FieldRedistStore(src_field, dst_field, vm, &
                                  fromInject_rh, rc=rc)
 
     endif
