@@ -1,4 +1,4 @@
-! $Id: inter_ESMF_Class.F90,v 1.4 2003/02/03 22:46:09 nscollins Exp $
+! $Id: inter_ESMF_Class.F90,v 1.5 2003/02/13 15:08:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: inter_ESMF_Class.F90,v 1.4 2003/02/03 22:46:09 nscollins Exp $'
+      '$Id: inter_ESMF_Class.F90,v 1.5 2003/02/13 15:08:32 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -161,28 +161,31 @@ end interface
 ! !REQUIREMENTS:
 
 
-!       local vars
+        ! local vars
         type (ESMF_<Class>) :: class        ! new thing being created
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
-!       ! Initialize the contents to Null in case of failure
+        ! Initialize the contents to Null in case of failure
         class%this = ESMF_NULL_POINTER
 
-!       ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE 
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        else
+          rcpresent = .FALSE.
         endif
 
-!       ! Routine which interfaces to the C++ creation routine.
+        ! Routine which interfaces to the C++ creation routine.
         call c_ESMC_<Class>Create(class, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "<Class> construction error"
           return
         endif
 
-!       ! Set return values
+        ! Set return values
         ESMF_<Class>CreateNew = class 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -217,28 +220,31 @@ end interface
 ! !REQUIREMENTS:
 
 
-!       ! Local variables
+        ! Local variables
         type (ESMF_<Class>) :: class        ! new class being created
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
-!       ! Initialize the contents to Null in case of failure
+        ! Initialize the contents to Null in case of failure
         class%this = ESMF_NULL_POINTER
 
-!       ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE 
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        else
+          rcpresent = .FALSE.
         endif
 
-!       ! C routine which interfaces to the C++ routine which does actual work
+        ! C routine which interfaces to the C++ routine which does actual work
         call c_ESMC_<Class>CreateNoData(class, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "<Class> construction error"
           return
         endif
 
-!       ! Set return values
+        ! Set return values
         ESMF_<Class>CreateNoData = class
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -271,24 +277,27 @@ end interface
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        ! local vars
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
-!       ! Initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE 
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
+        else
+          rcpresent = .FALSE.
         endif
 
-!       ! Call Destroy to release resources on the C++ side
+        ! Call Destroy to release resources on the C++ side
         call c_ESMC_<Class>Destroy(<class>, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "<Class> contents destruction error"
           return
         endif
 
-!       ! Set return code if user specified it
+        ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_<Class>Destroy
@@ -401,7 +410,7 @@ end interface
 !
         type (ESMF_<Class>) :: a 
 
-!       ! add code here
+        ! add code here
 
         ESMF_<Class>Restore = a 
  
@@ -489,33 +498,38 @@ end interface
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
-       logical :: rcpresent=.FALSE.
+        character (len=6) :: defaultopts    ! printing options
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
-!      Initialize return code; assume failure until success is certain
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE 
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        else
+          rcpresent = .FALSE.
+        endif
 
-!      ! Interface to call the C++ print code
-       if(present(options)) then
-           call c_ESMC_<Class>Print(<class>, options, status) 
-       else
-           call c_ESMC_<Class>Print(<class>, defaultopts, status) 
-       endif
+        defaultopts = "brief"
 
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "<Class> print error"
-         return
-       endif
+        ! Interface to call the C++ print code
+        if(present(options)) then
+            call c_ESMC_<Class>Print(<class>, options, status) 
+        else
+            call c_ESMC_<Class>Print(<class>, defaultopts, status) 
+        endif
 
-!      ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "<Class> print error"
+          return
+        endif
 
-       end subroutine ESMF_<Class>Print
+        ! Set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_<Class>Print
 
 
-       end module ESMF_<Class>Mod
+        end module ESMF_<Class>Mod
 
