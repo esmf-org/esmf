@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.17 2003/03/21 21:10:20 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.18 2003/03/21 22:17:26 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.17 2003/03/21 21:10:20 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.18 2003/03/21 22:17:26 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -157,8 +157,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      struct ESMC_XPacket *xpacket1,      // in  - first XPacket
-      struct ESMC_XPacket *xpacket2) {    // in  - second XPacket
+      ESMC_XPacket *xpacket1,      // in  - first XPacket
+      ESMC_XPacket *xpacket2) {    // in  - second XPacket
 //
 // !DESCRIPTION:
 //      Finds the intersection of two XPackets, which is itself an XPacket.
@@ -354,6 +354,73 @@
     return rc;
 
  } // end ESMC_XPacketFromAxisIndex
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_XPacketGlobalToLocal - get a local XPacket from a global one
+//
+// !INTERFACE:
+      int ESMC_XPacket::ESMC_XPacketGlobalToLocal(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_XPacket *global_XP, // in  - global XPacket
+      ESMC_AxisIndex *indexlist,      // in  - set of AxisIndices
+      int rank,                       // in  - rank of AxisIndex array
+      int nx,                         // in  - position of DE in the first
+                                      //       decomposition
+      int ny) {                       // in  - position of DE in the second
+                                      //       decomposition
+//
+// !DESCRIPTION:
+//      Translates a global XPacket into a local XPacket.
+//      Returns an XPacket and error code if problems are found.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+
+    // switch based on array rank  TODO: is this necessary?
+    switch (rank) {
+      case 1:
+        {
+          printf("no code to handle %d rank yet\n", rank);
+        }
+      break;
+      case 2:
+        {
+          int gstart = ny*indexlist[0].max + indexlist[0].gstart;
+          this->left  = global_XP->left  - gstart;
+          this->right = global_XP->right - gstart;
+          this->strides[0] = global_XP->strides[0];
+          this->num[0] = global_XP->num[0];
+        }
+      break;
+      case 3:
+        {
+          printf("no code to handle %d rank yet\n", rank);
+        }
+      break;
+      case 4:
+        {
+          printf("no code to handle %d rank yet\n", rank);
+        }
+      break;
+      case 5:
+        {
+          printf("no code to handle %d rank yet\n", rank);
+        }
+      break;
+    } 
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_XPacketGlobalToLocal
 
 
 //-----------------------------------------------------------------------------
