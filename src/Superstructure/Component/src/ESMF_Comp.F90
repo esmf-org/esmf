@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.32 2003/03/10 05:40:48 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.33 2003/03/24 23:01:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.32 2003/03/10 05:40:48 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.33 2003/03/24 23:01:31 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -461,7 +461,7 @@ end interface
           compp%layout = layout
         else
           ! query for # processors and create a layout
-          ! compp%layout = ESMF_DELayoutCreate()
+          compp%layout = ESMF_DELayoutCreate(rc=status)
         endif 
 
         if (present(filepath)) then
