@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.46 2003/09/09 20:47:31 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.47 2003/09/09 21:08:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,7 +152,9 @@
 !     ! state has to be different because it's a forward reference.
 
       type ESMF_DataHolder
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       private
           type(ESMF_Bundle) :: bp
           type(ESMF_Field)  :: fp 
@@ -167,7 +169,9 @@
 !     !  which holds the place for an optional Data item.
 
       type ESMF_StateData
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       private
         type(ESMF_StateObjectType) :: otype
         character(len=ESMF_MAXSTR), pointer :: namep
@@ -184,7 +188,9 @@
 !     ! Internal State data type.
 
       type ESMF_StateType
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       private
         type(ESMF_Base) :: base
         type(ESMF_StateImpExpType) :: st
@@ -202,7 +208,9 @@
 !     ! State data type.
 
       type ESMF_State
+#ifndef ESMF_SEQUENCE_BUG
       sequence
+#endif
       private
 #ifndef ESMF_NO_INITIALIZERS
         type(ESMF_StateType), pointer :: statep => NULL()
@@ -263,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.46 2003/09/09 20:47:31 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.47 2003/09/09 21:08:41 nscollins Exp $'
 
 !==============================================================================
 ! 
