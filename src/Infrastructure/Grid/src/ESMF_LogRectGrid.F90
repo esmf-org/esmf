@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.117 2004/12/06 17:00:44 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.118 2004/12/06 17:20:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.117 2004/12/06 17:00:44 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.118 2004/12/06 17:20:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8999,8 +8999,17 @@
       integer :: i
       type(ESMF_LogRectGrid), pointer :: lrgrid  ! lrgrid class
 
+      ! allocate logRectGrid derived type
+      allocate(grid%gridSpecific%logRectGrid, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "logRectGrid", &
+                                     ESMF_CONTEXT, rc)) return
+      
       ! shortcut to internals
       lrgrid => grid%gridSpecific%logRectGrid
+      call ESMF_LRGridConstructSpecificNew(lrgrid, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! serialize the grid derived type
       call c_ESMC_LRGridDeserialize(lrgrid%countPerDim(1), &
