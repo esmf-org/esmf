@@ -1,13 +1,13 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.2 2002/10/29 21:48:03 nscollins Exp $"
+"$Id: conf.h,v 1.3 2002/10/29 22:17:07 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
 #if !defined(INCLUDED_CONF_H)
 #define INCLUDED_CONF_H
 
-#define PARCH_linux
-#define ESMF_ARCH_NAME "linux"
+#define PARCH_solaris
+#define ESMF_ARCH_NAME "solaris"
 
 #define ESMC_HAVE_LIMITS_H
 #define ESMC_HAVE_PWD_H 
