@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/03/05 20:35:40 nscollins Exp $
+# $Id: makefile,v 1.2 2003/03/15 00:13:32 nscollins Exp $
 
 ALL:  tests
 
@@ -15,18 +15,22 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
-TESTEXAMPLES_3  = \
-	ESMC_RegridTest RUN_ESMC_RegridTest ESMC_RegridTest.rm
+TESTEXAMPLES_3  =
+TESTEXAMPLES_9  = 
 
-TESTEXAMPLES_9  = \
-	ESMC_RegridTest RUN_ESMC_RegridTestUNI ESMC_RegridTest.rm
+#TESTEXAMPLES_3  = \
+#	ESMC_RegridTest RUN_ESMC_RegridTest ESMC_RegridTest.rm
+#
+#TESTEXAMPLES_9  = \
+#	ESMC_RegridTest RUN_ESMC_RegridTestUNI ESMC_RegridTest.rm
 
 EXAMPLESF       = ESMF_Regrid.F90
 EXAMPLESC       = ESMC_Regrid.F90
 
 include ${ESMF_DIR}/makefile
 
-tests test: ESMF_RegridTest ESMC_RegridTest
+tests test:
+#tests test: ESMF_RegridTest ESMC_RegridTest
 
 ESMF_RegridCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
