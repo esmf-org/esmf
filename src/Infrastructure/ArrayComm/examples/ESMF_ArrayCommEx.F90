@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommEx.F90,v 1.2 2004/06/15 19:02:03 svasquez Exp $
+! $Id: ESMF_ArrayCommEx.F90,v 1.3 2004/09/23 16:24:47 nscollins Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -27,6 +27,7 @@
 !   ! Local variables
     integer :: nx, ny, arank, rc
     integer :: i, j, ni, nj, half, quart
+    integer :: bytwo, byfour
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
     type(ESMF_Grid) :: grid1, grid2
@@ -58,14 +59,24 @@
     call ESMF_VMGet(vm, petcount=nPETs, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    half = nPETs / 2
-    quart = nPETs / 4
+    bytwo = 2
+    half = nPETs / bytwo
+    if (half .le. 0) then
+       half = 1
+       bytwo = 1
+    endif
+    byfour = 4
+    quart = nPETs / byfour 
+    if (quart .le. 0) then
+       quart = 1
+       byfour = 1
+    endif
 
     ! Make a Nx4 and Nx2 layout
-    delayout1 = ESMF_DELayoutCreate(vm, (/ quart, 4 /), rc=rc)
+    delayout1 = ESMF_DELayoutCreate(vm, (/ quart, byfour /), rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    delayout2 = ESMF_DELayoutCreate(vm, (/ half, 2 /), rc=rc)
+    delayout2 = ESMF_DELayoutCreate(vm, (/ half, bytwo /), rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     !------------------------------------------------------------------------
