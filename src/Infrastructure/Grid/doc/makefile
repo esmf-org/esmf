@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/04 22:42:19 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/04/30 22:23:25 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,15 +13,15 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Grid/doc
 
-DVIFILES  = $(ESMC_DOCDIR)/Grid_desdoc.dvi \
-#		${ESMC_DOCDIR}/Grid_reqdoc.dvi \
-#		${ESMC_DOCDIR}/Grid_refdoc.dvi
+DVIFILES  =	$(ESMC_DOCDIR)/Grid_desdoc.dvi \
+		${ESMC_DOCDIR}/Grid_reqdoc.dvi \
+		${ESMC_DOCDIR}/Grid_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
-HTMLFILES = $(ESMC_DOCDIR)/Grid_desdoc
-#		${ESMC_DOCDIR}/Grid_reqdoc 
-#		${ESMC_DOCDIR}/Grid_refdoc
+HTMLFILES =	$(ESMC_DOCDIR)/Grid_desdoc \
+		${ESMC_DOCDIR}/Grid_reqdoc \
+		${ESMC_DOCDIR}/Grid_refdoc
 
 #
 # Tex Files to make
