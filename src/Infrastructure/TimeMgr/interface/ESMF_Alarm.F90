@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.50 2004/04/09 20:13:39 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.51 2004/04/13 23:13:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.50 2004/04/09 20:13:39 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.51 2004/04/13 23:13:27 eschwab Exp $'
 
 !==============================================================================
 !
@@ -285,11 +285,13 @@
 !          The clock with which to associate this newly created alarm.
 !     \item[{[ringTime]}]
 !          The ring time for a one-shot alarm or the first ring time for a 
-!          repeating (interval) alarm.
+!          repeating (interval) alarm.  Must specify at least one of ringTime
+!          or ringInterval.
 !     \item[{[ringInterval]}]
 !          The ring interval for repeating (interval) alarms.  If
 !          {\tt ringTime} is not also specified (first ring time), it will be
 !          calculated as the {\tt clock}'s current time plus {\tt ringInterval}.
+!          Must specify at least one of ringTime or ringInterval.
 !     \item[{[stopTime]}]
 !          The stop time for repeating (interval) alarms.  If not
 !          specified, an interval alarm will repeat forever.

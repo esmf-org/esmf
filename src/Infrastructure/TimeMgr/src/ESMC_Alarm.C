@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.33 2004/04/09 20:13:56 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.34 2004/04/13 23:13:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.33 2004/04/09 20:13:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.34 2004/04/13 23:13:27 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -79,6 +79,13 @@ int ESMC_Alarm::count=0;
     int returnCode;
     ESMC_Alarm *alarm;
 
+    if (ringTime == ESMC_NULL_POINTER && ringInterval == ESMC_NULL_POINTER) {
+      cerr << "ESMC_AlarmCreate(): must specify at least one of ringTime or "
+           << "ringInterval.\n";
+      *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+ 
     try {
       alarm = new ESMC_Alarm;
     }
@@ -730,8 +737,8 @@ int ESMC_Alarm::count=0;
     sticky = false;
 
     // mutually exclusive: can only specify one ring duration type
-    if (ringDuration == ESMC_NULL_POINTER &&
-        ringTimeStepCount == ESMC_NULL_POINTER) {
+    if (ringDuration != ESMC_NULL_POINTER &&
+        ringTimeStepCount != ESMC_NULL_POINTER) {
       cout << "ESMC_Alarm::ESMC_AlarmNotSticky(): can only specify " <<
               "one type of ring duration, not both." << endl;
       return(ESMF_FAILURE);
