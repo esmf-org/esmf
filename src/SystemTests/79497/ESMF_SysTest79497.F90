@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.2 2003/07/29 20:08:08 jwolfe Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.3 2003/08/01 15:45:26 nscollins Exp $
 !
 ! System test code #79497
 
@@ -143,7 +143,7 @@
 
       ! initialize stop time to 5/02/2003
       call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=5, dd_i4=2, &
-                        cal=gregorianCalendar, rc=rc)
+                        calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
       call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
@@ -257,7 +257,7 @@
                           testname, failMsg, testresult, ESMF_SRCLINE)
   
         ! Separate message to console, for quick confirmation of success/failure
-        if (rc .eq. ESMF_SUCCESS)) then
+        if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS!! Component test finished correctly."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc

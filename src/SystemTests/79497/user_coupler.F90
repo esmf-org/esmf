@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2003/07/29 20:08:41 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.3 2003/08/01 15:45:26 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -52,12 +52,11 @@
 !   ! Initialization routine.
  
     
-    subroutine user_init(comp, regrid, statelist, clock, rc)
+    subroutine user_init(comp, statelist, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_Regrid) :: regrid
-      type(ESMF_State), optional :: statelist
-      type(ESMF_Clock), optional :: clock
-      integer, optional :: rc
+      type(ESMF_State) :: statelist
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
       ! Local variables
       integer :: itemcount
@@ -77,9 +76,13 @@
 
       ! These are fields on different Grids - call RegridCreate to set
       ! up the Regrid structure
-      regrid = ESMF_RegridCreateFromField(humidity1, humidity2, &
-                                          method=ESMF_RegridMethod_Bilinear, &
-                                          name="humidity1_to_2", rc=status)
+      !! nsc - we currently do not have an explicit regrid object
+      !!  comment this out until we work out the interfaces.
+      !!  (the current code does internal caching of precomputed regrids)
+      !!regrid = ESMF_RegridCreateFromField(humidity1, humidity2, &
+      !!                                    method=ESMF_RegridMethod_Bilinear, &
+      !!                                    name="humidity1_to_2", rc=status)
+
 ! TODO:  send cpllayout to Regrid?  not in argument list
 
       print *, "User Coupler Init returning"
@@ -91,12 +94,11 @@
 !   !  The Run routine where data is coupled.
 !   !
  
-    subroutine user_run(comp, regrid, statelist, clock, rc)
+    subroutine user_run(comp, statelist, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_Regrid) :: regrid
-      type(ESMF_State), optional :: statelist
-      type(ESMF_Clock), optional :: clock
-      integer, optional :: rc
+      type(ESMF_State) :: statelist
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
       ! Local variables
       type(ESMF_State) :: mysource, mydest
@@ -122,9 +124,13 @@
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
-      !  the data
-      call ESMF_RegridRunField(humidity1, humidity2, regrid, status)
-! TODO:  send cpllayout to Regrid?  not in argument list
+      !  the data.  nsc - i think even if we make a regrid object, that
+      !  this will still be a field method and take a regrid argument?
+      !!call ESMF_RegridRunField(humidity1, humidity2, regrid, status)
+      call ESMF_FieldRegrid(humidity1, humidity2, cpllayout, &
+      !!                    method=ESMF_RegridMethod_Bilinear, &
+      !!                    name="humidity1_to_2", &
+                            rc=status)
 
       ! Set output data
       call ESMF_StateAddData(mydest, humidity2, rc=status)
@@ -141,12 +147,11 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, regrid, statelist, clock, rc)
+    subroutine user_final(comp, statelist, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_Regrid) :: regrid
-      type(ESMF_State), optional :: statelist
-      type(ESMF_Clock), optional :: clock
-      integer, optional :: rc
+      type(ESMF_State) :: statelist
+      type(ESMF_Clock) :: clock
+      integer :: rc
 
       ! Local variables
       type(ESMF_State) :: state1, state2
@@ -158,7 +163,9 @@
       call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
       call ESMF_StatePrint(state2, rc=rc)
    
-      call ESMF_RegridDestroy(regrid, rc)
+      !! right now regrids are cached by the system, no need to
+      !! delete.
+      !call ESMF_RegridDestroy(regrid, rc)
 
       print *, "User Coupler Final returning"
    
