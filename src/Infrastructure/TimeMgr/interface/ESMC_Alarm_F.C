@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.12 2003/07/25 19:36:07 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.13 2003/07/25 22:57:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,6 +55,14 @@ extern "C" {
            *status = (ptr)->ESMC_AlarmTurnOff();
        }
 
+       void FTN(c_esmc_alarmsticky)(ESMC_Alarm *ptr, int *status) {
+           *status = (ptr)->ESMC_AlarmSticky();
+       }
+
+       void FTN(c_esmc_alarmnotsticky)(ESMC_Alarm *ptr, int *status) {
+           *status = (ptr)->ESMC_AlarmNotSticky();
+       }
+
        void FTN(c_esmc_alarmisringing)(ESMC_Alarm *ptr, 
                 int *esmf_alarmIsRinging, int *status) {
            *esmf_alarmIsRinging = (int) (ptr)->ESMC_AlarmIsRinging(status);
@@ -70,6 +78,22 @@ extern "C" {
                                              ESMC_TimeInterval *ringInterval,
                                              int *status) {
            *status = (ptr)->ESMC_AlarmSetRingInterval(ringInterval);
+       }
+
+       void FTN(c_esmc_alarmgetringduration)(ESMC_Alarm *ptr, 
+                                             ESMC_TimeInterval *ringDuration,
+                                             int *status) {
+           *status = (ptr)->ESMC_AlarmGetRingDuration(ringDuration);
+       }
+
+       void FTN(c_esmc_alarmsetringduration)(ESMC_Alarm *ptr, 
+                                             ESMC_TimeInterval *ringDuration,
+                                             int *numTimeSteps,
+                                             ESMC_TimeInterval *timeStep,
+                                             int *status) {
+           *status = (ptr)->ESMC_AlarmSetRingDuration(ringDuration, 
+                                                      *numTimeSteps,
+                                                      timeStep);
        }
 
        void FTN(c_esmc_alarmgetringtime)(ESMC_Alarm *ptr, 
@@ -108,6 +132,18 @@ extern "C" {
            *status = (ptr)->ESMC_AlarmSetStopTime(stopTime);
        }
 
+       void FTN(c_esmc_alarmgetreftime)(ESMC_Alarm *ptr, 
+                                        ESMC_Time *refTime,
+                                        int *status) {
+           *status = (ptr)->ESMC_AlarmGetRefTime(refTime);
+       }
+
+       void FTN(c_esmc_alarmsetreftime)(ESMC_Alarm *ptr, 
+                                        ESMC_Time *refTime,
+                                        int *status) {
+           *status = (ptr)->ESMC_AlarmSetRefTime(refTime);
+       }
+
        void FTN(c_esmc_alarmeq)(ESMC_Alarm *alarm1, ESMC_Alarm *alarm2,
                                 int *esmf_alarmEQ) {
            *esmf_alarmEQ = (int) (*alarm1 == *alarm2);
@@ -115,30 +151,42 @@ extern "C" {
 
        void FTN(c_esmc_alarmreadrestart)(ESMC_Alarm *ptr,
                                          ESMC_TimeInterval *ringInterval,
+                                         ESMC_TimeInterval *ringDuration,
                                          ESMC_Time *ringTime,
                                          ESMC_Time *prevRingTime,
                                          ESMC_Time *stopTime,
+                                         ESMC_Time *ringBegin,
+                                         ESMC_Time *refTime,
                                          bool *ringing,
                                          bool *enabled,
+                                         bool *sticky,
                                          int  *id,
                                          int  *status) {
-           //*status = (ptr)->ESMC_AlarmReadRestart(ringInterval, ringTime,
-           //                                       prevRingTime, stopTime,
-           //                                       *ringing, *enabled, *id);
+           *status = (ptr)->ESMC_AlarmReadRestart(ringInterval, ringDuration, 
+                                                  ringTime, prevRingTime, 
+                                                  stopTime, ringBegin,
+                                                  refTime, *ringing, *enabled,
+                                                  *sticky, *id);
        }
 
        void FTN(c_esmc_alarmwriterestart)(ESMC_Alarm *ptr,
                                           ESMC_TimeInterval *ringInterval,
+                                          ESMC_TimeInterval *ringDuration,
                                           ESMC_Time *ringTime,
                                           ESMC_Time *prevRingTime,
                                           ESMC_Time *stopTime,
+                                          ESMC_Time *ringBegin,
+                                          ESMC_Time *refTime,
                                           bool *ringing,
                                           bool *enabled,
+                                          bool *sticky,
                                           int  *id,
                                           int  *status) {
-           //*status = (ptr)->ESMC_AlarmWriteRestart(ringInterval, ringTime,
-           //                                        prevRingTime, stopTime,
-           //                                        ringing, enabled, id);
+           *status = (ptr)->ESMC_AlarmWriteRestart(ringInterval, ringDuration, 
+                                                  ringTime, prevRingTime, 
+                                                  stopTime, ringBegin,
+                                                  refTime, ringing, enabled,
+                                                  sticky, id);
        }
 
        void FTN(c_esmc_alarmvalidate)(ESMC_Alarm *ptr, const char *opts,

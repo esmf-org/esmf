@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.22 2003/07/25 05:17:06 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.23 2003/07/25 22:57:54 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -61,13 +61,17 @@
       sequence
       private
         type(ESMF_TimeInterval) :: ringInterval
+        type(ESMF_TimeInterval) :: ringDuration
         type(ESMF_Time)  :: ringTime
         type(ESMF_Time)  :: prevRingTime
         type(ESMF_Time)  :: stopTime
+        type(ESMF_Time)  :: ringBegin
+        type(ESMF_Time)  :: refTime
         integer :: id
         integer :: alarmMutex
-        logical :: ringing
-        logical :: enabled
+        logical :: ringing = .false.
+        logical :: enabled = .true.
+        logical :: sticky  = .true.
       end type
 
 !------------------------------------------------------------------------------
@@ -79,16 +83,22 @@
       public ESMF_AlarmSet
       public ESMF_AlarmGetRingInterval
       public ESMF_AlarmSetRingInterval
+      public ESMF_AlarmGetRingDuration
+      public ESMF_AlarmSetRingDuration
       public ESMF_AlarmGetRingTime
       public ESMF_AlarmSetRingTime
       public ESMF_AlarmGetPrevRingTime
       public ESMF_AlarmSetPrevRingTime
       public ESMF_AlarmGetStopTime
       public ESMF_AlarmSetStopTime
+      public ESMF_AlarmGetRefTime
+      public ESMF_AlarmSetRefTime
       public ESMF_AlarmEnable
       public ESMF_AlarmDisable
       public ESMF_AlarmTurnOn
       public ESMF_AlarmTurnOff
+      public ESMF_AlarmSticky
+      public ESMF_AlarmNotSticky
       public ESMF_AlarmIsRinging
  
 ! Required inherited and overridden ESMF_Base class methods
@@ -105,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.22 2003/07/25 05:17:06 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.23 2003/07/25 22:57:54 eschwab Exp $'
 
 !==============================================================================
 !
@@ -245,6 +255,82 @@
 
       end subroutine ESMF_AlarmSetRingInterval
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmGetRingDuration - Get an alarm's ring duration
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmGetRingDuration(alarm, ringDuration, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm
+      type(ESMF_TimeInterval), intent(out) :: ringDuration
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt ESMF\_Alarm}'s ring duration; how long it rings
+!     once it begins ringing.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the ring duration.
+!     \item[ringDuration]
+!          The {\tt Alarm}'s ring duration.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+      call c_ESMC_AlarmGetRingDuration(alarm, ringDuration, rc)
+
+      end subroutine ESMF_AlarmGetRingDuration
+ 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmSetRingDuration - Set an alarm's ring duration
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmSetRingDuration(alarm, ringDuration, &
+                                           numTimeSteps, timeStep, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_TimeInterval), intent(in), optional :: ringDuration
+      integer, intent(in), optional :: numTimeSteps
+      type(ESMF_TimeInterval), intent(in), optional :: timeStep
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s ring duration; how long it rings
+!     once it begins ringing. Either specify the time interval ringDuration,
+!     or a number of timesteps and the timestep and the ringDuration will
+!     be calculated.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the ring duration.
+!     \item[ringDuration]
+!          The {\tt Alarm}'s ring duration.
+!     \item[numTimeSteps]
+!          The number of time steps to set the duration to.
+!     \item[timeStep]
+!          The time step * number of time steps = ring duration.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+      call c_ESMC_AlarmSetRingDuration(alarm, ringDuration, numTimeSteps, &
+                                       timeStep, rc)
+
+      end subroutine ESMF_AlarmSetRingDuration
+ 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_AlarmGetRingTime - Get an alarm's time to ring
@@ -445,6 +531,72 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_AlarmGetRefTime - Get an alarm's reference time
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmGetRefTime(alarm, refTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm
+      type(ESMF_Time), intent(out) :: refTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt ESMF\_Alarm}'s reference time.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the reference time.
+!     \item[refTime]
+!          The {\tt ESMF\_Alarm}'s reference time.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+   
+      call c_ESMC_AlarmGetRefTime(alarm, refTime, rc)
+
+      end subroutine ESMF_AlarmGetRefTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmSetRefTime - Set an alarm's reference time
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmSetRefTime(alarm, refTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Time), intent(in) :: refTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s reference time.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set the reference time.
+!     \item[refTime]
+!          The {\tt ESMF\_Alarm}'s reference time.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+   
+      call c_ESMC_AlarmSetRefTime(alarm, refTime, rc)
+
+      end subroutine ESMF_AlarmSetRefTime
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AlarmEnable - Enables an alarm
 
 ! !INTERFACE:
@@ -563,6 +715,70 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_AlarmSticky - Set an alarm's sticky flag
+
+
+! !INTERFACE:
+      subroutine ESMF_AlarmSticky(alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      integer, intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
+!     it remains ringing until {\tt ESMF\_AlarmTurnOff()} is called.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set sticky.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      call c_ESMC_AlarmSticky(alarm, rc)
+
+      end subroutine ESMF_AlarmSticky
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmNotSticky - Unset an alarm's sticky flag
+
+
+! !INTERFACE:
+      subroutine ESMF_AlarmNotSticky(alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      integer, intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Unset an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
+!     it turns itself off after ringDuration.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to unset sticky.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      call c_ESMC_AlarmNotSticky(alarm, rc)
+
+      end subroutine ESMF_AlarmNotSticky
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE:  ESMF_AlarmIsRinging - Check if alarm is ringing
 
 ! !INTERFACE:
@@ -636,18 +852,23 @@
 ! !IROUTINE: ESMF_AlarmReadRestart - restores an alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmReadRestart(alarm, ringInterval, ringTime, &
-                                       prevRingTime, stopTime, ringing, &
-                                       enabled, id, rc)
+      subroutine ESMF_AlarmReadRestart(alarm, ringInterval, ringDuration, &
+                                       ringTime, prevRingTime, stopTime, &
+                                       ringBegin, refTime, ringing, enabled, &
+                                       sticky, id, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(out) :: alarm
       type(ESMF_TimeInterval), intent(in) :: ringInterval
+      type(ESMF_TimeInterval), intent(in) :: ringDuration
       type(ESMF_Time), intent(in) :: ringTime
       type(ESMF_Time), intent(in) :: prevRingTime
       type(ESMF_Time), intent(in) :: stopTime
+      type(ESMF_Time), intent(in) :: ringBegin
+      type(ESMF_Time), intent(in) :: refTime
       logical, intent(in) :: ringing
       logical, intent(in) :: enabled
+      logical, intent(in) :: sticky
       integer, intent(in) :: id
       integer, intent(out), optional :: rc
 
@@ -660,16 +881,24 @@
 !          The object instance to restore.
 !     \item[ringInterval]
 !          The ring interval for repeating alarms.
+!     \item[ringDuration]
+!          The ring duration.
 !     \item[ringTime]
 !          Ring time for one-shot or first repeating alarm.
 !     \item[prevRingTime]
 !          The {\tt ESMF\_Alarm}'s previous ring time.
 !     \item[stopTime]
 !          Stop time for repeating alarms.
+!     \item[ringBegin]
+!          Begin time for ringing alarm.
+!     \item[refTime]
+!          The {\tt ESMF\_Alarm}'s reference time.
 !     \item[ringing]
 !          The {\tt ESMF\_Alarm}'s ringing state.
 !     \item[enabled]
 !          {\tt ESMF\_Alarm} enabled/disabled.
+!     \item[sticky]
+!          {\tt ESMF\_Alarm} sticky flag.
 !     \item[id]
 !          The {\tt ESMF\_Alarm}'s ID.
 !     \item[{[rc]}]
@@ -678,9 +907,10 @@
 !
 !EOP
 ! !REQUIREMENTS:
-      call c_ESMC_AlarmReadRestart(alarm, ringInterval, ringTime, &
-                                   prevRingTime, stopTime, ringing, &
-                                   enabled, id, rc)
+      call c_ESMC_AlarmReadRestart(alarm, ringInterval, ringDuration, &
+                                   ringTime, prevRingTime, stopTime, &
+                                   ringBegin, refTime, ringing, enabled, &
+                                   sticky, id, rc)
 
       end subroutine ESMF_AlarmReadRestart
 
@@ -689,18 +919,23 @@
 ! !IROUTINE: ESMF_AlarmWriteRestart - saves an alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmWriteRestart(alarm, ringInterval, ringTime, &
-                                        prevRingTime, stopTime, ringing, &
-                                        enabled, id, rc)
+      subroutine ESMF_AlarmWriteRestart(alarm, ringInterval, ringDuration, &
+                                       ringTime, prevRingTime, stopTime, &
+                                       ringBegin, refTime, ringing, enabled, &
+                                       sticky, id, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(in) :: alarm
       type(ESMF_TimeInterval), intent(out) :: ringInterval
+      type(ESMF_TimeInterval), intent(out) :: ringDuration
       type(ESMF_Time), intent(out) :: ringTime
       type(ESMF_Time), intent(out) :: prevRingTime
       type(ESMF_Time), intent(out) :: stopTime
+      type(ESMF_Time), intent(out) :: ringBegin
+      type(ESMF_Time), intent(out) :: refTime
       logical, intent(out) :: ringing
       logical, intent(out) :: enabled
+      logical, intent(out) :: sticky
       integer, intent(out) :: id
       integer, intent(out), optional :: rc
 
@@ -713,16 +948,24 @@
 !          The object instance to save.
 !     \item[ringInterval]
 !          Ring interval for repeating alarms.
+!     \item[ringDuration]
+!          The ring duration.
 !     \item[ringTime]
 !          Ring time for one-shot or first repeating alarm.
 !     \item[prevRingTime]
 !          The {\tt ESMF\_Alarm}'s previous ring time.
 !     \item[stopTime]
 !          Stop time for repeating alarms.
+!     \item[ringBegin]
+!          Begin time for ringing alarm.
+!     \item[refTime]
+!          The {\tt ESMF\_Alarm}'s reference time.
 !     \item[ringing]
 !          The {\tt ESMF\_Alarm}'s ringing state.
 !     \item[enabled]
 !          {\tt ESMF\_Alarm} enabled/disabled.
+!     \item[sticky]
+!          {\tt ESMF\_Alarm} sticky flag.
 !     \item[id]
 !          The {\tt ESMF\_Alarm}'s ID.
 !     \item[{[rc]}]
@@ -731,9 +974,10 @@
 !
 !EOP
 ! !REQUIREMENTS:
-      call c_ESMC_AlarmWriteRestart(alarm, ringInterval, ringTime, &
-                                    prevRingTime, stopTime, ringing, &
-                                    enabled, id, rc)
+      call c_ESMC_AlarmWriteRestart(alarm, ringInterval, ringDuration, &
+                                    ringTime, prevRingTime, stopTime, &
+                                    ringBegin, refTime, ringing, enabled, &
+                                    sticky, id, rc)
 
       end subroutine ESMF_AlarmWriteRestart
 
