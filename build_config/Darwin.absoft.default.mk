@@ -1,10 +1,8 @@
-#  $Id: Darwin.default.default.mk,v 1.1 2003/09/25 21:21:53 flanigan Exp $
+#  $Id: Darwin.absoft.default.mk,v 1.1 2003/09/29 19:50:23 flanigan Exp $
 #
-#  Darwin.default.default.mk
+#  Darwin.absoft.default.mk
 #
-#
-#  Default compiler for mac is absoft.
-#
+
 
 #
 #  Make sure that ESMF_PREC is set to 32
