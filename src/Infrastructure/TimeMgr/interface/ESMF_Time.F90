@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.7 2003/03/24 21:25:11 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.8 2003/03/26 01:08:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.7 2003/03/24 21:25:11 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.8 2003/03/26 01:08:39 eschwab Exp $'
 
 !==============================================================================
 
@@ -122,7 +122,7 @@
 ! !INTERFACE:
       subroutine ESMF_TimeInit(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
                                d_, h_, m_, s_, ms_, us_, ns_, &
-                               Sn, Sd, cal, rc)
+                               Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
@@ -146,6 +146,7 @@
       integer, intent(in), optional :: Sn
       integer, intent(in), optional :: Sd
       type(ESMF_Calendar), intent(in), optional :: cal
+      integer, intent(out), optional :: tz
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -196,6 +197,8 @@
 !          Integer fractional seconds - denominator
 !     \item[{[cal]}]
 !          Associated {\tt Calendar}
+!     \item[{[tz]}]
+!          Associated timezone (hours offset from GMT, e.g. EST = -5)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -207,7 +210,7 @@
       ! use optional args for any subset
 !      call c_ESMC_TimeInit(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
 !                           d_, h_, m_, s_, ms_, us_, ns_, &
-!                           Sn, Sd, cal, rc)
+!                           Sn, Sd, cal, tz, rc)
 
       end subroutine ESMF_TimeInit
 
