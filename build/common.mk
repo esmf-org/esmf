@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.65 2004/07/29 21:20:33 nscollins Exp $
+#  $Id: common.mk,v 1.66 2004/08/03 22:18:23 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -262,7 +262,7 @@ chkdir_tests:
 
 chkdir_include:
 	-@if [ ! -d $(ESMF_INCDIR) ]; then \
-	  echo Making directory $(ESMF_INCDIR) for test output; mkdir -p $(ESMF_INCDIR) ; fi
+	  echo Making directory $(ESMF_INCDIR) for include files; mkdir -p $(ESMF_INCDIR) ; fi
 
 chkdir_examples:
 	-@if [ ! -d ${ESMF_EXDIR} ]; then \
@@ -287,33 +287,25 @@ VPATH = ${ESMF_TOP_DIR}/${LOCDIR}:${ESMF_TOP_DIR}/include
 libc:${LIBNAME}(${OBJSC})
 libf:${LIBNAME}(${OBJSF})
 
-storeh: chkdir_include
-	for hfile in ${STOREH} foo ; do \
-	  if [ $$hfile != "foo" ]; then \
-	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile $(ESMF_INCDIR) ; \
-	  fi ; \
-	done
-
-
 #-------------------------------------------------------------------------------
 # Builds ESMF recursively.
 #-------------------------------------------------------------------------------
 build_libs: chk_dir
 	cd $(ESMF_TOP_DIR) ;\
-	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
+	${MAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
 
 # Build only stuff below the current dir.
 build_here: chk_dir
-	${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
+	${MAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} ACTION=vpathlib tree shared
 
 # Builds library
 vpathlib:
-	dir=`pwd`; cd ${ESMC_OBJDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile lib
+	dir=`pwd`; cd ${ESMC_OBJDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile lib
 
 # Builds library
 lib:: chk_dir ${SOURCE}
 	@if [ "${STOREH}" != "" ] ; then \
-	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} storeh; fi
+	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} tree_include; fi
 	@if [ "${SOURCEC}" != "" ] ; then \
 	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} ESMF_BOPT=${ESMF_BOPT} libc; fi
 	@if [ "${SOURCEF}" != "" ] ; then \
@@ -330,11 +322,28 @@ lib:: chk_dir ${SOURCE}
 #
 # Builds library - fast version
 libfast: chk_dir ${SOURCEC} ${SOURCEF}
-	@-if [ "${SOURCEC}" != "" ] ; then \
+	-@if [ "${SOURCEC}" != "" ] ; then \
 	     ${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${SOURCEC} ${SSOURCE} ;\
 	  ${AR} ${AR_FLAGS} ${LIBNAME} ${OBJSC} ${SOBJS}; \
 	  ${RM} -f ${OBJSC} ${SOBJS}; \
 	fi
+
+include: chkdir_include
+	cd $(ESMF_TOP_DIR) ;\
+	$(MAKE) ACTION=tree_include tree
+
+tree_include:
+	-@for hfile in ${STOREH} foo ; do \
+	  if [ $$hfile != "foo" ]; then \
+	    cp -f ../include/$$hfile $(ESMF_INCDIR) ; \
+	  fi ; \
+	done
+
+cppfiles: chkdir_include include
+	cd $(ESMF_TOP_DIR) ;\
+	$(MAKE) ACTION=tree_cppfiles tree
+
+tree_cppfiles:  $(CPPFILES)
 
 #-------------------------------------------------------------------------------
 # Clean and clobber targets.
@@ -810,45 +819,53 @@ tree_build_quick_start: chkdir_quick_start
 #  Doc targets
 #-------------------------------------------------------------------------------
 
-doc: chkdir_doc tex
+doc:  chkdir_doc
+	-@echo "========================================="
+	-@echo "doc rule from common.mk"
 	-@echo "========================================="
 	cd $(ESMF_TOP_DIR)/src/doc ;\
-	$(MAKE) $(DVIFILES) $(PDFFILES) $(HTMLFILES) 
+	$(MAKE) dvi html pdf
 	-@echo "Build doc completed."
 
-alldoc: chkdir_doc 
+alldoc: chkdir_doc include cppfiles tex
+	-@echo "========================================="
 	-@echo "Building All Documentation"
 	-@echo "========================================="
-	-@$(MAKE) tex dvi pdf html
+	-@$(MAKE) dvi pdf html
 	-@echo "Build alldoc completed."
 
-tex:
-	-@echo "Building .tex files"
-	-@echo "========================================="
+tex: chkdir_doc include cppfiles
+	cd $(ESMF_TOP_DIR) ;\
 	$(MAKE) ACTION=tree_tex tree
 
 tree_tex: $(TEXFILES_TO_MAKE)
 
-dvi: chkdir_doc tex
-	-@echo "Building .dvi files"
+dvi: chkdir_doc include cppfiles tex
 	-@echo "========================================="
-	-@${OMAKE} ACTION=tree_dvi  tree       
+	-@echo "dvi rule from common.mk, Building .dvi files"
+	-@echo "dvi files are:" $(DVIFILES)
+	-@echo "========================================="
+	$(MAKE) $(DVIFILES)
 
 tree_dvi: chkdir_doc ${DVIFILES}
 
 
 pdf: chkdir_doc
-	-@echo "Building .pdf files"
 	-@echo "========================================="
-	-@${OMAKE} ACTION=tree_pdf  tree 
+	-@echo "pdf rule from common.mk, Building .pdf files"
+	-@echo "pdf files are:" $(PDFFILES)
+	-@echo "========================================="
+	$(MAKE) $(PDFFILES)
 
 tree_pdf: chkdir_doc ${PDFFILES}
 
 
-html: chkdir_doc
-	-@echo "Building .html files"
+html: chkdir_doc include cppfiles tex
 	-@echo "========================================="
-	-@${OMAKE} ACTION=tree_html tree 
+	-@echo "html rule from common.mk, Building .html files"
+	-@echo "html files are:" $(HTMLFILES)
+	-@echo "========================================="
+	$(MAKE) $(HTMLFILES)
 
 tree_html:chkdir_doc ${HTMLFILES}
 
@@ -1064,19 +1081,30 @@ build_shared:
 #
 
 TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:"
+export TEXINPUTS_VALUE
+
 
 #-------------------------------------------------------------------------------
 #  dvi rules
 #-------------------------------------------------------------------------------
 %_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
+	-@echo "========================================="
+	-@echo "_desdoc.dvi rule from common.mk"
+	-@echo "========================================="
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* des
 
 %_refdoc.dvi : %_refdoc.ctex $(REFDOC_DEP_FILES)
+	-@echo "========================================="
+	-@echo "_refdoc.dvi rule from common.mk"
+	-@echo "========================================="
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* ref
 
 %_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
+	-@echo "========================================="
+	-@echo "_reqdoc.dvi rule from common.mk"
+	-@echo "========================================="
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* req
 
@@ -1085,6 +1113,9 @@ TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/de
 #-------------------------------------------------------------------------------
 
 $(ESMC_DOCDIR)/%.pdf: %.dvi
+	-@echo "========================================="
+	-@echo "_%pdf from %.dvi rule from common.mk"
+	-@echo "========================================="
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	dvipdf $< $@
 
@@ -1092,6 +1123,9 @@ $(ESMC_DOCDIR)/%.pdf: %.dvi
 #  html rules
 #-------------------------------------------------------------------------------
 $(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
+	-@echo "========================================="
+	-@echo "_%desdoc from %.ctex rule from common.mk"
+	-@echo "========================================="
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
@@ -1101,6 +1135,9 @@ $(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 
 
 $(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
+	-@echo "========================================="
+	-@echo "_%refdoc from %.ctex rule from common.mk"
+	-@echo "========================================="
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
@@ -1109,6 +1146,9 @@ $(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
+	-@echo "========================================="
+	-@echo "_%reqdoc from %.ctex rule from common.mk"
+	-@echo "========================================="
 	if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
 	fi;
@@ -1153,21 +1193,21 @@ include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE
 #
 testexamples_1: ${TESTEXAMPLES_1}
 vtestexamples_1:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
 testexamples_2: ${TESTEXAMPLES_2}
 testexamples_3: ${TESTEXAMPLES_3}
 vtestexamples_3:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
 testexamples_4: ${TESTEXAMPLES_4}
 vtestexamples_4:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
 testexamples_5: ${TESTEXAMPLES_5}
 testexamples_6: ${TESTEXAMPLES_6}
 testexamples_7: ${TESTEXAMPLES_7}
 testexamples_8: ${TESTEXAMPLES_8}
 testexamples_9: ${TESTEXAMPLES_9}
 vtestexamples_9:
-	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${MAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
 testexamples_10: ${TESTEXAMPLES_10}
 testexamples_11: ${TESTEXAMPLES_11}
 testexamples_12: ${TESTEXAMPLES_12}
