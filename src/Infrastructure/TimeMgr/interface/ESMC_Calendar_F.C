@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.34 2004/04/26 18:01:42 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.35 2004/06/17 18:48:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@ extern "C" {
                                    ESMC_Calendar **calendar2,
                                    int *esmf_calendarEQ) {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar1, *calendar2,
-                                                           esmf_calendarEQ)
+                                               esmf_calendarEQ)
            *esmf_calendarEQ = (int) (**calendar1 == **calendar2);
        }
 
@@ -295,6 +295,22 @@ extern "C" {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendarType1, *calendarType2,
                                                esmf_calendarTypeEQ)
            *esmf_calendarTypeEQ = (int) (*calendarType1 == *calendarType2);
+       }
+
+       void FTN(c_esmc_calendarcalandtypeeq)(ESMC_Calendar **calendar,
+                                             ESMC_CalendarType *calendarType,
+                                             int *esmf_calendarCalAndTypeEQ) {
+           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar, *calendarType,
+                                               esmf_calendarCalAndTypeEQ)
+           *esmf_calendarCalAndTypeEQ = (int) (**calendar == *calendarType);
+       }
+
+       void FTN(c_esmc_calendartypeandcaleq)(ESMC_CalendarType *calendarType,
+                                             ESMC_Calendar **calendar,
+                                             int *esmf_calendarTypeAndCalEQ) {
+           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendarType, *calendar,
+                                               esmf_calendarTypeAndCalEQ)
+           *esmf_calendarTypeAndCalEQ = (int) (**calendar == *calendarType);
        }
 
        void FTN(c_esmc_calendarne)(ESMC_Calendar **calendar1,
@@ -311,6 +327,22 @@ extern "C" {
            ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendarType1, *calendarType2,
                                                esmf_calendarTypeNE)
            *esmf_calendarTypeNE = (int) (*calendarType1 != *calendarType2);
+       }
+
+       void FTN(c_esmc_calendarcalandtypene)(ESMC_Calendar **calendar,
+                                             ESMC_CalendarType *calendarType,
+                                             int *esmf_calendarCalAndTypeNE) {
+           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar, *calendarType,
+                                               esmf_calendarCalAndTypeNE)
+           *esmf_calendarCalAndTypeNE = (int) (**calendar != *calendarType);
+       }
+
+       void FTN(c_esmc_calendartypeandcalne)(ESMC_CalendarType *calendarType,
+                                             ESMC_Calendar **calendar,
+                                             int *esmf_calendarTypeAndCalNE) {
+           ESMF_CHECK_BINARY_OPERATOR_POINTERS(*calendar, *calendarType,
+                                               esmf_calendarTypeAndCalNE)
+           *esmf_calendarTypeAndCalNE = (int) (**calendar != *calendarType);
        }
 
        void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar **ptr, int *nameLen,

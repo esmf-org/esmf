@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.72 2004/06/16 20:19:44 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.73 2004/06/17 18:48:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.72 2004/06/16 20:19:44 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.73 2004/06/17 18:48:10 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1721,13 +1721,13 @@ int ESMC_Calendar::count=0;
 //
 // !DESCRIPTION:
 //      Compare for equality the current object's (this) {\tt ESMC\_Calendar}
-//      with given {\tt ESMC\_Calendar}, return result
+//      with given {\tt ESMC\_Calendar}, return result.
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Calendar::operator==()"
+ #define ESMC_METHOD "ESMC_Calendar::operator==(calendar)"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1736,6 +1736,39 @@ int ESMC_Calendar::count=0;
     }
 
     return(calendarType == calendar.calendarType);
+
+}  // end ESMC_Calendar::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Calendar(==) - Calendar equality comparison
+//
+// !INTERFACE:
+      bool ESMC_Calendar::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_CalendarType &calendarType) const {   // in - ESMC_CalendarType to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt ESMC\_Calendar}
+//      type with given {\tt ESMC\_CalendarType}, return result.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Calendar::operator==(calendarType)"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
+
+    return(this->calendarType == calendarType);
 
 }  // end ESMC_Calendar::operator==
 
@@ -1754,13 +1787,13 @@ int ESMC_Calendar::count=0;
 //
 // !DESCRIPTION:
 //      Compare for inequality the current object's (this) {\tt ESMC\_Calendar}
-//      with given {\tt ESMC\_Calendar}, return result
+//      with given {\tt ESMC\_Calendar}, return result.
 //
 //EOP
 // !REQUIREMENTS:
 
  #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMC_Calendar::operator!=()"
+ #define ESMC_METHOD "ESMC_Calendar::operator!=(calendar)"
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
@@ -1769,6 +1802,39 @@ int ESMC_Calendar::count=0;
     }
 
     return(calendarType != calendar.calendarType);
+
+}  // end ESMC_Calendar::operator!=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Calendar(!=) - Calendar inequality comparison
+//
+// !INTERFACE:
+      bool ESMC_Calendar::operator!=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_CalendarType &calendarType) const {   // in - ESMC_CalendarType to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this) {\tt ESMC\_Calendar}
+//      type with given {\tt ESMC\_CalendarType}, return result.
+//
+//EOP
+// !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Calendar::operator!=(calendarType)"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
+
+    return(this->calendarType != calendarType);
 
 }  // end ESMC_Calendar::operator!=
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.70 2004/06/13 05:25:43 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.71 2004/06/17 18:48:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,6 +122,10 @@
       private ESMF_CalendarNE
       private ESMF_CalendarTypeEQ
       private ESMF_CalendarTypeNE
+      private ESMF_CalendarCalAndTypeEQ
+      private ESMF_CalendarCalAndTypeNE
+      private ESMF_CalendarTypeAndCalEQ
+      private ESMF_CalendarTypeAndCalNE
       private ESMF_CalendarCreateBuiltIn
       private ESMF_CalendarCreateCopy
       private ESMF_CalendarCreateCustom
@@ -133,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.70 2004/06/13 05:25:43 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.71 2004/06/17 18:48:07 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -213,6 +217,81 @@
 ! !REQUIREMENTS:
 !     TMGx.x.x
 !
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarCalAndTypeOperator(==) - Test if Calendar is equal to Calendar Type
+!
+! !INTERFACE:
+!     interface operator(==)
+!     if (calendar == calendartype) then ... endif
+!                  OR
+!     result = (calendar == calendartype)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Calendar),     intent(in) :: calendar
+!     type(ESMF_CalendarType), intent(in) :: calendartype
+!
+! !DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
+!     Compare a calendar object's type with a given calendar type for equality;
+!     return true if equal, false otherwise.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendar]
+!          The {\tt ESMF\_Calendar} in comparison.
+!     \item[calendartype]
+!          The {\tt ESMF\_CalendarType} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarCalAndTypeEQ      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarTypeAndCalOperator(==) - Test if Calendar Type is equal to Calendar
+!
+! !INTERFACE:
+!     interface operator(==)
+!     if (calendartype == calendar) then ... endif
+!                  OR
+!     result = (calendartype == calendar)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_CalendarType), intent(in) :: calendartype
+!     type(ESMF_Calendar),     intent(in) :: calendar
+!
+! !DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
+!     Compare a calendar type with a given calendar object's type for equality;
+!     return true if equal, false otherwise.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendartype]
+!          The {\tt ESMF\_CalendarType} in comparison.
+!     \item[calendar]
+!          The {\tt ESMF\_Calendar} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarTypeAndCalEQ      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
        end interface    
 !
 !------------------------------------------------------------------------------
@@ -285,6 +364,80 @@
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
        module procedure ESMF_CalendarTypeNE      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarCalAndTypeOperator(/=) - Test if Calendar is not equal to Calendar Type
+!
+! !INTERFACE:
+!     interface operator(/=)
+!     if (calendar /= calendartype) then ... endif
+!                  OR
+!     result = (calendar /= calendartype)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Calendar),     intent(in) :: calendar
+!     type(ESMF_CalendarType), intent(in) :: calendartype
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
+!     Compare a calendar object's type with a given calendar type for
+!     inequality; return true if equal, false otherwise.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendar]
+!          The {\tt ESMF\_Calendar} in comparison.
+!     \item[calendartype]
+!          The {\tt ESMF\_CalendarType} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarCalAndTypeNE      ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMGx.x.x
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarTypeAndCalOperator(/=) - Test if Calendar Type is not equal to Calendar
+!
+! !INTERFACE:
+!     interface operator(/=)
+!     if (calendartype /= calendar) then ... endif
+!                  OR
+!     result = (calendartype /= calendar)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_CalendarType), intent(in) :: calendartype
+!     type(ESMF_Calendar),     intent(in) :: calendar
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
+!     Compare a calendar type with a given calendar object's type for
+!     inequality; return true if equal, false otherwise.
+!
+!     The arguments are:
+!     \begin{description}   
+!     \item[calendartype]
+!          The {\tt ESMF\_CalendarType} in comparison.
+!     \item[calendar]
+!          The {\tt ESMF\_Calendar} in comparison.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+       module procedure ESMF_CalendarTypeAndCalNE      ! internal implementation
 !
 ! !REQUIREMENTS:
 !     TMGx.x.x
@@ -1186,6 +1339,56 @@
 
 !------------------------------------------------------------------------------
 !BOPI
+! !IROUTINE:  ESMF_CalendarCalAndTypeEQ - Compare a Calendar and Calendar type for equality
+!
+! !INTERFACE:
+      function ESMF_CalendarCalAndTypeEQ(calendar, calendartype)
+! 
+! !RETURN VALUE:
+      logical :: ESMF_CalendarCalAndTypeEQ
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),     intent(in) :: calendar
+      type(ESMF_CalendarType), intent(in) :: calendartype
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(==)" above for complete description.
+!             
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarCalAndTypeEQ(calendar, calendartype, &
+                                       ESMF_CalendarCalAndTypeEQ)
+
+      end function ESMF_CalendarCalAndTypeEQ
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_CalendarTypeAndCalEQ - Compare a Calendar type and Calendar for equality
+!
+! !INTERFACE:
+      function ESMF_CalendarTypeAndCalEQ(calendartype, calendar)
+! 
+! !RETURN VALUE:
+      logical :: ESMF_CalendarTypeAndCalEQ
+
+! !ARGUMENTS:
+      type(ESMF_CalendarType), intent(in) :: calendartype
+      type(ESMF_Calendar),     intent(in) :: calendar
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(==)" above for complete description.
+!             
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarTypeAndCalEQ(calendartype, calendar, &
+                                       ESMF_CalendarTypeAndCalEQ)
+
+      end function ESMF_CalendarTypeAndCalEQ
+
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE:  ESMF_CalendarNE - Compare two Calendars for inequality
 !
 ! !INTERFACE:
@@ -1232,6 +1435,56 @@
                                  ESMF_CalendarTypeNE)
 
       end function ESMF_CalendarTypeNE
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_CalendarCalAndTypeNE - Compare a Calendar and Calendar type for inequality
+!
+! !INTERFACE:
+      function ESMF_CalendarCalAndTypeNE(calendar, calendartype)
+! 
+! !RETURN VALUE:
+      logical :: ESMF_CalendarCalAndTypeNE
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),     intent(in) :: calendar
+      type(ESMF_CalendarType), intent(in) :: calendartype
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(/=)" above for complete description.
+!             
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarCalAndTypeNE(calendar, calendartype, &
+                                       ESMF_CalendarCalAndTypeNE)
+
+      end function ESMF_CalendarCalAndTypeNE
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_CalendarTypeAndCalNE - Compare a Calendar type and Calendar for inequality
+!
+! !INTERFACE:
+      function ESMF_CalendarTypeAndCalNE(calendartype, calendar)
+! 
+! !RETURN VALUE:
+      logical :: ESMF_CalendarTypeAndCalNE
+
+! !ARGUMENTS:
+      type(ESMF_CalendarType), intent(in) :: calendartype
+      type(ESMF_Calendar),     intent(in) :: calendar
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Calendar}
+!     class.  See "interface operator(/=)" above for complete description.
+!             
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarTypeAndCalNE(calendartype, calendar, &
+                                       ESMF_CalendarTypeAndCalNE)
+
+      end function ESMF_CalendarTypeAndCalNE
 
 !------------------------------------------------------------------------------
 

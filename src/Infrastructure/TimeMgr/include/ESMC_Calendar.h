@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.42 2004/05/19 22:05:04 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.43 2004/06/17 18:48:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -192,7 +192,9 @@ class ESMC_Calendar {
                                      const;
 
     bool operator==(const ESMC_Calendar &) const;
+    bool operator==(const ESMC_CalendarType &) const;
     bool operator!=(const ESMC_Calendar &) const;
+    bool operator!=(const ESMC_CalendarType &) const;
 
     // TODO:  add method to convert calendar interval to core time ?
 
