@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.25 2004/09/03 16:49:33 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.26 2004/09/03 17:15:28 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1014,10 +1014,14 @@ end subroutine ESMF_LogFlush
     if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTWARNING).and. (msgtype .gt. ESMF_LOG_WARNING)) then
         ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%stopprogram=.TRUE.
 	call ESMF_LogFlush(ESMF_LogDefault, rc=rc2)
+    endif
+    if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) then
+        call ESMF_LogFlush(ESMF_LogDefault, rc=rc2) 
+	ESMF_LogDefault%findex
+    else
+        ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
-    if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) &
-        call ESMF_LogFlush(ESMF_LogDefault, rc=rc2)
-    ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1
+   
 
    if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
