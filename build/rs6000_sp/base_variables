@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.15 2003/04/14 14:57:05 nscollins Exp $ 
+# $Id: base_variables,v 1.16 2003/04/14 14:58:12 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -47,16 +47,6 @@ O_FOPTFLAGS		= -O3 -w
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 # ########################## C++ compiler ##################################
 #
-<<<<<<< base_variables
-###  this section used to call mpCC_r, but it is currently broken on
-###  bluesky.  i was told that mpcc_r should compile both C and C++,
-###  and it seems to work on what i've tried so far.  but if something
-###  doesn't work, try setting the mpcc_r lines in this section back to
-###  mpCC_r, and add /usr/vacpp/bin to your search path if you get errors
-###  about xlC_r not being found.   nsc  1/29/2003
-CXX_CC			= mpCC_r -qcheck -qheapdebug
-CXX_FC			= mpxlf_r -qcheck 
-=======
 ###  on one of our rs6000s the mpCC_r system cover script will not find 
 ###  the actual xlC_r compiler without adding the dir /usr/vacpp/bin to 
 ###  your search path.  on the other rs6000 it works as expected
@@ -70,7 +60,6 @@ CXX_FC			= mpxlf_r -qcheck
 ###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003
 CXX_CC			= mpCC_r -qcheck -qheapdebug
 CXX_FC			= mpxlf_r -qcheck 
->>>>>>> 1.11
 CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
 CXX_CLINKER		= mpCC_r -qcheck -qheapdebug
