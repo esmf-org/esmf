@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.32 2004/05/24 20:27:33 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.33 2004/05/25 21:11:36 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@
 //
 //-------------------------------------------------------------------------
 //
- #define ESMF_FILENAME "ESMC_BaseTime.C"
+ #define ESMC_FILENAME "ESMC_BaseTime.C"
 
  #include <iostream.h>
  #include <stdlib.h>
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.32 2004/05/24 20:27:33 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.33 2004/05/25 21:11:36 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
