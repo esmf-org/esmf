@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2005/02/08 20:23:05 nscollins Exp $
+# $Id: build_rules.mk,v 1.27 2005/02/23 05:20:31 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -170,9 +170,16 @@ endif
 endif
 
 # add standard flags
-C_CC    +=  -pthread $(INTEL_C_LIB_FLAG)
-CXX_CC  +=  -pthread $(INTEL_C_LIB_FLAG)
-C_FC    +=  -threads 
+C_CC    +=  $(INTEL_C_LIB_FLAG)
+CXX_CC  +=  $(INTEL_C_LIB_FLAG)
+C_FC    +=
+
+# conditionally add pthread compiler flags
+ifeq ($(ESMF_PTHREADS),on)
+C_CC    +=  -pthread
+CXX_CC  +=  -pthread
+C_FC    +=  -threads
+endif
 
 # Which compiler to call when
 C_CLINKER	   = ${C_CC}
