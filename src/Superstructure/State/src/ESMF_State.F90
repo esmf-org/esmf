@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.16 2004/02/23 22:57:42 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.17 2004/02/23 23:03:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.16 2004/02/23 22:57:42 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.17 2004/02/23 23:03:15 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -4846,9 +4846,9 @@ end function
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! state name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name              
+      type(ESMF_IOSpec), intent(in), optional :: iospec   
+      integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
