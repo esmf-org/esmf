@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.4 2003/03/18 01:40:45 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.5 2003/03/18 17:37:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.4 2003/03/18 01:40:45 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.5 2003/03/18 17:37:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -329,6 +329,16 @@
       ! Requirement 1.3 Index Order
       ! It shall be possible to specify the index order of field data and also to rearrange it.
       ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not implemented"
+      ! is fixed.
+
+      ! Requirement 1.7.2 Query number of dimensions and index order
+      ! A Field shall be able to return the number of dimensions and index order it has.
+      ! Cannot be tested until Bug 705308 "ESMF_FieldGetLocalDataInfo not implemented"
+      ! is fixed.
+
+      ! Requirement 1.7.3 Query attributes
+      ! A Field can return its list of attributes.
+      ! Cannot be tested until Bug 705716 "Field Query attributes not implemented"
       ! is fixed.
 
 
