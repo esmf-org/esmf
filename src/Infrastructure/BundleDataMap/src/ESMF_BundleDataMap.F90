@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.9 2004/06/03 12:49:27 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.10 2004/06/04 13:13:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !------------------------------------------------------------------------------
+#define ESMF_FILE "ESMF_BundleDataMap.F90"
 !
 ! ESMF BundleDataMap module
 !
@@ -123,7 +124,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.9 2004/06/03 12:49:27 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.10 2004/06/04 13:13:55 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -175,8 +176,10 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapGet"
 !BOP
-! !IROUTINE: ESMF_BundleDataMapGet - Get object from a BundleDataMap type.
+! !IROUTINE: ESMF_BundleDataMapGet - Get values from a BundleDataMap
 !
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapGet(bundledatamap, bundleInterleave, rc)
@@ -187,12 +190,12 @@ end function
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!   Return info about the {\tt ESMF\_BundleDataMap} described by this object.
+!   Return values from an {\tt ESMF\_BundleDataMap}.
 !
 !   The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           An {\tt ESMF\_BundleDataMap} object.
+!           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Possible values are {\tt ESMF\_BIL\_BYITEM} and
@@ -203,7 +206,6 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: 
  
         ! local vars
         integer :: status                     ! local error status
@@ -226,6 +228,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapPrint"
 !BOP
 ! !IROUTINE: ESMF_BundleDataMapPrint - Print a BundleDataMap type
 !
@@ -240,12 +244,12 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a {\tt ESMF\_BundleDataMap}.
+!     Print information about a {\tt ESMF\_BundleDataMap}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           {\tt ESMF\_BundleDataMap} object to print.
+!           {\tt ESMF\_BundleDataMap} to print.
 !     \item [{[options]}]
 !           Print options.
 !     \item [{[rc]}]
@@ -253,7 +257,6 @@ end function
 !       \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         character (len = ESMF_MAXSTR) :: str
 
@@ -274,8 +277,10 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapSet"
 !BOP
-! !IROUTINE: ESMF_BundleDataMapSet - Set a BundleDataMap type object.
+! !IROUTINE: ESMF_BundleDataMapSet - Set values in a BundleDataMap 
 !
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapSet(bundledatamap, bundleInterleave, rc)
@@ -286,12 +291,12 @@ end function
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!   Set info about the given {\tt ESMF\_BundleDataMap}.
+!   Set values in an {\tt ESMF\_BundleDataMap}.
 !
 !   The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           An {\tt ESMF\_BundleDataMap} object.
+!           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
@@ -300,9 +305,7 @@ end function
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!
 !EOP
-! !REQUIREMENTS: 
  
         ! local vars
         integer :: status                     ! local error status
@@ -327,6 +330,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapSetDefault"
 !BOP
 ! !IROUTINE:  ESMF_BundleDataMapSetDefault - Set BundleDataMap default values
 
@@ -340,11 +345,13 @@ end function
 !
 ! !DESCRIPTION:
 !     Set default values of a {\tt ESMF\_BundleDataMap} type.
+!     The differences between this routine and {\tt ESMF\_BundleDataMapSet()}
+!     is that unspecified arguments are reset to their default values.
 !
 !     The arguments are:
 !     \begin{description} 
 !     \item [bundledatamap]
-!           An {\tt ESMF\_BundleDataMap} object.
+!           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[bundleInterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
@@ -355,7 +362,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: internal
 
         ! local vars
         integer :: status                     ! local error status
@@ -386,6 +392,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapSetInvalid"
 !BOP
 ! !IROUTINE:  ESMF_BundleDataMapSetInvalid - set contents of a BundleDataMap to uninitialized value.
 
@@ -403,14 +411,13 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           An {\tt ESMF\_BundleDataMap} object.
+!           An {\tt ESMF\_BundleDataMap}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !
 !EOP
-! !REQUIREMENTS: internal
 
         bundledatamap%status = ESMF_STATE_INVALID
 
@@ -421,6 +428,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapValidate"
 !BOP
 ! !IROUTINE: ESMF_BundleDataMapValidate - Validate internal state of a BundleDataMap type
 !
@@ -429,16 +438,16 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap
-      character (len = *), intent(in) :: options
+      character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Routine to validate the internal state of a {\tt ESMF\_BundleDataMap}.
+!      Validate the internal state of a {\tt ESMF\_BundleDataMap}.
 !
 !      The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           {\tt ESMF\_BundleDataMap} object to validate.
+!           {\tt ESMF\_BundleDataMap} to validate.
 !     \item [{[options]}]
 !           Validation options.
 !     \item [{[rc]}]
@@ -446,7 +455,6 @@ end function
 !       \end{description}
 !
 !EOP
-! !REQUIREMENTS:  FLD4.1
         
         ! local vars
         integer :: status                     ! local error status
@@ -470,6 +478,8 @@ end function
         end subroutine ESMF_BundleDataMapValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleInterleaveString"
 !BOPI
 ! !IROUTINE:  ESMF_BundleInterleaveString - Return an interleave as a string
 !
@@ -483,12 +493,12 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Routine to turn an interleave into a string.
+!     Return an {\tt ESMF\_BundleInterleave} as a printable string.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [interleave]
-!           The {\tt ESMF\_BundleInterleave} object to be turned into a string.
+!           The {\tt ESMF\_BundleInterleave} to be turned into a string.
 !     \item [string]
 !          Return string.
 !     \item [{[rc]}]
@@ -497,7 +507,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
         if (interleave .eq. ESMF_BIL_BYFIELD) string = "Interleave by Field"
         if (interleave .eq. ESMF_BIL_BYITEM) string = "Interleave by Item"
@@ -507,7 +516,11 @@ end function
         end subroutine ESMF_BundleInterleaveString
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapWriteRestart"
 !BOPI
+! !IROUTINE: ESMF_BundleDataMapWriteRestart - Save a BundleDataMap
+!
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapWriteRestart(bundledatamap, iospec, rc)
 !
@@ -525,7 +538,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           {\tt ESMF\_BundleDataMap} object to save.
+!           {\tt ESMF\_BundleDataMap} to save.
 !     \item [{[iospec]}]
 !           File specification.
 !     \item [{[rc]}]
@@ -534,7 +547,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS: FLD1.6.8
 
 !	BOP/EOP changed to BOPI/EOPI until code is added.
 !
@@ -546,6 +558,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapReadRestart"
 !BOPI
 ! !IROUTINE: ESMF_BundleDataMapReadRestart - Reinitialize a BundleDataMap type
 !
@@ -577,7 +591,6 @@ end function
 !       \end{description}
 !
 !EOPI
-! !REQUIREMENTS: FLD1.6.8
 
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
 !
@@ -591,6 +604,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapWrite"
 !BOPI
 ! !IROUTINE: ESMF_BundleDataMapWrite - Store a BundleDataMap type
 !
@@ -610,7 +625,7 @@ end function
 !      The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           {\tt ESMF\_BundleDataMap} object to save.
+!           {\tt ESMF\_BundleDataMap} to save.
 !     \item [{[iospec]}]
 !           File specification.
 !     \item [{[rc]}]
@@ -620,7 +635,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS: FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
 
 !
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
@@ -632,6 +646,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BundleDataMapRead"
 !BOPI
 ! !IROUTINE: ESMF_BundleDataMapRead - Read a stored BundleDataMap type
 !
@@ -661,7 +677,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS: (which req number is this?)
 
 !
 !	Changed BOP/EOP to BOPI/EOPI until code is added.
