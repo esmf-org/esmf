@@ -1,50 +1,113 @@
-% $Id: ESMF_archoverview.tex,v 1.9 2003/09/02 17:28:58 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.10 2003/11/17 21:59:35 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
-The ESMF architecture is characterized by the layering strategy shown in figure \ref{fig:TheESMFwich}. In this architectural pattern user code components that implement the {\it science} elements of an algorithm, for example evaluating
-finite-difference calculations or radiation physics terms, are sandwiched between two layers. The upper layer is
-denoted the {\bf Superstructure} layer and the lower layer the {\bf Infrastructure} layer. The role of the {\bf Superstructure}
-layer is to provide a shell which encompasses user code and provides a context for interconnecting input and output
+The ESMF architecture is characterized by the layering strategy shown in figure \ref{fig:TheESMFwich}. User code components that implement the {\it science} portions of an application, for example a sea ice or land model, are sandwiched 
+between two layers. The upper layer is denoted the {\bf Superstructure} layer 
+and the lower layer the {\bf Infrastructure} layer. The role of the {\bf Superstructure} layer is to provide a shell which encompasses user code and provides a context for interconnecting input and output
 data streams between components. The key elements of the {\bf Superstructure} layer are described in section \ref{sec:superstructure}.
-These elements include the extensible classes that represent envelope user code components, ensuring that all
+These elements include classes that wrap user code, ensuring that all
 components present consistent interfaces. The {\bf Infrastructure} layer provides a foundation that developers of
 user components can use to speed construction and to ensure consistent, guaranteed behavior of components.
 The elements of the {\bf Infrastructure} layer include constructs to support parallel processing with data types tailored
 to Earth science applications, specialized libraries to support consistent time and calendar management and
 performance, error handling and scalable I/O tools. The {\bf Infrastructure} layer is described in section \ref{sec:infrastructure}.
-A hierarchical combination of {\bf Superstructure}, user code components and Infrastructure are joined together
-to form what is termed an {\it application component} in the ESMF programming paradigm.
+A hierarchical combination of {\bf Superstructure}, user code components and Infrastructure are joined together to form an ESMF application.
 
-\subsection{Programming Paradigm}
-A complete, executable assembly of {\bf Superstructure}, user code components and {\bf Infrastructure} collectively forms an ESMF {\it application component}.
-Figure \ref{fig:ESMFApplication} shows the generic structure of an ESMF application component. 
-This figure shows a single tier composition involving three components. It captures the essence of the composition based programming paradigm that 
-ESMF employs, multi-tier composition is also supported in which components are recursively nested.
-An application is composed by connecting together one or more
-numerical simulation or other user code components within an overall ESMF based environment, figure \ref{fig:ESMFApplication} (1). User code components, figure \ref{fig:ESMFApplication} (3), are written
-or modified to fit within the ESMF environment that envelopes
-the user code components and that supports a unified high-level {\bf Superstructure} for connecting data and control flows between 
-components. A foundation-level {\bf Infrastructure} is also provided, figure \ref{fig:ESMFApplication} (2),
-to both accelerate user code development and ensure compatibility
-and consistency between components and between hardware platforms. 
-\begin{center}
-\begin{figure}
-\caption{The ESMF programming paradigm defines how an overall application is constructed. An application is an assembly
-of one or more gridded and coupler components (1). Components may make use of the ESMF {\bf Infrastructure} toolkit (2). All components,
-gridded components, coupler components and the top-level application component are primarily user written (3).}
-\label{fig:ESMFApplication}
-\scalebox{.5}{\includegraphics{ESMFprogrammingparadigm.eps}}
-\end{figure}
-\end{center}
+\subsection{Key Concepts}
 
-%\begin{center}
-%\begin{figure}
-%\caption{Assembly of multi-component applications in ESMF}
-%\label{fig:atmOptions}
-%\scalebox{.9}{\includegraphics{AtmosGridComp.eps}}
-%\end{figure}
-%\end{center}
+The ESMF architecture and programming paradigm are based upon 
+five key concepts:  modularity, flexibility, scalability, local 
+communication, and a uniform communication API.  
+
+\subsubsection{Modularity}
+
+The ESMF design is based upon modular components.  There
+are two types of components, one of which represents models 
+(GridComp) and one which represents couplers (CplComp).  Data
+are always passed between components using a data structure 
+called a State, which can store Fields, Bundles of Fields,
+and Arrays.  A GridComp stores no information about the internals 
+of the GridComps that it interacts with; this information is 
+passed in through the argument lists of its Initialize, Run, 
+and Finalize methods.  The information that is 
+passed in through the argument list can be a State from 
+another GridComp, or it can be a function pointer that performs
+a computation or communication on a State.  These function 
+pointers are called Transforms, and they are created by 
+CplComps.  They are called inside the GridComp they are passed 
+into.  Although Transforms add some complexity to the framework 
+(and their use is not required), they are what enable ESMF to 
+accommodate virtually any model of communication between components. 
+
+{\bf Modularity means that an ESMF component stores nothing about 
+the internals of other components.  This allows components to be 
+used more easily in multiple contexts.}
+
+\subsubsection{Flexibility}
+The ESMF does not dictate how models should be coupled, it
+simply provides tools for creating couplers.  For example, 
+both a hub-and-spokes (CCSM) type coupling strategy and  
+pairwise strategies are supported.  The ESMF also allows model
+communications to occur mid-timestep, if desired (as between
+the CAM and the land model).  Sequential, concurrent, and mixed
+modes of execution are supported.  
+
+{\bf The ESMF does not impose restrictions on how data flows through 
+an application.  This accommodates scientific innovation - if you 
+want your atmospheric model to communicate with your sea ice model
+mid-timestep, ESMF will not stop you.  It may in fact make
+it easier.}
+
+\subsubsection{Scalability}
+The ESMF allows applications to be composed hierarchically.
+For example, physics and dynamics modules can be defined as 
+separate GridComps, coupled together with a CplComp, and this 
+whole system can be nested within a single atmospheric GridComp.
+The atmospheric GridComp can be run standalone, or included
+in a larger climate or data assimilation application.  The
+data structure that enables you to do this in ESMF is the
+derived type GridComp.  F90 alone doesn't allow you to create
+generic components - you'd have to create derived types for
+PhysComp, and DynComp, and PhysDynCouplerComp, and AtmComp.  In 
+ESMF, they are always of type GridComp or CplComp, so they 
+can be called by the same drivers (whether that driver is a 
+standard ESMF driver or another model), and use the same methods
+without having to overload them with a lot of specific derived 
+types.  Same idea when you want to support different 
+implementations of the same component, like multiple dynamics.
+
+{\bf In short, the ESMF defines a sensible scalable 
+architecture for organizing very complex applications, and
+for allowing exchangeable components.}
+
+\subsubsection{Local Communication}
+Communication in ESMF always occurs within a component.  It
+can occur internal to a GridComp, and have nothing to do 
+with interactions with other components (setting aside 
+synchronization issues), or it can occur within a CplComp
+or a Transform generated by a CplComp.  This means that
+CplComps must always be defined on the union of all the
+components that they couple together.  Models can choose to 
+use whatever mechanism they want for intra-model communications.  
+
+{\bf The point is that although the ESMF defines some simple rules 
+for communication, the communication mechanism that the 
+framework uses is not hardwired into its architecture -
+the sends and receives or puts and gets are enclosed within 
+the CplComps and Transforms. This is designed to accommodate 
+multiple models of communication and technical innovations.}
+
+\subsubsection{Uniform Communication API}
+We are trying to create a single API for shared and distributed
+memory that, unlike MPI, accounts for NUMA achitectures and 
+does not treat all processes as being identical.  It's possible for
+users to set ESMF communications to a strictly message passing 
+mode and put in their own OpenMP commands.
+
+{\bf The goal is to create a programming paradigm 
+that is peformance sensitive to the architecture beneath it 
+without being discouragingly complicated.}
 
 \subsection{Superstructure}
 \label{sec:superstructure}
@@ -54,7 +117,7 @@ The flow of data and sequence of computation between atmospheric model term eval
 term evaluations would be prescribed in the {\bf Superstructure} layer. Under ESMF user code components are constructed or adapted
 to fit within this {\bf Superstructure} layer. This ensures that large components can be interchanged. There may still be issues
 of physical consistency between components, but ensuring that all components comply with the requirement to fit
-within an ESMF {\bf Superstructure} layer eliminates computational incompatibilities. 
+within an ESMF {\bf Superstructure} layer removes computational incompatibilities. 
 
 The {\bf Superstructure} layer provides
 the foundation for a flexible mechanism to address physical consistency between components that may use different dimensions or units to represent the
@@ -109,22 +172,18 @@ Component mappings independently, figure \ref{fig:point2point}.
 
 \begin{figure}
 \caption{ESMF can support configurations with a single central Coupler Component. In this case inputs from all Gridded 
-Components are transferred and regridded between all components in one place. The block arrows show how the 
-Coupler Component 
-(symbolized by the star icon) must take inputs from all Gridded Components (symbolized by the model output images) 
-and return data to all Gridded Components.}
+Components are transferred and regridded between all components in one place.}
 \label{fig:hubspoke}
-\scalebox{0.7}{\includegraphics{couplings_hub_and_spoke.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_hubandspokes.eps}}
 \end{figure}
 
 \begin{figure}
 \caption{ESMF also supports configurations with multiple point to point Coupler Components. 
 These take inputs from one Gridded
-Component and transfer and regrid the data for passing to another Gridded Component. The block arrows show the
-flow of data between point to point pairings of Coupler Components (symbolized by the star icons) and Gridded 
-Components (symbolized by the model output images).}
+Component and transfer and regrid the data for passing to another Gridded Component. This schematic shows a 
+flow of data between two Coupler Components that connect three Gridded Components:  an atmosphere model with a land model, and the same atmosphere model with a data assimilation system.}
 \label{fig:point2point}
-\scalebox{0.7}{\includegraphics{couplings_pt_to_pt.eps}}
+\scalebox{1.0}{\includegraphics{ESMF_pairwise.eps}}
 \end{figure}
 
 The set of {\bf Superstructure} abstractions allows flexible data-flow and control between components. However, 
