@@ -54,12 +54,14 @@
 
 \req{Superstructure Level Issues}
 \sreq{Arbitrary SPMD and MPMD support}
-The {\it Control}
+The {\it Control} layer in ESMF is required to manage arbitrary collections
+of SPMD and MPMD programs running across a potentially heterogeneous
+mix of platforms.
 \begin{reqlist}
 {\bf Potential Imapact:} Serious \\
-{\bf Problem Likelihood:} All codes\\
-{\bf Action Being Taken:} Approved-1. \\
-{\bf Fallback:} Milestone demonstrations.\\
+{\bf Problem Likelihood:} Low \\
+{\bf Action Being Taken:} ed-1. \\
+{\bf Fix:} Milestone demonstrations.\\
 {\bf Notes:} Some form of component versioning, labeling and naming
 is required that enables experiment configuration logs
 to include information of which components were used.
@@ -67,11 +69,35 @@ to include information of which components were used.
 
 \req{System Issues}
 \sreq{Interoperation between languages}
+ESMF will use a mix of Fortran, C and C++
 \sreq{F90 Continued Availability}
+Fortran 90/95 remain {\it fringe} languages, even though most of the Earth system
+community uses them. Two consequences of this are that ESMF Fortran 90 code will
+rely on vendor supplied compilers that have an ever decreasing user base and
+that there is no true open-source compiler for Fortran 90/95.
+This impacts ESMF directly because some of its code will use F90 and
+indirectly because many of its components exist in F90 only.
+\begin{reqlist}
+{\bf Potential Imapact:} Serious \\
+{\bf Problem Likelihood:} Low\\
+{\bf Action Being Taken:} Some framework development is being pursued in C/C++\\
+{\bf Fix:} Entire framework would need to be in C/C++.\\
+{\bf Notes:} Reimplementation in C/C++ would be time-consuming but
+otherwise straightforward. For components the impact would be far more
+serious, but this is outside the scope of ESMF.
+Components in Fortran 77, C and C++ would not be affected by lack of 
+compiler availability as compilers exist almost all hardware for these languages.
+\end{reqlist}
+
 \sreq{Vector Platform Availability}
+
 \sreq{Windows Availability}
+
 \sreq{Other OS Validation}
 
+\req{Infrastructure Fields and Grid Level Issues}
+
+\req{Infrastructure Utilities Level Issues}
 
 
 \end{document}
