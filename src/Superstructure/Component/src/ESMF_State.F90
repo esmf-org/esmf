@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.41 2003/05/07 04:34:31 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.42 2003/06/26 23:00:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -203,7 +203,7 @@
       type ESMF_State
       sequence
       private
-        type(ESMF_StateType), pointer :: statep
+        type(ESMF_StateType), pointer :: statep => NULL()
       end type
 
 !------------------------------------------------------------------------------
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.41 2003/05/07 04:34:31 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.42 2003/06/26 23:00:44 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2472,12 +2472,14 @@ end function
       type(ESMF_StateType), pointer :: stypep
       type(ESMF_StateData), pointer :: nextitem
 
-      stypep => state%statep
-      if (.not.associated(stypep)) then
+      if (.not.associated(state%statep)) then
+        print *, "Error: uninitialized or invalid State"
         if (present(rc)) rc=ESMF_FAILURE
         return
       endif
+      stypep => state%statep
       if (stypep%stvalid .eq. ESMF_STATEDATAINVALID) then
+        print *, "Error: uninitialized or invalid State"
         if (present(rc)) rc=ESMF_FAILURE
         return
       endif
@@ -2622,6 +2624,16 @@ end function
 
       itemfound = .FALSE.
   
+      ! Check for invalid state pointers
+      if (.not.associated(stypep)) then
+        print *, "Error: invalid or uninitialized state object"
+        return
+      endif
+      if (stypep%stvalid .eq. ESMF_STATEDATAINVALID) then
+        print *, "Error: invalid or uninitialized state object"
+        return
+      endif
+
       ! For each item in the array, check the name
       dcount = stypep%datacount
            
@@ -2696,6 +2708,7 @@ end function
 
       exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
       if (.not. exists) then
+          if (present(rc)) rc = status
           return
       endif
 
@@ -2743,10 +2756,25 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_StateGetNeeded
+      type(ESMF_StateData), pointer :: dataitem
+      logical :: exists
+      integer :: status
+
+      status = ESMF_FAILURE
+      ! Assume failure until we know we will succeed
+      if (present(rc)) rc=ESMF_FAILURE
+
+      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
+      if (.not. exists) then
+          if (present(rc)) rc = status
+          return
+      endif
+
+      needed = dataitem%needed
+
+      if (present(rc)) rc=ESMF_SUCCESS
+
+      end subroutine ESMF_StateGetNeeded
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2787,11 +2815,13 @@ end function
       integer :: status
 
       status = ESMF_FAILURE
+
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
 
       exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
       if (.not. exists) then
+          if (present(rc)) rc = status
           return
       endif
 
@@ -2848,6 +2878,7 @@ end function
 
       exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
+          if (present(rc)) rc = status
           return
       endif
 
@@ -2905,6 +2936,7 @@ end function
 
       exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
+          if (present(rc)) rc = status
           return
       endif
 
@@ -2966,6 +2998,7 @@ end function
 
       exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
+          if (present(rc)) rc = status
           return
       endif
 
@@ -3023,6 +3056,7 @@ end function
 
       exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
+          if (present(rc)) rc = status
           return
       endif
 
@@ -3257,11 +3291,11 @@ end function
        ! print num of states, state type, etc
 
        print *, "StatePrint: "  
-       sp => state%statep
-       if (.not.associated(sp)) then 
+       if (.not.associated(state%statep)) then 
            print *, "Not a valid State object"
            return
        endif
+       sp => state%statep
 
        call ESMF_GetName(sp%base, sname, status)
        print *, "  State name '", trim(sname), "'"
