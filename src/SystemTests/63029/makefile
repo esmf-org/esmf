@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.3 2003/02/27 17:55:10 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/02/27 21:29:01 nscollins Exp $ 
 
-ALL:  test
+ALL:
 
 CFLAGS    =
 FFLAGS    =
@@ -26,7 +26,7 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-# model has to be built first
+# user_model (and .mod file) has to be built first
 ESMF_SysTest63029.o: user_model.o
 
 ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.o chkopts

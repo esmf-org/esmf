@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.1 2003/02/26 01:18:02 nscollins Exp $
+! $Id: user_model.F90,v 1.2 2003/02/27 21:29:04 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -41,10 +41,15 @@
         type(ESMF_Comp) :: comp
         integer :: rc
 
+        print *, "In user register routine"
+
         ! Register the callback routines.
-        call ESMF_CompSetRoutine(comp, "init", 1, user_init, rc)
-        call ESMF_CompSetRoutine(comp, "run", 1, user_run, rc)
-        call ESMF_CompSetRoutine(comp, "final", 1, user_final, rc)
+
+        call ESMF_CompSetRoutine(comp, ESMF_CALLINIT, 1, user_init, rc)
+        call ESMF_CompSetRoutine(comp, ESMF_CALLRUN, 1, user_run, rc)
+        call ESMF_CompSetRoutine(comp, ESMF_CALLFINAL, 1, user_final, rc)
+
+        print *, "Registered Initialize, Run, and Finalize routines"
 
         ! If desired, this routine can register a private data block
         ! to be passed in to the routines above:
@@ -62,15 +67,23 @@
         integer :: rc
 
 !     ! Local variables
-        type(ESMF_State), pointer :: import, export
+        type(ESMF_State) :: import, export
+        type(ESMF_Layout) :: mylayout
+        integer :: de_id                        ! the current DE
+
 
         print *, "User Comp Init starting"
-    
 
         ! This is where the model specific setup code goes.  
 
-        call ESMF_CompGet(comp, export=export, rc=rc)
+        ! Query component for information.
+        call ESMF_CompGet(comp, export=export, layout=mylayout, rc=rc)
  
+        ! Something to show we are running on different procs
+        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
+
+        print *, "User Comp Init running on DE ", de_id
+
         ! If the initial Export state needs to be filled, do it here.
 
         print *, "User Comp Init returning"
@@ -87,16 +100,24 @@
         integer :: rc
 
 !     ! Local variables
-        type(ESMF_State), pointer :: import, export
+        type(ESMF_State) :: import, export
         type(ESMF_Field) :: humidity
+        type(ESMF_Layout) :: mylayout
+        integer :: de_id                        ! the current DE
 
         print *, "User Comp Run starting"
 
-        call ESMF_CompGet(comp, import=import, rc=rc)
+        call ESMF_CompGet(comp, import=import, layout=mylayout, rc=rc)
         call ESMF_StateGetData(import, "humidity", humidity, rc)
 
         ! This is where the model specific computation goes.
 
+        ! Something to show we are running on different procs
+        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
+        print *, "User Comp Run running on DE ", de_id
+
+
+        ! Here is where you produce output
 
         call ESMF_CompGet(comp, export=export, rc=rc)
         call ESMF_StateAddData(export, humidity, rc)
@@ -115,10 +136,19 @@
         integer :: rc
 
 !     ! Local variables
+        type(ESMF_Layout) :: mylayout
+        integer :: de_id                        ! the current DE
 
         print *, "User Comp Final starting"
     
-        ! Add whatever code here needed
+        ! Query component for information.
+        call ESMF_CompGet(comp, layout=mylayout, rc=rc)
+ 
+        ! Something to show we are running on different procs
+        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
+
+        print *, "User Comp Final running on DE ", de_id
+
 
         print *, "User Comp Final returning"
    
