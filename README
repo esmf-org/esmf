@@ -1,4 +1,4 @@
- $Id: README,v 1.17 2003/06/30 22:07:52 cdeluca Exp $
+ $Id: README,v 1.18 2003/06/30 22:55:26 jwolfe Exp $
 ================================================================================
                                    README
 
@@ -58,6 +58,8 @@ src:            Contains the source code.
 In addition, the following directories are created during the building and
 testing stages:
 
+doc:            Contains documentation (if built).
+
 lib:            Contains the ESMF libraries.
 
 mod:            Contains the Fortran module files.
@@ -75,23 +77,10 @@ addressing.
 Environment Variables
 ---------------------
 
-Currently the following environment variables must be set:
+Currently the following environment variables must be set on all platforms:
 
 ESMF_ARCH     alpha, IRIX64, rs6000_sp (32-bit), rs6000_64
 ESMF_DIR      top-level ESMF directory
-
-On rs6000 machines an additional environment variable needs to be set to 
-execute any of the tests or examples:
-
-MP_RMPOOL     <Node allocation pool>
-
-On Alpha machines an additional environment variable needs to be set:
-
-ESMF_PROJECT  <Load Sharing Facility (LSF) project name>
-
-On an Alpha machine, test and demo applications are run using the bsub command.  
-The value of ESMF_PROJECT is used as the argument for bsub's -P option. The -P 
-option assigns a job to a specific project.  
 
 Environment variables must be set in the user's shell and not inside an ESMF 
 makefile or build system file.  Here is an example of setting an environment 
@@ -102,6 +91,16 @@ variable in tcsh and csh shells:
 In ksh shell environment variables are set this way:
 
 	export ESMF_ARCH=rs6000_sp
+
+Platform notes:
+
+Compaq alpha - Before running on the Compaq, you will need to set the
+environment variable ESMF_PROJECT to a valid project number suitable for the -P
+option on brun. If you do not know what to set this to first run with it unset
+and you should be prompted by the system for valid values for your userid. 
+
+IBM rs6000 - Before running on rs6000 machines, you will need to set an
+additional environment variable MP_RMPOOL to a valid node allocation pool.
 
 
 Build Information
@@ -149,7 +148,7 @@ first if the unit tests have already been compiled without the
 ESMF_EXHAUSTIVE=ON option.
 
 Output files from the tests are directed to files in 
-$ESMF_DIR/test${BOPT}/${ESMF_ARCH} directories.
+${ESMF_DIR}/test/test${BOPT}/${ESMF_ARCH} directories.
 
 To build documentation:
 
@@ -158,15 +157,27 @@ To build documentation:
   gmake html          ! Creates the html directory.
   gmake alldoc        ! Builds all the above documents.
 
-Final documentation files will be located in the $ESMF_DIR/doc directory.
+Final documentation files will be located in the ${ESMF_DIR}/doc directory.
 
 
 Usage
 -----
 
-<C++>
+The ESMF builds libraries as both static archives (.a) and dynamic shared
+objects (.so).  They are located in the ${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
+directory.  For additional information about linking with dynamic shared
+objects on a particular platform, please see the ESMF User's Guide on the ESMF
+Web pages, under the "Downloads & Documentation" link.
 
-<F90>
+To use ESMF from Fortran, add the ESMF mod directory
+(${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}) to the search path for include files
+and .mod files, and link with the ESMF library (either libesmf.a or libesmf.so).
+There is a single ESMF module, called ESMF_Mod, that should be included in
+applications with the Fortran USE statement. 
+
+To use ESMF from C/C++, link with the ESMF library (either libesmf.a ori
+libesmf.so) and include the ESMC.h file. 
+
 
 ================================================================================
 
