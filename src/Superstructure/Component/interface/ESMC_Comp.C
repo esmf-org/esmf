@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.13 2003/10/16 20:23:29 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.14 2003/10/16 22:31:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,11 +42,17 @@
  // return min value 
 #define min(a,b)  (((a)<(b))?(a):(b))
 
+const char *ESMC_SetInit         = "ESMF_Initialize";
+const char *ESMC_SetRun          = "ESMF_Run";
+const char *ESMC_SetFinal        = "ESMF_Finalize";
+const char *ESMC_SetWriteRestart = "ESMF_WriteRestart";
+const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.13 2003/10/16 20:23:29 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.14 2003/10/16 22:31:58 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -389,8 +395,9 @@
 //EOP
 
     int rc;
+    ESMC_MainLanguage l = ESMF_MAIN_C;
 
-    FTN(f_esmf_frameworkinitialize)(ESMF_MAIN_C, &rc);
+    FTN(f_esmf_frameworkinitialize)((int*)&l, &rc);
 
     return rc;
 
