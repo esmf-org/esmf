@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.76 2003/09/12 22:35:45 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.77 2003/09/18 22:54:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -234,7 +234,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.76 2003/09/12 22:35:45 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.77 2003/09/18 22:54:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3980,7 +3980,8 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: my_DE, my_dst_DE, my_src_DE
-      real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: src_min, src_max
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
@@ -4065,8 +4066,8 @@
         ! From the grid get the bounding box on this DE
         call ESMF_GridGetPhysGrid(src_grid, src_relloc, local_min=src_min, &
                                   local_max=src_max, rc=status)
-        call ESMF_GridBoxIntersectSend(dst_grid, src_min, src_max, myAI, &
-                                       sendDomainList, status)
+        call ESMF_GridBoxIntersectSend(dst_grid, src_grid, src_min, src_max, &
+                                       myAI, sendDomainList, status)
       endif
 
       ! if dst field exists on this DE, query it for information
