@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.52 2004/03/24 23:58:52 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.53 2004/03/25 17:52:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3881,6 +3881,8 @@
         deallocate(gtempAI2D)
         deallocate(ltempAI2D)
       endif
+
+      deallocate(dimOrderUse)
 
       if (rcpresent) rc = ESMF_SUCCESS
 
