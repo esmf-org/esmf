@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.10 2004/06/07 17:06:41 slswift Exp $
+# $Id: build_rules.mk,v 1.11 2004/09/16 20:49:50 theurich Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -120,6 +120,7 @@ C_CXXF90LD         = CC -n32
 C_F90CXXLD         = f90 -n32
 C_CXXF90LIBS       = -rpath . -lftn90 -lftn -lfortran
 C_F90CXXLIBS       = -rpath . -lCsup -lC -lCio -lc 
+SL_ABIOPTS         = -check_registry /usr/lib32/so_locations
 endif
 
 
@@ -147,6 +148,7 @@ C_F90CXXLD         = f90 -64
 C_CXXF90LIBS       = -rpath . -lftn90 -lftn -lfortran
 C_F90CXXLIBS       = -rpath . -lC -lCio -lc
 C_CXXSO            =  CC -64 -shared -rpath .
+SL_ABIOPTS         = -check_registry /usr/lib64/so_locations
 ###########################################################################
 
 endif
@@ -208,7 +210,7 @@ OCOMP_FOPTFLAGS	   = -O3
 PARCH		   = IRIX
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = -rpath $(ESMF_LIBDIR) -shared
+SL_LIBOPTS  = $(SL_ABIOPTS) -rpath $(ESMF_LIBDIR) -shared
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
