@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/12/09 17:22:55 nscollins Exp $
+# $Id: makefile,v 1.8 2004/12/18 16:53:20 nscollins Exp $
 
 ALL: tree_build_demo
 
@@ -45,7 +45,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod
+CLEANFILES  = *.o *.mod SIE.* U_velocity.* V_velocity.* FLAG.* DE.*
 CLOBBERDIRS =
 
 RUN_CoupledFlowApp:
