@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.33 2003/04/14 16:18:47 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.34 2003/04/17 22:15:23 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.33 2003/04/14 16:18:47 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.34 2003/04/17 22:15:23 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1027,7 +1027,7 @@ end function
         end subroutine ESMF_StateAddBundleList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeAddBundleList - Add a list of Bundles to a StateType
 !
 ! !INTERFACE:
@@ -1042,7 +1042,7 @@ end function
 ! !DESCRIPTION:
 !      Add multiple bundles to a {\tt State}.  Internal routine only.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status                   ! local error status
@@ -1437,7 +1437,7 @@ end function
       end subroutine ESMF_StateAddFieldList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeAddFieldList - Add a list of Fields to a StateType
 !
 ! !INTERFACE:
@@ -1452,7 +1452,7 @@ end function
 ! !DESCRIPTION:
 !      Add multiple fields to a {\tt State}.  Internal routine only.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status                   ! local error status
@@ -1678,7 +1678,7 @@ end function
         end subroutine ESMF_StateAddArrayList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeAddArrayList - Add a list of Arrays to a StateType
 !
 ! !INTERFACE:
@@ -1693,7 +1693,7 @@ end function
 ! !DESCRIPTION:
 !      Add multiple arrays to a {\tt State}.  Internal routine only.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 
@@ -1919,7 +1919,7 @@ end function
         end subroutine ESMF_StateAddStateList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeAddStateList - Add a list of States to a StateType
 !
 ! !INTERFACE:
@@ -1934,7 +1934,7 @@ end function
 ! !DESCRIPTION:
 !      Add multiple states to a {\tt State}.  Internal routine only.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 
@@ -2153,7 +2153,7 @@ end function
       end subroutine ESMF_StateAddDataNameList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeAddDataNameList - internal routine
 !
 ! !INTERFACE:
@@ -2175,7 +2175,7 @@ end function
 !      Unneeded data need not be generated.
 !
 ! !REQUIREMENTS: 
-!EOP
+!EOPI
       integer :: status                   ! local error status
       logical :: rcpresent                ! did user specify rc?
       type(ESMF_StateData), pointer :: nextitem, dataitem
@@ -2320,7 +2320,7 @@ end function
       end subroutine ESMF_StateTypeAddDataNameList
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeExtendList - internal routine
 !
 ! !INTERFACE:
@@ -2337,7 +2337,7 @@ end function
 !      {\tt rc} is NOT optional, especially since allocation can fail.
 !
 ! !REQUIREMENTS: 
-!EOP
+!EOPI
 
       type(ESMF_StateData), dimension(:), pointer :: temp_list
       type(ESMF_StateData), pointer :: nextitem
@@ -2566,7 +2566,7 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_StateTypeFindData - internal routine to find data item by name
 !
 ! !INTERFACE:
@@ -2602,7 +2602,7 @@ end function
 !  \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
       integer :: status                   ! local error status
