@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.2 2002/08/18 23:22:49 eschwab Exp $
+# $Id: makefile,v 1.3 2002/08/18 23:33:53 eschwab Exp $
 
 All: 
 	do_fprotex time ../ESMF_TimeMod.f90
 	do_fprotex time_interval ../ESMF_TimeIntervalMod.f90
-	do_fprotex time_intstant ../ESMF_TimeInstantMod.f90
+	do_fprotex time_instant ../ESMF_TimeInstantMod.f90
 	do_fprotex calendar ../ESMF_CalendarMod.f90
 	do_fprotex clock ../ESMF_ClockMod.f90
 	do_fprotex alarm ../ESMF_AlarmMod.f90
