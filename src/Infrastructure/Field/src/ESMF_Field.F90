@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.7 2003/03/17 21:34:12 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.8 2003/03/17 23:29:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -192,7 +192,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.7 2003/03/17 21:34:12 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.8 2003/03/17 23:29:05 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2172,7 +2172,7 @@
       integer :: nx, ny
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
-      integer :: my_src_DE, my_dst_DE
+      integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       integer :: AI_snd_count, AI_rcv_count
 
@@ -2188,18 +2188,29 @@
       stypep = srcfield%ftypep
       dtypep = dstfield%ftypep
 
+      ! in case we need it, here is our DE number in the parent layout
+      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
+
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
 
       ! if srclayout ^ parentlayout == NULL, nothing to send
       call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
       ! call ESMF_DELayoutThisDEExists(parentlayout, srclayout, hassrcdata)
-      hassrcdata = .true.
+      hassrcdata = .true.   ! temp for now
+      if (hassrcdata) then
+          ! don't ask for our de number if this de isn't part of the layout
+          call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
+      endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv
       call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
       ! call ESMF_DELayoutThisDEExists(parentlayout, dstlayout, hasdstdata)
-      hasdstdata = .true.
+      hasdstdata = .true.   ! temp for now
+      if (hasdstdata) then
+          ! don't ask for our de number if this de isn't part of the layout
+          call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
+      endif
 
       ! if neither are true this DE cannot be involved in the communication
       !  and it can just return now.
