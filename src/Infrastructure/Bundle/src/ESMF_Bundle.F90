@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.13 2004/01/30 04:45:23 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.14 2004/02/05 21:50:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -164,6 +164,9 @@
        public ESMF_BundleSetAttribute       ! Set and Get Attributes
        public ESMF_BundleGetAttribute       !   interface to Base class
 
+       public ESMF_BundleGetAttributeCount  ! number of attribs
+       public ESMF_BundleGetAttributeInfo   ! get type, length by name or number
+
        public ESMF_BundleGetFieldCount ! Get count of Fields 
        public ESMF_BundleGetFields    ! Get one or more Fields by name or number
        public ESMF_BundleAddFields    ! Add one or more Fields 
@@ -297,11 +300,11 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_BundleSetIntAttr
-       !module procedure ESMF_BundleSetIntListAttr
+        module procedure ESMF_BundleSetIntListAttr
         module procedure ESMF_BundleSetRealAttr
-       !module procedure ESMF_BundleSetRealListAttr
+        module procedure ESMF_BundleSetRealListAttr
         module procedure ESMF_BundleSetLogicalAttr
-       !module procedure ESMF_BundleSetLogicalListAttr
+        module procedure ESMF_BundleSetLogicalListAttr
         module procedure ESMF_BundleSetCharAttr
 
 ! !DESCRIPTION:
@@ -320,11 +323,11 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_BundleGetIntAttr
-       !module procedure ESMF_BundleGetIntListAttr
+        module procedure ESMF_BundleGetIntListAttr
         module procedure ESMF_BundleGetRealAttr
-       !module procedure ESMF_BundleGetRealListAttr
+        module procedure ESMF_BundleGetRealListAttr
         module procedure ESMF_BundleGetLogicalAttr
-       !module procedure ESMF_BundleGetLogicalListAttr
+        module procedure ESMF_BundleGetLogicalListAttr
         module procedure ESMF_BundleGetCharAttr
 
 ! !DESCRIPTION:
@@ -334,6 +337,23 @@
 !EOP
       end interface
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Get type, count from a Bundle Attribute
+!
+! !INTERFACE:
+      interface ESMF_BundleGetAttributeInfo
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_BundleGetAttrInfoByName
+        module procedure ESMF_BundleGetAttrInfoByNum
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     information about attributes from an {\tt ESMF\_Bundle}.
+ 
+!EOP
+      end interface
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
@@ -2162,6 +2182,7 @@ end function
 
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_BundleGetIntAttr - Retrieve an Attribute from a Bundle
 !
@@ -2206,7 +2227,8 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetInt(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleGetAttribute"
         return
@@ -2215,6 +2237,72 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetIntListAttr - Retrieve an Attribute from a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetIntListAttr(bundle, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer, dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an integer list attribute from a {\tt ESMF\_Bundle}.
+!
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The integer values of the named Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_BundleGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, count, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetIntListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2233,7 +2321,6 @@ end function
 ! !DESCRIPTION:
 !      Returns a real attribute from a {\tt ESMF\_Bundle}.
 !
-! 
 !     \begin{description}
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
@@ -2261,7 +2348,8 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetReal(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleGetAttribute"
         return
@@ -2270,6 +2358,71 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetRealListAttr - Retrieve an Attribute from a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetRealListAttr(bundle, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real, dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns a real attribute from a {\tt ESMF\_Bundle}.
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The real values of the named Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_BundleGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetRealListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2286,8 +2439,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Bundle}.
-!
+!      Returns an logical attribute from a {\tt ESMF\_Bundle}.
 ! 
 !     \begin{description}
 !     \item [bundle]
@@ -2316,7 +2468,8 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetLogical(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleGetAttribute"
         return
@@ -2325,6 +2478,71 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleGetLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetLogicalListAttr - Retrieve an Attribute from a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns an logical list attribute from a {\tt ESMF\_Bundle}.
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The logical values of the named Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_BundleGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleGetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetLogicalListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2384,6 +2602,191 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleGetAttributeCount - Query the number of attrs
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetAttributeCount(bundle, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      integer, intent(out) :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [count]
+!           The number of attributes on this object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetCount(bundle%btypep%base, count, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleGetAttributeCount"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetAttributeCount
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetAttrInfoByName - Query info about an attrs
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetAttrInfoByName(bundle, name, type, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character(len=*), intent(in) :: name
+      type(ESMF_DataType), intent(out), optional :: type
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to query.
+!     \item [type]
+!           The type of the Attribute.
+!     \item [count]
+!           The number of items in this Attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_DataType) :: localDt
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetAttrInfoName(bundle%btypep%base, name, &
+                                           localDt, localCount, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleGetAttributeInfo"
+        return
+      endif 
+
+      if (present(type)) type = localDt
+      if (present(count)) count = localCount
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetAttrInfoByName
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGetAttrInfoByNum - Query info about an attrs
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGetAttrInfoByNum(bundle, num, name, type, count, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      integer, intent(in) :: num
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DataType), intent(out), optional :: type
+      integer, intent(out), optional :: count   
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Returns the number of values associated with the given attribute.
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [num]
+!           The number of the Attribute to query.
+!     \item [name]
+!           Returns the name of the Attribute.
+!     \item [type]
+!           Returns the type of the Attribute.
+!     \item [count]
+!           Returns the number of items in this Attribute.  For character types,
+!           the length of the character string.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      character(len=ESMF_MAXSTR) :: localName
+      type(ESMF_DataType) :: localDt
+      integer :: localCount
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeGetAttrInfoNum(bundle%btypep%base, num, &
+                                       localName, localDt, localCount, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleGetAttributeInfo"
+        return
+      endif 
+
+      if (present(name)) name = localName
+      if (present(type)) type = localDt
+      if (present(count)) count = localCount
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleGetAttrInfoByNum
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_BundleSetIntAttr - Set an Attribute on a Bundle
 !
 ! !INTERFACE:
@@ -2398,7 +2801,6 @@ end function
 !
 ! !DESCRIPTION:
 !      Attaches an integer attribute to a {\tt ESMF\_Bundle}.
-!
 ! 
 !     \begin{description}
 !     \item [bundle]
@@ -2427,7 +2829,8 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetInt(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleSetAttribute"
         return
@@ -2436,6 +2839,71 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleSetIntListAttr - Set an Attribute on a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleSetIntListAttr(bundle, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer, dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an integer list attribute to a {\tt ESMF\_Bundle}.
+!
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The integer values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+  
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_BundleGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleSetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetIntListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2453,7 +2921,6 @@ end function
 !
 ! !DESCRIPTION:
 !      Attaches a real attribute to a {\tt ESMF\_Bundle}.
-!
 ! 
 !     \begin{description}
 !     \item [bundle]
@@ -2482,7 +2949,8 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetReal(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleSetAttribute"
         return
@@ -2491,6 +2959,72 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleSetRealListAttr - Set an Attribute on a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleSetRealListAttr(bundle, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real, dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a real list attribute to a {\tt ESMF\_Bundle}.
+!
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The real values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_BundleGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleSetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetRealListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2507,7 +3041,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Bundle}.
+!      Attaches an logical attribute to a {\tt ESMF\_Bundle}.
 !
 ! 
 !     \begin{description}
@@ -2537,7 +3071,8 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetLogical(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleSetAttribute"
         return
@@ -2546,6 +3081,72 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleSetLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleSetLogicalListAttr - Set an Attribute on a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleSetLogicalListAttr(bundle, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an logical list attribute to a {\tt ESMF\_Bundle}.
+!
+! 
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The logical true/false values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_BundleGetAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_BundleSetAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleSetLogicalListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2564,7 +3165,6 @@ end function
 ! !DESCRIPTION:
 !      Attaches a character attribute to a {\tt ESMF\_Bundle}.
 !
-! 
 !     \begin{description}
 !     \item [bundle]
 !           A {\tt ESMF\_Bundle} object.
