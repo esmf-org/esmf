@@ -1,4 +1,4 @@
-% $Id: Demo_usrdoc.ctex,v 1.2 2003/05/07 07:49:55 cdeluca Exp $
+% $Id: CoupledFlow_usrdoc.ctex,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -38,14 +38,14 @@
 #ifdef STANDALONE
 \input{flow_intro}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/flow_intro}
+\input{../demo/coupled_flow/doc/flow_intro}
 #endif
 
 %\section{Major Pieces}
 #ifdef STANDALONE
 \input{flow_pieces}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/flow_pieces}
+\input{../demo/coupled_flow/doc/flow_pieces}
 #endif
 
 \section{Framework Usage Details}
@@ -53,50 +53,50 @@
 #ifdef STANDALONE
 \input{CoupledFlowApp_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/CoupledFlowApp_fapi}
+\input{../demo/coupled_flow/doc/CoupledFlowApp_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{CoupledFlowDemo_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/CoupledFlowDemo_fapi}
+\input{../demo/coupled_flow/doc/CoupledFlowDemo_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{FlowSolverMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/FlowSolverMod_fapi}
+\input{../demo/coupled_flow/doc/FlowSolverMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{FlowArraysMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/FlowArraysMod_fapi}
+\input{../demo/coupled_flow/doc/FlowArraysMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{CouplerMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/CouplerMod_fapi}
+\input{../demo/coupled_flow/doc/CouplerMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{InjectorMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/InjectorMod_fapi}
+\input{../demo/coupled_flow/doc/InjectorMod_fapi}
 #endif
 
 #ifdef STANDALONE
 \input{InjectArraysMod_fapi}
 #elif defined(CONSTITUENT)
-\input{../Demo/coupled_flow/doc/InjectArraysMod_fapi}
+\input{../demo/coupled_flow/doc/InjectArraysMod_fapi}
 #endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %\input{flow_res}
 %#elif defined(CONSTITUENT)
-%\input{../Demo/coupled_flow/doc/flow_res}
+%\input{../demo/coupled_flow/doc/flow_res}
 %#endif
 
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/05/29 20:59:06 flanigan Exp $
+# $Id: makefile,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
 ALL: alldoc 
 
 CFLAGS    =
@@ -10,13 +10,13 @@ OBJSC     =
 OBJSF     = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Demo/coupled_flow/doc
+LOCDIR	  = src/demo/coupled_flow/doc
 
-DVIFILES  = 	Demo_usrdoc.dvi
+DVIFILES  = 	CoupledFlow_usrdoc.dvi
 
-PDFFILES  =     ${ESMC_DOCDIR}/Demo_usrdoc.pdf
+PDFFILES  =     ${ESMC_DOCDIR}/CoupledFlow_usrdoc.pdf
 
-HTMLFILES = 	${ESMC_DOCDIR}/Demo_usrdoc 
+HTMLFILES = 	${ESMC_DOCDIR}/CoupledFlow_usrdoc 
 
 #
 # Tex Files to make
@@ -48,9 +48,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Demo_usrdoc $(HTMLFILES)
+CLEANDIRS   = CoupledFlow_usrdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG \
-              Demo_usrdoc.tex $(PDFFILES)
+              CoupledFlow_usrdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 
 
