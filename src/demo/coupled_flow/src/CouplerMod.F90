@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.3 2004/03/08 16:03:25 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.4 2004/03/08 16:19:31 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -197,7 +197,6 @@
       
         character(len=ESMF_MAXSTR) :: statename
        
-        integer :: status
         integer :: i, datacount
         character(len=ESMF_MAXSTR), dimension(7) :: datanames
 
@@ -260,7 +259,7 @@
 
         enddo
  
-        rc = status
+        ! rc has the last error code already
 
     end subroutine coupler_run
 
