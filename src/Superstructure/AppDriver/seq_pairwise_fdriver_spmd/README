@@ -1,0 +1,16 @@
+
+This directory contains the starting files needed to build an ESMF
+Application with sequential execution, a pair-wise Coupling Component,
+and a main program in Fortran. 
+
+
+To compile as-is for testing, simply run 'gmake' in this directory.
+
+The resulting skeleton and driver files should produce an executable
+which can be run and will print out messages during each stage of execution.
+
+
+Then to begin to customize the Component files.  The AppDriver file
+can be used as-is with most applications.
+
+
