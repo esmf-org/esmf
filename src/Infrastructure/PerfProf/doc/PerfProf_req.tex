@@ -1,4 +1,4 @@
-% $Id: PerfProf_req.tex,v 1.8 2002/05/18 07:39:38 cdeluca Exp $
+% $Id: PerfProf_req.tex,v 1.9 2002/10/15 22:35:43 ekluz Exp $
 
 \req{Code section timing}
 
@@ -7,10 +7,10 @@ provided so that a user may insert calls to the profiler at the beginning and
 end of a passage of interest.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -21,10 +21,10 @@ and the library shall provide a means for distinguishing these separate calls.  
 the results of the timing are reported, each timer will be associated with its name.
 
 \begin{reqlist}
-{\bf Priority:} \\
+{\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -33,10 +33,10 @@ the results of the timing are reported, each timer will be associated with its n
 A named timer may be reset at any time.  All data will be cleared.
 
 \begin{reqlist}
-{\bf Priority:} \\
-{\bf Source:} MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Priority:} 1 \\
+{\bf Source:} MIT, CAM-FV \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -53,10 +53,10 @@ Process user time can be recorded.
 The timer will provide a means to estimate and reconcile the extra time added by its usage.
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 2 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} It is desirable to offer a mechanism which removes the
   intrusiveness of the timing calls themselves; there are mechanisms
   to estimate the timing call overhead (WS).
@@ -68,10 +68,10 @@ The timer will provide a means to estimate and reconcile the extra time added by
 System time can be recorded.
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 2 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -81,10 +81,10 @@ System time can be recorded.
 Wall clock time can be recorded.
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -104,10 +104,10 @@ Collection of the following data will be supported, where available:
 \end{itemize}
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 2 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test\\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -117,10 +117,10 @@ The profiler will be able to operate within a nested structure of processes (e.g
 from MPI process 3, thread 6).
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 2 \\
 {\bf Source:}  CAM-FV, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -130,10 +130,10 @@ The profiler can be called safely from any process (MPI or other).  It will
 identify and report which process it was called from.
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -143,10 +143,10 @@ The profiler can be called safely from any thread.  It will
 identify and report which thread it was called from.
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -160,9 +160,9 @@ be called at any point of execution, as many times as desired.
 The profiler will write its output via the log.  
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 1 \\
 {\bf Source:}  MIT \\
-{\bf Status:} Proposed \\
+{\bf Status:} Approved-1 \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
 \end{reqlist}
@@ -171,10 +171,10 @@ The profiler will write its output via the log.
 
 The profiler data will be accessible to the program by means of an API.
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 2 \\
 {\bf Source:} MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -189,10 +189,10 @@ A named timer can perform analysis across threads and report the
 minimum amount of time spent in any thread, the maximum, and the mean.
 
 \begin{reqlist}
-{\bf Priority:}  \\
-{\bf Source:}  MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT, CAM-EUL, CLM, CCSM-CPL \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit-test \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -209,9 +209,9 @@ The library can be turned into stub calls at compile time.
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, PSAS, MIT \\
-{\bf Status:} Proposed \\
+{\bf Status:} Rejected \\
 {\bf Verification:} Code Inspection \\
-{\bf Notes:} 
+{\bf Notes:} Can be implimented using CPP in user-code.
 \end{reqlist}
 
 \sreq{Runtime deactivation}
@@ -220,9 +220,9 @@ A flag may be set so that calls to the profiling library do no more than check
 this flag and return.
 
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} 1 \\
 {\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
-{\bf Status:} Proposed \\
+{\bf Status:} Approved-1 \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} It is particularly useful to be able to do some timing
 early on in a run to predict time to completion and then have
