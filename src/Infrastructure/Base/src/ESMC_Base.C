@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.16 2003/12/19 21:42:58 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.17 2004/01/26 17:42:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,14 +19,16 @@
 //
 //-----------------------------------------------------------------------------
 //
- // associated class definition file
-#include "ESMC_Base.h"
+ // associated class definition file and others
 #include <string.h>
+#include <stdlib.h>
+#include "ESMC.h"
+#include "ESMC_Base.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.16 2003/12/19 21:42:58 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.17 2004/01/26 17:42:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -532,9 +534,286 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
+//
+// !INTERFACE:
+    char *ESMC_F90toCstring(
+//
+// !RETURN VALUE:
+//  returns pointer to a newly allocated C string buffer.  this space
+//  must be deleted by the caller when finished!
+// 
+// !ARGUMENTS:
+    char *src,                // in - F90 character source buffer
+    int slen) {               // in - length of the F90 source buffer
+
+    char *cp, *ctmp;
+    int clen;
+
+    // minor idiotproofing
+    if ((src == NULL) || (slen < 0) || (slen > ESMF_MAXSTR)) {
+        printf("Bad input parameters: either bad count or NULL pointer\n");
+        return NULL;
+    }
+
+    // count back from end of string to last non-blank character.
+    for (clen=slen, cp = &src[slen-1]; *cp == ' '; cp--, clen--)
+        ;
+
+    // make new space and leave room for a null terminator
+    ctmp = new char[clen+1];
+    strncpy(ctmp, src, clen);
+    ctmp[clen] = '\0';
+
+    // return pointer.  caller MUST free this when finished with it.
+    return ctmp;
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
+//
+// !INTERFACE:
+    int ESMC_F90toCstring(
+//
+// !RETURN VALUE:
+//  converts an F90, space padded string into a C++ null terminated string
+//  returns ESMF_SUCCESS or ESMF_FAILURE.
+// 
+// !ARGUMENTS:
+    char *src,                // in - F90 character source buffer
+    int slen,                 // in - length of the F90 source buffer
+    char *dst,                // inout - pointer to a buffer to hold C string
+    int dlen) {               // in - max len of C dst buffer, inc term NULL
+
+    char *cp, *ctmp;
+    int clen;
+
+    // minor idiotproofing
+    if (  (slen < 0)    || (slen > ESMF_MAXSTR) 
+       || (dlen < 0)    || (dlen > ESMF_MAXSTR)
+       || (src == NULL) || (dst == NULL) ) {
+        printf("Bad input parameters: either bad count or NULL pointer\n");
+        return ESMF_FAILURE;
+    }
+
+    // count back from end of string to last non-blank character.
+    for (clen=slen, cp = &src[slen-1]; *cp == ' '; cp--, clen--)
+        ;
+
+    // make sure dst space is long enough 
+    if (clen >= dlen) {
+        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+                dlen, clen+1);
+        return ESMF_FAILURE;
+    }
+    
+    strncpy(dst, src, clen);
+    dst[clen] = '\0';
+
+    // return ok.  caller has passed us in dst buffer so it is up to them
+    // to manage that space.
+    return ESMF_SUCCESS;
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CtoF90string - Convert a C++ string into an F90 string
+//
+// !INTERFACE:
+    int ESMC_CtoF90string(
+//
+// !RETURN VALUE:
+//  constructs a space padded F90, non-null terminated string in dst buffer.
+//  returns ESMF_SUCCESS or ESMF_FAILURE.
+// 
+// !ARGUMENTS:
+    char *src,                // in - C++ null term string source buffer
+    char *dst,                // inout - pointer to a buffer holding F90 string
+    int dlen) {               // in - length of dst buffer, space padded
+
+    char *cp, *ctmp;
+    int clen;
+
+    // minor idiotproofing
+    if (  (dlen < 0)    || (dlen > ESMF_MAXSTR)
+       || (src == NULL) || (dst == NULL) ) {
+        printf("Bad input parameters: either bad count or NULL pointer\n");
+        return ESMF_FAILURE;
+    }
+
+    // fortran doesn't need trailing null, so len can be up to == maxlen
+    clen = strlen(src);
+    if (clen > dlen) {
+        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+                dlen, clen);
+        return ESMF_FAILURE;
+    }
+
+    // move bytes, then pad rest of string to spaces
+    strncpy(dst, src, clen);
+    
+    for (cp=&dst[clen]; cp < &dst[dlen-1]; cp++)
+        *cp = ' ';
+
+    // return ok. 
+    return ESMF_SUCCESS;
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMF_F90toCstring - Fortran-callable conversion routine from F90 character to C++ string
+//
+// !INTERFACE:
+extern "C" {
+    void  FTN(esmf_f90tocstring)(
+//
+// !RETURN VALUE:
+//  converts an F90, space padded string into a C++ null terminated string
+//  sets *rc to ESMF_SUCCESS or ESMF_FAILURE, returns nothing.
+//  the arguments below labeled *hidden* are added by the fortran compiler
+//  and should not appear in the fortran argument list
+// 
+// !ARGUMENTS:
+    char *src,          // in - F90 character source buffer
+    char *dst,          // inout - pointer to a buffer to hold C string
+    int *rc,            // out - return code
+    int *slen,          // *hidden* in - length of the F90 source buffer
+    int *dlen) {        // *hidden* in - max len of C dst buffer, inc term NULL
+
+    char *cp, *ctmp;
+    int clen;
+
+    // minor idiotproofing
+    if (  (*slen < 0)   || (*slen > ESMF_MAXSTR) 
+       || (*dlen < 0)   || (*dlen > ESMF_MAXSTR)
+       || (src == NULL) || (dst == NULL) ) {
+        printf("Bad input parameters: either bad count or NULL pointer\n");
+        if (rc) *rc = ESMF_FAILURE;
+        return;
+    }
+
+    // count back from end of string to last non-blank character.
+    for (clen= *slen, cp = &src[*slen-1]; *cp == ' '; cp--, clen--)
+        ;
+
+    // make sure dst space is long enough 
+    if (clen >= *dlen) {
+        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+                *dlen, clen+1);
+        if (rc) *rc = ESMF_FAILURE;
+        return;
+    }
+    
+    strncpy(dst, src, clen);
+    dst[clen] = '\0';
+
+    // return ok.  caller has passed us in dst buffer so it is up to them
+    // to manage that space.
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+ }
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character 
+//
+// !INTERFACE:
+extern "C" {
+    void  FTN(esmf_ctof90string)(
+//
+// !RETURN VALUE:
+//  converts a C++ null terminated string info an F90, space padded string
+//  sets *rc to ESMF_SUCCESS or ESMF_FAILURE, returns nothing.
+//  the arguments below labeled *hidden* are added by the fortran compiler
+//  and should not appear in the fortran argument list
+// 
+// !ARGUMENTS:
+    char *src,         // in - F90 character source buffer
+    char *dst,         // inout - pointer to a buffer to hold C string
+    int *rc,           // out - return code
+    int *slen,         // *hidden* in - length of the F90 source buffer
+    int *dlen) {       // *hidden* in - max len of C dst buffer, inc term NULL
+
+    char *cp, *ctmp;
+    int clen;
+
+    // minor idiotproofing
+    if (  (*slen < 0)   || (*slen > ESMF_MAXSTR) 
+       || (*dlen < 0)   || (*dlen > ESMF_MAXSTR)
+       || (src == NULL) || (dst == NULL) ) {
+        printf("Bad input parameters: either bad count or NULL pointer\n");
+        if (rc) *rc = ESMF_FAILURE;
+        return;
+    }
+
+    // fortran doesn't need trailing null, so len can be up to == maxlen
+    clen = strlen(src);
+    if (clen > *dlen) {
+        printf("dest buffer size of %d bytes too small, must be >= %d bytes\n", 
+                *dlen, clen);
+        if (rc) *rc = ESMF_FAILURE;
+        return;
+    }
+
+    // move bytes, then pad rest of string to spaces
+    strncpy(dst, src, clen);
+    
+    for (cp=&dst[clen]; cp < &dst[*dlen-1]; cp++)
+        *cp = ' ';
+
+    // return ok.  caller has passed us in dst buffer so it is up to them
+    // to manage that space.
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+ }
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Attribute methods
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_AttributeAlloc - ensure the attribute list is long enough
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_AttributeAlloc(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+      int adding) {             // in - number of attributes being added
+// 
+// !DESCRIPTION:
+//     Ensure there is enough space to add nattr more attributes.
+//
+//EOPI
+
+#define ATTR_CHUNK  4           // allocate and realloc in units of this
+
+  void *saveme;   // in case of error
+
+  if ((attrCount + adding) <= attrAlloc) 
+      return ESMF_SUCCESS;
+
+  saveme = (void *)attr;
+  attr = (ESMC_Attribute *)realloc((void *)attr, 
+                           (attrAlloc + ATTR_CHUNK) * sizeof(ESMC_Attribute));
+  if (attr == NULL) {
+      free(saveme);   // although at this point, the heap is probably boffed
+      return ESMF_FAILURE;
+  }
+  attrAlloc += ATTR_CHUNK;
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_AttributeAlloc
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -556,6 +835,35 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOP
 // !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
+  int i, rc;
+
+  // simple sanity check
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMF_AttributeSet: bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  // first, see if you are replacing an existing attribute
+  for (i=0; i<attrCount; i++) {
+      if (strcmp(name, attr[i].attrName))
+          continue;
+
+      // FIXME: we might want an explicit flag saying that this is what
+      // is wanted, instead of an error if a previous value not expected.
+
+      // if you get here, you found a match.  replace previous copy.
+      attr[i].attrValue = value;      // struct contents copy
+      return ESMF_SUCCESS;
+  }   
+
+  // new attribute name, make sure there is space for it.
+  rc = ESMC_AttributeAlloc(1);
+  if (rc != ESMF_SUCCESS)
+      return rc;
+  
+  strcpy(attr[attrCount].attrName, name);
+  attr[attrCount].attrValue = value;      // struct contents copy
+  attrCount++;
   return ESMF_SUCCESS;
 
 }  // end ESMC_AttributeSet
@@ -580,7 +888,26 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOP
 // !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
 
-  return ESMF_SUCCESS;
+  int rc, i;
+
+  // simple sanity check
+  if ((!name) || (name[0] == '\0')) {
+      printf("ESMC_AttributeGet: bad attribute name\n");
+      return ESMF_FAILURE;
+  }
+
+  for (i=0; i<attrCount; i++) {
+      if (strcmp(name, attr[i].attrName))
+          continue;
+
+      // if you get here, you found a match
+      if (type) *type = attr[i].attrValue.dt;
+      if (value) *value = attr[i].attrValue;      // struct contents copy
+      return ESMF_SUCCESS;
+  }   
+
+  // bad news - you get here if no matches found
+  return ESMF_FAILURE;
 
 }  // end ESMC_AttributeGet
 
@@ -592,10 +919,10 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       int ESMC_Base::ESMC_AttributeGetCount(
 // 
 // !RETURN VALUE:
-//    int return code
+//    int attribute count
 // 
 // !ARGUMENTS:
-      int count) const {    // out - number of attributes for this object
+      void) const {  
 // 
 // !DESCRIPTION:
 //      Returns number of attributes present
@@ -603,7 +930,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOP
 // !REQUIREMENTS:   FLD1.7.5
 
-  return ESMF_SUCCESS;
+  
+  return attrCount;
 
 } // end ESMC_AttributeGetCount
 
@@ -615,7 +943,8 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
       int ESMC_Base::ESMC_AttributeGetbyNumber(
 // 
 // !RETURN VALUE:
-//    int return code
+//    int return code.  name must point to existing space long enough to
+//    hold up to ESMF_MAXSTR bytes.
 // 
 // !ARGUMENTS:
       int number,                      // in - attribute number
@@ -630,6 +959,20 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //
 //EOP
 // !REQUIREMENTS:   
+
+
+  int rc, i;
+
+  // simple sanity check
+  if ((number < 0) || (number >= attrCount)) {
+      printf("ESMC_AttributeGetByNumber: attribute number must be  0 < N <= %d\n",
+                                         attrCount-1);
+      return ESMF_FAILURE;
+  }
+
+  if (name) strcpy(name, attr[number].attrName);
+  if (type) *type = attr[number].attrValue.dt;
+  if (value) *value = attr[number].attrValue;      // struct contents copy
 
   return ESMF_SUCCESS;
 
@@ -839,10 +1182,12 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
   attrCount = 0;
+  attrAlloc = 0;
   attr = ESMC_NULL_POINTER;
 
   ID = ++globalCount;
   refCount = 1;
+  strcpy(baseName, "unnamed");
   baseStatus = ESMF_STATE_READY;
 
  } // end ESMC_Base
@@ -865,9 +1210,10 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here
-//
   baseStatus = ESMF_STATE_INVALID;
+  if (attr) delete (attr);
+
+  // if we have to support reference counts someday,
+  // if (refCount > 0) do something;
 
  } // end ~ESMC_Base

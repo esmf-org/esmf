@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.14 2004/01/07 22:39:42 jwolfe Exp $
+! $Id: ESMF_RHandle.F90,v 1.15 2004/01/26 17:42:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,11 @@
       type ESMF_RouteHandle
       sequence
       private
+#ifndef ESMF_NO_INITIALIZERS
+        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -124,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.14 2004/01/07 22:39:42 jwolfe Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.15 2004/01/26 17:42:12 nscollins Exp $'
 
 !==============================================================================
 
@@ -1004,6 +1008,12 @@
        endif
 
        defaultopts = "quick"
+
+       ! See if this has been created yet or not.
+       if ((rhandle%this).eq.ESMF_NULL_POINTER) then
+         if (present(rc)) rc = ESMF_FAILURE
+         return
+       endif
 
        if(present(options)) then
            call c_ESMC_RouteHandleValidate(rhandle, options, status)   

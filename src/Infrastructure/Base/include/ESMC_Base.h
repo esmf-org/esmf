@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.36 2003/12/19 21:42:56 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.37 2004/01/26 17:42:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -97,10 +97,10 @@ enum ESMC_Logical { ESMF_TRUE=1,
 
 // union to hold a value of any type
 struct ESMC_DataValue {
-  private:
+  //private:
     ESMC_DataType dt;
     int rank;
-    union {   // can't do in F90 ?? EQUIVALENCE statement too limited ?? TODO
+    union {         // overload pointers to conserve space 
       int     vi;               // could be an integer,
       int    *vip;              // pointer to integer,
       double  vr;               // double (real),
@@ -109,14 +109,16 @@ struct ESMC_DataValue {
       bool   *vlp;              // pointer to boolean (logical),
       char    vc[ESMF_MAXSTR];  // character string,
       char   *vcp;              // or a pointer to a character string
+      void   *voidp;            // cannot be dereferenced
     };
 };
 
+
 // elemental attribute
 struct ESMC_Attribute {
-  private:
+  //private:
     char           attrName[ESMF_MAXSTR];
-    ESMC_DataType  attrType;
+    //ESMC_DataType  attrType;   // redundant w/ dt in datavalue
     ESMC_DataValue attrValue;
 };
 
@@ -162,7 +164,8 @@ class ESMC_Base
     char          baseName[ESMF_MAXSTR];  // object name
 
   private:
-    int attrCount;            // number of attributes in list
+    int attrCount;            // number of attributes in use in list
+    int attrAlloc;            // number of attributes currently allocated
     ESMC_Attribute *attr;     // attribute list
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -216,8 +219,9 @@ class ESMC_Base
     int ESMC_AttributeSet(char *name, ESMC_DataValue value);
     int ESMC_AttributeGet(char *name, ESMC_DataType *type,
                           ESMC_DataValue *value) const;
+    int ESMC_AttributeAlloc(int adding);
 
-    int ESMC_AttributeGetCount(int count) const;
+    int ESMC_AttributeGetCount(void) const;
     int ESMC_AttributeGetbyNumber(int number, char *name, ESMC_DataType *type,
                                   ESMC_DataValue *value) const;
     int ESMC_AttributeGetNameList(int *count, char **namelist) const;
@@ -247,6 +251,31 @@ int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
 int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
+
+// string utility functions:
+// the first set are for converting an F90 char buffer + max count into a 
+// null terminated C string.  
+// the first routine allocates space for the return string and the caller
+//  must delete the buffer when finished.
+// the second routine copies up to dlen bytes into the dst buffer.  the order
+//  of the arguments are logical for a caller in C++.  see the following call
+//  for something that can be called straight from fortran (where the counts
+//  are added by the compiler as hidden arguments at the end of the arg list).
+//
+// the second set takes in a C string and fortran buffer with max length
+//  (which is added by the compiler for a call straight from fortran)
+//  and copies the contents of the src to the dst, padding the remainder
+//  with spaces and no null terminator.
+//
+char *ESMC_F90toCstring(char *src, int slen);
+int  ESMC_F90toCstring(char *src, int slen, char *dst, int dlen);
+int  ESMC_CtoF90string(char *src, char *dst, int dlen);
+extern "C" {
+void  FTN(esmf_f90tocstring)(char *src, char *dst, int *rc, 
+                             /* hidden */ int *slen, int *dlen);
+void  FTN(esmf_ctof90string)(char *src, char *dst, int *rc, 
+                             /* hidden */ int *slen, int *dlen);
+}
 
 // return byte counts for DataKinds
 int ESMC_DataKindSize(ESMC_DataKind dk);

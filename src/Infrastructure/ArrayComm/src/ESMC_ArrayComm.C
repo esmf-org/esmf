@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.6 2003/12/09 22:31:37 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.7 2004/01/26 17:42:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -506,7 +506,7 @@
     }
 
     // deallocate global array
-    delete [] vp;
+    delete [] (char *)vp;
 
     rc = ESMF_SUCCESS;
     return rc;

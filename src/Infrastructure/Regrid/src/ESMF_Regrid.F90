@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.43 2004/01/07 22:34:36 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.44 2004/01/26 17:42:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,9 +95,9 @@
     !  They cannot physically be down in the Field or Array files because 
     !  they need to call Regrid methods and Fortran can't call routines 
     !  from modules which it doesn't know about yet.
-    public ESMF_BundleRegridStore, ESMF_BundleRegrid, ESMF_BundleRegridRelease
-    public ESMF_FieldRegridStore, ESMF_FieldRegrid, ESMF_FieldRegridRelease
-    public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
+    !public ESMF_BundleRegridStore, ESMF_BundleRegrid, ESMF_BundleRegridRelease
+    !public ESMF_FieldRegridStore, ESMF_FieldRegrid, ESMF_FieldRegridRelease
+    !public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
 
     !public ESMF_RegridCreate     ! create and fill a routehandle object
     !public ESMF_RegridRun        ! perform a regrid operation
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.43 2004/01/07 22:34:36 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.44 2004/01/26 17:42:12 nscollins Exp $'
 
 !==============================================================================
 
@@ -733,6 +733,7 @@
 ! RegridRun, etc.
 !------------------------------------------------------------------------------
 
+#if 0
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute Regrid operation on a Bundle
@@ -1224,6 +1225,8 @@
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
       end subroutine ESMF_FieldRegridRelease
+
+#endif
 
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.9 2004/01/20 23:10:29 jwolfe Exp $
+! $Id: ESMF_Bundle.F90,v 1.10 2004/01/26 17:42:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,8 +39,8 @@
       use ESMF_LocalArrayMod
       use ESMF_DataMapMod
       use ESMF_DELayoutMod
-      use ESMF_GridMod
       use ESMF_GridTypesMod
+      use ESMF_GridMod
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
       use ESMF_RouteMod
@@ -60,7 +60,7 @@
 
       type ESMF_PackFlag
       sequence
-      private
+      !private
         integer :: packflag
       end type
 
@@ -76,7 +76,7 @@
 !       ! {\tt ESMF\_Field}'s data in the packed buffer.
         type ESMF_FieldInterleave
         sequence
-        private
+        !private
           integer, pointer :: field_order                 ! index field order
           type(ESMF_DataMap), pointer :: field_dm         ! array of data maps
         end type
@@ -86,7 +86,7 @@
 !
       type ESMF_LocalBundle
       sequence
-      private
+      !private
         type(ESMF_Array) :: packed_data               ! local packed array
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_GridType), pointer :: gridp => NULL() ! local data
@@ -107,7 +107,7 @@
 !
       type ESMF_BundleType
       sequence
-      private
+      !private
         type(ESMF_Base) :: base                   ! base class object
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_Status) :: bundlestatus = ESMF_STATE_UNINIT
@@ -152,6 +152,7 @@
 ! !PUBLIC TYPES:
       public ESMF_Bundle, ESMF_PackFlag, ESMF_PACKED_DATA, ESMF_NO_PACKED_DATA
       public ESMF_BundleType   ! intended for internal ESMF use only
+      public ESMF_LocalBundle, ESMF_FieldInterleave
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -173,6 +174,7 @@
        public ESMF_BundlePackData     ! Pack bundle data into a single 
 !                                     !   buffer
 
+      public ESMF_BundleSetGrid           ! In empty Bundle, set Grid
       public ESMF_BundleGetGrid           ! Return reference to Grid
 !      public ESMF_BundleGetGlobalGridInfo ! Return global grid info
 !      public ESMF_BundleGetLocalGridInfo  ! Return local grid info
@@ -181,8 +183,8 @@
 !      public ESMF_BundleGetLocalDataInfo  ! Return local data info
 
    ! These are the recommended entry points; the code itself is in Array:
-   public ESMF_BundleRedist   ! Redistribute existing arrays, matching grids
-   public ESMF_BundleHalo     ! Halo updates
+   !public ESMF_BundleRedist   ! Redistribute existing arrays, matching grids
+   !public ESMF_BundleHalo     ! Halo updates
 
    !public ESMF_BundleGather   ! Combine 1 decomposed bundle into 1 on 1 DE
    !public ESMF_BundleAllGather! Combine 1 decomposed bundle into N copies on N DEs
@@ -429,12 +431,13 @@ end function
 ! !IROUTINE: ESMF_BundleCreateNoFields - Create an empty Bundle
 !
 ! !INTERFACE:
-      function ESMF_BundleCreateNoFields(name, iospec, rc)
+      function ESMF_BundleCreateNoFields(grid, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNoFields
 !
 ! !ARGUMENTS:
+      type(ESMF_Grid), intent(in), optional :: grid
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
@@ -445,6 +448,11 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
+!     \item [{[grid]}]
+!           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!           {\tt ESMF\_Bundle} must have.  If not specified now, the 
+!           grid associated with the first {\tt ESMF\_Field} added will be
+!           used as the {\tt ESMF\_Grid} for this {\tt ESMF\_Bundle}.
 !     \item [{[name]}]
 !           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
@@ -464,34 +472,47 @@ end function
       integer :: status                          ! Error status
       logical :: rcpresent                       ! Return code present
 
-!     Initialize pointers
+      ! Initialize pointers
       status = ESMF_FAILURE
       rcpresent = .FALSE. 
       nullify(btypep)
       nullify(ESMF_BundleCreateNoFields%btypep)
 
-!     Initialize return code
+      ! Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
       allocate(btypep, stat=status)
-!     If error write message and return.
-!     Formal error handling will be added asap.
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
       if(status .NE. 0) then
         print *, "ERROR in ESMF_BundleCreateNew: Allocate"
         return
       endif
 
-!     Call construction method to allocate and initialize bundle internals.
+      ! Call construction method to allocate and initialize bundle internals.
       call ESMF_BundleConstructNoFields(btypep, name, iospec, rc)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleCreateNoFields: Bundle construct"
         return
       endif
 
-!     Set return values.
+      ! If specified, set the Grid.  All Fields added to this Bundle
+      !  must be based on this same Grid.
+      
+      if (present(grid)) then
+          call ESMF_GridValidate(grid, rc=status)
+          if (status .ne. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_BundleCreate: bad Grid object"
+            return
+          endif
+          btypep%grid = grid
+          btypep%gridstatus = ESMF_STATE_READY
+      endif
+
+      ! Set return values.
       ESMF_BundleCreateNoFields%btypep => btypep
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1617,6 +1638,83 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleSetGrid - Associate a Grid with an empty Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleSetGrid(bundle, grid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Sets the {\tt ESMF\_Grid} for an empty {\tt ESMF\_Bundle}.  All 
+!     {\tt ESMF\_Field}s added to this {\tt ESMF\_Bundle} must have this
+!     same {\tt ESMF\_Grid}.
+!
+!     \begin{description}
+!     \item [bundle]
+!           A {\tt ESMF\_Bundle} object.
+!     \item [grid]
+!           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
+!           {\tt ESMF\_Bundle} must have.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD2.5.7
+
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType), pointer :: btype     ! internal data
+
+!     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      ! Validate bundle before using it.
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleSetGrid: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleSetGrid: bad Bundle object"
+        return
+      endif
+   
+      ! here we will only let someone associate a grid with a bundle
+      ! if there is not one already associated with it.  
+      if (btype%gridstatus .eq. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleSetGrid: A Grid is already associated with this Bundle"
+        return
+      endif
+
+      ! OK to set grid, but validate it first
+      call ESMF_GridValidate(grid, rc=status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_BundleSetGrid: bad Grid object"
+        return
+      endif
+      btype%grid = grid
+      btype%gridstatus = ESMF_STATE_READY
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+
+      end subroutine ESMF_BundleSetGrid
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_BundleGetGrid - Return the Grid associated with this Bundle
 !
 ! !INTERFACE:
@@ -2025,7 +2123,7 @@ end function
 !
 !------------------------------------------------------------------------------
 
-
+#if 0
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
@@ -2393,6 +2491,7 @@ end function
 
       end subroutine ESMF_BundleRedist
 
+#endif
 
 
 
