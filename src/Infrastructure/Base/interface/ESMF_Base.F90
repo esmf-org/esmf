@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.32 2003/04/21 21:35:37 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.33 2003/04/24 16:38:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,6 +68,8 @@
                                       ESMF_STATE_BUSY = ESMF_Status(5), &
                                       ESMF_STATE_INVALID = ESMF_Status(6)
  
+!------------------------------------------------------------------------------
+!
       type ESMF_Pointer
       sequence
       private
@@ -78,9 +80,15 @@
                                        ESMF_BAD_POINTER = ESMF_Pointer(-1)
 
 
+!------------------------------------------------------------------------------
+!
+      !! TODO: I believe if we define an assignment(=) operator to convert
+      !!   a datatype into integer, then we could use the type and kind as
+      !!   targets in a select case() statement and make the contents private.
+      !!   (see pg 248 of the "big book")
       type ESMF_DataType
       sequence
-      !private
+      !!private
           integer :: dtype
       end type
 
@@ -93,9 +101,12 @@
 !     ! Where we can use a derived type, the compiler will help do 
 !     ! typechecking.  For those places where the compiler refuses to allow
 !     ! anything but an Integer data type, use the second set of constants.
+      !! TODO: see comment below about defining an assignment(=) operator
+      !!  which converts a dkind into a real int.  then this could go back
+      !!  to being private.
       type ESMF_DataKind
       sequence
-      !private
+      !!private
         integer :: dkind
       end type
 
@@ -109,6 +120,9 @@
                    ESMF_KIND_C8 = ESMF_DataKind(selected_real_kind(3,25)), &
                    ESMF_KIND_C16 = ESMF_DataKind(selected_real_kind(6,45))
 
+      !! TODO: I believe that if we defined an assignment(=) operator for
+      !! the data kind to convert the derived type into a real integer, 
+      !! then we might be able to get rid of this second set of integer parms.
       integer, parameter :: &
                    ESMF_IKIND_I1 = selected_int_kind(2), &
                    ESMF_IKIND_I2 = selected_int_kind(4), &
@@ -138,6 +152,8 @@
           !character, pointer :: vcp
       end type
 
+!------------------------------------------------------------------------------
+!
       type ESMF_Attribute
       sequence
       private
@@ -146,9 +162,13 @@
           type (ESMF_DataValue) :: attr_value
       end type
 
+!------------------------------------------------------------------------------
+!
+      !! TODO: this should be a shallow object, with a simple init() and
+      !!  get() function, and the contents should go back to being private.
       type ESMF_AxisIndex
       sequence
-!     private
+!     !!private
           integer :: l
           integer :: r
           integer :: max
@@ -156,15 +176,18 @@
           integer :: gstart
       end type
 
+      !! TODO: same comment as above.
       type ESMF_MemIndex
       sequence
-!     private
+!     !!private
           integer :: l
           integer :: r
           integer :: str
           integer :: num
       end type
 
+!------------------------------------------------------------------------------
+!
       type ESMF_BasePointer
       sequence
       private
@@ -173,6 +196,21 @@
 
       integer :: global_count = 0
 
+!------------------------------------------------------------------------------
+!
+!     ! WARNING: must match corresponding values in ../include/ESMC_Base.h
+      type ESMF_Logical
+      sequence
+      private
+          integer :: value
+      end type
+
+      type(ESMF_Logical), parameter :: ESMF_TF_UNKNOWN  = ESMF_Logical(1), &
+                                       ESMF_TF_TRUE     = ESMF_Logical(2), &
+                                       ESMF_TF_FALSE    = ESMF_Logical(3)
+
+!------------------------------------------------------------------------------
+!
       type ESMF_Base
       sequence
       private
@@ -210,6 +248,8 @@
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
       public ESMF_DataValue, ESMF_Attribute, ESMF_AxisIndex, ESMF_MemIndex
       public ESMF_BasePointer, ESMF_Base
+
+      public ESMF_Logical, ESMF_TF_TRUE, ESMF_TF_FALSE
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -275,7 +315,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.32 2003/04/21 21:35:37 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.33 2003/04/24 16:38:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -288,6 +328,7 @@ interface operator (.eq.)
  module procedure ESMF_dteq
  module procedure ESMF_dkeq
  module procedure ESMF_opeq
+ module procedure ESMF_tfeq
 end interface
 
 interface operator (.ne.)
@@ -295,6 +336,7 @@ interface operator (.ne.)
  module procedure ESMF_dtne
  module procedure ESMF_dkne
  module procedure ESMF_opne
+ module procedure ESMF_tfne
 end interface
 
 
@@ -371,6 +413,23 @@ function ESMF_opne(op1, op2)
  ESMF_opne = (op1%ptr .ne. op2%ptr)
 end function
 
+
+! function to compare two ESMF_Logicals to see if they're the same or not
+! also need assignment to real f90 logical?
+
+function ESMF_tfeq(tf1, tf2)
+ logical ESMF_tfeq
+ type(ESMF_Logical), intent(in) :: tf1, tf2
+
+ ESMF_tfeq = (tf1%value .eq. tf2%value)
+end function
+
+function ESMF_tfne(tf1, tf2)
+ logical ESMF_tfne
+ type(ESMF_Logical), intent(in) :: tf1, tf2
+
+ ESMF_tfne = (tf1%value .ne. tf2%value)
+end function
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
