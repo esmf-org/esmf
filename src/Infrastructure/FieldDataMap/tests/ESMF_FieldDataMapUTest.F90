@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.7 2004/07/27 16:23:12 nscollins Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.8 2004/08/26 20:43:04 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,14 +36,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.7 2004/07/27 16:23:12 nscollins Exp $'
+      '$Id: ESMF_FieldDataMapUTest.F90,v 1.8 2004/08/26 20:43:04 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, datarank
+      integer :: rc, datarank, npets
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -55,6 +55,7 @@
       !character(ESMF_MAXSTR) :: validate_options
       !character(ESMF_MAXSTR) :: print_options
       type(ESMF_RelLoc) :: horzRelloc
+      type(ESMF_VM):: vm
 
       ! instantiate a FieldDataMap 
       type(ESMF_FieldDataMap) :: fieldDataMap1
@@ -69,7 +70,10 @@
       !------------------------------------------------------------------------
 
 
-      call ESMF_Initialize(rc=rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
+
       datarank=1
 
       !------------------------------------------------------------------------
