@@ -1,4 +1,4 @@
-% $Id: TimeInterval_desc.tex,v 1.8 2003/08/15 18:33:38 cdeluca Exp $
+% $Id: TimeInterval_desc.tex,v 1.9 2003/08/18 15:02:02 cdeluca Exp $
 
 A TimeInterval represents a period between time instants.  
 It can be either positive or negative.  Like the Time interface, 
@@ -15,17 +15,20 @@ Methods are also defined to take the absolute value and negative
 absolute value of a TimeInterval, and for comparing the length of two
 TimeIntervals.
 
-When a TimeInterval is expressed as a combination of hours, 
-minutes, seconds or fractions of a second, it is independent of a 
-standard calendar.  When it is expressed as a longer time unit,
-such as a month, the length of the time period that it represents 
-depends on the starting time instant of the interval and the 
-standard calendar that is associated with that starting instant.
-
 The class used to represent time instants in ESMF is Time,
 and this class is frequently used in operations along with 
 TimeIntervals.  For example, the difference between two
 Times is a TimeInterval.  
+
+When a TimeInterval is used in calculations that involve an absolute 
+reference time, such as incrementing a Time with a TimeInterval, calendar 
+dependencies may be introduced.  The length of the time period that the 
+TimeInterval represents will depend on the reference Time and the 
+standard calendar that is associated with it.  The calendar dependency becomes 
+apparent when, for example, adding a TimeInterval of 1 day to the Time 
+of February 28, 1996, at 4:00pm EST.  In a 360 day calendar, the 
+resulting date would be February 29, 1996, at 4:00pm EST.  In a no-leap 
+calendar, the result would be March 1, 1996, at 4:00pm EST.
 
 TimeIntervals are used by other parts of the ESMF timekeeping
 system, such as Clocks (Section~\ref{sec:Clock}) and Alarms 
