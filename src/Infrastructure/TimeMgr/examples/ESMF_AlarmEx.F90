@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.4 2003/12/18 17:55:48 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.5 2004/01/06 17:11:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,9 +13,6 @@
       program ESMF_AlarmEx
 
 !------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_AlarmEx.F90,v 1.4 2003/12/18 17:55:48 svasquez Exp $'
 !
 !==============================================================================
 !BOP
