@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.15 2003/06/06 21:11:58 jwolfe Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.16 2003/07/17 20:19:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.15 2003/06/06 21:11:58 jwolfe Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.16 2003/07/17 20:19:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -137,7 +137,6 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             halo_width=1, &
                              name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -163,7 +162,6 @@
                              vert_stagger=vert_stagger, &
                              horz_coord_system=horz_coord_system, &
                              vert_coord_system=vert_coord_system, &
-                             halo_width=1, &
                              name=gname, rc=status)
 
       write(failMsg, *) ""
@@ -174,7 +172,7 @@
       !NEX_UTest
       ! Verifing that an Array can be created
       call ESMF_GridGetDE(grid1, lcelltot_index=g1_ai)
-      allocate(f90ptr1(g1_ai(1)%r, g1_ai(2)%r))
+      allocate(f90ptr1(g1_ai(1)%max, g1_ai(2)%max))
       f90ptr1 = 10+myde
       arr1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
@@ -186,7 +184,7 @@
       !NEX_UTest
       ! second array
       call ESMF_GridGetDE(grid2, lcelltot_index=g2_ai)
-      allocate(f90ptr2(g2_ai(1)%r, g2_ai(2)%r))
+      allocate(f90ptr2(g2_ai(1)%max, g2_ai(2)%max))
       f90ptr2 = -1
       arr2 = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)
       write(failMsg, *) ""
@@ -198,7 +196,7 @@
       !NEX_UTest
       ! Verifing that a Field can be created with a Grid and Array
       f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   dm, "Field 0", ios, rc)
+                                   1, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -207,7 +205,7 @@
       !NEX_UTest
       ! second field
       f2 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   dm, "Field 1", ios, rc)
+                                   1, dm, "Field 1", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

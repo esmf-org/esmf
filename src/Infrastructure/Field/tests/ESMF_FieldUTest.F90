@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.22 2003/06/27 21:27:59 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.23 2003/07/17 20:19:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.22 2003/06/27 21:27:59 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.23 2003/07/17 20:19:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -306,7 +306,7 @@
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   dm, "Field 0", ios, rc)
+                                   2, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -334,7 +334,7 @@
       !EX_UTest
       ! Verifing that a Field cannot be created with an uninitialized Grid and Array
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   dm, "Field 0", ios, rc)
+                                   3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -382,7 +382,7 @@
       grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-                                   dm, "Field 0", ios, rc)
+                                   1, dm, "Field 0", ios, rc)
       call ESMF_FieldGetGrid(f3, grid3, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting a Grid from a Field created with no data Test"
