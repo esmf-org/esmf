@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.80 2003/10/16 23:13:00 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.81 2003/11/11 18:40:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.80 2003/10/16 23:13:00 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.81 2003/11/11 18:40:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -360,8 +360,8 @@
 ! !ARGUMENTS:
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: counts
       type (ESMF_DELayout), intent(in) :: layout
-      character (len = *), intent(in), optional :: name  
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+      character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -371,13 +371,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{counts]}] 
+!     \item[counts] 
 !          Array of number of computational cells in each direction.
-!     \item[{layout]}]
+!     \item[layout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[{name]}] 
+!     \item[{[periodic]}] 
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
+!     \item[{[name]}] 
 !          {\tt ESMF\_DistGrid} name.
-!     \item[{rc]}] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -454,12 +457,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[countsPerDE1]}] 
+!     \item[countsPerDE1] 
 !          Array of number of computational cells for each DE in direction 1.
-!     \item[{[countsPerDE2]}] 
+!     \item[countsPerDE2] 
 !          Array of number of computational cells for each DE in direction 2.
-!     \item[{[layout]}]
+!     \item[layout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[periodic]}] 
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
 !     \item[{[name]}] 
 !          {\tt ESMF\_DistGrid} name.
 !     \item[{[rc]}] 
@@ -699,11 +705,11 @@
 !     \begin{description}
 !     \item[dgtype] 
 !          Pointer to a {\tt ESMF\_DistGrid}.
-!     \item[{[layout]}]
+!     \item[layout]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[{[countsPerDE1]}]
+!     \item[countsPerDE1]
 !          Array of number of computational cells per DE in first direction.
-!     \item[{[countsPerDE2]}]
+!     \item[countsPerDE2]
 !          Array of number of computational cells per DE in second direction.
 !     \item[{[periodic]}] 
 !          Logical value for whether the axes are periodic, one value per axis.
@@ -1300,7 +1306,7 @@
 !     \begin{description}
 !     \item[dgtype] 
 !          Class to be modified.
-!     \item[{[DE\_id]}]
+!     \item[DE\_id]
 !          Given {\tt ESMF\_DE}'s identifier.
 !     \item[{[lcell\_count]}]
 !          Array of the number of cells per dimension for this {\tt ESMF\_DE}.
@@ -1372,7 +1378,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetCountsInternal(dgtype, nDE, countsPerDE1, &
-                                             countsPerDE2, periodic, total, rc)
+                                                countsPerDE2, periodic, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -1397,6 +1403,9 @@
 !          Array of number of computational cells per DE in first direction.
 !     \item[countsPerDE2]
 !          Array of number of computational cells per DE in second direction.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
 !     \item[{[total]}] 
 !          Logical; if TRUE set the total counts.  Defaults to setting the
 !          computational region only.
@@ -1700,7 +1709,7 @@
 !     \begin{description}
 !     \item[dgtype]
 !          Class to be modified.
-!     \item[{[AI]}]
+!     \item[AI]
 !          Array of {\tt AxisIndices} corresponding to the {\tt DistGrid}.
 !     \item[{[total]}]
 !          Logical; if TRUE return AIs for all cells including boundary cells.
@@ -1759,8 +1768,8 @@
 !     \begin{description}
 !     \item[dgtype]
 !          Class to be modified.
-!     \item[{[counts]}]
-!          Array of the numbers of cells along each axis on each DE
+!     \item[counts]
+!          Array of the numbers of cells along each axis on each DE.
 !     \item[{[total]}]
 !          Logical; if TRUE return counts including boundary cells.  Default is FALSE,
 !          returning only computational cells.
@@ -1824,7 +1833,7 @@
 !     \begin{description}
 !     \item[dgtype]
 !          Class to be modified.
-!     \item[{[layout]}]
+!     \item[layout]
 !          The {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_DistGrid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
