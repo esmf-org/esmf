@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.20 2003/02/12 17:55:50 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.21 2003/02/12 17:58:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.20 2003/02/12 17:55:50 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.21 2003/02/12 17:58:13 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2023,6 +2023,10 @@ end function
       endif
 
       if (dataitem%otype .ne. ESMF_STATEFIELD) then
+          if (dataitem%otype .eq. ESMF_STATEINDIRECT) then
+              ! TODO: how do we return the info that this is inside a bundle?
+              print *, "found indirect pointer to bundle, need to do what?"
+          endif
           return
       endif
 
