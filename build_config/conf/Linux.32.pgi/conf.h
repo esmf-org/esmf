@@ -1,5 +1,5 @@
 #if 0
-$Id: conf.h,v 1.2 2003/09/09 20:20:48 nscollins Exp $
+$Id: conf.h,v 1.3 2003/09/25 17:42:42 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ Licensed under the GPL.
 #define ESMF_NO_INITIALIZERS 1
 
 #define ESMF_IS_32BIT_MACHINE 1
-#define ESMF_F90_PTR_BASE_SIZE 96
+#define ESMF_F90_PTR_BASE_SIZE 72
 #define ESMF_F90_PTR_PLUS_RANK 24
 
 
