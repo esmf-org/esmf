@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2004/01/28 23:11:56 svasquez Exp $
+# $Id: makefile,v 1.42 2004/01/29 23:54:39 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -32,6 +32,8 @@ TOPALL: all
 ESMF_TOP_DIR   = $(ESMF_DIR)
 # name of directory containing the /build makefiles
 ESMF_BUILD_DIR = $(ESMF_DIR)
+# name of framework library to build
+LIBBASE = libesmf
 
 include $(ESMF_BUILD_DIR)/build/common.mk
 
