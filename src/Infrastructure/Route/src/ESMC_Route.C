@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.69 2003/09/24 22:19:20 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.70 2003/10/20 23:50:43 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.69 2003/09/24 22:19:20 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.70 2003/10/20 23:50:43 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -756,6 +756,8 @@ static int maxroutes = 10;
          
                     // This is a new fix - should take care of byte size issues.
                     nbytes = ESMC_DataKindSize(dk);
+                    if (l>=srep_count[j]) srcbytes=0;
+                    if (l>=rrep_count[j]) rcvbytes=0;
          
                     srcmem = (void *)((char *)srcaddr+(srcbytes*nbytes)); 
                     rcvmem = (void *)((char *)dstaddr+(rcvbytes*nbytes)); 
