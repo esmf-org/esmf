@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/14 19:15:05 cdeluca Exp $
+# $Id: makefile,v 1.2 2003/02/27 17:54:42 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -25,8 +25,6 @@ TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = PerfProfobj
 LIBBASE	  = libesmf
 
-# leave the following line blank.
-DIRS	  = 
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
@@ -35,7 +33,10 @@ LOCDIR	  = src/Infrastructure/PerfProf/<subdir>
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+# leave the following line blank.
+DIRS	  = 
 
 
 # if you have class files which need to be compiled in a particular

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/15 17:00:40 jwolfe Exp $ 
+# $Id: makefile,v 1.2 2003/02/27 17:54:53 flanigan Exp $ 
 
 ALL: 
 
@@ -22,7 +22,9 @@ TESTEXAMPLES_4 = ${TESTEXAMPLES_1}
 
 EXAMPLESC       = ESMC_TimeEx.c ESMC_DateEx.c ESMC_TimeMgrEx.c
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 MFLOGDIR=${ESMC_TESTDIR}
 

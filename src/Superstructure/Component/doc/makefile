@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/02/05 03:51:17 nscollins Exp $ 
+# $Id: makefile,v 1.9 2003/02/27 17:55:01 flanigan Exp $ 
 
 all: alldocs
 
@@ -13,7 +13,6 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Superstructure/Component/doc
 
 DVIFILES  = \
@@ -52,8 +51,9 @@ REFREXFILES = Component_refdoc.ctex
 #                     do_ccprotex comp ../src/ESMC_Component.C
 #
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+DIRS	  = 
 
 # Dvi files
 Component_desdoc.dvi: Component_desdoc.ctex fsrc ccsrc

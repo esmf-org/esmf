@@ -23,34 +23,44 @@
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #
 
-ESMF_BUILD	= ${ESMF_DIR}
-LDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
-ESMC_MODDIR	= ${ESMF_BUILD}/mod/mod${BOPT}/${ESMF_ARCH}
+ESMF_BUILD	= ${ESMF_TOP_DIR}
+LDIR		= ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
+ESMC_MODDIR     = ${ESMF_TOP_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
+ESMF_INCDIR     = $(ESMF_TOP_DIR)/src/include
+
+
+ESMF_LDIR     = ${ESMF_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
+ESMF_MDIR     = ${ESMF_DIR}/mod/mod${BOPT}/${ESMF_ARCH}
+ESMF_IDIR     = $(ESMF_DIR)/src/include
+
 # Building in the moddir solves problems about trying to copy module files
 # in after the fact.
 ESMC_OBJDIR	= ${ESMC_MODDIR}
-ESMC_TESTDIR	= ${ESMF_DIR}/test/test${BOPT}/${ESMF_ARCH}
-ESMC_DOCDIR	= ${ESMF_DIR}/doc
-PROTEX		= ${ESMF_DIR}/scripts/doc_templates/templates/protex 
-DO_LATEX	= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_latex
+ESMC_TESTDIR	= ${ESMF_TOP_DIR}/test/test${BOPT}/${ESMF_ARCH}
+ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
+ESMF_BUILD_DOCDIR = $(ESMF_BUILD_DIR)/doc
+PROTEX		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/protex 
+DO_LATEX	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_latex
 # this below should be consistent with the line above?  i added a dup line
 # with the _ so it didn't break older stuff.   nsc 01/28/03
-DOL2H		= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
-DO_L2H		= ${ESMF_DIR}/scripts/doc_templates/templates/scripts/do_l2h
-PDIR		= ${ESMF_BUILD}/lib/lib${BOPT}/${ESMF_ARCH}
+DOL2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
+DO_L2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
+PDIR		= ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}
 LIBNAME		= ${PDIR}/${LIBBASE}.a
 SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
-ESMC_INCLUDE	= -I${ESMF_DIR}/${LOCDIR} \
-		  -I${ESMF_DIR}/${LOCDIR}/../include \
-		  -I${ESMF_DIR} \
-		  -I${ESMF_DIR}/src/include \
+
+ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
+		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
+		  -I${ESMF_TOP_DIR}/src/include \
 		  -I/usr/local/include \
-		  -I${ESMF_DIR}/build/${ESMF_ARCH} \
+		  -I${ESMF_BUILD_DIR}/${ESMF_ARCH} \
 		  -I${ESMF_DIR}/include \
 		  -I${ESMC_MODDIR} \
 		  ${LOCAL_INCLUDE} \
-		  -I${ESMF_DIR}/timing
+		  -I${ESMF_TOP_DIR}/src/timing \
+		  -I$(ESMF_IDIR) -I$(ESMF_MDIR) 
+
 CCPPFLAGS	= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
 FCPPFLAGS	= ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
@@ -81,9 +91,9 @@ EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${
 # need to edit only ${ESMF_DIR}/build/${ESMF_ARCH}/base.site to specify your
 # particular machine configuration.  See the users manual for details.
 #
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base.site
+include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base.site
 # (This line MUST be present for certain machines (e.g., Cray T3D))
-include ${ESMF_DIR}/build/common_${BOPT}
+include $(ESMF_BUILD_DIR)/common_$(BOPT)
 
 
 

@@ -1,7 +1,7 @@
-# $Id: base,v 1.4 2003/02/05 18:29:34 nscollins Exp $ 
+# $Id: base,v 1.5 2003/02/27 17:53:57 flanigan Exp $ 
 #
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
-include ${ESMF_DIR}/build/common
+include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base_variables
+include $(ESMF_BUILD_DIR)/common
 
 libc: ${LIBNAME}(${OBJSC})
 libf: ${LIBNAME}(${OBJSF})

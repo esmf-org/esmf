@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/01/10 21:59:25 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/02/27 17:54:18 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -11,7 +11,6 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Data/doc
 
 DVIFILES  = \
@@ -26,7 +25,9 @@ HTMLFILES = \
 #		${ESMC_DOCDIR}/Data_desdoc \
 #		${ESMC_DOCDIR}/Data_refdoc
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
 
 # Dvi files
 ${ESMC_DOCDIR}/Data_desdoc.dvi:

@@ -1,5 +1,7 @@
-# $Id: makefile,v 1.12 2003/02/07 20:13:17 flanigan Exp $ 
+# $Id: makefile,v 1.13 2003/02/27 17:55:14 flanigan Exp $ 
 ALL: lib 
+
+
 
 CFLAGS    =
 FFLAGS    =
@@ -36,7 +38,11 @@ ARCHDOC_FILES = ESMF_archdoc.ctex ESMF_archintro.tex ESMF_shortscope.tex ESMF_st
                 ESMF_superclasses.tex ESMF_fieldclasses.tex ESMF_utilclasses.tex ESMF_implications.tex ESMF_terms.tex \
                 ESMF_archauth.tex
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
+
+
 
 # Dvi files
 ${ESMC_DOCDIR}/ESMF_reqdoc.dvi: $(REQDOC_FILES)
@@ -44,6 +50,7 @@ ${ESMC_DOCDIR}/ESMF_reqdoc.dvi: $(REQDOC_FILES)
 	mv -f ESMF_reqdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USERDOC_FILES)
+	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):" ;\
 	${DO_LATEX} ESMF usr
 	mv -f ESMF_usrdoc.dvi ${ESMC_DOCDIR}
 
@@ -54,7 +61,7 @@ ${ESMC_DOCDIR}/ESMF_archdoc.dvi: $(ARCHDOC_FILES)
 
 # Pdf files
 ${ESMC_DOCDIR}/ESMF_reqdoc.pdf: ${ESMC_DOCDIR}/ESMF_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/ESMF_reqdoc.dvi ${ESMC_DOCDIR}/ESMF_reqdoc.pdf
+	dvipdf ${ESMC_DOCDIR}/ESMF_reqdoc.dvi ${ESMC_DOCDIR}/ESMF_reqdoc.pdff
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ${ESMC_DOCDIR}/ESMF_usrdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf

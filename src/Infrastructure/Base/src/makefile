@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002/11/04 23:00:11 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/02/27 17:54:11 flanigan Exp $ 
 ALL: lib  install
 
 CFLAGS    =
@@ -16,6 +16,8 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Base/src
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 

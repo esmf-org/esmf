@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/03/27 20:53:40 dneckels Exp $ 
+# $Id: makefile,v 1.3 2003/02/27 17:54:42 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -11,8 +11,7 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
-LOCDIR	  = src/Infrastructure/Log/doc
+LOCDIR	  = src/Infrastructure/PerfProf/doc
 
 DVIFILES  = \
 		${ESMC_DOCDIR}/PerfProf_reqdoc.dvi 
@@ -26,19 +25,21 @@ HTMLFILES = \
 #		${ESMC_DOCDIR}/PerfProf_desdoc \
 #		${ESMC_DOCDIR}/PerfProf_refdoc
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 # Dvi files
 ${ESMC_DOCDIR}/PerfProf_desdoc.dvi:
-	${DO_LATEX} Log des
+	${DO_LATEX} PerfProf des
 	mv -f PerfProf_desdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PerfProf_reqdoc.dvi:
-	${DO_LATEX} Log req
+	${DO_LATEX} PerfProf req
 	mv -f PerfProf_reqdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PerfProf_refdoc.dvi:
-	${DO_LATEX} Log ref
+	${DO_LATEX} PerfProf ref
 	mv -f PerfProf_refdoc.dvi ${ESMC_DOCDIR}
 
 
@@ -54,13 +55,13 @@ ${ESMC_DOCDIR}/PerfProf_refdoc.pdf: ${ESMC_DOCDIR}/PerfProf_refdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/PerfProf_desdoc: 
-	${DOL2H} Log des
+	${DOL2H} PerfProf des
 	mv -f PerfProf_desdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PerfProf_reqdoc: 
-	${DOL2H} Log req
+	${DOL2H} PerfProf req
 	mv -f PerfProf_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/PerfProf_refdoc: 
-	${DOL2H} Log ref
+	${DOL2H} PerfProf ref
 	mv -f PerfProf_refdoc ${ESMC_DOCDIR}

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/02/14 22:34:53 nscollins Exp $ 
+# $Id: makefile,v 1.7 2003/02/27 17:55:02 flanigan Exp $ 
 
 ALL:  examples
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Superstructure/Component/examples
 
 TESTEXAMPLES_1  = \
@@ -65,7 +64,9 @@ examples:  ESMF_AppCompEx ESMF_AppMainEx ESMF_CompEx ESMF_CplEx ESMF_GCompEx \
        ESMC_CplEx ESMC_GCompEx ESMC_StateEx ESMC_XformEx
 
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
 
 
 #------------------------

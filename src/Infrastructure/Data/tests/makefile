@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/02/21 18:32:31 nscollins Exp $ 
+# $Id: makefile,v 1.9 2003/02/27 17:54:23 flanigan Exp $ 
 
 ALL:  tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Data/tests
 
 
@@ -35,7 +34,9 @@ run:
 	ESMF_ArrayBasic 
 	ESMF_ArrayTest
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 
 ##

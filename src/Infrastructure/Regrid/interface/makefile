@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2002/11/03 19:43:00 cdeluca Exp $
+# $Id: makefile,v 1.3 2003/02/27 17:54:49 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -23,8 +23,7 @@ TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Regridobj
 LIBBASE	  = libesmf
 
-# leave the following line blank.
-DIRS	  = 
+
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
@@ -33,8 +32,10 @@ LOCDIR	  = src/Infrastructure/Regrid/interface
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+# leave the following line blank.
+DIRS	  = 
 
 # if you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.

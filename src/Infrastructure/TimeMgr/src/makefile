@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/02/11 19:03:34 eschwab Exp $
+# $Id: makefile,v 1.7 2003/02/27 17:54:58 flanigan Exp $
 
 ALL: lib
 
@@ -19,4 +19,7 @@ DIRS      =
 LOCDIR    = src/Infrastructure/TimeMgr/src
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
+

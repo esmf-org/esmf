@@ -1,4 +1,4 @@
- $Id: README,v 1.8 2001/12/13 18:10:20 dneckels Exp $
+ $Id: README,v 1.9 2003/02/27 17:53:46 flanigan Exp $
 ================================================================================
                                    README
 
@@ -20,6 +20,14 @@ Currently the following environment variables must be set:
 ESMF_ARCH     alpha, IRIX, IRIX64, rs6000_sp, linux_pgi, linux_gnupgi, linux_lf95, solaris, solaris_hpc
 ESMF_DIR      top-level ESMF directory
 
+
+GNU make is required to build the library.  On most
+systems this will be just the command gmake.  On others 
+it might be installed as gnumake or even just make.
+In any event, use the --version option with these make 
+commands to determine which is GNU make.
+
+
 Build the library with the command:
  
   gmake BOPT=g 
@@ -29,6 +37,10 @@ for a debug version or
   gmake BOPT=O
 
 for an optimized version.
+
+To build and run the system tests:
+
+  gmake BOPT=g system_tests
 
 To build and run C tests:
 
@@ -55,6 +67,8 @@ To build documentation:
   gmake pdf           ! Makes the pdf files
   gmake html          ! Creates the html directory.
   gmake alldoc        ! Builds all the above documents.
+
+Final documenation files will be located in the $ESMF_DIR/doc directory.
 
 To use the library from C/C++, link with the appropriate library executable 
 under $ESMF_DIR/lib and include the "ESMC.h" file.

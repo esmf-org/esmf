@@ -1,11 +1,12 @@
-# $Id: makefile,v 1.1 2002/11/15 16:58:49 jwolfe Exp $ 
+# $Id: makefile,v 1.2 2003/02/27 17:54:53 flanigan Exp $ 
 
-DIRS     = C F90
+
 LOCDIR   = src/Infrastructure/TimeMgmt/examples
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
 
+DIRS     = C F90
 
 
 

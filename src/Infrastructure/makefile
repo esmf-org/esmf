@@ -1,4 +1,6 @@
-# $Id: makefile,v 1.17 2003/02/05 17:11:08 nscollins Exp $ 
+# $Id: makefile,v 1.18 2003/02/27 17:54:07 flanigan Exp $ 
+
+include $(ESMF_DIR)/makefile
 
 DIRS     = Base BasicUtil IO ConfigAttr Error Log TimeMgmt Machine TimeMgr \
 	   CommMem PerfProf Data DistGrid PhysGrid Grid Fields Regrid App \
@@ -6,7 +8,7 @@ DIRS     = Base BasicUtil IO ConfigAttr Error Log TimeMgmt Machine TimeMgr \
 
 LOCDIR   = src/Infrastructure
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+
 
 
 

@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.13 2003/01/24 00:12:53 flanigan Exp $
+% $Id: ESMF_install.tex,v 1.14 2003/02/27 17:55:14 flanigan Exp $
 
 \section{Installation}
 
@@ -10,26 +10,13 @@ Currently the following environment variables need to be set:
   ESMF_ARCH     platform and compiler configuration
 \end{verbatim}
 
-The following configurations are supported:
-
-\begin{tabular}{lll}
-{\tt ESMF\_ARCH}  & {\tt alpha}      &  OSF1, Native compilers. \\
-                  & {\tt IRIX64}     &  IRIX64, MIPSpro/mpt 64 bit compilers. \\
-                  & {\tt IRIX}       &  IRIX64, MIPSpro/mpt n32 abi compilers. \\
-                  & {\tt rs6000\_sp}  &  AIX, mpxlf90\_r, mpcc\_r, and mpCC\_r.  \\
-                  & {\tt linux\_gnupgf90} & Linux, pgf90, gcc and g++.  \\
-                  & {\tt linux\_pgi}  &  Linux, pgf90, pgcc, pgCC. \\
-                  & {\tt linux\_lf95} &  Linux, lf95, gcc, g++. \\
-                  & {\tt solaris}        &  SunOs, SUNWspro compilers. \\
-                  & {\tt solaris\_hpc}   &  SunOs, SUNWhpc compilers. \\
-\end{tabular}
+% List of architectures supported. File in 
+% build/doc.
+\input{user_arch.tex}
 
 
-GNU make is required to build the library.  On some
-systems this will be just the command \texttt{make}.  On others 
-it might be installed as \texttt{gmake} or even \texttt{gnumake}.
-In any event, use the --version option with the make command
-to determine if it is GNU make.
+% GNU make requirement.  File in build/doc
+\input{user_make.tex}
 
 Simultaneous multiple architecture builds are supported, with
 one restriction; the test cases may only be run on one platform at a time. 

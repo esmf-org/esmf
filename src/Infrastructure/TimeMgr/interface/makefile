@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/02/11 19:03:33 eschwab Exp $ 
+# $Id: makefile,v 1.5 2003/02/27 17:54:56 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    = 
@@ -17,8 +17,9 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/TimeMgr/interface
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+DIRS = 
 
 c_ESMF_BaseTime.o:	ESMC_BaseTime.h makefile
 

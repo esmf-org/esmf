@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/01 18:23:10 jwolfe Exp $
+# $Id: makefile,v 1.2 2003/02/27 17:54:24 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -26,7 +26,6 @@ EXAMPLESC =
 # leave the following lines blank.
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 
 # fill in the following with the executable names
 TESTEXAMPLES =
@@ -38,7 +37,9 @@ LOCDIR	  = src/Infrastructure/DistGrid/examples
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
 
 
 # if you have dependencies between source files in this dir,

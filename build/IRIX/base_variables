@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.4 2003/02/06 23:40:58 jwolfe Exp $ 
+# $Id: base_variables,v 1.5 2003/02/27 17:53:49 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -66,4 +66,4 @@ OCOMP_FOPTFLAGS	   = -O3
 
 PARCH		   = IRIX
 
-include ${ESMF_DIR}/build/common_variables
+include $(ESMF_BUILD_DIR)/common_variables

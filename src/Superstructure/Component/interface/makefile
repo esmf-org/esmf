@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/02/26 01:17:14 nscollins Exp $
+# $Id: makefile,v 1.11 2003/02/27 17:55:06 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -27,8 +27,6 @@ TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Componentobj
 LIBBASE	  = libesmf
 
-# leave the following line blank.
-DIRS	  = 
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
@@ -37,5 +35,7 @@ LOCDIR	  = src/Superstructure/Component/interface
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+# leave the following line blank.
+DIRS	  = 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/11 18:24:00 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/02/27 17:55:08 flanigan Exp $ 
 
 ALL:  tests
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Superstructure/Component/tests
 
 TESTEXAMPLES_3  = \
@@ -27,7 +26,10 @@ TESTSF       = ESMF_CompCreate.F90  ESMF_StateCreate.F90
 
 test tests:  ESMF_CompCreate ESMF_StateCreate
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
+
 
 ESMF_CompCreateDir:
 	mkdir -p ${ESMC_TESTDIR}

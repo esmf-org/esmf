@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/01/10 22:11:01 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/02/27 17:54:35 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -11,7 +11,6 @@ OBJSF     =
 TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Grid/doc
 
 DVIFILES  = $(ESMC_DOCDIR)/Grid_desdoc.dvi \
@@ -26,7 +25,10 @@ HTMLFILES = $(ESMC_DOCDIR)/Grid_desdoc
 #		${ESMC_DOCDIR}/Grid_desdoc \
 #		${ESMC_DOCDIR}/Grid_refdoc
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS	  = 
+
 
 # Dvi files
 ${ESMC_DOCDIR}/Grid_desdoc.dvi:

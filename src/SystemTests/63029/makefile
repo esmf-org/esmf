@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/26 01:30:04 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/02/27 17:55:10 flanigan Exp $ 
 
 ALL:  test
 
@@ -15,19 +15,16 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/SystemTests/63029
 
-TESTEXAMPLES_3  = \
-	ESMF_SysTest63029  RUN_ESMF_SysTest63029  ESMF_SysTest63029.rm 
 
-TESTEXAMPLES_9  = \
-	ESMF_SysTest63029  RUN_ESMF_SysTest63029UNI  ESMF_SysTest63029.rm 
+SYSTEM_TESTS_BUILD = $(ESMC_TESTDIR)/ESMF_SysTest63029
 
-EXAMPLESF       = user_model.F90 ESMF_SysTest63029.F90
+SYSTEM_TESTS_RUN   = RUN_ESMF_SysTest63029  
 
-EXAMPLESC       = 
+SYSTEM_TESTS_RM    = ESMF_SysTest63029.rm
 
-test:	ESMF_SysTest63029
+include $(ESMF_DIR)/makefile
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+DIRS = 
 
 # model has to be built first
 ESMF_SysTest63029.o: user_model.o

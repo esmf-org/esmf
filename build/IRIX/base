@@ -1,8 +1,8 @@
-# $Id: base,v 1.3 2003/02/06 23:40:18 jwolfe Exp $ 
+# $Id: base,v 1.4 2003/02/27 17:53:49 flanigan Exp $ 
 #
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
-include ${ESMF_DIR}/build/common
+include $(ESMF_BUILD_DIR)$(ESMF_ARCH)/base_variables
+include $(ESMF_BUILD_DIR)common
 
 ###################
 

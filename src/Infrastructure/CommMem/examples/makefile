@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/02/21 05:28:52 eschwab Exp $
+# $Id: makefile,v 1.7 2003/02/27 17:54:12 flanigan Exp $
 
 # makefile template for the examples directory.
 
@@ -26,7 +26,6 @@ EXAMPLESC = ESMC_CommMemEx.C
 # leave the following lines blank.
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 
 # fill in the following with the executable names
 TESTEXAMPLES = ESMF_Layout_FEx ESMF_Layout_FEx2 ESMC_CommMemEx
@@ -38,7 +37,9 @@ LOCDIR	  = src/Infrastructure/CommMem/examples
 # leave these alone 
 CLEANFILES = $(ESMC_MODDIR)/ESMF_Layout_FEx $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 ESMF_Layout_FEx: ESMF_Layout_FEx.o chkopts
 	-${F90CXXLD} -o ESMF_Layout_FEx ESMF_Layout_FEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}

@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.6 2003/02/20 17:43:32 nscollins Exp $ 
+# $Id: base_variables,v 1.7 2003/02/27 17:53:59 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -50,7 +50,7 @@ CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = f95 
-C_F90CXXLIBS       = 
+C_F90CXXLIBS       = -lstdc++
 C_CXXF90LD         = f95
 C_CXXF90LIBS       = 
 # ------------------------- BOPT - g_c++ options ------------------------------
@@ -69,4 +69,4 @@ OCOMP_FOPTFLAGS	   = -O
 
 PARCH		   = mac_osx
 
-include ${ESMF_DIR}/build/common_variables
+include $(ESMF_BUILD_DIR)/common_variables

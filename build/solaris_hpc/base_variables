@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.4 2002/09/20 18:00:33 jwolfe Exp $ 
+# $Id: base_variables,v 1.5 2003/02/27 17:54:05 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -61,4 +61,4 @@ OCOMP_FOPTFLAGS	   = -O
 
 PARCH		   = solaris_hpc
 
-include ${ESMF_DIR}/build/common_variables
+include ${ESMF_BUILD_DIR}/common_variables

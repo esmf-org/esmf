@@ -1,4 +1,4 @@
-# $Id: common,v 1.15 2003/02/05 17:11:32 nscollins Exp $ 
+# $Id: common,v 1.16 2003/02/27 17:53:47 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -19,10 +19,6 @@ chkdir_doc:
 	  echo Making directory ${ESMC_DOCDIR} for documents; mkdir -p ${ESMC_DOCDIR} ; fi
 
 chkdir_tests:
-	@if [ ${BOPT}foo = foo ] ; then \
-	  echo "You must use the make variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
-	  echo "For example, use: make BOPT=g ex1"; \
-          echo "Remove all .o files and rerun make with appropriate BOPT"; false; fi
 	-@if [ ! -d ${ESMC_TESTDIR} ]; then \
 	  echo Making directory ${ESMC_TESTDIR} for test output; mkdir -p ${ESMC_TESTDIR} ; fi
 
@@ -31,7 +27,7 @@ chkdir_tests:
 # 1. Checks that user has set BOPT variable
 # 2. Check if the ${LDIR} exists
 #-------------------------------------------------------------------------------
-chkopts: 
+chkopts:
 	@if [ ${BOPT}foo = foo ] ; then \
 	  echo "You must set the variable BOPT=[g,O,Opg,O_c++,O_complex,...]" ; \
 	  echo "For example, use: make BOPT=g ex1"; \
@@ -40,7 +36,7 @@ chkopts:
 # Does nothing; needed for some rules that require actions.
 foo:
 
-VPATH = ${ESMF_DIR}/${LOCDIR}:${ESMF_DIR}/include
+VPATH = ${ESMF_TOP_DIR}/${LOCDIR}:${ESMF_TOP_DIR}/include
 
 libc:${LIBNAME}(${OBJSC})
 libf:${LIBNAME}(${OBJSF})
@@ -48,7 +44,7 @@ libf:${LIBNAME}(${OBJSF})
 storeh:
 	for hfile in ${STOREH} foo ; do \
 	  if [ $$hfile != "foo" ]; then \
-	    cp -f ${ESMF_DIR}/${LOCDIR}/../include/$$hfile ${ESMF_DIR}/src/include ; \
+	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile ${ESMF_TOP_DIR}/src/include ; \
 	  fi ; \
 	done
 
@@ -162,6 +158,17 @@ buildexamples_11: ${BUILDEXAMPLES_11}
 buildexamples_12: ${BUILDEXAMPLES_12}
 buildexamples_13: ${TESTEXAMPLES_13}
 
+
+#System tests
+tree_system_tests: $(SYSTEM_TESTS_BUILD) $(SYSTEM_TESTS_RUN) 
+		   $(SYSTEM_TESTS_RM)
+
+tree_build_system_tests: $(SYSTEM_TESTS_BUILD) 
+
+tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
+
+
+# Recursive calls
 tree: ${ACTION}
 	@if [ "${DIRS}" != "" ]; then \
 	  for dir in ${DIRS} foo ; do \

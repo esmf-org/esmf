@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/02/05 17:27:14 nscollins Exp $ 
+# $Id: makefile,v 1.9 2003/02/27 17:54:54 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -44,7 +44,9 @@ RMMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
 # RM MOD FILES does generate the right list, but the case of the basename isn't
 # correct - it needs to be all lower case.  try using tr first...
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 lib:: 
 	rm -f `echo ${RMMODFILES} | tr [:upper:]  [:lower:] `

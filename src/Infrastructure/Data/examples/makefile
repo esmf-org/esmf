@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/01/16 22:29:26 nscollins Exp $ 
+# $Id: makefile,v 1.8 2003/02/27 17:54:21 flanigan Exp $ 
 
 ALL: 
 
@@ -12,7 +12,6 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/Data/examples
 
 examples: ESMF_ArrayCreateEx
@@ -25,7 +24,9 @@ TESTEXAMPLES_9  = \
 
 EXAMPLESF       = ESMF_ArrayCreateEx.F90
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 ESMF_ArrayCreateDir:
 	mkdir -p ${ESMC_TESTDIR}

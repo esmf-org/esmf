@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/01/09 15:25:58 nscollins Exp $
+# $Id: makefile,v 1.8 2003/02/27 17:54:13 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -37,8 +37,9 @@ LOCDIR	  = src/Infrastructure/CommMem/src
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+DIRS = 
 
 # if you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.

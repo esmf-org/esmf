@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.6 2003/01/10 21:38:39 nscollins Exp $ 
+# $Id: base_variables,v 1.7 2003/02/27 17:53:55 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -63,4 +63,4 @@ OCOMP_FOPTFLAGS	   = -O
 
 PARCH		   = linux_lf95
 
-include ${ESMF_DIR}/build/common_variables
+include $(ESMF_BUILD_DIR)/common_variables

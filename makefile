@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/01/13 23:22:54 flanigan Exp $
+# $Id: makefile,v 1.10 2003/02/27 17:53:46 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -9,13 +9,20 @@
 
 ALL: all
 
+#
+#  New Varaibles to point to build and top dirs.
+#  DFF Feb 7, 2003
+ESMF_TOP_DIR   = $(ESMF_DIR)
+ESMF_BUILD_DIR = $(ESMF_DIR)/build
+
+
 #Default build option.
 BOPT = g
 
 DIRS = src
 CLEANDIRS = lib mod test${BOPT}
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
 
 build_libs:
 	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
@@ -52,7 +59,7 @@ info:
 	-@echo "-----------------------------------------"
 	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "-----------------------------------------"
-	-@echo "Using ESMF directory: ${ESMF_DIR}"
+	-@echo "Using ESMF directory: ${ESMF_TOP_DIR}"
 	-@echo "Using ESMF arch: ${ESMF_ARCH}"
 	-@echo "------------------------------------------"
 	-@echo "Using C linker: ${CLINKER}"
@@ -83,7 +90,7 @@ info_h:
 	-@echo  "-----------------------------------------" >> MINFO
 	-@echo  "Using include paths: ${ESMC_INCLUDE}" >> MINFO
 	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using ESMF directory: ${ESMF_DIR}" >> MINFO
+	-@echo  "Using ESMF directory: ${ESMF_TOP_DIR}" >> MINFO
 	-@echo  "Using ESMF arch: ${ESMF_ARCH}" >> MINFO
 	-@echo  "------------------------------------------" >> MINFO
 	-@echo  "Using C linker: ${CLINKER}" >> MINFO
@@ -101,8 +108,8 @@ build_c:
 	-@echo "BEGINNING TO COMPILE LIBRARIES IN ALL DIRECTORIES"
 	-@echo "========================================="
 	-@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=libfast tree 
-	-@cd ${ESMF_DIR}/interface/F; \
-	${OMAKE} BOPT=${BOPT} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} 
+	-@cd ${ESMF_TOP_DIR}/interface/F; \
+	${OMAKE} BOPT=${BOPT} ESMF_DIR=${ESMF_TOP_DIR} ESMF_ARCH=${ESMF_ARCH} 
 	${RANLIB} ${PDIR}/*.a
 	-@echo "Completed building libraries"
 	-@echo "========================================="
@@ -118,7 +125,7 @@ build_fortran:
 	-@echo "========================================="
 	-@cd interface/F90; \
 	  ${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} libf clean 
-	-@mv ${ESMF_DIR}/interface/F90/*.mod ${ESMC_MODDIR}
+	-@mv ${ESMF_TOP_DIR}/interface/F90/*.mod ${ESMC_MODDIR}
 	${RANLIB} ${PDIR}/*.a
 	-@echo "Completed compiling Fortran source"
 	-@echo "========================================="
@@ -231,6 +238,39 @@ html: chkdir_doc tex
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=buildhtml  tree 
+
+
+#
+#  System Test Targets
+#
+
+system_tests: chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_system_tests tree
+
+build_system_tests: chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_build_system_tests tree
+
+run_system_tests:  chkopts chkdir_tests
+	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
+	   if [ -d $(SYSTEM_TEST) ] ; then \
+	       cd $(SYSTEM_TEST); \
+	   fi; \
+        fi; \
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_run_system_tests tree
+
 
 # Clean recursively deletes files that each makefile wants
 # deleted.   Remove the .mod files here manually since the case

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/03/27 20:53:08 dneckels Exp $ 
+# $Id: makefile,v 1.2 2003/02/27 17:54:41 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -11,11 +11,13 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Timeobj
 LIBBASE	  = libesmf
-DIRS	  = doc
 LOCDIR	  = src/Infrastructure/PerfProf/
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
+
+DIRS = doc
+
 
 
 

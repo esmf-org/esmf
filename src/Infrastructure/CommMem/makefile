@@ -1,8 +1,9 @@
-# $Id: makefile,v 1.4 2003/01/08 23:39:16 nscollins Exp $
+# $Id: makefile,v 1.5 2003/02/27 17:54:11 flanigan Exp $
 
-DIRS     = src interface examples 
+
 #DIRS     = src interface examples doc
 LOCDIR    = src/Infrastructure/CommMem
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+DIRS     = src interface examples 

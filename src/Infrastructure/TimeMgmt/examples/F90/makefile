@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/15 17:03:00 jwolfe Exp $ 
+# $Id: makefile,v 1.2 2003/02/27 17:54:53 flanigan Exp $ 
 
 ALL: 
 
@@ -31,8 +31,9 @@ TESTEXAMPLES_9  = \
 
 EXAMPLESF       = ESMF_TimeEx.f ESMF_DateEx.f ESMF_TimeMgrEx.f ESMF_AlarmEx.f
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+include $(ESMF_DIR)/makefile
 
+DIRS = 
 
 ESMF_TimeEx: ESMF_TimeEx.o  chkopts
 	-${FLINKER} -o ESMF_TimeEx ESMF_TimeEx.o ${ESMC_TIME_LIB} -lesmf ${MPI_LIB} ${MP_LIB} ${THREAD_LIB}

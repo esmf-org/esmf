@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/26 20:33:41 jwolfe Exp $ 
+# $Id: makefile,v 1.3 2003/02/27 17:55:12 flanigan Exp $ 
 
 ALL:  test
 
@@ -15,18 +15,16 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/SystemTests/70385
 
-TESTEXAMPLES_3  = \
-	ESMF_SysTest70385  RUN_ESMF_SysTest70385  ESMF_SysTest70385.rm 
 
-TESTEXAMPLES_9  = 
+SYSTEM_TESTS_BUILD = $(ESMC_TESTDIR)/ESMF_SysTest70385
 
-EXAMPLESF       = ESMF_SysTest70385.F90 
+SYSTEM_TESTS_RUN   = RUN_ESMF_SysTest70385  
 
-EXAMPLESC       = 
+SYSTEM_TESTS_RM    = ESMF_SysTest70385.rm
 
-test:	ESMF_SysTest70385
+include $(ESMF_DIR)/makefile
 
-include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+DIRS = 
 
 
 ESMF_SysTest70385: ESMF_SysTest70385.o  chkopts
