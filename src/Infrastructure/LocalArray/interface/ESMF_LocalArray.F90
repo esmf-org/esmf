@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.18 2004/03/11 18:06:50 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.19 2004/03/11 18:19:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -322,7 +322,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.18 2004/03/11 18:06:50 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.19 2004/03/11 18:19:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -10812,6 +10812,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -10821,6 +10826,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -10831,25 +10838,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -10867,10 +10873,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr1DI2 => newp 
+ wrap % ptr1DI2 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -10961,6 +10967,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -10970,6 +10981,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -10980,25 +10993,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11016,10 +11028,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr1DI4 => newp 
+ wrap % ptr1DI4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -11110,6 +11122,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -11119,6 +11136,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -11129,25 +11148,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11165,10 +11183,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr1DI8 => newp 
+ wrap % ptr1DI8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -11259,6 +11277,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -11268,6 +11291,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -11278,25 +11303,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11314,10 +11338,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr2DI2 => newp 
+ wrap % ptr2DI2 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -11408,6 +11432,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -11417,6 +11446,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -11427,25 +11458,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11463,10 +11493,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr2DI4 => newp 
+ wrap % ptr2DI4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -11557,6 +11587,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -11566,6 +11601,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -11576,25 +11613,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11612,10 +11648,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr2DI8 => newp 
+ wrap % ptr2DI8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -11706,6 +11742,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -11715,6 +11756,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -11725,25 +11768,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11761,10 +11803,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr3DI2 => newp 
+ wrap % ptr3DI2 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -11855,6 +11897,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -11864,6 +11911,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -11874,25 +11923,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -11910,10 +11958,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr3DI4 => newp 
+ wrap % ptr3DI4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12004,6 +12052,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12013,6 +12066,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12023,25 +12078,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12059,10 +12113,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr3DI8 => newp 
+ wrap % ptr3DI8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12153,6 +12207,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12162,6 +12221,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12172,25 +12233,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12208,10 +12268,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr4DI2 => newp 
+ wrap % ptr4DI2 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12302,6 +12362,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12311,6 +12376,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12321,25 +12388,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12357,10 +12423,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr4DI4 => newp 
+ wrap % ptr4DI4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12451,6 +12517,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12460,6 +12531,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12470,25 +12543,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12506,10 +12578,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr4DI8 => newp 
+ wrap % ptr4DI8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12600,6 +12672,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12609,6 +12686,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12619,25 +12698,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12655,10 +12733,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr5DI2 => newp 
+ wrap % ptr5DI2 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12749,6 +12827,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12758,6 +12841,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12768,25 +12853,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12804,10 +12888,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr5DI4 => newp 
+ wrap % ptr5DI4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -12898,6 +12982,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -12907,6 +12996,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -12917,25 +13008,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -12953,10 +13043,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr5DI8 => newp 
+ wrap % ptr5DI8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13047,6 +13137,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13056,6 +13151,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13066,25 +13163,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13102,10 +13198,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr1DR4 => newp 
+ wrap % ptr1DR4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13196,6 +13292,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13205,6 +13306,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13215,25 +13318,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13251,10 +13353,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr1DR8 => newp 
+ wrap % ptr1DR8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13345,6 +13447,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13354,6 +13461,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13364,25 +13473,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13400,10 +13508,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr2DR4 => newp 
+ wrap % ptr2DR4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13494,6 +13602,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13503,6 +13616,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13513,25 +13628,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13549,10 +13663,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr2DR8 => newp 
+ wrap % ptr2DR8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13643,6 +13757,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13652,6 +13771,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13662,25 +13783,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13698,10 +13818,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr3DR4 => newp 
+ wrap % ptr3DR4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13792,6 +13912,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13801,6 +13926,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13811,25 +13938,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13847,10 +13973,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr3DR8 => newp 
+ wrap % ptr3DR8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -13941,6 +14067,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -13950,6 +14081,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -13960,25 +14093,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -13996,10 +14128,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr4DR4 => newp 
+ wrap % ptr4DR4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14090,6 +14222,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14099,6 +14236,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14109,25 +14248,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -14145,10 +14283,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr4DR8 => newp 
+ wrap % ptr4DR8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14239,6 +14377,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14248,6 +14391,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14258,25 +14403,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -14294,10 +14438,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr5DR4 => newp 
+ wrap % ptr5DR4 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14388,6 +14532,11 @@ end function
  rc = ESMF_FAILURE 
  endif 
  
+ ! Assume defaults first, then alter if lb or ub specified, 
+ ! or if an existing pointer is given and can be queried. 
+ lb(:) = 1 
+ ub(1:size(counts)) = counts 
+ 
  ! Decide if we need to do: make a new allocation, copy existing data 
  if (.not. present(f90ptr)) then 
  nullify(newp) 
@@ -14397,6 +14546,8 @@ end function
  else 
  if (docopy .eq. ESMF_DATA_SPACE) then 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .true. 
  willcopy = .false. 
  do_dealloc = ESMF_TRUE 
@@ -14407,25 +14558,24 @@ end function
  do_dealloc = ESMF_TRUE 
  else ! ESMF_DATA_REF 
  newp => f90ptr ! ptr alias, important this be => 
+ lb(1:size(counts)) = lbound(f90ptr) 
+ ub(1:size(counts)) = ubound(f90ptr) 
  willalloc = .false. 
  willcopy = .false. 
  do_dealloc = ESMF_FALSE 
  endif 
  endif 
  
- ! lb always needs a value even if not allocating 
- lb = 1 
+ ! lbounds, if given, should be used 
  if (present(lbounds)) then 
  lb(1:size(lbounds)) = lbounds 
  endif 
  
  ! ub is only used during allocation 
  if (willalloc) then 
- ub(1:size(counts)) = counts 
  if (present(ubounds)) then 
  ub(1:size(ubounds)) = ubounds 
  endif 
- 
  allocate(newp ( lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "LocalArray space allocate error" 
@@ -14443,10 +14593,10 @@ end function
  ! Until we need offsets, use 0. 
  offsets = 0 
  
- wrap%ptr5DR8 => newp 
+ wrap % ptr5DR8 => newp 
  call c_ESMC_LocalArraySetInternal(array, wrap, & 
  ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
- lbounds, ubounds, offsets, & 
+ lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, status) 
  
  if (status .ne. ESMF_SUCCESS) then 
@@ -14534,10 +14684,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr1DI2 
+ localp = wrap % ptr1DI2 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr1DI2 
+ f90ptr => wrap % ptr1DI2 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -14615,10 +14765,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr1DI4 
+ localp = wrap % ptr1DI4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr1DI4 
+ f90ptr => wrap % ptr1DI4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -14696,10 +14846,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr1DI8 
+ localp = wrap % ptr1DI8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr1DI8 
+ f90ptr => wrap % ptr1DI8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -14777,10 +14927,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr2DI2 
+ localp = wrap % ptr2DI2 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr2DI2 
+ f90ptr => wrap % ptr2DI2 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -14858,10 +15008,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr2DI4 
+ localp = wrap % ptr2DI4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr2DI4 
+ f90ptr => wrap % ptr2DI4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -14939,10 +15089,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr2DI8 
+ localp = wrap % ptr2DI8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr2DI8 
+ f90ptr => wrap % ptr2DI8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15020,10 +15170,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr3DI2 
+ localp = wrap % ptr3DI2 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr3DI2 
+ f90ptr => wrap % ptr3DI2 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15101,10 +15251,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr3DI4 
+ localp = wrap % ptr3DI4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr3DI4 
+ f90ptr => wrap % ptr3DI4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15182,10 +15332,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr3DI8 
+ localp = wrap % ptr3DI8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr3DI8 
+ f90ptr => wrap % ptr3DI8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15263,10 +15413,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr4DI2 
+ localp = wrap % ptr4DI2 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr4DI2 
+ f90ptr => wrap % ptr4DI2 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15344,10 +15494,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr4DI4 
+ localp = wrap % ptr4DI4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr4DI4 
+ f90ptr => wrap % ptr4DI4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15425,10 +15575,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr4DI8 
+ localp = wrap % ptr4DI8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr4DI8 
+ f90ptr => wrap % ptr4DI8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15506,10 +15656,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr5DI2 
+ localp = wrap % ptr5DI2 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr5DI2 
+ f90ptr => wrap % ptr5DI2 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15587,10 +15737,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr5DI4 
+ localp = wrap % ptr5DI4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr5DI4 
+ f90ptr => wrap % ptr5DI4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15668,10 +15818,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr5DI8 
+ localp = wrap % ptr5DI8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr5DI8 
+ f90ptr => wrap % ptr5DI8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15749,10 +15899,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr1DR4 
+ localp = wrap % ptr1DR4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr1DR4 
+ f90ptr => wrap % ptr1DR4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15830,10 +15980,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr1DR8 
+ localp = wrap % ptr1DR8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr1DR8 
+ f90ptr => wrap % ptr1DR8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15911,10 +16061,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr2DR4 
+ localp = wrap % ptr2DR4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr2DR4 
+ f90ptr => wrap % ptr2DR4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -15992,10 +16142,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr2DR8 
+ localp = wrap % ptr2DR8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr2DR8 
+ f90ptr => wrap % ptr2DR8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16073,10 +16223,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr3DR4 
+ localp = wrap % ptr3DR4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr3DR4 
+ f90ptr => wrap % ptr3DR4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16154,10 +16304,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr3DR8 
+ localp = wrap % ptr3DR8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr3DR8 
+ f90ptr => wrap % ptr3DR8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16235,10 +16385,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr4DR4 
+ localp = wrap % ptr4DR4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr4DR4 
+ f90ptr => wrap % ptr4DR4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16316,10 +16466,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr4DR8 
+ localp = wrap % ptr4DR8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr4DR8 
+ f90ptr => wrap % ptr4DR8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16397,10 +16547,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr5DR4 
+ localp = wrap % ptr5DR4 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr5DR4 
+ f90ptr => wrap % ptr5DR4 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16478,10 +16628,10 @@ end function
  return 
  endif 
  ! this must do a contents assignment 
- localp = wrap%ptr5DR8 
+ localp = wrap % ptr5DR8 
  f90ptr => localp 
  else 
- f90ptr => wrap%ptr5DR8 
+ f90ptr => wrap % ptr5DR8 
  endif 
  
  if (rcpresent) rc = ESMF_SUCCESS 
@@ -16521,7 +16671,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr1DI2) 
+ deallocate(wrap % ptr1DI2) 
  
  if (present(rc)) rc = status 
  
@@ -16555,7 +16705,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr1DI4) 
+ deallocate(wrap % ptr1DI4) 
  
  if (present(rc)) rc = status 
  
@@ -16589,7 +16739,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr1DI8) 
+ deallocate(wrap % ptr1DI8) 
  
  if (present(rc)) rc = status 
  
@@ -16623,7 +16773,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr2DI2) 
+ deallocate(wrap % ptr2DI2) 
  
  if (present(rc)) rc = status 
  
@@ -16657,7 +16807,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr2DI4) 
+ deallocate(wrap % ptr2DI4) 
  
  if (present(rc)) rc = status 
  
@@ -16691,7 +16841,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr2DI8) 
+ deallocate(wrap % ptr2DI8) 
  
  if (present(rc)) rc = status 
  
@@ -16725,7 +16875,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr3DI2) 
+ deallocate(wrap % ptr3DI2) 
  
  if (present(rc)) rc = status 
  
@@ -16759,7 +16909,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr3DI4) 
+ deallocate(wrap % ptr3DI4) 
  
  if (present(rc)) rc = status 
  
@@ -16793,7 +16943,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr3DI8) 
+ deallocate(wrap % ptr3DI8) 
  
  if (present(rc)) rc = status 
  
@@ -16827,7 +16977,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr4DI2) 
+ deallocate(wrap % ptr4DI2) 
  
  if (present(rc)) rc = status 
  
@@ -16861,7 +17011,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr4DI4) 
+ deallocate(wrap % ptr4DI4) 
  
  if (present(rc)) rc = status 
  
@@ -16895,7 +17045,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr4DI8) 
+ deallocate(wrap % ptr4DI8) 
  
  if (present(rc)) rc = status 
  
@@ -16929,7 +17079,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr5DI2) 
+ deallocate(wrap % ptr5DI2) 
  
  if (present(rc)) rc = status 
  
@@ -16963,7 +17113,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr5DI4) 
+ deallocate(wrap % ptr5DI4) 
  
  if (present(rc)) rc = status 
  
@@ -16997,7 +17147,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr5DI8) 
+ deallocate(wrap % ptr5DI8) 
  
  if (present(rc)) rc = status 
  
@@ -17031,7 +17181,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr1DR4) 
+ deallocate(wrap % ptr1DR4) 
  
  if (present(rc)) rc = status 
  
@@ -17065,7 +17215,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr1DR8) 
+ deallocate(wrap % ptr1DR8) 
  
  if (present(rc)) rc = status 
  
@@ -17099,7 +17249,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr2DR4) 
+ deallocate(wrap % ptr2DR4) 
  
  if (present(rc)) rc = status 
  
@@ -17133,7 +17283,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr2DR8) 
+ deallocate(wrap % ptr2DR8) 
  
  if (present(rc)) rc = status 
  
@@ -17167,7 +17317,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr3DR4) 
+ deallocate(wrap % ptr3DR4) 
  
  if (present(rc)) rc = status 
  
@@ -17201,7 +17351,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr3DR8) 
+ deallocate(wrap % ptr3DR8) 
  
  if (present(rc)) rc = status 
  
@@ -17235,7 +17385,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr4DR4) 
+ deallocate(wrap % ptr4DR4) 
  
  if (present(rc)) rc = status 
  
@@ -17269,7 +17419,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr4DR8) 
+ deallocate(wrap % ptr4DR8) 
  
  if (present(rc)) rc = status 
  
@@ -17303,7 +17453,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr5DR4) 
+ deallocate(wrap % ptr5DR4) 
  
  if (present(rc)) rc = status 
  
@@ -17337,7 +17487,7 @@ end function
  status = ESMF_FAILURE 
  
  call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
- deallocate(wrap%ptr5DR8) 
+ deallocate(wrap % ptr5DR8) 
  
  if (present(rc)) rc = status 
  

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.10 2004/03/11 18:06:50 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.11 2004/03/11 18:19:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -720,6 +720,11 @@
           rc = ESMF_FAILURE @\
         endif @\
  @\
+        ! Assume defaults first, then alter if lb or ub specified, @\
+        ! or if an existing pointer is given and can be queried. @\
+        lb(:) = 1 @\
+        ub(1:size(counts)) = counts @\
+ @\
         ! Decide if we need to do: make a new allocation, copy existing data @\
         if (.not. present(f90ptr)) then @\
            nullify(newp) @\
@@ -729,6 +734,8 @@
         else @\
            if (docopy .eq. ESMF_DATA_SPACE) then @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
+               lb(1:size(counts)) = lbound(f90ptr) @\
+               ub(1:size(counts)) = ubound(f90ptr) @\
                willalloc = .true. @\
                willcopy = .false. @\
                do_dealloc = ESMF_TRUE @\
@@ -739,25 +746,24 @@
                do_dealloc = ESMF_TRUE @\
            else       ! ESMF_DATA_REF @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
+               lb(1:size(counts)) = lbound(f90ptr) @\
+               ub(1:size(counts)) = ubound(f90ptr) @\
                willalloc = .false. @\
                willcopy = .false. @\
                do_dealloc = ESMF_FALSE @\
            endif @\
         endif @\
  @\
-        ! lb always needs a value even if not allocating @\
-        lb = 1 @\
+        ! lbounds, if given, should be used @\
         if (present(lbounds)) then @\
             lb(1:size(lbounds)) = lbounds @\
         endif @\
  @\
         ! ub is only used during allocation @\
         if (willalloc) then @\
-            ub(1:size(counts)) = counts @\
             if (present(ubounds)) then @\
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
- @\
             allocate(newp ( mrng ), stat=status) @\
             if (status .ne. 0) then     ! f90 status, not ESMF @\
               print *, "LocalArray space allocate error" @\
@@ -775,10 +781,10 @@
         ! Until we need offsets, use 0. @\
         offsets = 0 @\
  @\
-        wrap%ptr##mrank##D##mtypekind => newp @\
+        wrap % ptr##mrank##D##mtypekind => newp @\
         call c_ESMC_LocalArraySetInternal(array, wrap, & @\
                                  ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
-                                 lbounds, ubounds, offsets, & @\
+                                 lb, ub, offsets, & @\
                                  ESMF_TRUE, do_dealloc, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
@@ -867,10 +873,10 @@
             return @\
           endif @\
           ! this must do a contents assignment @\
-          localp = wrap%ptr##mrank##D##mtypekind @\
+          localp = wrap % ptr##mrank##D##mtypekind @\
           f90ptr => localp  @\
         else @\
-          f90ptr => wrap%ptr##mrank##D##mtypekind @\
+          f90ptr => wrap % ptr##mrank##D##mtypekind @\
         endif @\
  @\
         if (rcpresent) rc = ESMF_SUCCESS @\
@@ -911,7 +917,7 @@
         status = ESMF_FAILURE  @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
-        deallocate(wrap%ptr##mrank##D##mtypekind) @\
+        deallocate(wrap % ptr##mrank##D##mtypekind) @\
  @\
         if (present(rc)) rc = status @\
  @\
