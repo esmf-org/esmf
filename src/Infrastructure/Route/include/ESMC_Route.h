@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.19 2003/04/29 21:37:45 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.20 2003/05/02 16:19:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,6 +51,31 @@
  class ESMC_Route;
 
 // !PRIVATE TYPES:
+
+ // structure for matching precomputed routes
+ typedef struct {
+    int entrystatus;
+    int rank; 
+    ESMC_DELayout *snd_layout;
+    int snd_DE; 
+    int snd_AI_count; 
+    ESMC_AxisIndex snd_AI_exc[ESMF_MAXDIM]; 
+    ESMC_AxisIndex snd_AI_tot[ESMF_MAXDIM];
+    ESMC_DELayout *rcv_layout;
+    int rcv_DE; 
+    int rcv_AI_count; 
+    ESMC_AxisIndex rcv_AI_exc[ESMF_MAXDIM]; 
+    ESMC_AxisIndex rcv_AI_tot[ESMF_MAXDIM];
+    int routeid;
+    ESMC_Route *theroute;
+ } ESMC_RouteCacheEntry;
+
+ // structure for caching them
+ typedef struct {
+    int nroutes;
+    int nalloc;
+    ESMC_RouteCacheEntry **rcep;
+ } ESMC_RouteCacheTable;
 
  // class declaration type
  class ESMC_Route : public ESMC_Base {    // inherits from ESMC_Base class
@@ -117,10 +142,13 @@
 
  ESMC_Route *ESMC_RouteCreate(ESMC_DELayout *layout, int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
- int ESMC_RouteGetCached(int rank, int my_DE_rcv, ESMC_AxisIndex *AI_rcv,
-                             int AI_rcv_count, ESMC_DELayout *layout_rcv,
-                             int my_DE_snd, ESMC_AxisIndex *AI_snd,
-                             int AI_snd_count, ESMC_DELayout *layout_snd,
-			     ESMC_Logical *hascachedroute, ESMC_Route **route);
+ int ESMC_RouteGetCached(int rank, 
+                       int my_DE_rcv, 
+                       ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
+                       int AI_rcv_count, ESMC_DELayout *layout_rcv,
+                       int my_DE_snd, 
+                       ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
+                       int AI_snd_count, ESMC_DELayout *layout_snd,
+                       ESMC_Logical *hascachedroute, ESMC_Route **route);
 
  #endif  // ESMC_Route_H

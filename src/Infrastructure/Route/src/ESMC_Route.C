@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.39 2003/04/29 21:37:47 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.40 2003/05/02 16:19:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,8 +33,13 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.39 2003/04/29 21:37:47 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.40 2003/05/02 16:19:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
+
+
+static ESMC_RouteCacheTable routetable = { 
+   0, 0, NULL };
+static int maxroutes = 10;
 
 //
 //-----------------------------------------------------------------------------
@@ -103,10 +108,13 @@
 //
 //EOP
 // !REQUIREMENTS:  
+    int rc;
 
     // call destruct routine
+    rc = route->ESMC_RouteDestruct();
 
-    return ESMF_FAILURE;
+    delete route;
+    return rc;
 
  } // end ESMC_RouteDestroy
 
@@ -181,10 +189,25 @@
 //
 //EOP
 // !REQUIREMENTS:  
+    int rc;
 
     // free both route tables and comm table by calling Destroy on them.
+    rc = sendRT->ESMC_RTableDestruct();
+    if (rc == ESMF_FAILURE)
+       return rc;
+    delete sendRT;
 
-    return ESMF_FAILURE;
+    rc = recvRT->ESMC_RTableDestruct();
+    if (rc == ESMF_FAILURE)
+       return rc;
+    delete recvRT;
+
+    rc = ct->ESMC_CommTableDestruct();
+    if (rc == ESMF_FAILURE)
+       return rc;
+    delete ct;
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RouteDestruct
 
@@ -231,18 +254,24 @@
       int rank,                    // in  - rank of data in both Fields
       int my_DE_rcv,               // in  - DE identifier in the DELayout of
                                    //       the receiving Field
-      ESMC_AxisIndex *AI_rcv,      // in  - array of axis indices for all DE's
+      ESMC_AxisIndex *AI_rcv_exc,  // in  - array of axis indices for all DE's
                                    //       in the DELayout for the receiving
-                                   //       Field
+                                   //       Field - exclusive region
+      ESMC_AxisIndex *AI_rcv_tot,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field - total region
       int AI_rcv_count,            // in  - number of sets of AI's in the rcv
                                    //       array (should be the same as the 
                                    //       number of DE's in the rcv layout)
       ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
-      ESMC_AxisIndex *AI_snd,      // in  - array of axis indices for all DE's
+      ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
                                    //       in the DELayout for the sending
-                                   //       Field
+                                   //       Field - exclusive region
+      ESMC_AxisIndex *AI_snd_tot,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the sending
+                                   //       Field - total region
       int AI_snd_count,            // in  - number of sets of AI's in the snd
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
@@ -257,13 +286,46 @@
 //
 //EOP
 // !REQUIREMENTS:  
+    int i, j;
+    ESMC_Logical tf;
+    ESMC_RouteCacheEntry *ep;
 
+    for (i=0; i<routetable.nroutes; i++) {
+
+        ep = routetable.rcep[i];
+    
+        // see if we find a match.  
+        if (ep->entrystatus != 1) continue;    // make this a type, and flag
+        if (rank != ep->rank) continue;
+        if (layout_snd != ep->snd_layout) continue;
+        if (layout_rcv != ep->rcv_layout) continue;
+        if (my_DE_snd != ep->snd_DE) continue; 
+        if (my_DE_rcv != ep->rcv_DE) continue; 
+        if (AI_snd_count != ep->snd_AI_count) continue; 
+        if (AI_rcv_count != ep->rcv_AI_count) continue; 
+        for (j=0; j<rank; j++) {
+            tf = ESMC_AxisIndexEqual(AI_snd_exc, ep->snd_AI_exc); 
+            if (tf == ESMF_TF_FALSE) continue;
+            tf = ESMC_AxisIndexEqual(AI_snd_tot, ep->snd_AI_tot); 
+            if (tf == ESMF_TF_FALSE) continue;
+            tf = ESMC_AxisIndexEqual(AI_rcv_exc, ep->rcv_AI_exc); 
+            if (tf == ESMF_TF_FALSE) continue;
+            tf = ESMC_AxisIndexEqual(AI_rcv_tot, ep->rcv_AI_tot); 
+            if (tf == ESMF_TF_FALSE) continue;
+        }
+
+        *hascachedroute = ESMF_TF_TRUE;
+        *route = routetable.rcep[i]->theroute;
+
+        return ESMF_SUCCESS;
+    }
+ 
     *hascachedroute = ESMF_TF_FALSE;
     *route = NULL;
 
     return ESMF_SUCCESS;
 
- } // end ESMC_RouteGet
+ } // end ESMC_RouteGetCached
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -438,11 +500,16 @@
                  // to compute # of items and item type and pass it down.
                  // this "sizeof(int)" is WRONG and just a hack to test the
                  // code for now.
+         
                  srcmem = (void *)((char *)srcaddr+(srcbytes*sizeof(int))); 
                  rcvmem = (void *)((char *)dstaddr+(rcvbytes*sizeof(int))); 
                  srccount = sendxp ? sright-sleft+1 : 0;
                  rcvcount = recvxp ? rright-rleft+1 : 0;
 
+                 // Debug:
+                 if ((srccount == 0) && (rcvcount == 0)) 
+                     printf("WARNING!! both send/recv counts = 0, myDE %d, theirDE %d\n", 
+                                        mydeid, theirdeid); 
                  //printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
                  //           srccount, (long int)srcmem, mydeid, theirdeid);
                  //printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
@@ -482,7 +549,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_RoutePrecompute - initialize a a Route
+// !IROUTINE:  ESMC_RoutePrecompute - initialize a Route
 //
 // !INTERFACE:
       int ESMC_Route::ESMC_RoutePrecompute(
@@ -529,6 +596,7 @@
     ESMC_XPacket *my_XP = new ESMC_XPacket;
     ESMC_XPacket *their_XP = new ESMC_XPacket;
     ESMC_XPacket *intersect_XP = NULL;
+    ESMC_RouteCacheEntry *ep;
     int i, j, k;
     int their_de, their_de_parent, their_decount;
 
@@ -648,6 +716,55 @@
         }
     }
 
+    // free unneeded XPs here
+    delete my_XP;  
+    my_XP = NULL;
+    delete their_XP; 
+    their_XP = NULL;
+
+    // add to cache table here.
+    if (routetable.rcep == NULL) {
+       routetable.rcep = (ESMC_RouteCacheEntry **) 
+                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
+       routetable.nalloc = maxroutes;
+
+    }
+    // if we decide to grow the table slowly...
+    //if (routetable.nroutes <= routetable.nalloc) {
+    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
+    //                                    sizeof(ESMC_RouteCacheEntry *));
+    //    routetable.nalloc += 4;
+    //}
+
+    if (routetable.nroutes < maxroutes) {
+
+        ep = new ESMC_RouteCacheEntry;
+        routetable.rcep[routetable.nroutes] = ep;
+        routetable.nroutes++;
+        
+        // store this in the cache
+        ep->routeid = routeid;
+        ep->theroute = this; 
+        ep->entrystatus = 1;
+        ep->rank = rank; 
+        ep->snd_layout = layout_snd;
+        ep->snd_DE = my_DE_snd; 
+        ep->snd_AI_count = AI_snd_count; 
+        for (i=0; i<rank; i++) {
+          ep->snd_AI_exc[i] = AI_snd_exc[i]; 
+          ep->snd_AI_tot[i] = AI_snd_tot[i];
+        }
+        ep->rcv_layout = layout_rcv;
+        ep->rcv_DE = my_DE_rcv; 
+        ep->rcv_AI_count = AI_rcv_count; 
+        for (i=0; i<rank; i++) {
+          ep->rcv_AI_exc[i] = AI_rcv_exc[i]; 
+          ep->rcv_AI_tot[i] = AI_rcv_tot[i];
+        }
+    } else {
+       printf("Warning: this route not Cached - Cache table full\n");
+    }
+        
     //printf("end of RoutePrecompute:\n");
     //this->ESMC_RoutePrint("");
     return ESMF_SUCCESS;
@@ -691,6 +808,7 @@
     ESMC_XPacket *my_XP = new ESMC_XPacket;
     ESMC_XPacket *their_XP = new ESMC_XPacket;
     ESMC_XPacket *intersect_XP = NULL;
+    ESMC_RouteCacheEntry *ep;
     int i, j, k;
     int their_de, decount;
 
@@ -781,9 +899,56 @@
       recvRT->ESMC_RTableSetEntry(their_de, intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de);
     }
+ 
+    // free unneeded XPs here
+    delete my_XP;  
+    my_XP = NULL;
+    delete their_XP; 
+    their_XP = NULL;
 
-    //printf("end of RoutePrecomputeHalo:\n");
-    //this->ESMC_RoutePrint("");
+    // add to cache table here.
+    if (routetable.rcep == NULL) {
+       routetable.rcep = (ESMC_RouteCacheEntry **) 
+                       malloc(sizeof(ESMC_RouteCacheEntry *) * maxroutes);
+       routetable.nalloc = maxroutes;
+
+    }
+    // if we decide to grow the table slowly...
+    //if (routetable.nroutes <= routetable.nalloc) {
+    //    realloc(routetable.rcep, (routetable.nalloc + 4) *
+    //                                    sizeof(ESMC_RouteCacheEntry *));
+    //    routetable.nalloc += 4;
+    //}
+
+    if (routetable.nroutes < maxroutes) {
+
+        ep = new ESMC_RouteCacheEntry;
+        routetable.rcep[routetable.nroutes] = ep;
+        routetable.nroutes++;
+        
+        // store this in the cache
+        ep->routeid = routeid;
+        ep->theroute = this; 
+        ep->entrystatus = 1;
+        ep->rank = rank; 
+        ep->snd_layout = layout;
+        ep->snd_DE = my_DE; 
+        ep->snd_AI_count = AI_count; 
+        for (i=0; i<rank; i++) {
+          ep->snd_AI_exc[i] = AI_exc[i]; 
+          ep->snd_AI_tot[i] = AI_tot[i];
+        }
+        ep->rcv_layout = layout;
+        ep->rcv_DE = my_DE; 
+        ep->rcv_AI_count = AI_count; 
+        for (i=0; i<rank; i++) {
+          ep->rcv_AI_exc[i] = AI_exc[i]; 
+          ep->rcv_AI_tot[i] = AI_tot[i];
+        }
+    } else {
+       printf("Warning: this route not Cached - Cache table full\n");
+    }
+    
     return ESMF_SUCCESS;
 
  } // end ESMC_RoutePrecomputeHalo

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.16 2003/05/01 16:42:59 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.17 2003/05/02 16:19:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.16 2003/05/01 16:42:59 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.17 2003/05/02 16:19:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -425,18 +425,20 @@
 
 ! !INTERFACE:
       subroutine ESMF_RouteGetCached(rank, &
-                       my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
-                       my_DE_src, AI_src, AI_src_count, layout_src, &
-                       hascachedroute, route, rc)
+                 my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
+                 my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
+                 hascachedroute, route, rc)
 !
 ! !ARGUMENTS:
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
       integer, intent(in) :: AI_dst_count
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
       logical, intent(out) :: hascachedroute
@@ -483,35 +485,45 @@
         ! Translate AxisIndices from F90 to C++
         do j=1,rank
           do i=1,AI_dst_count
-            AI_dst(i,j)%l = AI_dst(i,j)%l - 1
-            AI_dst(i,j)%r = AI_dst(i,j)%r - 1
+            AI_dst_exc(i,j)%l = AI_dst_exc(i,j)%l - 1
+            AI_dst_exc(i,j)%r = AI_dst_exc(i,j)%r - 1
+            AI_dst_tot(i,j)%l = AI_dst_tot(i,j)%l - 1
+            AI_dst_tot(i,j)%r = AI_dst_tot(i,j)%r - 1
           enddo
           do i=1,AI_src_count
-            AI_src(i,j)%l = AI_src(i,j)%l - 1
-            AI_src(i,j)%r = AI_src(i,j)%r - 1
+            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l - 1
+            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r - 1
+            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l - 1
+            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r - 1
           enddo
         enddo
 
         ! Call C++  code
         call c_ESMC_RouteGetCached(rank, &
-                       my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
-                       my_DE_src, AI_src, AI_src_count, layout_src, &
-                       lcache, lroute, rc)
+                 my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, layout_dst, &
+                 my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, layout_src, &
+                 lcache, lroute, status)
 
         ! Translate AxisIndices back to  F90 from C++
         do j=1,rank
           do i=1,AI_dst_count
-            AI_dst(i,j)%l = AI_dst(i,j)%l + 1
-            AI_dst(i,j)%r = AI_dst(i,j)%r + 1
+            AI_dst_exc(i,j)%l = AI_dst_exc(i,j)%l + 1
+            AI_dst_exc(i,j)%r = AI_dst_exc(i,j)%r + 1
+            AI_dst_tot(i,j)%l = AI_dst_tot(i,j)%l + 1
+            AI_dst_tot(i,j)%r = AI_dst_tot(i,j)%r + 1
           enddo
           do i=1,AI_src_count
-            AI_src(i,j)%l = AI_src(i,j)%l + 1
-            AI_src(i,j)%r = AI_src(i,j)%r + 1
+            AI_src_exc(i,j)%l = AI_src_exc(i,j)%l + 1
+            AI_src_exc(i,j)%r = AI_src_exc(i,j)%r + 1
+            AI_src_tot(i,j)%l = AI_src_tot(i,j)%l + 1
+            AI_src_tot(i,j)%r = AI_src_tot(i,j)%r + 1
           enddo
         enddo
 
         if (status .ne. ESMF_SUCCESS) then  
           !print *, "Route Get Cached error"
+            hascachedroute = .false.
+            if (rcpresent) rc = ESMF_FAILURE
           return  
         endif
 
