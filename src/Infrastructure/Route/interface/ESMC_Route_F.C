@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.21 2003/09/24 22:19:20 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.22 2003/11/06 23:55:38 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,13 +53,13 @@ extern "C" {
        //}
 
        void FTN(c_esmc_routesetsend)(ESMC_Route **ptr, int *dest_de, 
-                                              ESMC_XPacket *xp, int *status) {
+                                     ESMC_XPacket *xp, int *status) {
 
            *status = (*ptr)->ESMC_RouteSetSend(*dest_de, xp);
        }
 
        void FTN(c_esmc_routesetrecv)(ESMC_Route **ptr, int *src_de, 
-                                           ESMC_XPacket *xp, int *status) {
+                                     ESMC_XPacket *xp, int *status) {
 
            *status = (*ptr)->ESMC_RouteSetRecv(*src_de, xp);
        }
@@ -77,8 +77,8 @@ extern "C" {
            *status = ESMF_SUCCESS;
        }
 
-       void FTN(c_esmc_routerun)(ESMC_Route **ptr, ESMC_LocalArray **src,
-                                 ESMC_LocalArray **dst, int *status) {
+       void FTN(c_esmc_routerunla)(ESMC_Route **ptr, ESMC_LocalArray **src,
+                                   ESMC_LocalArray **dst, int *status) {
            void *src_base_addr = NULL;
            void *dst_base_addr = NULL;
            ESMC_DataKind dk;
@@ -90,6 +90,12 @@ extern "C" {
            dk = (*src)->ESMC_LocalArrayGetKind();
 
            *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, dk);
+       }
+
+       void FTN(c_esmc_routerunna)(ESMC_Route **ptr, void *src,
+                                   void *dst, ESMC_DataKind *dk, int *status) {
+
+           *status = (*ptr)->ESMC_RouteRun(src, dst, *dk);
        }
 
        void FTN(c_esmc_routeprecomputeregrid)(ESMC_Route **ptr, int *rank, 
