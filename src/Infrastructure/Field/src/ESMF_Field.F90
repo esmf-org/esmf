@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.157 2004/06/09 15:38:33 slswift Exp $
+! $Id: ESMF_Field.F90,v 1.158 2004/06/09 16:06:27 slswift Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -282,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.157 2004/06/09 15:38:33 slswift Exp $'
+      '$Id: ESMF_Field.F90,v 1.158 2004/06/09 16:06:27 slswift Exp $'
 
 !==============================================================================
 !
@@ -2881,6 +2881,24 @@
               return
            endif
         else
+           call ESMF_IOSpecGet(field%ftypep%iospec, iofileformat=fileformat, rc=status)
+           if (fileformat == ESMF_IO_FILEFORMAT_HDF) then
+              print*, "HDF output is not currently supported."
+              return
+           else if (fileformat == ESMF_IO_FILEFORMAT_UNSPECIFIED) then
+           call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
+           else if (fileformat == ESMF_IO_FILEFORMAT_NETCDF) then
+#if (ESMF_NO_IOCODE)
+              print*, "netCDF support not configured in."
+              return
+#else
+              continue
+#endif
+           else
+              print*, "Unrecognized IO Fileformat."
+              return
+           endif
+        else
            call ESMF_FieldWriteFileASCII(field, iospec, rc=status)
         endif
 
@@ -3200,8 +3218,8 @@
         character (80) SysDepInfo
         integer     :: DataHandle
         integer DomDesc
-        character*3 MemOrd
-        character*3 Stagger
+        character*2 MemOrd
+        character*2 Stagger
         character*31, dimension(2) :: DimNames
         character(len=ESMF_MAXSTR) :: filename
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_ptr
