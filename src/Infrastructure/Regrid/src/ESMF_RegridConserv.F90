@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.36 2004/06/14 22:31:26 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.37 2004/06/16 14:48:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.36 2004/06/14 22:31:26 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.37 2004/06/16 14:48:31 nscollins Exp $'
 
 !==============================================================================
 
@@ -1309,7 +1309,7 @@
 
       do srcAdd = 1,srcSize
         if (srcArea(srcAdd) < -.01) then
-          print logMsg, "Source grid area < -0.01, value is ", srcArea(srcAdd), &
+          write(logMsg, *) "Source grid area < -0.01, value is ", srcArea(srcAdd), &
                         " at location ", srcAdd
           dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
@@ -1318,7 +1318,7 @@
       do jDst   = 1,dstSizeY
         do iDst = 1,dstSizeX
           if (dstArea(iDst,jDst) < -.01) then
-            print logMsg, "Dest grid area < -0.01, value is ", &
+            write(logMsg, *) "Dest grid area < -0.01, value is ", &
                            dstArea(iDst,jDst), " at location ", iDst, jDst
             dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
@@ -1333,12 +1333,12 @@
         weights(1) = weightsData(n)             ! TODO: fix this for second order
 
         if (weightsData(n) < -.05) then
-          print logMsg, "Regrid weight < 0, value is ", weights(1), &
+          write(logMsg, *) "Regrid weight < 0, value is ", weights(1), &
                         " at location ", srcAdd, iDst, jDst
           dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         if (regridnorm /= ESMF_REGRID_NORM_NONE .AND. weights(1) > 1.05d0) then
-          print logMsg, "Regrid weight > 1.05, value is ", weights(1), &
+          write(logMsg, *) "Regrid weight > 1.05, value is ", weights(1), &
                         " at location ", srcAdd, iDst, jDst
           dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
@@ -1364,7 +1364,7 @@
 
           if (abs(temp2d(iDst,jDst)) > 1.d-12 .AND. &
               abs(temp2d(iDst,jDst)-normFactor) > .05) then
-            print logMsg, "Sum of weights for regrid , value is ", &
+            write(logMsg, *) "Sum of weights for regrid , value is ", &
                            temp2d(iDst,jDst), " should be ", normFactor, &
                           " at location ", srcAdd, iDst, jDst
             dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
