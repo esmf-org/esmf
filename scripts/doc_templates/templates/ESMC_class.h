@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.12 2002/11/04 21:28:34 nscollins Exp $
+// $Id: ESMC_class.h,v 1.13 2002/11/08 00:41:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -75,8 +75,8 @@
 
   public:
  // the following methods apply to deep classes only
-    ESMC_<Class> *ESMC_<Class>Create(args, int *rc);// interface only, deep class
-    int ESMC_<Class>Destroy(void);            // interface only, deep class
+ // ESMC_<Class>Create and ESMC_<Class>Destroy are declared below,
+ // outside the ESMC_<Class> declaration
     int ESMC_<Class>Construct(args);          // internal only, deep class
     int ESMC_<Class>Destruct(void);           // internal only, deep class
 
@@ -112,5 +112,15 @@
 //-----------------------------------------------------------------------------
 
  };   // end class ESMC_<Class>
+
+// Create and Destroy are declared as class helper functions (not methods)
+// since they create and destroy an ESMC_<Class> object itself. E.g. if Create
+// were a method, the ESMC_<Class> object on whose behalf it was being invoked
+// would need to already exist!  These functions are supersets of C++ new
+// and delete; they perform allocation/deallocation specialized to
+// an ESMC_<Class> object.
+
+ ESMC_<Class> *ESMC_<Class>Create(args, int *rc);// interface only, deep class
+ int ESMC_<Class>Destroy(ESMC_<Class> *<class>); // interface only, deep class
 
  #endif  // ESMC_<Class>_H

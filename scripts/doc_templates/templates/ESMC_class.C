@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.12 2002/10/29 22:06:12 eschwab Exp $
+// $Id: ESMC_class.C,v 1.13 2002/11/08 00:41:58 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_class.C,v 1.12 2002/10/29 22:06:12 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_class.C,v 1.13 2002/11/08 00:41:58 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -43,10 +43,10 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_<Class>Create - Create a new <Class>
+// !ROUTINE:  ESMC_<Class>Create - Create a new <Class>
 //
 // !INTERFACE:
-      ESMC_<Class> *ESMC_<Class>::ESMC_<Class>Create(
+      ESMC_<Class> *ESMC_<Class>Create(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_<Class>
@@ -65,6 +65,9 @@
 //      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC_<Class>.h)
+//
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
@@ -76,20 +79,23 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_<Class>Destroy - free a <Class> created with Create
+// !ROUTINE:  ESMC_<Class>Destroy - free a <Class> created with Create
 //
 // !INTERFACE:
-      int ESMC_<Class>::ESMC_<Class>Destroy(void) {
+      int ESMC_<Class>Destroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-//    none
+      ESMC_<Class> *<class>) {    // in - <class> object to destroy
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a <Class> object previously allocated
 //      via an ESMC_<Class>Create routine.  Define for deep classes only.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC_<Class>.h)
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
