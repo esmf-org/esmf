@@ -1,6 +1,8 @@
-#  $Id: common.mk,v 1.43 2004/03/16 17:59:19 nscollins Exp $
+#  $Id: common.mk,v 1.44 2004/03/17 17:47:25 nscollins Exp $
 #===============================================================================
-#  common.mk
+#   common.mk
+#
+#  GNU make makefile - cannot be used with standard unix make!!
 #
 #  This file contains variables and rules that are common across all
 #  platforms.
@@ -867,17 +869,20 @@ tree: $(ACTION)
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
-# The rules below generate a value Fortran file using cpp.
+# The rules below generate a valid Fortran file using gcc as a cpp.
 # The -P option prevents putting #line directives in the output, and
 # -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
 # translating @s into newlines to separate multiline macros, and
 # also translate ^ into # so that other include files are ready to
 # be processed by the second runthru of the preprocessor during the
-# actual compile. (These lines are: ^include "fred" in the
+# actual compile. (These lines are: ^include "fred.h" in the
 # original source to shield them from the first preprocess pass.)
+# the dir, notdir macros below are to be sure to create the .F90 file
+# in the original source directory, since the makefile has already
+# changed dirs into the mod dir to build.
 #
 .cpp.F90:
-	gcc -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" > $(dir $< )$@
+	${CPP} -E -P -I${ESMF_INCDIR} $< | tr "@^" "\n#" > $(dir $<)$(notdir $@)
 
 
 #-------------------------------------------------------------------------------
