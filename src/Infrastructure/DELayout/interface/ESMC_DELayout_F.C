@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.15 2004/06/07 21:18:39 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.16 2004/06/08 02:39:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutdestroy()"
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DELayoutDestroy(*ptr),
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_DELayoutDestroy(ptr),
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
