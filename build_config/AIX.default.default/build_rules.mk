@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.18 2004/11/22 14:59:45 jedwards Exp $
+#  $Id: build_rules.mk,v 1.19 2004/11/22 23:17:08 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -8,11 +8,12 @@
 #
 ifndef ESMF_COMM
   export ESMF_COMM := mpi
-  MPIPREFIX=mp
-  CC = mpCC_r
 endif
 ifeq ($(ESMF_COMM),default)
   export ESMF_COMM := mpi
+endif
+
+ifeq ($(ESMF_COMM),mpi)
   MPIPREFIX=mp
   CC = mpCC_r
 endif
