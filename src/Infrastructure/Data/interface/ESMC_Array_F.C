@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.36 2003/04/24 16:45:33 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.37 2003/04/24 20:57:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -112,10 +112,10 @@ extern "C" {
      void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,
                                   int *rank_trans, int *size_rank_trans, 
                                   int *olddecompids, int *decompids,  int *size_decomp,
-                                  ESMC_Array ***RedistArray, int *status) {
+                                  ESMC_Array **RedistArray, int *status) {
           *status = (*ptr)->ESMC_ArrayRedist(*layout, rank_trans, *size_rank_trans,
                                              olddecompids, decompids, *size_decomp,
-                                             **RedistArray);
+                                             *RedistArray);
      }
 
      void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **layout,
