@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.9 2003/03/12 19:11:33 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.10 2003/03/13 16:58:54 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.9 2003/03/12 19:11:33 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.10 2003/03/13 16:58:54 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -311,6 +311,73 @@
     return rc;
 
  } // end ESMC_RouteRun
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RouteInitialize - initialize a a Route
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteInitialize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:A
+      // send/recv flag?
+      ESMC_AxisIndex *my_AI,    // in  - axis indices for this DE and the
+                                //       Field to be communicated from
+      ESMC_AxisIndex *AI,       // in  - array of axis indices for all DE's
+                                //       in the layout for the Field to be
+                                //       communicated with
+      int AI_count,             // in  - number of sets of AI's in the array
+                                //       (should be the same as the number
+                                //       of DE's in the second layout)
+      int rank,                 // in  - rank of data in both Fields
+      int global_counts[],      // in  - total (global) number of elements
+                                //       per axis (array) for the Field to
+                                //       be communicated with
+      int decompids[],          // in  - decomposition identifier for each
+                                //       axis (array) for the Field to
+                                //       be communicated with
+      ESMC_DELayout *layout1,   // in  - "my" layout 
+      ESMC_DELayout *layout2) { // in  - layout to be communicated with
+//
+// !DESCRIPTION:
+//      Initializes a Route with send or receive RouteTables.
+//      Returns error code if problems are found.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    ESMC_AxisIndex *their_AI;
+    ESMC_XPacket *my_XP, *their_XP, *intersect_XP;
+
+    // calculate "my" (local DE's) XPacket in the sense of the global data
+    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, my_XP);
+
+    // loop over DE's from layout to be communicated with
+    int i, j, k;
+    int their_de, their_de_parent;
+    int nx2, ny2;
+    layout2->ESMC_DELayoutGetSize(&nx2, &ny2);
+    for (j=0; j<ny2; j++) {
+      for (i=0; i<nx2; i++) {
+        their_de = j*nx2 + i;
+        // layout2->ESMC_DELayoutGetParentID(their_de, their_de_parent);
+        for (k=0; k<rank; k++) {
+          their_AI[k] = AI[their_de,k];
+        }
+        their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, their_XP);
+        intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP, intersect_XP);
+        // this->sendRT.ESMC_RTableSetEntry(their_de_parent, ????, intersect_XP);
+        // TODO: should the above be a case for send/recv
+      }
+    }
+
+    return ESMF_FAILURE;
+
+ } // end ESMC_RouteInitialize
+
 
 //-----------------------------------------------------------------------------
 //BOP
