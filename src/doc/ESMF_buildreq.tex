@@ -1,4 +1,4 @@
-% $Id: ESMF_buildreq.tex,v 1.9 2003/07/09 23:06:46 flanigan Exp $
+% $Id: ESMF_buildreq.tex,v 1.10 2003/07/10 18:54:43 flanigan Exp $
 
 \sreq{Build}
 
@@ -17,32 +17,7 @@ have .so as their file name extension.
 \ssreq{Common Targets}
 The build system tasks will be controlled with a series of
 makefile targets. Standard targets will be used whenever 
-possible. These are the targets that will be available
-for all releases:
-
-\begin{description}
-\item[all] Builds all libraries, test programs and documentation.
-\item[install] Installs ESMF products.
-
-\item[build\_libs] Builds .a and .so library files.
-\item[build\_c] Compiles all c and c++ source code.  
-\item[build\_f] Compiles all FORTRAN source code 
-
-\item[tests] Builds and runs the unit tests
-\item[tests\_uni] Builds and runs single processor unit tests.
-
-\item[run\_tests\_uni] Runs the single processor unit tests.
-\item[system\_tests] Builds and runs system tests.
-\item[system\_tests\_uni] Builds and runs single processor system tests.
-
-\item[alldoc] Builds all formats of the documentation.
-\item[dvi] Builds dvi documentation files.
-\item[pdf] Builds pdf documentation files.
-\item[html] Builds html documentation files.
-\item[clean] Removes all products for current architecture.
-\item[clobber] Removes all products for all architectures.
-
-\end{description}
+possible. 
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
@@ -98,7 +73,7 @@ code to the ESMF and EVA source trees.
 \ssreq{EVA Builds}
 EVA will use either the build system
 of a checked out and built  ESMF source release or 
-an install pre-compiled version of the ESMF library files.
+an installed pre-compiled version of the ESMF library files.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Application Group \\
@@ -150,7 +125,7 @@ the build system.
 \end{reqlist}
 
 \ssreq{Configuration Checking}
-The build system will check for the required system 
+The build system will check for required system 
 libraries and utilities.
 \begin{reqlist}
 {\bf Priority:} 1. \\
@@ -181,7 +156,7 @@ read only directory.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Application Group \\
+{\bf Source:} CCSM \\
 {\bf Status:} proposed \\
 {\bf Verification:} test
 \end{reqlist}
@@ -193,7 +168,7 @@ of applications that use ESMF.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Application Group \\
+{\bf Source:} DAO \\
 {\bf Status:} proposed \\
 {\bf Verification:} test
 \end{reqlist}
@@ -204,7 +179,7 @@ easily overridden.
 
 \begin{reqlist}
 {\bf Priority:} 1. \\
-{\bf Source:} Application Group \\
+{\bf Source:} CCSM \\
 {\bf Status:} proposed \\
 {\bf Verification:} test
 \end{reqlist}
