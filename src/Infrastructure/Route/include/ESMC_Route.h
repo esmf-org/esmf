@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.44 2004/12/07 22:31:28 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.45 2004/12/17 19:38:33 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,6 +121,17 @@
                        ESMC_DELayout *dstdeLayout, int srcMyDE, 
                        ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
                        int srcAICount, int *srcGlobalStart, int *srcGlobalCount,
+                       ESMC_DELayout *srcdeLayout);
+    int ESMC_RoutePrecomputeRedistV(int rank, 
+                       int dstMyDE, ESMC_Logical dstVector,
+                       ESMC_AxisIndex *dstCompAI, ESMC_AxisIndex *dstTotalAI,
+                       int dstAICount, int *dstAICountPerDE,
+                       int *dstGlobalStart, int dstGSCount, int *dstGlobalCount,
+                       ESMC_DELayout *dstdeLayout,
+                       int srcMyDE, ESMC_Logical srcVector,
+                       ESMC_AxisIndex *srcCompAI, ESMC_AxisIndex *srcTotalAI,
+                       int srcAICount, int *srcAICountPerDE,
+                       int *srcGlobalStart, int srcGSCount, int *srcGlobalCount,
                        ESMC_DELayout *srcdeLayout);
     int ESMC_RoutePrecomputeRegrid(int rank, int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
