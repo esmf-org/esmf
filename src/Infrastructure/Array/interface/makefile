@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/07/30 17:10:56 nscollins Exp $
+# $Id: makefile,v 1.4 2003/09/26 20:56:49 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -32,6 +32,15 @@ LOCDIR	  = src/Infrastructure/Array/interface
 
 
 include $(ESMF_DIR)/makefile
+
+# on the mac, you have to give this additional flag so the file uses > 16 bit
+# offsets internally in the file.
+ifeq ($(ESMF_COMPILER),absoft)
+FFLAGS += -N11
+endif
+ifeq ($(ESMF_COMPILER),default)
+FFLAGS += -N11
+endif
 
 # leave the following line blank.
 DIRS	  = 
