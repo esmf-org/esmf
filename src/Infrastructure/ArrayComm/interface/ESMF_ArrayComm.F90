@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.56 2004/09/21 18:02:32 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.57 2004/11/05 08:14:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.56 2004/09/21 18:02:32 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.57 2004/11/05 08:14:48 theurich Exp $'
 !
 !==============================================================================
 !
@@ -720,6 +720,7 @@
 
       integer :: status         ! local error status
       type(ESMF_DELayout) :: delayout
+      type(ESMF_VM) :: vm
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
@@ -744,6 +745,9 @@
       ! Extract layout information from the Grid
       call ESMF_GridGet(grid, delayout=delayout, rc=status)
       call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
+      
+      ! Get the associated VM
+      call ESMF_DELayoutGetVM(delayout, vm, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
       call ESMF_DELayoutGet(delayout, deCount=nDEs, localDE=my_DE, rc=status)
@@ -815,7 +819,7 @@
 
       if (.not. hascachedroute) then
           ! Create the route object.
-          route = ESMF_RouteCreate(delayout, rc)
+          route = ESMF_RouteCreate(vm, rc)
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
                                         gl_dst_AI, nDEs, &
@@ -1076,6 +1080,7 @@
 
       integer :: status         ! local error status
       type(ESMF_DELayout) :: dstDElayout, srcDElayout
+      type(ESMF_VM) :: vm
       type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI, srcCompAI, &
                                                      dstTotalAI, srcTotalAI, &
@@ -1218,8 +1223,11 @@
                             periodic, hascachedroute, route, status)
 
       if (.not. hascachedroute) then
+          ! Get the associated VM
+          call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
+
           ! Create the route object.
-          route = ESMF_RouteCreate(parentDElayout, rc)
+          route = ESMF_RouteCreate(vm, rc)
 
           call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
                                        dstTotalAI, dstStartPerDEPerDim, &

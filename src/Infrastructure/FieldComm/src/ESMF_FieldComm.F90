@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.60 2004/11/05 00:08:34 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.61 2004/11/05 08:14:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.60 2004/11/05 00:08:34 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.61 2004/11/05 08:14:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -1571,6 +1571,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
       type(ESMF_DELayout) :: delayout
+      type(ESMF_VM) :: vm
       integer :: datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
@@ -1599,6 +1600,9 @@
       ! Get the Layout from the Field's Grid
       ftypep = field%ftypep
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
+      
+      ! Get the associated VM
+      call ESMF_DELayoutGetVM(delayout, vm, rc=status)
 
       ! Our DE number in the layout
       call ESMF_DELayoutGet(delayout, localDE=my_DE, rc=status)
@@ -1673,7 +1677,7 @@
 
       if (.not. hascachedroute) then
           ! Create the route object.
-          route = ESMF_RouteCreate(delayout, rc) 
+          route = ESMF_RouteCreate(vm, rc) 
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
                                         gl_dst_AI, AI_count, &

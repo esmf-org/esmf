@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.29 2004/10/05 22:57:51 jwolfe Exp $
+// $Id: ESMC_Route_F.C,v 1.30 2004/11/05 08:14:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,8 +39,8 @@ extern "C" {
 
        // keep these for deep classes, or see init below for shallow
        void FTN(c_esmc_routecreate)(ESMC_Route **ptr, 
-                                    ESMC_DELayout **layout, int *status) {
-           *ptr = ESMC_RouteCreate(*layout, status);
+                                    ESMC_VM **vm, int *status) {
+           *ptr = ESMC_RouteCreate(*vm, status);
        }
 
        void FTN(c_esmc_routedestroy)(ESMC_Route **ptr, int *status) {

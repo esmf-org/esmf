@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.60 2004/10/05 22:53:02 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.61 2004/11/05 08:14:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@
       use ESMF_BaseTypesMod
       use ESMF_BaseMod       ! ESMF base   class
       use ESMF_LogErrMod
+      use ESMF_VMMod
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayDataMapMod
@@ -225,7 +226,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.60 2004/10/05 22:53:02 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.61 2004/11/05 08:14:50 theurich Exp $'
 
 !==============================================================================
 !
@@ -551,6 +552,7 @@
       type(ESMF_DomainList) :: sendDomainList
       type(ESMF_RelLoc) :: horzRelLoc
       type(ESMF_Route) :: route
+      type(ESMF_VM) :: vm
 
 !     Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -745,8 +747,11 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
 
+      ! Get the associated VM
+      call ESMF_DELayoutGetVM(parentDElayout, vm, rc=localrc)
+ 
       ! Create Route
-      route = ESMF_RouteCreate(parentDELayout, localrc)
+      route = ESMF_RouteCreate(vm, localrc)
       call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, &
                                        sendDomainList, recvDomainList, &
                                        hasSrcData, hasDstData, localrc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.20 2004/11/05 00:21:58 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.21 2004/11/05 08:14:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,6 +64,16 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
        
+  void FTN(c_esmc_delayoutgetvm)(ESMC_DELayout **ptr, ESMC_VM **vm, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutgetvm()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetVM(
+      vm),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));  
+}
+
   void FTN(c_esmc_delayoutget)(ESMC_DELayout **ptr,
     int *deCount, int *dimCount, int *localDeCount, int *localDeList,
     int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 

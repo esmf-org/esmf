@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.105 2004/11/05 05:54:30 theurich Exp $
+// $Id: ESMC_Route.C,v 1.106 2004/11/05 08:14:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.105 2004/11/05 05:54:30 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.106 2004/11/05 08:14:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -63,7 +63,7 @@ static int maxroutes = 10;
 //     pointer to newly allocated ESMC_Route
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout,
+      ESMC_VM *vm,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -80,7 +80,7 @@ static int maxroutes = 10;
 
     ESMC_Route *newr = new ESMC_Route;
 
-    *rc = newr->ESMC_RouteConstruct(delayout);
+    *rc = newr->ESMC_RouteConstruct(vm);
 
     if (*rc == ESMF_FAILURE)
         return NULL;
@@ -136,7 +136,7 @@ static int maxroutes = 10;
 //    int error return code 
 //
 // !ARGUMENTS:
-      ESMC_DELayout *delayout
+      ESMC_VM *vm
       ) {          // in
 //
 // !DESCRIPTION:
@@ -155,7 +155,7 @@ static int maxroutes = 10;
     int npets;          // total number of PETs in this VM
     int mypet;          // pet id of this pet
 
-    delayout->ESMC_DELayoutGetVM(&vm);
+    this->vm = vm;
     npets = vm->vmk_npets();
     mypet = vm->vmk_mypet();
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.56 2004/10/05 22:59:03 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.57 2004/11/05 08:14:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
       use ESMF_BaseTypesMod
       use ESMF_BaseMod       
       use ESMF_LogErrMod
+      use ESMF_VMMod
       use ESMF_DELayoutMod  
       use ESMF_LocalArrayMod
       use ESMF_XPacketMod  
@@ -95,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.56 2004/10/05 22:59:03 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.57 2004/11/05 08:14:50 theurich Exp $'
 
 !==============================================================================
 !
@@ -112,13 +113,13 @@
 ! !IROUTINE: ESMF_RouteCreate - Create a new Route
 
 ! !INTERFACE:
-      function ESMF_RouteCreate(delayout, rc)
+      function ESMF_RouteCreate(vm, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RouteCreate
 !
 ! !ARGUMENTS:
-      type(ESMF_DELayout), intent(in) :: delayout
+      type(ESMF_VM), intent(in) :: vm
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -127,9 +128,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[delayout] 
-!          An {\tt ESMF\_Layout} which encompasses all 
-!          DEs involved in the route operation, both source and destination.  
+!     \item[vm] 
+!          An {\tt ESMF\_VM} object which encompasses all virtual address
+!          spaces accessed by the route operation.  
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -153,7 +154,7 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_RouteCreate(route, delayout, status)
+        call c_ESMC_RouteCreate(route, vm, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

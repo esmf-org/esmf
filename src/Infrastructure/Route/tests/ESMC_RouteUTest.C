@@ -1,4 +1,4 @@
-// $Id: ESMC_RouteUTest.C,v 1.2 2004/04/23 22:00:14 nscollins Exp $
+// $Id: ESMC_RouteUTest.C,v 1.3 2004/11/05 08:14:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RouteUTest.C,v 1.2 2004/04/23 22:00:14 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RouteUTest.C,v 1.3 2004/11/05 08:14:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -57,19 +57,19 @@
    //  tests default constructor; add args to test other constructors
    ESMC_Route route;
 
-   // create a layout to use below
-   ESMC_DELayout *mylayout = ESMC_DELayoutCreate(&rc);
+   // get the global VM
+   ESMC_VM *vm = ESMC_VMGetGlobal(&rc);
 
    // test dynamic allocation of ESMC_Route
    //   also tests default constructor
-   route_ptr = ESMC_RouteCreate(mylayout, &rc);
+   route_ptr = ESMC_RouteCreate(vm, &rc);
    sprintf(failMsg, "rc = %d, route_ptr = %p", rc, route_ptr);
    ESMC_Test((route_ptr!=0 && rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
     
    // test internal dynamic allocation within statically allocated
    //   ESMC_Route
-   rc = route_ptr->ESMC_RouteConstruct(mylayout);
+   rc = route_ptr->ESMC_RouteConstruct(vm);
    sprintf(failMsg, "rc = %d", rc);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);

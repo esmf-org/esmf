@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.40 2004/11/05 00:21:58 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.41 2004/11/05 08:14:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,6 +121,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutCreate
   public ESMF_DELayoutDestroy
   
+  public ESMF_DELayoutGetVM
   public ESMF_DELayoutGet
   public ESMF_DELayoutGetDELocalInfo
   public ESMF_DELayoutGetDEMatchDE
@@ -146,7 +147,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.40 2004/11/05 00:21:58 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.41 2004/11/05 08:14:49 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -459,6 +460,54 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
  
   end subroutine ESMF_DELayoutDestroy
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutGetVM()"
+!BOP
+! !IROUTINE: ESMF_DELayoutGetVM - Get VM on which this DELayout is defined
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutGetVM(delayout, vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),  intent(in)              :: delayout
+    type(ESMF_VM),        intent(out)             :: vm
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Get internal decomposion information.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!        Queried {\tt ESMF\_DELayout} object.
+!     \item[{vm}]
+!        Upon return this holds the {\tt ESMF\_VM} object on which delayout
+!        is defined.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DELayoutGetVM(delayout, vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DELayoutGetVM
 !------------------------------------------------------------------------------
 
 

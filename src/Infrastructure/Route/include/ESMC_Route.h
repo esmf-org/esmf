@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.40 2004/11/05 05:54:17 theurich Exp $
+// $Id: ESMC_Route.h,v 1.41 2004/11/05 08:14:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>        // all classes inherit from the ESMC Base class.
+ #include <ESMC_VM.h>
  #include <ESMC_DELayout.h>
  #include <ESMC_XPacket.h>
  #include <ESMC_RTable.h>
@@ -96,7 +97,7 @@
   public:
  // ESMC_RouteCreate and ESMC_RouteDestroy are declared below,
  // outside the ESMC_Route declaration
-    int ESMC_RouteConstruct(ESMC_DELayout *delayout);
+    int ESMC_RouteConstruct(ESMC_VM *vm);
     int ESMC_RouteDestruct(void);
 
  // accessor methods for class members
@@ -174,7 +175,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Route object.
 
- ESMC_Route *ESMC_RouteCreate( ESMC_DELayout *delayout, int *rc);
+ ESMC_Route *ESMC_RouteCreate( ESMC_VM *vm, int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
  int ESMC_RouteGetCached(int rank, 
                        int my_DE_rcv, 
