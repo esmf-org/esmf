@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.52 2004/03/08 20:01:14 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.53 2004/03/10 03:08:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,6 +26,7 @@
  #include <ctype.h>
 
  #include <ESMC_Time.h>
+ #include <ESMC_TimeInterval.h>
 
  // associated class definition file
  #include <ESMC_Calendar.h>
@@ -33,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.52 2004/03/08 20:01:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.53 2004/03/10 03:08:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
