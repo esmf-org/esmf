@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/04/15 20:11:52 svasquez Exp $ 
+# $Id: makefile,v 1.11 2003/09/23 15:22:31 nscollins Exp $ 
 
 ALL:  tests
 
@@ -15,21 +15,25 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/Component/tests
 
 TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
+		$(ESMC_TESTDIR)/ESMC_CompCreate \
 		$(ESMC_TESTDIR)/ESMF_CompRun \
 		$(ESMC_TESTDIR)/ESMF_StateCreate \
 		$(ESMC_TESTDIR)/ESMF_StateUTest
 
 TESTS_RUN     =	RUN_ESMF_CompCreate \
+		RUN_ESMC_CompCreate \
 		RUN_ESMF_CompRun \
 		RUN_ESMF_StateCreate \
 		RUN_ESMF_StateUTest
 
 TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
+		RUN_ESMC_CompCreateUNI \
 		RUN_ESMF_CompRunUNI \
 		RUN_ESMF_StateCreateUNI \
 		RUN_ESMF_StateUTestUNI
 
 TESTS_RM      =	ESMF_CompCreate.rm \
+		ESMC_CompCreate.rm \
 		ESMF_CompRun.rm \
 		ESMF_StateCreate.rm \
 		ESMF_StateUTest.rm
@@ -59,6 +63,22 @@ RUN_ESMF_CompCreateUNI:
 
 ESMF_CompCreate.rm:
 	echo "ESMF_CompCreate.rm target called here."
+
+
+$(ESMC_TESTDIR)/ESMC_CompCreate: ESMC_CompCreate.o
+	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_CompCreate ESMC_CompCreate.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMC_CompCreate.o
+
+RUN_ESMC_CompCreate:
+	-@rm -f testlog stdlog.* logfile.* ESMC_CompCreate.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
+
+RUN_ESMC_CompCreateUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMC_CompCreate.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_CompCreate > $(ESMC_TESTDIR)/ESMC_CompCreate.stdout
+
+ESMC_CompCreate.rm:
+	echo "ESMC_CompCreate.rm target called here."
 
 #
 #

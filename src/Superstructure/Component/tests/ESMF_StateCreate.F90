@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.12 2003/04/14 14:51:42 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.13 2003/09/23 15:22:31 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -42,6 +42,8 @@
 !   ! Test 1:
 !   !
 !   !  Quick Test - Create/Destroy an Empty State.
+ 
+    call ESMF_FrameworkInitialize(rc)
  
     P_START("State Test 1: Empty State")
 
@@ -370,6 +372,7 @@
     P_BLANK()
 
 
+    call ESMF_FrameworkFinalize(rc)
 
     end program ESMF_StateCreateTest
     
