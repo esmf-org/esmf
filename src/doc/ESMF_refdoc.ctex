@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.51 2004/05/14 13:54:19 nscollins Exp $
+% $Id: ESMF_refdoc.ctex,v 1.52 2004/05/17 22:28:19 jwolfe Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -117,6 +117,8 @@
 %\section{Design and Implementation Notes}
 \input{ESMF_infradataimplnotes.tex}
 
+\newpage
+
 #include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
@@ -132,6 +134,17 @@
 #include "../Infrastructure/ArraySpec/doc/ArraySpec_refdoc.ctex"
 
 #include "../Infrastructure/IOSpec/doc/IOSpec_refdoc.ctex"
+
+\newpage
+
+%\section{Overview of Distributed Data Methods}
+\input{ESMF_inframethodoverview.tex}
+
+#include "../Infrastructure/ArrayComm/doc/ArrayHalo_refdoc.ctex"
+
+#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+
+#include "../Infrastructure/ArrayComm/doc/ArrayRedist_refdoc.ctex"
 
 %===============================================================================
 \newpage
