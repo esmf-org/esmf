@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.3 2003/11/13 18:12:36 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.4 2003/11/13 22:32:54 nscollins Exp $
 
 \section{Overview of Infrastructure Data Classes}
 
@@ -57,10 +57,11 @@ creation and initialization of Fields.
 
 \begin{description}
 
-\item{Application Initialization}
+\item{Framework Initialization}
  
-At Application initialization there is an opportunity to 
-specify configuration attributes which can affect the
+At Framework initialization there is an opportunity to 
+specify a configuration file which can contain attribute values 
+that affect the
 operation of Fields and Bundles.  The most likely used
 attributes will control I/O specifications, e.g. 
 filenames and file formats defaults.  These can be
@@ -69,16 +70,12 @@ queried at run time by the Field and Bundle code.
 \item{Field Creation}
 
 All versions of the {\tt ESMF\_FieldCreate} 
-routines require a Grid object as input at some point.
+routines require a Grid object as input, or require a Grid
+be added before most operations involving Fields can be performed.
 The Grid contains the information needed to know which 
 Decomposition Elements ({\tt DE}s) are participating in 
-the processing of this Field.  
-
-One of the Field decompositions
-will have the responsibility for coordinating
-any global operations on the Field (e.g. calls for Regridding,
-Halo updates, I/O, etc).  It will communicate global information
-to all the other Field decompositions.
+the processing of this Field, and which subsets of the data
+are local to this {\tt DE}.
 
 Requests to access local Field data will not require 
 communication overhead; the user code is expected to
@@ -94,21 +91,17 @@ Some differences will be discussed below.
 \item{Associating constructed data with Fields}
 
 There are versions of the {\tt ESMF\_FieldCreate} interface
-which allow user code to construct or read in data
-outside of the ESMF and specify it either at Field create
-time or add it to the Field later.  
-In these cases, each DE must individually query the Grid object 
-for details about what decomposition of the global grid is local 
-to this PE so it correctly maps the local data decomposition
-to the overall global Field.
+which allow user code to specify the initial data values.
+The can be constructed or read in data from
+outside of the ESMF.  Empty Fields can also be created in
+which case the data can be added at some later time.
 
-The user code first calls 
-{\tt ESMF\_ArrayCreateSpec} to create a
-description of the data object (e.g. items are scalar or vector,
-real or integer) and passes that into {\tt ESMF\_ArrayCreate}
-to create an Array object.  That object can then be given
-to the Field create code, with options to reference that array
-or make a separate copy inside the Field. 
+For versions of Create which do not specify data values,
+user code can create an {\tt ESMF\_ArraySpec} object, which
+contains information about the Type, Kind, and Rank of the
+data values in the array.  Then at Field create time, the
+appropriate amount of memory is allocated to contain the
+data which is local to each {\tt DE}.
 
 \item{Having Fields Allocate Space for Data}
 
@@ -124,15 +117,13 @@ initial data values, and reattach the buffer.
 Fields can be created by the {\tt ESMF\_FieldRead}
 routine, with options to create the Grid at this time
 as well as creating the associated Arrays.
-See the following section on Field I/O for a longer
-discussion of Field Reads.
 
 \end{description}
 
 Fields can be created and destroyed
 at any time during application execution.  However, the creation
-and deletion of Fields requires interprocessor communication
-and will require some time to complete.  It is not recommended
+and deletion of Fields will require some time to complete.  
+It is not recommended
 that Fields are created or destroyed
 inside performance-critical computational loops.
 
@@ -197,25 +188,7 @@ data until {\tt ESMF\_FieldDataAttach} is called.  Once the data
 is reattached the framework can use the data in regridding 
 operations, halo updates, etc.  
 
-If the user code only needs read-only access and wants
-the option of greater concurrency, there is an option on the
-Detach routine which says access will be read only.  There is
-a corresponding {\tt ESMF\_FieldDataDrop} subroutine that must be called
-after all access is done, but during this time other parts of
-the code can also call {\tt ESMF\_FieldDataDetach} with the read-only
-option so multiple readers are allowed.  However, if write access
-is requested it will fail (or optionally, wait) until all readers 
-are finished, and
-then write access will be exclusive.   Requests for read access
-will fail until the updated data is reattached. 
-This does not, of course, preclude user code from passing around
-buffer pointers directly and making whatever concurrent accesses to the
-data buffer it wants.  These restrictions are only for internal
-ESMF access.
-(Note: This exclusive access may not be implemented if no user
-code finds a need for it.)
-
-There is a final data access option, {\tt ESMF\_FieldDataDetachCopy}
+There is a data access option, {\tt ESMF\_FieldDataDetachCopy}
 which returns a copy of the data buffer and does not mark the
 Field data as detached or in use in any way.  The ESMF 
 allocates space for this data buffer, so it becomes the
@@ -250,95 +223,48 @@ can be contained by multiple Bundles.
 
 \subsection{Data Class Communication Methods}
 
+The following methods operate on Data Class objects, including
+{\tt ESMF\_Bundle}s, {\tt ESMF\_Field}s, and {\tt ESMF\_Array}s.
+The {\it Regrid} method computes new data values based on a source
+and destination grid, and a Regridding Method.  The {\it Halo} 
+method updates ghost-cell or halo regions; data which is computed
+by a one DE but a copy is needed by another DE to do computations.
+The {\it Redistribution} method moves data from one DE to another
+when the decomposition of identical Grids is different or the
+index ordering of the data is to be changed.  No data
+interpolation is done during this process.
+
+There is a common object handle, an {\tt ESMF\_RouteHandle}, which
+allows the communication patterns to be precomputed during initialization
+and the information stored in that RouteHandle.
+By specifying the correct RouteHandle at execution time, only
+the source and destination data pointers must be supplied and the
+runtime overhead is minimized.
+
+In the following methods, the Bundle and Field code cascades down
+through the Array code, so that the actual computations exist in
+only one place in the source.
+
 \subsubsection{Regrid}
+
+#include "../Infrastructure/Regrid/doc/Regrid_desc.tex"
 
 \subsubsection{Halo}
 
+#include "../Infrastructure/ArrayComm/doc/ArrayHalo_desc.tex"
+
 \subsubsection{Redistribution}
 
+#include "../Infrastructure/ArrayComm/doc/ArrayRedist_desc.tex"
 
-\subsection{Internal Framework Use}
+\subsubsection{Gather, Scatter, etc}
 
-{\tt Fields} and {\tt Bundles} play a prominent role in {\tt Regrid} 
-operations, in Halo updates,  
-and in data exchanges between {\tt Components}.
-
-\begin{description}
-
-\item{Halo Updates from the Field's Perspective}
-
-The Grid object manages Halo information such as how large the
-halo area is around each Field, and what DEs contain the
-corresponding Field.  There is an interface at the Field level
-for initiating a Halo update, but the actual work happens
-partly at the Field level (e.g. determining the data buffer is
-attached and accessible by the ESMF, and accessing
-the actual data values) and partly at the Distributed Grid
-object level (e.g. determining the communication patterns, the
-size and shape of the Halo region, etc).
-
-\item{Field Import/Export between Components}
-
-If a Field has been identified as being part of either the
-Exchange Packet Import or Export process, then at the time
-data is required the proper Transform subroutine must be 
-called.  All Fields participating in the Transform must have
-their data in the Attached state.  
-
-\item{Field Export}
-
-The Transform object contains
-a series of functions which are called on the data.  The
-original Field data is not altered; copies of the data are
-created in the Export buffers and sent to the receiving
-Components.  The decomposition of data from component to
-component is expected to be different, so part of the transform
-process is reshuffling the local Field data to match the
-receiving component's Field decomposition.
-
-\item{Field Import}
-
-The Transform object contains a description of what data is
-expected at Import time, and the data for the corresponding
-Field objects are updated before the Import function returns.
-
-\item{Regrid Operations}
-
-The Regrid object contains methods for converting data from
-one Grid to another, which may include interpolation, averaging,
-or remapping operations.  The Regrid methods must be able to
-first compute the map from the existing Grid, which it can
-obtain by querying the Field, to the new Grid (specified by
-the caller).  Then it must query the Field for how the data
-is positioned on the existing Grid (cell centered, vertex, etc)
-and how it is to be positioned on the new grid.  It then detaches
-the data from the Field and does the necessary transformations
-to construct a new Array.  It then can create the new field
-with the new Grid and the new Array.  It then attaches
-(or drops) the data from the existing Field to indicate it is
-finished using it.
-
-\item{Creating New Fields from a Combination of Existing Fields}
-
-Creating new Fields from a weighted combination of existing
-Fields is similar in procedure to Regridding, except that the
-Grids are the same but the transformation of data is given 
-by the caller.
-
-\item{Changing Grids Underneath Fields}
-
-The Grid object cannot be changed as long as it is being used
-by any existing Fields.  To change the Grid object a copy of
-the grid must be made and then new Fields created using the
-new grid.  The Regrid functions are available if there's a 
-mapping between the old Grid and the new one.
-
-\item{Nested Grids and Fields}
-
-The Regrid object understands about transformations between
-grids, including mappings between Grids and nested Grids.
-
-\end{description}
+There are lower level communication routines which have methods
+at the Array level to simplify the interfaces to the user code.
+Field and Bundle methods may be added if required.
+The full list of possible communication routines in this category
+are Gather, AllGather, Scatter, Reduce,
+AllReduce, Broadcast, and AllToAll.
 
 \newpage
 \subsection{Object Model}
