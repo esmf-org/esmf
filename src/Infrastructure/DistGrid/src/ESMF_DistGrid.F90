@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.78 2003/10/15 17:06:13 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.79 2003/10/16 18:22:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.78 2003/10/15 17:06:13 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.79 2003/10/16 18:22:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1460,7 +1460,7 @@
           glob%ai_global(de,1)%min = global_start
           glob%ai_global(de,1)%max = global_end
         enddo
-        global_start = global_end + 1
+        global_start = global_end - bnd/2 + 1
       enddo
       do j = 1,nDE(1)
         do i = 1,nDE(2)
@@ -1494,7 +1494,7 @@
           glob%ai_global(de,2)%min = global_start
           glob%ai_global(de,2)%max = global_end
         enddo
-        global_start = global_end + 1
+        global_start = global_end - bnd/2 + 1
       enddo
       do j = 1,nDE(2)
         do i = 1,nDE(1)
