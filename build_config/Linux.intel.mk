@@ -1,4 +1,4 @@
-# $Id: Linux.intel.mk,v 1.8 2003/09/16 19:42:27 nscollins Exp $ 
+# $Id: Linux.intel.mk,v 1.9 2003/09/16 21:17:44 nscollins Exp $ 
 
 # Location of MPI (Message Passing Interface) software
 
@@ -8,6 +8,15 @@ ifeq ($(ESMF_MPI),lam)
 MPI_HOME       = 
 MPI_LIB        = -lmpi -llam
 MPI_INCLUDE    = 
+MPIRUN         =  mpirun
+endif
+
+ifeq ($(ESMF_MPI),mpich)
+# this section is set up for MPICH
+#ESMC_MPIRUN   = 
+MPI_HOME       = /soft/apps/packages/mpich-gm-1.2.5..9-pre6-gm-1.6.3-intel-7.0
+MPI_LIB        = -L$(MPI_HOME)/lib -lmpi 
+MPI_INCLUDE    = -I$(MPI_HOME)/include
 MPIRUN         =  mpirun
 endif
 
