@@ -1,0 +1,62 @@
+# $Id: makefile,v 1.1 2003/01/23 17:27:29 nscollins Exp $ 
+
+ALL: 
+
+CFLAGS    =
+FFLAGS    =
+SOURCEC	  = 
+SOURCEF	  =
+
+SOURCEH	  = 
+OBJSC	  =  
+OBJSF	  = 
+MANSEC	  = 
+LIBBASE	  = 
+DIRS	  = 
+LOCDIR	  = src/SystemTests/NNNNN
+
+TESTEXAMPLES_3  = \
+	ESMF_SysTestNNNNN  RUN_ESMF_SysTestNNNNN  ESMF_SysTestNNNNN.rm
+
+TESTEXAMPLES_9  = \
+	ESMF_SysTestNNNNN  RUN_ESMF_SysTestNNNNNUNI  ESMF_SysTestNNNNN.rm 
+
+EXAMPLESF       = ESMF_SysTestNNNNN.F90 
+
+EXAMPLESC       = 
+
+test:	ESMF_SysTestNNNNN 
+
+include ${ESMF_DIR}/build/${ESMF_ARCH}/base
+
+
+ESMF_SysTestNNNNNDir:
+	mkdir -p ${ESMC_TESTDIR}
+
+ESMF_SysTestNNNNN: ESMF_SysTestNNNNN.o  chkopts
+	-${F90CXXLD} -o ESMF_SysTestNNNNN ESMF_SysTestNNNNN.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_SysTestNNNNN.o
+
+RUN_ESMF_SysTestNNNNN:
+	-@rm -f testlog stdlog.* logfile.* ESMF_SysTestNNNNN.tmps
+	${MPIRUN} -np 4 ESMF_SysTestNNNNN > ESMF_SysTestNNNNN.stdout
+	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_SysTestNNNNN.tmp
+	#@if (diff ESMF_SysTestNNNNN.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_SysTestNNNNN.out) then \
+	#echo "PASS SysTestNNNNN test" > ${ESMC_TESTDIR}/ESMF_SysTestNNNNN.log; else \
+	#echo "FAIL SysTestNNNNN test" > ${ESMC_TESTDIR}/ESMF_SysTestNNNNN.log; fi
+	#@rm -f testlog stdlog.* logfile.* ESMF_SysTestNNNNN.tmp optlog
+
+RUN_ESMF_SysTestNNNNNUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_SysTestNNNNN.tmps
+	${MPIRUN} -np 1 ESMF_SysTestNNNNN > ESMF_SysTestNNNNN.stdout
+	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_SysTestNNNNN.tmp
+	#@if (diff ESMF_SysTestNNNNN.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_SysTestNNNNN.outuni) then \
+	#echo "PASS SysTestNNNNN test" > ${ESMC_TESTDIR}/ESMF_SysTestNNNNN.log; else \
+	#echo "FAIL SysTestNNNNN test" > ${ESMC_TESTDIR}/ESMF_SysTestNNNNN.log; fi
+	#@rm -f testlog stdlog.* logfile.* ESMF_SysTestNNNNN.tmp optlog
+
+ESMF_SysTestNNNNN.rm:
+	echo "ESMF_SysTestNNNNN.rm target called here."
+
+
+
