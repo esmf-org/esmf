@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.11 2003/09/18 20:42:34 flanigan Exp $
+#  $Id: common.mk,v 1.12 2003/09/18 22:19:41 svasquez Exp $
 #
 #  common.mk
 #
@@ -409,7 +409,7 @@ buildexamples_13: ${TESTEXAMPLES_13}
 # system_tests, build and run system tests
 #
 system_tests: chkopts build_libs chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -423,7 +423,7 @@ tree_system_tests: tree_build_system_tests tree_run_system_tests
 # system_tests_uni, build and run uni versions of the system tests
 #
 system_tests_uni: chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -438,7 +438,7 @@ tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 # build_system_tests
 #
 build_system_tests: chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -461,7 +461,7 @@ $(ESMC_TESTDIR)/ESMF_SysTest% : $(SYSTEM_TESTS_OBJ) ESMF_SysTest%.o
 # run_system_tests
 #
 run_system_tests:  chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
@@ -475,7 +475,7 @@ tree_run_system_tests: $(SYSTEM_TESTS_RUN)
 # run_system_tests_uni
 #
 run_system_tests_uni:  chkopts chkdir_tests
-	@if [ -d src/SystemTests ] ; then cd src/SystemTests; fi; \
+	@if [ -d src/system_tests ] ; then cd src/system_tests; fi; \
 	if [ ! $(SYSTEM_TEST)foo = foo ] ; then \
 	   if [ -d $(SYSTEM_TEST) ] ; then \
 	       cd $(SYSTEM_TEST); \
