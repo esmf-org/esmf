@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogConstants.inc,v 1.2 2004/06/11 17:27:58 cpboulder Exp $
+ $Id: ESMF_LogConstants.inc,v 1.3 2004/06/14 21:00:48 cpboulder Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@ ESMF\_LOG\_UNIT\_NUMBER: used to create fortran unit numbers
 ESMF\_LOG\_FORT\_STDOUT: standard out for Fortran
 !EOP
 #endif
-#define ESMF_LOG_FORT_STDOUT 6
+#define ESMF_LOG_FORT_STDOUT 11
 
 #if 0
 !BOP

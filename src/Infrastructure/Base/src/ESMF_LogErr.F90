@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.12 2004/06/14 02:27:15 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.13 2004/06/14 21:00:48 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -83,7 +83,6 @@ type ESMF_Log
     type(ESMF_Logical)                      ::  flush
     integer                                     halt
     type(ESMF_LOGENTRY), dimension(1)       ::  LOG_ENTRY
-    type(ESMF_MsgType)                      ::  msgtype ! TODO: this is wrong
     integer                                     maxElements
     character(len=32)                           nameLogErrFile 
     type(ESMF_Logical)                      ::  rootOnly
@@ -254,8 +253,8 @@ end subroutine ESMF_LogFinalize
 	integer::msglen=0
 	
     ESMF_LogFoundAllocError=.FALSE.
-    if (present(rcToReturn)) rcToReturn=statusToCheck
     if (statusToCheck .NE. 0) then
+        if (present(rcToReturn)) rcToReturn=ESMF_RC_MEM
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
 	    logrc = ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method)
@@ -501,12 +500,12 @@ end subroutine ESMF_LogInitialize
     logical :: logrc
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-	integer::msglen=0
+    integer::msglen=0
     
     ESMF_LogMsgFoundAllocError=.FALSE.
-    if (present(rcToReturn)) rcToReturn=statusToCheck
     if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
+	if (present(rcToReturn)) rcToReturn=ESMF_RC_MEM
         allocmsg=tempmsg(1:msglen)
 	    logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method)
 	    if (.not. logrc) then
@@ -686,7 +685,6 @@ end subroutine ESMF_LogOpen
 	if (present(flush)) log%flush=flush
 	if (present(rootOnly)) log%rootOnly=rootOnly
 	if (present(halt)) log%halt=halt
-	if (present(msgtype)) log%msgtype=msgtype
 	if (present(stream)) log%stream=stream
 	if (present(maxElements)) log%maxElements=maxElements
 	if (present(rc)) rc=ESMF_SUCCESS 
