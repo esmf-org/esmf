@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.14 2004/12/17 16:08:01 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.15 2004/12/30 21:34:01 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -33,6 +33,7 @@
     program FieldExcl
 
 #include <ESMF_Macros.inc>
+#include <ESMF_Conf.inc>
 
     ! ESMF Framework module
     use ESMF_Mod
@@ -85,6 +86,12 @@
     ! Initialize framework and get back default global VM
     call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
+
+#ifdef ESMF_FieldExcl_AUTO_FAIL
+      print *, "This system test will not run yet on this architecture"
+      rc = ESMF_FAILURE
+      goto 10
+#endif
 
     ! Get number of PETs we are running with
     call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
