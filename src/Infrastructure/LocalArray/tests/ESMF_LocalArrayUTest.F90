@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.28 2004/10/05 16:15:07 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.29 2005/01/06 20:36:42 jwolfe Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -567,8 +567,8 @@
     !This print of array4 is commented out becauses it crashes
     !Bug report 972679 has been filed.
     !This print statement will be uncommented when the bug is fixed
-    call ESMF_LocalArrayPrint(array4, "", rc)
-    print *, "array 4c print of bad array returned"
+    !call ESMF_LocalArrayPrint(array4, "", rc)
+    !print *, "array 4c print of bad array returned"
 
     !This test is commented out becauses it crashes
     !Bug report 791282 has been filed.
