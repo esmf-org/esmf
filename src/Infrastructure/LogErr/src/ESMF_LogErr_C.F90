@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.2 2003/04/15 20:29:35 nscollins Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.3 2003/04/25 20:08:37 shep_smith Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.2 2003/04/15 20:29:35 nscollins Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.3 2003/04/25 20:08:37 shep_smith Exp $'
 !==============================================================================
    subroutine f_esmf_logopenfortran(isOpen, unitNumber, nameLogFile)
          use ESMF_BaseMod    ! ESMF base class
@@ -39,8 +39,8 @@
    end subroutine f_esmf_logopenfortran
 
    subroutine f_esmf_logclosefortran(unitNumber)
-         use ESMF_BaseMod    ! ESMF base class
-         use ESMF_LogErrMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_LogErrMod
        integer, intent(in) :: unitNumber
 
        call ESMF_LogCloseFortran(unitNumber)
@@ -48,68 +48,21 @@
    end subroutine f_esmf_logclosefortran
 
 
-   subroutine f_esmf_logprintchar(unitNumber, charData, flushSet, msg, length)
-         use ESMF_BaseMod    ! ESMF base class
-         use ESMF_LogErrMod
+   subroutine f_esmf_logprintstring(unitNumber, stringData,flushSet)
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_LogErrMod
        integer, intent(in) :: unitNumber   
-       character, intent(in) :: charData  
+       character(len=*), intent(in) :: stringData  
        integer, intent(in) :: flushSet   
-       character(len=32), intent(in) :: msg
-       integer, intent(in) :: length
 
-       call ESMF_LogPrintChar(unitNumber, charData, flushSet, msg, length)
-
-   end subroutine f_esmf_logprintchar
-
-
-   subroutine f_esmf_logprintint(unitNumber, intData, flushSet, msg, length)
-         use ESMF_BaseMod    ! ESMF base class
-         use ESMF_LogErrMod
-       integer, intent(in) :: unitNumber   
-       integer, intent(in) :: intData  
-       integer, intent(in) :: flushSet   
-       character(len=32), intent(in) :: msg
-       integer, intent(in) :: length
-
-       call ESMF_LogPrintInt(unitNumber, intData, flushSet, msg, length)
-
-   end subroutine f_esmf_logprintint
-
-
-   subroutine f_esmf_logprintreal(unitNumber, realData, flushSet, msg, length)
-         use ESMF_BaseMod    ! ESMF base class
-         use ESMF_LogErrMod
-       integer, intent(in) :: unitNumber   
-       real, intent(in) :: realData  
-       integer, intent(in) :: flushSet   
-       character(len=32), intent(in) :: msg
-       integer, intent(in) :: length
-
-       call ESMF_LogPrintReal(unitNumber, realData, flushSet, msg, length)
-
-   end subroutine f_esmf_logprintreal
-
-
-   subroutine f_esmf_logprintstring(unitNumber, stringData, strlength, &
-                                                        flushSet, msg, length)
-         use ESMF_BaseMod    ! ESMF base class
-         use ESMF_LogErrMod
-       integer, intent(in) :: unitNumber   
-       character(len=32), intent(in) :: stringData  
-       integer, intent(in) :: strlength
-       integer, intent(in) :: flushSet   
-       character(len=32), intent(in) :: msg
-       integer, intent(in) :: length
-
-       call ESMF_LogPrintString(unitNumber, stringData, strlength, &
-                                                       flushSet, msg, length)
+       call ESMF_LogPrintString(unitNumber, stringData,flushSet)
 
    end subroutine f_esmf_logprintstring
 
 
    subroutine f_esmf_logprintnewline(unitNumber, flushSet)
-         use ESMF_BaseMod    ! ESMF base class
-         use ESMF_LogErrMod
+       use ESMF_BaseMod    ! ESMF base class
+       use ESMF_LogErrMod
        integer, intent(in) :: unitNumber   
        integer, intent(in) :: flushSet   
 

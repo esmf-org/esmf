@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.9 2003/04/17 20:48:06 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.10 2003/04/25 20:10:15 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,18 +41,14 @@
 
 
 extern "C" {
-   void FTN(f_esmf_logopenfortran)(int *isOpen, int *unitNumber, 
+ void FTN(f_esmf_logopenfortran)(int *isOpen, int *unitNumber, 
                                        char *nameLogFile, int);
-   void FTN(f_esmf_logclosefortran)(int *unitNumber);
-   void FTN(f_esmf_logprintchar)(int *unitNumber, char *charData, 
-                               int *flushSet, char *msg, int *length, int, int);
-   void FTN(f_esmf_logprintint)(int *unitNumber, int *intData, 
-                                   int *flushSet, char *msg, int *length, int);
-   void FTN(f_esmf_logprintreal)(int *unitNumber, double *realData, 
-                                 int *flushSet, char *msg, int *length, int);
-   void FTN(f_esmf_logprintstring)(int *unitNumber, char *stringData, int *slen,
-                              int *flushSet, char *msg, int *length, int, int);
-   void FTN(f_esmf_logprintnewline)(int *unitNumber, int *flushSet);
+ void FTN(f_esmf_logclosefortran)(int *unitNumber);
+ void FTN(f_esmf_logprintint)(int *unitNumber, int *intData, int *flushSet);
+ void FTN(f_esmf_logprintreal)(int *unitNumber,double *realData,int *flushSet);
+ void FTN(f_esmf_logprintstring)(int *unitNumber, char *stringData,
+                              int *flushSet,int fortCharDescriptor);
+ void FTN(f_esmf_logprintnewline)(int *unitNumber, int *flushSet);
 
 }
 
