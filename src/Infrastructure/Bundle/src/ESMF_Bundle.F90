@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.52 2004/06/10 23:39:48 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.53 2004/06/14 01:29:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -468,20 +468,20 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
-      subroutine ESMF_BundleAddIntListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleAddIntListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(in) :: value
+      integer, dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Attaches an integer list attribute to the {\tt bundle}.  
-!     The attribute has a {\tt name} and a {\tt value}.
-!     The number of integer items in the {\tt value} list is given 
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is given 
 !     by {\tt count}. 
 !
 !     The arguments are:
@@ -491,8 +491,8 @@ end function
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
-!           The number of integers in the {\tt value} list.
-!     \item [value]
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
 !           The integer values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -514,15 +514,15 @@ end function
           rc = ESMF_FAILURE
       endif
   
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
+                                    ESMF_DATA_INTEGER, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -597,20 +597,20 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
-      subroutine ESMF_BundleAddRealListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleAddRealListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(in) :: value
+      real, dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Attaches a real list attribute to the {\tt bundle}.
-!     The attribute has a {\tt name} and a {\tt value}.
-!     The number of real items in the {\tt value} list is given 
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is given 
 !     by {\tt count}.
 ! 
 !     The arguments are:
@@ -620,7 +620,7 @@ end function
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
-!           The number of reals in the {\tt value} list.
+!           The number of reals in the {\tt valueList}.
 !     \item [value]
 !           The real values of the attribute to add.
 !     \item [{[rc]}] 
@@ -643,15 +643,15 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
+                                    ESMF_DATA_REAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -726,19 +726,19 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleAddAttribute()
-      subroutine ESMF_BundleAddLogicalListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleAddLogicalListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Attaches a logical list attribute to the {\tt bundle}.
-!     The attribute has a {\tt name} and a {\tt value}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of logical items in the {\tt value} list is given 
 !     by {\tt count}.
 !
@@ -749,8 +749,8 @@ end function
 !     \item [name]
 !           The name of the attribute to add.
 !     \item [count]
-!           The number of logicals in the {\tt value} list.
-!     \item [value]
+!           The number of logicals in the {\tt valueList}.
+!     \item [valueList]
 !           The logical values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -772,15 +772,15 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
+                                    ESMF_DATA_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1435,13 +1435,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetIntListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleGetIntListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(out) :: value
+      integer, dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -1456,8 +1456,8 @@ end function
 !           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values in the list.
-!     \item [value]
-!           The list (Fortran array) of integer values of the named attribute.
+!     \item [valueList]
+!           The integer values of the named attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1479,15 +1479,15 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
+                                    ESMF_DATA_INTEGER, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1560,13 +1560,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetRealListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleGetRealListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(out) :: value
+      real, dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -1581,8 +1581,8 @@ end function
 !           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values in the list.
-!     \item [value]
-!           The list (Fortran array) of real values of the named attribute.
+!     \item [valueList]
+!           The real values of the named attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1604,15 +1604,15 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
+                                    ESMF_DATA_REAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1686,13 +1686,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttribute()
-      subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, value, rc)
+      subroutine ESMF_BundleGetLogicalListAttr(bundle, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: value
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -1707,8 +1707,8 @@ end function
 !           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values in the list.
-!     \item [value]
-!           The list (Fortran array) of logical values of the named attribute.
+!     \item [valueList]
+!           The logical values of the named attribute.
 !           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1730,15 +1730,15 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(bundle%btypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
+                                    ESMF_DATA_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1860,7 +1860,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetAttrInfoByName"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an attribute by name
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query Bundle attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()
@@ -1926,7 +1926,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGetAttrInfoByNum"
 !BOP
-! !IROUTINE: ESMF_BundleGetAttributeInfo - Query an attribute by index number
+! !IROUTINE: ESMF_BundleGetAttributeInfo - Query Bundle attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleGetAttributeInfo()

@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.164 2004/06/12 15:27:24 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.165 2004/06/14 01:29:35 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.164 2004/06/12 15:27:24 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.165 2004/06/14 01:29:35 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -423,7 +423,7 @@
 #define ESMF_METHOD "ESMF_FieldAddIntAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set an integer attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Add an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -437,16 +437,17 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to an {\tt ESMF\_Field}.
+!      Attaches an integer attribute to the {\tt field}.
+!      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The integer value of the attribute.
+!           The integer value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -482,33 +483,36 @@
 #define ESMF_METHOD "ESMF_FieldAddIntListAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Add an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddIntListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldAddIntListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(in) :: value
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer list attribute to an {\tt ESMF\_Field}.
+!     Attaches an integer list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
+!     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The integer values of the attribute.
+!           The number of integers in the {\tt valueList}.
+!     \item [valueList]
+!           The integer values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -529,15 +533,15 @@
           rc = ESMF_FAILURE
       endif
   
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
+                                    ESMF_DATA_INTEGER, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -552,7 +556,7 @@
 #define ESMF_METHOD "ESMF_FieldAddRealAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a real attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Add a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -566,16 +570,17 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches a real attribute to an {\tt ESMF\_Field}.
+!      Attaches a real attribute to the {\tt field}.
+!      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The real value of the attribute.
+!           The real value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -611,33 +616,36 @@
 #define ESMF_METHOD "ESMF_FieldAddRealListAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a real list attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Add a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddRealListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldAddRealListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: value
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Attaches a real list attribute to an {\tt ESMF\_Field}.
+!     Attaches a real list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
+!     given by {\tt count}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [count]
-!           The number of values to be set.
+!           The number of reals in the {\tt valueList}.
 !     \item [value]
-!           The real values of the attribute.
+!           The real values of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -658,15 +666,15 @@
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
+                                    ESMF_DATA_REAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -681,7 +689,7 @@
 #define ESMF_METHOD "ESMF_FieldAddLogicalAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a logical attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Add a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -695,16 +703,17 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical attribute to an {\tt ESMF\_Field}.
+!     Attaches a logical attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The logical true/false value of the attribute.
+!           The logical true/false value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -740,31 +749,34 @@
 #define ESMF_METHOD "ESMF_FieldAddLogicalListAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Add a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddLogicalListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldAddLogicalListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical list attribute to an {\tt ESMF\_Field}.
-!
+!     Attaches a logical list attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt valueList} is
+!     given by {\tt count}.
+! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [count]
-!           The number of values to be set.
+!           The number of logicals in the {\tt valueList}.
 !     \item [value]
 !           The logical true/false values of the attribute.
 !     \item [{[rc]}] 
@@ -787,15 +799,15 @@
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
+                                    ESMF_DATA_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -824,16 +836,17 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to an {\tt ESMF\_Field}.
+!      Attaches a character attribute to the {\tt field}.
+!     The attribute has a {\tt name} and a {\tt value}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the attribute to set.
+!           The name of the attribute to add.
 !     \item [value]
-!           The character value of the attribute.
+!           The character value of the attribute to add.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1413,7 +1426,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from an {\tt ESMF\_Field}.
+!      Returns an integer attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1462,18 +1475,18 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetIntListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldGetIntListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(out) :: value
+      integer(ESMF_KIND_I4), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from an {\tt ESMF\_Field}.
+!      Returns an integer list attribute from the {\tt field}.
 !
 ! 
 !     The arguments are:
@@ -1483,9 +1496,10 @@
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
+!           The number of values in the attribute.
+!     \item [valueList]
 !           The integer values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1506,15 +1520,15 @@
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
+                                    ESMF_DATA_INTEGER, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1543,7 +1557,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from an {\tt ESMF\_Field}.
+!      Returns a real attribute from the {\tt field}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1592,13 +1606,13 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetRealListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldGetRealListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(out) :: value
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -1612,9 +1626,10 @@
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
+!           The number of values in the attribute.
+!     \item [valueList]
 !           The real values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1635,15 +1650,15 @@
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
+                                    ESMF_DATA_REAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1672,7 +1687,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from an {\tt ESMF\_Field}.
+!      Returns a logical attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1721,18 +1736,18 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
-      subroutine ESMF_FieldGetLogicalListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldGetLogicalListAttr(field, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: value
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from an {\tt ESMF\_Field}.
+!      Returns a logical list attribute from the {\tt field}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1741,9 +1756,10 @@
 !     \item [name]
 !           The name of the attribute to retrieve.
 !     \item [count]
-!           The number of values to be set.
-!     \item [value]
+!           The number of values in the attribute.
+!     \item [valueList]
 !           The logical values of the named attribute.
+!           The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1764,15 +1780,15 @@
           rc = ESMF_FAILURE
       endif
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "count longer than value list", &
+                                "count longer than valueList", &
                                  ESMF_CONTEXT, rc)) return
       endif
 
       call c_ESMC_AttributeGetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
+                                    ESMF_DATA_LOGICAL, count, valueList, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1801,7 +1817,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from an {\tt ESMF\_Field}.
+!      Returns a character attribute from the {\tt field}.
 !
 ! 
 !     The arguments are:
@@ -1859,14 +1875,14 @@
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns the number of attributes associated with the given {\tt field} in the argument {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [count]
-!           The number of attributes on this object.
+!           The number of attributes associated with this object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1916,7 +1932,8 @@
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the named attribute, 
+!      including {\tt datatype} and {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1969,15 +1986,15 @@
 #define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by number
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
-      subroutine ESMF_FieldGetAttrInfoByNum(field, num, name, datatype, count, rc)
+      subroutine ESMF_FieldGetAttrInfoByNum(field, attributeIndex, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
-      integer, intent(in) :: num
+      integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
@@ -1985,14 +2002,15 @@
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the indexed attribute, 
+!      including {\tt name}, {\tt datatype}, and {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
-!     \item [num]
-!           The number of the attribute to query.
+!     \item [attributeIndex]
+!           The index number of the attribute to query.
 !     \item [name]
 !           Returns the name of the attribute.
 !     \item [datatype]
@@ -2022,7 +2040,7 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, num, &
+      call c_ESMC_AttributeGetAttrInfoNum(field%ftypep%base, attributeIndex, &
                                          localName, localDt, localCount, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &

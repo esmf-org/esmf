@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.60 2004/06/12 17:17:56 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.61 2004/06/14 01:29:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.60 2004/06/12 17:17:56 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.61 2004/06/14 01:29:43 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -763,20 +763,20 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddIntListAttr(state, name, count, value, rc)
+      subroutine ESMF_StateAddIntListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(in) :: value
+      integer, dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Attaches an integer list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
-!     The number of integer items in the {\tt value} list is
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
 !
 !     The arguments are:
@@ -786,8 +786,8 @@ end function
 !     \item [name]
 !       The name of the attribute to add.
 !     \item [count]
-!       The number of integers in the {\tt value} list.
-!     \item [value]
+!       The number of integers in the {\tt valueList}.
+!     \item [valueList]
 !       The integer values of the attribute to add.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -803,16 +803,16 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
   
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than list", &
+                                      "count longer than valueList", &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, localrc)
+                                    ESMF_DATA_INTEGER, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -881,20 +881,20 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddRealListAttr(state, name, count, value, rc)
+      subroutine ESMF_StateAddRealListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(in) :: value
+      real, dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Attaches a real list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
-!     The number of real items in the {\tt value} list is
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
 !     The arguments are:
@@ -904,7 +904,7 @@ end function
 !     \item [name]
 !       The name of the attribute to add.
 !     \item [count]
-!       The number of reals in the {\tt value} list.
+!       The number of reals in the {\tt valueList}.
 !     \item [value]
 !       The real values of the attribute to add.
 !     \item [{[rc]}] 
@@ -921,16 +921,16 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than list", &
+                                      "count longer than valueList", &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, value, localrc)
+                                    ESMF_DATA_REAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -957,7 +957,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Attaches an logical attribute to the {\tt state}.
+!     Attaches a logical attribute to the {\tt state}.
 !     The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -998,20 +998,20 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
-      subroutine ESMF_StateAddLogicalListAttr(state, name, count, value, rc)
+      subroutine ESMF_StateAddLogicalListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
+      type(ESMF_Logical), dimension(:), intent(in) :: valueList
       integer, intent(out), optional :: rc   
 
 !
 ! !DESCRIPTION:
 !     Attaches a logical list attribute to the {\tt state}.
-!     The attribute has a {\tt name} and a {\tt value}.
-!     The number of logical items in the {\tt value} list is
+!     The attribute has a {\tt name} and a {\tt valueList}.
+!     The number of logical items in the {\tt valueList} is
 !     given by {\tt count}.
 ! 
 !     The arguments are:
@@ -1021,8 +1021,8 @@ end function
 !     \item [name]
 !       The name of the attribute to add.
 !     \item [count]
-!       The number of logicals in the {\tt value} list.
-!     \item [value]
+!       The number of logicals in the {\tt valueList}.
+!     \item [valueList]
 !       The logical true/false values of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1038,16 +1038,16 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than list", &
+                                      "count longer than valueList", &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, localrc)
+                                    ESMF_DATA_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -1925,13 +1925,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetIntListAttr(state, name, count, value, rc)
+      subroutine ESMF_StateGetIntListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      integer, dimension(:), intent(out) :: value
+      integer, dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -1946,10 +1946,9 @@ end function
 !      The name of the attribute to retrieve.
 !     \item [count]
 !      The number of values in the attribute.
-!     \item [value]
+!     \item [valueList]
 !      The integer values of the named attribute.
-!      The list (Fortran array)
-!      must be at least {\tt count} long.
+!      The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1964,16 +1963,16 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than list", &
+                                      "count longer than valueList", &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
-                                    ESMF_DATA_INTEGER, count, value, localrc)
+                                    ESMF_DATA_INTEGER, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2040,13 +2039,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetRealListAttr(state, name, count, value, rc)
+      subroutine ESMF_StateGetRealListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      real, dimension(:), intent(out) :: value
+      real, dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -2061,10 +2060,9 @@ end function
 !      The name of the attribute to retrieve.
 !     \item [count]
 !      The number of values in the attribute.
-!     \item [value]
+!     \item [valueList]
 !      The real values of the named attribute.  
-!      The list (Fortran array)
-!      must be at least {\tt count} long.
+!      The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2079,16 +2077,16 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than list", &
+                                      "count longer than valueList", &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, value, localrc)
+                                    ESMF_DATA_REAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2155,13 +2153,13 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
-      subroutine ESMF_StateGetLogicalListAttr(state, name, count, value, rc)
+      subroutine ESMF_StateGetLogicalListAttr(state, name, count, valueList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
       character (len = *), intent(in) :: name
       integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(out) :: value
+      type(ESMF_Logical), dimension(:), intent(out) :: valueList
       integer, intent(out), optional :: rc   
 
 !
@@ -2176,10 +2174,9 @@ end function
 !      The name of the attribute to retrieve.
 !     \item [count]
 !      The number of values in the attribute.
-!     \item [value]
+!     \item [valueList]
 !      The logical values of the named attribute.
-!      The list (Fortran array)
-!      must be at least {\tt count} long.
+!      The list must be at least {\tt count} items long.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2194,16 +2191,16 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      limit = size(value)
+      limit = size(valueList)
       if (count > limit) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                      "count longer than list", &
+                                      "count longer than valueList", &
                                       ESMF_CONTEXT, rc)
           return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, localrc)
+                                    ESMF_DATA_LOGICAL, count, valueList, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2278,15 +2275,15 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of elements in the value list associated 
-!      with the given attribute.
+!      Returns the number of attributes associated with the given
+!      {\tt state} in the argument {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [count]
-!      The number of attributes attached to this object.
+!      The number of attributes associated with this object.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2327,7 +2324,9 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!      Returns information associated with the named
+!      attribute, including {\tt datatype} and 
+!      {\tt count}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2336,8 +2335,7 @@ end function
 !     \item [name]
 !      The name of the attribute to query.
 !     \item [datatype]
-!      The  data type of the attribute, which includes ESMF\_DATA\_INTEGER,
-!      ESMF\_DATA\_REAL, ESMF\_DATA\_LOGICAL, ESMF\_DATA\_CHARACTER.
+!      The  datatype of the attribute.
 !     \item [count]
 !      The number of items in this attribute.  For character types,
 !       the length of the character string.
@@ -2372,15 +2370,15 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttrInfoByNum"
 !BOP
-! !IROUTINE: ESMF_StateGetAttributeInfo - Query State attributes by number
+! !IROUTINE: ESMF_StateGetAttributeInfo - Query State attributes by index number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
-      subroutine ESMF_StateGetAttrInfoByNum(state, index, name, datatype, count, rc)
+      subroutine ESMF_StateGetAttrInfoByNum(state, attributeIndex, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state  
-      integer, intent(in) :: index
+      integer, intent(in) :: attributeIndex
       character(len=*), intent(out), optional :: name
       type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
@@ -2396,12 +2394,12 @@ end function
 !     \begin{description}
 !     \item [state]
 !      An {\tt ESMF\_State} object.
-!     \item [index]
+!     \item [attributeIndex]
 !      The index number of the attribute to query.
 !     \item [name]
 !       Returns the name of the attribute.
 !     \item [datatype]
-!       Returns the type of the attribute.
+!       Returns the datatype of the attribute.
 !     \item [count]
 !       Returns the number of items in this attribute.  For character types,
 !       this is the length of the character string.
@@ -2420,7 +2418,7 @@ end function
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, index, &
+      call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, attributeIndex, &
                                         localName, localDt, localCount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
