@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.34 2004/02/05 22:04:11 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.35 2004/02/05 23:25:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.34 2004/02/05 22:04:11 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.35 2004/02/05 23:25:17 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,7 +64,7 @@
       type(ESMF_Field) :: f1, f2, f3, f4, f5, f6
       integer :: intattr, intattr2
       integer :: intattrlist(6)
-      real :: rattr, rattrlist(2)
+      real :: rattr, rattrlist(2), diff
       character (len=32) :: lattrstr
       type(ESMF_Logical) :: lattr, lattrlist(6)
       character (len=512) :: cattr, cattr2
@@ -444,6 +444,7 @@
       call ESMF_FieldSetAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
       call ESMF_FieldPrint(f3, rc=rc)
       intattr = 0
+      count = 4   ! expected number of values
       call ESMF_FieldGetAttribute(f3, "Multiple Scale Factors", count, intattrlist, rc)
       print *, count, "attributes found in list"
       write(failMsg, *) ""
@@ -459,13 +460,14 @@
       print *, "Pi should be 3.14159, is: ", rattr
       write(failMsg, *) ""
       write(name, *) "Getting a real Attribute back from a Field"
-      call ESMF_Test((rattr.eq.3.14159999), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rattr-3.14159.lt.0.00001), name, failMsg, result, ESMF_SRCLINE)
 
       !NEX_UTest
       ! test setting a real list
       call ESMF_FieldSetAttribute(f3, "Vertices", 2, (/1.1, 2.2/), rc)
       !call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
+      count = 2   ! expected count
       call ESMF_FieldGetAttribute(f3, "Vertices", count, rattrlist, rc)
       print *, count, "attributes found in list"
       print *, "Vertices should be 1.1 and 2.2, are: ", rattrlist
@@ -490,6 +492,7 @@
       call ESMF_FieldSetAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
       !call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
+      count = 3   ! expected count
       call ESMF_FieldGetAttribute(f3, "FlipFlop", count, lattrlist, rc)
       print *, count, "attributes found in list"
       print *, "FlipFlop should be alternate, are: " 
