@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.8 2003/02/05 18:38:03 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.9 2003/02/06 22:18:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,6 +124,7 @@
  
       public ESMF_CompInit  !  (comptype, modeltype, ...)
       !public ESMF_CompSetRoutine  ! (component, "init", My_Init)
+      !   expected values: "init", "run", "finalize", "checkpoint", "restart"
       public ESMF_CompRun   ! (component, time) or (coupler, statelist?, time)
       public ESMF_CompFinalize   ! (component)
       !public ESMF_CompGetState  ! (component, "import"/"export"/"list", state)
@@ -143,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.8 2003/02/05 18:38:03 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.9 2003/02/06 22:18:41 nscollins Exp $'
 
 !==============================================================================
 ! 

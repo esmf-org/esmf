@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.2 2003/02/04 20:19:25 nscollins Exp $
+// $Id: ESMC_StateEx.C,v 1.3 2003/02/06 22:18:40 nscollins Exp $
 //
 // Example/test code which creates a new State.
 
@@ -102,12 +102,12 @@ main(int argc, char **argv) {
     printf("State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind";
-    rc = ESMF_StateAddNameOnly(state3, dataname);
-    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
+    rc = ESMF_StateAddData(state3, dataname);
+    printf("StateAddData returned, rc = %d, name = %s\n", rc, dataname);
 
     dataname = "Humidity";
-    rc = ESMF_StateAddNameOnly(state3, dataname)
-    printf("StateAddNameOnly returned, rc = %d, name = %s\n", rc, dataname);
+    rc = ESMF_StateAddData(state3, dataname)
+    printf("StateAddData returned, rc = %d, name = %s\n", rc, dataname);
 
     // See next example for how this is used.
 

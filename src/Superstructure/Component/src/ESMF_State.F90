@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.8 2003/02/04 15:19:44 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.9 2003/02/06 22:18:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,8 +78,7 @@
                 ESMF_STATEFIELD = ESMF_StateObjectType(2), &
                 ESMF_STATEARRAY = ESMF_StateObjectType(3), &
                 ESMF_STATEDATANAME = ESMF_StateObjectType(4), &
-                ESMF_STATELAST = ESMF_StateObjectType(5), &
-                ESMF_STATEOBJTYPEUNKNOWN = ESMF_StateObjectType(6)
+                ESMF_STATEOBJTYPEUNKNOWN = ESMF_StateObjectType(5)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataNeeded
@@ -95,9 +94,7 @@
 
       type(ESMF_StateDataNeeded), parameter :: &
                 ESMF_STATEDATAISNEEDED = ESMF_StateDataNeeded(1), &
-                ESMF_STATEDATANOTNEEDED= ESMF_StateDataNeeded(2), &
-                ESMF_STATEDATADONOTCARE = ESMF_StateDataNeeded(3), &
-                ESMF_STATEDATANEEDUNKNOWN = ESMF_StateDataNeeded(4)
+                ESMF_STATEDATANOTNEEDED = ESMF_StateDataNeeded(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataReady
@@ -110,8 +107,22 @@
 
       type(ESMF_StateDataReady), parameter :: &
                 ESMF_STATEDATAREADYTOWRITE = ESMF_StateDataReady(1), &
-                ESMF_STATEDATAREADYTOREAD= ESMF_StateDataReady(2), &
+                ESMF_STATEDATAREADYTOREAD = ESMF_StateDataReady(2), &
                 ESMF_STATEDATAREADYUNKNOWN = ESMF_StateDataReady(3)
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateDataReqRestart
+!
+      type ESMF_StateDataReqRestart
+      sequence
+      private
+         integer :: required4restart
+      end type
+
+      type(ESMF_StateDataReqRestart), parameter :: &
+                ESMF_STATEDATAREQUIREDRESTART = ESMF_StateDataReqRestart(1), &
+                ESMF_STATEDATANOTREQUIREDRESTART = ESMF_StateDataReqRestart(2)
 
 
 !------------------------------------------------------------------------------
@@ -159,7 +170,6 @@
         type(ESMF_StateDataNeeded) :: needed
         type(ESMF_StateDataReady) :: ready
         type(ESMF_StateDataValid) :: valid
-        type(ESMF_StateData), pointer :: nextdata
       end type
 
 !------------------------------------------------------------------------------
@@ -194,11 +204,12 @@
       public ESMF_State
       public ESMF_StateImpExpType, ESMF_STATEIMPORT, ESMF_STATEEXPORT
       public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
-                                   ESMF_STATEDATANOTNEEDED, &
-                                   ESMF_STATEDATADONOTCARE
+                                   ESMF_STATEDATANOTNEEDED
       public ESMF_StateDataReady,  ESMF_STATEDATAREADYTOWRITE, &
                                    ESMF_STATEDATAREADYTOREAD, &
                                    ESMF_STATEDATAREADYUNKNOWN
+      public ESMF_StateDataReqRestart,  ESMF_STATEDATAREQUIREDRESTART, &
+                                   ESMF_STATEDATANOTREQUIREDRESTART
       public ESMF_StateDataValid,  ESMF_STATEDATAISVALID, &
                                    ESMF_STATEDATAINVALID, &
                                    ESMF_STATEDATAVALIDITYUNKNOWN
@@ -210,7 +221,6 @@
 
       public ESMF_StateAddData, ESMF_StateGetData
       public ESMF_StateGetInfo
-      public ESMF_StateAddNameOnly 
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       public ESMF_StateIsNeeded
       !public ESMF_StateGetNeededList   ! returns an array of values
@@ -230,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.8 2003/02/04 15:19:44 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.9 2003/02/06 22:18:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -271,6 +281,8 @@ end interface
         !module procedure ESMF_StateAddFieldList
         !module procedure ESMF_StateAddArray
         !module procedure ESMF_StateAddArrayList
+        module procedure ESMF_StateAddDataName
+        module procedure ESMF_StateAddDataNameList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -296,25 +308,6 @@ end interface
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_StateGetData} functions.   
-!  
-!EOP 
-end interface
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddNameOnly -- Add names as placeholders to the State
-
-! !INTERFACE:
-     interface ESMF_StateAddNameOnly
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-        module procedure ESMF_StateAddDataName
-        module procedure ESMF_StateAddDataNameList
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddNameOnly} functions.   
 !  
 !EOP 
 end interface

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.2 2003/02/04 20:19:24 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.3 2003/02/06 22:18:41 nscollins Exp $
 !
 ! Example code for creating States.
 
@@ -105,12 +105,12 @@
     print *, "State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind"
-    call ESMF_StateAddNameOnly(state3, dataname, rc)
-    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
+    call ESMF_StateAddData(state3, dataname, rc)
+    print *, "StateAddData returned", rc, " name = ", trim(dataname)
     
     dataname = "Humidity"
-    call ESMF_StateAddNameOnly(state3, dataname, rc)
-    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
+    call ESMF_StateAddData(state3, dataname, rc)
+    print *, "StateAddData returned", rc, " name = ", trim(dataname)
     
     ! See next example for how this is used.
 
@@ -120,7 +120,7 @@
 !-------------------------------------------------------------------------
 !   ! Example 4:
 !   !
-!   !  Mark and Query Needed flags, and add Bundle data
+!   !  Mark Needed Flag
  
     print *, "State Example 4: Get/Set Needed flags in Export State"
 
@@ -164,7 +164,8 @@
 !-------------------------------------------------------------------------
 !   ! Similar flags exist for "Ready" and for "Valid" to mark each data
 !   !  item as ready or having been validated, to help synchronize data
-!   !  exchange between Components and Couplers.
+!   !  exchange between Components and Couplers.  Also "Required for 
+!   !  Restart".
 !-------------------------------------------------------------------------
 
 
