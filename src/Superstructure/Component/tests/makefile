@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2004/07/22 20:13:04 jwolfe Exp $ 
+# $Id: makefile,v 1.20 2004/07/22 21:16:35 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -33,7 +33,7 @@ TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
 		RUN_ESMF_CplCompCreateUTestUNI \
 		RUN_ESMC_CompCreateUNI \
 		RUN_ESMF_CompRunUNI \
-		RUN_ESMC_CompRunUN 
+		RUN_ESMC_CompRunUNI
 
 TESTS_RM      =	ESMF_CompCreate.rm \
 		ESMF_GridCompCreateUTest.rm \
