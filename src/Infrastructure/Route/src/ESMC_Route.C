@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.75 2003/10/22 19:54:47 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.76 2003/11/08 00:33:37 rjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.75 2003/10/22 19:54:47 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.76 2003/11/08 00:33:37 rjacob Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -673,6 +673,10 @@ static int maxroutes = 10;
     int srep_count[ESMF_MAXDIM], rrep_count[ESMF_MAXDIM];
     void *srcmem, *rcvmem;
     int srccount, rcvcount;
+    int srctcount, rcvtcount;
+    char *srcbufstart, *rcvbufstart;
+    char *srcbuf, *rcvbuf;
+    char *srcptr, *rcvptr;
     int nbytes;
 
     rc = layout->ESMC_DELayoutGetDEID(&mydeid);
@@ -749,53 +753,62 @@ static int maxroutes = 10;
            //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
            //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
            //                     (long int)srcaddr, (long int)dstaddr);
-           for (j=0, srcbytes = soffset, rcvbytes = roffset; j<mrank-1; j++) {
-               //printf("j=%d, srep_count[j]=%d, rrep_count[j]=%d\n", j, srep_count[j], rrep_count[j]);
-               for (l=0; l<srep_count[j] || l<rrep_count[j]; l++, 
-                               srcbytes += sstride[j], rcvbytes += rstride[j]) {
-         
-                    // This is a new fix - should take care of byte size issues.
-                    nbytes = ESMC_DataKindSize(dk);
-                    if (l>=srep_count[j]) srcbytes=0;
-                    if (l>=rrep_count[j]) rcvbytes=0;
-         
-                    srcmem = (void *)((char *)srcaddr+(srcbytes*nbytes)); 
-                    rcvmem = (void *)((char *)dstaddr+(rcvbytes*nbytes)); 
-              // jw   srccount = sendxp ? scontig_length-soffset+1 : 0;
-              // jw   rcvcount = recvxp ? rcontig_length-roffset+1 : 0;
+
+	   // Count the total number of points to send/recv
+	   srctcount=0;
+	   rcvtcount=0;
+           for (j=0; j<mrank-1; j++) {
+               for (l=0; l<srep_count[j] || l<rrep_count[j]; l++){ 
+
+                    if (l<srep_count[j] && sendxp) srctcount += scontig_length;
+                    if (l<rrep_count[j] && recvxp) rcvtcount += rcontig_length;
+               }
+           }
+
+           nbytes = ESMC_DataKindSize(dk);
+
+	   // allocate temporary buffers
+	   srcbufstart = (char *)(malloc(srctcount*nbytes));
+	   rcvbufstart = (char *)(malloc(rcvtcount*nbytes));
+	   srcbuf = srcbufstart;
+	   rcvbuf = rcvbufstart;
+
+           // copy in to the send buffer
+	   if(srctcount > 0){
+             for (j=0, srcbytes = soffset; j<mrank-1; j++) {
+               //printf("j=%d, srep_count[j]=%d", j, srep_count[j]);
+               for (l=0; l<srep_count[j] ; l++, srcbytes += sstride[j]) {
+
+                    srcptr = (char *)srcaddr+(srcbytes*nbytes); 
                     srccount = sendxp ? scontig_length : 0;
+		    memcpy(srcbuf,srcptr,srccount*nbytes);
+		    srcbuf += srccount*nbytes;
+               }
+             }
+           }
+
+           if(mydeid == theirdeid)
+	      rcvbuf = srcbufstart;
+	   else
+              rc = layout->ESMC_DELayoutSendRecv(srcbufstart, rcvbufstart,
+                         srctcount, rcvtcount, theirdeid, theirdeid, dk);
+
+           // copy out of the recv buffer
+	   if(rcvtcount > 0){
+             for (j=0, rcvbytes = roffset; j<mrank-1; j++) {
+               //printf("j=%d, rrep_count[j]=%d", j, rrep_count[j]);
+               for (l=0; l<rrep_count[j]; l++, rcvbytes += rstride[j]) {
+                    rcvptr = (char *)dstaddr+(rcvbytes*nbytes); 
                     rcvcount = recvxp ? rcontig_length : 0;
-                    if (l>=srep_count[j]) srccount=0;
-                    if (l>=rrep_count[j]) rcvcount=0;
+		    memcpy(rcvptr,rcvbuf,rcvcount*nbytes);
+		    rcvbuf += rcvcount*nbytes;
+               }
+             }
+           }
 
-                    // Debug:
-                    if ((srccount == 0) && (rcvcount == 0)) 
-                        printf("WARNING!! both send/recv counts = 0, myDE %d, theirDE %d\n", 
-                                           mydeid, theirdeid); 
-                    //printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
-                    //           srccount, (long int)srcmem, mydeid, theirdeid);
-                    //printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
-                    //           rcvcount, (long int)rcvmem, mydeid, theirdeid);
+           free(srcbufstart);
+           free(rcvbufstart);
 
-                    //printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
-                    //                l, srcbytes, rcvbytes);
-                    //printf("soffset=%d, scontig_length=%d, roffset=%d, rcontig_length=%d)\n", 
-                    //                  soffset, scontig_length, roffset, rcontig_length);
-                    //printf(" (j=%d, sstride[j]=%d, rstride[j]=%d)\n", 
-                    //                   j, sstride[j], rstride[j]);
-
-             
-                    //  theirdeid  is the other processor de number
-                    //  srcmem and rcvmem are the mem addresses 
-                    //  srccount and rcvcount are the byte counts.  they are 0
-                    //    if there is nothing to send or receive, respectively.
-                    //  at the MPI level, src and rcv could be different types,
-                    //  but for now make them be the same.
-
-                    rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
-                                srccount, rcvcount, theirdeid, theirdeid, dk);
-                }
-            }
 	}
 
     }
