@@ -1,4 +1,4 @@
- $Id: README,v 1.24 2003/08/20 18:40:11 flanigan Exp $
+ $Id: README,v 1.25 2003/08/21 21:01:47 flanigan Exp $
 ================================================================================
                                    README
 
@@ -81,7 +81,8 @@ platforms.  ESMF_DIR should be set to the path of the top
 level ESMF directory.  
 
 The following environment variables need to be set only if the
-default values are not acceptable.
+default values are not acceptable.  For supported platforms,
+the default values should be all that is needed.
 
 ESMF_ARCH      Value of uname -s.  This will be AIX for IBM RS6000's.
 
@@ -108,6 +109,11 @@ In ksh shell environment variables are set this way:
 
         export ESMF_PREC=32
 
+Environment variables can also be set on the command line of
+the gmake command.  Example:
+
+        gmake ESMF_PREC=32
+
 Platform notes:
 
 Compaq alpha - Before running on the Compaq, you will need to set the
@@ -118,7 +124,7 @@ valid values for your userid.
 
 IBM rs6000 - Before running on rs6000 machines, you will need to set
 an additional environment variable MP_RMPOOL to a valid node
-allocation pool.  Usually this can be a value of 1.
+allocation pool.  Usually this will be a value of 1.
 
 
 Build Information
