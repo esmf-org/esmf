@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.7 2004/02/13 20:24:49 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.8 2004/02/17 19:43:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,6 +155,7 @@
         integer :: gridrank                             ! grid rank
         integer, dimension (ESMF_MAXDIM) :: dim_order   ! 0 = not a grid dim
         integer, dimension (ESMF_MAXDIM) :: sense       ! +/- iteration order
+        integer, dimension (ESMF_MAXDIM) :: counts      ! if rank > grid, items
         ! individual data item information
         integer :: datarank                             ! scalar, vector, etc.
         integer, dimension (ESMF_MAXDIM) :: ranklength  ! len if > scalar
@@ -223,7 +224,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.7 2004/02/13 20:24:49 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.8 2004/02/17 19:43:39 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -337,7 +338,8 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_DataMapCreateNew(iorder, horizRelloc, vertRelloc, gridrank, rc)
+      function ESMF_DataMapCreateNew(iorder, horizRelloc, vertRelloc, &
+                                     gridrank, counts, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DataMap) :: ESMF_DataMapCreateNew
@@ -348,6 +350,7 @@ end function
       type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: gridrank
+      integer, dimension(:), intent(in), optional :: counts
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -370,6 +373,9 @@ end function
 !    \item[{[gridrank]}]
 !       Number of dimensions in the Grid.  Default is the same as the 
 !       number of dimensions implied by the iorder input.
+!    \item[{[counts]}]
+!       If array rank is larger than the grid rank, the counts for the
+!       additional dimensions.  
 !    \item[{[rc]}] 
 !       Return code equals {\tt ESMF\_SUCCESS} if the method
 !       executes without errors.
@@ -404,7 +410,7 @@ end function
         endif
     
         call ESMF_DataMapConstructNew(dmp, iorder, horizRelloc, vertRelloc, &
-                                      gridrank, status)
+                                      gridrank, counts, status)
         if (status .ne. ESMF_SUCCESS) then
            print *, "DataMap construction error"
            return
@@ -504,7 +510,7 @@ end function
 !BOPI
 ! !INTERFACE:
       subroutine ESMF_DataMapConstructNew(datamap, iorder, horizRelloc, &
-                                          vertRelloc, gridrank, rc)
+                                          vertRelloc, gridrank, counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMapType), pointer :: datamap
@@ -512,6 +518,7 @@ end function
       type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: gridrank
+      integer, dimension(:), intent(in), optional :: counts
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -601,6 +608,9 @@ end function
    
       ! if specified, use the real gridrank
         if (present(gridrank)) datamap%gridrank = gridrank
+
+        datamap%counts(:) = 1
+        if (present(counts)) datamap%counts(1:size(counts)) = counts(:)
 
 !       in this interface assume scalar data and use the relloc the caller gave
         datamap%datarank = 0
@@ -716,7 +726,7 @@ end function
 !BOP
 ! !INTERFACE:
       subroutine ESMF_DataMapGet(datamap, gridrank, dimlist, &
-                                 horizRelloc, vertRelloc, rc)
+                                 horizRelloc, vertRelloc, counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap  
@@ -724,6 +734,7 @@ end function
       integer, dimension (:), intent(out), optional :: dimlist 
       type(ESMF_RelLoc), intent(out), optional :: horizRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
+      integer, dimension(:), intent(out), optional :: counts
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
@@ -759,6 +770,11 @@ end function
 
         if (present(vertRelloc)) then
            vertRelloc = dmp%vertRelloc
+        endif
+
+        if (present(counts)) then
+           counts(:) = 1
+           counts(1:size(dmp%counts)) = dmp%counts(:)
         endif
 
         if (present(dimlist)) then
