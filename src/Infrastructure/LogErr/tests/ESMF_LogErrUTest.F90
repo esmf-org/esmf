@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.19 2005/03/29 22:16:22 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.20 2005/03/31 22:08:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.19 2005/03/29 22:16:22 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.20 2005/03/31 22:08:09 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, k
+      integer :: rc
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -53,7 +53,8 @@
       character(1) :: pet_char
       character(4) :: my_pet_char
       character(8) :: my_todays_date, todays_date
-      integer, allocatable:: itime(:)
+      integer :: rndseed(1), v(8)
+      
 
       character :: random_char
       character (5) :: random_string, msg_string
@@ -318,11 +319,9 @@
      	 call date_and_time(date=my_todays_date, time=my_time)
       end do
       ! Generate a random string using clock as seed and write it to log file
-      !call random_seed(generator=2) ! commented out because does not compile
-      call random_seed(size=k)
-      allocate(itime(k))
-      call system_clock(count_max=itime(3), count=itime(1), count_rate=itime(2)) 
-      call random_seed(put=itime)
+      call date_and_time(values=v(:))
+      rndseed(1)=v(8)*v(7)+1
+      call random_seed(put=rndseed)
       do i=1, 5
       	call random_number(r1)
       	ran_num = int(26.0*r1) + 65
