@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.67 2003/09/11 22:54:50 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.68 2003/09/12 22:41:40 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.67 2003/09/11 22:54:50 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.68 2003/09/12 22:41:40 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1475,7 +1475,7 @@ static int maxroutes = 10;
       offset += count;
 
       // load the XPacket into the sending RTable
-      sendRT->ESMC_RTableSetEntry(their_de, their_XP);
+      recvRT->ESMC_RTableSetEntry(their_de, their_XP);
       ct->ESMC_CommTableSetPartner(their_de);
 
       // free each XP before allocating another in XPacketFromAxisIndex
