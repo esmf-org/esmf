@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.6 2003/05/01 16:12:56 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.7 2003/05/02 14:27:47 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -459,6 +459,9 @@
       character(len=ESMF_MAXSTR), dimension(7) :: datanames
       type(ESMF_Field) :: thisfield
 
+      ! debug
+      integer :: ilb, jlb, iub, jub
+
       datacount = 7
       datanames(1) = "SIE"
       datanames(2) = "U"
@@ -505,22 +508,39 @@
       !call ESMF_FieldHalo(field_v, status)
       !call ESMF_FieldHalo(field_rho, status)
       
+      ! Debug checks for data pointers, exclusive region only
+      ilb = lbound(flag, 1) + 1
+      jlb = lbound(flag, 2) + 1
+      iub = ubound(flag, 1) - 1
+      jub = ubound(flag, 2) - 1
+      if ((ilb .ne. imin) .or. (jlb .ne. jmin) .or. (iub .ne. imax) &
+          .or. (jub .ne. jmax)) then
+          print *, "!!!-----FlowSolver----------!!!"
+          print *, "run counter = ", counter
+          call ESMF_ClockPrint(clock, "currtime string", rc)
+          print *, "!!! i lbound = ", ilb, " imin = ", imin, " !!!"
+          print *, "!!! j lbound = ", jlb, " jmin = ", jmin, " !!!"
+          print *, "!!! i ubound = ", iub, " imax = ", imax, " !!!"
+          print *, "!!! j ubound = ", jub, " jmax = ", jmax, " !!!"
+     endif
+
       ! copy injection values from exclusive domain into ghost cells
       do j = jmin, jmax
         do i = imin, imax
-          if (flag(i,j).eq.10 .and. flag(i,j-1).eq.10) then
-            sie(i,j-1) = sie(i,j)
-            v(i,j-1) = v(i,j)
-            rho(i,j-1) = rho(i,j)
+          if (flag(i,j).eq.10) then
+            if (flag(i,j-1).eq.10) then
+              sie(i,j-1) = sie(i,j)
+              v(i,j-1) = v(i,j)
+              rho(i,j-1) = rho(i,j)
+            else
+              rhoi(i,j) = rho(i,j)*sie(i,j)
+              rhov(i,j) = rho(i,j)*v(i,j)
+              rhou(i,j) = 0.0
+              u(i,j) = 0.0
+            endif
           endif
         enddo
       enddo
-      where (flag.eq.10.0)
-        rhoi = rho*sie
-        rhov = rho*v
-        rhou = 0.0
-        u = 0.0
-      endwhere
 
       !
       ! calculate RHOU's and RHOV's
