@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.14 2003/02/18 17:06:39 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.15 2003/02/18 20:41:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.14 2003/02/18 17:06:39 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.15 2003/02/18 20:41:32 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -416,7 +416,7 @@ end interface
         ! TODO: add code here
         ! look up init routine in the list (or use #define index?)
         ! and call it (from here? from C++?)
-        call c_ESMC_CompInit(component, status)
+        !call c_ESMC_CompInit(component, status)
         !call (component%funclist(init))(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
@@ -538,7 +538,7 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_CompFinalize(component, status)
+        !call c_ESMC_CompFinalize(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component finalization error"
           return
@@ -797,9 +797,9 @@ end interface
 
 !      ! Interface to call the C++ validate code
        if(present(options)) then
-           call c_ESMC_CompValidate(component, options, status) 
+           !call c_ESMC_CompValidate(component, options, status) 
        else
-           call c_ESMC_CompValidate(component, defaultopts, status) 
+           !call c_ESMC_CompValidate(component, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
@@ -850,9 +850,9 @@ end interface
 
 !      ! Interface to call the C++ print code
        if(present(options)) then
-           call c_ESMC_CompPrint(component, options, status) 
+           !call c_ESMC_CompPrint(component, options, status) 
        else
-           call c_ESMC_CompPrint(component, defaultopts, status) 
+           !call c_ESMC_CompPrint(component, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
