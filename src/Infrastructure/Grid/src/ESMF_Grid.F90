@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.149 2004/03/19 20:01:41 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.150 2004/03/19 23:35:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.149 2004/03/19 20:01:41 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.150 2004/03/19 23:35:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1302,14 +1302,12 @@
 ! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetCellMask(grid, maskArray, horzRelLoc, vertRelLoc, &
-                                      rc)
+      subroutine ESMF_GridGetCellMask(grid, maskArray, relloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_Array), intent(inout) :: maskArray
-      type(ESMF_RelLoc), intent(in) :: horzRelLoc
-      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1327,12 +1325,8 @@
 !          {\tt ESMF\_Array} to contain the internally-used cell array denoting
 !          whether cells are in the computational regime, a ghost region, or a
 !          halo region.
-!     \item[horzRelLoc]
-!          Horizontal relative location of the {\tt ESMF\_PhysGrid} to be
-!          queried.
-!     \item[{[vertRelLoc]}]
-!          Vertical relative location of the {\tt ESMF\_PhysGrid} to be
-!          queried.
+!     \item[relloc]
+!          Relative location of the {\tt ESMF\_PhysGrid} to be queried.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1366,8 +1360,7 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridGetCellMask(grid, maskArray, horzRelLoc, vertRelLoc, &
-                                    rc)
+        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, rc)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
