@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.8 2003/03/05 18:17:18 nscollins Exp $ 
+# $Id: base_variables,v 1.9 2003/04/09 19:18:16 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -68,5 +68,10 @@ OCOMP_FOPTFLAGS	   = -O
 ##################################################################################
 
 PARCH		   = mac_osx
+
+SL_SUFFIX   = 
+SL_LIBOPTS  = 
+SL_LINKOPTS = 
+SL_LINKER   = 
 
 include $(ESMF_BUILD_DIR)/common_variables

@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2003/02/27 17:54:05 flanigan Exp $ 
+# $Id: base_variables,v 1.6 2003/04/09 19:18:22 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -60,5 +60,11 @@ OCOMP_FOPTFLAGS	   = -O
 ##################################################################################
 
 PARCH		   = solaris_hpc
+
+SL_SUFFIX   = 
+SL_LIBOPTS  = 
+SL_LINKOPTS = 
+SL_LINKER   = 
+
 
 include ${ESMF_BUILD_DIR}/common_variables

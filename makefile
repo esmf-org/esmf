@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003/04/07 21:36:44 flanigan Exp $
+# $Id: makefile,v 1.23 2003/04/09 19:18:02 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -30,7 +30,7 @@ CLOBBERDIRS = lib mod test
 #-------------------------------------------------------------------------------
 # Basic targets to build ESMF libraries.
 #-------------------------------------------------------------------------------
-all       : info info_h chk_dir build_libs
+all       : info info_h chk_dir build_libs shared
 
 #-------------------------------------------------------------------------------
 # Prints information about the system and version of ESMF being compiled
