@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.33 2003/07/31 23:01:54 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.34 2003/08/05 23:05:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.33 2003/07/31 23:01:54 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.34 2003/08/05 23:05:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -491,20 +491,18 @@
 ! !IROUTINE: ESMF_PhysGridCreateSpecd - Create a new PhysGrid from specifications
 
 ! !INTERFACE:
-      function ESMF_PhysGridCreateSpecd(dim_num, myDE, dx, dy, global_min, &
-                                        countsPerDE1, countsPerDE2, name, rc)
+      function ESMF_PhysGridCreateSpecd(dim_num, delta1, delta2, global_min, &
+                                        counts, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_PhysGrid) :: ESMF_PhysGridCreateSpecd
 !
 ! !ARGUMENTS:
       integer, intent(in) :: dim_num
-      integer, dimension(dim_num), intent(in) :: myDE
-      real, dimension(:), intent(in) :: dx
-      real, dimension(:), intent(in) :: dy
+      real, dimension(:), intent(in) :: delta1
+      real, dimension(:), intent(in) :: delta2
       real, dimension(dim_num), intent(in) :: global_min
-      integer, dimension(:), intent(in) :: countsPerDE1
-      integer, dimension(:), intent(in) :: countsPerDE2
+      integer, dimension(dim_num), intent(in) :: counts
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -561,9 +559,8 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstruct(physgrid, dim_num, myDE, dx, dy, &
-                                  global_min, countsPerDE1, countsPerDE2, &
-                                  name, status)
+      call ESMF_PhysGridConstruct(physgrid, dim_num, delta1, delta2, &
+                                  global_min, counts, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridCreateSpecd: PhysGrid construct"
         return
@@ -805,19 +802,16 @@
 ! !IROUTINE: ESMF_PhysGridConstructSpecd - Construct the internals of an allocated PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridConstructSpecd(physgrid, dim_num, myDE, dx, dy, &
-                                             global_min, countsPerDE1, &
-                                             countsPerDE2, name, rc)
+      subroutine ESMF_PhysGridConstructSpecd(physgrid, dim_num, delta1, delta2, &
+                                             local_min, counts, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGridType) :: physgrid  
       integer, intent(in) :: dim_num
-      integer, dimension(dim_num), intent(in) :: myDE
-      real, dimension(:), intent(in) :: dx
-      real, dimension(:), intent(in) :: dy
-      real, dimension(dim_num), intent(in) :: global_min
-      integer, dimension(:), intent(in) :: countsPerDE1
-      integer, dimension(:), intent(in) :: countsPerDE2
+      real, dimension(:), intent(in) :: delta1
+      real, dimension(:), intent(in) :: delta2
+      real, dimension(dim_num), intent(in) :: local_min
+      integer, dimension(dim_num), intent(in) :: counts
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -857,8 +851,7 @@
       integer :: status=ESMF_SUCCESS              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
       integer :: i
-      integer, dimension(dim_num) :: start_local, stop_local
-      real, dimension(dim_num) :: local_min, local_max, global_max
+      real, dimension(dim_num) :: local_max
 
 !     Initialize return code
       if(present(rc)) then
@@ -873,60 +866,19 @@
         return
       endif
 
-!     Calculate local mins and maxs
-      start_local(1) = 1
-      if (myDE(1).ge.2) then
-        do i = 1,myDE(1)-1
-          start_local(1) = start_local(1) + countsPerDE1(i)
-        enddo
-      endif
-      stop_local(1) = start_local(1) + countsPerDE1(myDE(1))
-
-      local_min(1) = global_min(1)
-      if (start_local(1).gt.1) then
-        do i = 1,start_local(1)-1
-          local_min(1) = local_min(1) + dx(i)
-        enddo
-      endif
+!     Calculate local maxs
       local_max(1) = local_min(1)
-      do i = start_local(1), stop_local(1)
-        local_max(1) = local_max(1) + dx(i)
+      do i = 1, counts(1)
+        local_max(1) = local_max(1) + delta1(i)
       enddo
-
-      start_local(2) = 1
-      if (myDE(2).ge.2) then
-        do i = 1,myDE(2)-1
-          start_local(2) = start_local(2) + countsPerDE1(2)
-        enddo
-      endif
-      stop_local(2) = start_local(2) + countsPerDE1(myDE(2))
-
-      local_min(2) = global_min(1)
-      if (start_local(2).ge.2) then
-        do i = 1,start_local(2)-1
-          local_min(2) = local_min(2) + dy(i)
-        enddo
-      endif
       local_max(2) = local_min(2)
-      do i = start_local(2), stop_local(2)
-        local_max(2) = local_max(2) + dy(i)
-      enddo
-
-!     Calculate global maxs
-      global_max(1) = global_min(1)
-      do i = 1,size(dx)
-        global_max(1) = global_max(1) + dx(i)
-      enddo
-      global_max(2) = global_min(2)
-      do i = 1,size(dy)
-        global_max(2) = global_max(2) + dy(i)
+      do i = 1, counts(2)
+        local_max(2) = local_max(2) + delta2(i)
       enddo
 
 !     Fill in physgrid derived type with function arguments
-      call ESMF_PhysGridSet(physgrid, dim_num=dim_num, &
-                            local_min=local_min, local_max=local_max, &
-                            global_min=global_min, global_max=global_max, &
-                            rc=status)
+      call ESMF_PhysGridSet(physgrid, dim_num=dim_num, local_min=local_min, &
+                            local_max=local_max, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridConstructSpecd: PhysGrid set"
         return
