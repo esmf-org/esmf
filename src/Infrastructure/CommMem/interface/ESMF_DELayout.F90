@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.15 2003/04/14 16:24:51 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.16 2003/04/24 22:30:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.15 2003/04/14 16:24:51 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.16 2003/04/24 22:30:49 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -823,7 +823,7 @@
       type(ESMF_DELayout), intent(in) :: layout
       integer, intent(in) :: deid
       type(ESMF_DELayout), intent(in) :: other
-      logical, intent(out) :: exists
+      type(ESMF_Logical), intent(out) :: exists
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:

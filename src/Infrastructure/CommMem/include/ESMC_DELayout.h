@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.15 2003/04/08 23:05:27 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.16 2003/04/24 22:30:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ typedef int ESMC_CommType;
                                                         int *parentdeid) const;
     int ESMC_DELayoutGetChildDEID(int parentdeid, ESMC_DELayout *child, 
                                                         int *childdeid) const;
-    int ESMC_DELayoutGetDEExists(int deid, ESMC_DELayout *other, bool *exists) const;
+    int ESMC_DELayoutGetDEExists(int deid, ESMC_DELayout *other, ESMC_Logical *exists) const;
     int ESMC_DELayoutGetXXX(void) const;
     int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
 

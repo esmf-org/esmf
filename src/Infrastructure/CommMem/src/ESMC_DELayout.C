@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.26 2003/04/23 13:59:37 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.27 2003/04/24 22:30:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.26 2003/04/23 13:59:37 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.27 2003/04/24 22:30:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1498,7 +1498,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 // !ARGUMENTS:
       int deid,               // in - DE ID in "this" layout
       ESMC_DELayout *other,   // in - Other layout - must be parent/child
-      bool *exists) const {   // out - true/false
+      ESMC_Logical *exists) const {   // out - true/false
 //
 // !DESCRIPTION:
 //    Method applied to a layout which has a child or parent relationship
@@ -1511,9 +1511,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   rc = this->ESMC_DELayoutGetSameDEID(deid, other, &dummy);
   if (rc == ESMF_FAILURE) 
-      *exists = true;
+      *exists = ESMF_TF_FALSE;
   else
-      *exists = false;
+      *exists = ESMF_TF_TRUE;
 
   return ESMF_SUCCESS;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.16 2003/04/08 23:05:27 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.17 2003/04/24 22:30:48 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,8 +90,8 @@ extern "C" {
        }
 
        void FTN(c_esmc_delayoutgetdeexists)(ESMC_DELayout **ptr, int *deid, 
-                                            ESMC_DELayout **other, bool *exists,
-                                            int *status) {
+                                   ESMC_DELayout **other, ESMC_Logical *exists,
+                                   int *status) {
            *status = (*ptr)->ESMC_DELayoutGetDEExists(*deid, *other, exists);
        }
 
