@@ -1,4 +1,4 @@
-% $Id: Alarm_usage.tex,v 1.1 2003/05/07 06:58:56 cdeluca Exp $
+% $Id: Alarm_usage.tex,v 1.2 2003/08/15 17:15:24 eschwab Exp $
 
 The {\tt Alarm} class contains {\tt Time} instants and a {\tt TimeInterval}
 to perform one-shot and interval alarming.  A single {\tt TimeInterval}
@@ -23,4 +23,5 @@ depending on the parameter passed in by the clock.
 
 Other methods are defined for getting the ringing state, turning the
 ringer on/off, enabling/disabling the alarm, and getting/setting the
-time attributes defined above.
+time attributes defined above.  These will be typically be used to check for
+and process ringing alarms after a clock's time step.
