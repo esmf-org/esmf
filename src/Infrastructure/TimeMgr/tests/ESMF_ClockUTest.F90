@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.45 2003/09/17 22:45:00 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.46 2003/09/19 22:05:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.45 2003/09/17 22:45:00 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.46 2003/09/19 22:05:52 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,7 +70,8 @@
       type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2
       type(ESMF_Time) :: currentTime, previousTime 
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
-      integer(ESMF_KIND_I8) :: advanceCounts
+      integer(ESMF_KIND_I8) :: advanceCounts, year, day2, month, minute, second
+      integer(ESMF_KIND_I4) :: day, hour
 
 
       ! initialize ESMF framework
@@ -128,6 +129,7 @@
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Start Time Initialization Test"
       call ESMF_TimeSet(startTime, yr=2003, mm=3, dd=13, &
+                             	   h=18, m=45, s=27, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -165,6 +167,146 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
+      ! Verify the hour is set correctly
+      write(name, *) "Get StartTime Hours Test"
+      call ESMF_TimeGet(startTime, h=H, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Hour not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(H.eq.18), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Verify the minutes is set correctly
+      write(name, *) "Get StartTime Minutes Test"
+      call ESMF_TimeGet(startTime, m=MM, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or minutes not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.1125), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Minutes = 18 X 60 + 45 = 1125
+      print *, "minutes = ", MM
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      ! Verify the seconds are set correctly
+      write(name, *) "Get StartTime seconds Test"
+      call ESMF_TimeGet(startTime, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.67527), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! seconds = 1125 X 60 + 27 = 67527
+
+      print *, "seconds = ", secs
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      ! Verify the hours, minutes and seconds  are set correctly
+      write(name, *) "Get StartTime in hours, minutes & seconds Test"
+      call ESMF_TimeGet(startTime, h=H, m=MM, s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27).and.(H.eq.18).and.(MM.eq.45), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      ! Verify the hours and seconds are set correctly
+      write(name, *) "Get StartTime in hours, & seconds Test"
+      call ESMF_TimeGet(startTime, h=H,  s=secs, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.2727).and.(H.eq.18), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Seconds = 60 X 45 + 27 = 2727
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      ! Verify the minutes and seconds are set correctly
+      write(name, *) "Get StartTime in minutes, & seconds Test"
+      call ESMF_TimeGet(startTime, s=secs,  m=MM, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or seconds not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(secs.eq.27).and.(MM.eq.1125), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! Minutes = 60 X 18 + 45 = 1125
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting the Start Time
+      day = 25
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Set Start Time Initialization Test"
+      call ESMF_TimeSet(startTime, yr=yr, mm=11, d=day, &
+                             	   h=11, m=45, s=18, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Verify the day is set correctly
+      write(name, *) "Get StartTime Day Test"
+      call ESMF_TimeGet(startTime, d=day, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Day not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(day.eq.25), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting the Start Time
+      year = 30067
+      day2 = 25
+      hour = 7
+      minute = 33
+      second = 51
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Set Start Time Initialization Test"
+      call ESMF_TimeSet(startTime, yr_i8=year, mm=6, d_i8=day2, &
+                                   h=hour, m=56, s_i8=second, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Verify the year is set correctly
+      !write(name, *) "Get Start Time Year Test"
+      !call ESMF_TimeGet(startTime, yr_i8=YR, rc=rc)
+      !write(failMsg, *) " Returned ESMF_FAILURE and/or Year not correct value"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.3002), &
+      !                name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Verify the month is set correctly
+      write(name, *) "Get StartTime Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Month not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.6), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Verify the day is set correctly
+      !write(name, *) "Get StartTime Day Test"
+      !call ESMF_TimeGet(startTime, d_i8=DD, rc=rc)
+      !write(failMsg, *) " Returned ESMF_FAILURE and/or Day not correct value"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.31), &
+      !                name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
       ! Verify the calendar is set correctly
       !write(name, *) "Get Calendar Type Test"
       !call ESMF_CalendarGet(gregorianCalendar, type=cal_type, rc=rc)
@@ -188,7 +330,7 @@
       !EX_UTest
       ! Set time to illegite month
       write(name, *) "Stop Time Initialization to illegite month (0) Test"
-      write(failMsg, *) " Should return ESMF_FAILURE."
+      write(failMsg, *) " Should not return ESMF_SUCCESS."
       call ESMF_TimeSet(stopTime, yr=2003, mm=0, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
@@ -199,7 +341,7 @@
       !EX_UTest
       ! Set time to illegite month
       write(name, *) "Stop Time Initialization to illegite month (13) Test"
-      write(failMsg, *) " Should return ESMF_FAILURE."
+      write(failMsg, *) " Should not return ESMF_SUCCESS."
       call ESMF_TimeSet(stopTime, yr=2003, mm=13, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
@@ -239,7 +381,6 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      ! ----------------------------------------------------------------------------
 #endif
 
       ! ----------------------------------------------------------------------------
@@ -276,13 +417,25 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
-      ! This code crashes, bug report 801311 has been opened.
-      ! write(name, *) "Clock Initialization Test with uninitialized startTime"
-      ! write(failMsg, *) " Returned ESMF_SUCCESS"
-      ! call ESMF_ClockSetup(clock, timeStep, startTime2, stopTime, rc=rc)
-      ! call ESMF_Test((rc.eq.ESMF_FAILURE), &
-                      ! name, failMsg, result, ESMF_SRCLINE)
+      ! Initialize clock with uninitialized Start Time.
+       write(name, *) "Clock Initialization Test with uninitialized startTime"
+       write(failMsg, *) " Returned ESMF_SUCCESS"
+       call ESMF_ClockSetup(clock, timeStep, startTime2, stopTime, rc=rc)
+       call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                       name, failMsg, result, ESMF_SRCLINE)
 #endif
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting the Start Time
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Set Start Time Initialization Test"
+      call ESMF_TimeSet(startTime, yr=2003, mm=3, dd=13, &
+                             	   h=18, m=45, s=27, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
  
@@ -342,7 +495,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(failMsg, *) " Returned ESMF_FAILURE and/or bool not False"
+      write(failMsg, *) " Did not return ESMF_SUCCESS and/or bool not False"
       write(name, *) "ClockIsStopTime Test"
       bool = ESMF_ClockIsStopTime(clock, rc)
       call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(.not.bool)), &
@@ -351,6 +504,7 @@
 
 
       ! ----------------------------------------------------------------------------
+
 
       !NEX_UTest
       ! time step from start time to stop time
@@ -361,7 +515,7 @@
 
       bool = ESMF_ClockIsStopTime(clock, rc)
       print *, "bool = ", bool
-      write(failMsg, *) " Returned ESMF_FAILURE and/or bool not True"
+      write(failMsg, *) " Did not return ESMF_SUCCESS and/or bool not True"
       write(name, *) "Clock Advance Test"
       call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(bool)), &
                       name, failMsg, result, ESMF_SRCLINE)
