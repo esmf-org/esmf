@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.80 2004/10/05 22:53:41 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.81 2004/10/14 16:54:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.80 2004/10/05 22:53:41 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.81 2004/10/14 16:54:36 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2360,24 +2360,12 @@
       !real(kind=ESMF_KIND_R8) :: sign_test     ! test to see if cross products
                                                ! are same sign
       real(kind=ESMF_KIND_R8) :: zero, one
-      real(kind=ESMF_KIND_R8) :: minX, maxX, minY, maxY
       
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       ! set default return value
       ESMF_PhysGridPointInCell = .false.
-
-      ! quick and dirty screen test first
-      minX = minval(cornerX)
-      maxX = maxval(cornerX)
-      minY = minval(cornerY)
-      maxY = maxval(cornerY)
-      if (pointX.lt.minX .or. pointX.gt.maxX .or. &
-          pointY.lt.minY .or. pointY.gt.maxY) then
-        if (present(rc)) rc = ESMF_SUCCESS
-        return
-      endif
 
       ! set constants
       zero = 0.0
