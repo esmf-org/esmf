@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.34 2005/03/08 06:17:53 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.35 2005/03/21 17:43:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -596,9 +596,9 @@ static void *vmk_spawn(void *arg){
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
   // obtain reference to the vm instance on heap
-  ESMC_VMK &vm = *(sarg->myvm);
+  ESMC_VMK *vm = sarg->myvm;
   // setup the pet section in this vm instance
-  vm.vmk_construct(sarg->mypet, sarg->pthid, sarg->npets, sarg->lpid, 
+  vm->vmk_construct(sarg->mypet, sarg->pthid, sarg->npets, sarg->lpid, 
     sarg->pid, sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
     sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
     sarg->commarray, sarg->pref_intra_ssi);
@@ -619,9 +619,9 @@ static void *vmk_spawn(void *arg){
       vmkt->tid, pthread_self(), getpid());
 #endif
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
-#if (VERBOSITY > 5)
-    fprintf(stderr,"thread %d: %d was released, pid: %d\n", vmkt->tid,
-      pthread_self(), getpid());
+#if (VERBOSITY > 1)
+    fprintf(stderr,"thread %d: %d was released, pid: %d, vm: %p\n", 
+      vmkt->tid, pthread_self(), getpid(), vm);
 #endif
     if (*f==1) break; // check whether this was a wrap up call
 
@@ -630,9 +630,9 @@ static void *vmk_spawn(void *arg){
     // call the function pointer with the new ESMC_VMK as its argument
     // this is where we finally enter the user code again...
     if (vmkt->arg==NULL)
-      sarg->fctp((void *)sarg->myvm, sarg->cargo);
+      sarg->fctp((void *)vm, sarg->cargo);
     else
-      sarg->fctp((void *)sarg->myvm, vmkt->arg);
+      sarg->fctp((void *)vm, vmkt->arg);
     //vmkt->routine(vmkt->arg);
     
   // before pet terminates it must send a signal indicating that core is free
@@ -650,7 +650,7 @@ static void *vmk_spawn(void *arg){
 //      VM_TID_MPI_TAG, vm.default_mpi_c);
     MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_vmkt),
       sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
-      VM_TID_MPI_TAG, vm.default_mpi_c);
+      VM_TID_MPI_TAG, vm->default_mpi_c);
   }
     // now signal to parent thread that child is done with its work
     pthread_mutex_lock(&(vmkt->mut0)); // wait until parent has reached "catch"
@@ -658,7 +658,7 @@ static void *vmk_spawn(void *arg){
     pthread_mutex_unlock(&(vmkt->mut0)); // release the mutex lock for parent
   }
   // wrap-up...
-  vm.vmk_destruct();
+  vm->vmk_destruct();
   // when returning from this procedure this pet will terminate
   return NULL;
 }
@@ -683,14 +683,6 @@ static void *vmk_sigcatcher(void *arg){
   // ... and we are between back-sync #1 and #2
   pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
   pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
-  // now use vmkt features to prepare for catch/release loop (back-sync)
-  // - part 2
-  pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
-  pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
-  pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
-#if (VERBOSITY > 5)
-  fprintf(stderr, "sigcatcher is past back-sync #2\n");  
-#endif  
   volatile int *f = &(vmkt->flag);
   // since LinuxThreads (pre NPTL) have the problem that each thread reports
   // its own PID instead the same for each thread, which would be the posix
@@ -705,13 +697,11 @@ static void *vmk_sigcatcher(void *arg){
   int caught;
   MPI_Status mpi_s;
   ESMC_VMK vm;  // need a handle to access the MPI_Comm of default ESMC_VMK
-  // next is to signal the parent thread that sigcatcher is done with getpid
-  pthread_mutex_lock(&(vmkt->mut_extra2));
-  pthread_cond_signal(&(vmkt->cond_extra2));
-  pthread_mutex_unlock(&(vmkt->mut_extra2));
-#if (VERBOSITY > 5)
-  fprintf(stderr, "sigcatcher is past extra2 sync after getpid()\n");  
-#endif  
+  // now use vmkt features to prepare for catch/release loop (back-sync)
+  // - part 2
+  pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
+  pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
+  pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
@@ -1018,16 +1008,9 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
               // of the sigcatcher in order to work. For correct posix behavior
               // that pid will be identical to the one out of the parent thread
               // obtained with getpid() above, and thus won't break posix!
-              // So we wait here until the sigcatcher thead is done getting its
-              // PID and then overwrite the .pid member:
-#if (VERBOSITY > 5)
-              fprintf(stderr, "parent thread is going into wait on extra2:\n");
-#endif
-              pthread_cond_wait(&(sarg[0].vmkt_extra.cond_extra2), 
-                &(sarg[0].vmkt_extra.mut_extra2));
-#if (VERBOSITY > 5)
-              fprintf(stderr, "parent thread is past wait on extra2\n");
-#endif
+              // The sigcatcher will have put the correct pid into the
+              // vmkt_extra.arg during its vmkt_create() call, so we can
+              // simply pull it out of there and replace the pid member.
               new_contributors[new_petid][ncontrib_counter].pid = 
                 *(pid_t *)sarg[0].vmkt_extra.arg;
               // send contributor info over to this pet (i) that receives cores
@@ -1411,8 +1394,13 @@ void ESMC_VMK::vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt){
       if (vmp->contribute[i]==mypet && i!=mypet)
         vmk_recv(NULL, 0, i); // listen if contributor has released its threads
     // now all contributors are in, pets that spawn need to release their vmkts
-    for (int i=0; i<vmp->spawnflag[mypet]; i++)
+    for (int i=0; i<vmp->spawnflag[mypet]; i++){
+#if (VERBOSITY > 9)
+      fprintf(stderr, "gjt in vmk_enter: release &(sarg[%d].vmkt)=%d\n", i,
+        &(sarg[i].vmkt));
+#endif
       vmkt_release(&(sarg[i].vmkt), argvmkt);
+    }
   }
 }
 
