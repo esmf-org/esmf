@@ -1,4 +1,4 @@
-% $Id: PerfProf_req.tex,v 1.4 2002/05/13 21:43:53 pwjones Exp $
+% $Id: PerfProf_req.tex,v 1.5 2002/05/15 08:02:48 wsawyer Exp $
 
 \req{Code Section Timing}
 
@@ -8,7 +8,7 @@ end of a passage of interest.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -22,7 +22,7 @@ the results of the timing are reported, each timer will be associated with its n
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -41,10 +41,13 @@ Process user time can be recorded.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
-{\bf Notes:} 
+{\bf Notes:} It is desirable to offer a mechanism which removes the
+  intrusiveness of the timing calls themselves; there are mechanisms
+  to estimate the timing call overhead (WS).
+  
 \end{reqlist}
 
 \ssreq{System Time}
@@ -53,7 +56,7 @@ System time can be recorded.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -66,7 +69,7 @@ Wall clock time can be recorded.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -79,7 +82,7 @@ from MPI process 3, thread 6).
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:}  POP, CICE \\
+{\bf Source:}  CAM-FV, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -92,7 +95,7 @@ identify and report which process it was called from.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -105,7 +108,7 @@ identify and report which thread it was called from.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -123,7 +126,7 @@ The library can be turned into stub calls at compile time.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -136,7 +139,7 @@ this flag and return.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -150,7 +153,7 @@ provide a high level interface for accessing these registers.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
