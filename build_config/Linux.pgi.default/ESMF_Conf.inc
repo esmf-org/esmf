@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.1 2003/10/17 19:34:56 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.2 2005/01/13 00:02:53 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,3 +26,13 @@ the State derived types.
 #endif
 
 #define ESMF_SEQUENCE_BUG 1
+
+#if 0
+this build is not running the field exclusive system test;
+it is hanging in the state reconcile call.  to prevent the entire
+build from freezing on this one test, simply error out until we
+find and fix the problem.
+#endif
+
+#define ESMF_FieldExcl_AUTO_FAIL 1
+
