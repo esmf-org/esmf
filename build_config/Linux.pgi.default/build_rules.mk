@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2005/03/08 07:16:04 theurich Exp $
+# $Id: build_rules.mk,v 1.16 2005/03/09 22:03:37 jwolfe Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -110,72 +110,107 @@ OMAKE		   = ${MAKE}
 RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
-SH_LD		   = pgcc 
+
+# ################## Compilers, Linkers, and Loaders ########################
 #
-# C and Fortran compiler 
-#
+
+# the default is to use the pgi C and C++ compilers.
+# if you want gcc and g++, set ESMF_C_COMPILER to gcc before building.
+
 ifneq ($(ESMF_COMM),mpich)
+ifeq ($(ESMF_C_COMPILER),gcc)
+C_CC               = gcc
+CXX_CC             = g++
+C_FC               = pgf90
+else
 C_CC		   = pgcc 
 C_FC		   = pgf90
-CXX_CC		   = pgCC -tlocal
+# CXX_CC		   = pgCC -tlocal   note: this was here, but not recognized on lightning
+CXX_CC		   = pgCC
 CXX_FC		   = pgf90
 endif
-
-ifeq ($(ESMF_COMM),mpich)
-C_CC		   = mpicc
-C_FC		   = mpif90
-CXX_CC		   = mpiCC -tlocal
-CXX_FC		   = mpif90
 endif
 
-C_FC_MOD           = -I
+# if you are using mpich, then however the mpich wrappers have been built
+# will determine which compilers you are using.
+ifeq ($(ESMF_COMM),mpich)
+ifeq ($(ESMF_C_COMPILER),gcc)
+C_CC		   = mpicc
+C_FC		   = mpif90
+CXX_CC		   = mpiCC
+CXX_FC		   = mpif90
+else
+C_CC		   = mpicc
+C_FC		   = mpif90
+# CXX_CC		   = mpiCC -tlocal   note: this was here, but not recognized on lightning
+CXX_CC		   = mpiCC
+CXX_FC		   = mpif90
+endif
+endif
+
+# the default is to link with the pgi C and C++ libraries unless you have
+# already set ESMF_C_COMPILER to gcc.  if you want to still compile with pgi
+# but link with the gcc libs anyway, set ESMF_C_LIBRARY to gcc before building.
+ifeq ($(ESMF_C_COMPILER),gcc)
+PGI_C_LIB_FLAG = 
+PGI_C_LIB_NEEDED = -lstdc++
+else 
+ifeq ($(ESMF_C_LIBRARY),gcc)
+PGI_C_LIB_FLAG = -cxxlib-gcc
+PGI_C_LIB_NEEDED = -lstdc++
+else
+PGI_C_LIB_FLAG =
+PGI_C_LIB_NEEDED =
+endif
+endif
+
+# add standard flags
+C_CC    +=  $(PGI_C_LIB_FLAG)
+CXX_CC  +=  $(PGI_C_LIB_FLAG)
+C_FC    +=
+
+# Which compiler to call when
+C_CLINKER          = ${C_CC}
+C_FLINKER          = ${C_FC}
+CXX_FC             = ${C_FC} -mp
+CXX_CLINKER        = ${C_CC}
+CXX_FLINKER        = ${C_CC}
+C_F90CXXLD         = ${C_FC} -mp
+C_CXXF90LD         = ${C_CC}
+C_CXXSO            = ${C_CC} -shared
+SH_LD              = ${C_CC}
+
+#
+# C, C++, and Fortran compiler flags
+#
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = ${C_CC}
-C_FLINKER	   = ${C_FC}
-C_CCV		   = ${C_CC} -V
-C_FCV              = ${C_FC} -V
-C_SYS_LIB	   = -ldl -lc -lg2c -lm
+CXX_CLINKER_SLFLAG = -Wl,-rpath,
+CXX_FLINKER_SLFLAG = -Wl,-rpath,
 
+# version stuff
+C_CCV              = ${C_CC} -V -v
+C_FCV              = ${C_FC} -V -v
+CXX_CCV            = ${CXX_CC} -V -v
+
+# default system libs
+C_SYS_LIB          = -ldl -lc -lg2c -lm
+CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+
+# fortran flags
+C_FC_MOD           = -I
 F_FREECPP          = -Mpreprocess -Mfreeform
 F_FIXCPP           = -Mpreprocess -Mnofreeform
 F_FREENOCPP        = -Mfreeform
 F_FIXNOCPP         = -Mnofreeform
+
+# compile time debugging or optimization flags
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
-#
-# C++ compiler 
-#
-CXX_CLINKER_SLFLAG = -Wl,-rpath,
-CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = ${CXX_CC}
-CXX_FLINKER	   = ${CXX_CC}
-CXX_CCV		   = ${CXX_CC} -V
-CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-# by default append each directory which is in LD_LIBRARY_PATH to
-# the -L flag and also to the run-time load flag.  (on systems which
-# support the 'module' command, that is how it works - by adding dirs
-# to LD_LIBRARY_PATH.)  if it is not set, default to where the pgi
-# compilers try to install themselves.  if your compiler is someplace else
-# either set LD_LIBRARY_PATH first, or make a site specific file and
-# edit the paths explicitly.
-ifeq ($(origin LD_LIBRARY_PATH), environment)
-LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
-LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
-else
-LIB_PATHS   = -L/opt/pgi-5.2/linux86/5.2/lib -L/opt/intel/icc/icc-8.1/lib
-LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib \
-              $(C_FLINKER_SLFLAG)/opt/intel/icc/icc-8.1/lib
-endif
-C_F90CXXLD         = ${CXX_FC} ${LD_PATHS}
-C_F90CXXLIBS       = ${LIB_PATHS} -lrt -lpthread -lC -lc
-C_CXXF90LD         = ${CXX_CC}  ${LD_PATHS}
-C_CXXF90LIBS       = ${LIB_PATHS} -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
-C_CXXSO            = ${CXX_CC} -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
@@ -188,6 +223,24 @@ GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
+
+# by default append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if it is not set, default to where the pgi
+# compilers try to install themselves.  if your compiler is someplace else
+# either set LD_LIBRARY_PATH first, or make a site specific file and
+# edit the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+else
+LIB_PATHS   = -L/opt/pgi-5.2/linux86/5.2/lib
+LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib
+endif
+
+C_F90CXXLIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lC -lc
+C_CXXF90LIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 ###############################################################################
 
 PARCH		   = linux_pgi
