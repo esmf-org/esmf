@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.6 2002/12/07 00:08:37 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.7 2002/12/09 23:16:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,6 +107,31 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 	ESMC_Array(void);
 	~ESMC_Array(void);
   
+ // get/set methods for internal data
+    void ESMC_ArraySetRank(int rank) { this->rank = rank; }
+    int ESMC_ArrayGetRank() { return this->rank; }
+
+    void ESMC_ArraySetType(enum ESMC_DataType type) { this->type = type; }
+    enum ESMC_DataType ESMC_ArrayGetType() { return this->type; }
+
+    void ESMC_ArraySetKind(enum ESMC_DataKind kind) { this->kind = kind; }
+    enum ESMC_DataKind ESMC_ArrayGetKind() { return this->kind; }
+
+    void ESMC_ArraySetLengths(int ni) { this->length[0] = ni; }
+    void ESMC_ArraySetLengths(int ni, int nj) { 
+           this->length[0] = ni; this->length[1] = nj; }
+
+    void ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; }
+
+    //int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
+    //int stride[ESMF_MAXDIM];       // byte spacing between elements/dim
+    //enum ESMC_Logical iscontig;    // optimization possible if all contig
+    //void *f90dopev;                // opaque object which is real f90 ptr
+                                   // potentially these could be needed... 
+    // int lbounds[ESMF_MAXDIM];      // real lower indicies
+    // int ubounds[ESMF_MAXDIM];      // real upper indicies
+    // void *first_element;           // memory address of the first element
+    
  // < declare the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.4 2002/12/07 00:00:29 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.5 2002/12/09 23:16:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
@@ -30,6 +31,12 @@
 //  allows F90 to call C++ for supporting {\tt Array} class functions.
 //
 //EOP
+
+ // dummy structure which is the right size for an F90 pointer on
+ //  the alpha architcture (halem)
+struct c_F90ptr {
+   int pad[22];
+};
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
@@ -51,9 +58,8 @@ extern "C" {
      void FTN(c_esmc_arrayconstructbyspec)() {
      }
 
-     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, struct c_F90ptr *f90ptr, 
-                                              int *ni, int *nj, int *status) {
-             struct c_F90ptr tp;
+     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, int *ni, int *nj, int *status) {
+             ESMC_Array *lptr;
              int lengths[2];
              enum ESMC_DataType dt;
              enum ESMC_DataKind dk;
@@ -64,13 +70,29 @@ extern "C" {
              dt = ESMF_DATA_REAL;
              dk = ESMF_KIND_4;
              
-             ptr = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
-                                      NULL, &tp, status);
+             lptr = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
+                                      NULL, NULL, status);
+
+             *(unsigned long *)ptr = (unsigned long)lptr;
+             printf("ptr = 0x%08lx, lptr = 0x%08lx, *lptr = 0x%08lx\n", 
+                      (unsigned long)ptr, (unsigned long)lptr, *(unsigned long *)lptr);
+
+             printf("status = %d\n", *status);
      }
  
      void FTN(c_esmc_arraydestroy)(ESMC_Array *ptr, int *status) {
          *status = ESMC_ArrayDestroy(ptr);
      }
+
+     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array *ptr, float *base, int *status) {
+          ptr->ESMC_ArraySetBaseAddr((void *)(base));
+          *status = ESMF_SUCCESS;
+     }
+
+     void FTN(c_esmc_arrayprint)(ESMC_Array *ptr, int *status) {
+         *status = ptr->ESMC_ArrayPrint("");
+     }
+
 };
 
 

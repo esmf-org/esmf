@@ -1,4 +1,4 @@
-// $Id: ESMC_Alloc.h,v 1.2 2002/12/07 00:00:39 nscollins Exp $
+// $Id: ESMC_Alloc.h,v 1.3 2002/12/09 23:16:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,9 +25,9 @@
  // fortran interface declarations
 extern "C" {
 
-struct c_F90ptr {
-   int pad[12];
-};
+ // dummy structure which is the right size for an F90 pointer on 
+ //  the alpha architcture (halem)
+//extern struct c_F90ptr;
 
    void FTN(f_esmf_allocate2dr4)(struct c_F90ptr *f90ptr, int *ni, int *nj, int *rc);
    void FTN(f_esmf_deallocate2dr4)(struct c_F90ptr *f90ptr, int *rc);

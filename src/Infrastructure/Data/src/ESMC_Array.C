@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.6 2002/12/07 00:00:18 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.7 2002/12/09 23:16:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,15 +25,17 @@
 //-----------------------------------------------------------------------------
 //
 
+// for printf
+#include <stdio.h>
 // associated class definition file
-#include "../include/ESMC_Array.h"
-#include "../include/ESMC_Alloc.h"
+#include "ESMC_Array.h"
+#include "ESMC_Alloc.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.6 2002/12/07 00:00:18 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.7 2002/12/09 23:16:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -187,10 +189,22 @@
 // 
 //   The return from this routine is a pointer to the new Array data.
 //
+     int i;
      ESMC_Array *a = new ESMC_Array;
-  
-     (allocfuncaddr)(f90ptr, lengths+0, lengths+1, rc);
 
+     a->ESMC_ArraySetRank(rank);
+     a->ESMC_ArraySetType(dt);
+     a->ESMC_ArraySetKind(dk);
+     a->ESMC_ArraySetBaseAddr((void *)0);
+     a->ESMC_ArraySetLengths(lengths[0], lengths[1]);
+
+     printf("in ESMC_ArrayCreate_F, a = 0x%08lx\n", (unsigned long)a);
+
+     printf("in ESMC_ArrayCreate_F, f90ptr = 0x%08lx\n", (unsigned long)f90ptr);
+  
+     // (allocfuncaddr)(f90ptr, lengths+0, lengths+1, rc);
+
+     *rc = ESMF_SUCCESS;
      return a;
 
  } // end ESMC_ArrayCreate_F
@@ -428,7 +442,18 @@
 //  code goes here
 //
     int rc = ESMF_FAILURE;
+    int i;
 
+    printf("Array at address 0x%08lx:\n", (unsigned long)this);
+    printf("rank = %d, type = %d, kind = %d, ", 
+                             this->rank, this->type, this->kind);
+    printf("base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
+    for (i=0; i<this->rank; i++)
+        printf("dim[%d] = %d  ", i, this->length[i]);
+    printf("\n");
+    
+
+    rc = ESMF_SUCCESS;
     return rc;
 
  } // end ESMC_ArrayPrint

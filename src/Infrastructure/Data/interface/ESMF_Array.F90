@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.6 2002/12/06 16:43:59 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.7 2002/12/09 23:16:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
       type ESMF_Array
       sequence
       private
-        type(ESMF_Pointer) :: this      ! the dope vector is in the C++ class
+        type(ESMF_Array), pointer :: this       ! the C++ class data
       end type
 
 !------------------------------------------------------------------------------
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.6 2002/12/06 16:43:59 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.7 2002/12/09 23:16:40 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -251,7 +251,7 @@ end function
 
 
 !       local vars
-        type (ESMF_Pointer) :: ptr          ! opaque pointer to new C++ Array
+        type (ESMF_Array), pointer :: ptr          ! opaque pointer to new C++ Array
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -272,7 +272,7 @@ end function
         endif
 
 !       set return values
-        ESMF_ArrayCreateNew%this = ptr 
+        ESMF_ArrayCreateNew%this => ptr 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateNew
@@ -403,12 +403,15 @@ end function
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_Pointer) :: ptr          ! what C++ is going to return
+        !type (ESMF_Pointer) :: ptr           ! what C++ is going to return
+        type (ESMF_Array), target :: thearray ! the real array
+        type (ESMF_Array), pointer :: ptr   ! what C++ is going to return
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       TODO: need a null pointer to assign to initialize ptr
 !       ptr = NULLPTR
+        ptr => thearray
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -417,17 +420,31 @@ end function
         endif
 
 !       set up callback
-        call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4);
+        call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4, status);
 
 !       call create routine
-        call c_ESMC_ArrayCreateByPtr2D(ptr, f90ptr, ni, nj, status)
+        call c_ESMC_ArrayCreateByPtr2D(ptr, ni, nj, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Array construction error"
+          print *, "Array initial construction error"
           return
         endif
 
-!       set return values
-        ESMF_ArrayCreateByPtr2DR4%this = ptr 
+        call ESMF_Allocate(f90ptr, ni, nj, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array allocate construction error"
+          return
+        endif
+
+!       set base address
+        call c_ESMC_ArraySetBaseAddr(ptr%this, f90ptr(1,1), status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array base address construction error"
+          return
+        endif
+
+
+!       return value set by c_ESMC func above
+        ESMF_ArrayCreateByPtr2DR4%this => ptr%this
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ArrayCreateByPtr2DR4  
@@ -817,7 +834,7 @@ end function
 !
         type (ESMF_Array) :: a
 
-        call ESMF_SetNullPointer(a%this)
+        !! call ESMF_SetNullPointer(a%this)
 
         ESMF_ArrayRestore = a 
  
@@ -874,7 +891,7 @@ end function
 !
         type (ESMF_Array) :: a
 
-        call ESMF_SetNullPointer(a%this)
+        !!call ESMF_SetNullPointer(a%this)
         ESMF_ArrayRead = a 
  
         end function ESMF_ArrayRead
@@ -889,7 +906,7 @@ end function
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), pointer :: array
+      type(ESMF_Array) :: array
       character (len = *), intent(in) :: options
       integer, intent(out), optional :: rc 
 !
@@ -902,7 +919,10 @@ end function
 !
 ! code goes here
 !
+        call c_ESMC_ArrayPrint(array%this, rc) 
+
         end subroutine ESMF_ArrayPrint
+
 
         end module ESMF_ArrayMod
 

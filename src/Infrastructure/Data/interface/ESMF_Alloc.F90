@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.3 2002/12/07 00:00:30 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.4 2002/12/09 23:16:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.3 2002/12/07 00:00:30 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.4 2002/12/09 23:16:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -164,8 +164,7 @@
 !
 !
 ! !ARGUMENTS:
-      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
-      real*4, dimension(:,:), pointer :: f90ptr
+      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
       integer, intent(in) :: ni
       integer, intent(in) :: nj
       integer, intent(out), optional :: rc               
@@ -192,6 +191,9 @@
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
+
+! FIXME
+      print *, ni, nj, rc
 
 !     make sure the pointer isn't already associated w/ something
 !     if ok, start with a null ptr
@@ -224,8 +226,7 @@
 !
 !
 ! !ARGUMENTS:
-      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
-      real*4, dimension(:,:), pointer :: f90ptr
+      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
