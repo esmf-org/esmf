@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.38 2004/05/26 06:14:13 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.39 2004/05/26 11:13:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.38 2004/05/26 06:14:13 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.39 2004/05/26 11:13:18 nscollins Exp $'
 
 !==============================================================================
 !
@@ -673,7 +673,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompFinalize"
 !BOP
-! !IROUTINE: ESMF_CplCompFinalize - Call the CplComps finalize routine
+! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
 !
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
@@ -755,16 +755,16 @@
 
 !
 ! !DESCRIPTION:
-!      Returns information about an {\tt ESMF\_CplComp}.
-!      For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the {\tt cplcomp} argument are optional 
-!      to facilitate this.
+!  Returns information about an {\tt ESMF\_CplComp}.
+!  For queries where the caller
+!  only wants a single value, specify the argument by name.
+!  All the arguments after {\tt cplcomp} argument are optional 
+!  to facilitate this.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to query.
+!    {\tt ESMF\_CplComp} to query.
 !   \item[{[name]}]
 !    Return the name of the {\tt ESMF\_CplComp}.
 !   \item[{[config]}]
@@ -790,7 +790,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompInitialize"
 !BOP
-! !IROUTINE: ESMF_CplCompInitialize - Call the CplComps initialize routine
+! !IROUTINE: ESMF_CplCompInitialize - Call the CplComp's initialize routine
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
@@ -823,18 +823,18 @@
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}] 
-!      Component providers must document whether their each of their
-!      routines are {\em single-phase} or {\em multi-phase}.  
-!      Single-phase routines require only one invocation to complete
-!      their work.  
-!      Multi-phase routines provide multiple subroutines to accomplish
-!      the work, accomodating components which must complete part of their
-!      work, return to the caller and allow other processing to occur,
-!      and then continue the original operation.
-!      For single-phase child components this argument is optional, but   
-!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
-!      For multiple-phase child components, this is the integer phase 
-!      number to be invoked.
+!    Component providers must document whether their each of their
+!    routines are {\em single-phase} or {\em multi-phase}.  
+!    Single-phase routines require only one invocation to complete
+!    their work.  
+!    Multi-phase routines provide multiple subroutines to accomplish
+!    the work, accomodating components which must complete part of their
+!    work, return to the caller and allow other processing to occur,
+!    and then continue the original operation.
+!    For single-phase child components this argument is optional, but   
+!    if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!    For multiple-phase child components, this is the integer phase 
+!    number to be invoked.
 !   \item[{[blockingFlag]}]
 !    Valid values are {\tt ESMF\_BLOCKING} (the default) 
 !    or {\tt ESMF\_NONBLOCKING}.
@@ -844,9 +844,8 @@
 !
 !EOP
 
-        call ESMF_CompInitialize(cplcomp%compp, importState=importState, &
-                                 exportState=exportState, clock=clock,   &
-                                 phase=phase, blockingFlag=blockingFlag, rc=rc)
+        call ESMF_CompInitialize(cplcomp%compp, importState, exportState, &
+                    clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_CplCompInitialize
 
@@ -866,21 +865,21 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about an {\tt ESMF\_CplComp}.
+!  Print information about an {\tt ESMF\_CplComp}.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
 !    {\tt ESMF\_CplComp} to print.
 !   \item[{[options]}]
-!    Print options.  See ref XX for the list of standard options.
+!    Print options.  See {\ref XX} for the list of standard options.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-       print *, "Coupler CplComp:"
+       print *, "Coupler Component:"
        call ESMF_CompPrint(cplcomp%compp, options, rc)
 
        end subroutine ESMF_CplCompPrint
@@ -889,17 +888,18 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompReadRestart"
 !BOP
-! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComps restore routine
+! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
 !
 ! !INTERFACE:
      recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, &
-                                                                    phase, rc)
+                                                  phase, blockingFlag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp), intent(inout) :: cplcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -908,7 +908,7 @@
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call readrestart routine for.
+!    {\tt ESMF\_CplComp} to call readrestart routine for.
 !   \item[{[iospec]}]
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
@@ -918,27 +918,31 @@
 !    a private clock for its own internal time computations.
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[phase]}]  
-!      Component providers must document whether their each of their
-!      routines are {\em single-phase} or {\em multi-phase}.  
-!      Single-phase routines require only one invocation to complete
-!      their work.  
-!      Multi-phase routines provide multiple subroutines to accomplish
-!      the work, accomodating components which must complete part of their
-!      work, return to the caller and allow other processing to occur,
-!      and then continue the original operation.
-!      For single-phase child components this argument is optional, but   
-!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
-!      For multiple-phase child components, this is the integer phase 
-!      number to be invoked.
-!      If multiple-phase restore, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!    Component providers must document whether their each of their
+!    routines are {\em single-phase} or {\em multi-phase}.  
+!    Single-phase routines require only one invocation to complete
+!    their work.  
+!    Multi-phase routines provide multiple subroutines to accomplish
+!    the work, accomodating components which must complete part of their
+!    work, return to the caller and allow other processing to occur,
+!    and then continue the original operation.
+!    For single-phase child components this argument is optional, but   
+!    if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!    For multiple-phase child components, this is the integer phase 
+!    number to be invoked.
+!    If multiple-phase restore, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]
+!    Valid values are {\tt ESMF\_BLOCKING} (the default) 
+!    or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-        call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, rc)
+        call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, &
+                                  blockingFlag, rc)
 
         end subroutine ESMF_CplCompReadRestart
 
@@ -946,7 +950,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompRun"
 !BOP
-! !IROUTINE: ESMF_CplCompRun - Call CplComp run routine with two States
+! !IROUTINE: ESMF_CplCompRun - Call the CplComp's run routine
 !
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
@@ -967,7 +971,7 @@
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call run routine for.
+!    {\tt ESMF\_CplComp} to call run routine for.
 !   \item[{[importState]}]
 !    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
@@ -978,29 +982,31 @@
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
-!      Component providers must document whether their each of their
-!      routines are {\em single-phase} or {\em multi-phase}.  
-!      Single-phase routines require only one invocation to complete
-!      their work.  
-!      Multi-phase routines provide multiple subroutines to accomplish
-!      the work, accomodating components which must complete part of their
-!      work, return to the caller and allow other processing to occur,
-!      and then continue the original operation.
-!      For single-phase child components this argument is optional, but   
-!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
-!      For multiple-phase child components, this is the integer phase 
-!      number to be invoked.
-!      If multiple-phase restore, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!     External clock for passing in time information.
+!    Component providers must document whether their each of their
+!    routines are {\em single-phase} or {\em multi-phase}.  
+!    Single-phase routines require only one invocation to complete
+!    their work.  
+!    Multi-phase routines provide multiple subroutines to accomplish
+!    the work, accomodating components which must complete part of their
+!    work, return to the caller and allow other processing to occur,
+!    and then continue the original operation.
+!    For single-phase child components this argument is optional, but   
+!    if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!    For multiple-phase child components, this is the integer phase 
+!    number to be invoked.
+!    If multiple-phase restore, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!    External clock for passing in time information.
+!   \item[{[blockingFlag]}]
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-        call ESMF_CompRun(cplcomp%compp, importState=importState,  &
-                      exportState=exportState, clock=clock, phase=phase, rc=rc)
+        call ESMF_CompRun(cplcomp%compp, importState, exportState, &
+                    clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_CplCompRun
 
@@ -1024,22 +1030,27 @@
 
 !
 ! !DESCRIPTION:
-!      Sets or resets information about an {\tt ESMF\_CplComp}.
-!      The caller can set individual values by specifying
-!      the arguments by name.
-!      All the arguments except the {\tt cplcomp} are optional 
-!      to facilitate this.
+!  Sets or resets information about an {\tt ESMF\_CplComp}.
+!  The caller can set individual values by specifying
+!  the arguments by name.
+!  All the arguments except {\tt cplcomp} are optional 
+!  to facilitate this.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to change.
+!    {\tt ESMF\_CplComp} to change.
 !   \item[{[name]}]
 !    Set the name of the {\tt ESMF\_CplComp}.
 !   \item[{[config]}]
-!    Set the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
+!    Set the configuration information for the {\tt ESMF\_CplComp} from
+!    this already created {\tt ESMF\_Config} object.   
+!    If specified, takes priority over {\tt configFile}.
 !   \item[{[configFile]}]
 !    Set the configuration filename for this {\tt ESMF\_CplComp}.
+!    An {\tt ESMF\_Config} object will be created for this file
+!    and attached to the {\tt ESMF\_CplComp}.  Superceeded by {\tt config}
+!    if both are specified.
 !   \item[{[clock]}]
 !    Set the private clock for this {\tt ESMF\_CplComp}.
 !   \item[{[rc]}]
@@ -1052,96 +1063,6 @@
                           configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompSet
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompValidate"
-!BOP
-! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
-!
-! !INTERFACE:
-      subroutine ESMF_CplCompValidate(cplcomp, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp) :: cplcomp
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to ensure an {\tt ESMF\_CplComp} is valid.
-!
-!  The arguments are:
-!  \begin{description}
-!   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to validate.
-!   \item[{[options]}]
-!    Validation options.  See ref XX for the list of standard options.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-       call ESMF_CompValidate(cplcomp%compp, options, rc)
- 
-       end subroutine ESMF_CplCompValidate
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CplCompWriteRestart"
-!BOP
-! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComps checkpoint routine
-
-! !INTERFACE:
-    recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
-                                                                     phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp), intent(inout) :: cplcomp
-      type (ESMF_IOSpec), intent(inout), optional :: iospec
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user checkpoint code for an {\tt ESMF\_CplComp}.
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call writerestart routine for.
-!   \item[{[iospec]}]
-!    {\tt ESMF\_IOSpec} object which describes I/O options.
-!   \item[{[clock]}]  
-!    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent component's clock, and will be treated
-!    as read-only by the child component.  The child component can maintain
-!    a private clock for its own internal time computations.
-!   \item[{[phase]}]  
-!      Component providers must document whether their each of their
-!      routines are {\em single-phase} or {\em multi-phase}.  
-!      Single-phase routines require only one invocation to complete
-!      their work.  
-!      Multi-phase routines provide multiple subroutines to accomplish
-!      the work, accomodating components which must complete part of their
-!      work, return to the caller and allow other processing to occur,
-!      and then continue the original operation.
-!      For single-phase child components this argument is optional, but   
-!      if specified it must be {\tt ESMF\_SINGLEPHASE}.
-!      For multiple-phase child components, this is the integer phase 
-!      number to be invoked.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-
-        call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, rc)
-
-        end subroutine ESMF_CplCompWriteRestart
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1169,13 +1090,13 @@
 !     \item[cplcomp] 
 !      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 !     \item[{[max]}] 
-!      Maximum threading level
+!      Maximum threading level.
 !     \item[{[pref\_intra\_process]}] 
-!      Intra process communication preference
+!      Intra process communication preference.
 !     \item[{[pref\_intra\_ssi]}] 
-!      Intra SSI communication preference
+!      Intra SSI communication preference.
 !     \item[{[pref\_inter\_ssi]}] 
-!      Inter process communication preference
+!      Inter process communication preference.
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1225,13 +1146,13 @@
 !     \item[cplcomp] 
 !      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 !     \item[{[max]}] 
-!      Maximum number of PEs per PET
+!      Maximum number of PEs per PET.
 !     \item[{[pref\_intra\_process]}] 
-!      Intra process communication preference
+!      Intra process communication preference.
 !     \item[{[pref\_intra\_ssi]}] 
-!      Intra SSI communication preference
+!      Intra SSI communication preference.
 !     \item[{[pref\_inter\_ssi]}] 
-!      Inter process communication preference
+!      Inter process communication preference.
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1282,13 +1203,13 @@
 !     \item[cplcomp] 
 !      {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
 !     \item[{[max]}] 
-!      Maximum number of PEs per PET
+!      Maximum number of PEs per PET.
 !     \item[{[pref\_intra\_process]}] 
-!      Intra process communication preference
+!      Intra process communication preference.
 !     \item[{[pref\_intra\_ssi]}] 
-!      Intra SSI communication preference
+!      Intra SSI communication preference.
 !     \item[{[pref\_inter\_ssi]}] 
-!      Inter process communication preference
+!      Inter process communication preference.
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1313,6 +1234,99 @@
   end subroutine ESMF_CplCompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompValidate"
+!BOP
+! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
+!
+! !INTERFACE:
+      subroutine ESMF_CplCompValidate(cplcomp, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp) :: cplcomp
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Ensure an {\tt ESMF\_CplComp} is valid.
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[cplcomp]
+!    {\tt ESMF\_CplComp} to validate.
+!   \item[{[options]}]
+!    Validation options.  See {\ref XX} for the list of standard options.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+       call ESMF_CompValidate(cplcomp%compp, options, rc)
+ 
+       end subroutine ESMF_CplCompValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompWriteRestart"
+!BOP
+! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
+
+! !INTERFACE:
+    recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
+                                                  phase, blockingFlag, rc)
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp), intent(inout) :: cplcomp
+      type (ESMF_IOSpec), intent(inout), optional :: iospec
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user checkpoint code for an {\tt ESMF\_CplComp}.
+!    
+!  The arguments are: 
+!  \begin{description} 
+!   \item[cplcomp]
+!    {\tt ESMF\_CplComp} to call writerestart routine for.
+!   \item[{[iospec]}]
+!    {\tt ESMF\_IOSpec} object which describes I/O options.
+!   \item[{[clock]}]  
+!    External {\tt ESMF\_Clock} for passing in time information.  
+!    This is generally the parent component's clock, and will be treated
+!    as read-only by the child component.  The child component can maintain
+!    a private clock for its own internal time computations.
+!   \item[{[phase]}]  
+!    Component providers must document whether their each of their
+!    routines are {\em single-phase} or {\em multi-phase}.  
+!    Single-phase routines require only one invocation to complete
+!    their work.  
+!    Multi-phase routines provide multiple subroutines to accomplish
+!    the work, accomodating components which must complete part of their
+!    work, return to the caller and allow other processing to occur,
+!    and then continue the original operation.
+!    For single-phase child components this argument is optional, but   
+!    if specified it must be {\tt ESMF\_SINGLEPHASE}.
+!    For multiple-phase child components, this is the integer phase 
+!    number to be invoked.
+!   \item[{[blockingFlag]}]
+!    Valid values are {\tt ESMF\_BLOCKING} (the default) 
+!    or {\tt ESMF\_NONBLOCKING}.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+
+        call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, &
+                                   blockingFlag, rc)
+
+        end subroutine ESMF_CplCompWriteRestart
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1333,7 +1347,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp] 
-!       {\tt ESMF\_CplComp} object to wait for. 
+!      {\tt ESMF\_CplComp} to wait for. 
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.95 2004/05/18 10:18:49 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.96 2004/05/26 11:13:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -215,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.95 2004/05/18 10:18:49 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.96 2004/05/26 11:13:18 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -581,6 +581,8 @@ end function
 !   \item[{[phase]}]  
 !    If multiple-phase init, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -686,7 +688,7 @@ end function
 
 ! !INTERFACE:
       recursive subroutine ESMF_CompWriteRestart(compp, iospec, clock, &
-                                                                     phase, rc)
+                                                 phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -694,11 +696,11 @@ end function
       type(ESMF_IOSpec), intent(in), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Call the associated user checkpoint code for a component.
-!
 !    
 !  The arguments are:
 !  \begin{description}
@@ -711,6 +713,8 @@ end function
 !   \item[{[phase]}]  
 !     If multiple-phase checkpoint, which phase number this is.
 !     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -722,6 +726,7 @@ end function
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type (ESMF_BlockingFlag) :: blocking
 
         ! WriteRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -732,6 +737,15 @@ end function
         endif
 
         call ESMF_GetName(compp%base, cname, status)
+
+        ! set the default mode to ESMF_BLOCKING
+        if (present(blockingFlag)) then
+          blocking = blockingFlag
+        else
+          blocking = ESMF_BLOCKING
+        endif
+
+        ! TODO: add rest of default handling here.
 
         ! Wrap comp so it's passed to C++ correctly.
         compw%compp => compp
@@ -761,7 +775,8 @@ end function
 ! !IROUTINE: ESMF_CompReadRestart -- Call the Component's internal restart routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompReadRestart(compp, iospec, clock, phase, rc)
+      recursive subroutine ESMF_CompReadRestart(compp, iospec, clock, phase, &
+                                                blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -769,6 +784,7 @@ end function
       type(ESMF_IOSpec), intent(in), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -786,6 +802,8 @@ end function
 !   \item[{[phase]}]  
 !     If multiple-phase restore, which phase number this is.
 !     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -797,6 +815,7 @@ end function
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type (ESMF_BlockingFlag) :: blocking
 
         ! ReadRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -807,6 +826,15 @@ end function
         endif
 
         call ESMF_GetName(compp%base, cname, status)
+
+        ! set the default mode to ESMF_BLOCKING
+        if (present(blockingFlag)) then
+          blocking = blockingFlag
+        else
+          blocking = ESMF_BLOCKING
+        endif
+
+        ! TODO: put in rest of default argument handling here
 
         ! Wrap comp so it's passed to C++ correctly.
         compw%compp => compp
@@ -839,7 +867,7 @@ end function
 
 ! !INTERFACE:
       recursive subroutine ESMF_CompFinalize(compp, importState, &
-        exportState, clock, phase, blockingFlag, rc)
+                                  exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -868,6 +896,8 @@ end function
 !   \item[{[phase]}]  
 !    If multiple-phase finalize, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHAS} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -973,7 +1003,7 @@ end function
 
 ! !INTERFACE:
       recursive subroutine ESMF_CompRun(compp, importState, &
-        exportState, clock, phase, blockingFlag, rc)
+                                    exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1003,6 +1033,8 @@ end function
 !   \item[{[phase]}]  
 !    If multiple-phase run, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!   \item[{[blockingFlag]}]  
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1112,8 +1144,8 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, vm, gridcomptype, &
-        grid, clock, dirPath, configFile, config, ctype, rc)
+      subroutine ESMF_CompGet(compp, name, vm, gridcomptype, grid, &
+                              clock, dirPath, configFile, config, ctype, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1199,7 +1231,7 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_CompSet(compp, name, vm, gridcomptype, grid, &
-                                        clock, dirPath, configFile, config, rc)
+                              clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
