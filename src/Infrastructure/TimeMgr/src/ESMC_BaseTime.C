@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.34 2004/05/26 21:18:00 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.35 2004/06/17 22:41:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.34 2004/05/26 21:18:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.35 2004/06/17 22:41:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -148,7 +148,7 @@
     //    sD always positive and >= 1
     if ( !(((s >= 0 && sN >= 0) || (s <= 0 && sN <= 0)) && sD >= 1) ) {
       char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "s=%d and sN=%d not both positive or both negative, "
+      sprintf(logMsg, "s=%lld and sN=%d not both positive or both negative, "
                       "or sD=%d negative or less than one.", s, sN, sD); 
       ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
       return(ESMF_FAILURE);
@@ -220,7 +220,7 @@
       if (hours < INT_MIN || hours > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "For s=%lld, hours=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%lld to INT_MAX=%lld).",
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingTime, hours, INT_MIN, INT_MAX);
         ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
@@ -233,7 +233,7 @@
       if (minutes < INT_MIN || minutes > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "For s=%lld, minutes=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%lld to INT_MAX=%lld).",
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingTime, minutes, INT_MIN, INT_MAX);
         ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
@@ -245,7 +245,7 @@
       if (remainingTime < INT_MIN || remainingTime > INT_MAX) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "s=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%lld to INT_MAX=%lld).",
+                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
                         remainingTime, INT_MIN, INT_MAX);
         ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
         return (ESMF_FAILURE);
