@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.15 2004/11/29 18:13:59 nscollins Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.16 2004/12/09 18:09:22 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !BOC
     ! LogMsgSetError
     call ESMF_LogMsgSetError(ESMF_FAILURE,"Interpolation Failure", ESMF_CONTEXT, &
-          rcToReturn=rc2,log=alog)
+        rcToReturn=rc2,log=alog)
 
     ! Close the log.
     call ESMF_LogClose(alog,rc2)
@@ -119,11 +119,11 @@
 !BOC
 
     ! Finalize ESMF to close the default log
-    call ESMF_Finalize(rc=rc1)
+    !call ESMF_Finalize(rc=rc1)
 !EOC
-    if (rc1.NE.ESMF_SUCCESS) then
-        finalrc = ESMF_FAILURE
-    end if
+    !if (rc1.NE.ESMF_SUCCESS) then
+     !   finalrc = ESMF_FAILURE
+    !end if
 
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_LogErrEx.F90"

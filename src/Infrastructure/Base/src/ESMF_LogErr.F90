@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.54 2004/12/07 23:22:57 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.55 2004/12/09 18:09:22 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -340,7 +340,7 @@ end subroutine ESMF_LogFinalize
 
     if (present(rc)) rc=ESMF_FAILURE
     if (present(petnum)) then 
-        pet=petnum
+        pet=petnum+1
     else
         pet=1
     endif	
@@ -632,7 +632,8 @@ end subroutine ESMF_LogGet
     integer 				       :: status, i, j, rc2,rc3,un	
     type(ESMF_LOGENTRY), dimension(:,:), pointer :: localbuf
     type(ESMF_LOGARRAY), dimension(:), pointer  :: localbuf2
-    character(len=32)                                 :: fname, fnum
+    character(len=32)                                 :: fname
+    character(len=4)                                  ::fnum
 	
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%logNone = ESMF_FALSE !default is to log
@@ -1159,13 +1160,13 @@ end subroutine ESMF_LogSet
     integer			    ::tline
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2
-    integer                         ::petid
+    integer                         ::petid,petnum
     
+    call ESMF_VMGet(ESMF_LogDefault%vm,localpet=petnum)
     if (ESMF_LogDefault%LogType .eq. ESMF_LOG_SINGLE) then
         petid=1
-    else
-        call ESMF_VMGet(ESMF_LogDefault%vm,localpet=petid)
-	petid=petid+1
+    else        
+	petid=petnum+1
     endif	
     
     if (ESMF_LogDefault%logNone .ne. ESMF_TRUE) then
@@ -1207,14 +1208,14 @@ end subroutine ESMF_LogSet
     ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%msg = msg
     if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTERROR).and. (msgtype .eq. ESMF_LOG_ERROR)) then
         ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%stopprogram=.TRUE.
-        call ESMF_LogFlush(ESMF_LogDefault,petnum=petid,rc=rc2)
+        call ESMF_LogFlush(ESMF_LogDefault,petnum=petnum,rc=rc2)
     endif    	 
     if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTWARNING).and. (msgtype .gt. ESMF_LOG_WARNING)) then
         ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%stopprogram=.TRUE.
-	call ESMF_LogFlush(ESMF_LogDefault, petnum=petid,rc=rc2)
+	call ESMF_LogFlush(ESMF_LogDefault, petnum=petnum,rc=rc2)
     endif
     if (ESMF_LogDefault%LOG_ARRAY(petid)%findex .eq. ESMF_LogDefault%maxElements) then
-        call ESMF_LogFlush(ESMF_LogDefault, petnum=petid,rc=rc2) 
+        call ESMF_LogFlush(ESMF_LogDefault, petnum=petnum,rc=rc2) 
 	ESMF_LogDefault%LOG_ARRAY(petid)%findex = 1
     else
         ESMF_LogDefault%LOG_ARRAY(petid)%findex = ESMF_LogDefault%LOG_ARRAY(petid)%findex + 1	
