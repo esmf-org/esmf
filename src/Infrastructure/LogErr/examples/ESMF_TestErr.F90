@@ -1,8 +1,8 @@
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogMacros.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_LogConstants.inc"
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMF_ErrConstants.inc"
+#include "../include/ESMF_LogMacros.inc"
+#include "../include/ESMF_LogConstants.inc"
+#include "../include/ESMF_ErrConstants.inc"
 program test_log
-use ESMF
+use ESMF_LogErr
 
 integer rc,int_num,nnn
 type(ESMF_Log) :: anErr,anErr2
@@ -21,7 +21,6 @@ call ESMF_LogErrMsg(anErr,ESMF_FATAL,"oy")
 call ESMF_LogInfo(anErr2,"Hi there %c",ch)
 call ESMF_LogWarn(anErr2,ESMF_FATAL)
 call ESMF_LogInfo(anErr,"Hi there %c",ch)
-!write(LogWrite(anErr),*)'text',int_num
 call ESMF_LogCloseFile(anErr)
 call ESMF_LogErrMsg(anErr,ESMF_FATAL,"oy")
 call ESMF_LogCloseFile(anErr)
