@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.17 2003/06/06 22:32:06 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.18 2003/06/20 17:45:54 nscollins Exp $
 !
 ! System test code #70385
 
@@ -43,7 +43,7 @@
     character(ESMF_MAXSTR) :: testname
 
     ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -136,12 +136,25 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test #70385 complete!"
 
-    write(failMsg, *) "System Test failure"
-    write(testname, *) "System Test 70385: Field Halo Test"
+    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      write(failMsg, *) "System Test failure"
+      write(testname, *) "System Test 70385: Field Halo Test"
 
-    if (de_id .eq. 0) then
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
+
+      ! Separate message to console, for quick confirmation of success/failure
+      if (rc .eq. ESMF_SUCCESS) then
+        write(finalMsg, *) "SUCCESS!! Halo values are as expected"
+      else
+        write(finalMsg, *) "System Test did not succeed. ", &
+        "Halo values do not match expected, or error code set ", rc
+      endif
+      write(0, *) ""
+      write(0, *) trim(testname)
+      write(0, *) trim(finalMsg)
+      write(0, *) ""
+
     endif
     
     end program ESMF_SysTest70385

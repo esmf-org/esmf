@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.13 2003/06/07 00:46:51 eschwab Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.14 2003/06/20 17:45:54 nscollins Exp $
 !
 ! System test code #74558
 
@@ -26,8 +26,7 @@
     implicit none
     
     ! Local variables
-    integer :: i, de_id, ndes, delist(64)
-    integer :: status
+    integer :: i, de_id, ndes, delist(64), rc
 
     character(len=ESMF_MAXSTR) :: aname, cname1
     type(ESMF_DELayout) :: layout1, layout2
@@ -48,15 +47,15 @@
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    ! individual test failure message and final status message
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
 ! Set initial values
 !
-    status = ESMF_FAILURE
+    rc = ESMF_FAILURE
 
     print *, "System Test #74558:"
 
@@ -69,12 +68,15 @@
 
     ! Create the top level application component.
     aname = "System Test #74558"
-    app = ESMF_AppCompCreate(aname, rc=status)
-    print *, "Created component ", trim(aname), ",  rc =", status
+    app = ESMF_AppCompCreate(aname, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Created component ", trim(aname), ",  rc =", rc
 
     ! Query application for layout.
-    call ESMF_AppCompGet(app, layout=layout1, rc=status)
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, status)
+    call ESMF_AppCompGet(app, layout=layout1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     if (ndes .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", ndes
         goto 10
@@ -84,10 +86,11 @@
     ! Create the model component
     cname1 = "fluid flow"
     delist = (/ (i, i=0, ndes-1) /)
-    layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), &
-              status)
-    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=status)
-    print *, "Created component ", trim(cname1), "rc =", status 
+    layout2 = ESMF_DELayoutCreate(delist, 2, (/ ndes/2, 2 /), (/ 0 ,0 /), rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Created component ", trim(cname1), "rc =", rc 
 
     print *, "Comp Creates finished"
 
@@ -97,8 +100,9 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(comp1, FlowMod_register, status)
-      print *, "Comp SetServices finished, rc= ", status
+      call ESMF_GridCompSetServices(comp1, FlowMod_register, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Comp SetServices finished, rc= ", rc
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -106,23 +110,26 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, &
-                            status)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 1 second
-      call ESMF_TimeIntervalSet(time_step, s_=1.0D0, rc=status)
+      call ESMF_TimeIntervalSet(time_step, s_=1.0D0, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 3/28/2003 10:00
       call ESMF_TimeSet(startTime, YR=2003, MM=3, DD=28, H=10, M=0, &
-                        cal=gregorianCalendar, rc=status)
+                        cal=gregorianCalendar, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize stop time to 3/28/2003 10:01
       call ESMF_TimeSet(stopTime, YR=2003, MM=3, DD=28, H=10, M=1, &
-                        cal=gregorianCalendar, rc=status)
+                        cal=gregorianCalendar, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values
-      call ESMF_ClockSet(clock, time_step, startTime, stopTime, &
-                         rc=status)
+      call ESMF_ClockSet(clock, time_step, startTime, stopTime, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -130,12 +137,12 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
+      c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, &
-                                   rc=status)
-      print *, "Comp 1 Initialize finished, rc =", status
- 
-      print *, "Component Initialize finished, rc =", status
+                                   rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Component Initialize finished, rc =", rc
  
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -143,14 +150,15 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-      do while (.not. ESMF_ClockIsStopTime(clock, status))
+      do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, &
-                              rc=status)
-        print *, "Comp 1 Run returned, rc =", status
+        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
+        print *, "Component Run returned, rc =", rc
 
-        call ESMF_ClockAdvance(clock, rc=status)
-        !call ESMF_ClockPrint(clock, rc=status)
+        call ESMF_ClockAdvance(clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
+        !call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
 
@@ -161,12 +169,13 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, &
-                                 rc=status)
-      print *, "Comp 1 Finalize finished, rc =", status
+      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Component Finalize finished, rc =", rc
 
       ! Figure out our local processor id for message below.
-      call ESMF_DELayoutGetDEID(layout1, de_id, status)
+      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
@@ -184,13 +193,17 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-      call ESMF_StateDestroy(c1exp, status)
+      call ESMF_StateDestroy(c1exp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_GridCompDestroy(comp1, status)
+      call ESMF_GridCompDestroy(comp1, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_DELayoutDestroy(layout2, status)
+      call ESMF_DELayoutDestroy(layout2, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_AppCompDestroy(app, status)
+      call ESMF_AppCompDestroy(app, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "All Destroy routines done"
 
@@ -199,12 +212,24 @@
 10    print *, "System Test #74558 complete!"
 
 
-      write(failMsg, *)  "System Test failure"
-      write(testname, *) "System Test 74558: Fluid Solver, single component"
+      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+        write(failMsg, *)  "System Test failure"
+        write(testname, *) "System Test 74558: Fluid Solver, single component"
   
-      if (de_id .eq. 0) then
-        call ESMF_Test((status.eq.ESMF_SUCCESS), &
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
+
+        ! Separate message to console, for quick confirmation of success/failure
+        if (rc .eq. ESMF_SUCCESS) then
+          write(finalMsg, *) "SUCCESS!! See output files for computed values"
+        else
+          write(finalMsg, *) "System Test did not succeed.  Error code ", rc
+        endif
+        write(0, *) ""
+        write(0, *) trim(testname)
+        write(0, *) trim(finalMsg)
+        write(0, *) ""
+
       endif
     
       end program ESMF_SysTest74558

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.10 2003/06/07 00:45:50 eschwab Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.11 2003/06/20 17:45:54 nscollins Exp $
 !
 ! System test code #62503
 
@@ -51,8 +51,8 @@
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    ! individual test failure message, and final status msg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
         
 !-------------------------------------------------------------------------
@@ -252,14 +252,28 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test #62503 complete!"
 
+      ! Only on de 0 or any DE with an error. 
+      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
-    write(failMsg, *) "System Test failure"
-    write(testname, *) "System Test 62503: Components on Exclusive DE sets"
-
-    if (de_id .eq. 0) then
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
-    endif
+        ! Normal ESMF Test output
+        write(failMsg, *) "System Test failure"
+        write(testname, *) "System Test 62503: Components on Exclusive DE sets"
+  
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                          testname, failMsg, testresult, ESMF_SRCLINE)
+  
+        ! Separate message to console, for quick confirmation of success/failure
+        if (rc .eq. ESMF_SUCCESS)) then
+          write(finalMsg, *) "SUCCESS!! Component test finished correctly."
+        else
+          write(finalMsg, *) "System Test did not succeed.  Error code ", rc
+        endif
+        write(0, *) ""
+        write(0, *) trim(testname)
+        write(0, *) trim(finalMsg)
+        write(0, *) ""
+  
+      endif
     
       end program ESMF_SysTest62503
     

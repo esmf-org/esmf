@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.14 2003/06/06 20:24:13 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.15 2003/06/20 17:45:54 nscollins Exp $
 !
 ! System test code #63029
 
@@ -39,8 +39,8 @@
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    ! individual test failure message and status msg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -55,10 +55,13 @@
 !
 
     call ESMF_FrameworkInitialize(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1xN DELayout
     layout1 = ESMF_DELayoutCreate(rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (ndes .le. 1) then
      mid = 1
@@ -73,9 +76,11 @@
     delist = (/ (i, i=0, ndes-1) /)
     layout2 = ESMF_DELayoutCreate(layout1, 2, (/ mid, by2 /), (/ 0, 0 /), &
                                                    de_indices=delist, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #63029"
     comp1 = ESMF_GridCompCreate(cname, layout=layout2, mtype=ESMF_ATM, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompPrint(comp1)
 
     print *, "Comp Create finished, name = ", trim(cname)
@@ -87,6 +92,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
       call ESMF_GridCompSetServices(comp1, user_register, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Register finished, rc= ", rc
 
 !-------------------------------------------------------------------------
@@ -96,12 +102,16 @@
 !-------------------------------------------------------------------------
  
       imp = ESMF_StateCreate("grid import state", ESMF_STATEIMPORT, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       exp = ESMF_StateCreate("grid export state", ESMF_STATEEXPORT, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompInitialize(comp1, imp, exp, phase=1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 1 finished"
  
       call ESMF_GridCompInitialize(comp1, imp, exp, phase=2, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Initialize 2 finished"
  
 !-------------------------------------------------------------------------
@@ -111,12 +121,15 @@
 !-------------------------------------------------------------------------
 
       call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned first time"
 
       call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned second time"
  
       call ESMF_GridCompRun(comp1, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp Run returned third time"
 
 !-------------------------------------------------------------------------
@@ -127,8 +140,10 @@
 !     Print result
 
       call ESMF_GridCompFinalize(comp1, imp, exp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
@@ -147,25 +162,44 @@
 !     Clean up
 
       call ESMF_GridCompDestroy(comp1, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(imp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(exp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_DELayoutDestroy(layout2, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_DELayoutDestroy(layout1, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "All Destroy routines done"
 
       call ESMF_FrameworkFinalize(rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
  10   print *, "System Test #63029 complete!"
 
-      write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test 63029: Component Create Test"
+      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+        ! Standard ESMF Test output to log file
+        write(failMsg, *) "System Test failure"
+        write(testname, *) "System Test 63029: Component Create Test"
   
-      if (de_id .eq. 0) then
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
+
+        ! Separate message to console, for quick confirmation of success/failure
+        if (rc .eq. ESMF_SUCCESS) then
+          write(finalMsg, *) "SUCCESS!! Component Create complete"
+        else
+          write(finalMsg, *) "System Test did not succeed.  Error code ", rc
+        endif
+        write(0, *) ""
+        write(0, *) trim(testname)
+        write(0, *) trim(finalMsg)
+        write(0, *) ""
+
       endif
 
 

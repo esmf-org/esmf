@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.14 2003/06/20 15:24:59 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.15 2003/06/20 17:45:55 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -60,8 +60,8 @@
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    ! individual test failure message and final status message
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
         
 !------------------------------------------------------------------------------
@@ -79,12 +79,19 @@
     ! Create the top level application component.  This initializes the
     ! ESMF Framework as well.
     app = ESMF_AppCompCreate("Coupled Flow Demo", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layoutApp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    ! Get our DE number for later
+    call ESMF_DELayoutGetDEId(layoutApp, de_id, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Sanity check the number of DEs we were started on.
     call ESMF_DELayoutGetNumDEs(layoutApp, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
         print *, "This test needs to run at least 4-way and no more than 16-way."
         print *, "The requested number of processors was ", ndes
@@ -109,14 +116,19 @@
     !  The coupler will run on the original default 1 x N layout.
     cnameIN = "Injector model"
     layoutIN = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     INcomp = ESMF_GridCompCreate(cnameIN, layout=layoutIN, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
     layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "Two-way coupler"
     cpl = ESMF_CplCompCreate(cplname, layout=layoutApp, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
 
     print *, "Comp Creates finished"
@@ -128,12 +140,15 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
       call ESMF_GridCompSetServices(INcomp, Injector_register, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
       call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
       call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp SetServices finished, rc= ", rc
 
 !------------------------------------------------------------------------------
@@ -143,21 +158,26 @@
 !------------------------------------------------------------------------------
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 2 seconds
       call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 12May2003, 9:00 am
       call ESMF_TimeSet(startTime, YR=2003, MM=5, DD=12, H=9, &
                         cal=gregorianCalendar, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
-      ! initialize stop time to 12May2003, 3:00 pm -- shortened from 15May, 9:00 am
+      ! initialize stop time to 12May2003, 3:00 pm
       ! to keep runtime down
       call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=12, H=15, &
                         cal=gregorianCalendar, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values
       call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
 
  
@@ -168,38 +188,52 @@
 !------------------------------------------------------------------------------
  
       ! Create import/export states for Injection Component
-      INimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT,  cnameIN)
-      INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, cnameIN)
+      INimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT, &
+                                                              cnameIN, rc=rc)
+      INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, &
+                                                              cnameIN, rc=rc)
 
       call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Injection Model Initialize finished, rc =", rc
  
       ! Create import/export states for FlowSolver Component
-      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, cnameFS)
-      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, cnameFS)
+      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, &
+                                                               cnameFS, rc=rc)
+      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, &
+                                                               cnameFS, rc=rc)
 
       call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Flow Model Initialize finished, rc =", rc
 
       ! Create a list of 2 states for Coupler, direction 1
       cplstateI2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
-                                                      ESMF_STATELIST, cplname)
+                                               ESMF_STATELIST, cplname, rc=rc)
       call ESMF_StateAddData(cplstateI2F, INexp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateAddData(cplstateI2F, FSimp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
  
       ! Create a list of 2 states for Coupler, direction 2
       cplstateF2I = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
-                                                      ESMF_STATELIST, cplname)
+                                               ESMF_STATELIST, cplname, rc=rc)
       call ESMF_StateAddData(cplstateF2I, FSexp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateAddData(cplstateF2I, INimp, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
  
       ! Create a list of the previous 2 statelists for initialization
-      cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, cplname)
+      cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, &
+                                                               cplname, rc=rc)
 
       call ESMF_StateAddData(cplbothlists, cplstateI2F, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateAddData(cplbothlists, cplstateF2I, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_CplCompInitialize(cpl, cplbothlists, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Initialize finished, rc =", rc
  
 !------------------------------------------------------------------------------
@@ -210,29 +244,36 @@
 
       print *, "Run Loop Start time"
       call ESMF_ClockPrint(clock, "currtime string", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
         ! Run FlowSolver Component
         call ESMF_GridCompRun(FScomp, FSimp, FSexp, clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
 
         ! Couple export state of FlowSolver to import of Injector
         call ESMF_CplCompRun(cpl, cplstateF2I, clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Run Injector Component
         call ESMF_GridCompRun(INcomp, INimp, INexp, clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Couple export state of Injector to import of FlowSolver
         call ESMF_CplCompRun(cpl, cplstateI2F, clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
   
         ! Advance the time
         call ESMF_ClockAdvance(clock, rc=rc)
+        if (rc .ne. ESMF_SUCCESS) goto 10
         !call ESMF_ClockPrint(clock, "currtime string", rc)
 
 
       enddo
       print *, "Run Loop End time"
       call ESMF_ClockPrint(clock, "currtime string", rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
  
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -242,12 +283,15 @@
 
       ! Finalize Injector Component    
       call ESMF_GridCompFinalize(INcomp, INimp, INexp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Finalize FlowSolver Component
       call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Finalize Coupler
       call ESMF_CplCompFinalize(cpl, cplstateI2F, clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -257,32 +301,55 @@
 !     Clean up
 
       call ESMF_StateDestroy(INimp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(INexp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(FSimp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(FSexp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(cplstateI2F, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_StateDestroy(cplstateF2I, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompDestroy(INcomp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_GridCompDestroy(FScomp, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_CplCompDestroy(cpl, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_DELayoutDestroy(layoutIN, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       call ESMF_DELayoutDestroy(layoutFS, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_AppCompDestroy(app, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 10    print *, "Coupled Flow Demo complete!"
 
-      write(failMsg, *)  "System Test failure"
-      write(testname, *) "System Test 74559: Coupled Fluid Flow"
+      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+        write(failMsg, *)  "System Test failure"
+        write(testname, *) "System Test 74559: Coupled Fluid Flow"
   
-      call ESMF_DELayoutGetDEId(layoutApp, de_id, rc)
-      if (de_id .eq. 0) then
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
+
+        ! Separate message to console, for quick confirmation of success/failure
+        if (rc .eq. ESMF_SUCCESS) then
+          write(finalMsg, *) "SUCCESS!! See output files for computed values"
+        else
+          write(finalMsg, *) "System Test did not succeed.  Error code ", rc
+        endif
+        write(0, *) ""
+        write(0, *) trim(testname)
+        write(0, *) trim(finalMsg)
+        write(0, *) ""
+
       endif
     
       end program ESMF_CoupledFlowDemo

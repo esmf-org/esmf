@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.13 2003/06/06 20:24:13 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.14 2003/06/20 17:45:54 nscollins Exp $
 !
 ! System test code #69527
 
@@ -50,8 +50,8 @@
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    ! individual test failure message and final status msg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -67,9 +67,11 @@
 !-------------------------------------------------------------------------
 !
     call ESMF_FrameworkInitialize(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
 !   ! Create a DELayout 
     layout1 = ESMF_DELayoutCreate(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #69527"
 
@@ -110,10 +112,12 @@
 
     ! figure out our local processor id
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
 
     ! Allocate and set initial data values.  These are different on each DE.
     call ESMF_GridGetDE(grid1, lcelltot_count=ni, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "allocating", ni, " cells on DE", de_id
     allocate(idata(ni))
     allocate(ldata(ni))
@@ -124,10 +128,12 @@
        ldata(i) = i
     enddo
     call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, rc=rc) 
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
     array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! No deallocate() is needed for idata, it will be freed when the
     !  Array is destroyed.  TODO:  it seems delete need a 'delete data' 
@@ -139,7 +145,9 @@
     fname = "relative humidity"
     field1 = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
                                     name=fname, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_FieldPrint(field1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Field Create returned"
 
@@ -160,15 +168,20 @@
 
     ! Get a pointer to the data Array in the Field
     call ESMF_FieldGetData(field1, array2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayValidate(array2, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayPrint(array2, "foo", rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get a pointer to the start of the data
     call ESMF_ArrayGetData(array2, idata2, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
     call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE
     rowlen = index(1)%r - index(1)%l + 1
@@ -186,6 +199,7 @@
 
     ! Call the Reduce code
     call ESMF_DELayoutAllReduce(layout1, rowdata, result, rowlen, ESMF_SUM, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Row Reduction operation called"
 
     ! Clean up local array
@@ -217,24 +231,44 @@
 !   Clean up
 
     call ESMF_FieldDestroy(field1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridDestroy(grid1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayDestroy(array1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutDestroy(layout1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
     call ESMF_FrameworkFinalize(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    print *, "System Test #69527 complete!"
+10     print *, "System Test #69527 complete!"
 
 
-    write(failMsg, *)  "Row Reduction value incorrect"
-    write(testname, *) "System Test 69527: Field Row Reduction"
+    ! Only print on DE 0 for success, or any DE with an error
+    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      write(failMsg, *)  "Row Reduction value incorrect"
+      write(testname, *) "System Test 69527: Field Row Reduction"
 
-    if (de_id .eq. 0) then
-      call ESMF_Test((result .eq. 7585) .and. (rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((result .eq. 12205) .and. (rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
+
+      ! Separate message to console, for quick confirmation of success/failure
+      if ((result .eq. 12205) .and. (rc .eq. ESMF_SUCCESS)) then
+        write(finalMsg, *) "SUCCESS!! Row reduction value (7585) is correct"
+      else
+        write(finalMsg, *) "System Test did not succeed. ", &
+                           "Row reduction result", result, &
+                           "not equal 12205, or error code set ", rc
+      endif
+      write(0, *) ""
+      write(0, *) trim(testname)
+      write(0, *) trim(finalMsg)
+      write(0, *) ""
+
     endif
     
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.7 2003/06/06 20:24:13 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.8 2003/06/20 17:45:53 nscollins Exp $
 !
 ! System test code #62501
 
@@ -52,7 +52,7 @@
     character(ESMF_MAXSTR) :: testname
 
     ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
         
 !-------------------------------------------------------------------------
@@ -235,12 +235,27 @@
 !-------------------------------------------------------------------------
     print *, "System Test #62501 complete!"
 
-    write(failMsg, *) "Row reduction value not correct"
-    write(testname, *) "System Test 62501: Field Data Reduction Test"
-
+    ! Output results from processor 0 only.  When LogErr code is added
+    !  it will replace this section.
     if (de_id .eq. 0) then
+      ! Standard ESMF test macros, writes to log file
+      write(testname, *) "System Test 62501: Field Data Reduction Test"
+      write(failMsg, *)  "Row reduction value not correct"
+
       call ESMF_Test((result .eq. 12205) .and. rc.eq.ESMF_SUCCESS), &
-                        testname, failMsg, testresult, ESMF_SRCLINE)
+                            testname, failMsg, testresult, ESMF_SRCLINE)
+
+      ! Separate message to console, for quick confirmation of success/failure
+      if ((result .eq. 12205) .and. (rc .eq. ESMF_SUCCESS)) then
+        write(finalMsg, *) "SUCCESS!! Row reduction value correct"
+      else
+        write(finalMsg, *) "System Test did not succeed. ", &
+        "Row reduction value", result, "not equal 12205 or error code set", rc
+      endif
+      write(0, *) "" 
+      write(0, *) trim(testname)
+      write(0, *) trim(finalMsg)
+      write(0, *) "" 
     endif
     
 

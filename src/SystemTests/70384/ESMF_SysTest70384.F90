@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.16 2003/06/16 17:17:21 jwolfe Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.17 2003/06/20 17:45:54 nscollins Exp $
 !
 ! System test code #70384
 
@@ -46,8 +46,8 @@
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
-    ! individual test failure message
-    character(ESMF_MAXSTR) :: failMsg
+    ! individual test failure message and final status msg
+    character(ESMF_MAXSTR) :: failMsg, finalMsg
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -62,10 +62,13 @@
 !-------------------------------------------------------------------------
 !
     call ESMF_FrameworkInitialize(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create a default 1xN DELayout
     layout0 = ESMF_DELayoutCreate(rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutGetNumDES(layout0, ndes, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     if (ndes .eq. 1) then
        print *, "This test must run with > 1 processor"
@@ -78,6 +81,7 @@
     delist = (/ (i, i=0, ndes-1) /)
     layout1 = ESMF_DELayoutCreate(layout0, 2, (/ ndex, ndey /), (/ 0, 0 /), &
                                                       de_indices=delist, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "DELayout Create finished, rc =", rc
     if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -85,6 +89,7 @@
     cname = "Atmosphere"
     sname = "Atmosphere Export State"
     state1 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, cname, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "State Create finished, name = ", trim(sname), " rc =", rc
 
     print *, "Create section finished"
@@ -114,13 +119,17 @@
 
     ! Get our local DE id
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Create arrays, set and get axis info here before initializing
     ! the data.
 
     array1 = ESMF_ArrayCreate(srcdata, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     array2 = ESMF_ArrayCreate(dstdata, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     array3 = ESMF_ArrayCreate(resdata, ESMF_DATA_REF, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Array Creates returned"
 
     ! Create axis indices  TODO:  move to an array method - ArrayDist?
@@ -132,8 +141,10 @@
     decompids1(3) = 0
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
                                  indexlist1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
                                  indexlist3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     global_counts(1) = ni*ndex
     global_counts(2) = nj*ndey
     global_counts(3) = nk
@@ -142,11 +153,15 @@
     decompids2(3) = 2
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids2, &
                                  indexlist2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
     call ESMF_ArraySetAxisIndex(array1, indexlist1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArraySetAxisIndex(array2, indexlist2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArraySetAxisIndex(array3, indexlist3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Generate global cell numbers, where cell numbering scheme goes
     ! across the global mesh, rows first
@@ -165,11 +180,13 @@
 
     print *, "Initial data, before Transpose:"
     call ESMF_ArrayPrint(array1, "foo", rc);
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! No deallocate() is needed for array data, it will be freed when the
     !  Array is destroyed. 
 
     call ESMF_StateAddData(state1, array1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array added to state"
 
 
@@ -184,6 +201,7 @@
 !
 
     call ESMF_StateGetData(state1, "default array name", array1a, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "Source Array retrieved from state"
     
     !! Call transpose method here, output ends up in array2
@@ -192,9 +210,11 @@
     rank_trans(3) = 3
     call ESMF_ArrayRedist(array1, layout1, rank_trans, decompids1, &
                           decompids2, array2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after Transpose:"
     call ESMF_ArrayPrint(array2, "", rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     !! Transpose back so we can compare contents
     !! Call transpose method again here, output ends up in array3
@@ -203,9 +223,11 @@
     rank_trans(3) = 3
     call ESMF_ArrayRedist(array2, layout1, rank_trans, decompids2, &
                           decompids1, array3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Array contents after second Transpose, should match original:"
     call ESMF_ArrayPrint(array3, "", rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "Run section finished"
 
@@ -219,6 +241,7 @@
 !   Print result
 
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
@@ -227,7 +250,9 @@
     print *, "-----------------------------------------------------------------"
 
     call ESMF_ArrayGetData(array1, srcptr, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayGetData(array3, resptr, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     match = .true.
     miscount = 0
     do i=1, ni
@@ -260,24 +285,43 @@
 !   Clean up
 
     call ESMF_StateDestroy(state1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayDestroy(array1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayDestroy(array2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_ArrayDestroy(array3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutDestroy(layout1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
     call ESMF_FrameworkFinalize(rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 20    print *, "System Test #70384 complete!"
 
-    write(failMsg, *)  "Transposed transpose not same as original"
-    write(testname, *) "System Test 70384: Array Transpose/Redistribute"
+    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      write(failMsg, *)  "Transposed transpose not same as original"
+      write(testname, *) "System Test 70384: Array Transpose/Redistribute"
 
-    if (de_id .eq. 0) then
       call ESMF_Test((miscount.eq.0) .and. (rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
+
+      ! Separate message to console, for quick confirmation of success/failure
+      if (rc .eq. ESMF_SUCCESS) then
+        write(finalMsg, *) "SUCCESS!! Data transposed twice same as original"
+      else
+        write(finalMsg, *) "System Test did not succeed. ", &
+        "Data transpose does not match expected values, or error code set ", rc
+      endif
+      write(0, *) ""
+      write(0, *) trim(testname)
+      write(0, *) trim(finalMsg)
+      write(0, *) ""
+
     endif
     
 
