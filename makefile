@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/03/04 19:58:15 nscollins Exp $
+# $Id: makefile,v 1.12 2003/03/04 20:33:46 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -10,7 +10,7 @@
 ALL: all
 
 #
-#  New Varaibles to point to build and top dirs.
+#  New Variables to point to build and top dirs.
 #  DFF Feb 7, 2003
 ESMF_TOP_DIR   = $(ESMF_DIR)
 ESMF_BUILD_DIR = $(ESMF_DIR)/build
@@ -50,12 +50,13 @@ info:
 	-@echo "Using Fortran compiler: ${FC} ${FOPTFLAGS} ${FCPPFLAGS}"
 	-@if [ -n "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; fi
-	-@grep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMF_Version.inc | ${SED} "s/........//"
+	-@if [ -f ${ESMF_DIR}/src/include/ESMF_Version.inc ] ; then \
+	  grep ESMF_VERSION_STRING ${ESMF_DIR}/src/include/ESMF_Version.inc | ${SED} "s/........//" ; fi
 	-@echo "-----------------------------------------"
 	-@echo "Using ESMF flags: ${PCONF}"
 	-@echo "-----------------------------------------"
 	-@echo "Using configuration flags:"
-	-@grep "define " ${ESMF_DIR}/build/${ESMF_ARCH}/conf.h
+	-@grep "define " ${ESMF_BUILD_DIR}/${ESMF_ARCH}/conf.h
 	-@echo "-----------------------------------------"
 	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "-----------------------------------------"
