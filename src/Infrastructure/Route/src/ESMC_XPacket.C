@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.50 2005/03/04 00:28:24 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.51 2005/03/10 17:43:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.50 2005/03/04 00:28:24 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.51 2005/03/10 17:43:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -61,24 +61,30 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *nrank,     // out, single ints
-      int *noffset,     // out, single ints
-      int *ncontig_length,    // out, single ints
-      int *nstride,  // out, array of rank ints
-      int *nrep_count) {    // out, array of rank ints
+      int *nrank,             // out, single int
+      int *noffset,           // out, single int
+      int *ncontig_length,    // out, single int
+      int *nstride,           // out, array of rank-1 ints
+      int *nrep_count) {      // out, array of rank-1 ints
 //
 // !DESCRIPTION:
-//     Returns the contents of XPacket member.
+//     Returns the contents of XPacket member.  Allow incoming values to 
+//     be NULL so caller can query for only the items they need.
 //
 //EOP
 // !REQUIREMENTS:  
 
-    *nrank = rank;
-    *noffset = offset;
-    *ncontig_length = contig_length;
-    for (int i=0; i<rank; i++) {
-      nstride[i] = stride[i];
-      nrep_count[i] = rep_count[i];
+    if (nrank) *nrank = rank;
+    if (noffset) *noffset = offset;
+    if (ncontig_length) *ncontig_length = contig_length;
+    if (nstride) {
+        for (int i=0; i<rank; i++) 
+            nstride[i] = stride[i];
+
+    }
+    if (nrep_count) {
+        for (int i=0; i<rank; i++) 
+            nrep_count[i] = rep_count[i];
     }
 
     return ESMF_SUCCESS;
@@ -129,16 +135,22 @@
 //
 // !DESCRIPTION:
 //
-//   Determine if the region of memory described by this XP is contiguous,
-//   and set a flag in the class which can be queried later.
+//   Determine if the region of memory described by this XP is contiguous.
+//   For higher dimensional blocks, it might be possible that lower dim
+//   slabs are contig, so instead of a boolean, this stores the highest rank
+//   at which the data can be moved in a single contiguous memory transfer.
 //
 //EOPI
 // !REQUIREMENTS:  AAAn.n.n
 
     int i, j, reps;
 
-    // assume the worst.
-    iscontig = false;
+    // start out assuming only the contig_length items are together.
+    contigrank = 1;
+
+    // if the packet describes an empty region, return here.
+    if (contig_length == 0)
+        return;
 
     // if the counts are 1 in all dimensions, then this has to be a single
     // block of memory.
@@ -147,26 +159,29 @@
         reps *= rep_count[i];
 
     if (reps == 1) {
-        iscontig = true;
+        contigrank = rank;
         return;
     }
 
     // it still might be contig even if the repcounts are > 1, if the strides
     // for each dim match the size of the previous block of memory.
 
+    // no, return leaving contigrank = 1
     if (contig_length != stride[0]) 
         return;
 
-    for (j=1; j<rank-2; j++)
+    // for each time thru this loop where the strides times the rep_counts
+    // match the next stride up, that slab is contig so bump up the rank.
+    for (j=1; j<rank-2; j++) {
        if (stride[j] != rep_count[j-1] * stride[j-1]) 
            return;
+      
+       contigrank++;
+    }
    
 
-    // if there was a mismatch, you don't get here - you've returned above
-    // leaving iscontig false.
-    // if you make it thru the loop and get here, it was contig.
-
-    iscontig = true;
+    // you get here if the entire block is contig, but by this point
+    // contigrank should have been incremented the proper amount
 
     return;
 
@@ -243,7 +258,7 @@
        rep_count[i] = 0;
        stride[i]    = 0;
     }
-    iscontig = true;
+    contigrank = 1;
 
     return ESMF_SUCCESS;
 
@@ -334,31 +349,180 @@
         return ESMF_SUCCESS;
     }
 
-    // loop over the number of XPs, adding the size of the data to the buffer size
+    // loop over the XPs adding the size of the data to the buffer size
+    // all the counts and sizes in an XP are in terms of number of items
     for (i=0; i<xpCount; i++) {
+
+      if (xpList[i]->ESMC_XPacketIsEmpty())
+          continue;
+
       rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
                                       stride, repCount);
 
+      //  number of items represented by this XP
       xpDataSize = contigLength;
       for (j=0; j<rank-1; j++) {
         xpDataSize *= repCount[j];
       }
+
       *bufferSize += xpDataSize;
     }
 
+    // the buffer count so far is in #items; convert to bytes
     *bufferSize *= nbytes;
 
-    // allocate the buffer
+    // allocate the buffer, or set explicitly to NULL
     if (*bufferSize > 0) {
       *buffer = new char[*bufferSize];
     } else {
       *buffer = NULL;
     }
 
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketMakeBuffer
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketDoBuffer"
+//BOPI
+// !IROUTINE:  ESMC_XPacketDoBuffer - pack or unpack a flat buffer from/to XPs
+//
+// !INTERFACE:
+      int ESMC_XPacketDoBuffer(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_PackUnpackFlag packflag,  // in  - move XPs from/to the buffer
+      int xpCount,                   // in  - count of XPs to pack/unpack
+      ESMC_XPacket **xpList,         // in  - list of XPs to pack/unpack
+      int VMType,                    // in  - datatype
+      int nbytes,                    // in  - number of bytes per item
+      void *dataAddr,                // in  - address of data to be un/packed
+      char *buffer) {                // in  - buffer to pack/unpack into
+//
+// !DESCRIPTION:
+//    Packs an already allocated buffer with data described by one or more XPs.
+//
+//EOPI
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+    int i, j, k;
+    int xpItemCount, totalRepCount;
+    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
+    int itemPtr, contigBytes, index[ESMF_MAXDIM];
+    char *dataPtr;
+    char msgbuf[ESMF_MAXSTR];
+
+    // make it a no-op to ask to pack an empty xp list
+    if ((xpCount == 0) || (xpList == NULL))
+        return ESMF_SUCCESS;
+
+    // loop over the XPs, packing the data into the buffer or unpacking the
+    // buffer into multiple memory regions described by the XPs.
+    for (i=0; i<xpCount; i++) {
+  
+      // make sure this XP isn't empty before proceeding.
+      if (xpList[i]->ESMC_XPacketIsEmpty())
+          continue;
+
+      rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
+                                      stride, repCount);
+
+#if 0
+      // compute the total number of data items to be packed from this XP, 
+      // and loop if it is 0.
+      xpItemCount = contigLength;
+      for (j=0; j<rank-1; j++) {
+        xpItemCount *= repCount[j];
+      }
+
+      if (xpItemCount <= 0)
+          continue;
+
+      // pack the buffer here.
+      switch (rank) {
+        case 2:
+          itemCount = offset;
+          for (j=0; j<repCount[0] ; j++, itemCount += stride[0]) {
+
+            dataPtr = (char *)dataAddr + (itemCount*nbytes);
+            memcpy(buffer, dataPtr, contigLength*nbytes);
+            buffer += contigLength*nbytes;
+          }
+          break;
+        case 3:
+          for (k=0; k<repCount[1]; k++, offset += stride[1]) {
+            itemCount = offset;
+            for (j=0; j<repCount[0]; j++, itemCount += stride[0]) {
+
+              dataPtr = (char *)dataAddr + (itemCount*nbytes);
+              memcpy(buffer, dataPtr, contigLength*nbytes);
+              buffer += contigLength*nbytes;
+            }
+          }
+          break;
+        default:
+          sprintf(msgbuf, "no code to handle rank %d yet\n", rank);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                                                msgbuf, &rc);
+          return (rc);
+      }   // rank switch
+#else
+
+        // loops for all ranks collapsed into a single master loop
+        // if timing shows an advantage, the inner-most loop could be unrolled
+        // to give the optimizer some help.
+
+        // total number of contig regions which will be moved
+        totalRepCount = 1; 
+        for (k=0; k<rank-1; k++) {
+            totalRepCount *= repCount[k];
+            index[k] = 0;
+        }
+
+        // initial value for item offset, plus size of contig buffer in 
+        // bytes (xp values are computed and stored as number of items)
+        itemPtr = offset;
+        contigBytes = contigLength * nbytes;
+
+        // for each contig region which must be moved...
+        for (k=0; k<totalRepCount; k++) {
+
+            // move data into the buffer or out of the buffer
+            dataPtr = (char *)dataAddr + (itemPtr*nbytes);
+	    if (packflag == ESMC_BUFFER_PACK)
+                memcpy(buffer, dataPtr, contigBytes);
+            else
+                memcpy(dataPtr, buffer, contigBytes);
+            buffer += contigBytes;
+
+            // increment the innermost counter 
+            index[0]++;
+            itemPtr += stride[0];
+
+            // and now roll up the index, thru all ranks
+            // at the end of a loop for one rank, roll back the pointer to
+            // the start of the previous loop and add in the next stride.
+            for (j=0; (j<rank-2) && (index[j] >= repCount[j]); j++) {
+                index[j] = 0;
+                index[j+1]++;
+                itemPtr -= (repCount[j]*stride[j]);
+                itemPtr += stride[j+1];
+            }   // end of j (per-rank, "odometer-rollover" or "carry-bit") loop
+
+        }      // end of k (total rep count) loop
+#endif
+    }     // end of i (XP) loop
+
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_XPacketMakeBuffer
+ } // end ESMC_XPacketDoBuffer
 
 
 //-----------------------------------------------------------------------------
@@ -387,63 +551,8 @@
 //EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int rc = ESMF_FAILURE;
-    int i, j, k;
-    int xpItemCount, itemCount;
-    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
-    char *dataPtr;
-    char msgbuf[ESMF_MAXSTR];
-
-    // make it a no-op to ask to pack an empty xp list
-    if ((xpCount == 0) || (xpList == NULL))
-        return ESMF_SUCCESS;
-
-    // loop over the XPs, packing the data into the buffer
-    for (i=0; i<xpCount; i++) {
-      rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
-                                      stride, repCount);
-
-      // check the number of data items to be packed from this XP -- mostly
-      // making sure it's not 0
-      xpItemCount = xpList[i] ? contigLength : 0;
-      for (j=0; j<rank-1; j++) {
-        xpItemCount *= repCount[j];
-      }
-
-      // copy into the buffer
-      if (xpItemCount > 0) {
-        switch (rank) {
-          case 2:
-            itemCount = offset;
-            for (j=0; j<repCount[0] ; j++, itemCount += stride[0]) {
-
-              dataPtr = (char *)dataAddr + (itemCount*nbytes);
-              memcpy(buffer, dataPtr, contigLength*nbytes);
-              buffer += contigLength*nbytes;
-            }
-            break;
-          case 3:
-            for (k=0; k<repCount[1]; k++, offset += stride[1]) {
-              itemCount = offset;
-              for (j=0; j<repCount[0]; j++, itemCount += stride[0]) {
-
-                dataPtr = (char *)dataAddr + (itemCount*nbytes);
-                memcpy(buffer, dataPtr, contigLength*nbytes);
-                buffer += contigLength*nbytes;
-              }
-            }
-            break;
-          default:
-            sprintf(msgbuf, "no code to handle rank %d yet\n", rank);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                                                  msgbuf, &rc);
-            return (rc);
-        }   // rank switch
-      }     // check for non-zero data items from this XP
-    }       // loop over XPs
-
-    rc = ESMF_SUCCESS;
-    return rc;
+    return ESMC_XPacketDoBuffer(ESMC_BUFFER_PACK, xpCount, xpList,
+                                VMType, nbytes, dataAddr, buffer);
 
  } // end ESMC_XPacketPackBuffer
 
@@ -475,63 +584,8 @@
 //EOPI
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    int rc = ESMF_FAILURE;
-    int i, j, k;
-    int xpItemCount, itemCount;
-    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
-    char *dataPtr;
-    char msgbuf[ESMF_MAXSTR];
-
-    // make it a no-op to unpack an empty XP list
-    if ((xpCount == 0) || (xpList == NULL))
-        return ESMF_SUCCESS;
-
-    // loop over the XPs, unpacking the data from the buffer into the data array
-    for (i=0; i<xpCount; i++) {
-      rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
-                                      stride, repCount);
-
-      // check the number of data items to be packed from this XP -- mostly
-      // making sure it's not 0
-      xpItemCount = xpList[i] ? contigLength : 0;
-      for (j=0; j<rank-1; j++) {
-        xpItemCount *= repCount[j];
-      }
-
-      // copy into the data array
-      if (xpItemCount > 0) {
-        switch (rank) {
-          case 2:
-            itemCount = offset;
-            for (j=0; j<repCount[0] ; j++, itemCount += stride[0]) {
-
-              dataPtr = (char *)dataAddr + (itemCount*nbytes);
-              memcpy(dataPtr, buffer, contigLength*nbytes);
-              buffer += contigLength*nbytes;
-            }
-            break;
-          case 3:
-            for (k=0; k<repCount[1]; k++, offset += stride[1]) {
-              itemCount = offset;
-              for (j=0; j<repCount[0]; j++, itemCount += stride[0]) {
-
-                dataPtr = (char *)dataAddr + (itemCount*nbytes);
-                memcpy(dataPtr, buffer, contigLength*nbytes);
-                buffer += contigLength*nbytes;
-              }
-            }
-            break;
-          default:
-            sprintf(msgbuf, "no code to handle rank %d yet\n", rank);
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                                                  msgbuf, &rc);
-            return (rc);
-        }   // rank switch
-      }     // check for non-zero data items from this XP
-    }       // loop over XPs
-
-    rc = ESMF_SUCCESS;
-    return rc;
+    return ESMC_XPacketDoBuffer(ESMC_BUFFER_UNPACK, xpCount, xpList,
+                                VMType, nbytes, dataAddr, buffer);
 
  } // end ESMC_XPacketUnpackBuffer
 
@@ -970,8 +1024,8 @@
     char msgbuf[ESMF_MAXSTR];
     char tempbuf[ESMF_MAXSTR];
 
-    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, iscontig=%s, contig_length=%d, ", 
-                         rank, offset, iscontig?"true":"false", contig_length);
+    sprintf(msgbuf, "XPacket: rank=%d, offset=%d, contigrank=%d, contig_length=%d, ", 
+                         rank, offset, contigrank, contig_length);
     printf(msgbuf);
  
     sprintf(tempbuf,"strides=(");
