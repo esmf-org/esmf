@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2004/03/18 23:17:50 nscollins Exp $
+! $Id: user_coupler.F90,v 1.9 2004/04/14 21:13:03 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -65,7 +65,7 @@
 
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2
-        type(ESMF_DELayout) :: cpllayout
+        type(ESMF_newDELayout) :: cpllayout
 
         print *, "User Coupler Init starting"
         call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)

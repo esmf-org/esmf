@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.17 2004/04/09 19:54:18 eschwab Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.18 2004/04/14 21:13:20 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -39,7 +39,7 @@
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(2) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
-    type(ESMF_DELayout) :: layout1 
+    type(ESMF_newDELayout) :: layout1 
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
@@ -69,10 +69,13 @@
     call ESMF_Initialize(rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    ! get the global VM
+    call ESMF_VMGlobalGet(vm, rc=rc)
+
     ! Create a default 1 x N DELayout 
-    layout1 = ESMF_DELayoutCreate(rc)
+    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    call ESMF_newDELayoutGetNumDEs(layout1, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test DELayoutRowReduce"
@@ -113,7 +116,7 @@
 
 
     ! figure out our local processor id
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    call ESMF_newDELayoutGetDEID(layout1, de_id, rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
     call ESMF_GridGetDE(grid1, localCellCount=ni, &
@@ -211,7 +214,7 @@
     print *, "row data = ", rowdata
 
     ! Call the Reduce code
-    call ESMF_DELayoutAllReduce(layout1, rowdata, result, rowlen, ESMF_SUM, rc)
+    call ESMF_newDELayoutAllReduce(layout1, rowdata, result, rowlen, ESMF_SUM, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Row Reduction operation called"
 
@@ -249,7 +252,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_ArrayDestroy(array1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_DELayoutDestroy(layout1, rc)
+    call ESMF_newDELayoutDestroy(layout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
