@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.45 2004/05/25 15:12:25 jwolfe Exp $
+! $Id: ESMF_State.F90,v 1.46 2004/06/01 19:27:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.45 2004/05/25 15:12:25 jwolfe Exp $'
+      '$Id: ESMF_State.F90,v 1.46 2004/06/01 19:27:31 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -448,7 +448,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateAddAttribute - Set a State Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a State attribute
 !
 ! !INTERFACE:
       interface ESMF_StateAddAttribute 
@@ -471,7 +471,7 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateGetAttribute - Get a State Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Get a State attribute
 !
 ! !INTERFACE:
       interface ESMF_StateGetAttribute 
@@ -494,7 +494,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_StateGetAttributeInfo - Get type, count from a State Attribute
+! !IROUTINE: ESMF_StateGetAttributeInfo - Get type, count from a State attribute
 !
 ! !INTERFACE:
       interface ESMF_StateGetAttributeInfo
@@ -708,7 +708,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddIntAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -729,9 +729,9 @@ end function
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the Attribute to set.
+!       The name of the attribute to set.
 !     \item [value]
-!       The integer value of the Attribute.
+!       The integer value of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -758,7 +758,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddIntListAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -780,11 +780,11 @@ end function
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the Attribute to set.
+!       The name of the attribute to set.
 !     \item [count]
 !       The number of values to be set.
 !     \item [value]
-!       The integer values of the Attribute.
+!       The integer values of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -821,7 +821,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddRealAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a real Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -842,9 +842,9 @@ end function
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the Attribute to set.
+!       The name of the attribute to set.
 !     \item [value]
-!       The real value of the Attribute.
+!       The real value of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -871,7 +871,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddRealListAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -893,11 +893,11 @@ end function
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the Attribute to set.
+!       The name of the attribute to set.
 !     \item [count]
 !       The number of values to be set.
 !     \item [value]
-!       The real values of the Attribute.
+!       The real values of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -934,7 +934,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddLogicalAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a logical Attribute 
+! !IROUTINE: ESMF_StateAddAttribute - Set a logical attribute 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -955,9 +955,9 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to set.
+!      The name of the attribute to set.
 !     \item [value]
-!       The logical true/false value of the Attribute.
+!       The logical true/false value of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -984,7 +984,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -1006,11 +1006,11 @@ end function
 !     \item [state]
 !       An {\tt ESMF\_State} object.
 !     \item [name]
-!       The name of the Attribute to set.
+!       The name of the attribute to set.
 !     \item [count]
 !       The number of values to be set.
 !     \item [value]
-!       The logical true/false values of the Attribute.
+!       The logical true/false values of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1047,7 +1047,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateAddCharAttr"
 !BOP
-! !IROUTINE: ESMF_StateAddAttribute - Set a character Attribute
+! !IROUTINE: ESMF_StateAddAttribute - Set a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddAttribute()
@@ -1068,9 +1068,9 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to set.
+!      The name of the attribute to set.
 !     \item [value]
-!      The character value of the Attribute.
+!      The character value of the attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1864,7 +1864,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetIntAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer Attribute 
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer attribute 
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
@@ -1885,9 +1885,9 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [value]
-!      The integer value of the named Attribute.
+!      The integer value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1913,7 +1913,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetIntListAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer list Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
@@ -1935,11 +1935,11 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [count]
-!      The number of values in the Attribute.
+!      The number of values in the attribute.
 !     \item [value]
-!      The integer values of the named Attribute.
+!      The integer values of the named attribute.
 !      The list (fortran array)
 !      must be at least {\tt count} long.
 !     \item [{[rc]}] 
@@ -1978,7 +1978,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetRealAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
@@ -1999,9 +1999,9 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [value]
-!      The real value of the named Attribute.
+!      The real value of the named attribute.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2028,7 +2028,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetRealListAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real list Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
@@ -2050,11 +2050,11 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [count]
-!      The number of values in the Attribute.
+!      The number of values in the attribute.
 !     \item [value]
-!      The real values of the named Attribute.  
+!      The real values of the named attribute.  
 !      The list (fortran array)
 !      must be at least {\tt count} long.
 !     \item [{[rc]}] 
@@ -2093,7 +2093,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetLogicalAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
@@ -2114,9 +2114,9 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [value]
-!      The logical value of the named Attribute.
+!      The logical value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2143,7 +2143,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetLogicalListAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical list Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttribute()
@@ -2165,11 +2165,11 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [count]
-!      The number of values in the Attribute.
+!      The number of values in the attribute.
 !     \item [value]
-!      The logical values of the named Attribute.
+!      The logical values of the named attribute.
 !      The list (fortran array)
 !      must be at least {\tt count} long.
 !     \item [{[rc]}] 
@@ -2208,7 +2208,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetCharAttr"
 !BOP
-! !IROUTINE: ESMF_StateGetAttribute - Retrieve a character Attribute
+! !IROUTINE: ESMF_StateGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -2229,9 +2229,9 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to retrieve.
+!      The name of the attribute to retrieve.
 !     \item [value]
-!      The character value of the named Attribute.
+!      The character value of the named attribute.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2258,7 +2258,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttributeCount"
 !BOP
-! !IROUTINE: ESMF_StateGetAttributeCount - Query the number of Attributes
+! !IROUTINE: ESMF_StateGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
       subroutine ESMF_StateGetAttributeCount(state, count, rc)
@@ -2303,7 +2303,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttrInfoByName"
 !BOP
-! !IROUTINE: ESMF_StateGetAttributeInfo - Query State Attributes by name
+! !IROUTINE: ESMF_StateGetAttributeInfo - Query State attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
@@ -2325,12 +2325,12 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [name]
-!      The name of the Attribute to query.
+!      The name of the attribute to query.
 !     \item [type]
-!      The  data type of the Attribute, which includes ESMF\_DATA\_INTEGER,
+!      The  data type of the attribute, which includes ESMF\_DATA\_INTEGER,
 !      ESMF\_DATA\_REAL, ESMF\_DATA\_LOGICAL, ESMF\_DATA\_CHARACTER.
 !     \item [count]
-!      The number of items in this Attribute.  For character types,
+!      The number of items in this attribute.  For character types,
 !       the length of the character string.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2363,7 +2363,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateGetAttrInfoByNum"
 !BOP
-! !IROUTINE: ESMF_StateGetAttributeInfo - Query State Attributes by number
+! !IROUTINE: ESMF_StateGetAttributeInfo - Query State attributes by number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGetAttributeInfo()
@@ -2388,13 +2388,13 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [num]
-!      The number of the Attribute to query.
+!      The number of the attribute to query.
 !     \item [name]
-!       Returns the name of the Attribute.
+!       Returns the name of the attribute.
 !     \item [type]
-!       Returns the type of the Attribute.
+!       Returns the type of the attribute.
 !     \item [count]
-!       Returns the number of items in this Attribute.  For character types,
+!       Returns the number of items in this attribute.  For character types,
 !       this is the length of the character string.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
