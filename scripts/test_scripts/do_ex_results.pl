@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.8 2005/02/01 22:52:51 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.9 2005/02/02 20:17:33 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -23,10 +23,11 @@ use File::Find
 %options = ();		#arguments
 
 
-getopts("d:", \%options);
+getopts("d:b:", \%options);
 
 
 	$EX_DIR = "$options{d}"; 
+	$ESMF_BOPT = "$options{b}";
 
 	#Find all files
 	find(\&allFiles, '.'); 
@@ -54,7 +55,7 @@ getopts("d:", \%options);
                         @file_lines=();
 	}
 	if ( $ex_count == 0 ) {
-		print "Found no example files.\n";
+		print "NOTE: Found no example files.\n";
 		exit 0;
 	}
 	# Delete "./" from file name
@@ -80,8 +81,9 @@ getopts("d:", \%options);
 
 	if (not $ok) {
 		#The examples directory does not exist.
-		print "There are no executable or stdout examples files, either the 'gmake build_examples' has \n";
-		print "not been run or the 'gmake build_examples' did not build successfully. \n\n";
+		print "NOTE: There is no $EX_DIR directory,\n";
+		print "either the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples' has not been run or \n";
+		print "the 'gmake  ESMF_BOPT=$ESMF_BOPT build_examples' did not build successfully. \n\n";
 		exit 0;
 	}
 	else {
@@ -201,8 +203,8 @@ getopts("d:", \%options);
                              	$ex_count = $ex_count + 1;
                 	}
 			if ($ex_count == 0) {
-				print "There are no executable examples files, either the 'gmake build_examples' has \n";
-				print "not been run or the 'build_examples' did not build successfully. \n\n";
+				print "NOTE: There are no executable examples files, either the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples' has \n";
+				print "not been run or the 'gmake ESMF_BOPT=$ESMF_BOPT build_examples' did not build successfully. \n\n";
 			}
 		}
 		else{
