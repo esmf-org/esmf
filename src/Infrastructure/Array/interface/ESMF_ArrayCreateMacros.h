@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.6 2004/06/23 10:45:28 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.7 2004/10/05 22:44:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -378,9 +378,11 @@
  @\
         ! Local variables @\
         integer :: status                   ! local error status @\
+        integer :: i                        ! loop counter @\
         logical :: rcpresent                ! did user specify rc? @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\
         logical :: willcopy                 ! do we need to copy data? @\
+        logical :: zerosize                 ! one or more counts = 0 @\
         type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call @\
  @\
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap ! to pass f90 ptr to C++ @\
@@ -399,6 +401,7 @@
         ! Assume defaults first, then alter if lb or ub specified, @\
         ! or if an existing pointer is given and can be queried. @\
         lb(:) = 1 @\
+        ub(:) = 1 @\
         ub(1:size(counts)) = counts @\
  @\
         ! Decide if we need to do: make a new allocation, copy existing data @\
@@ -440,7 +443,26 @@
             if (present(ubounds)) then @\
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
-            allocate(newp ( mrng ), stat=status) @\
+            ! more error checking; for allocation lb must be @\
+            ! less than or equal ub.  if any count is 0, all counts @\
+            ! will be 0 for now. @\
+            zerosize = .FALSE. @\
+            do i=1, mrank @\
+                if (counts(i) .le. 0) then @\
+                    zerosize = .TRUE. @\
+                    lb(i) = 0 @\
+                    ub(i) = 0 @\
+                else if (lb(i) .gt. ub(i)) then @\
+                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, & @\
+                                 "Lower bounds must be .le. upper bounds", & @\
+                                 ESMF_CONTEXT, rc)) return @\
+                endif @\
+            enddo @\
+            if (zerosize) then @\
+                allocate(newp ( mlen ), stat=status) @\
+            else @\
+                allocate(newp ( mrng ), stat=status) @\
+            endif @\
             if (ESMF_LogMsgFoundAllocError(status, "Array data space", & @\
                                        ESMF_CONTEXT, rc)) return @\
         endif @\
@@ -456,10 +478,17 @@
         offsets = 0 @\
  @\
         wrap % ptr##mrank##D##mtypekind => newp @\
-        call c_ESMC_ArraySetInfo(array, wrap, & @\
-                                 ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
-                                 lb, ub, offsets, & @\
-                                 ESMF_TRUE, do_dealloc, hwidth, status) @\
+        if (zerosize) then @\
+            call c_ESMC_ArraySetInfo(array, wrap, & @\
+                                     ESMF_NULL_POINTER, counts, & @\
+                                     lb, ub, offsets, & @\
+                                     ESMF_TRUE, do_dealloc, hwidth, status) @\
+        else @\
+            call c_ESMC_ArraySetInfo(array, wrap, & @\
+                                     ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
+                                     lb, ub, offsets, & @\
+                                     ESMF_TRUE, do_dealloc, hwidth, status) @\
+        endif @\
  @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
