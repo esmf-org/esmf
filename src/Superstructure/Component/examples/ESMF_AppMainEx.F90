@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.20 2004/04/15 19:09:06 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.21 2004/04/26 15:34:17 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
@@ -207,7 +207,6 @@
     type(ESMF_Time) :: startTime, stopTime
     integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname, cname1, cname2
-    type(ESMF_newDELayout) :: layoutall, layout1, layout2, layout3
     type(ESMF_VM) :: vm
     type(ESMF_State) :: states(2)
     type(ESMF_GridComp) :: top
@@ -228,11 +227,8 @@
 
     cname = "Top Level Atmosphere Model Component"
     top = ESMF_GridCompCreate(cname, configFile="setup.rc", rc=rc)  
-    !delist1 = (/ (i, i=0,3) /)
-    !layout1 = ESMF_newDELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
-    layout1 = ESMF_newDELayoutCreate(vm, (/ 1, 4 /), rc=rc)
     cname1 = "Atmosphere Physics"
-    gcomp1 = ESMF_GridCompCreate(cname1, layout1, ESMF_ATM, rc=rc)  
+    gcomp1 = ESMF_GridCompCreate(cname1, ESMF_ATM, rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point 
     !  and can renamed with the 'use localname => modulename' syntax if
@@ -243,22 +239,16 @@
 
     print *, "Comp Create returned, name = ", trim(cname1)
 
-    !delist2 = (/ (i, i=0,3) /)
-    !layout2 = ESMF_newDELayoutCreate(delist1, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
-    layout2 = ESMF_newDELayoutCreate(vm, (/ 4, 1 /), rc=rc)
     cname2 = "Atmosphere Dynamics"
-    gcomp2 = ESMF_GridCompCreate(cname2, layout2, ESMF_ATM, rc=rc)
+    gcomp2 = ESMF_GridCompCreate(cname2, ESMF_ATM, rc=rc)
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc)
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
-    !delist3 = (/ (i, i=0,3) /)
-    !layout3 = ESMF_newDELayoutCreate(delist1, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
-    layout3 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
     cname = "Atmosphere Coupler"
-    cpl = ESMF_CplCompCreate(cname, layout3, rc=rc)
+    cpl = ESMF_CplCompCreate(cname, rc=rc)
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_CplCompSetServices(cpl, CPLR_SetServices, rc)

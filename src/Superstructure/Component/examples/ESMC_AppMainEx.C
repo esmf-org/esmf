@@ -1,4 +1,4 @@
-// $Id: ESMC_AppMainEx.C,v 1.11 2004/04/23 22:08:07 nscollins Exp $
+// $Id: ESMC_AppMainEx.C,v 1.12 2004/04/26 15:34:17 nscollins Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
@@ -28,8 +28,7 @@ main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, mycell;
      char compname[32];
-     ESMC_newDELayout *layout;
-     ESMC_VM vm;
+     ESMC_VM *vm;
      ESMC_GridComp *gcomp1, *gcomp2, *gcomp3, *comp4;
      ESMC_CplComp *ccomp1;
      ESMC_Grid *grid = NULL;
@@ -42,9 +41,8 @@ main(int argc, char **argv) {
 //   // Example 1:
 //   //
 
-     //vm = ?? ;
-     layout = ESMC_newDELayoutCreate(vm, NULL, 0, NULL, 0, NULL, &rc);
-     gcomp1 = ESMC_GridCompCreate("Atmosphere", layout, ESMF_ATM, grid, 
+     vm = ESMC_VMGetGlobal(&rc);
+     gcomp1 = ESMC_GridCompCreate("Atmosphere", ESMF_ATM, grid, 
                                   "setup.rc", &rc);
 
      rc = gcomp1->ESMC_GridCompSetServices(ATM_SetServices); 
@@ -84,7 +82,6 @@ main(int argc, char **argv) {
 //   //
 
      //rc = ESMC_CompDestroy(comp1);
-     //rc = ESMC_newDELayoutDestroy(layout);
 
      //printf("Comp example 5 returned\n");
 
