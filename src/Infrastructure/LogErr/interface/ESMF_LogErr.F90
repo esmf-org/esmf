@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.7 2003/04/14 20:26:42 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.8 2003/04/14 22:33:10 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -240,7 +240,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 
   if (length /= 0) write(unitNumber,10) (msg(i:i),i=1,length) 
   write(unitNumber,10) charData
-  if (flushSet == ESMF_LOG_TRUE) call flush(unitNumber, istat)
+!  if (flushSet == ESMF_LOG_TRUE) call flush(unitNumber, istat)
   10 format(/A)
  end subroutine
 
@@ -264,7 +264,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 !=====================================================================
   integer :: istat
   write(unitNumber,*)
-  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
+!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
  end subroutine
 
 
@@ -288,7 +288,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   integer :: i,istat
   if (len2 /= 0) write(unitNumber,10) (msg(i:i),i=1,len2)
   write(unitNumber,10) (stringData(i:i), i=1,len1)
-  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
+!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
   10 format(/A)
  end subroutine
 
@@ -313,7 +313,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 !======================================================================
   if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) intData
-  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
+!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
   10 format(/I3)
   20 format(/A1)
  end subroutine
@@ -338,7 +338,7 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
 !======================================================================
   if (length /= 0) write(unitNumber,20) (msg(i:i),i=1,length)
   write(unitNumber,10) floatdata 
-  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
+!  if (flushSet .eq. ESMF_LOG_TRUE) call flush(unitNumber, istat)
   10 format(/F14.7)
   20 format(/A)
  end subroutine
