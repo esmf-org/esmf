@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.11 2004/01/06 17:50:11 svasquez Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.12 2004/01/08 21:05:49 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
@@ -70,7 +70,7 @@
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime, stopTime
-    integer :: delistall(18), delist1(8), delist2(8), delist3(16)
+    integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname, cname1, cname2
     type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
     type(ESMF_State) :: states(2), bothstates
@@ -92,10 +92,10 @@
     ! Create the top level application component
 
     cname = "Top Level Application"
-    top = ESMF_GridCompCreate(cname, configfile="/home/myname/model1/setup", rc=rc)  
+    top = ESMF_GridCompCreate(cname, configfile="setup.rc", rc=rc)  
 
-    delist1 = (/ (i, i=0,7) /)
-    layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 2, 4 /), (/ 0, 0 /), rc)
+    delist1 = (/ (i, i=0,3) /)
+    layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
 
     cname1 = "Atmosphere Physics"
     gcomp1 = ESMF_GridCompCreate(cname1, layout1, ESMF_ATM, rc=rc)  
@@ -109,8 +109,8 @@
 
     print *, "Comp Create returned, name = ", trim(cname1)
 
-    delist2 = (/ (i, i=8,15) /)
-    layout2 = ESMF_DELayoutCreate(delist1, 2, (/ 2, 4 /), (/ 2, 0 /), rc)
+    delist2 = (/ (i, i=0,3) /)
+    layout2 = ESMF_DELayoutCreate(delist1, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
 
     cname2 = "Atmosphere Dynamics"
     gcomp2 = ESMF_GridCompCreate(cname2, layout2, ESMF_ATM, rc=rc)
@@ -120,8 +120,8 @@
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
-    delist3 = (/ (i, i=0,15) /)
-    layout3 = ESMF_DELayoutCreate(delist1, 2, (/ 4, 4 /), (/ 0, 0 /), rc)
+    delist3 = (/ (i, i=0,3) /)
+    layout3 = ESMF_DELayoutCreate(delist1, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
 
     cname = "Atmosphere Coupler"
     cpl = ESMF_CplCompCreate(cname, layout3, rc=rc)
@@ -164,7 +164,7 @@
                                  rc=rc)
     call ESMF_GridCompInitialize(gcomp2, importstate=states(2), clock=tclock, &
                                  rc=rc)
-    call ESMF_CplCompInitialize(cpl, statelist=bothstates, clock=tclock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, statelist=states, clock=tclock, rc=rc)
     print *, "Comp Initialize complete"
 
 
@@ -173,7 +173,7 @@
     do while (.not. finished)
 
         call ESMF_GridCompRun(gcomp1, exportstate=states(1), clock=tclock, rc=rc)
-        call ESMF_CplCompRun(cpl, statelist=bothstates, clock=tclock, rc=rc)
+        call ESMF_CplCompRun(cpl, statelist=states, clock=tclock, rc=rc)
         call ESMF_GridCompRun(gcomp2, importstate=states(2), clock=tclock, rc=rc)
    
         call ESMF_ClockAdvance(tclock, timestep)
@@ -190,7 +190,7 @@
     !  for those components which have multiple entry points.
     call ESMF_GridCompFinalize(gcomp1, exportstate=states(1), clock=tclock, rc=rc)
     call ESMF_GridCompFinalize(gcomp2, importstate=states(2), clock=tclock, rc=rc)
-    call ESMF_CplCompFinalize(cpl, statelist=bothstates, clock=tclock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, statelist=states, clock=tclock, rc=rc)
     print *, "Comp Finalize complete"
 
 
