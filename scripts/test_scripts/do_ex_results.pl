@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.11 2005/02/03 22:52:58 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.12 2005/02/08 23:32:42 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -69,7 +69,7 @@ getopts("d:b:", \%options);
 	@st_ex_files = @act_ex_files;
 	foreach ( @st_ex_files) {
 		s/\///g; # Delete all the "/"
-		s/ESMF/ ESMF/;# Break it into 2 fields
+		s/ESM/ ESM/;# Break it into 2 fields
 		s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
 		s/\./ /; # Break it into 2 fields
 		s/([^ ]*) ([^ ]*)/$1.stdout\n/; # Get rid of the 2nd field
