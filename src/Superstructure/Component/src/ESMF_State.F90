@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.22 2003/02/12 18:57:51 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.23 2003/02/12 21:25:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.22 2003/02/12 18:57:51 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.23 2003/02/12 21:25:04 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1062,12 +1062,14 @@ end function
 
       integer :: status=ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
-      type(ESMF_StateData), pointer :: nextitem
+      type(ESMF_StateData), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
-      character(len=ESMF_MAXSTR) :: bname
-      integer, pointer, dimension(:) :: bindex, btodo
-      integer :: i, j, startbase
-      integer :: count, fcount, ecount
+      character(len=ESMF_MAXSTR) :: bname, fname
+      integer, pointer, dimension(:) :: btodo, ftodo
+      integer :: bindex, findex 
+      integer :: i, j
+      integer :: fcount, fruncount, newcount
+      logical :: exists, fneedsdealloc=.FALSE.
 
       ! Initialize return code.  Assume failure until success assured.
       if(present(rc)) then
@@ -1075,87 +1077,196 @@ end function
         rc = ESMF_FAILURE
       endif
   
-      ! Add the bundles to the state, checking for name clashes
-      ! TODO: check for existing name, if placeholder, replace it
-
-      ! for each bundle, look for existing name
-      !  if found and if placeholder,  ...
-      ! call ESMF_BundleGetName(bundles(i), nextitem%namep)
+      ! Return if list is empty.  TODO: decide if this should *not* be an error.
+      if (bcount .le. 0) return
       
-      ! TODO: check for name collisions
+      ! Add the bundles to the state, checking for name clashes
+      !  and name placeholders
 
-      call ESMF_StateTypeExtendList(stypep, bcount, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_StateTypeAddBundleList: datalist allocate"
-        return
-      endif
+      ! TODO: check for existing name, if placeholder, replace it
+      !       if existing object - what?  replace it silently?
 
-      ! Last valid entry before adding more items
-      startbase = stypep%datacount
+      ! get a count of all fields in all bundles
+      fruncount = 0
+      do i=1, bcount
+        call ESMF_BundleGetFieldCount(bundles(i), fcount, status)
+        fruncount = fruncount + fcount
+      enddo
 
-      ! There is enough space now to add new bundles to the list.
-           
-      allocate(bindex(bcount), stat=status)
+      ! Allocate some flags to mark whether this is a new item which
+      !  needs to be added to the end of the list, or if it replaces an
+      !  existing entry or placeholder.
+      allocate(btodo(bcount), stat=status)
       if (status .ne. 0) then    ! F90 return code
         print *, "Error: adding bundles to a state"
         return
       endif
 
-      fcount = 0
+      if (fruncount .ge. 0) then
+        allocate(ftodo(fruncount), stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding bundles to a state"
+          return
+        endif
+        fneedsdealloc = .TRUE.
+      endif
+
+  
+      ! Initialize flag arrays to 0, counters to 0, indices to 1
+      fruncount = 1
+      newcount = 0
+      btodo = 0
+      ftodo = 0
+
+      ! This is the start of the first pass through the bundle list.
+      ! For each bundle...
       do i=1, bcount
-        nextitem => stypep%datalist(startbase + i)
-        nextitem%otype = ESMF_STATEBUNDLE
 
-        ! add bundle by name
-        allocate(nextitem%namep, stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "Error: adding bundles to a state"
-          return
+        call ESMF_BundleGetName(bundles(i), bname)
+    
+        ! See if this name is already in the state
+        exists = ESMF_StateTypeFindData(stypep, bname, dataitem, bindex, status)
+   
+        ! If not, in the second pass we will need to add it.
+        if (.not. exists) then
+            newcount = newcount + 1
+            bindex = -1
+            btodo(i) = 1
+        else
+            ! It does already exist.  
+            ! Check to see if this is a placeholder, and if so, replace it
+            if (dataitem%otype .eq. ESMF_STATEDATANAME) then
+                allocate(dataitem%datap, stat=status)
+                if (status .ne. 0) then    ! F90 return code
+                  print *, "Error: adding bundles to a state"
+                  return
+                endif
+            endif
+
+            dataitem%otype = ESMF_STATEBUNDLE
+            dataitem%datap%bp = bundles(i)
+        
+            dataitem%needed = ESMF_STATEDATAISNEEDED
+            dataitem%ready = ESMF_STATEDATAREADYTOREAD
+            dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
-        call ESMF_BundleGetName(bundles(i), nextitem%namep)
 
-        allocate(nextitem%datap, stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "Error: adding bundles to a state"
-          return
-        endif
-        nextitem%datap%bp = bundles(i)
+        ! and now the same for each field in the bundle
+        call ESMF_BundleGetFieldCount(bundles(i), fcount, status)
 
-        bindex(i) = startbase+i
-        nextitem%needed = ESMF_STATEDATANOTNEEDED
-        nextitem%ready = ESMF_STATEDATANOTREADY
-        nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+        do j=1, fcount
+            exists = ESMF_StateTypeFindData(stypep, bname, dataitem, &
+                                                              findex, status)
+            ! If the field is going to have to be added later,
+            !  keep track of whether it belongs to a bundle which has to
+            !  be added new, or exists.  If it exists, note the index number
+            !  so we don't have to search for it later.
+            if (.not. exists) then
+                newcount = newcount + 1
+                ftodo(fruncount) = bindex
+            else
+                ! TODO: decide if we need to verify that this is only a
+                ! placeholder, or if it's ok to silently overwrite an array
+                ! or bundle which had the same name.
+                if (dataitem%otype .ne. ESMF_STATEDATANAME) then
+                  ! print *, "Warning: overwriting old entry"
+                endif
+   
+                ! If there was previously associated data, deallocate it.
+	        if (associated(dataitem%datap)) then
+                    deallocate(dataitem%datap, stat=status)
+                    if (status .ne. 0) then    ! F90 return code
+                      print *, "Error: adding bundles to a state"
+                      return
+                    endif
+                    nullify(dataitem%datap)
+                endif
 
-        ! get a running count of all fields in all bundles
-        call ESMF_BundleGetFieldCount(bundles(i), count, status)
-        fcount = fcount + count
+                ! Set up the new entry.
+                dataitem%otype = ESMF_STATEINDIRECT
+                if (bindex .eq. -1) then
+                    ! We found the field already in the state list but
+                    ! not the bundle, so we can't set the right index yet.
+                    ! Set a flag so later we can update this in pass 2.
+                    ftodo(fruncount) = -2
+                    dataitem%indirect_index = 0   
+                else
+                    dataitem%indirect_index = bindex
+                endif
+            
+                dataitem%needed = ESMF_STATEDATAISNEEDED
+                dataitem%ready = ESMF_STATEDATAREADYTOREAD
+                dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            endif
 
+            ! This is a total running count of all fields in all bundles.
+            fruncount = fruncount+1
+    
+        enddo
       enddo
-  
-      stypep%datacount = startbase + bcount
 
-      ! TODO: make indirect entries for fields inside the bundles.
-      if (fcount .gt. 0) then
-  
-        call ESMF_StateTypeExtendList(stypep, fcount, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: datalist 2nd allocate"
-          return
+
+      ! We now know how many total new items need to be added
+      call ESMF_StateTypeExtendList(stypep, newcount, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_StateTypeAddBundleList: datalist allocate"
+        return
+      endif
+
+
+      ! There is enough space now to add new bundles & fields to the list.
+      ! This is the start of the second pass through the bundle list.
+      fruncount = 1     
+      do i=1, bcount
+
+        ! If bundle wasn't found in the list, we need to add it here.
+        if (btodo(i) .eq. 1) then
+            stypep%datacount = stypep%datacount + 1
+
+            nextitem => stypep%datalist(stypep%datacount)
+            nextitem%otype = ESMF_STATEBUNDLE
+
+            ! Add name
+            allocate(nextitem%namep, stat=status)
+            if (status .ne. 0) then    ! F90 return code
+              print *, "Error: adding bundles to a state"
+              return
+            endif
+
+            call ESMF_BundleGetName(bundles(i), nextitem%namep)
+
+            allocate(nextitem%datap, stat=status)
+            if (status .ne. 0) then    ! F90 return code
+              print *, "Error: adding bundles to a state"
+              return
+            endif
+            nextitem%datap%bp = bundles(i)
+ 
+            nextitem%needed = ESMF_STATEDATAISNEEDED
+            nextitem%ready = ESMF_STATEDATAREADYTOREAD
+            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+ 
+            ! save the current datalist index for the fields code below
+            bindex = stypep%datacount
+
         endif
 
-        startbase = stypep%datacount
-        do i=1, bcount
+        ! Whether it was found in pass 1 or just added above, we still
+        !  have to go through each field and see if any of them need to
+        !  be added or updated.
+        call ESMF_BundleGetFieldCount(bundles(i), fcount, status)
 
-          ! Add an entry for each field in a bundle
-          call ESMF_BundleGetFieldCount(bundles(i), count, status)
+        ! Skip empty bundles
+        if (fcount .le. 0) cycle
 
-          ! Skip empty fields
-          if (count .le. 0) cycle
+        ! for each field in the bundle
+        do j=1, fcount
 
-          ! For each field in the bundle...
-          do j=1, count
-  
-            nextitem => stypep%datalist(startbase + i)
+          ! If new field entry needs to be added
+          if (ftodo(fruncount) .eq. -1) then
+            stypep%datacount = stypep%datacount + 1
+
+            nextitem => stypep%datalist(stypep%datacount)
             nextitem%otype = ESMF_STATEINDIRECT
     
             ! get next field and query name
@@ -1174,21 +1285,51 @@ end function
     
             nullify(nextitem%datap)
     
-            nextitem%indirect_index = bindex(i)
+            ! If we found the corresponding bundle entry during pass 1,
+            ! it was stored in the todo list.  Otherwise, we just added it
+            ! above and we saved the new index to use here.
+            if (ftodo(fruncount) .ge. 0) then
+                nextitem%indirect_index = ftodo(fruncount)
+            else
+                nextitem%indirect_index = bindex
+            endif
 
-            nextitem%needed = ESMF_STATEDATANOTNEEDED
-            nextitem%ready = ESMF_STATEDATANOTREADY
+            nextitem%needed = ESMF_STATEDATAISNEEDED
+            nextitem%ready = ESMF_STATEDATAREADYTOREAD
             nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
-          enddo
+
+          ! If the field entry already existed but needs bundle index updated,
+          !  we do have to do a lookup on the field to see where it was
+          !  found.  We just added the bundle above, so bindex is the
+          !  value to set.
+          else if (ftodo(fruncount) .eq. -2) then
+            exists = ESMF_StateTypeFindData(stypep, fname, dataitem, &
+                                                              findex, status)
+
+            if (.not. exists) then
+              print *, "Error: internally inconsistent"
+            endif
+            dataitem%indirect_index = bindex
+          endif
   
+          ! Update the running count.
+          fruncount = fruncount+1
         enddo
 
-      endif
+      enddo
 
-      deallocate(bindex, stat=status)
+      ! Get rid of temp flag arrays
+      deallocate(btodo, stat=status)
       if (status .ne. 0) then    ! F90 return code
         print *, "Error: adding bundles to a state"
         return
+      endif
+      if (fneedsdealloc) then
+        deallocate(ftodo, stat=status)
+        if (status .ne. 0) then    ! F90 return code
+          print *, "Error: adding bundles to a state"
+          return
+        endif
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1308,8 +1449,8 @@ end function
         endif
         nextitem%datap%fp = fields(i)
         !integer :: indirect_index
-        nextitem%needed = ESMF_STATEDATANOTNEEDED
-        nextitem%ready = ESMF_STATEDATANOTREADY
+        nextitem%needed = ESMF_STATEDATAISNEEDED
+        nextitem%ready = ESMF_STATEDATAREADYTOREAD
         nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
       enddo
   
@@ -1432,8 +1573,8 @@ end function
         endif
         nextitem%datap%ap = arrays(i)
         !integer :: indirect_index
-        nextitem%needed = ESMF_STATEDATANOTNEEDED
-        nextitem%ready = ESMF_STATEDATANOTREADY
+        nextitem%needed = ESMF_STATEDATAISNEEDED
+        nextitem%ready = ESMF_STATEDATAREADYTOREAD
         nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
       enddo
   
@@ -1564,7 +1705,7 @@ end function
         nullify(nextitem%datap)
         !integer :: indirect_index
         nextitem%needed = ESMF_STATEDATANOTNEEDED
-        nextitem%ready = ESMF_STATEDATANOTREADY
+        nextitem%ready = ESMF_STATEDATAREADYTOREAD
         nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
       enddo
   
