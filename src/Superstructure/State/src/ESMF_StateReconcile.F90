@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.1 2004/11/01 23:40:27 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.2 2004/11/03 00:12:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.1 2004/11/01 23:40:27 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.2 2004/11/03 00:12:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -111,11 +111,13 @@
 !     \end{description}
 !
 !EOPI
-    integer :: pets, mypet, i, j, k, localrc
+    integer :: pets, mypet, i, j, k, l, localrc
     integer(ESMF_KIND_I4), allocatable, dimension(:) :: idsend, idrecv
     integer(ESMF_KIND_I4), allocatable, dimension(:) :: objsend, objrecv
-    integer(ESMF_KIND_I4) :: sendcount(1), recvcount(1)
+    integer(ESMF_KIND_I4), allocatable, dimension(:) :: attrsend, attrrecv
+    integer(ESMF_KIND_I4) :: sendcount(1), recvcount(1), attrcount(1)
     type(ESMF_StateItem), pointer :: stateitem
+    logical :: ihave
 
     ! each PET broadcasts the object ID lists and compares them to what
     ! they get back.   eventually, hash the ID lists so we can send a
@@ -133,33 +135,51 @@
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
+        allocate(attrsend(sendcount(1)), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local attr counts", &
+                                       ESMF_CONTEXT, rc)) return
     endif
     do i=1, state%statep%datacount
         stateitem => state%statep%datalist(i)
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_BUNDLE%ot)
-             call c_ESMC_GetID(stateitem%datap%bp, idsend(i), localrc)
+             call c_ESMC_GetID(stateitem%datap%bp%btypep, idsend(i), localrc)
+             call c_ESMC_AttributeGetCount(stateitem%datap%bp%btypep, attrsend(i), localrc)
              objsend(i) = ESMF_ID_BUNDLE%objectID
+            print *, "getting bundle, obj=", objsend(i), " id=", idsend(i)
            case (ESMF_STATEITEM_FIELD%ot)
-             call c_ESMC_GetID(stateitem%datap%fp, idsend(i), localrc)
+             call c_ESMC_GetID(stateitem%datap%fp%ftypep, idsend(i), localrc)
+             call c_ESMC_AttributeGetCount(stateitem%datap%fp%ftypep, attrsend(i), localrc)
              objsend(i) = ESMF_ID_FIELD%objectID
+            print *, "getting field, obj=", objsend(i), " id=", idsend(i)
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, idsend(i), localrc)
+             call c_ESMC_AttributeGetCount(stateitem%datap%ap, attrsend(i), localrc)
              objsend(i) = ESMF_ID_ARRAY%objectID
+            print *, "getting array, obj=", objsend(i), " id=", idsend(i)
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, idsend(i), localrc)
+             call c_ESMC_AttributeGetCount(stateitem%datap%spp, attrsend(i), localrc)
              objsend(i) = ESMF_ID_STATE%objectID
+            print *, "getting state, obj=", objsend(i), " id=", idsend(i)
            case (ESMF_STATEITEM_NAME%ot)
              print *, "placeholder name"
              idsend(i) = -1
+             objsend(i) = 0
+             attrsend(i) = 0
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
              print *, "field inside a bundle"
              idsend(i) = -2
+             objsend(i) = 0
+             attrsend(i) = 0
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_UNKNOWN%ot)
              print *, "unknown type"
              idsend(i) = -3
+             objsend(i) = 0
+             attrsend(i) = 0
              localrc = ESMF_SUCCESS
         end select
         if (ESMF_LogMsgFoundError(localrc, &
@@ -199,6 +219,10 @@
                        if (ESMF_LogMsgFoundError(localrc, &
                                                  ESMF_ERR_PASSTHRU, &
                                                  ESMF_CONTEXT, rc)) return
+                       call ESMF_VMSend(vm, attrsend, sendcount(1), i, rc=localrc)
+                       if (ESMF_LogMsgFoundError(localrc, &
+                                                 ESMF_ERR_PASSTHRU, &
+                                                 ESMF_CONTEXT, rc)) return
 
                    endif
                endif
@@ -227,12 +251,20 @@
                    if (ESMF_LogMsgFoundAllocError(localrc, &
                                        "Allocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
+                   allocate(attrrecv(recvcount(1)), stat=localrc)
+                   if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "Allocating buffer for local attr list", &
+                                       ESMF_CONTEXT, rc)) return
      
                    call ESMF_VMRecv(vm, idrecv, recvcount(1), j, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
                    call ESMF_VMRecv(vm, objrecv, recvcount(1), j, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
+                   call ESMF_VMRecv(vm, attrrecv, recvcount(1), j, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
@@ -247,6 +279,31 @@
                                 k, idrecv(k), objrecv(k)
                enddo
 
+               do k=1, recvcount(1)
+                 ihave = .false.
+                 do l=1, sendcount(1)
+                     if (idrecv(k) .eq. idsend(l)) then 
+                         ihave = .true.
+                         exit
+                     endif
+                 enddo
+                 if (.not. ihave) then
+                    select case (objrecv(k))
+                       case (ESMF_ID_BUNDLE%objectID)
+                        print *, "need to create proxy bundle, id=", idrecv(k)
+                       case (ESMF_ID_FIELD%objectID)
+                        print *, "need to create proxy field, id=", idrecv(k)
+                       case (ESMF_ID_ARRAY%objectID)
+                        print *, "need to create proxy array, id=", idrecv(k)
+                       case (ESMF_ID_STATE%objectID)
+                        print *, "need to create proxy state, id=", idrecv(k)
+                       case default
+                        print *, "not needed yet, id=", idrecv(k)
+                    end select
+                    if (attrrecv(k) .gt. 0) print *, "with", attrrecv(k), "attributes"
+                 endif
+               enddo
+
                if (recvcount(1) .gt. 0) then
                    deallocate(idrecv, stat=localrc)
                    if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -255,6 +312,10 @@
                    deallocate(objrecv, stat=localrc)
                    if (ESMF_LogMsgFoundAllocError(localrc, &
                                   "Deallocating buffer for local obj list", &
+                                   ESMF_CONTEXT, rc)) return
+                   deallocate(attrrecv, stat=localrc)
+                   if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "Deallocating buffer for local attr list", &
                                    ESMF_CONTEXT, rc)) return
                endif
            endif
@@ -269,6 +330,10 @@
         deallocate(objsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                  "Deallocating buffer for local obj list", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(attrsend, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                 "Deallocating buffer for local attr list", &
                                        ESMF_CONTEXT, rc)) return
     endif
 
