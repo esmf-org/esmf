@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.60 2004/12/17 19:41:37 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.61 2004/12/18 00:56:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.60 2004/12/17 19:41:37 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.61 2004/12/18 00:56:57 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -380,10 +380,10 @@
                               ESMF_CONTEXT, rc)) return
 
     ! Clean up
-    deallocate(localAxisLengths)
-    deallocate(      tempMLCCPD)
-    deallocate(       tempGCCPD)
-    deallocate(     tempCCPDEPD)
+    deallocate(localAxisLengths, stat=status)
+    deallocate(      tempMLCCPD, stat=status)
+    deallocate(       tempGCCPD, stat=status)
+    deallocate(     tempCCPDEPD, stat=status)
 
     ! set return code if user specified it
     if (present(rc)) rc = ESMF_SUCCESS
@@ -462,7 +462,7 @@
         do i = 1,gridrank
           nAIs = nAIs * countPerDim(i)
         enddo
-        deallocate(countPerDim)
+        deallocate(countPerDim, stat=status)
       endif
 
       ! allocate arrayindex array and get all of them from the array
@@ -880,9 +880,9 @@
                                htype=ESMF_HALOHANDLE, rc=status)
 
       ! get rid of temporary arrays
-      if (allocated(periodic))    deallocate(periodic)
-      if (allocated(decompids))   deallocate(decompids)
-      if (allocated(globalCellCountPerDim)) deallocate(globalCellCountPerDim)
+      if (allocated(periodic))    deallocate(periodic, stat=status)
+      if (allocated(decompids))   deallocate(decompids, stat=status)
+      if (allocated(globalCellCountPerDim)) deallocate(globalCellCountPerDim, stat=status)
       if (allocated(globalStartPerDEPerDim)) &
          deallocate(globalStartPerDEPerDim, stat=status)
       if (associated(    src_AI)) deallocate(src_AI, stat=status)
@@ -1151,6 +1151,18 @@
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      ! start with a very clean slate...
+      nullify(dstAICountPerDE)
+      nullify(srcAICountPerDE)
+      nullify(dstCompAI)
+      nullify(srcCompAI)
+      nullify(dstTotalAI)
+      nullify(srcTotalAI)
+      nullify(dstCLocalAI)
+      nullify(srcCLocalAI)
+      nullify(dstTLocalAI)
+      nullify(srcTLocalAI)
+
       ! create the routehandle
       routehandle = ESMF_RouteHandleCreate(status)
 
@@ -1377,22 +1389,22 @@
                                htype=ESMF_REDISTHANDLE, rc=status)
 
       ! get rid of temporary arrays
-      if (allocated(           periodic)) deallocate(periodic)
-      if (allocated(          decompids)) deallocate(decompids)
-      if (allocated( dstCellCountPerDim)) deallocate(dstCellCountPerDim)
-      if (allocated( srcCellCountPerDim)) deallocate(srcCellCountPerDim)
-      if (allocated(dstStartPerDEPerDim)) deallocate(dstStartPerDEPerDim)
-      if (allocated(srcStartPerDEPerDim)) deallocate(srcStartPerDEPerDim)
-      if (associated(   dstAICountPerDE)) deallocate(dstAICountPerDE)
-      if (associated(   srcAICountPerDE)) deallocate(srcAICountPerDE)
-      if (associated(         dstCompAI)) deallocate(dstCompAI)
-      if (associated(         srcCompAI)) deallocate(srcCompAI)
-      if (associated(        dstTotalAI)) deallocate(dstTotalAI)
-      if (associated(        srcTotalAI)) deallocate(srcTotalAI)
-      if (associated(       dstCLocalAI)) deallocate(dstCLocalAI)
-      if (associated(       srcCLocalAI)) deallocate(srcCLocalAI)
-      if (associated(       dstTLocalAI)) deallocate(dstTLocalAI)
-      if (associated(       srcTLocalAI)) deallocate(srcTLocalAI)
+      if (allocated(           periodic)) deallocate(periodic, stat=status)
+      if (allocated(          decompids)) deallocate(decompids, stat=status)
+      if (allocated( dstCellCountPerDim)) deallocate(dstCellCountPerDim, stat=status)
+      if (allocated( srcCellCountPerDim)) deallocate(srcCellCountPerDim, stat=status)
+      if (allocated(dstStartPerDEPerDim)) deallocate(dstStartPerDEPerDim, stat=status)
+      if (allocated(srcStartPerDEPerDim)) deallocate(srcStartPerDEPerDim, stat=status)
+      if (associated(   dstAICountPerDE)) deallocate(dstAICountPerDE, stat=status)
+      if (associated(   srcAICountPerDE)) deallocate(srcAICountPerDE, stat=status)
+      if (associated(         dstCompAI)) deallocate(dstCompAI, stat=status)
+      if (associated(         srcCompAI)) deallocate(srcCompAI, stat=status)
+      if (associated(        dstTotalAI)) deallocate(dstTotalAI, stat=status)
+      if (associated(        srcTotalAI)) deallocate(srcTotalAI, stat=status)
+      if (associated(       dstCLocalAI)) deallocate(dstCLocalAI, stat=status)
+      if (associated(       srcCLocalAI)) deallocate(srcCLocalAI, stat=status)
+      if (associated(       dstTLocalAI)) deallocate(dstTLocalAI, stat=status)
+      if (associated(       srcTLocalAI)) deallocate(srcTLocalAI, stat=status)
 
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
