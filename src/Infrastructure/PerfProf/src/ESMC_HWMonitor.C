@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.5 2003/03/11 03:01:00 cdeluca Exp $
+// $Id: ESMC_HWMonitor.C,v 1.6 2003/03/24 18:20:57 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.5 2003/03/11 03:01:00 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.6 2003/03/24 18:20:57 ekluz Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -150,6 +150,30 @@
 //
 
  } // end ESMC_HWMonitorGetFLOPS
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetMemoryOpsPercent- return percentage of load-store 
+// operations.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetMemoryOpsPercent(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the percentage of load-store operations for all instructions for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetFLOPS
+
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Timer.h,v 1.2 2003/03/11 03:00:58 cdeluca Exp $
+// $Id: ESMC_Timer.h,v 1.3 2003/03/24 18:20:56 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,26 +62,18 @@
  class ESMC_Timer : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
- //  < insert class members here >  corresponds to type ESMF_Timer members
- //                                 in F90 modules
+     double usrTimeStart; 
+     double sysTimeStart; 
+     double usrTime; 
+     double sysTime; 
+     double elapsedTimeStart; 
+     double elapsedTime; 
+
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
-//  whether this is a deep class (the class/derived type has pointers to
-//  other memory which must be allocated/deallocated) or a shallow class
-//  (the class/derived type is self-contained) and needs no destroy methods
-//  other than deleting the memory for the object/derived type itself.
 
   public:
- // the following methods apply to deep classes only
- // ESMC_TimerCreate and ESMC_TimerDestroy are declared below,
- // outside the ESMC_Timer declaration
-    int ESMC_TimerConstruct(args);          // internal only, deep class
-    int ESMC_TimerDestruct(void);           // internal only, deep class
-
- // or
- // the following method applies to a shallow class
     int ESMC_TimerInit(args);         // shallow class only
 
  // optional configuration methods
@@ -91,14 +83,149 @@
  // accessor methods for class members
     int ESMC_TimerGet<Value>(<value type> *value) const;
     int ESMC_TimerSet<Value>(<value type>  value);
+
+    inline double ESMC_TimerGetUsr();
+    inline double ESMC_TimerGetSys();
+    inline double  ESMC_TimerGetElapsed(); 
+    double ESMC_TimerGetHpcWall();
+
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_TimerValidate(const char *options) const;
     int ESMC_TimerPrint(const char *options) const;
+    void ESMC_TimerStart ();
+    void ESMC_TimerComputeElapsed ();
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimerInit - initializes a Timer object
+//
+// !INTERFACE:
+      inline void ESMC_Timer::ESMC_TimerInit( void ) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which only initializes Timer values; it does not
+//      allocate any resources.  Define for shallow classes only,
+//      for deep classes define and use routines Create/Destroy and
+//      Construct/Destruct.  Can be overloaded like ESMC_TimerCreate.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+  usrTimeStart=0;
+  sysTimeStart=0;
+  usrTime=0;
+  sysTime=0;
+  elapsedTimeStart=0;
+  elapsedTime=0;
+
+ } // end ESMC_TimerInit
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimerGetSys - get System time for a Timer
+//
+// !INTERFACE:
+      int ESMC_Timer::ESMC_TimerGetSys( void ) {
+//
+// !RETURN VALUE:
+//    double system time
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//     Returns the value of Timer member sysTime.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    return sysTime;
+
+ } // end ESMC_TimerGetSys
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimerGetUsr - get User time for a Timer
+//
+// !INTERFACE:
+      int ESMC_Timer::ESMC_TimerGetUsr( void ) {
+//
+// !RETURN VALUE:
+//    double user time
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//     Returns the value of Timer member usrTime.
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    return usrTime;
+
+ } // end ESMC_TimerGetUsr
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimerGetElapsed - get Elapsed time for a Timer
+//
+// !INTERFACE:
+      int ESMC_Timer::ESMC_TimerGetElapsed( void ) {
+//
+// !RETURN VALUE:
+//    double elapsed time
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//     Returns the value of Timer member elapsedTime.
+//
+//EOP
+// !REQUIREMENTS:
+
+    return elapsedTime;
+
+ } // end ESMC_TimerGetElapsed
 
  // native C++ constructors/destructors
-	ESMC_Timer(args);
-	~ESMC_Timer(args);
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Timer - native C++ constructor
+//
+// !INTERFACE:
+    inline ESMC_Timer::ESMC_Timer(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Calls standard ESMF shallow methods for initialization.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+   usrTimeStart=0;
+   sysTimeStart=0;
+   usrTime=0;
+   sysTime=0;
+   elapsedTimeStart=0;
+   elapsedTime=0;
+
+}
+
+	~ESMC_Timer();
   
  // < declare the rest of the public interface methods here >
   

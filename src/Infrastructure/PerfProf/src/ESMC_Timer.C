@@ -1,4 +1,4 @@
-// $Id: ESMC_Timer.C,v 1.3 2003/03/11 03:01:01 cdeluca Exp $
+// $Id: ESMC_Timer.C,v 1.4 2003/03/24 18:20:58 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Timer.C,v 1.3 2003/03/11 03:01:01 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Timer.C,v 1.4 2003/03/24 18:20:58 ekluz Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -169,36 +169,6 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimerInit - initializes a Timer object
-//
-// !INTERFACE:
-      int ESMC_Timer::ESMC_TimerInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
-//      ESMF routine which only initializes Timer values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_TimerCreate.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_TimerInit
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_TimerGetConfig - get configuration info from a Timer
 //
 // !INTERFACE:
@@ -249,58 +219,6 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimerGet<Value> - get <Value> for a Timer
-//
-// !INTERFACE:
-      int ESMC_Timer::ESMC_TimerGet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      <value type> *value) const {     // out - value
-//
-// !DESCRIPTION:
-//     Returns the value of Timer member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_TimerGet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimerSet<Value> - set <Value> for a Timer
-//
-// !INTERFACE:
-      int ESMC_Timer::ESMC_TimerSet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      <value type> value) {     // in - value
-//
-// !DESCRIPTION:
-//     Sets the Timer member <Value> with the given value.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_TimerSet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_TimerValidate - internal consistency check for a Timer
 //
 // !INTERFACE:
@@ -324,6 +242,34 @@
 //
 
  } // end ESMC_TimerValidate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimerStart - start a timer for a code segment
+//
+// !INTERFACE:
+      void ESMC_Timer::ESMC_TimerStart(void) {
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Start a timer for a code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  struct tms local;
+
+  times(&local);
+  usrTimeStart=(double) local.tms_utime/TICKS;
+  sysTimeStart= (double) local.tms_stime/TICKS;
+  elapsedTimeStart=TimerHpcWall();
+
+ } // end ESMC_TimerStart
 
 
 //-----------------------------------------------------------------------------
@@ -354,31 +300,73 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Timer - native C++ constructor
+// !IROUTINE:  ESMC_TimerGetHpcWall - Get wall clock time
 //
 // !INTERFACE:
-      ESMC_Timer::ESMC_Timer(
+      double ESMC_Timer::ESMC_TimerGetHpcWall( void ) {
+//
+// !RETURN VALUE:
+//    double Wall clock time
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Get the wall clock time.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  static long zsec = 0;
+  static long zusec = 0;
+  double esec;
+  struct timeval tp;
+  struct timezone tzp;
+ 
+  gettimeofday(&tp, &tzp);
+ 
+  if ( zsec == 0 ) zsec = tp.tv_sec;
+  if ( zusec == 0 ) zusec = tp.tv_usec;
+ 
+  return (tp.tv_sec - zsec) + (tp.tv_usec - zusec ) * 0.000001 ;
+
+ } // end ESMC_TimerGetHpcWall
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimerComputeElapsed - Compute elapsed times
+//
+// !INTERFACE:
+      void ESMC_Timer::ESMC_TimerComputeElapsed( void ) {
 //
 // !RETURN VALUE:
 //    none
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+//    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
+//      Compute the elapsed time for later retrieval.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here
-//
+  static long zsec = 0;
+  static long zusec = 0;
+  double esec;
+  struct timeval tp;
+  struct timezone tzp;
+ 
+  gettimeofday(&tp, &tzp);
+ 
+  if ( zsec == 0 ) zsec = tp.tv_sec;
+  if ( zusec == 0 ) zusec = tp.tv_usec;
+ 
+  return (tp.tv_sec - zsec) + (tp.tv_usec - zusec ) * 0.000001 ;
 
- } // end ESMC_Timer
+ } // end ESMC_TimerGetElapsed
+
 
 //-----------------------------------------------------------------------------
 //BOP

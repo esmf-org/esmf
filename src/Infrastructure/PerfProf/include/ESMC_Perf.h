@@ -1,4 +1,4 @@
-// $Id: ESMC_Perf.h,v 1.2 2003/03/11 03:00:55 cdeluca Exp $
+// $Id: ESMC_Perf.h,v 1.3 2003/03/24 18:20:56 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,10 +34,20 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Perf members and declares method 
-// signatures (prototypes).  The companion file ESMC_Perf.C contains
+// signatures (prototypes).  The companion file ESMC\_Perf.C contains
 // the definitions (full code bodies) for the Perf methods.
 //
-// 
+// The performance class allows the user to time and measure hardware
+// performance of their code.  To begin the section of code to be
+// monitored, call StartSegment.  End the section by calling EndSegment.
+// For example,
+//            ESMC\_PerfStart('name',...;
+//            - code -
+//            ESMC\_PerfEnd( 'name')
+//
+// Each segment of code to be instrumented is stored in an array of instrumented
+// segments, a type defined in perf.h.
+//
 //
 //-----------------------------------------------------------------------------
 // 
@@ -47,66 +57,48 @@
                         // composites, associates, friends)
 
 // !PUBLIC TYPES:
- class ESMC_PerfConfig;
+
  class ESMC_Perf;
 
 // !PRIVATE TYPES:
 
- // class configuration type
- class ESMC_PerfConfig {
-   private:
- //   < insert resource items here >
- };
-
- // class declaration type
+  // class declaration type
  class ESMC_Perf : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
- //  < insert class members here >  corresponds to type ESMF_Perf members
- //                                 in F90 modules
+     bool monitoring; 
+     Segment *aSegment;
+     int currentSegment;
+     int maxSegments;
+     bool initialized = false;
+     LogErr perfData;
+     ofstream logFile;
+
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
-//  whether this is a deep class (the class/derived type has pointers to
-//  other memory which must be allocated/deallocated) or a shallow class
-//  (the class/derived type is self-contained) and needs no destroy methods
-//  other than deleting the memory for the object/derived type itself.
-
   public:
- // the following methods apply to deep classes only
- // ESMC_PerfCreate and ESMC_PerfDestroy are declared below,
- // outside the ESMC_Perf declaration
     int ESMC_PerfConstruct(args);          // internal only, deep class
     int ESMC_PerfDestruct(void);           // internal only, deep class
 
- // or
- // the following method applies to a shallow class
-    int ESMC_PerfInit(args);         // shallow class only
-
- // optional configuration methods
-    int ESMC_PerfGetConfig(ESMC_PerfConfig *config) const;
-    int ESMC_PerfSetConfig(const ESMC_PerfConfig *config);
-
- // accessor methods for class members
-    int ESMC_PerfGet<Value>(<value type> *value) const;
-    int ESMC_PerfSet<Value>(<value type>  value);
-    
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_PerfValidate(const char *options) const;
-    int ESMC_PerfPrint(const char *options) const;
+    int ESMC_PerfPrint() const;
 
  // native C++ constructors/destructors
-	ESMC_Perf(args);
-	~ESMC_Perf(args);
+	ESMC_Perf();
+	~ESMC_Perf();
   
  // < declare the rest of the public interface methods here >
   
+    void ESMC_PerfStart(string someName, bool doHardware );
+    void ESMC_PerfEnd( string someName);
+
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
-//
- // < declare private interface methods here >
+     void ESMC_PerfPrintTimes(double time[], int bound);
+     int ESMC_PerfFindSegment(string someName );
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -120,7 +112,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Perf object.
 
- ESMC_Perf *ESMC_PerfCreate(args, int *rc);// interface only, deep class
+ ESMC_Perf *ESMC_PerfCreate();// interface only, deep class
  int ESMC_PerfDestroy(ESMC_Perf *<class>); // interface only, deep class
 
  #endif  // ESMC_Perf_H

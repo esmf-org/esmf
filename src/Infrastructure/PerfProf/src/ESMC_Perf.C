@@ -1,4 +1,4 @@
-// $Id: ESMC_Perf.C,v 1.3 2003/03/11 03:01:00 cdeluca Exp $
+// $Id: ESMC_Perf.C,v 1.4 2003/03/24 18:20:57 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,11 +26,12 @@
 
  // associated class definition file
  #include <ESMC_Perf.h>
+ #include <ESMC_Segment.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Perf.C,v 1.3 2003/03/11 03:01:00 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Perf.C,v 1.4 2003/03/24 18:20:57 ekluz Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -43,7 +44,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_PerfCreate - Create a new Perf
+// !ROUTINE:  ESMC_PerfCreate - Create a new Perf object
 //
 // !INTERFACE:
       ESMC_Perf *ESMC_PerfCreate(
@@ -52,21 +53,14 @@
 //     pointer to newly allocated ESMC_Perf
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3     // in
-      int *rc) {           // out - return code
+      bool doHW;    // in, Flag to turn on/off hardware performance monitoring
+      bool monitor; // in, Flag to turn on/off monitoring
+      PEList sync_pe_list ) { // in - PE-list to synchronize with
 //
 // !DESCRIPTION:
-//      Create a new Perf from ... Allocates memory for a new Perf
-//      object and uses the internal routine ESMC_PerfConstruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_PerfInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_Perf.h)
+//      Create a new Perf object. Allocates memory for a new Perf
+//      object and uses the internal routine ESMC_PerfContruct to
+//      initialize it.
 //
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
@@ -92,10 +86,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Perf object previously allocated
-//      via an ESMC_PerfCreate routine.  Define for deep classes only.
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_Perf.h)
+//      via an ESMC_PerfCreate routine.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -111,23 +102,21 @@
 // !IROUTINE:  ESMC_PerfConstruct - fill in an already allocated Perf
 //
 // !INTERFACE:
-      int ESMC_Perf::ESMC_PerfConstruct(
+      int ESMC_Perf::ESMC_PerfConstruct(void) {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+//    None
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated Perf object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_PerfDestruct
+//      as needed.  Must call the corresponding ESMC\_PerfDestruct
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_PerfCreate, which calls
-//      ESMC_PerfConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use ESMC\_PerfCreate, which calls
+//      ESMC\_PerfConstruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -153,10 +142,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF_PerfConstruct, does any additional cleanup before the
+//      ESMF\_PerfConstruct, does any additional cleanup before the
 //      original Perf object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_PerfDestroy, which calls
-//      ESMC_PerfDestruct.  Define for deep classes only.
+//      use only; end-users use ESMC\_PerfDestroy, which calls
+//      ESMC\_PerfDestruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -186,7 +175,7 @@
 //      ESMF routine which only initializes Perf values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_PerfCreate.
+//      Construct/Destruct.  Can be overloaded like ESMC\_PerfCreate.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -249,68 +238,16 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_PerfGet<Value> - get <Value> for a Perf
-//
-// !INTERFACE:
-      int ESMC_Perf::ESMC_PerfGet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      <value type> *value) const {     // out - value
-//
-// !DESCRIPTION:
-//     Returns the value of Perf member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_PerfGet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_PerfSet<Value> - set <Value> for a Perf
-//
-// !INTERFACE:
-      int ESMC_Perf::ESMC_PerfSet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      <value type> value) {     // in - value
-//
-// !DESCRIPTION:
-//     Sets the Perf member <Value> with the given value.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_PerfSet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_PerfValidate - internal consistency check for a Perf
 //
 // !INTERFACE:
-      int ESMC_Perf::ESMC_PerfValidate(
+      int ESMC_Perf::ESMC_PerfValidate(void) {
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
+//    none
 //
 // !DESCRIPTION:
 //      Validates that a Perf is internally consistent.
@@ -352,24 +289,137 @@
 
  } // end ESMC_PerfPrint
 
+
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Perf - native C++ constructor
+// !IROUTINE:  ESMC_PerfStart - start performance monitoring on a code segment.
 //
 // !INTERFACE:
-      ESMC_Perf::ESMC_Perf(
+      int ESMC_Perf::ESMC_PerfStart(
 //
 // !RETURN VALUE:
-//    none
+//    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      const char *name) {     //  in - code segment name
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
+//        Start performance monitoring of a given code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+    string aName;
+    int segment;
+    bool newSegment;
+    bool HWcounter;
+
+    if ( ! monitoring ) {
+       return;
+    }
+    if ( ! initialized ) {
+       perfData.LogErrPrintErrFile(ESMC_ERR_FILE_ACTIVE,ESMC_WARNING,
+                                __LINE__,__FILE__, __DIR__,__FUNC__);
+       return;
+    }
+   //
+    // Check to see if this is a segment that's already being timed or not
+    //
+    segment = ESMC_PerfFindSegment( someName );
+    if ( segment == -1 ) { 
+       newSegment = true; 
+    } else {
+       newSegment = false; 
+    }
+    //
+    //
+    //
+    if ( doHardware.empty ) {
+      HWcounter = doHW;
+    } else {
+      HWcounter = doHardware;
+    }
+    //
+    // If this is a new section to time
+    //
+    if ( newSegment ) {
+       currentSegment++;
+       if ( currentSegment > MaxSegments ) {
+         // TODO:: Allocate array bigger
+       }
+       aSegment[currentSegment].SegmentBegin( someName, HWcounter );
+    //
+    // If this is a section already timed once
+    //
+    } else {
+       if ( aSegment[segment].SegmentActive ) {
+          // If already active somethings wrong...
+          // Segments being timed should be initially activated here
+          // and then unactivated in a PerfEnd call.
+          perfData.LogErrPrintErrFile(ESMC_ERR_FILE_ACTIVE,ESMC_FATAL,
+                                __LINE__,__FILE__, __DIR__,__FUNC__);
+       } else {
+          aSegment[segment].SegmentBegin( someName, HWcounter );
+       }
+    }
+
+ } // end ESMC_PerfStart
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_PerfFindSegment - Find a segment
+//
+// !INTERFACE:
+      int ESMC_Perf::ESMC_PerfFindSegment(
+//
+// !RETURN VALUE:
+//    int segment array index
+//
+// !ARGUMENTS:
+      string someName ) {     //  in - code segment name
+//
+// !DESCRIPTION:
+//        Find index number of given segment name.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    bool newSegment;
+    int  Segment;
+
+    newSegment = true;
+    for (segment=0; segment <= currentSegment; segment++ ) {
+       // TODO:: Do a real string comparision
+       if ( aSegment[segment].SegmentGetName == someName ) {
+         newSegment = false;
+         break;
+       }
+    }
+    if ( newSegment ) {
+      segment = -1;
+    }
+    return( segment );
+ } // end ESMC_PerfFindSegment
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_PerfEnd- end performance monitoring on a code segment.
+//
+// !INTERFACE:
+      int ESMC_Perf::ESMC_PerfEnd(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *name) {     //  in - code segment name
+//
+// !DESCRIPTION:
+//        End performance monitoring of a given code segment.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -378,29 +428,4 @@
 //  code goes here
 //
 
- } // end ESMC_Perf
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ~ESMC_Perf - native C++ destructor
-//
-// !INTERFACE:
-      ESMC_Perf::~ESMC_Perf(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-
- } // end ~ESMC_Perf
+ } // end ESMC_PerfEnd

@@ -1,4 +1,4 @@
-% $Id: HWMonitor_design.tex,v 1.4 2002/11/22 23:28:38 ekluz Exp $
+% $Id: HWMonitor_design.tex,v 1.5 2003/03/24 18:20:55 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 The HWMonitor class uses Hardware monitoring libraries (PCL or PAPI)
 to do performance profiling of code segments. Floating point operations
 per second, data cache utilization and miss rates, floating point unit
-utilization, and cycle counts are the desired statistics to be reported.
+utilization, load-store operations and cycle counts are the desired statistics to be reported.
 The HWMonitor class is meant to be created by the CodeSeg
 class. There are three important methods for HWMonitor: Init, BeginMonitoring,
 EndMonitoring, and the Get methods. The Init method does the initialization needed
@@ -65,8 +65,8 @@ PCL\_read is used to get the counter results, and when using PAPI, PAPI\_read\_c
 is used to get the counter results.
 
 More information on the Get methods. There are five Get methods: GetFLOPS, GetCacheUtilRate,
-GetCacheMissRate, GetFPUUtilRate, and GetCycles. These get methods use the current values
-in the accum array to return the respective statistic for the code segment being timed.
-They are designed to be queried by the PerfPrint method in order to report on these
-statistics for all threads and PE's.
+GetCacheMissRate, GetFPUUtilRate, GetMemoryOpsPercent and GetCycles. These get methods use 
+the current values in the accum array to return the respective statistic for the code 
+segment being timed.  They are designed to be queried by the PerfPrint method in 
+order to report on these statistics for all threads and PE's.
 

@@ -1,4 +1,4 @@
-% $Id: Perf_design.tex,v 1.3 2002/11/27 21:34:19 ekluz Exp $
+% $Id: Perf_design.tex,v 1.4 2003/03/24 18:20:55 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,8 +12,9 @@
 
 The Perf class has five high level interfaces accessible by the user:
 PerfCreate, PerfStart, PerfEnd, PerfPrint, and PerfDestroy. PerfCreate does the needed
-initialization and allocates needed memory, and sets the monitoring, and doHW 
-flags. If the monitoring flag is set to false by the user performance monitoring 
+initialization, allocates needed memory, and sets the monitoring, and doHW 
+flags as well as the optional PE-list synchronization. If the monitoring flag is 
+set to false by the user performance monitoring 
 will be turned off. If the doHW flag is set, it's value will be used as the 
 default value to determine if hardware performance monitoring is done. Individual code
 segments that are timed can also turn hardware monitoring on or off for
@@ -24,7 +25,9 @@ allocated in PerfCreate.
 
 More information on PerfCreate. PerfCreate sets the maximum number of code-segments
 that can be used (which will be increased if exceeded) and does the initial
-allocates of the array of Segments.
+allocates of the array of Segments. If a PE-list is sent to PerfCreate as a
+optional argument, every-time PerfStart is called a synchronization will be done
+across all PE's in the PE-list given to PerfCreate.
 
 More information on PerfStart. When called PerfStart figures out if the given
 code segment has been activated before or not. If it hasn't it increments
@@ -37,8 +40,8 @@ for this code segment.
 More information on PerfEnd. PerfEnd deactivates a code segment, and calls
 the SegmentEnd method to accumulate the relevant counters.
 
-More information on PerfPrint. PerfPrint figures out the maximum, minimum, and
-average times across both threads and distributed PE's. The results are then 
+More information on PerfPrint. PerfPrint figures out the maximum, minimum, standard-deviation
+and average times across both threads and distributed PE's. The results are then 
 printed to the Log file. Below we give an example printout for a case with
 no threads and no distributed tasks as well as a case with threads and distributed
 tasks.
@@ -52,25 +55,34 @@ total            calls             1         #
                  wall            102.032     sec
                  cpu              64.00      sec
                  flops           640.00      Mops/sec
-                 cache_util       50.00      %      
-                 cache_miss       40.00      %      
+                 L1_cache_util    50.00      %      
+                 L1_cache_miss    40.00      %      
+                 L2_cache_util    30.00      %      
+                 L2_cache_miss    25.00      %      
                  FPU_util         40.00      %      
+                 load_store       30         %
                  cycles           90         M
 initialization   calls            1          #
                  wall             2.032      sec
                  cpu              1.00       sec
                  flops          340.00       Mops/sec
-                 cache_util      50.00       %      
-                 cache_miss      30.00       %      
+                 L1_cache_util   50.00       %      
+                 L1_cache_miss   30.00       %      
+                 L2_cache_util   30.00       %      
+                 L2_cache_miss   25.00       %      
                  FPU_util        30.00       %      
+                 load_store       5          %
                  cycles           9          M
 physics          calls          992
                  wall            52.032      sec
                  cpu             40.00       sec
                  flops          340.00       Mops/sec
-                 cache_util      50.00       %      
-                 cache_miss      80.00       %      
+                 L1_cache_util   50.00       %      
+                 L1_cache_miss   80.00       %      
+                 L2_cache_util   30.00       %      
+                 L2_cache_miss   60.00       %      
                  FPU_util        20.00       %      
+                 load_store      20          %
                  cycles          30          M
 \end{verbatim}
 }
@@ -83,36 +95,36 @@ all tasks send log to the same log file.
 \begin{verbatim}
 Statistics over all PE's:
 
-Timer            Type            Max      Avg      Min     Units
-total            calls            1        -        -       #
-                 wall           121.235  111.41  101.592    sec
-initialization   calls            1                         #
-                 wall             3.102    2.07    1.032    sec
-physics          calls          992        -       -        #
-                 threads          4        -       -        #
-                 wall            60.103   45.48   30.363    sec
+Timer            Type            Max      Avg      Min     Std-dev  Units
+total            calls            1        -        -        -       #
+                 wall           121.235  111.41  101.592     5.673   sec
+initialization   calls            1                          -       #
+                 wall             3.102    2.07    1.032     0.545   sec
+physics          calls          992        -       -         -       #
+                 threads          4        -       -         -       #
+                 wall            60.103   45.48   30.363     3.234   sec
 
 Statistics over PE 0 over all threads
 
-Timer            Type            Max      Avg      Min      Units
-total            calls            1        -        -        #
-                 wall           101.592    -        -        sec
-initialization   calls            1        -        -        #
-                 wall             1.032    -        -        sec
-physics          calls          992        -        -        #
-                 threads          4        -        -        #
-                 wall            50.023   40.532   30.363    sec
+Timer            Type            Max      Avg      Min    Std-dev  Units
+total            calls            1        -        -        -       #
+                 wall           101.592    -        -        -       sec
+initialization   calls            1        -        -        -       #
+                 wall             1.032    -        -        -       sec
+physics          calls          992        -        -        -       #
+                 threads          4        -        -        -       #
+                 wall            50.023   40.532   30.363    5.876   sec
 
 Statistics over PE 1 over all threads
 
-Timer            Type            Max      Avg      Min      Units
-total            calls            1        -        -        #
-                 wall           121.235    -        -        sec
-initialization   calls            1                          #
-                 wall             3.102    -        -        sec
-physics          calls          992        -        -        #
-                 threads          4        -        -        #
-                 wall            60.103   50.422   40.233    sec
+Timer            Type            Max      Avg      Min      Std-dev  Units
+total            calls            1        -        -        -         #
+                 wall           121.235    -        -        -         sec
+initialization   calls            1                          -         #
+                 wall             3.102    -        -        -         sec
+physics          calls          992        -        -        -         #
+                 threads          4        -        -        -         #
+                 wall            60.103   50.422   40.233    5.987     sec
 \end{verbatim}
 }
 

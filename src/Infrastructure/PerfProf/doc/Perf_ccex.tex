@@ -1,4 +1,4 @@
-% $Id: Perf_ccex.tex,v 1.1 2002/11/22 23:28:38 ekluz Exp $
+% $Id: Perf_ccex.tex,v 1.2 2003/03/24 18:20:55 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,6 +91,37 @@ for some code segments}
 .
 .
      perf.PerfEnd( 'non_threaded_section');
+  }
+  perf.PerfPrint( );
+  perf.PerfDestroy( );
+\end{verbatim}
+}
+
+\subsubsection{Example 4. Turn on timing sychronization}
+{\tt
+\begin{verbatim}
+   ESMC_Perf   perf;
+   ESMC_Layout pe_list;
+
+.
+.
+.
+   perf = PerfCreate( pe_list );
+
+   for( time = 0; time <=10000000; time++ ) {
+#pragma omp parallel for
+      for( i = 0, i < 4; i++ ) {
+
+#pragma omp critical
+
+        {
+           perf.PerfStart( 'threaded_section');
+.
+.
+.
+           perf.PerfEnd( 'threaded_section');
+        }
+     }
   }
   perf.PerfPrint( );
   perf.PerfDestroy( );
