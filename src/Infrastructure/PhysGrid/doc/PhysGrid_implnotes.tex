@@ -1,4 +1,4 @@
-% $Id: PhysGrid_implnotes.tex,v 1.3 2003/11/17 20:49:18 jwolfe Exp $
+% $Id: PhysGrid_implnotes.tex,v 1.4 2005/01/03 23:30:48 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,18 +21,22 @@ The PhysGrid class contains the following private classes:
 
 \item {\bf ESMF\_GridMask} Data type describing masks for a PhysGrid.  Masks
 are named and can be of different types, including logical masks,
-multiplicative masks, and integer region IDs.
+multiplicative masks, and integer region identifiers.
 
-\item {\bf ESMF\_PhysCoord} A physical coordinate carries information describing
-coordinate attributes like names and flags for special properties of a
-coordinate axis.  This information is used by PhysGrid and Grid to help
-describe the complete physical properties of a grid.
+\item {\bf ESMF\_PhysCoord} Data type describing a coordinate axis in the
+physical domain, including attributes like names and flags for special
+properties of an axis.  This information is used by PhysGrid and Grid
+to help describe the complete physical properties of a grid.
 
-\item {\bf ESMF\_PhysLocation} Physical locations for a set of points defining
-the grid.
+\item {\bf ESMF\_PhysLocation} Data type containing coordinate values for 
+the center of each grid cell.
 
-\item {\bf ESMF\_PhysRegion} Physical locations for a set of points defining
-regions of the grid (e.g. cell vertices or domains of influence).
+\item {\bf ESMF\_PhysRegion} Data type containing coordinate values for a set
+of points defining regions of the grid (e.g. cell vertices or domains of
+influence).  These typically describe each grid cell, though they can also be
+used to define bounding boxes of larger regions.  Regions can be either
+polygons or circles/spheres/ellipses.
+
 \end{itemize}
 
 

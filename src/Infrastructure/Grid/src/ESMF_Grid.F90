@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.211 2004/12/28 07:19:22 theurich Exp $
+! $Id: ESMF_Grid.F90,v 1.212 2005/01/03 23:32:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.211 2004/12/28 07:19:22 theurich Exp $'
+      '$Id: ESMF_Grid.F90,v 1.212 2005/01/03 23:32:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -345,17 +345,19 @@
 ! !DESCRIPTION:
 !     This routine adds a vertical subGrid to an already 
 !     allocated {\tt grid}.
-!     This explicit interface only creates vertical subGrids with coordinate
-!     systems where the zero point is defined at the bottom.
-!     Only one vertical subGrid is allowed for any {\tt ESMF\_Grid}, 
-!     so if a vertical subGrid
-!     already exists for the Grid that is passed in, an error is returned.
+!     The ESMF_GridAddVertHeight interface only creates vertical subGrids
+!     with coordinate systems where the zero point is defined at the bottom.
+!     Only one vertical grid is allowed for any {\tt ESMF\_Grid}, though
+!     the vertical grid may have more than one related subGrid due to the
+!     the number of relative locations for a given staggering.  If a vertical
+!     grid already exists for the {\tt ESMF\_Grid} that is passed in, an error
+!     is returned.
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
-!     \item given array of deltas (variable delta), assuming 0 is 
-!        the minimum or starting coordinate
-!     \item given array of coordinates (variable coords)
+!     \item given array of coordinate increments or spacings, assuming 0 is 
+!        the minimum or starting coordinate (optional argument {delta});
+!     \item given array of coordinates (optional argument {coords}).
 !     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and an error code returned.
@@ -363,13 +365,13 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          {\tt ESMF\_Grid} to add vertical grid to.
+!          Existing {\tt ESMF\_Grid} the vertical grid is being added to.
 !     \item[{[delta]}]
 !          Array of physical increments in the vertical direction.
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridVertStagger} specifier denoting vertical grid stagger.
 !     \item[{[dimName]}]
 !          Dimension name.
 !     \item[{[dimUnit]}]
@@ -477,8 +479,8 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object and constructs its
-!     internals, but does not fill in any contents.  Returns a pointer to
-!     the new {\tt ESMF\_Grid}.
+!     internal derived types, but does not fill in any contents.  Returns a
+!     pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -573,9 +575,9 @@
       !-------------
       !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -585,29 +587,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -671,9 +673,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -683,29 +685,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -775,9 +777,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -788,29 +790,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -884,9 +886,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -897,29 +899,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -986,9 +988,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -999,29 +1001,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1047,8 +1049,8 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_Grid} object previously allocated
-!     via an {\tt ESMF\_GridCreate routine}.
+!     Destroys an {\tt ESMF\_Grid} object and all related internal structures
+!     previously allocated via an {\tt ESMF\_GridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1058,8 +1060,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
       logical :: dummy
@@ -1094,29 +1096,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       ! If error write message and return.
@@ -1151,7 +1153,7 @@
 ! !INTERFACE:
      ! Private name; call using ESMF_GridDistribute()
       subroutine ESMF_GridDistributeBlock(grid, delayout, countsPerDEDim1, &
-                                          countsPerDEDim2, decompIds, name, rc)
+                                          countsPerDEDim2, decompIds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1159,7 +1161,6 @@
       integer, dimension(:), intent(in), optional :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
       integer, dimension(:), intent(in), optional :: decompIds
-      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1194,11 +1195,13 @@
 !          {\tt delayout}.  The elements of this array contains decompostion
 !          information for the corresponding grid axis.  The following is a
 !          list of valid values and the meaning of each:
-!                  0   the grid axis is not distributed;
-!                  1   the grid axis is distributed by the first decomposition
+!          \begin{description}
+!            \item 0   the grid axis is not distributed;
+!            \item 1   the grid axis is distributed by the first decomposition
 !                      axis in the {\tt delayout};
-!                  2   the grid axis is distributed by the second decomposition
+!            \item 2   the grid axis is distributed by the second decomposition
 !                      axis in the {\tt delayout}.
+!          \end{description}
 !          The number of array elements should be greater or equal to the number
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
@@ -1207,14 +1210,12 @@
 !          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and {\tt grid}
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -1228,43 +1229,42 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDistributeBlock(grid%ptr, delayout, countsPerDEDim1, &
-                                        countsPerDEDim2, decompIds, name, &
-                                        localrc)
+                                        countsPerDEDim2, decompIds, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1279,12 +1279,12 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridDistributeVect"
 !BOP
-! !IROUTINE: ESMF_GridDistribute - Distribute a Grid with vector storage 
+! !IROUTINE: ESMF_GridDistribute - Distribute a Grid stored as a vector 
 
 ! !INTERFACE:
      ! Private name; call using ESMF_GridDistribute()
       subroutine ESMF_GridDistributeVect(grid, delayout, myCount, myIndices, &
-                                         decompIds, name, rc)
+                                         decompIds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1292,7 +1292,6 @@
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
       integer, dimension(:), intent(in), optional :: decompIds
-      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1316,11 +1315,13 @@
 !          {\tt delayout}.  The elements of this array contains decompostion
 !          information for the corresponding grid axis.  The following is a
 !          list of valid values and the meaning of each:
-!                  0   the grid axis is not distributed;
-!                  1   the grid axis is distributed by the first decomposition
+!          \begin{description}
+!            \item 0   the grid axis is not distributed;
+!            \item 1   the grid axis is distributed by the first decomposition
 !                      axis in the {\tt delayout};
-!                  2   the grid axis is distributed by the second decomposition
+!            \item 2   the grid axis is distributed by the second decomposition
 !                      axis in the {\tt delayout}.
+!          \end{description}
 !          The number of array elements should be greater or equal to the number
 !          of grid dimensions.  The default is that the first grid axis is
 !          distributed by the first decompostion axis, the second grid axis is
@@ -1329,14 +1330,12 @@
 !          axes (from an {\tt ESMF\_Field} or {\tt ESMF\_Array}) and {\tt grid}
 !          axes are defined elsewhere in {\tt ESMF\_FieldDataMap} and
 !          {\tt ESMF\_ArrayDataMap} interfaces.
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -1350,42 +1349,42 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDistributeVect(grid%ptr, delayout, myCount, myIndices, &
-                                       decompIds, name, localrc)
+                                       decompIds, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -1409,7 +1408,7 @@
                                      horzstagger, vertstagger, &
                                      horzcoordsystem, vertcoordsystem, &
                                      coordorder, &
-                                     dimCount, distDimCount, gridStorage, &
+                                     dimCount, distDimCount, gridstorage, &
                                      minGlobalCoordPerDim, maxGlobalCoordPerDim, &
                                      periodic, delayout, name, rc)
 !
@@ -1424,7 +1423,7 @@
       type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
       integer, intent(out), optional :: distDimCount
-      type(ESMF_GridStorage), intent(out), optional :: gridStorage
+      type(ESMF_GridStorage), intent(out), optional :: gridstorage
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
@@ -1443,13 +1442,13 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[{[horzgridtype]}]
-!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!          {\tt ESMF\_GridType} specifier denoting horizontal grid type.
 !     \item[{[vertgridtype]}]
-!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting vertical grid stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -1459,20 +1458,22 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
+!          ordering for the Grid and all related Fields (i.e. ZXY).
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this {\tt grid}.
 !     \item[{[distDimCount]}]
 !          Number of dimensions represented by the distribution of this {\tt grid}.
-!     \item[{[gridStorage]}]
-!          {\tt ESMF\_GridStorage} specifier to denote grid storage.
+!          For grids distributed as a vector, this could be different than the rank
+!          of the underlying grid.
+!     \item[{[gridstorage]}]
+!          {\tt ESMF\_GridStorage} specifier denoting grid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
-!          Returns the periodicity along the coordinate axes - logical array.
+!          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[delayout]}]
 !          {\tt delayout} that this {\tt grid} was distributed over.
 !     \item[{[name]}]
@@ -1481,8 +1482,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -1491,8 +1492,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-         call ESMF_LogWrite("trying to query an uninitialized grid", &
-                            ESMF_LOG_WARNING, ESMF_CONTEXT)
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1520,7 +1521,7 @@
             present(coordorder             ) .OR. &
             present(dimCount               ) .OR. &
             present(distDimCount           ) .OR. &
-            present(gridStorage            ) .OR. &
+            present(gridstorage            ) .OR. &
             present(minGlobalCoordPerDim   ) .OR. &
             present(maxGlobalCoordPerDim   ) .OR. &
             present(periodic               ) .OR. &
@@ -1542,7 +1543,7 @@
                             vertCoordSystem=vertcoordsystem, &
                             coordOrder=coordorder, &
                             dimCount=dimCount, distDimCount=distDimCount, &
-                            gridStorage=gridStorage, &
+                            gridStorage=gridstorage, &
                             minGlobalCoordPerDim=minGlobalCoordPerDim, &
                             maxGlobalCoordPerDim=maxGlobalCoordPerDim, &
                             periodic=periodic, delayout=delayout, &
@@ -1598,7 +1599,7 @@
                                         horzstagger, vertstagger, &
                                         horzcoordsystem, vertcoordsystem, &
                                         coordorder, &
-                                        dimCount, distDimCount, gridStorage, &
+                                        dimCount, distDimCount, gridstorage, &
                                         minGlobalCoordPerDim, &
                                         maxGlobalCoordPerDim, &
                                         globalCellCountPerDim, &
@@ -1620,7 +1621,7 @@
       type(ESMF_CoordOrder),  intent(out), optional :: coordorder
       integer, intent(out), optional :: dimCount
       integer, intent(out), optional :: distDimCount
-      type(ESMF_GridStorage), intent(out), optional :: gridStorage
+      type(ESMF_GridStorage), intent(out), optional :: gridstorage
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
@@ -1643,19 +1644,17 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
 !     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
 !     \item[{[horzgridtype]}]
-!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!          {\tt ESMF\_GridType} specifier denoting horizontal grid type.
 !     \item[{[vertgridtype]}]
-!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting vertical grid stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -1665,14 +1664,14 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
+!          ordering for the Grid and all related Fields (i.e. ZXY).
 !     \item[{[dimCount]}]
 !          Number of dimensions represented by this {\tt grid}.
 !     \item[{[distDimCount]}]
 !          Number of dimensions represented by the distribution of this {\tt grid}.
-!     \item[{[gridStorage]}]
-!          {\tt ESMF\_GridStorage} specifier to denote grid storage.
+!     \item[{[gridstorage]}]
+!          {\tt ESMF\_GridStorage} specifier denoting grid storage.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1682,11 +1681,11 @@
 !     \item[{[globalStartPerDEPerDim]}]
 !          Array of global starting locations for each DE and in each direction.
 !     \item[{[maxLocalCellCountPerDim]}]
-!          Array of maximum grid counts on any DE in each direction.
+!          Array of maximum number of grid cells on any DE in each direction.
 !     \item[{[cellCountPerDEPerDim]}]
-!          2-D array of grid counts on each DE and in each direction.
+!          2-D array of number of grid cells on each DE and in each direction.
 !     \item[{[periodic]}]
-!          Returns the periodicity along the coordinate axes - logical array.
+!          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[delayout]}]
 !          {\tt delayout} that this {\tt grid} was distributed over.
 !     \item[{[name]}]
@@ -1695,8 +1694,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -1734,7 +1733,7 @@
             present(coordorder             ) .OR. &
             present(dimCount               ) .OR. &
             present(distDimCount           ) .OR. &
-            present(gridStorage            ) .OR. &
+            present(gridstorage            ) .OR. &
             present(minGlobalCoordPerDim   ) .OR. &
             present(maxGlobalCoordPerDim   ) .OR. &
             present(globalCellCountPerDim  ) .OR. &
@@ -1755,7 +1754,7 @@
                             horzgridtype, vertgridtype, &
                             horzstagger, vertstagger, &
                             horzcoordsystem, vertcoordsystem, &
-                            coordorder, dimCount, distDimCount, gridStorage, &
+                            coordorder, dimCount, distDimCount, gridstorage, &
                             minGlobalCoordPerDim, maxGlobalCoordPerDim, &
                             globalCellCountPerDim, maxLocalCellCountPerDim, &
                             globalStartPerDEPerDim, cellCountPerDEPerDim, &
@@ -2734,7 +2733,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoord"
 !BOP
-! !IROUTINE: ESMF_GridGetCoord - Get the coordinates of a Grid
+! !IROUTINE: ESMF_GridGetCoord - Get the horizontal and/or vertical coordinates of a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoord(grid, horzrelloc, vertrelloc, centerCoord, &
@@ -2746,7 +2745,7 @@
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
       type(ESMF_Array), intent(out), dimension(:), optional :: cornerCoord
-      type(ESMF_Array), intent(out), optional :: faceCoord
+      type(ESMF_Array), intent(out), dimension(:), optional :: faceCoord
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -2759,11 +2758,9 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the {\tt grid} to be
-!          queried.
-!     \item[{[vertrelloc]}]
-!          Vertical relative location of the {\tt grid} to be
-!          queried.
+!          Horizontal relative location of the subGrid to be queried.
+!     \item[[{vertrelloc]}]
+!          Vertical relative location of the subGrid to be queried.
 !     \item[{[centerCoord]}]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -2773,26 +2770,27 @@
 !          be numbered in either clockwise or counter-clockwise direction,
 !          but must be numbered consistently throughout grid.
 !     \item[{[faceCoord]}]
-!          Coordinates of corners of each cell.  The dimension index should
+!          Coordinates of face centers of each cell.  The dimension index should
 !          be defined first, followed by the face index.  Faces should
 !          be numbered consistently with corners.  For example, face 1 should
 !          correspond to the face between corners 1,2.
 !     \item[{[reorder]}]
-!          Logical flag.  If TRUE, reorder any results using a previously set
-!          CoordOrder before returning.  If FALSE do not reorder.  The default
+!          If TRUE, reorder any results using a previously set CoordOrder 
+!          before returning.  If FALSE, do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
 !          applications.  This optional argument is available mostly for
 !          internal use.
 !     \item[{[total]}]
-!          Logical. If TRUE, return the total coordinates including internally
-!          generated boundary cells. If FALSE return the
-!          computational cells (which is what the user will be expecting.)
+!          If TRUE, return the total coordinates including internally
+!          generated boundary cells. If FALSE, return the computational
+!          cells (which is what the user will be expecting).  The default
+!          value is FALSE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -2814,9 +2812,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -2827,29 +2825,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -2876,14 +2874,14 @@
       type(ESMF_Grid) :: grid
       type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
-      integer, intent(inout), optional :: myDE
-      integer, intent(inout), optional :: localCellCount
-      integer, dimension(:), intent(inout), optional :: localCellCountPerDim
+      integer, intent(out), optional :: myDE
+      integer, intent(out), optional :: localCellCount
+      integer, dimension(:), intent(out), optional :: localCellCountPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minLocalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             maxLocalCoordPerDim
-      integer, dimension(:), intent(inout), optional :: globalStartPerDim
+      integer, dimension(:), intent(out), optional :: globalStartPerDim
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -2896,38 +2894,45 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
 !     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
 !     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
 !     \item[{[myDE]}]
-!          Identifier for this {\tt ESMF\_DE}, zero-based.
+!          Identifier for this {\tt ESMF\_DE}, zero-based.  Note that this is 
+!          a returned value.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells per dimension.
 !     \item[{[minLocalCoordPerDim]}]
-!          Array of minimum local physical coordinates in each dimension.
+!          Array of minimum local coordinate values on this DE in each dimension.
+!          The number of array elements should be greater or equal to the number
+!          of grid dimensions.
 !     \item[{[maxLocalCoordPerDim]}]
-!          Array of maximum local physical coordinates in each dimension.
+!          Array of maximum local coordinate values on this DE in each dimension.
+!          The number of array elements should be greater or equal to the number
+!          of grid dimensions.
 !     \item[{[globalStartPerDim]}]
 !          Global index of starting counts for each dimension.
+!          The number of array elements should be greater or equal to the number
+!          of grid dimensions.
 !     \item[{[reorder]}]
-!          Logical flag.  If TRUE, reorder any results using a previously set 
-!          CoordOrder before returning.  If FALSE do not reorder.  The default
+!          If TRUE, reorder any results using a previously set CoordOrder
+!          before returning.  If FALSE, do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
 !          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
-!          Logical flag to indicate getting DistGrid information for total cells.
-!          The default is the computational regime.
+!          If TRUE, return queries based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return queries based
+!          on the computational cells (which is what the user will be expecting).
+!          The default value is FALSE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -2949,9 +2954,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                "Unknown grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
@@ -2965,29 +2970,29 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Log Rect Block", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure Unstructured", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_USER
       case(4)
-         if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
-                                "Grid structure User", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       case default
-         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
-                                "Invalid Grid structure", &
-                                 ESMF_CONTEXT, rc)) return
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
       end select
 
       if (ESMF_LogMsgFoundError(localrc, &
@@ -3036,11 +3041,9 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be used.
 !     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
 !     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
 !     \item[{[global1D]}]
 !          One-dimensional array of global identifiers to be translated.
 !          Usage of this optional argument infers translating between positions
@@ -3076,8 +3079,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -3183,11 +3186,9 @@
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be used.
 !     \item[horzrelloc]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal subGrid.
 !     \item[{[vertrelloc]}]
-!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          grid.
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical subGrid.
 !     \item[{[local1D]}]
 !          One-dimensional array of global identifiers to be translated.
 !          Usage of this optional argument infers translating between positions
@@ -3223,8 +3224,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -3407,20 +3408,24 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Sets information for the {\tt grid}.
+!     Sets information for the {\tt grid} that may not have been included at
+!     {\tt grid} creation.  WARNING:  This routine does not automatically
+!     regenerate the {\tt grid} when used to reset its values, some of which may
+!     significantly alter it.  Therefore this routine may only be used prior to
+!     the {\tt ESMF\_GridDistribute} call.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be modified.
 !     \item[{[horzgridType]}]
-!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!          {\tt ESMF\_GridType} specifier denoting horizontal grid type.
 !     \item[{[vertgridType]}]
-!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid stagger.
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid stagger.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridVertStagger} specifier denoting vertical grid stagger.
 !     \item[{[horzcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -3430,23 +3435,22 @@
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
-!          ordering for the Grid and all related Fields (i.e. KIJ).
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
+!          ordering for the Grid and all related Fields (i.e. ZXY).
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
+!          Logical array that returns the periodicity of the coordinate axes.
 !     \item[{[name]}]
 !          Character string name of {\tt ESMF\_Grid}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOP
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
       integer :: i                                ! loop index
@@ -4168,8 +4172,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4215,8 +4219,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4262,8 +4266,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4302,8 +4306,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4342,8 +4346,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4384,8 +4388,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4425,8 +4429,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4465,8 +4469,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4505,8 +4509,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4545,8 +4549,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4587,8 +4591,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -4611,8 +4615,8 @@
 !
 ! !DESCRIPTION:
 !     Validates that an {\tt ESMF\_Grid} is internally consistent.  Currently
-!     checks to make sure:
-!          the pointer to the grid is associated;
+!     checks to ensure:
+!          the pointer to the grid is associated; and
 !          the grid status indicates the grid is ready to use.
 !
 !     The arguments are:
@@ -4703,8 +4707,7 @@
       subroutine ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
                                            localMinPerDim, localMaxPerDim, &
                                            domainList, hasDstData, hasSrcData, &
-                                           srcRelloc, dstRelloc, &
-                                           total, rc)
+                                           srcrelloc, dstrelloc, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: srcGrid
@@ -4715,8 +4718,8 @@
       type(ESMF_DomainList), intent(inout) :: domainList
       logical, intent(in) :: hasDstData
       logical, intent(in) :: hasSrcData
-      type(ESMF_RelLoc), intent(in), optional :: srcRelloc
-      type(ESMF_RelLoc), intent(in), optional :: dstRelloc
+      type(ESMF_RelLoc), intent(in), optional :: srcrelloc
+      type(ESMF_RelLoc), intent(in), optional :: dstrelloc
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -4725,7 +4728,6 @@
 !     described by an array of min/max's.  This routine is for the case of
 !     a DE that is part of a destination Grid determining which DEs it will
 !     receive data from.
-
 !
 !     The arguments are:
 !     \begin{description}
@@ -4744,15 +4746,17 @@
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
-!     \item[{[srcRelloc]}]
+!     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
-!          grid for all searches.  The default is ESMF_CELL_CENTER.
-!     \item[{[dstRelloc]}]
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!     \item[{[dstrelloc]}]
 !          Optional argument to set the relative location of the destination
-!          grid for all searches.  The default is ESMF_CELL_CENTER.
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[total]}]
-!          Logical flag to indicate the domainList should use total cells
-!          instead of computational cells.
+!          If TRUE, return DomainLists based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return DomainLists
+!          based on the computational cells (which is what the user will be
+!          expecting).  The default value is FALSE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4791,7 +4795,7 @@
         call ESMF_LRGridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
                                          localMinPerDim, localMaxPerDim, &
                                          domainList, hasDstData, hasSrcData, &
-                                         srcRelloc, dstRelloc, &
+                                         srcrelloc, dstrelloc, &
                                          total, localrc)
 
       !-------------
@@ -4840,7 +4844,7 @@
       subroutine ESMF_GridBoxIntersectSend(srcGrid, dstGrid, &
                                            localMinPerDim, localMaxPerDim, &
                                            myAI, domainList, &
-                                           srcRelloc, dstRelloc, total, rc)
+                                           srcrelloc, dstrelloc, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: srcGrid
@@ -4849,8 +4853,8 @@
       real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
       type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
       type(ESMF_DomainList), intent(inout) :: domainList
-      type(ESMF_RelLoc), intent(in), optional :: srcRelloc
-      type(ESMF_RelLoc), intent(in), optional :: dstRelloc
+      type(ESMF_RelLoc), intent(in), optional :: srcrelloc
+      type(ESMF_RelLoc), intent(in), optional :: dstrelloc
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -4880,15 +4884,17 @@
 !     \item[domainList]
 !          Resulting {\tt ESMF\_DomainList} containing the set of
 !          {\tt ESMF\_Domains} necessary to cover the box.
-!     \item[{[srcRelloc]}]
+!     \item[{[srcrelloc]}]
 !          Optional argument to set the relative location of the source
-!          grid for all searches.  The default is ESMF_CELL_CENTER.
-!     \item[{[dstRelloc]}]
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
+!     \item[{[dstrelloc]}]
 !          Optional argument to set the relative location of the destination
-!          grid for all searches.  The default is ESMF_CELL_CENTER.
+!          subGrid for all searches.  The default is ESMF_CELL_CENTER.
 !     \item[{[total]}]
-!          Logical flag to indicate the domainList should use total cells
-!          instead of computational cells.
+!          If TRUE, return DomainLists based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return DomainLists
+!          based on the computational cells (which is what the user will be
+!          expecting).  The default value is FALSE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4927,7 +4933,7 @@
         call ESMF_LRGridBoxIntersectSend(srcGrid, dstGrid, &
                                          localMinPerDim, localMaxPerDim, &
                                          myAI, domainList, &
-                                         srcRelloc, dstRelloc, total, localrc)
+                                         srcrelloc, dstrelloc, total, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
@@ -5002,8 +5008,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 !EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       integer :: localrc                          ! local error status
       logical :: dummy
@@ -5064,14 +5070,16 @@
 !          Global axis indices on all DE's.
 !     \item[{[AICountPerDE]}]
 !     \item[{[total]}]
-!          Logical flag for whether the axis indices should be for total
-!          cells or not.  Default is false, which infers computational cells.
+!          If TRUE, return queries based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return queries based
+!          on the computational cells (which is what the user will be expecting).
+!          The default value is FALSE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -5168,8 +5176,8 @@
 !     \end{description}
 !
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -5269,20 +5277,22 @@
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
 !     \item[{[reorder]}]
-!          Logical flag.  If TRUE, reorder any results using a previously set
-!          CoordOrder before returning.  If FALSE do not reorder.  The default
+!          If TRUE, reorder any results using a previously set CoordOrder
+!          before returning.  If FALSE, do not reorder.  The default
 !          value is TRUE and users should not need to reset this for most
 !          applications.  This optional argument is available primarily for
 !          internal use.
 !     \item[{[total]}]
-!          Logical flag to indicate getting DistGrid information for total cells.
-!          The default is the computational regime.
+!          If TRUE, return queries based on the total coordinates including
+!          internally generated boundary cells. If FALSE, return queries based
+!          on the computational cells (which is what the user will be expecting).
+!          The default value is FALSE.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -5386,8 +5396,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -5490,8 +5500,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-! !REQUIREMENTS:
 !EOPI
+! !REQUIREMENTS:
 
       integer :: localrc                          ! local error status
 
@@ -5856,9 +5866,9 @@
 !EOPI
 
       integer :: localrc, status             ! Error status, allocation status
-      integer :: i, i1, j, n
-      integer :: dimCount, oldDimCount, npets, npets2
-      integer :: newDEId, oldDEId, petId, coords(2)
+      integer :: i, j, n
+      integer :: oldDimCount, npets, npets2
+      integer :: newDEId, oldDEId, petId
       integer :: petMatchCount, petMatchList(1)
       integer, dimension(:), allocatable :: decompIDs, newNDEs, oldNDEs
       integer, dimension(:), allocatable :: newCountPerDE1, newCountPerDE2

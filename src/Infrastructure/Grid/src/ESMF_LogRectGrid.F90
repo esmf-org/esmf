@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.130 2004/12/30 07:07:03 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.131 2005/01/03 23:33:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.130 2004/12/30 07:07:03 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.131 2005/01/03 23:33:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -309,15 +309,19 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
-!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     internal derived types, and internally generates the {\tt ESMF\_Grid}.
+!     Returns a pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
-!             logically rectangular;
-!             user-specified spacing;
-!             horizontal spherical coordinate system.
+!     \begin{description}
+!       \item logically rectangular;
+!       \item user-specified spacing;
+!       \item horizontal spherical coordinate system.
+!     \end{description}
 !     This routine generates {\tt ESMF\_Grid} coordinates from the following
 !     set of arguments:
-!             given arrays of coordinates (variables coords1 and coords2).
+!     \begin{description}
+!       \item given arrays of coordinates (arguments [coords1] and [coords2]).
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -326,7 +330,7 @@
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
 !          stagger.  If none is specified, the default is 
 !          ESMF\_GRID\_HORZ\_STAGGER\_A.
 !     \item[{[dimNames]}]
@@ -334,12 +338,12 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
 !          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.  The default is false for all axes.
+!          Logical array denoting the periodicity of the coordinate axes.
+!          The default is FALSE for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -418,16 +422,20 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
-!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     internal derived types, and internally generates the {\tt ESMF\_Grid}.
+!     Returns a pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
-!             logically rectangular;
-!             user-specified spacing;
-!             horizontal spherical coordinate system.
+!     \begin{description}
+!       \item logically rectangular;
+!       \item user-specified spacing;
+!       \item horizontal spherical coordinate system.
+!     \end{description}
 !     This specific routine generates {\tt ESMF\_Grid} coordinates from the
 !     following set of arguments:
-!             given array of minimum coordinates and arrays of deltas,
-!             (variables minGlobalCoordPerDim, delta1 and delta2);
+!     \begin{description}
+!       \item given array of minimum coordinates and arrays of deltas 
+!             (arguments [minGlobalCoordPerDim], [delta1] and [delta2]).
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -438,7 +446,7 @@
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
 !          stagger.  If none is specified, the default is 
 !          ESMF\_GRID\_HORZ\_STAGGER\_A.
 !     \item[{[dimNames]}]
@@ -446,12 +454,12 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
 !          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.  The default is false for all axes.
+!          Logical array denoting the periodicity of the coordinate axes.
+!          The default is FALSE for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -535,19 +543,23 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
-!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     internal derived types, and internally generates the {\tt ESMF\_Grid}.
+!     Returns a pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
-!             logically rectangular;
-!             uniformly spaced coordinates (the distance between any 
+!     \begin{description}
+!       \item logically rectangular;
+!       \item uniformly spaced coordinates (the distance between any 
 !                   two consecutive grid points is equal);
-!             horizontal spherical coordinate system.
+!       \item horizontal spherical coordinate system.
+!     \end{description}
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
-!        (1). given min, max, and count (variables minGlobalCoordPerDim, 
-!             maxGlobalCoordPerDim, and counts);
-!        (2). given min, delta, and count (variables minGlobalCoordPerDim, 
-!             deltaPerDim, and counts).
+!     \begin{enumerate}
+!       \item given min, max, and count (arguments [minGlobalCoordPerDim], 
+!             [{[maxGlobalCoordPerDim]}], and [counts]);
+!       \item given min, delta, and count (arguments [minGlobalCoordPerDim], 
+!             [{[deltaPerDim]}], and [counts]).
+!     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and the program is terminated.
 !
@@ -564,7 +576,7 @@
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
 !          stagger.  If none is specified, the default is 
 !          ESMF\_GRID\_HORZ\_STAGGER\_A.
 !     \item[{[dimNames]}]
@@ -572,12 +584,12 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
 !          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.  The default is false for all axes.
+!          Logical array denoting the periodicity of the coordinate axes.
+!          The default is FALSE for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -654,15 +666,19 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
-!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     internal dervied types, and internally generates the {\tt ESMF\_Grid}.
+!     Returns a pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
-!             logically rectangular;
-!             user-specified spacing;
-!             horizontal cartesian coordinate system.
+!     \begin{description}
+!       \item logically rectangular;
+!       \item user-specified spacing;
+!       \item horizontal cartesian coordinate system.
+!     \end{description}
 !     This routine generates {\tt ESMF\_Grid} coordinates from the following
 !     set of arguments:
-!             given arrays of coordinates (variables coords1 and coords2).
+!     \begin{description}
+!       \item given arrays of coordinates (arguments [coords1] and [coords2]).
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -671,7 +687,7 @@
 !     \item[coord2]
 !          Array of physical coordinates in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
 !          stagger.  If none is specified, the default is 
 !          ESMF\_GRID\_HORZ\_STAGGER\_A.
 !     \item[{[dimNames]}]
@@ -679,12 +695,12 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
 !          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.  The default is false for all axes.
+!          Logical array denoting the periodicity of the coordinate axes.
+!          The default is FALSE for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -763,16 +779,20 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
+!     internal derived types, and internally generates the {\tt ESMF\_Grid}.  Returns a
 !     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
-!             logically rectangular;
-!             user-specified spacing;
-!             horizontal cartesian coordinate system.
+!     \begin{description}
+!       \item logically rectangular;
+!       \item user-specified spacing;
+!       \item horizontal cartesian coordinate system.
+!     \end{description}
 !     This routine generates {\tt ESMF\_Grid} coordinates from the following
 !     set of arguments:
-!             given array of minimum coordinates and arrays of deltas
-!             (variables minGlobalCoordPerDim, delta1 and delta2);
+!     \begin{description}
+!       \item given array of minimum coordinates and arrays of deltas
+!             (arguments [minGlobalCoordPerDim], [delta1] and [delta2]).
+!     \end{description}
 !
 !     The arguments are:
 !     \begin{description}
@@ -783,7 +803,7 @@
 !     \item[delta2]
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
 !          stagger.  If none is specified, the default is 
 !          ESMF\_GRID\_HORZ\_STAGGER\_A.
 !     \item[{[dimNames]}]
@@ -791,12 +811,12 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
 !          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.  The default is false for all axes.
+!          Logical array denoting the periodicity of the coordinate axes.
+!          The default is FALSE for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -880,19 +900,23 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
-!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     internal derived types, and internally generates the {\tt ESMF\_Grid}.
+!     Returns a pointer to the new {\tt ESMF\_Grid}.  This routine creates an
 !     {\tt ESMF\_Grid} with the following parameters:
-!             logically rectangular;
-!             uniformly spaced coordinates (the distance between any 
+!     \begin{description}
+!       \item logically rectangular;
+!       \item uniformly spaced coordinates (the distance between any 
 !                   two consecutive grid points is equal);
-!             horizontal cartesian coordinate system.
+!       \item horizontal cartesian coordinate system.
+!     \end{description}
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
-!        (1). given min, max, and count (variables minGlobalCoordPerDim, 
-!             maxGlobalCoordPerDim, and counts);
-!        (2). given min, delta, and count (variables minGlobalCoordPerDim, 
-!             deltaPerDim, and counts).
+!     \begin{enumerate}
+!       \item given min, max, and count (arguments [minGlobalCoordPerDim], 
+!             [{[maxGlobalCoordPerDim]}], and [counts]);
+!       \item given min, delta, and count (arguments [minGlobalCoordPerDim], 
+!             [{[deltaPerDim]}], and [counts]).
+!     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and the program is terminated.
 !
@@ -909,7 +933,7 @@
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzstagger]}]
-!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          {\tt ESMF\_GridHorzStagger} specifier denoting horizontal grid
 !          stagger.  If none is specified, the default is 
 !          ESMF\_GRID\_HORZ\_STAGGER\_A.
 !     \item[{[dimNames]}]
@@ -917,12 +941,12 @@
 !     \item[{[dimUnits]}]
 !          Array of dimension units.
 !     \item[{[coordorder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
+!          {\tt ESMF\_CoordOrder} specifier denoting the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
 !          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.  The default is false for all axes.
+!          Logical array denoting the periodicity of the coordinate axes.
+!          The default is FALSE for all axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1002,8 +1026,11 @@
 !     already exists for the Grid that is passed in, an error is returned.
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:                 
-!        (1). given min and array of deltas (variables minGlobalCoord and delta);
-!        (2). given array of coordinates (variable coords).
+!     \begin{enumerate}
+!       \item given min and array of deltas (arguments [{[minGlobalCoord]}]
+!             and [{[delta]}]);
+!       \item given array of coordinates (argument [[{coord]}]).
+!     \end{enumerate}
 !     If neither of these sets of arguments is present and valid, an error
 !     message is issued and the program is terminated.
 !
@@ -1018,9 +1045,9 @@
 !     \item[{[coord]}]
 !          Array of physical coordinates in the vertical direction.
 !     \item[{[vertgridtype]}]
-!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!          {\tt ESMF\_GridVertType} specifier denoting vertical grid type.
 !     \item[{[vertstagger]}]
-!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridVertStagger} specifier denoting vertical grid stagger.
 !     \item[{[vertcoordsystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -1148,8 +1175,8 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and reads a {\tt ESMF\_Grid} in from a file.  Return a pointer to
-!     the new {\tt ESMF\_Grid}.
+!     internal derived types, and reads a {\tt ESMF\_Grid} in from a file.
+!     Return a pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1209,8 +1236,8 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and copies attributes from another {\tt ESMF\_Grid}.  Return a
-!     pointer to the new {\tt ESMF\_Grid}.
+!     internal derived types, and copies attributes from another
+!     {\tt ESMF\_Grid}.  Return a pointer to the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2047,7 +2074,7 @@
       subroutine ESMF_LRGridDistributeBlock(grid, delayout, &
                                             countsPerDEDecomp1, &
                                             countsPerDEDecomp2, &
-                                            decompIds, name, rc)
+                                            decompIds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
@@ -2055,7 +2082,6 @@
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
       integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
       integer, dimension(:), intent(in), optional :: decompIds
-      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2080,8 +2106,6 @@
 !          axis.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2814,7 +2838,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridDistributeVect(grid, delayout, myCount, myIndices, &
-                                           decompIds, name, rc)
+                                           decompIds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
@@ -2822,7 +2846,6 @@
       integer, intent(in) :: myCount
       integer, dimension(:,:), intent(in) :: myIndices
       integer, dimension(:), intent(in), optional :: decompIds
-      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2847,8 +2870,6 @@
 !          second.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -4492,7 +4513,7 @@
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
       type(ESMF_Array), intent(out), dimension(:), optional :: cornerCoord
-      type(ESMF_Array), intent(out), optional :: faceCoord
+      type(ESMF_Array), intent(out), dimension(:), optional :: faceCoord
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -5212,7 +5233,7 @@
                                           "AICountPerDE not present", &
                                           ESMF_CONTEXT, rc)
             return
-          endif
+          endif 
         else
           call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrids(horzDistIdUse)%ptr, &
                                             horzAI, total, rc=localrc)
@@ -8392,7 +8413,7 @@
       integer :: i, i1, j, rank, nDEs, numDomains
       integer :: size, totalPoints
       integer :: counts(ESMF_MAXDIM)
-      integer :: physId, myDE, thisDE
+      integer :: physId
       integer :: myPET, nPETs, thisPET, srcDEs, srcDE, srcPID
       integer(ESMF_KIND_I4) :: localIndex(2)
       integer(ESMF_KIND_I4), dimension(:), allocatable :: globalMinIndex, &
@@ -8403,10 +8424,8 @@
       type(ESMF_AxisIndex) :: thisAI(2)
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gridAI, localAI
       type(ESMF_LocalArray) :: array
-      type(ESMF_PhysGrid) :: physgrid
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
       type(ESMF_DELayout) :: srcDELayout
-      type(ESMF_VM) :: vm
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -8570,10 +8589,6 @@
               thisAI(2) = localAI(j,2)
               thisAI(1)%min = 1
               thisAI(2)%min = 1
-        !      thisAI(1)%min = globalMinIndex(i1  )
-        !      thisAI(2)%min = globalMinIndex(i1+1)
-        !      thisAI(1)%max = globalMaxIndex(i1  )
-        !      thisAI(2)%max = globalMaxIndex(i1+1)
               thisAI(1)%max = globalMaxIndex(i1  ) - globalMinIndex(i1  ) + 1
               thisAI(2)%max = globalMaxIndex(i1+1) - globalMinIndex(i1+1) + 1
               thisAI(1)%stride = thisAI(1)%max
@@ -8717,7 +8732,6 @@
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI, thisAI
       type(ESMF_LocalArray) :: array
-      type(ESMF_PhysGrid) :: physgrid
       type(ESMF_RelLoc) :: srcRellocUse, dstRellocUse
 
       ! Initialize return code; assume failure until success is certain
