@@ -1,4 +1,4 @@
-! $Id: FieldHaloPeriodic.F90,v 1.2 2003/09/18 22:32:11 cdeluca Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.1 2003/09/19 21:40:19 jwolfe Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
