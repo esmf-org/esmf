@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.4 2004/01/06 16:44:59 pwjones Exp $
+! $Id: ESMF_DataMap.F90,v 1.5 2004/01/07 18:41:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,6 @@
                            ESMF_CELL_BOTFACE   = ESMF_RelLoc(11), &
                            ESMF_CELL_CELL      = ESMF_RelLoc(12), &
                            ESMF_CELL_VERTEX    = ESMF_RelLoc(13)
-
  
 !------------------------------------------------------------------------------
 !  ! A set of predefined index orders, which shortcut setting
@@ -196,6 +195,7 @@
       public ESMF_CELL_EFACE,     ESMF_CELL_WFACE
       public ESMF_CELL_NECORNER,  ESMF_CELL_NWCORNER
       public ESMF_CELL_SECORNER,  ESMF_CELL_SWCORNER
+      public ESMF_CELL_TOPFACE,   ESMF_CELL_BOTFACE
       public ESMF_CELL_CELL,      ESMF_CELL_VERTEX
 
 
@@ -222,7 +222,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.4 2004/01/06 16:44:59 pwjones Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.5 2004/01/07 18:41:57 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 
