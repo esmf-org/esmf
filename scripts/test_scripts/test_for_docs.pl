@@ -1,8 +1,8 @@
 #! /usr/bin/perl -w
 #
-# $Id: testForDocs.pl,v 1.1 2003/06/25 20:20:12 flanigan Exp $
+# $Id: test_for_docs.pl,v 1.1 2003/06/25 20:34:04 flanigan Exp $
 #
-# testForDocs.pl
+# test_for_docs.pl
 # 
 # This script simple tests for the existence of
 # of a list of ESMF docs.  Right now it will
@@ -112,7 +112,7 @@ $numberOfArgs = keys %options;
 if ($options{h} || ($numberOfArgs == 0)) {
     # print out help message
     print "\n";
-    print "testForDocs.pl  \n\n";
+    print "test_for_docs.pl  \n\n";
 
     print "This script tests for the existence of \n";
     print "ESMF and impl_rep docs. \n\n";
@@ -130,7 +130,7 @@ if ($options{h} || ($numberOfArgs == 0)) {
     print "            the value of ESMF_DIR. \n\n";
 
     print "-i <DIR>    Look for impl_rep docs.  DIR should be\n";
-    print "            the value of ESMF_IMP_DIR. \n\n";
+    print "            the value of ESMF_IMPL_DIR. \n\n";
 
     exit 0;
 }
@@ -222,7 +222,7 @@ if($options{s}) {
 
     print "\n\n";
 
-    print "lookForDoc runtime: ",scalar localtime, "\n\n";
+    print "test_for_docs runtime: ",scalar localtime, "\n\n";
 
 
     if ($options{e}) {
