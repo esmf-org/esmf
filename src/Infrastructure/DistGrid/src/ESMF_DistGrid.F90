@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.63 2003/07/31 23:36:31 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.64 2003/08/01 16:54:35 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.63 2003/07/31 23:36:31 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.64 2003/08/01 16:54:35 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -676,6 +676,11 @@
       distgrid%layout = layout
 
 !     Allocate resources based on number of DE's
+      allocate(distgrid%local_cell_count(nDE), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        return
+      endif
       allocate(distgrid%global_start(nDE,ESMF_MAXGRIDDIM), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
