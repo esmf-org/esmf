@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.39 2004/05/10 15:42:09 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.40 2004/05/12 12:24:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@
       type ESMF_BundleFieldAccess
       sequence
       private
-         !type(ESMF_BundleInterleave) :: bfa_type
+         type(ESMF_BundleInterleave) :: bfa_type
          integer :: bfa_start
          integer :: bfa_end
          integer :: bfa_strides
@@ -89,7 +89,7 @@
         sequence
         private
           integer :: field_order                      ! index of this field
-          !type(ESMF_FieldDataMap) :: field_dm         ! copy of this field's dm
+          type(ESMF_FieldDataMap) :: field_dm         ! copy of this field's dm
           type(ESMF_BundleFieldAccess) :: field_bfa   ! access info if packed
         end type
 
@@ -942,7 +942,8 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_BundleCreate()
-      function ESMF_BundleCreateNew(fieldCount, fields, packflag, name, iospec, rc)
+      function ESMF_BundleCreateNew(fieldCount, fields, &
+                                  packflag, bundleInterleave, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Bundle) :: ESMF_BundleCreateNew
@@ -951,40 +952,44 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_Bundle} from a list of existing
-!     gridded {\tt ESMF\_Fields}.  Optionally create a packed
-!     {\tt ESMF\_Array} which collects all {\tt ESMF\_Field} data into
-!     a single contiguous memory buffer.  All {\tt ESMF\_Field}s
-!     must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
+!   Create an {\tt ESMF\_Bundle} from a list of existing
+!   gridded {\tt ESMF\_Fields}.  Optionally create a packed
+!   {\tt ESMF\_Array} which collects all {\tt ESMF\_Field} data into
+!   a single contiguous memory buffer.  All {\tt ESMF\_Field}s
+!   must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!           data in individual {\tt ESMF\_Array}s will be collected
-!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
-!           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!     \item [{[iospec]}]
-!           I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [fieldCount]
+!      Number of fields to be added to the {\tt ESMF\_Bundle}.
+!      Must be equal to or less than the number of 
+!      {\tt ESMF\_Field}s in the following argument.
+!   \item [fields]
+!      Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_FieldCount}
+!      items will be added to the {\tt ESMF\_Bundle}.
+!   \item [{[packflag]}]
+!      If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
+!      data in individual {\tt ESMF\_Array}s will be collected
+!      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
+!      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
+!   \item [{[bundleInterleave]}]
+!      {\tt ESMF\_BundleInterleave} type.  Controls whether the data in
+!      the packed bundle is interleaved by field or by item.
+!   \item [{[name]}]
+!      {\tt ESMF\_Bundle} name.  A default name will be generated if
+!      one is not specified.
+!   \item [{[iospec]}]
+!      I/O specification.
+!   \item [{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !
 !EOP
@@ -1017,7 +1022,7 @@ end function
 
 !     Call construction method to allocate and initialize bundle internals.
       call ESMF_BundleConstructNew(btypep, fieldCount, fields, &
-                                              packflag, name, iospec, rc)
+                                   packflag, bundleInterleave, name, iospec, rc)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleCreateNew: Bundle construct"
         return
@@ -3139,49 +3144,54 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_BundleConstructNew(btype, fieldCount, fields, &
-                                              packflag, name, iospec, rc)
+                                         packflag, bundleInterleave, &
+                                         name, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleType), pointer :: btype 
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs an {\tt ESMF\_Bundle} from a list of existing
-!     gridded {\tt ESMF\_Fields}.  This routine requires an existing
-!     {\tt ESMF\_Bundle} type as an input and fills in
-!     the internals.  {\tt ESMF\_BundleCreateNew()} does
-!     the allocation of an {\tt ESMF\_Bundle} type first and then
-!     calls this routine.
+!   Constructs an {\tt ESMF\_Bundle} from a list of existing
+!   gridded {\tt ESMF\_Fields}.  This routine requires an existing
+!   {\tt ESMF\_Bundle} type as an input and fills in
+!   the internals.  {\tt ESMF\_BundleCreateNew()} does
+!   the allocation of an {\tt ESMF\_Bundle} type first and then
+!   calls this routine.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [btype]
-!           Pointer to an {\tt ESMF\_Bundle} object.
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of
-!           {\tt ESMF\_Field}s in the following argument.
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!           data in individual {\tt ESMF\_Array}s will be collected
-!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
-!           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!     \item [{[iospec]}]
-!           I/O specification.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item [btype]
+!      Pointer to an {\tt ESMF\_Bundle} object.
+!   \item [fieldCount]
+!      Number of fields to be added to the {\tt ESMF\_Bundle}.
+!      Must be equal to or less than the number of
+!      {\tt ESMF\_Field}s in the following argument.
+!   \item [fields]
+!      Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
+!      items will be added to the {\tt ESMF\_Bundle}.
+!   \item [{[packflag]}]
+!      If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
+!      data in individual {\tt ESMF\_Array}s will be collected
+!      into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
+!      The default is {\tt ESMF\_NO\_PACKED\_DATA}.
+!   \item [{[bundleInterleave]}]
+!      {\tt ESMF\_BundleInterleave} type.  Controls whether the data in
+!      the packed bundle is interleaved by field or by item.
+!   \item [{[name]}]
+!      {\tt ESMF\_Bundle} name.  A default name will be generated if
+!      one is not specified.
+!   \item [{[iospec]}]
+!      I/O specification.
+!   \item [{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
       
@@ -3189,7 +3199,7 @@ end function
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
 
-!     Initialize return code.  Assume failure until success assured.
+      ! Initialize return code.  Assume failure until success assured.
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -3197,17 +3207,18 @@ end function
         rc = ESMF_FAILURE
       endif
 
-!     Initialize the derived type contents.
+      ! Initialize the derived type contents.
       call ESMF_BundleConstructNoFields(btype, name, iospec, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
         return
       endif
 
-!     If specified, set packflag
+      ! If specified, set packflag and interleave
       if(present(packflag)) btype%pack_flag = packflag
+      if(present(bundleInterleave)) btype%fil%field_bfa%bfa_type = bundleInterleave
 
-!     Add the fields in the list, checking for consistency.
+      ! Add the fields in the list, checking for consistency.
       call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
