@@ -1,8 +1,9 @@
-# $Id: makefile,v 1.6 2001/12/11 17:16:07 dneckels Exp $
+# $Id: makefile,v 1.7 2001/12/11 23:20:05 dneckels Exp $
 #===============================================================================
 #                            makefile
 # 
-# This is the primary makefile for building Modeling Framework (ESMF) utilities.  
+# This is the primary makefile for building Earth System Modeling Framework
+# (ESMF) utilities.  
 #===============================================================================
 
 
@@ -189,6 +190,16 @@ DOCS	   = build/readme build/conf.defs
 SCRIPTS    = maint/addlinks maint/builddist maint/buildlinks maint/wwwman \
 	     maint/xclude maint/crontab  \
 	     maint/autoftp include/foldinclude/generateincludes
+
+install:
+	-@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
+	cp ${PDIR}/libesmf.a ${ESMF_LIB_INSTALL} ; \
+	cp ${PDIR}/libmpiuni.a ${ESMF_LIB_INSTALL} ; \
+	fi
+	-if [ "${ESMF_MOD_INSTALL}" != "" ] ; then \
+	cp ${ESMC_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
+	fi
+
 
 alldoc: chkdir_doc 
 	-@echo "Building All Documentation"
