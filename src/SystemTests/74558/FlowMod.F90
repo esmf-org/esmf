@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.6 2003/04/15 22:42:05 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.7 2003/04/17 19:18:47 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -895,6 +895,7 @@
       type(ESMF_DELayout) :: layout
       real, dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(2) :: indext, indexe
+      character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
 !
@@ -910,6 +911,9 @@
 !
 ! Print out some results before finalizing
 !
+      ! TODO: need to get this from the state object, not a global, i.e.:
+      ! call ESMF_StateGetData(import_state, "U", field_u, rc)
+
       ! Get a pointer to the data Array in the Field
       call ESMF_FieldGetData(field_u, array1, rc=rc)
       print *, "data back from field"
@@ -938,6 +942,21 @@
       enddo
       print *, "------------------------------------------------------"
 
+      ! And now test output to a file
+      write(filename, 20)  "U_velocity", de_id+1
+      call ESMF_ArrayWrite(array1, filename=filename, rc=rc)
+
+      ! call ESMF_StateGetData(import_state, "V", field_v, rc)
+      call ESMF_FieldGetData(field_v, array1, rc=rc)
+      write(filename, 20)  "V_velocity", de_id+1
+      call ESMF_ArrayWrite(array1, filename=filename, rc=rc)
+
+      ! call ESMF_StateGetData(import_state, "SIE", field_sie, rc)
+      call ESMF_FieldGetData(field_sie, array1, rc=rc)
+      write(filename, 20)  "SIE", de_id+1
+      call ESMF_ArrayWrite(array1, filename=filename, rc=rc)
+
+ 20   format(A,".",I0.2)
 
       call ArraysGlobalDealloc(status)
       if(status .NE. ESMF_SUCCESS) then
