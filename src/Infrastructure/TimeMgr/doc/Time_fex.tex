@@ -1,27 +1,26 @@
-% $Id: Time_fex.tex,v 1.3 2003/02/11 18:21:21 eschwab Exp $
+% $Id: Time_fex.tex,v 1.4 2003/07/25 23:11:45 eschwab Exp $
 
 A Time instant will typically be used to set the start time in a
 clock.  The following shows how to create and initialize three in F90:
 
 \begin{verbatim}
-! use the Time Module
-use ESMF_TimeMod
+use ESMF_Mod
 
 ! create 3 Time instants
-type(ESMF_Time) :: StartTime1, StartTime2, StartTime3
+type(ESMF_Time) :: startTime1, startTime2, startTime3
 
 ! initialize first to 8/1/2002, 14:25:45.250, Gregorian calendar
-call ESMF_TimeInit(StartTime1, YY=2002, MM=8, DD=1, &
-                   H=14, M=25, S=45, MS=250, Gregorian)
+call ESMF_TimeSet(startTime1, yr_i4=2002, mm_i4=8, dd_i4=1, &
+                  h_i4=14, m_i4=25, s_i4=45, ms_i4=250, gregorian)
 
 ! initialize second to real time (wall clock time)
-call ESMF_TimeGetRealTime(StartTime2)
+call ESMF_TimeGetRealTime(startTime2)
 
 ! initialize third to be same as second
-StartTime3 = StartTime2
+startTime3 = startTime2
 
 ! pass them to their clocks
-call ESMF_ClockInit(ModelTime1, TimeStep, StartTime1, ...)
-call ESMF_ClockInit(ModelTime2, TimeStep, StartTime2, ...)
-call ESMF_ClockInit(ModelTime3, TimeStep, StartTime3, ...)
+call ESMF_ClockSet(modelTime1, timeStep, startTime1, ...)
+call ESMF_ClockSet(modelTime2, timeStep, startTime2, ...)
+call ESMF_ClockSet(modelTime3, timeStep, startTime3, ...)
 \end{verbatim}

@@ -1,4 +1,4 @@
-% $Id: Alarm_fex.tex,v 1.2 2003/02/11 18:58:54 eschwab Exp $
+% $Id: Alarm_fex.tex,v 1.3 2003/07/25 23:11:44 eschwab Exp $
 
 A Alarm is used in conjunction with a clock to ring at certain points in time.
 The following shows how to create and initialize two in F90, based on the
@@ -6,38 +6,37 @@ example shown in Figure 2.  The first is a one-shot and the second is an
 interval alarm.
 
 \begin{verbatim}
-! use the Alarm Module
-use ESMF_AlarmMod
+use ESMF_Mod
 
 ! create two Alarms
-type(ESMF_Alarm) :: Alarm1, Alarm2
+type(ESMF_Alarm) :: alarm1, alarm2
 
 ! Initialize one to be a one-shot
-type(ESMF_Time) :: AlarmTime
-call ESMF_TimeInit(AlarmTime, YY=2002, MM=8, DD=30, Gregorian)
-call ESMF_AlarmInit(Alarm1, RingTime=AlarmTime)
+type(ESMF_Time) :: alarmTime
+call ESMF_TimeSet(alarmTime, yr_i4=2002, mm_i4=8, dd_i4=30, calendar=gregorian)
+call ESMF_AlarmSet(alarm1, ringTime=alarmTime)
 
 ! Initialize other to ring on an interval
-type(ESMF_TimeInterval) :: AlarmInterval
-call ESMF_TimeIntervalInit(AlarmInterval, DD=1)
-call ESMF_AlarmInit(Alarm2, RingInterval=AlarmInterval)
+type(ESMF_TimeInterval) :: alarmInterval
+call ESMF_TimeIntervalInit(alarmInterval, dd_i4=1)
+call ESMF_AlarmInit(alarm2, ringInterval=alarmInterval)
 
 ! Associate alarms with clock
-call ESMF_ClockAddAlarm(ModelTime, Alarm1)
-call ESMF_ClockAddAlarm(ModelTime, Alarm2)
+call ESMF_ClockAddAlarm(modelTime, alarm1)
+call ESMF_ClockAddAlarm(modelTime, alarm2)
 
 ! time step, clock reports active alarms in RingingAlarms list
-call ESMF_ClockAdvance(ModelTime, RingingAlarms, NumActiveAlarms)
+call ESMF_ClockAdvance(modelTime, ringingAlarms, numActiveAlarms)
 
 ! process any active alarms
-do i=1,NumActiveAlarms
-  if (RingingAlarms(i) == Alarm(i)) then
-    ! process Alarm(i)
+do i=1,numActiveAlarms
+  if (ringingAlarms(i) == alarm(i)) then
+    ! process alarm(i)
     call ProcessAlarm(i)
 
    ! after processing alarms, turn off interval alarm to prepare for next
    !   ring time
-   ESMF_AlarmTurnOff(Alarm(i))
+   call ESMF_AlarmTurnOff(alarm(i))
 end do
 
 end if

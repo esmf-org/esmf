@@ -1,20 +1,16 @@
-% $Id: TimeInterval_fex.tex,v 1.3 2003/07/24 15:50:50 cdeluca Exp $
+% $Id: TimeInterval_fex.tex,v 1.4 2003/07/25 23:11:45 eschwab Exp $
 
 A {\tt TimeInterval} will typically be used as a time step for a {\tt Clock} 
 or an {\tt Alarm} interval.  The following shows how to create and 
 initialize one in F90:
 
 \begin{verbatim}
-! use the ESMF Module
 use ESMF_Mod
 
 ! create a TimeInterval
-type(ESMF_TimeInterval) :: TimeStep
+type(ESMF_TimeInterval) :: timeStep
 
 ! initialize it to 3 days, 5 hours, 15 minutes, 30 seconds
-call ESMF_TimeIntervalInit(TimeStep, D=3, H=5, M=15, S=30)
+call ESMF_TimeIntervalSet(timeStep, d_i4=3, h_i4=5, m_i4=15, s_i4=30)
 
 \end{verbatim}
-
-
-
