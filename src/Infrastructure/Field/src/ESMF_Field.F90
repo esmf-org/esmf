@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.193 2004/12/02 00:08:09 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.194 2004/12/02 17:26:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.193 2004/12/02 00:08:09 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.194 2004/12/02 17:26:43 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5127,16 +5127,20 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_GridSerialize(fp%grid, buffer, length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
-      call ESMF_FieldDataMapSerialize(fp%mapping, buffer, length, &
-                                      offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+      if (fp%datamapstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_FieldDataMapSerialize(fp%mapping, buffer, length, &
+                                          offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
     ! TODO: if shallow, call C directly?
       !call ESMF_IOSpecSerialize(fp%iospec, buffer, length, offset, localrc)
@@ -5144,11 +5148,13 @@
       !                           ESMF_ERR_PASSTHRU, &
       !                           ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_ArraySerialize(fp%localfield%localdata, buffer(1), length, &
-                                 offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+          call c_ESMC_ArraySerializeNoData(fp%localfield%localdata, buffer(1),&
+                                           length, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
       !call c_ESMC_ArraySpecSerialize(fp%localfield%arrayspec, buffer, length, &
       !                               offset, localrc)
@@ -5238,16 +5244,24 @@
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      fp%grid = ESMF_GridDeserialize(buffer, offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+      if (fp%gridstatus .eq. ESMF_STATUS_READY) then
+          fp%grid = ESMF_GridDeserialize(buffer, offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+        ! TODO: REMOVE THIS ONCE GRID DESERIAL IS WORKING!!
+        ! for now mark it as not present because validate is getting
+        ! confused deep in the grid code at the moment.
+        fp%gridstatus = ESMF_STATUS_UNINIT
+      endif
 
-      call ESMF_FieldDataMapDeserialize(fp%mapping, buffer, &
-                                      offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+      if (fp%datamapstatus .eq. ESMF_STATUS_READY) then
+          call ESMF_FieldDataMapDeserialize(fp%mapping, buffer, &
+                                          offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
 
     ! TODO: if shallow, call C directly?
       !call ESMF_IOSpecDeserialize(fp%iospec, buffer, offset, localrc)
@@ -5255,12 +5269,14 @@
       !                           ESMF_ERR_PASSTHRU, &
       !                           ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_ArrayDeserialize(fp%localfield%localdata, &
-                                   buffer(1), offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-
+      if (fp%datastatus .eq. ESMF_STATUS_READY) then
+          call c_ESMC_ArrayDeserializeNoData(fp%localfield%localdata, &
+                                       buffer(1), offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rc)) return
+      endif
+    
     ! TODO: if shallow, call C directly?
       !call ESMF_ArraySpecDeserialize(fp%arrayspec, buffer, offset, localrc)
       !if (ESMF_LogMsgFoundError(localrc, &
