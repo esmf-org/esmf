@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_AllocMacros.h,v 1.1 2003/04/24 16:45:35 nscollins Exp $
+! $Id: ESMF_AllocMacros.h,v 1.2 2003/05/01 16:10:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,6 +60,7 @@
 #endif
 #define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
 ! <Created by macro - do not edit directly >  @\
+        call c_ESMC_ArrayGetF90Ptr(array, local##mtypekind##mrank##D, status) @\
         deallocate(local##mtypekind##mrank##D%mtypekind##mrank##Dptr, stat=status)  @\
         nullify(local##mtypekind##mrank##D%mtypekind##mrank##Dptr) @\
 ! < End macro - do not edit directly >  @\
