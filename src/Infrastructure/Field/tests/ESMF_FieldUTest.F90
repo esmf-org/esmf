@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.63 2004/07/07 20:22:20 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.64 2004/07/22 21:29:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.63 2004/07/07 20:22:20 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.64 2004/07/22 21:29:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -529,7 +529,7 @@
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
-      call ESMF_FieldAddAttribute(f3, "Scale Factor", 4, rc)
+      call ESMF_FieldSetAttribute(f3, "Scale Factor", 4, rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding Attribute to a Field "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -579,7 +579,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a second attribute
-      call ESMF_FieldAddAttribute(f3, "Invalid Data Tag", -999, rc)
+      call ESMF_FieldSetAttribute(f3, "Invalid Data Tag", -999, rc)
       call ESMF_FieldPrint(f3, rc=rc)
       intattr2 = 0
       call ESMF_FieldGetAttribute(f3, "Invalid Data Tag", intattr2, rc)
@@ -600,7 +600,7 @@
       !EX_UTest
       ! getting a non-existant attribute
       ! setting an integer list
-      call ESMF_FieldAddAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
+      call ESMF_FieldSetAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
       call ESMF_FieldPrint(f3, rc=rc)
       intattr = 0
       count = 4   ! expected number of values
@@ -614,7 +614,7 @@
       !EX_UTest
       ! test setting a real attribute
       rattr = 3.14159
-      call ESMF_FieldAddAttribute(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
+      call ESMF_FieldSetAttribute(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
       call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       call ESMF_FieldGetAttribute(f3, "Pi", rattr, rc)
@@ -627,7 +627,7 @@
       !EX_UTest
       ! test setting a real list
       rattrlist = (/ 1.1, 2.2 /)
-      call ESMF_FieldAddAttribute(f3, "Vertices", 2, rattrlist, rc)
+      call ESMF_FieldSetAttribute(f3, "Vertices", 2, rattrlist, rc)
       call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       count = 2   ! expected count
@@ -641,7 +641,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a logical attribute
-      call ESMF_FieldAddAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
+      call ESMF_FieldSetAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
       call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
       call ESMF_FieldGetAttribute(f3, "Sky is Blue", lattr, rc)
@@ -654,7 +654,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a logical list
-      call ESMF_FieldAddAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
+      call ESMF_FieldSetAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
       call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
       count = 3   ! expected count
@@ -673,7 +673,7 @@
       !EX_UTest
       ! test setting a character attribute
       cattr = "It was a dark and stormy night"
-      call ESMF_FieldAddAttribute(f3, "Book", cattr, rc)
+      call ESMF_FieldSetAttribute(f3, "Book", cattr, rc)
       call ESMF_FieldPrint(f3, rc=rc)
       call ESMF_FieldGetAttribute(f3, "Book", cattr2, rc)
       print *, "Book  should be drivel, is: ", trim(cattr2)
