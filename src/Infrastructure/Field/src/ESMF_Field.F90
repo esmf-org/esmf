@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.196 2004/12/07 17:18:50 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.197 2004/12/17 18:01:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.196 2004/12/07 17:18:50 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.197 2004/12/17 18:01:28 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3125,7 +3125,7 @@
       if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
 
           ! get grid dim and extents for the local piece
-          call ESMF_GridGet(ftypep%grid, dimCount=gridrank, rc=status)
+          call ESMF_GridGet(ftypep%grid, distDimCount=gridrank, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -4395,7 +4395,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
+      call ESMF_GridGet(grid, distDimCount=gridRank, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4656,7 +4656,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(grid, dimCount=gridRank, rc=status)
+      call ESMF_GridGet(grid, distDimCount=gridRank, rc=status)
       if (present(datamap)) then
         ftype%mapping = datamap   ! copy, datamap can be reused by user now
         ! if specified as explicit args to create, they override anything
@@ -4775,7 +4775,7 @@
       ftype%grid = grid
       ftype%gridstatus = ESMF_STATUS_READY
 
-      call ESMF_GridGet(ftype%grid, dimCount=gridRank, rc=status)
+      call ESMF_GridGet(ftype%grid, distDimCount=gridRank, rc=status)
       if (present(datamap)) then
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
@@ -5013,7 +5013,7 @@
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_DELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
-        call ESMF_GridGet(stypep%grid, dimCount=gridrank, rc=status)
+        call ESMF_GridGet(stypep%grid, distDimCount=gridrank, rc=status)
         call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
         call ESMF_GridGetDELocalAI(stypep%grid, myAI(1:gridrank), horzRelLoc, &
