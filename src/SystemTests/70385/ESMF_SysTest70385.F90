@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.19 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.20 2003/07/18 20:42:44 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -210,8 +210,8 @@
       type(ESMF_Field) :: field1
       integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
-      integer :: i_max, j_max
-      integer :: horz_gridtype, vert_gridtype, halo_width
+      integer, dimension(ESMF_MAXGRIDDIM) :: counts
+      integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
       real :: x_min, x_max, y_min, y_max
@@ -228,8 +228,8 @@
       ! The user creates a simple horizontal Grid internally by passing all
       ! necessary information through the CreateInternal argument list.
 
-      i_max = 30
-      j_max = 36
+      counts(1) = 30
+      counts(2) = 36
       x_min = 0.0
       x_max = 15.0
       y_min = 0.0
@@ -237,10 +237,9 @@
       horz_gridtype = ESMF_GridType_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
-      halo_width = 2
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      grid1 = ESMF_GridCreate(counts=counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layout1, &
@@ -257,10 +256,10 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Allocate arrays.
-      call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
+      call ESMF_GridGetDE(grid1, ai_global=index, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      ni = index(1)%r - index(1)%l + 1
-      nj = index(2)%r - index(2)%l + 1
+      ni = index(1)%max - index(1)%min + 1
+      nj = index(2)%max - index(2)%min + 1
       print *, "allocating", ni, " by ",nj," cells on DE", de_id
       allocate(ldata(ni,nj))
 
@@ -271,20 +270,20 @@
         enddo
       enddo
 
-      ! Set initial data values over exclusive domain to the de identifier
-      call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
+      ! Create Array based on an existing, allocated F90 pointer.
+      ! Data is type Integer, 2D.
+      array1 = ESMF_ArrayCreate(ldata, ESMF_DATA_COPY, halo_width=2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      do j=index(2)%l,index(2)%r
-        do i=index(1)%l,index(1)%r
+      print *, "Array Create returned"
+
+      ! Set initial data values over computational domain to the de identifier
+      call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      do j=index(2)%min,index(2)%max
+        do i=index(1)%min,index(1)%max
           ldata(i,j) =de_id
         enddo
       enddo
-
-      ! Create Array based on an existing, allocated F90 pointer.
-      ! Data is type Integer, 2D.
-      array1 = ESMF_ArrayCreate(ldata, ESMF_DATA_REF, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "Array Create returned"
 
       ! No deallocate() is needed for idata, it will be freed when the
       ! Array is destroyed. 
@@ -416,10 +415,10 @@
       print *, "data back from array"
 
       ! Get size of local array
-      call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
+      call ESMF_GridGetDE(grid1, ai_global=index, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      ni = index(1)%r - index(1)%l + 1
-      nj = index(2)%r - index(2)%l + 1
+      ni = index(1)%max - index(1)%min + 1
+      nj = index(2)%max - index(2)%min + 1
 
       ! Validity check for results - return error if results do not match
 
