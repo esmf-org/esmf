@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.47 2004/04/22 18:01:20 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.48 2004/04/29 17:23:19 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -148,7 +148,10 @@
 %#include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
-%#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
+
+#include "../Infrastructure/DELayout/doc/DELayout_refdoc.ctex"
+
+#include "../Infrastructure/VM/doc/VM_refdoc.ctex"
 
 %#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
