@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMC_LogErr.inc,v 1.3 2004/04/21 04:08:23 cpboulder Exp $
+$Id: ESMC_LogErr.inc,v 1.4 2004/05/12 22:04:00 cpboulder Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,5 +20,13 @@ by both C++ and F90 compilers.
 
 #include "ESMF_ErrConstants.inc"
 #include "ESMF_LogConstants.inc"
-#include "ESMF_LogMacros.inc"
+#ifndef __sgi__
+
+#define ESMC_LogWrite(...) \
+ESMC_LogWrite(__LINE__,__FILE__,__VA_ARGS__)
+
+#define ESMC_LogFoundError(rc,...) \
+ESMC_LogFoundError(rc,__LINE__,__FILE__,__VA_ARGS__)
+
+#endif
 

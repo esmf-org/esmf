@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.5 2004/05/05 13:53:30 nscollins Exp $
+// $Id: ESMC_LogErr_F.C,v 1.6 2004/05/12 22:04:00 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.5 2004/05/05 13:53:30 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.6 2004/05/12 22:04:00 cpboulder Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -79,7 +79,7 @@ extern "C" {
           return;
       }
   } 
-  strcpy(Glog.nameLogErrFile,fname);
+  strcpy(ESMC_LogDefault.nameLogErrFile,fname);
   if (fname)  delete [] fname;
   *rc = ESMF_SUCCESS;
   return;
