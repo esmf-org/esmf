@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2004/12/21 03:31:02 theurich Exp $
+! $Id: user_model1.F90,v 1.10 2004/12/22 04:12:21 nscollins Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -74,9 +74,6 @@
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: npets, pet_id, countsPerDE1(2), countsPerDE2(2)
         type(ESMF_GridHorzStagger) :: horz_stagger
-        type(ESMF_Field) :: temp1
-        type(ESMF_Bundle) :: bundle1
-        type(ESMF_State) :: state1
         integer :: status
 
         ! this should be overwritten by a more specific error code on error
@@ -87,7 +84,6 @@
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-      !  delayout = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=status)
         delayout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
