@@ -1,4 +1,4 @@
-! $Id: ESMF_Component.F90,v 1.1 2003/01/07 21:38:18 nscollins Exp $
+! $Id: ESMF_Component.F90,v 1.2 2003/01/08 23:35:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
+      use ESMF_LayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -44,7 +45,7 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_Component
 !
-!     ! Component data type.  All information is kept on the C++ side inside
+!     ! Component class data.  All information is kept on the C++ side inside
 !     ! the class structure.
 
       type ESMF_Component
@@ -54,8 +55,45 @@
       end type
 
 !------------------------------------------------------------------------------
+!     ! ESMF_CompType
+!
+!     ! Component type: Application, Gridded Component, or Coupler
+!
+      type ESMF_CompType
+      sequence
+      private
+        integer :: ctype
+      end type
+
+      type(ESMF_CompType), parameter :: &
+                  ESMF_APPCOMP = ESMF_CompType(1), &
+                  ESMF_GRIDCOMP = ESMF_CompType(2), &
+                  ESMF_CPLCOMP = ESMF_CompType(3)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_ModelType
+!
+!     ! Model type: Atmosphere, Land, Ocean, SeaIce, River runoff.
+!
+      type ESMF_ModelType
+      sequence
+      private
+        integer :: mtype
+      end type
+
+      type(ESMF_ModelType), parameter :: &
+                  ESMF_ATM = ESMF_ModelType(1), &
+                  ESMF_LAND = ESMF_ModelType(2), &
+                  ESMF_OCEAN = ESMF_ModelType(3), &
+                  ESMF_SEAICE = ESMF_ModelType(4), &
+                  ESMF_RIVER = ESMF_ModelType(5)
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Component
+      public ESMF_CompType, ESMF_APPCOMP, ESMF_GRIDCOMP, ESMF_CPLCOMP
+      public ESMF_ModelType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
+                             ESMF_SEAICE, ESMF_RIVER
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -63,22 +101,23 @@
       public ESMF_ComponentCreate
       public ESMF_ComponentDestroy
  
-      !public ESMF_ComponentInit
-      !public ESMF_ComponentRun
-      !public ESMF_ComponentFinalize
+      public ESMF_ComponentInit
+      public ESMF_ComponentRun
+      public ESMF_ComponentFinal
  
-      public ESMF_ComponentCheckpoint
-      public ESMF_ComponentRestore
-      public ESMF_ComponentWrite
-      public ESMF_ComponentRead
+      !public ESMF_ComponentCheckpoint
+      !public ESMF_ComponentRestore
+      !public ESMF_ComponentWrite
+      !public ESMF_ComponentRead
  
+      public ESMF_ComponentValidate
       public ESMF_ComponentPrint
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Component.F90,v 1.1 2003/01/07 21:38:18 nscollins Exp $'
+      '$Id: ESMF_Component.F90,v 1.2 2003/01/08 23:35:42 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -136,12 +175,17 @@ end interface
 ! !IROUTINE: ESMF_ComponentCreateNew -- Create a new Component specifying all options.
 
 ! !INTERFACE:
-      function ESMF_ComponentCreateNew(rc)
+      function ESMF_ComponentCreateNew(name, layout, ctype, mtype, filepath, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Component) :: ESMF_ComponentCreateNew
 !
 ! !ARGUMENTS:
+      character(len=*), intent(in) :: name
+      type(ESMF_Layout), intent(in) :: layout
+      type(ESMF_CompType), intent(in) :: ctype
+      type(ESMF_ModelType), intent(in) :: mtype 
+      character(len=*), intent(in), optional :: filepath
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -151,6 +195,21 @@ end interface
 !    
 !  The arguments are:
 !  \begin{description}
+!
+!   \item[name]
+!    Component name.
+!
+!   \item[layout]
+!    Component layout.
+!
+!   \item[ctype]
+!    Component type, where valid types include ESMF\_APPCOMP, ESMF\_GRIDCOMP, 
+!    and ESMF\_CPLCOMP for Applications, Gridded Components, and Couplers,
+!    respectively.
+!
+!   \item[mtype]
+!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !
 !   \item[[rc]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -162,7 +221,7 @@ end interface
 
 
 !       local vars
-        type (ESMF_Component), pointer :: ptr   ! opaque pointer to new C++ Component
+        type (ESMF_Component), pointer :: ptr  ! opaque pointer to new C++ Component
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -293,6 +352,177 @@ end interface
 
         end subroutine ESMF_ComponentDestroy
 
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!
+! This section includes the Component Init, Run, and Finalize methods
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ComponentInit -- Call the Component's init routine
+
+! !INTERFACE:
+      subroutine ESMF_ComponentInit(component, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_Component) :: component
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user initialization code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Initialization routine for.
+!
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        call c_ESMC_ComponentInit(component%this, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component initialization error"
+          return
+        endif
+
+!       set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ComponentInit
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ComponentRun -- Call the Component's run routine
+
+! !INTERFACE:
+      subroutine ESMF_ComponentRun(component, timesteps, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_Component) :: component 
+      integer, intent(in) :: timesteps
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user initialization code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component for which to call Run routine.
+!
+!   \item[timesteps]
+!    How long the Run interval is.
+!
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Runialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        call c_ESMC_ComponentRun(component%this, timesteps, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component run error"
+          return
+        endif
+
+!       set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ComponentRun
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ComponentFinal -- Call the Component's finalization routine
+
+! !INTERFACE:
+      subroutine ESMF_ComponentFinal(component, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_Component) :: component 
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user finalization code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call finalization routine for.
+!
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+!       local vars
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       Finalialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       Routine which interfaces to the C++ creation routine.
+        call c_ESMC_ComponentFinal(component%this, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component initialization error"
+          return
+        endif
+
+!       set return values
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ComponentFinal
 
 
 !------------------------------------------------------------------------------
@@ -478,6 +708,55 @@ end interface
  
         end function ESMF_ComponentRead
 
+
+!------------------------------------------------------------------------------
+!BOP
+!
+!
+! !INTERFACE:
+      subroutine ESMF_ComponentValidate(component, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Component) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to ensure a Component is valid.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+       character (len=6) :: defaultopts="brief"
+       integer :: status=ESMF_FAILURE      ! local error status
+       logical :: rcpresent=.FALSE.
+
+!      Initialize return code; assume failure until success is certain
+       if (present(rc)) then
+         rcpresent = .TRUE.
+         rc = ESMF_FAILURE
+       endif
+
+!      ! Interface to call the C++ validate code
+       if(present(options)) then
+           call c_ESMC_ComponentValidate(component%this, options, status) 
+       else
+           call c_ESMC_ComponentValidate(component%this, defaultopts, status) 
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "Component validate error"
+         return
+       endif
+
+!      set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+
+       end subroutine ESMF_ComponentValidate
 
 !------------------------------------------------------------------------------
 !BOP
