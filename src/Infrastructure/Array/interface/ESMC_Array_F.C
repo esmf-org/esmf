@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.4 2003/07/22 19:36:49 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.5 2003/07/23 17:00:12 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -102,20 +102,22 @@ extern "C" {
          *status = ESMC_ArrayDestroy(*ptr);
      }
 
-     void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_DomainType dt, 
+     void FTN(c_esmc_arraysetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
                                         ESMC_AxisIndex *ai, int *status) {
-          *status = (*ptr)->ESMC_ArraySetAxisIndex(dt, ai);
+          *status = (*ptr)->ESMC_ArraySetAxisIndex(*dt, ai);
      }
 
-     void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_DomainType dt, 
+     void FTN(c_esmc_arraygetaxisindex)(ESMC_Array **ptr, ESMC_DomainType *dt, 
                                         ESMC_AxisIndex *ai, int *status) {
-          *status = (*ptr)->ESMC_ArrayGetAxisIndex(dt, ai);
+          *status = (*ptr)->ESMC_ArrayGetAxisIndex(*dt, ai);
      }
 
-     void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, ESMC_Grid **g,
+     void FTN(c_esmc_arraygetallaxisindices)(ESMC_Array **ptr, 
+                                     ESMC_AxisIndex *global, int *nDEs,
                                      ESMC_AxisIndex *total, ESMC_AxisIndex *comp, 
                                      ESMC_AxisIndex *excl, int *status) {
-          *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(*g, total, comp, excl);
+          *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, total,
+                                     comp, excl);
      }
 
      void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,
