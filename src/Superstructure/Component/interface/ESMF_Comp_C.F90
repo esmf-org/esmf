@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.9 2004/01/20 23:17:04 jwolfe Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.10 2004/01/21 18:15:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.9 2004/01/20 23:17:04 jwolfe Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.10 2004/01/21 18:15:03 jwolfe Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -90,9 +90,11 @@
    subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, &
                                      config, configfile, rc)
        !use ESMF_BaseMod    ! ESMF base class
+       use ESMF_ConfigMod
        use ESMF_DELayoutMod
        use ESMF_GridTypesMod
        use ESMF_GridCompMod
+       use ESMF_CompMod
 
        type(ESMF_GridComp) :: gcomp
        character(len=*) :: name
