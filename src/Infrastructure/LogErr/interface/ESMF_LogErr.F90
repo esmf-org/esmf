@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.33 2004/03/23 23:02:50 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.34 2004/03/24 06:56:06 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,9 +12,8 @@
 !
 
 #include "ESMF.h"
-!#include "ESMF_Macros.inc"
+#include "ESMF_Macros.inc"
 #include "ESMF_LogConstants.inc"
-
 module ESMF_LogErrMod
 
    use ESMF_BaseMod
@@ -116,7 +115,7 @@ type ESMF_Log
     integer :: stdOutUnitNumber=6
     type(ESMF_Logical) :: fileIO=ESMF_FALSE !File written to standard out
 #else
-    integer :: stdOutUnitNumber
+    integer :: stdOutUnitNumber=6
     type(ESMF_Logical) :: fileIO
 #endif
 end type ESMF_Log
@@ -139,21 +138,36 @@ end type ESMF_Log
 contains
 
 subroutine ESMF_LogOpen(aLog, filetype, filename,rc)
+
 	type(ESMF_Log)					:: aLog
 	integer 					:: filetype 
 	character(len=*)				:: filename
 	integer, intent(out),optional			:: rc
-  	call C_ESMF_LogOpenFile(aLog, filetype, filename)
+	
+	character(len=10) :: t
+	character(len=8) :: d
+	
+	aLog%nameLogErrFile=filename
+	call DATE_AND_TIME(d,t)
+	OPEN(UNIT=aLog%stdOutUnitNumber,File=aLog%nameLogErrFile,POSITION="APPEND")
+	WRITE(aLog%stdOutUnitNumber,*) t," ",d," Log Close"
 	rc=0
-  	print *, "ESMF_LogOpen"
+	
 end subroutine ESMF_LogOpen	
 
 subroutine ESMF_LogClose(aLog,rc)
+
 	type(ESMF_Log), intent(in) 			:: aLog
 	integer, intent(out),optional			:: rc
-	call C_ESMF_LogCloseFile(aLog)
-	print *, "Log Close"
+	
+	character(len=10) :: t
+	character(len=8) :: d
+	
+	call DATE_AND_TIME(d,t)
+	WRITE(aLog%stdOutUnitNumber,*) t," ",d," Log Close"
+	CLOSE(UNIT=aLog%stdOutUnitNumber)
 	rc=0
+	
 end subroutine ESMF_LogClose
 
 subroutine ESMF_LogWrite(aLog,logtype,context,rc)
@@ -162,12 +176,14 @@ subroutine ESMF_LogWrite(aLog,logtype,context,rc)
 	character(len=*), intent(in)			:: context
 	integer, intent(out),optional			:: rc
 	
-	integer :: contextLength
-   	
-	contextLength=len(context)
-	print *, "Log Write"
+   	character(len=10) :: t
+	character(len=8) :: d
+	
+	call DATE_AND_TIME(d,t)
+	
+	WRITE(aLog%stdOutUnitNumber,*) t," ",d," ",ESMF_SRCLINE," ",context
+	print *, ESMF_SRCLINE," ",t," ",d," ",context
 	rc=0
-   	call C_ESMF_LogWrite(aLog,context,contextLength)
        
 
 end subroutine ESMF_LogWrite
