@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.19 2004/04/16 23:06:10 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.20 2004/04/19 20:32:33 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -85,9 +85,9 @@
 
     ! Create a default 1-dim DELayout with N DE's, where N is number of PETs in VM
     delayout0 = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc /= ESMF_SUCCESS) stop
+    if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_newDELayoutGet(delayout0, deCount=ndes, rc=rc)
-    if (rc /= ESMF_SUCCESS) stop
+    if (rc .ne. ESMF_SUCCESS) goto 20
 
     if (ndes .eq. 1) then
        print *, "This test must run with > 1 processor"

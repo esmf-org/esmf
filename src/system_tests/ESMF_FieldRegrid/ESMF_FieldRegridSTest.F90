@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.18 2004/04/14 22:27:12 jwolfe Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.19 2004/04/19 20:33:35 jwolfe Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -87,9 +87,17 @@
     ! Create a default 1-dim DELayout with N DE's, where N is number of PETs
     ! in VM
     delayout1 = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) stop
+    if (rc .ne. ESMF_SUCCESS) then
+      print *, "Error in call to delayout create."
+      goto 10
+    endif
+
     call ESMF_newDELayoutGet(delayout1, ndes, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) stop
+    if (rc .ne. ESMF_SUCCESS) then
+      print *, "Error in call to delayout get."
+      goto 10
+    endif
+
     if (ndes .lt. 6) then
       print *, "This system test needs to run at least 6-way, current np = ", &
                ndes
