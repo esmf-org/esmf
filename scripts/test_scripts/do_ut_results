@@ -1,4 +1,4 @@
-# $Id: do_ut_results,v 1.6 2003/04/07 14:59:20 svasquez Exp $
+# $Id: do_ut_results,v 1.7 2003/04/10 20:53:28 svasquez Exp $
 #!/bin/ksh
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
@@ -7,7 +7,7 @@ echo "The following is the analysis of the Unit Tests results:"
 echo ""
 
 find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest" -print | wc -l > stdoutfiles
-if grep -q " 0" stdoutfiles # check if there are any unit tests executable files 
+if grep " 0" stdoutfiles > NULL # check if there are any unit tests executable files 
 then
 	echo "There are no executable Unit test files, either the 'gmake BOPT=g/O build_tests' has "
 	echo "not been run or the 'build_tests' did not build successfully."
@@ -25,7 +25,7 @@ else
 fi # end of if grep " 0" stdoutfiles
 
 find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest*.stdout" -print | wc -l > stdoutfiles
-if grep -q " 0" stdoutfiles
+if grep  " 0" stdoutfiles > NULL
 then
 	echo "There are no Unit Test stdout files." 
 	echo "" 
@@ -41,7 +41,7 @@ else
 	tests=`grep  PASS $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout | wc -l`
 	echo  $tests " Unit Tests passed " 
         echo ""
-	if grep -q FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout
+	if grep  FAIL $ESMF_DIR/test/testg/$ESMF_ARCH/*UTest*.stdout > NULL
 	then
 		echo "The following Unit Tests Failed: "  
 		cd $ESMF_DIR/test/testg/$ESMF_ARCH
@@ -50,7 +50,7 @@ else
 		echo "" 
 	else
 		find $ESMF_DIR/test/testg/$ESMF_ARCH -name "*UTest*.stdout"  -size 0 -print | wc -l > zerofiles
-		if diff stdoutfiles zerofiles #check if all the stdoutfiles are of zero length
+		if diff stdoutfiles zerofiles  > NULL #check if all the stdoutfiles are of zero length
 		then
 			echo ""
 		else
