@@ -1,4 +1,4 @@
-% $Id: State_rest.tex,v 1.3 2004/03/22 19:18:03 cdeluca Exp $
+% $Id: State_rest.tex,v 1.4 2004/06/13 00:41:31 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,7 +10,15 @@
 
 %\subsubsection{Restrictions and Future Work}
 
-No restrictions are noted.
+\begin{enumerate}
+\item{\bf Flags not fully implemented.}
+The flags for indicating various qualities associated with 
+data items in a State - validity, whether or not the item is
+required for restart, read/write status - are not fully implemented.
+Although their defaults can be set, the associated methods for 
+setting and getting these flags have not been implemented.
+
+\end{enumerate}
 
 
 

@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.6 2004/06/10 22:08:36 cpboulder Exp $
+% $Id: LogErr_rest.tex,v 1.7 2004/06/13 00:41:31 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,23 +8,28 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\subsubsection{Restrictions and Future Work}
-
 \begin{enumerate}
 
-\item Message writing methods are expanded using a macro that adds the
+\item {\bf Line and file only available when using the C preprocessor}
+Message writing methods are expanded using a macro that adds the
 predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ to the argument list.
 Using these constants, we can associate a file name and line number with the
 message.  If the CPP preprocessor is not used, this expansion will not be done
 and the file and line number will not appear in the Log text.
 
-Currently, the ESMF\_LogGet and ESMF_LogSet subroutines are not implemented.
-Also, the flushing will occur after every write instead of allowing the user to
+\item{\bf Get and set methods not implemented.}
+Currently, the {\tt ESMF\_LogGet()} and {\tt ESMF\_LogSet()} methods are 
+not implemented.
+
+\item{\bf Flush after write.}
+Flushing occurs after every write instead of allowing the user to
 specify the buffer size.
 
-ESMF\_LogInitialize and ESMF\_LogFinalize are called during ESMF\_Initialize and
-ESMF_\Finalize so they do not need to be called if the default Log is used.  If
-a new Log is required, ESMF\_LogOpen is used with a new new aLog object passed
-in so that there are no conflicts with the default Log.
+\item{\bf Avoiding conflicts with the default Log.}
+The private methods {\tt ESMF\_LogInitialize()} and {\tt ESMF\_LogFinalize()} 
+are called during {\tt ESMF\_Initialize()} and
+{\tt ESMF\_Finalize()} so they do not need to be called if the default 
+Log is used.  If a new Log is required, {\tt ESMF\_LogOpen()} is used with a 
+new Log object passed in so that there are no conflicts with the default Log.
 
 \end{enumerate}

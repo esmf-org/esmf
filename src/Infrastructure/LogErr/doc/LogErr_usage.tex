@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.3 2004/03/17 22:46:39 cdeluca Exp $
+% $Id: LogErr_usage.tex,v 1.4 2004/06/13 00:41:31 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
@@ -6,10 +6,13 @@ A typical sequence of tasks associated with using the Log utility would begin
 with the user calling {\tt ESMF\_LogOpen()} to open a Log file and retrieve
 an active Log object.  The user can then set or get options on how the Log
 should be used with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.
+These are not fully implemented at this time. 
+
 Depending on how the options are set, {\tt ESMF\_LogWrite()} either writes
 user messages direstly to a Log file or writes to a buffer that can be flushed
-when full or by using the {\tt ESMF\_LogFlush()} method.  When done writing
-messages, the Log is closed by calling {\tt ESMF\_LogClose}.  
+when full or by using the {\tt ESMF\_LogFlush()} method.  In the current
+implementation the Log flushes after every write.  When done writing
+messages, the Log is closed by calling {\tt ESMF\_LogClose()}.  
 
 Some of the assumptions implicit in using the Log utility are:
 
@@ -21,3 +24,5 @@ Some of the assumptions implicit in using the Log utility are:
 a message is written to file and the buffer flushes automatically.
 
 \end{enumerate}
+
+

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleGetMacros.h,v 1.2 2004/06/07 05:21:06 nscollins Exp $
+! $Id: ESMF_BundleGetMacros.h,v 1.3 2004/06/13 00:41:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,27 +34,28 @@
 ! @\
 ! !INTERFACE: @\
 !     ! Private name; call using ESMF_BundleGetDataPointer() @\
-!      subroutine ESMF_BundleGetDataPointer<rank><type><kind>(bundle, fieldname, fptr, copyflag, rc) @\
+!      subroutine ESMF_BundleGetDataPointer<rank><type><kind>(bundle, & @\
+!                                 fieldName, dataPointer, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Bundle), intent(in) :: bundle @\
-!      character(len=*), intent(in) :: fieldname @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!      character(len=*), intent(in) :: fieldName @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: dataPointer @\
 !      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
-! Retrieves data from a bundle, returning a direct Fortran pointer to @\
+! Retrieves data from the {\tt bundle}, returning a direct Fortran pointer to @\
 !   the data.  @\
 ! @\
 ! The arguments are: @\
 !  \begin{description} @\
 !  \item[bundle] @\
 !   The {\tt ESMF\_Bundle} to query. @\
-!  \item[fieldname] @\
-!   The name of the {\tt ESMF\_Field} inside the {\tt ESMF\_Bundle} @\
-!   to return.  The {\tt ESMF\_Bundle} cannot have packed data. @\
-!  \item[fptr] @\
+!  \item[fieldName] @\
+!   The name of the {\tt ESMF\_Field} inside the {\tt bundle} @\
+!   to return.  The {\tt bundle} cannot have packed data. @\
+!  \item[dataPointer] @\
 !   An unassociated Fortran pointer of the proper Type, Kind, and Rank as the data @\
 !   in the Bundle.  When this call returns successfully, the pointer will now point to @\
 !   the data in the Bundle.  This is either a reference or a copy, depending on the @\
@@ -80,11 +81,12 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_BundleGetDataPointer" @\
-      subroutine ESMF_BundleGetDataPointer##mrank##D##mtypekind(bundle, fieldname, fptr, copyflag, rc) @\
+      subroutine ESMF_BundleGetDataPointer##mrank##D##mtypekind(bundle, & @\
+                      fieldName, dataPointer, copyflag, rc) @\
  @\
       type(ESMF_Bundle), intent(in) :: bundle @\
-      character(len=*), intent(in) :: fieldname @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+      character(len=*), intent(in) :: fieldName @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       integer, intent(out), optional :: rc   @\
  @\
@@ -105,13 +107,13 @@
         endif @\
  @\
         ! Test to see if array already allocated, and fail if so. @\
-        if (associated(fptr)) then @\
+        if (associated(dataPointer)) then @\
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
                              "Data Pointer cannot already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        call ESMF_BundleGetField(bundle, fieldname, field, status) @\
+        call ESMF_BundleGetField(bundle, fieldName, field, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -121,7 +123,7 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        call ESMF_ArrayGetData(array, fptr, copyflag, rc=status) @\
+        call ESMF_ArrayGetData(array, dataPointer, copyflag, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.5 2004/03/17 22:01:18 svasquez Exp $
+% $Id: LogErr_desc.tex,v 1.6 2004/06/13 00:41:31 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,7 +16,7 @@ to write to a single file or multiple files, to write from a root PE or
 from all active PEs, and to halt at errors, at warnings, or never.  The 
 verbosity of ouput can be adjusted with a flag.  Multiple 
 Logs can be created within an application.  Logs may be given
-user-specified names, or, if desired, a default {\tt ESMF\_Log\_World} can 
+user-specified names, or, if desired, a default Log can 
 be used.  
 
 Log provides capabilities to write to a file immediately or store entries 
@@ -24,4 +24,5 @@ in a buffer for writing either when the buffer is full, or when the user
 calls an {\tt ESMF\_LogFlush()} command.  The user can specify the number 
 of entries that a Log should contain when it is flushed.  For buffered output, 
 it's also possible to specify whether Log entries should be ordered or not.  
+
 

@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.15 2004/06/09 06:02:28 cpboulder Exp $
+% $Id: LogErr_refdoc.ctex,v 1.16 2004/06/13 00:41:31 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,6 +47,13 @@
 \input{LogErr_desc}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/LogErr/doc/LogErr_desc}
+#endif
+
+\subsection{LogErr Options}
+#ifdef STANDALONE
+\input{LogErr_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/LogErr/doc/LogErr_options}
 #endif
 
 \subsection{Use and Examples}

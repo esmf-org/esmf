@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.8 2004/06/11 18:20:38 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.9 2004/06/13 00:41:31 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -327,7 +327,7 @@ end function ESMF_LogFoundAllocError
 end function ESMF_LogFoundError
 
 !--------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogGet - Returns information about a log object
 
 ! !INTERFACE: 
@@ -370,7 +370,7 @@ end function ESMF_LogFoundError
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOP 
+!EOPI
 	if (present(rc)) then
 	  rc=ESMF_FAILURE
 	endif
@@ -622,7 +622,7 @@ end function ESMF_LogMsgFoundError
 end subroutine ESMF_LogOpen	
 
 !--------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogSet - Sets Log Parameters
 
 ! !INTERFACE: 
@@ -664,7 +664,7 @@ end subroutine ESMF_LogOpen
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOP 
+!EOPI 
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(verbose)) aLog%verbose=verbose
 	if (present(flush)) aLog%flush=flush
@@ -797,3 +797,12 @@ end subroutine ESMF_LogSet
 end function ESMF_LogWrite
 
 end module ESMF_LogErrMod
+
+
+
+
+
+
+
+
+
