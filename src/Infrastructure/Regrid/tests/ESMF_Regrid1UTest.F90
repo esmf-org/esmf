@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid1UTest.F90,v 1.1 2005/02/07 16:37:54 rfaincht Exp $
+! $Id: ESMF_Regrid1UTest.F90,v 1.2 2005/02/15 17:58:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid1UTest.F90,v 1.1 2005/02/07 16:37:54 rfaincht Exp $'
+      '$Id: ESMF_Regrid1UTest.F90,v 1.2 2005/02/15 17:58:30 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -274,7 +274,7 @@
      end do
    end do
    !---------------------------------------------------------------
-   !EX_UTest
+   !NEX_UTest
    !Test Regrid for simple re-distribution operation
     write(failMsg, *) "Error in regrid --simple redistribution"
     write(name, *) "Regrid test"
