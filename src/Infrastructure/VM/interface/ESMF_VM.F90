@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.16 2004/05/20 02:05:38 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.17 2004/05/20 18:54:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! !USES:
   use ESMF_BaseMod                          ! ESMF base class
+  use ESMF_LogErrMod
       
   implicit none
 
@@ -145,7 +146,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.16 2004/05/20 02:05:38 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.17 2004/05/20 18:54:24 theurich Exp $'
 
 !==============================================================================
 
@@ -270,28 +271,22 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+    
     ! Copy the handle to the global VM into the output variable
     vm = GlobalVM
 
     ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_VMGetGlobal
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGet()"
 !BOP
 ! !IROUTINE: ESMF_VMGet - Get VM internals
 
@@ -346,15 +341,26 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-      okOpenMpFlag, rc)
-    
+      okOpenMpFlag, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMGet
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGetPET()"
 !BOP
 ! !IROUTINE: ESMF_VMGetPET - Get VM PET internals
 
@@ -399,14 +405,26 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, rc)
- 
+    call c_ESMC_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, &
+      localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMGetPET
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPrint()"
 !BOP
 ! !IROUTINE: ESMF_VMPrint - Print VM internals
 
@@ -431,31 +449,25 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    call c_ESMC_VMPrint(vm, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMPrint error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMPrint(vm, localrc) 
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMPrint
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendI4()"
 !BOP
 ! !IROUTINE: ESMF_VMSend - Send 4-byte integers
 
@@ -505,33 +517,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
     size = count * 4 ! 4 bytes
-    call c_ESMC_VMSend(vm, message, size, dst, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMSend error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMSend(vm, message, size, dst, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMSendI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendR4()"
 !BOP
 ! !IROUTINE: ESMF_VMSend - Send 4-byte reals
 
@@ -581,33 +587,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
     size = count * 4 ! 4 bytes
-    call c_ESMC_VMSend(vm, message, size, dst, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMSend error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMSend(vm, message, size, dst, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMSendR4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendR8()"
 !BOP
 ! !IROUTINE: ESMF_VMSend - Send 8-byte reals
 
@@ -657,33 +657,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
     size = count * 8 ! 8 bytes
-    call c_ESMC_VMSend(vm, message, size, dst, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMSend error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMSend(vm, message, size, dst, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMSendR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvI4()"
 !BOP
 ! !IROUTINE: ESMF_VMRecv - Receive 4-byte integers
 
@@ -733,33 +727,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
     size = count * 4 ! 4 bytes
-    call c_ESMC_VMRecv(vm, message, size, src, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMSend error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMRecv(vm, message, size, src, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMRecvI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvR4()"
 !BOP
 ! !IROUTINE: ESMF_VMRecv - Receive 4-byte reals
 
@@ -809,33 +797,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
     size = count * 4 ! 4 bytes
-    call c_ESMC_VMRecv(vm, message, size, src, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMSend error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMRecv(vm, message, size, src, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMRecvR4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvR8()"
 !BOP
 ! !IROUTINE: ESMF_VMRecv - Receive 8-byte reals
 
@@ -885,33 +867,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    size = count * 4 ! 4 bytes
-    call c_ESMC_VMRecv(vm, message, size, src, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMSend error"
-      return
-    endif
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMRecv(vm, message, size, src, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMRecvR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterI4()"
 !BOP
 ! !IROUTINE: ESMF_VMScatter - Scatter 4-byte integers
 
@@ -967,34 +943,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                 ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    size = count * 4 ! 4 bytes
-    call c_ESMC_VMScatter(vm, input, output, size, root, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMScatter error"
-      return
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMScatter(vm, input, output, size, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMScatterI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterR4()"
 !BOP
 ! !IROUTINE: ESMF_VMScatter - Scatter 4-byte reals
 
@@ -1051,34 +1020,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                 ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    size = count * 4 ! 4 bytes
-    call c_ESMC_VMScatter(vm, input, output, size, root, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMScatter error"
-      return
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMScatter(vm, input, output, size, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMScatterR4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMScatterR8()"
 !BOP
 ! !IROUTINE: ESMF_VMScatter - Scatter 8-byte reals
 
@@ -1135,34 +1097,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                 ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    size = count * 8 ! 8 bytes
-    call c_ESMC_VMScatter(vm, input, output, size, root, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMScatter error"
-      return
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMScatter(vm, input, output, size, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMScatterR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherI4()"
 !BOP
 ! !IROUTINE: ESMF_VMGather - Gather 4-byte integers
 
@@ -1218,34 +1173,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                 ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    size = count * 4 ! 4 bytes
-    call c_ESMC_VMGather(vm, input, output, size, root, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMGather error"
-      return
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGather(vm, input, output, size, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMGatherI4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherR4()"
 !BOP
 ! !IROUTINE: ESMF_VMGather - Gather 4-byte reals
 
@@ -1301,34 +1249,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                 ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    size = count * 4 ! 4 bytes
-    call c_ESMC_VMGather(vm, input, output, size, root, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMGather error"
-      return
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    size = count * 4 ! 4 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGather(vm, input, output, size, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMGatherR4
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMGatherR8()"
 !BOP
 ! !IROUTINE: ESMF_VMGather - Gather 8-byte reals
 
@@ -1384,34 +1325,27 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                 ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
     integer :: size
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-    
-    ! Routine which interfaces to the C++ creation routine.
-    size = count * 8 ! 8 bytes
-    call c_ESMC_VMGather(vm, input, output, size, root, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMGather error"
-      return
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    size = count * 8 ! 8 bytes
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGather(vm, input, output, size, root, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMGatherR8
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMBarrier()"
 !BOP
 ! !IROUTINE: ESMF_VMBarrier - VM wide barrier
 
@@ -1437,31 +1371,25 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    call c_ESMC_VMBarrier(vm, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMBarrier error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMBarrier(vm, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMBarrier
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMThreadBarrier()"
 !BOP
 ! !IROUTINE: ESMF_VMThreadBarrier - PET thread group wide barrier
 
@@ -1488,31 +1416,25 @@ module ESMF_VMMod
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    call c_ESMC_VMThreadBarrier(vm, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMThreadBarrier error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMThreadBarrier(vm, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMThreadBarrier
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMInitialize()"
 !BOPI
 ! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
 
@@ -1534,31 +1456,25 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    call c_ESMC_VMInitialize(GlobalVM, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMInitialize error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMInitialize(GlobalVM, localrc)
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMInitialize
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMFinalize()"
 !BOPI
 ! !IROUTINE: ESMF_VMFinalize - Finalize Global VM
 
@@ -1580,34 +1496,30 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
+    integer :: localrc                        ! local return code
 
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
 
-    call c_ESMC_VMFinalize(status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_VMFinalize error"
-      return
-    endif
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMFinalize(localrc)
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
 
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
   end subroutine ESMF_VMFinalize
 !------------------------------------------------------------------------------
+
 
 !==============================================================================
 ! ESMF_VMPlan methods:
 !==============================================================================
 
+
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanConstruct()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanConstruct - Construct a default plan
 
@@ -1641,14 +1553,25 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, rc)
+    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanConstruct
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanDestruct()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanDestruct - Destruct a vmplan
 
@@ -1673,14 +1596,25 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMPlanDestruct(vmplan, rc)
+    call c_ESMC_VMPlanDestruct(vmplan, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanDestruct
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanMaxThreads()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMaxThreads - Set up a MaxThreads vmplan
 
@@ -1727,16 +1661,27 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanMaxThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, rc)
-  
+      npetlist, petlist, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMPlanMaxThreads
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanMinThreads()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMinThreads - Set up a MinThreads vmplan
 
@@ -1783,16 +1728,27 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanMinThreads(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, rc)
-  
+      npetlist, petlist, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMPlanMinThreads
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanMinThreads()"
 !BOPI
 ! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
 
@@ -1839,11 +1795,20 @@ module ESMF_VMMod
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, rc)
-  
+      npetlist, petlist, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
   end subroutine ESMF_VMPlanMaxPEs
 !------------------------------------------------------------------------------
 
