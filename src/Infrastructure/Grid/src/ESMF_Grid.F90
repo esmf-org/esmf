@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.37 2003/03/17 21:34:12 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.38 2003/04/01 16:07:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.37 2003/03/17 21:34:12 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.38 2003/04/01 16:07:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1858,7 +1858,8 @@
       endif
       DE_id = grid%distgrid%ptr%MyDE%MyDE
       call ESMF_DistGridGetCounts(grid%distgrid%ptr, DE_id, &
-                                  lcellexc_start, lcellexc_end, &
+                                  lcellexc_start=lcellexc_start, &
+                                  lcellexc_end=lcellexc_end, &
                                   rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get counts"
