@@ -1,4 +1,4 @@
-# $Id: SunOS.default.default.mk,v 1.2 2003/10/17 21:16:10 nscollins Exp $
+# $Id: build_rules.mk,v 1.1 2003/10/20 20:09:18 nscollins Exp $
 #
 # SunOs.default.default.mk
 #

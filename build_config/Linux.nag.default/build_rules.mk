@@ -1,6 +1,6 @@
-#  $Id: Linux.absoft.default.mk,v 1.2 2003/10/17 21:14:10 nscollins Exp $
+#  $Id: build_rules.mk,v 1.1 2003/10/20 20:08:56 nscollins Exp $
 #
-#  Linus.absoft.default.mk
+#  Linus.nag.default.mk
 #
 
 
@@ -42,17 +42,15 @@ endif
 
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed:
-MPI_HOME       = 
 MPI_LIB        = -lmpi -llam 
 MPI_INCLUDE    = 
 MPIRUN         =  mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-# with mpich installed:
 MPI_LIB        = -lmpich
 MPI_INCLUDE    = -DESMF_MPICH=1
-MPIRUN         = mpirun $(ESMF_NODES)
+MPIRUN         =  mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
@@ -89,25 +87,13 @@ SED		   = /usr/bin/sed
 SH_LD		   = cc
 # ######################### C and Fortran compiler ########################
 #
-ifneq ($(ESMF_COMM),mpich)
-C_CC                = cc
-C_FC                = f95
-CXX_CC              = g++ -fPIC
-CXX_FC              = f95 -YEXT_NAMES=LCS -s 
-endif
-
-ifeq ($(ESMF_COMM),mpich)
-C_CC               = mpicc
-C_FC               = mpif90 
-CXX_CC             = mpiCC -fPIC
-CXX_FC             = mpif90 -YEXT_NAMES=LCS -s 
-endif
-
+C_CC		   = cc
+C_FC		   = f95 
 C_FC_MOD           = -p
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = ${C_CC}
-C_FLINKER	   = ${C_FC}
+C_CLINKER	   = cc
+C_FLINKER	   = f95
 C_CCV		   = ${C_CC} --version
 C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
@@ -127,16 +113,23 @@ F_FREENOCPP     = -ffree
 F_FIXNOCPP      = -ffixed
 # ########################## C++ compiler ##################################
 #
+CXX_CC		   = g++ -fPIC
+CXX_FC		   = f95 -YEXT_NAMES=LCS -s 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = ${CXX_CC}
-CXX_FLINKER	   = ${CXX_CC}
+CXX_CLINKER	   = g++
+CXX_FLINKER	   = g++
 CXX_CCV		   = ${CXX_CC} --version
+#CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-C_F90CXXLD         = ${CXX_CC}
-C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
-C_CXXF90LD         = ${CXX_CC} 
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -lf90math -lfio -lf77math
+#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
+#C_F90CXXLD         = f95 
+C_F90CXXLD         = g++
+C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
+#C_CXXF90LD         = f95
+C_CXXF90LD         = g++
+#C_CXXF90LIBS       = ${MPI_LIB}  
+C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
@@ -151,7 +144,7 @@ OCOMP_COPTFLAGS	   = -O
 OCOMP_FOPTFLAGS	   = -O
 ##################################################################################
 
-PARCH		   = linux
+PARCH		   = mac_osx
 
 SL_SUFFIX   = 
 SL_LIBOPTS  = 

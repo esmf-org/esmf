@@ -1,4 +1,4 @@
-# $Id: IRIX64.default.default.mk,v 1.2 2003/10/20 19:58:51 nscollins Exp $
+# $Id: build_rules.mk,v 1.1 2003/10/20 20:08:27 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #

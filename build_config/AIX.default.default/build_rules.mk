@@ -1,4 +1,4 @@
-#  $Id: AIX.default.default.mk,v 1.1 2003/10/17 19:34:55 nscollins Exp $
+#  $Id: build_rules.mk,v 1.1 2003/10/20 20:08:08 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
