@@ -231,11 +231,11 @@ enable a variety of applications to be built upon them.
 
 An alternative view of layers results from combining multiple modes of parallelism 
 in a single application.  In Earth system models individual model 
-components typically run as \htmladdnormallink{data parallel}{glos:DataParallel} 
+components typically run as data parallel 
 operations.  When a number of 
 these are combined in an application such as a coupled climate model, individual 
-components or sets of individual components may run as \htmladdnormallink{task 
-parallel}{glos:TaskParallel} operations 
+components or sets of individual components may run as task 
+parallel operations 
 on non-overlapping sets of nodes.  Data parallel operations can be viewed
 as residing in a lower layer, while the task parallel constructs that 
 synchronize and referee data transfers occur at a higher level. We refer to 

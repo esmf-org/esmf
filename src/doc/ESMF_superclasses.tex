@@ -3,7 +3,7 @@
 
 \subsection{Introduction}
 
-In this section, we explain the classes involved in ESMF applications, 
+In this section, we describe the classes involved in ESMF applications, 
 their relationships, and typical action sequences for component interactions.  
 
 \subsection{Design Goals and Considerations}
@@ -31,7 +31,7 @@ We aim to keep the coupling specification entirely external
 to {\tt Gridded Component}s involved in an interaction, which makes it easier 
 for the same {\tt Gridded Component} to be reconfigured for a variety of scenarios.
 This is the recognized ``mediator'' strategy for handling complexity in 
-software that requires many inter-component interactions (see Section~\ref{oop}).  
+software that requires many inter-component interactions (see Section~\ref{sec:oop}).  
 We avoid undue complication in the {\tt Coupler Component} by limiting
 its responsibility; the Coupler component does not instantiate 
 interacting components, schedule, or run them.  These tasks are performed
@@ -180,7 +180,7 @@ pointers can be passed to the component.
 The {\tt ESMF\_StateTransform} call executes a {\tt Transform} 
 within a {\tt Gridded Component}.  It takes as arguments a
 {\tt Transform} object and the component's import or export {\tt State}.  
-For transforms that initiate non-blocking sends, a {\tt ESMF\_StateTransformComplete} 
+For {\tt Transform}s that initiate non-blocking sends, a {\tt ESMF\_StateTransformComplete} 
 call can check that data  buffers are available for reuse.  This 
 call takes the initiated {\tt Transform} object as an argument.
 
@@ -190,8 +190,8 @@ a specified subset.
 
 \subsection{Flow of Data}
 \label{sec:dataflow}
-The design choices we have made enable the user to configure an ESMF
-{\tt Coupler} so that data is transferred from one component to another, 
+The design choices we have made enable the user to configure ESMF
+applications so that data is transferred from one component to another, 
 without requiring that it first be sent via message passing to the
 {\tt Coupler} (or even necessarily
 copied).  This is likely to be the most efficient way of performing 
