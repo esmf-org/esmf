@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2005/01/28 18:14:20 jwolfe Exp $ 
+# $Id: makefile,v 1.20 2005/01/28 20:46:05 jwolfe Exp $ 
 
 ALL:  build_examples
 
@@ -115,7 +115,7 @@ EXAMPLE_FieldFromUser_OBJS = UserCodeMod.o
 ESMF_FieldFromUserEx.o	: UserCodeMod.o
 
 run_ESMF_FieldFromUserEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_FieldFromUserEx > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
+	-${MPIRUN} -np 6 $(ESMF_EXDIR)/ESMF_FieldFromUserEx > $(ESMF_EXDIR)/ESMF_FieldFromUserEx.stdout
 
 #
 # ESMF_FieldGlobalEx
