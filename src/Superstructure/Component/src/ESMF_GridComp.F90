@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.63 2004/12/28 22:07:00 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.64 2005/03/29 20:49:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.63 2004/12/28 22:07:00 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.64 2005/03/29 20:49:46 theurich Exp $'
 
 !==============================================================================
 !
@@ -328,7 +328,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
       function ESMF_GridCompCreateVM(vm, name, gridcomptype, grid, &
-                                     config, configFile, clock, petList, rc)
+        config, configFile, clock, petList, contextflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateVM
@@ -343,6 +343,7 @@
       character(len=*),        intent(in),    optional :: configFile
       type(ESMF_Clock),        intent(inout), optional :: clock
       integer,                 intent(in),    optional :: petList(:)
+      type(ESMF_ContextFlag),  intent(in),    optional :: contextflag
       integer,                 intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
@@ -391,6 +392,10 @@
 !    component is giving to the created child 
 !    component. If {\tt petList} is not specified all of the 
 !    parents {\tt PET}s will be given to the child component.
+!   \item[{[contextflag]}]
+!    Specify the component's VM context. The default context is
+!    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
+!    complete list of valid flags.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -418,7 +423,8 @@
                                 gridcomptype=gridcomptype, &
                                 configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
-                                vm=vm, petList=petList, rc=localrc)
+                                vm=vm, petList=petList, &
+                                contextflag=contextflag, rc=localrc)
         ! if (ESMF_LogPassFoundError(localrc, rc)) return
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -792,7 +798,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_GridCompGet(gridcomp, name, gridcomptype, &
-                                  grid, config, configFile, clock, vm, rc)
+        grid, config, configFile, clock, vm, contextflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp),     intent(in)            :: gridcomp
@@ -803,6 +809,7 @@
       character(len=*),        intent(out), optional :: configFile
       type(ESMF_Clock),        intent(out), optional :: clock
       type(ESMF_VM),           intent(out), optional :: vm
+      type(ESMF_ContextFlag),  intent(out), optional :: contextflag
       integer,                 intent(out), optional :: rc             
 
 !
@@ -831,13 +838,16 @@
 !    Return the private clock for this {\tt ESMF\_GridComp}.
 !   \item[{[vm]}]
 !    Return the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
+!   \item[{[contextflag]}]
+!    Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_GridComp}.
+!    See section \ref{opt:contextflag} for a complete list of valid flags.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-        call ESMF_CompGet(gridcomp%compp, name, vm=vm, &
+        call ESMF_CompGet(gridcomp%compp, name, vm=vm, contextflag=contextflag,&
                           gridcomptype=gridcomptype, grid=grid, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
 
