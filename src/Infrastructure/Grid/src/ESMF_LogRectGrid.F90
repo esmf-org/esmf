@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.122 2004/12/13 19:07:18 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.123 2004/12/13 20:32:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.122 2004/12/13 19:07:18 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.123 2004/12/13 20:32:58 nscollins Exp $'
 
 !==============================================================================
 !
@@ -590,7 +590,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote the default coordinate
 !          ordering for the Grid and all related Fields (i.e. ZXY).  If none
-!          is specified, the default is ESMF_COORD_ORDER_XYZ.
+!          is specified, the default is ESMF\_COORD\_ORDER\_XYZ.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.  The default is false for all axes.
