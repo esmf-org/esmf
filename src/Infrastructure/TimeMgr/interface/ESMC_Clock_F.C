@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.34 2004/04/26 18:01:42 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.35 2004/07/02 20:27:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,11 +120,10 @@ extern "C" {
                                  int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->ESMC_ClockGet(
-                                           *nameLen,   // always present 
-                                                       //   internal argument.
-                                            tempNameLen,  // always present
-                                                          //  internal argument.
-                    ESMC_NOT_PRESENT_FILTER(tempName),
+			                  // always present internal arguments.
+                                           *nameLen,
+                                            tempNameLen,
+                                            tempName,
                     ESMC_NOT_PRESENT_FILTER(timeStep),
                     ESMC_NOT_PRESENT_FILTER(startTime),
                     ESMC_NOT_PRESENT_FILTER(stopTime),

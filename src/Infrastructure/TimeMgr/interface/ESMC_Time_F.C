@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.32 2004/05/19 22:05:05 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.33 2004/07/02 20:27:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@ extern "C" {
                                           // always present internal arguments
                                               *timeStringLen,
                                                tempTimeStringLen, 
-                       ESMC_NOT_PRESENT_FILTER(tempTimeString),
+                                               tempTimeString,
                        ESMC_NOT_PRESENT_FILTER(dayOfWeek),
                        ESMC_NOT_PRESENT_FILTER(midMonth),
                        ESMC_NOT_PRESENT_FILTER(dayOfYear),
