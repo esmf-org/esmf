@@ -1,4 +1,4 @@
-$Id: PhysGrid_req.tex,v 1.15 2002/05/14 22:21:10 dasilva Exp $
+$Id: PhysGrid_req.tex,v 1.16 2002/05/15 23:20:59 cnh Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -9,7 +9,7 @@ A mechanism shall be provided for describing physical locations in space in 1,
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -26,7 +26,7 @@ and degrees for the radius and angle in cylindrical coordinates.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, CAM-FV, PSAS \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection\\
 {\bf Notes:}  This suggestion follows common practice, but is an explicit
@@ -41,7 +41,7 @@ units must be assumed.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, NCEP-SSI,
-              PSAS \\
+              PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -57,7 +57,7 @@ may be redundant.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.3, POP, CICE, ReGrid, 
-              PSAS \\
+              PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Fundamental to allowing conservative interpolation, and for an
@@ -72,7 +72,7 @@ a value actually pertains to a region.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, 
-              PSAS \\
+              PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
@@ -87,7 +87,7 @@ the responsibility of user-provided software.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} General Req. 8.0.2, 
-              PSAS \\
+              PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} This is necessary for describing certain observational data streams.
@@ -135,7 +135,7 @@ http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection\\
 {\bf Notes:} 
@@ -145,7 +145,7 @@ http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-SSI,
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -158,7 +158,7 @@ bottom bounding points.  Such regions have the same extent regardless of the
 order in which the bounding points are specified.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP \\
+{\bf Source:} General Req. 8.0.2, POP, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -172,7 +172,7 @@ a value actually pertains to a region.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, NCEP-GSM,
-              PSAS \\
+              PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
@@ -216,7 +216,7 @@ topology, covering a space, or of locations being exclusive.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, NCEP-SSI,
-              PSAS \\
+              PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -225,7 +225,7 @@ topology, covering a space, or of locations being exclusive.
 \sreq{Location streams may be created}
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, PSAS \\
+{\bf Source:} NCEP-SSI, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -234,7 +234,7 @@ topology, covering a space, or of locations being exclusive.
 \sreq{Location streams may be destroyed}
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, PSAS \\
+{\bf Source:} NCEP-SSI, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -245,7 +245,7 @@ Given an existing location stream, a new stream may be generated with a new name
 possibly a different length.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS\\
+{\bf Source:} PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -255,17 +255,17 @@ possibly a different length.
 Location streams may be read from files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI \\
+{\bf Source:} NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Arlindo Notes:} I npo longer find this necessary. It is sufficient top have an IO requirement for fields (which can be defined on location streams).
+{\bf Arlindo Notes:} I npo longer find this necessary. It is sufficient top have an IO requirement for fields (which can be defined on location streams). - ditto CNH.
 \end{reqlist}
 
 \sreq{Writing streams}
 Location streams may be written to files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI \\
+{\bf Source:} NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Arlindo Notes:} see previous 
@@ -277,7 +277,7 @@ location stream element may be uniquely associated with a single grid cell. (A s
 grid cell may contain multiple location stream elements.)
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, PSAS \\
+{\bf Source:} NCEP-SSI, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is necessary for such operations as halo updates on a location
@@ -290,7 +290,7 @@ stream.
 Location streams may be of fixed length, specified at the time of generation.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS\\
+{\bf Source:} PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -304,7 +304,10 @@ with an initial length specified at the time of generation.
 {\bf Source:} \\
 {\bf Status:} Rejected \\
 {\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Notes:} Are we sure we want to reject? Could they just be
+not as optimised. Imagine a location stream that is representing lagrangian
+elements in a decomposed fluid simulation. It could be useful to
+be able to add particals as needed (CNH).
 \end{reqlist}
 
 \ssreq{Global attributes: location stream name}
@@ -314,7 +317,7 @@ Each location stream has a unique name by which it can be referred.
 {\bf Source:} \\
 {\bf Status:} Rejected \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} I think this should be deferred - CNH.
 \end{reqlist}
 
 \ssreq{Location stream registry}
@@ -325,7 +328,7 @@ registry.  A pointer to any location stream may be determined given its name.
 {\bf Source:} \\
 {\bf Status:} Rejected \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} I think this should be deferred - CNH.
 \end{reqlist}
 
 \ssreq{Global attributes: Number of dimensions}
@@ -333,7 +336,7 @@ A location stream may be queried for the number of dimensions, which is
 set at the time of creation of the stream.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS\\
+{\bf Source:} PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -343,7 +346,7 @@ set at the time of creation of the stream.
 Each dimension has a name, which may be set and queried.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS\\
+{\bf Source:} PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -353,7 +356,7 @@ Each dimension has a name, which may be set and queried.
 A location stream contains the units of each dimension, which may be set and queried.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS\\
+{\bf Source:} PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -368,10 +371,11 @@ attribute names.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} NCEP-SSI \\
+{\bf Source:} NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Arlindo Notes:} Not quite sure what this is. Again, since we can define fields on location streams, notr sure we need this here. 
+- ditto CNH.
 \end{reqlist}
 
 \ssreq{Global attributes: number of elements and number in use}
@@ -380,7 +384,7 @@ both the total number of elements and the number of elements before the last
 active element location may be queried.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} NCEP-SSI, PSAS\\
+{\bf Source:} NCEP-SSI, PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -405,7 +409,7 @@ same physical coordinates, the same units, the same element attributes (attribut
 some locations may be missing).
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Arlindo Notes:} MAJOR OBJECTION. Where did this come from? I'd like to be able to represent the whole observation vector for a given synoptic time on a single location stream. While data have horizontal coordinates in (lat,lon), vertical coordinates may vary widely (winds at 10m above sfc, temperature at 500 hPa, to name a few). So, each element would contain the (lat,lon,lev,levunits); it is conceivable that at  some point one would need (lat,lon,lev,xunits,yunits,zunits).
@@ -415,7 +419,7 @@ some locations may be missing).
 Methods shall be provided to set and query each element's location.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} PSAS\\
+{\bf Source:} PSAS, MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -457,7 +461,7 @@ to specify the elements that are irrelevant for a particular subdomain.
 {\bf Source:} \\
 {\bf Status:} Rejected \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} This "reject" seems inconsistent with earlier notes? - CNH
 \end{reqlist}
 
 \ssreq{Location streams may be queried for valid elements}
@@ -483,7 +487,7 @@ possible.
 {\bf Source:} \\
 {\bf Status:} Rejected \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} I don't know what this means - CNH.
 \end{reqlist}
 
 \ssreq{Registry of data streams}
@@ -495,7 +499,7 @@ manipulated in compatible ways.
 {\bf Source:} \\
 {\bf Status:} Rejected \\
 {\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Notes:} see previous req (what is a "data stream") - CNH.
 \end{reqlist}
 \ssreq{Extensible location streams may be extended}
 \begin{reqlist}
@@ -555,10 +559,10 @@ cells, but the relative indices of neighbors are unpredictable.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-     CAM-FV, PSAS \\
+     CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
-{\bf Notes:}
+{\bf Notes:}  PhysGrid_req.tex" [Modified] line 565 of 3021 --18\%-- col 13  - WOOOW!!!!
 \end{reqlist}
 
 \sreq{Reading grids}
@@ -568,7 +572,7 @@ be read in.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -579,7 +583,7 @@ PhysGrids can be output to standard files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -592,7 +596,7 @@ determining the PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -603,7 +607,7 @@ It shall be possible to create any data objects associated with a PhysGrid witho
 providing the data that a PhysGrid will contain.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL \\
+{\bf Source:} CCSM-CPL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -614,7 +618,7 @@ Methods shall be provided to query a PhysGrid for all information in contains.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -625,7 +629,7 @@ PhysGrids shall specify both the locations of cell vertices, and the locations
 of cell centers.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
@@ -637,7 +641,7 @@ domain at finer or coarser resolution.  Methods should be provided to accomplish
 interpolation via a simple interface that uses the Regrid facility.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 1.5.2 \\
+{\bf Source:} General Req. 1.5.2, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Necessary for runtime configurable resolution.  Also, note that 
@@ -653,7 +657,7 @@ The global domain of the source PhysGrid may be the same as or a superset of
 the target global domain.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 1.5.2 \\
+{\bf Source:} General Req. 1.5.2, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Necessary for support of transposes, or of moving nests.
@@ -663,7 +667,7 @@ the target global domain.
 A PhysGrid may be queried for the DistGrid upon which it is based.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:}  MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -688,7 +692,7 @@ independent of them.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} GFDL-MOM4 (required), NSIPP, POP, 
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection\\
 {\bf Notes:} This is necessary to support, for example, partial cells in
@@ -740,11 +744,12 @@ underlying DistGrid.
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS \\
+              CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
-without adding much functionality.
+without adding much functionality. Don't understand this note - without dimensions
+there is no PhysGrid - CNH?
 \end{reqlist}
 
 \sreq{Index order}
@@ -755,7 +760,8 @@ order.
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} Please list required orders in Fortran notation. CCSM-CPL(XY), C
-AM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY), NCEP(XYZ,XZY,YXZ,ZXY,ZYX),
+AM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY), NCEP(XYZ,XZY,YXZ,ZXY,ZYX), 
+MIT(XYZ, XZY, ZXY, YZX),
 PSAS (XYZ,XZY) \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
@@ -786,7 +792,7 @@ range of the global PhysGrid.  The index locations should be floating point numb
 facilitate interpolation.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, Regrid \\
+{\bf Source:} CCSM-CPL, POP, Regrid, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -815,7 +821,7 @@ cubed-sphere, polar stereographic, and Lambert conformal projections.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI,
-PSAS \\
+PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}  Perhaps some of these should be read in from a file, rather than
@@ -828,7 +834,7 @@ A simple interface shall be provided to internally generate a uniform Cartesian
 coordinate PhysGrid, given the lengths of the edges of a square domain.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -841,7 +847,7 @@ in latitude and longitude.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CCSM-CPL, 
-CAM-FV, PSAS \\
+CAM-FV, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -854,7 +860,7 @@ latitude-longitude grid and a tripolar grid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} GFDL, NCAR, 
-DAO \\
+DAO, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} These are intended both for real use, and for use as patterns in the
@@ -870,7 +876,7 @@ et al. 1996), reduced grids, and arbitrary nesting] will also be supported.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM,
-CAM-FV, PSAS  \\
+CAM-FV, PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}  Topologies are intrinsic to both DistGrid and PhysGrid.  Since
@@ -886,7 +892,7 @@ exception shall be generated in case of inconsistency.
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.2, CCSM-CPL, POP, CICE, 
-CAM-FV, PSAS  \\
+CAM-FV, PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -899,7 +905,7 @@ the sphere (or a portion of it).
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} GFDL (required), Regrid, 
-CAM-FV, PSAS  \\
+CAM-FV, PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Needed to permit exact conservation of fluxes between models.
@@ -910,7 +916,7 @@ Staggered grids will be supported as a single PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} POP, CICE, 
-CAM-FV, PSAS  \\
+CAM-FV, PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection\\
 {\bf Notes:} Standard requirement of a staggered grid.
@@ -939,7 +945,7 @@ to add an icosahedral grid.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} General Req. 8.0.2, POP(future icosahedral), CICE(future), 
-PSAS  \\
+PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} This is basic to the extensibility of ESMF.
@@ -951,7 +957,7 @@ A spectral horizontal description may be used.  More generally, the horizontal
 structure of information may be given by specifying functional decompositions.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2  \\
+{\bf Source:} General Req. 8.0.2, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -997,7 +1003,7 @@ The PhysGrid design should not preclude the user from using alternative
 functional horizontal representations, such as spectral elements.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2 , MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} This is basic to the extensibility of ESMF.
@@ -1025,7 +1031,7 @@ inverse transform, and the adjoint transform.
 A method shall be provided to check that PhysGrid cells do not overlap. 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL, CCSM-CPL, Regrid \\
+{\bf Source:} GFDL, CCSM-CPL, Regrid, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Standard self-consistency test.
@@ -1039,7 +1045,7 @@ Each PhysGrid has a unique name by which it can be referred.  If no name is
 specified, one will automatically be generated.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL \\
+{\bf Source:} CCSM-CPL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1052,7 +1058,7 @@ the same number of dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, Regrid, 
-PSAS  \\
+PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1064,7 +1070,7 @@ for a dimension, a name will be automatically generated.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, 
-PSAS \\
+PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1075,7 +1081,7 @@ A PhysGrid may be queried for the local or global lengths of each of its dimensi
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, Regrid, 
-PSAS \\
+PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1087,7 +1093,7 @@ Dimensions may also have additional named attributes.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, Regrid, 
-PSAS  \\
+PSAS, MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1102,7 +1108,7 @@ attribute names.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL, 
-PSAS  \\
+PSAS , MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1118,7 +1124,7 @@ fields that vary with time (thicknesses in isopycnal/isentropic coordinates
 or node locations in fully Lagrangian codes) are not handled by PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -1128,7 +1134,7 @@ or node locations in fully Lagrangian codes) are not handled by PhysGrid.
 All metrics may be calculated from grid locations.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2 , MIT\\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1138,7 +1144,7 @@ All metrics may be calculated from grid locations.
 All metrics may be read from a standard grid file.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1151,7 +1157,8 @@ Metrics have units of m or $m^2$, or other appropriate MKS units.
 {\bf Source:} Standard MKS requirement? \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Notes:} Does MKS allow things like Pascals? or is that SI - CNH.
+Some metrics may not have units i.e. scale factors with latitude etc... - CNH.
 \end{reqlist}
 
 \sreq{Available metrics}
@@ -1162,7 +1169,7 @@ the angle between logical and physical north.  Some functionality (e.g. certain
 regridding) may be limited if certain common metric terms are omitted.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} All? (required), POP, CICE \\
+{\bf Source:} All? (required), POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} All models require some subset of this information.
@@ -1174,7 +1181,7 @@ or from other metrics or from another PhysGrid, a method may be provided to crea
 that metric field only once it is clear that it will be needed.
 \begin{reqlist}
 {\bf Priority:} ? \\
-{\bf Source:} ? (required), POP(desired) \\
+{\bf Source:} ? (required), POP(desired), MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} With extensive metric information, this may be necessary to save space.
@@ -1207,7 +1214,7 @@ In cases where metric terms are independent of one or more dimensions, they may 
 stored in arrays that omit those dimensions.
 \begin{reqlist}
 {\bf Priority:} ? \\
-{\bf Source:} GFDL/HIM, POP, CICE \\
+{\bf Source:} GFDL/HIM, POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This may be necessary for adequate cache/register performance.  This may
@@ -1219,7 +1226,7 @@ Available metric information may include an extensive list of grid lengths, cell
 areas, and the angle between logical and physical north.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} All? (required), POP, CICE \\
+{\bf Source:} All? (required), POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} All using quadrilateral horizontal models require some subset of this information.
@@ -1229,7 +1236,7 @@ areas, and the angle between logical and physical north.
 Cell areas may be available for each of the 4 related subgrids.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} GFDL (required), POP(some), CICE(some) \\
+{\bf Source:} GFDL (required), POP(some), CICE(some), MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -1241,7 +1248,7 @@ subgrids.  Since neighboring cells share edges, it is desirable (although it vio
 the proposed CF convention) to include only 4 fields.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL/MOM (required) \\
+{\bf Source:} GFDL/MOM (required), MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -1252,7 +1259,7 @@ Each of the 4 center to edge distances may be available for each of the 4 relate
 subgrids.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL/MOM (required) \\
+{\bf Source:} GFDL/MOM (required), MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -1264,7 +1271,7 @@ subgrids.  Since neighboring cells share edges, it is desirable (although it vio
 the proposed CF convention) to include only 2 fields.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL/HIM (required), POP, CICE \\
+{\bf Source:} GFDL/HIM (required), POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -1275,7 +1282,7 @@ Both of the cell edge to edge distances may be available for each of the 4 relat
 subgrids.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL/HIM (required) \\
+{\bf Source:} GFDL/HIM (required), MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -1286,7 +1293,7 @@ Each of the 4 center to corner distances may be available for each of the 4
 related subgrids.
 \begin{reqlist}
 {\bf Priority:} 3 \\
-{\bf Source:}  \\
+{\bf Source:} MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} This is used in some E-grid implementations.
@@ -1297,7 +1304,7 @@ The angle at the cell center between logical and physical north may be available
 for each of the 4 related subgrids.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL (required), POP, CICE, Regrid \\
+{\bf Source:} GFDL (required), POP, CICE, Regrid, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} This is required for almost any non-latitude-longitude grid.
@@ -1343,7 +1350,7 @@ The following subrequirements provided a partial list of such algorithms,
 which may be augmented later.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP, CICE \\
+{\bf Source:} POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is basic to the extensibility of ESMF. 
@@ -1388,7 +1395,7 @@ It shall be possible for a user to specify additional metric terms to be associa
 with a PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL \\
+{\bf Source:} CCSM-CPL, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is basic to the extensibility of ESMF. 
@@ -1406,7 +1413,7 @@ land.  Masks are also important for nested applications.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -1416,7 +1423,7 @@ land.  Masks are also important for nested applications.
 A PhysGrid may have an arbitrary number of masks associated with it.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP \\
+{\bf Source:} POP, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection\\
 {\bf Notes:} 
@@ -1428,7 +1435,7 @@ unique name.  A method shall be specified to return a pointer to a mask given
 its name.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  \\
+{\bf Source:} MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1439,7 +1446,7 @@ Masks may have an arbitrary number of categories. (e.g. 1 for points in the
 Atlantic, 2 for the Pacific, 3 for the Mediterranean, etc.)
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP, CICE? \\
+{\bf Source:} POP, CICE, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1449,7 +1456,7 @@ Atlantic, 2 for the Pacific, 3 for the Mediterranean, etc.)
 Masks may consist only of the values 0 or 1, for multiplicative masking.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP \\
+{\bf Source:} POP, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1459,7 +1466,7 @@ Masks may consist only of the values 0 or 1, for multiplicative masking.
 A method shall be provided to generate the complement of a mask.
 \begin{reqlist}
 {\bf Priority:} 3 \\
-{\bf Source:} \\
+{\bf Source:} MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
