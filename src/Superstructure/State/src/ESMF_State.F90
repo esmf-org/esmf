@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.78 2004/12/09 23:51:12 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.79 2004/12/10 18:18:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.78 2004/12/09 23:51:12 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.79 2004/12/10 18:18:20 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -5007,16 +5007,16 @@ end interface
               endif
             endif
 
-            nextitem%otype = ESMF_STATEITEM_NAME
+            dataitem%otype = ESMF_STATEITEM_NAME
             ! don't have to add name, we already matched it.
 
-            nullify(nextitem%datap)
-            nextitem%indirect_index = -1
+            nullify(dataitem%datap)
+            dataitem%indirect_index = -1
 
-            nextitem%needed = stypep%needed_default
-            nextitem%ready = stypep%ready_default
-            nextitem%valid = stypep%stvalid_default
-            nextitem%reqrestart = stypep%reqrestart_default
+            dataitem%needed = stypep%needed_default
+            dataitem%ready = stypep%ready_default
+            dataitem%valid = stypep%stvalid_default
+            dataitem%reqrestart = stypep%reqrestart_default
         endif
       enddo
 
