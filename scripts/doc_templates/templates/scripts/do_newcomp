@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.6 2002/10/25 17:19:32 eschwab Exp $
+# $Id: do_newcomp,v 1.7 2003/01/30 15:58:51 nscollins Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -44,7 +44,7 @@ else
 endif
 
 # Create new component source directories if needed
-  foreach dir ($comp $comp/src $comp/include $comp/interface $comp/doc $comp/examples)
+  foreach dir ($comp $comp/src $comp/include $comp/interface $comp/doc $comp/examples $comp/tests )
     set newdir=$cwd/$dir
     if(!(-d $newdir)) then
       mkdir $newdir 
