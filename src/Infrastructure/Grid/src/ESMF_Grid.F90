@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.22 2003/01/10 18:59:41 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.23 2003/01/10 20:22:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -196,7 +196,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.22 2003/01/10 18:59:41 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.23 2003/01/10 20:22:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1469,7 +1469,10 @@
       subroutine ESMF_GridGetDE(grid, MyDE, MyDEx, MyDEy, &
                                 DE_E, DE_W, DE_N, DE_S, &
                                 DE_NE, DE_NW, DE_SE, DE_SW, &
-                                lsize, gstart, rc)
+                                lsize, gstart, &
+                                n_dir1_start, n_dir1_end, n_dir1_size, &
+                                n_dir2_start, n_dir2_end, n_dir2_size, &
+                                rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -1486,7 +1489,12 @@
       integer, intent(inout), optional :: DE_SW
       integer, intent(inout), optional :: lsize
       integer, intent(inout), optional :: gstart
-! TODO: figure out format for getting deeper derived type info, N_DIR1 N_DIR2
+      integer, intent(inout), optional :: n_dir1_start
+      integer, intent(inout), optional :: n_dir1_end
+      integer, intent(inout), optional :: n_dir1_size
+      integer, intent(inout), optional :: n_dir2_start
+      integer, intent(inout), optional :: n_dir2_end
+      integer, intent(inout), optional :: n_dir2_size
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1522,6 +1530,18 @@
 !
 !     \item[[gstart]]
 !
+!     \item[[n_dir1_start]]
+!
+!     \item[[n_dir1_end]]
+!
+!     \item[[n_dir1_size]]
+!
+!     \item[[n_dir2_start]]
+!
+!     \item[[n_dir2_end]]
+!
+!     \item[[n_dir2_size]]
+!
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1543,7 +1563,10 @@
       call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, MyDEx, MyDEy, &
                               DE_E, DE_W, DE_N, DE_S, &
                               DE_NE, DE_NW, DE_SE, DE_SW, &
-                              lsize, gstart, status)
+                              lsize, gstart, &
+                              n_dir1_start, n_dir1_end, n_dir1_size, &
+                              n_dir2_start, n_dir2_end, n_dir2_size, &
+                              status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
         return
