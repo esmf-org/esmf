@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.66 2004/06/08 18:39:15 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.67 2004/06/09 22:04:12 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -133,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.66 2004/06/08 18:39:15 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.67 2004/06/09 22:04:12 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -381,9 +381,9 @@
 !          is a unique sequence number from 001 to 999.
 !     \item[calendartype]
 !          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIANDAY},
-!            {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, and
-!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
+!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR}, and
+!            {\tt ESMF\_CAL\_NOLEAP}.
 !          See the "Time Manager Reference" document for a description of
 !          each calendar type.
 !     \item[{[rc]}]
@@ -864,9 +864,9 @@
 !          The new name for this calendar.
 !     \item[calendartype]
 !          The built-in {\tt CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIANDAY},
-!            {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, and
-!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GREGORIAN},
+!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOCALENDAR}, and
+!            {\tt ESMF\_CAL\_NOLEAP}.
 !          See the "Time Manager Reference" document for a description of
 !          each calendar type.
 !     \item[{[rc]}]
