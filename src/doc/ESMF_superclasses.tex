@@ -23,15 +23,15 @@ configuration in which model components execute concurrently.
 
 \subsection{Classes and Scoping}
 
-An ESMF coupled application involves an application component
-({\tt ESMF\_App})
-containing two or more gridded components ({\tt ESMF\_GComp}s) that require an 
+An ESMF coupled application involves an application component 
+containing two or more gridded components that require an 
 inter-component data exchange, and one or more coupling 
-components ({\tt ESMF\_Coupler}).
+components.
 
 There are restrictions on how objects within an application may be scoped
 on a parallel platform.  The application component must be instantiated on 
-any decomposition elements or DEs ({\tt ESMF\_DE}s) on which other components
+any decomposition elements or DEs (see Section~\ref{sec:progmodel}) on 
+which other components
 within the application are defined.  This is true whether the 
 application contains a single executable or multiple 
 executables.  There is only one application component defined for any
@@ -45,30 +45,31 @@ a component (see Section~\ref{sec:strategies}).  It is possible for
 some portions of the functionality of a component to be restricted to
 a subset of the DEs over which the component is defined.  For example, 
 it might be computationally efficient for the computation of interpolation
-weight to occur on a set of DEs which is 
+weights to occur on a set of DEs not being used by any gridded components
+in the application.  The coupler might define a subcomponent on those DEs 
+specifically to handle that function.
 
 A gridded component may exist across all DEs in the application.  When 
-a set of gridded  components and a coupler all reside on the same set of 
-DEs and are contained within an application running as a single 
-executable we have an SPMD, sequential execution model.  
+a set of gridded  components and a coupler all execute in sequence on 
+the same set of DEs and are contained within an application running 
+as a single executable we have an SPMD, sequential execution model.  
 
 Within an application, a gridded component may also reside on 
-a subset of DEs.  These may wholly coincide with, be wholly 
+a subset of DEs.  These DEs may wholly coincide with, be wholly 
 contained within or wholly contain another component.  Multiple gridded 
-components or couplers may be defined as separate executables.  A typical 
+components may be defined as separate executables.  A typical 
 MPMD, concurrent execution configuration is one in which gridded components 
-and a coupler are defined on separate DEs running simultaneously as multiple 
-executables.
+are defined on separate DEs running simultaneously as multiple 
+executables.  
 
 It is possible for ESMF applications to be a combination of the SPMD, 
 sequential 
 execution model and the MPMD, concurrent execution model.  We might have,
-for example, atmosphere and land components defined on the same set of 
-DEs and running as one executable, and ocean and sea ice 
-components defined on a separate set of DEs and running as 
-another executable, with a separate coupler executable running on yet 
-another set.  The application component must be defined
-on all sets of DEs.
+for example, atmosphere and land components instantiated on the same set of 
+DEs and running as one executable, ocean and sea ice 
+components instantiated on a separate set of DEs and running as 
+another executable, and a coupler and application component 
+instantiated across all DEs.
 
 \subsection{Flow of Control and Data}
 

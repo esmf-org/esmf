@@ -1,4 +1,5 @@
 \section{Design Strategies}
+\label{sec:strategies}
 
 Given the computational demands of Earth system modeling, the ESMF is by 
 necessity complicated software running on complicated hardware.  However,
@@ -87,9 +88,18 @@ if you wanted to transfer data between two CCA components A and B, you would nee
 to define a third component C on the union of A and B's processors and perform
 the data transfer entirely within component C.
 
+Architectures such as CA enable components to contain and run 
+subcomponents.  This
+capability is very import to support system scalability.  CCA does it 
+through an interface, called {\tt BuilderServices}, that any component
+can implement.  It allows components that have it to instantiate other
+components, run them, and direct them to communicate with each other.
+CCA has a specification but no implementation of this interface.
+
 Another feature common to component architectures is an Interface Definition 
 Language (IDL).  This is a language-independent way to express 
-interfaces.  \footnote{In practice IDLs tend to look a lot like C++.}  Although 
+interfaces.  \footnote{In practice IDLs tend to look a lot like C++.}  
+Although 
 an IDL isn't central to the notion of component architectures, it does enable 
 niceties such as allowing the ORB to automatically generate proxies and stubs.
 
@@ -106,6 +116,9 @@ and methods.  This enables a variety of components - with different functionalit
 in a coherent way and to reuse the same control, communication and utility
 mechanisms.  It also provides a clear definition of ESMF components so that
 project such as CCA can understand and support them.  
+
+ESMF supports the concept of subcomponents.  In ESMF this is done simply
+by allowing parent components to instantiate and run child components.
 
 The ESMF, like CCA, requires that all cross-process communication occur
 within a component, and that all inter-component calls exchange only
