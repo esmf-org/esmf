@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.167 2004/06/15 11:18:37 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.168 2004/06/15 22:47:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.167 2004/06/15 11:18:37 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.168 2004/06/15 22:47:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4440,9 +4440,8 @@
         call ESMF_GridGet(stypep%grid, dimCount=gridrank, rc=status)
         call ESMF_FieldGet(srcField, horzRelloc=horzRelLoc, &
                            vertRelloc=vertRelLoc, rc=rc)
-        call ESMF_GridGetDELocalInfo(stypep%grid, horzRelLoc=horzRelLoc, &
-                                     vertRelLoc=vertRelLoc, &
-                                     globalAIPerDim=myAI(1:gridrank), rc=status)
+        call ESMF_GridGetDELocalAI(stypep%grid, myAI(1:gridrank), horzRelLoc, &
+                                   vertRelLoc=vertRelLoc, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
