@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.9 2003/04/02 20:15:22 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.10 2003/04/05 01:51:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.9 2003/04/02 20:15:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.10 2003/04/05 01:51:10 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -55,9 +55,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,              // in - integer seconds
-      int Sn,             // in - fractional seconds, numerator
-      int Sd,             // in - fractional seconds, denominator
+      ESMF_IKIND_I8 S,      // in - integer seconds
+      int Sn,               // in - fractional seconds, numerator
+      int Sd,               // in - fractional seconds, denominator
       ESMC_Calendar *Cal) { // in - optional associated calendar for
                             //      calendar intervals
 //
@@ -106,7 +106,8 @@
       ESMC_Calendar *cal) {     // in - associated calendar
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt TimeInterval} with values given in variable arg list
+//      Initialzes a {\tt TimeInterval} with values given in F90
+//      variable arg list.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -120,26 +121,279 @@
     Calendar = ESMC_NULL_POINTER;
     
     // TODO: validate inputs (individual and combos), set basetime values
+    //       e.g. integer and float specifiers are mutually exclusive
+
+    // TODO: calendar intervals
+
+    // TODO: fractional, sub-seconds
+
+    // TODO: share code from here down with ESMC_TimeIntervalSet ?
 
     if (cal != ESMC_NULL_POINTER) {
       Calendar = cal;
     }
+
+    //
+    // integer units
+    //
+
     if (D != ESMC_NULL_POINTER) {
-      this->S += *D * 86400;
+      this->S += *D * SECONDS_PER_DAY;
     }
     if (H != ESMC_NULL_POINTER) {
-      this->S += *H * 3600;
+      this->S += *H * SECONDS_PER_HOUR;
     }
     if (M != ESMC_NULL_POINTER) {
-      this->S += *M * 60;
+      this->S += *M * SECONDS_PER_MINUTE;
     }
     if (S != ESMC_NULL_POINTER) {
       this->S += *S;
     }
 
+    //
+    // floating point units
+    //
+
+    if (d_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*d_ * SECONDS_PER_DAY);
+    }
+    if (h_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) *s_;
+    }
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeIntervalInit
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *TimeList,    // in  - time interval value specifier string
+      ...) const {             // out - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Gets a {\tt TimeInterval}'s values in user-specified format.
+//      This version supports native C++ use.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalSet - Set a TimeInterval value
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *TimeList,    // in - time interval value specifier string
+      ...) {                   // in - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Sets a {\tt TimeInterval}'s values in user-specified values.
+//      This version supports native C++ use.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value; supports F90 interface
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *YY,                  // out - integer number of interval years
+      int *MO,                  // out - integer number of interval months
+      int *D,                   // out - integer number of interval days
+      int *H,                   // out - integer hours
+      int *M,                   // out - integer minutes
+      ESMF_IKIND_I8 *S,         // out - long integer seconds 
+      int *MS,                  // out - integer milliseconds
+      int *US,                  // out - integer microseconds
+      int *NS,                  // out - integer nanoseconds
+      double *d_,               // out - floating point days
+      double *h_,               // out - floating point hours
+      double *m_,               // out - floating point minutes
+      double *s_,               // out - floating point seconds
+      double *ms_,              // out - floating point milliseconds
+      double *us_,              // out - floating point microseconds
+      double *ns_,              // out - floating point nanoseconds
+      int *Sn,                  // out - fractional seconds numerator
+      int *Sd) const {          // out - fractional seconds denominator
+//
+// !DESCRIPTION:
+//      Gets a {\tt TimeInterval}'s values in user-specified format.
+//      This version supports the F90 interface.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: calendar intervals
+
+    // TODO: fractional, sub-seconds
+
+    //
+    // integer units
+    //
+
+    ESMF_IKIND_I8 remainder = this->S;
+
+    if (D != ESMC_NULL_POINTER) {
+      *D = remainder / SECONDS_PER_DAY;
+      remainder %= SECONDS_PER_DAY;
+    }
+    if (H != ESMC_NULL_POINTER) {
+      *H = remainder / SECONDS_PER_HOUR;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (M != ESMC_NULL_POINTER) {
+      *M = remainder / SECONDS_PER_MINUTE;
+      remainder %= SECONDS_PER_MINUTE;
+    }
+    if (S != ESMC_NULL_POINTER) {
+      *S = remainder;
+    }
+
+    //
+    // floating point units
+    //
+
+    remainder = this->S;
+
+    if (d_ != ESMC_NULL_POINTER) {
+      *d_ = (double) remainder / (double) SECONDS_PER_DAY;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (h_ != ESMC_NULL_POINTER) {
+      *h_ = (double) remainder / (double) SECONDS_PER_HOUR;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      *m_ = (double) remainder / (double) SECONDS_PER_MINUTE;
+      remainder %= SECONDS_PER_MINUTE;
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      *s_ = (double) remainder;
+    }
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalSet - Set a TimeInterval value; supports F90 interface
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *YY,                  // in - integer number of interval years
+      int *MO,                  // in - integer number of interval months
+      int *D,                   // in - integer number of interval days
+      int *H,                   // in - integer hours
+      int *M,                   // in - integer minutes
+      ESMF_IKIND_I8 *S,         // in - long integer seconds 
+      int *MS,                  // in - integer milliseconds
+      int *US,                  // in - integer microseconds
+      int *NS,                  // in - integer nanoseconds
+      double *d_,               // in - floating point days
+      double *h_,               // in - floating point hours
+      double *m_,               // in - floating point minutes
+      double *s_,               // in - floating point seconds
+      double *ms_,              // in - floating point milliseconds
+      double *us_,              // in - floating point microseconds
+      double *ns_,              // in - floating point nanoseconds
+      int *Sn,                  // in - fractional seconds numerator
+      int *Sd) {                // in - fractional seconds denominator
+//
+// !DESCRIPTION:
+//      Sets a {\tt TimeInterval}'s values in user-specified format.
+//      This version supports the F90 interface.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: validate inputs (individual and combos), set basetime values
+    //       e.g. integer and float specifiers are mutually exclusive
+
+    // TODO: calendar intervals
+
+    // TODO: fractional, sub-seconds
+
+    // TODO: share code with ESMC_TimeIntervalInit ?
+
+    //
+    // integer units
+    //
+
+    if (D != ESMC_NULL_POINTER) {
+      this->S += *D * SECONDS_PER_DAY;
+    }
+    if (H != ESMC_NULL_POINTER) {
+      this->S += *H * SECONDS_PER_HOUR;
+    }
+    if (M != ESMC_NULL_POINTER) {
+      this->S += *M * SECONDS_PER_MINUTE;
+    }
+    if (S != ESMC_NULL_POINTER) {
+      this->S += *S;
+    }
+
+    //
+    // floating point units
+    //
+
+    if (d_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*d_ * SECONDS_PER_DAY);
+    }
+    if (h_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) *s_;
+    }
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalSet
 
 //-------------------------------------------------------------------------
 //BOP
