@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.78 2004/02/19 23:50:33 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.79 2004/02/20 17:28:00 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.78 2004/02/19 23:50:33 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.79 2004/02/20 17:28:00 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -823,8 +823,8 @@ static int maxroutes = 10;
                  for (l=0; l<rrep_count[0] ; l++, rcvitems += rstride[0]) {
 
                       rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
-		      memcpy(rcvbuf,rcvptr,rcontig_length*nbytes);
-		      rcvbuf += rcontig_length*nbytes;
+                      memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
+                      rcvbuf += rcontig_length*nbytes;
                  }
                  break;
                case 3:
@@ -833,8 +833,8 @@ static int maxroutes = 10;
                    for (l=0; l<rrep_count[0]; l++, rcvitems += rstride[0]) {
 
                         rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
-		        memcpy(rcvbuf,rcvptr,rcontig_length*nbytes);
-		        rcvbuf += rcontig_length*nbytes;
+                        memcpy(rcvptr,rcvbuf,rcontig_length*nbytes);
+                        rcvbuf += rcontig_length*nbytes;
                    }
                  }
                  break;
