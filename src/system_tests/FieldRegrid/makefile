@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:38:22 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 21:46:07 jwolfe Exp $ 
 
 ALL: system_tests
 
@@ -15,7 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/system_tests/FieldRegrid
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/FieldRegrid
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FieldRegridSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -39,12 +39,12 @@ CLOBBERDIRS =
 
 
 RUN_FieldRegrid:
-	-@rm -f testlog stdlog.* logfile.* FieldRegrid.tmps
-	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/FieldRegrid >$(ESMC_TESTDIR)/FieldRegrid.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldRegridSTest.tmps
+	-${MPIRUN} -np 6 $(ESMC_TESTDIR)/ESMF_FieldRegridSTest >$(ESMC_TESTDIR)/ESMF_FieldRegridSTest.stdout
 
 RUN_FieldRegridUNI:
-	-@rm -f testlog stdlog.* logfile.* FieldRegrid.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FieldRegrid >$(ESMC_TESTDIR)/FieldRegrid.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldRegridSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldRegridSTest >$(ESMC_TESTDIR)/ESMF_FieldRegridSTest.stdout
 
 FieldRegrid.rm:
 	echo "FieldRegrid.rm target called here."

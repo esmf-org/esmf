@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/18 22:47:18 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/09/19 21:49:55 jwolfe Exp $ 
 
 ALL: system_tests
 
@@ -15,7 +15,7 @@ LIBBASE	  =
 LOCDIR	  = src/system_tests/FlowComp
 
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/FlowComp
+SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_FlowCompSTest
 
 # Object files other than SysTest%.o that the
 # system tests executable will depend on.
@@ -39,12 +39,12 @@ CLOBBERDIRS =
 
 
 RUN_FlowComp:
-	-@rm -f testlog stdlog.* logfile.* FlowComp.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/FlowComp >$(ESMC_TESTDIR)/FlowComp.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FlowCompSTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FlowCompSTest >$(ESMC_TESTDIR)/ESMF_FlowCompSTest.stdout
 
 RUN_FlowCompUNI:
-	-@rm -f testlog stdlog.* logfile.* FlowComp.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/FlowComp >$(ESMC_TESTDIR)/FlowComp.stdout
+	-@rm -f testlog stdlog.* logfile.* ESMF_FlowCompSTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FlowCompSTest >$(ESMC_TESTDIR)/ESMF_FlowCompSTest.stdout
 
 FlowComp.rm:
 	echo "FlowComp.rm target called here."
