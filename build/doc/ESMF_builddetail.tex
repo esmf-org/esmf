@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.4 2003/08/28 17:14:37 flanigan Exp $
+%  $Id: ESMF_builddetail.tex,v 1.5 2003/09/02 15:50:05 flanigan Exp $
 
 
 \subsection{Make System}
@@ -177,4 +177,25 @@ Where ESMF\_ARCH, ESMF\_PREC and ESMF\_SITE are environment variables
 set by the user or given default values be the build system.  Based on 
 the settings of these environment variables, the build system provides
 a path to the correct conf.h file during source code compiles.
+
+
+\subsubsection{Building on New Platforms}
+
+The build system can be ported to other Unix platforms by adding new
+site and conf.h files.  The new site file has to follow the naming
+convention used by the existing site files and be created in the
+directory build\_config.  The new site file will also have to define
+the same makefile variables as the existing site files.
+
+Porting to a new machine will require a new conf.h as well. The new
+conf.h file will require a new directory in build\_config/conf that
+follows the naming convention as other direcories there.
+New conf.h files have to define the same machine attributes as
+existing conf.h files.  If a machine supports both 32 and 64 bit
+precision, then then two conf.h files are needed.  Example:
+
+\begin{verbatim}
+      build_config/conf/AIX.32.default/conf.h
+      build_config/conf/AIX.64.default/conf.h
+\end{verbatim}
 
