@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.12 2003/04/15 20:21:38 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.13 2003/04/17 20:48:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -237,10 +237,10 @@ end subroutine ESMF_LogCloseFortran
 
   integer :: istat, i
 
-  if (length .ne. 0) write(unitNumber,10) (msg(i:i),i=1,length) 
-  write(unitNumber,10) charData
+  if (length .ne. 0) write(unitNumber,10,ADVANCE="no") (msg(i:i),i=1,length) 
+  write(unitNumber,10,ADVANCE="no") charData
   if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-  10 format('+',A)
+  10 format(A1)
 
  end subroutine
 
@@ -284,10 +284,10 @@ end subroutine ESMF_LogCloseFortran
 
   integer :: i,istat
 
-  if (len2 .ne. 0) write(unitNumber,10) (msg(i:i),i=1,len2)
-  write(unitNumber,10) (stringData(i:i), i=1,len1)
+  if (len2 .ne. 0) write(unitNumber,10,ADVANCE="no") (msg(i:i),i=1,len2)
+  write(unitNumber,10,ADVANCE="no") (stringData(i:i), i=1,len1)
   if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-  10 format('+',A)
+  10 format(A1)
  end subroutine ESMF_LogPrintString
 
   
@@ -311,11 +311,11 @@ end subroutine ESMF_LogCloseFortran
 !EOP
   integer :: istat, i
 
-  if (length .ne. 0) write(unitNumber,20) (msg(i:i),i=1,length)
-  write(unitNumber,10) intData
+  if (length .ne. 0) write(unitNumber,20,ADVANCE="no") (msg(i:i),i=1,length)
+  write(unitNumber,10,ADVANCE="no") intData
   if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-  10 format('+',I3)
-  20 format('+',A1)
+  10 format(I3)
+  20 format(A1)
 
  end subroutine ESMF_LogPrintInt
 
@@ -338,12 +338,12 @@ end subroutine ESMF_LogCloseFortran
 !EOP
   integer :: istat, i
 
-  if (length .ne. 0) write(unitNumber,20) (msg(i:i),i=1,length)
-  write(unitNumber,10) floatdata 
+  if (length .ne. 0) write(unitNumber,20,ADVANCE="no") (msg(i:i),i=1,length)
+  write(unitNumber,10,ADVANCE="no") floatdata 
   if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
 
-  10 format('+',F14.7)
-  20 format('+',A)
+  10 format(F14.7)
+  20 format(A1)
 
  end subroutine ESMF_LogPrintReal
 
