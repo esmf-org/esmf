@@ -92,6 +92,15 @@ For example, assuming a Gregorian calendar:
 31 December 2000, 18Z   & 366.75 
 \end{tabular}
 
+\item[DE] \label{glos:DE} 
+Short for decomposition element.
+
+\item[Decomposition element (DE)] \label{glos:Decomp_Element}
+A decomposition element is a virtual portion of a computer 
+associated with a processing element and an address space.  A DE may 
+be associated with an MPI process or a thread.  Layouts 
+assign a topology to decomposition elements.
+
 \item[Distributed grid] \label{glos:DistGrid}
   A distributed grid defines the decomposition of the global index space 
   across the layout and methods on the indexed data.
@@ -284,6 +293,10 @@ and days per month as in a non-leap year of a Gregorian calendar.
 \item[Platform] \label{glos:Platform} 
   The processor hardware, operating system, compiler and
   parallel library that together form a unique compilation target.
+
+\item[Processing element (PE)] \label{glos:Processing_Element}
+A processing element is associated with a single hardware processor.  It may
+have a framework ID that is different than its vendor-assigned ID.  
 
 \item[Processing node] \label{glos:Pnode} A set of processors to which an
   operating system scheduler is capable of assigning to a single job.
