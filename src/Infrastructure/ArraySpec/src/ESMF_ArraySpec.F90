@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.4 2004/04/14 20:42:03 nscollins Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.5 2004/04/21 20:02:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.4 2004/04/14 20:42:03 nscollins Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.5 2004/04/21 20:02:03 nscollins Exp $'
 
 !==============================================================================
 !
@@ -172,9 +172,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArraySpecSetThree - Set values for an ArraySpec
+! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
 !
 ! !INTERFACE:
+     ! Private name; call using ESMF_ArraySpecSet()
      subroutine ESMF_ArraySpecSetThree(arrayspec, rank, type, kind, rc)
 !
 !
@@ -244,10 +245,11 @@
         end subroutine ESMF_ArraySpecSetThree
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArraySpecSetTwo - Set values for an ArraySpec
+!BOPI
+! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
 !
 ! !INTERFACE:
+     ! Private name; call using ESMF_ArraySpecSet()
      subroutine ESMF_ArraySpecSetTwo(arrayspec, rank, typekind, rc)
 !
 ! !ARGUMENTS:
@@ -276,7 +278,7 @@
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
         ! Local vars
         integer :: status ! local error status
