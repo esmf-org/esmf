@@ -1,0 +1,60 @@
+.F% $Id: State_options.tex,v 1.1 2004/06/07 05:27:05 cdeluca Exp $
+
+\subsubsection{ESMF\_StateImpExpType}
+
+{\sf DESCRIPTION:\\}
+Specifies whether an {\tt ESMF\_State} contains data to be imported
+into a component or exported from a component. 
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATEIMPORT] 
+         Contains data to be imported into a component.
+   \item [ESMF\_STATEEXPORT]
+         Contains data to be exported out of a component.
+   \item [ESMF\_STATEINVALID]
+         Does not contain valid data.
+\end{description}
+
+\subsubsection{ESMF\_StateObjectType}
+
+{\sf DESCRIPTION:\\}
+Specifies the type of object being added to or retrieved from an
+{ESMF\_State.}
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATEBUNDLE] 
+         Refers to an {\tt ESMF\_Bundle] within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEFIELD]
+         Refers to an {\tt ESMF\_Field] within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEARRAY]
+         Refers to an {\tt ESMF\_Array] within an {\tt ESMF\_State}.
+   \item [ESMF\_STATESTATE]
+         Refers to an {\tt ESMF\_State] within an {\tt ESMF\_State}.
+   \item [ESMF\_STATEDATANAME]
+         Refers to a data name used as a placeholder within 
+         an {\tt ESMF\_State}.
+   \item [ESMF\_STATEOBJTYPEUNKNOWN]
+         Object type within an {\tt ESMF_State}is unknown.
+\end{description}
+
+\subsubsection{ESMF\_StateDataNeeded}
+
+{\sf DESCRIPTION:\\}
+Specifies whether or not an {\tt ESMF\_State} entry is needed for a 
+particular application configuration.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_STATEDATAISNEEDED] 
+         Data is needed.
+   \item [ESMF\_STATEDATANOTNEEDED]
+         Data is not needed.
+\end{description}
+
+
+
+
+
+
