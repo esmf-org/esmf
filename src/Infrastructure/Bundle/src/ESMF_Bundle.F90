@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.53 2004/06/14 01:29:34 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.54 2004/06/14 13:50:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -896,9 +896,6 @@ end function
                                  ESMF_CONTEXT, rc)) return
       endif
       btype => bundle%btypep
-      if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "Uninitialized or already destroyed Bundle", &
-                                 ESMF_CONTEXT, rc)) return
     
       call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
 
