@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.22 2003/04/28 23:11:43 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.23 2003/05/01 00:31:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.22 2003/04/28 23:11:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.23 2003/05/01 00:31:27 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -357,8 +357,11 @@
 
             // convert basetime seconds to Julian days
             ESMF_IKIND_I8 jdays = T->S / SecondsPerDay;
+
             if (D != ESMC_NULL_POINTER) {
               *D = jdays;
+              // adjust for negative time (reverse integer division)
+              if (T->S % SecondsPerDay < 0) (*D)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
               *d_ = (double) T->S / (double) SecondsPerDay;
@@ -414,10 +417,12 @@
 
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = T->S / SecondsPerDay;
+              *D = tmpS / SecondsPerDay;
+              // adjust for negative time (reverse integer division)
+              if (tmpS % SecondsPerDay < 0) (*D)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
-              *d_ = (double) T->S / (double) SecondsPerDay;
+              *d_ = (double) tmpS / (double) SecondsPerDay;
             }
 
             break;
@@ -448,10 +453,12 @@
 
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = T->S / SecondsPerDay;
+              *D = tmpS / SecondsPerDay;
+              // adjust for negative time (reverse integer division)
+              if (tmpS % SecondsPerDay < 0) (*D)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
-              *d_ = (double) T->S / (double) SecondsPerDay;
+              *d_ = (double) tmpS / (double) SecondsPerDay;
             }
 
             break;
@@ -462,6 +469,8 @@
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
               *D = T->S / SecondsPerDay;
+              // adjust for negative time (reverse integer division)
+              if (T->S % SecondsPerDay < 0) (*D)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
               *d_ = (double) T->S / (double) SecondsPerDay;
