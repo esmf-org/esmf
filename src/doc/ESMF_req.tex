@@ -7,7 +7,7 @@ these General Requirements is {\bf GR}.
 
 \req{Computational Requirements}
 
-\sreq{Language Bindings}
+\sreq{Language bindings}
 ESMF software shall support the following language bindings:
 
 \ssreq{Fortran 90 Interface}
@@ -18,7 +18,7 @@ ESMF software shall support the following language bindings:
 {\bf Verification:} Interface inspection. 
 \end{reqlist}
 
-\ssreq{C++ Interface}
+\ssreq{C++ interface}
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} GFDL-HIM. \\
@@ -26,11 +26,11 @@ ESMF software shall support the following language bindings:
 {\bf Verification:} Interface inspection.
 \end{reqlist}
 
-\ssreq{C Interface}
+\ssreq{C interface}
 \begin{reqlist}
   {\bf Priority:} none \\
   {\bf Source:} GFDL-HIM. \\
-  {\bf Status:} Deleted. \\
+  {\bf Status:} Rejected. \\
   {\bf Notes:} There will be a single interface serving C and C++
   applications.
 \end{reqlist}
@@ -120,10 +120,10 @@ precision.
   \end{enumerate}
 \end{reqlist}
 
-\sreq{Runtime Configurability} The ESMF shall allow the user to set
+\sreq{Runtime configurability} The ESMF shall allow the user to set
 certain application parameters at runtime.
 
-\ssreq{Configurable Decomposition} ESMF shall allow domain
+\ssreq{Configurable decomposition} ESMF shall allow domain
 decomposition and assignment of domains to processors, nodes, and/or
 threads to be configurable at runtime.  The choice of parallelization
 mechanism (message passing/multithreading/combination) must be
@@ -135,7 +135,7 @@ configurable at runtime.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\ssreq{Configurable Resolution}
+\ssreq{Configurable resolution}
 ESMF shall allow model resolution to be configurable at runtime.
 \begin{reqlist}
 {\bf Priority:} 1. \\
@@ -144,7 +144,7 @@ ESMF shall allow model resolution to be configurable at runtime.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\sreq{Bit-Reproducibility}
+\sreq{Bit-reproducibility}
 
 Bitwise identical results between two runs is an important feature for
 deterministic execution, as well as for debugging and maintenance.
@@ -153,7 +153,7 @@ of compiler optimization, or even different versions of the same
 compiler. Within these constraints, ESMF shall provide varied levels
 of bit-reproducibility:
 
-\ssreq{Parallel Bit-Reproducibility}
+\ssreq{Parallel bit-reproducibility}
 
 An execution mode will be provided which allows an ESMF-based model to
 return bitwise identical results from the same executable at different
@@ -167,7 +167,7 @@ mode is not subject to the performance requirement of Section~\ref{perf}.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\ssreq{Bit-Reproducibility on Identical Configurations}
+\ssreq{Bit-reproducibility on identical configurations}
 
 The \emph{default} execution mode will allow an ESMF-based model to
 return bitwise identical results from the same executable at the same
@@ -182,7 +182,7 @@ Section~\ref{perf}.
 {\bf Verification:} System test.
 \end{reqlist}
 
-\ssreq{Non Bit-Reproducing Fast Option}
+\ssreq{Non bit-reproducing fast option}
 
 If a performance enhancement may be had by waiving the default
 requirement above, this will be made available in a special execution
@@ -220,7 +220,7 @@ implementations and data structures of component models.
 {\bf Verification:} Interoperability experiments.
 \end{reqlist}
 
-\sreq{Ease of Adoption}
+\sreq{Ease of adoption}
 It must be straightforward to integrate ESMF into an application 
 that is reasonably modular.  We adopt as a goal that such applications should
 need to modify no more than 2\% of their source code to utilize the coupling
@@ -232,7 +232,7 @@ features of ESMF.
 {\bf Verification:} Line count.
 \end{reqlist}
 
-\req{Maintenance and Support Requirement}
+\req{Maintenance and support requirement}
 The ESMF must be maintained as a long-term commitment by at least one
 institution.  This maintenance must extend beyond adaptation to the 
 computational environment, and must include an ongoing research component

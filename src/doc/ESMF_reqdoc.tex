@@ -1,6 +1,6 @@
 % $ Id: $
 
-\documentclass[english]{article}
+\documentclass[english]{report}
 \usepackage{babel}
 \usepackage{supertabular}
 \usepackage{html}
@@ -45,9 +45,15 @@
 
 \newpage
 \begin{htmlonly}
-\addcontentsline{toc}{part}{\longname Overview}
+\addcontentsline{toc}{part}{General Requirements}
 \end{htmlonly}
-\part{\longname Overview}
+\part{General Requirements}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{chapter}{\longname Overview}
+\end{htmlonly}
+\chapter{\longname Overview}
 
 %===============================================================================
 \section{Target Codes and Review Team}
@@ -106,11 +112,22 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Framework-Wide Requirements}
+\addcontentsline{toc}{chapter}{Framework-Wide Requirements}
 \end{htmlonly}
-\part{Framework-Wide Requirements}
+\chapter{Framework-Wide Requirements}
 
 \input{ESMF_req}
+
+%\section{Bibliography}
+\bibliography{ESMF} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Detailed Requirements}
+\end{htmlonly}
+\part{Detailed Requirements}
 
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
@@ -118,9 +135,9 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Superstructure Requirements: Components and Control}
+\addcontentsline{toc}{chapter}{Superstructure Requirements: Components and Control}
 \end{htmlonly}
-\part{Superstructure Requirements: Components and Control}
+\chapter{Superstructure Requirements: Components and Control}
 \input{../Superstructure/Control/doc/Control_reqdoc}
 \input{../Superstructure/Coupler/doc/Coupler_reqdoc}
 
@@ -130,9 +147,9 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Requirements: Fields and Grids}
+\addcontentsline{toc}{chapter}{Infrastructure Requirements: Fields and Grids}
 \end{htmlonly}
-\part{Infrastructure Requirements: Fields and Grids}
+\chapter{Infrastructure Requirements: Fields and Grids}
 \input{../Infrastructure/Fields/doc/Fields_reqdoc}
 \input{../Infrastructure/PhysGrid/doc/PhysGrid_reqdoc}
 \input{../Infrastructure/DistGrid/doc/DistGrid_reqdoc}
@@ -144,18 +161,13 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Requirements: Utilities}
+\addcontentsline{toc}{chapter}{Infrastructure Requirements: Utilities}
 \end{htmlonly}
-\part{Infrastructure Requirements: Utilities}
+\chapter{Infrastructure Requirements: Utilities}
 \input{../Infrastructure/TimeMgmt/doc/TimeMgmt_reqdoc}
 \input{../Infrastructure/PerfProf/doc/PerfProf_reqdoc}
 \input{../Infrastructure/Log/doc/Log_reqdoc}
 \input{../Infrastructure/IO/doc/IO_reqdoc}
-
-%\section{Bibliography}
-\bibliography{ESMF} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{References}
 
 \end{document}
 

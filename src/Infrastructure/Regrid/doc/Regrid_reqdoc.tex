@@ -1,40 +1,40 @@
-% $Id: Regrid_reqdoc.tex,v 1.6 2002/05/03 18:17:22 pwjones Exp $
+% $Id: Regrid_reqdoc.tex,v 1.7 2002/05/17 21:21:05 cdeluca Exp $
 
-\documentclass[english]{article}
+%\documentclass[english]{article}
 %\usepackage{babel}
 %\usepackage{supertabular}
-\usepackage{html}
+%\usepackage{html}
 %\usepackage[T1]{fontenc}
 
-\newcommand{\docmttype}{Requirements}
-\newcommand{\reqtitle}[1]{\shortname#1}
-\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
-\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
-\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype }
-\newenvironment
-{reqlist}
-{\begin{list} {} {} \rm \item[]}
-{\end{list}}
+%\newcommand{\docmttype}{Requirements}
+%\newcommand{\reqtitle}[1]{\shortname#1}
+%\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+%\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+%\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+%\newcommand{\mytitle}{\longname \docmttype }
+%\newenvironment
+%{reqlist}
+%{\begin{list} {} {} \rm \item[]}
+%{\end{list}}
 
 %===============================================================================
 % User-defined commands
 %-------------------------------------------------------------------------------
-\newcommand{\longname}{Regridding and Interpolation }
-\newcommand{\funcname}{Regrid}
-\newcommand{\shortname}{RG}
-\newcommand{\myauthors}{Phil Jones, Mark Iredell, Will Sawyer}
+\renewcommand{\longname}{Regridding and Interpolation }
+\renewcommand{\funcname}{Regrid}
+\renewcommand{\shortname}{RG}
+\renewcommand{\myauthors}{Phil Jones, Mark Iredell, Will Sawyer}
 %===============================================================================
 
-\begin{document}
+%\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+%\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
-\newpage
-\tableofcontents
+%\newpage
+%\tableofcontents
 
 \newpage
 \begin{htmlonly}
@@ -67,23 +67,23 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 %===============================================================================
 
-\section{Introduction}
-\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
+%\section{Introduction}
+%\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
 \section{\longname Background}
-\input{Regrid_background}
+\input{../Infrastructure/Regrid/doc/Regrid_background}
 
-\section{\longname Terms}
-\input{Regrid_terms}
+%\section{\longname Terms}
+%\input{Regrid_terms}
 
-\section{Document Organization and Conventions}
-\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
+%\section{Document Organization and Conventions}
+%\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
 
-\subsection{Requirement Attributes}
-\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
+%\subsection{Requirement Attributes}
+%\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
 
-\section{\longname Abbreviations}
-\input{Regrid_abbr}
+%\section{\longname Abbreviations}
+%\input{Regrid_abbr}
 
 \newpage
 
@@ -97,18 +97,18 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{\longname Requirements}
 
-\input{Regrid_req}
+\input{../Infrastructure/Regrid/doc/Regrid_req}
 
-\section*{Glossary}
-\input{Regrid_glos}
-\addcontentsline{toc}{section}{Glossary}
+%\section*{Glossary}
+%\input{Regrid_glos}
+%\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
-\bibliography{Regrid} 
+\bibliography{../Infrastructure/Regrid/doc/Regrid} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{References}
 
-\end{document}
+%\end{document}
 
 
 

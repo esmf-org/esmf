@@ -1,42 +1,42 @@
-% $Id: IO_reqdoc.tex,v 1.4 2002/05/14 20:05:57 lzaslavsky Exp $
+% $Id: IO_reqdoc.tex,v 1.5 2002/05/17 21:21:04 cdeluca Exp $
 
-\documentclass[english]{article}
-\usepackage{babel}
-\usepackage{supertabular}
-\usepackage{html}
+%\documentclass[english]{article}
+%\usepackage{babel}
+%\usepackage{supertabular}
+%\usepackage{html}
 % \usepackage[T1]{fontenc}
 
-\newcommand{\docmttype}{Requirements}
-\newcommand{\reqtitle}[1]{\shortname#1}
-\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
-\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
-\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~- Pre-Draft 2}
-\newenvironment
-{reqlist}
-{\begin{list} {} {} \rm \item[]}
-{\end{list}}
+%\newcommand{\docmttype}{Requirements}
+%\newcommand{\reqtitle}[1]{\shortname#1}
+%\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+%\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+%\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+%\newcommand{\mytitle}{\longname \docmttype ~~- Pre-Draft 2}
+%\newenvironment
+%{reqlist}
+%{\begin{list} {} {} \rm \item[]}
+%{\end{list}}
 
 %=============================================================================
 % User-defined commands
 %-----------------------------------------------------------------------------
-\newcommand{\longname}{IO }
-\newcommand{\funcname}{ IO }
-\newcommand{\shortname}{IO}
-\newcommand{\myauthors}{Leonid Zaslavsky, Arlindo da Silva, Michael
+\renewcommand{\longname}{IO }
+\renewcommand{\funcname}{ IO }
+\renewcommand{\shortname}{IO}
+\renewcommand{\myauthors}{Leonid Zaslavsky, Arlindo da Silva, Michael
 Young, 
 Mark Iredell}
 %=============================================================================
 
-\begin{document}
+%\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+%\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
-\newpage
-\tableofcontents
+%\newpage
+%\tableofcontents
 
 \newpage
 \begin{htmlonly}
@@ -69,48 +69,48 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 %==============================================================================
 
-\section{Introduction}
-\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
+%\section{Introduction}
+%\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
 %\section{\longname Background}
-\input{IO_background}
+\input{../Infrastructure/IO/doc/IO_background}
 
 %\section{\longname Terms}
 %\input{IO_terms}
 
-\section{Document Organization and Conventions}
-\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
+%\section{Document Organization and Conventions}
+%\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
 
-\subsection{Requirement Attributes}
-\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
+%\subsection{Requirement Attributes}
+%\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
 
 %\section{\longname Abbreviations}
 %\input{IO_abbr}
 
 \newpage
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \begin{htmlonly}
 \addcontentsline{toc}{part}{\longname Requirements}
 \end{htmlonly}
 \part{\longname Requirements}
 
-\input{IO_req}
+\input{../Infrastructure/IO/doc/IO_req}
 
-\section*{Glossary}
-\input{IO_glos}
-\addcontentsline{toc}{section}{Glossary}
+%\section*{Glossary}
+%\input{IO_glos}
+%\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
-\bibliography{IO}
+\bibliography{../Infrastructure/IO/doc/IO}
 \bibliographystyle{plain} 
 \addcontentsline{toc}{section}{References}
 
-\end{document}
+%\end{document}
 
 
 

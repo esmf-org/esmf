@@ -1,42 +1,42 @@
-% $Id: DistGrid_reqdoc.tex,v 1.7 2002/04/22 17:37:08 vbalaji Exp $
+% $Id: DistGrid_reqdoc.tex,v 1.8 2002/05/17 21:21:04 cdeluca Exp $
 
-\documentclass[english]{article}
+%\documentclass[english]{article}
 % \usepackage{underscore}
-\usepackage{babel}
-\usepackage{supertabular}
-\usepackage{html}
-\usepackage[T1]{fontenc}
-\usepackage{times}
+%\usepackage{babel}
+%\usepackage{supertabular}
+%\usepackage{html}
+%\usepackage[T1]{fontenc}
+%\usepackage{times}
 
-\newcommand{\docmttype}{Requirements}
-\newcommand{\reqtitle}[1]{\shortname#1}
-\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
-\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
-\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~- Pre-draft 1}
-\newenvironment{reqlist}
- {\begin{description}}
- {\end{description}}
+%\newcommand{\docmttype}{Requirements}
+%\newcommand{\reqtitle}[1]{\shortname#1}
+%\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+%\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+%\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+%\newcommand{\mytitle}{\longname \docmttype ~~- Pre-draft 1}
+%\newenvironment{reqlist}
+% {\begin{description}}
+% {\end{description}}
 
 %===============================================================================
 % User-defined commands
 %-------------------------------------------------------------------------------
-\newcommand{\longname}{Distributed Grid }
-\newcommand{\funcname}{DistGrid }
-\newcommand{\shortname}{DG}
-\newcommand{\myauthors}{V. Balaji, Will Sawyer, John Michalakes}
+\renewcommand{\longname}{Distributed Grid }
+\renewcommand{\funcname}{DistGrid }
+\renewcommand{\shortname}{DG}
+\renewcommand{\myauthors}{V. Balaji, Will Sawyer, John Michalakes}
 \newcommand{\DistGrid}{\textbf{DistGrid} }
 %===============================================================================
 
-\begin{document}
+%\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+%\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
-\newpage
-\tableofcontents
+%\newpage
+%\tableofcontents
 
 \newpage
 \begin{htmlonly}
@@ -69,23 +69,23 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 %===============================================================================
 
-\section{Introduction}
-\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
+%\section{Introduction}
+%\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
 \section{\longname Background}
-\input{DistGrid_background}
+\input{../Infrastructure/DistGrid/doc/DistGrid_background}
 
-\section{\longname Terms} \label{DG:terms}
-\input{DistGrid_terms}
+%\section{\longname Terms} \label{DG:terms}
+%\input{DistGrid_terms}
 
-\section{Document Organization and Conventions}
-\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
+%\section{Document Organization and Conventions}
+%\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
 
-\subsection{Requirement Attributes}
-\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
+%\subsection{Requirement Attributes}
+%\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
 
-\section{\longname Abbreviations}
-\input{DistGrid_abbr}
+%\section{\longname Abbreviations}
+%\input{../Infrastructure/DistGrid/doc/DistGrid_abbr}
 
 \newpage
 
@@ -99,18 +99,18 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{\longname Requirements}
 
-\input{DistGrid_req}
+\input{../Infrastructure/DistGrid/doc/DistGrid_req}
 
-\section*{Glossary}
-\input{DistGrid_glos}
-\addcontentsline{toc}{section}{Glossary}
+%\section*{Glossary}
+%\input{DistGrid_glos}
+%\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
 \bibliography{DistGrid} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{References}
 
-\end{document}
+%\end{document}
 
 
 

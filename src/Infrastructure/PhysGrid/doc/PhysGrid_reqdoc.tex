@@ -1,44 +1,43 @@
-% $Id: PhysGrid_reqdoc.tex,v 1.8 2002/04/23 13:38:30 cnh Exp $
+% $Id: PhysGrid_reqdoc.tex,v 1.9 2002/05/17 21:21:05 cdeluca Exp $
 
-\documentclass[english]{article}
-\usepackage{babel}
-\usepackage{supertabular}
-\usepackage{html}
-\usepackage[T1]{fontenc}
-\usepackage{times}
-\usepackage{graphicx}
-\usepackage{amsmath}
+%\documentclass[english]{article}
+%\usepackage{babel}
+%\usepackage{supertabular}
+%\usepackage{html}
+%\usepackage[T1]{fontenc}
+%\usepackage{times}
+%\usepackage{graphicx}
+%\usepackage{amsmath}
 
-\newcommand{\docmttype}{Requirements}
-\newcommand{\reqtitle}[1]{\shortname#1}
-\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
-\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
-\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~- Pre-Draft 2}
-\newenvironment
-{reqlist}
-{\begin{list} {} {} \rm \item[]}
-{\end{list}}
+%\newcommand{\docmttype}{Requirements}
+%\newcommand{\reqtitle}[1]{\shortname#1}
+%\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+%\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+%\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+%\newcommand{\mytitle}{\longname \docmttype ~~- Pre-Draft 2}
+%\newenvironment
+%{reqlist}
+%{\begin{list} {} {} \rm \item[]}
+%{\end{list}}
 
 %===============================================================================
 % User-defined commands
 %-------------------------------------------------------------------------------
-\newcommand{\longname}{Physical Grids }
-\newcommand{\funcname}{PhysGrid }
-\newcommand{\shortname}{PG}
-\newcommand{\myauthors}{Robert Hallberg, Arlindo da Silva, Matt Harrison}
+\renewcommand{\longname}{Physical Grids }
+\renewcommand{\funcname}{PhysGrid }
+\renewcommand{\shortname}{PG}
+\renewcommand{\myauthors}{Robert Hallberg, Arlindo da Silva, Matt Harrison}
 %===============================================================================
 
-\begin{document}
+%\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+%\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
-\newpage
-
-\tableofcontents
+%\newpage
+%\tableofcontents
 
 \newpage
 \begin{htmlonly}
@@ -70,23 +69,23 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 %===============================================================================
 
-\section{Introduction}
+%\section{Introduction}
 %\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
 %\section{\longname Background}
-\input{PhysGrid_background}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_background}
 
-\section{\longname Terms}
-\input{PhysGrid_terms}
+%\section{\longname Terms}
+%\input{../Infrastructure/PhysGrid/doc/PhysGrid_terms}
 
-\section{Document Organization and Conventions}
+%\section{Document Organization and Conventions}
 %\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
 
-\subsection{Requirement Attributes}
+%\subsection{Requirement Attributes}
 %\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
 
-\section{\longname Abbreviations}
-\input{PhysGrid_abbr}
+%\section{\longname Abbreviations}
+%\input{../Infrastructure/PhysGrid/doc/PhysGrid_abbr}
 
 \newpage
 
@@ -100,18 +99,18 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{\longname Requirements}
 
-\input{PhysGrid_req}
+\input{../Infrastructure/PhysGrid/doc/PhysGrid_req}
 
-\section*{Glossary}
-\input{PhysGrid_glos}
-\addcontentsline{toc}{section}{Glossary}
+%\section*{Glossary}
+%\input{PhysGrid_glos}
+%\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
 \bibliography{PhysGrid} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{References}
 
-\end{document}
+%\end{document}
 
 
 

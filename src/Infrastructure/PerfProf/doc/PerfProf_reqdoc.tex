@@ -1,40 +1,40 @@
-% $Id: PerfProf_reqdoc.tex,v 1.3 2002/05/16 20:33:39 dneckels Exp $
+% $Id: PerfProf_reqdoc.tex,v 1.4 2002/05/17 21:21:04 cdeluca Exp $
 
-\documentclass[english]{article}
-\usepackage{babel}
-\usepackage{supertabular}
-\usepackage{html}
-\usepackage[T1]{fontenc}
+%\documentclass[english]{article}
+%\usepackage{babel}
+%\usepackage{supertabular}
+%\usepackage{html}
+%\usepackage[T1]{fontenc}
 
-\newcommand{\docmttype}{Requirements}
-\newcommand{\reqtitle}[1]{\shortname#1}
-\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
-\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
-\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
-\newcommand{\mytitle}{\longname \docmttype ~~- Draft 1}
-\newenvironment
-{reqlist}
-{\begin{list} {} {} \rm \item[]}
-{\end{list}}
+%\newcommand{\docmttype}{Requirements}
+%\newcommand{\reqtitle}[1]{\shortname#1}
+%\newcommand{\req}[1]{\section{\hspace{.3in}#1}}
+%\newcommand{\sreq}[1]{\subsection{\hspace{.3in}#1}}
+%\newcommand{\ssreq}[1]{\subsubsection{\hspace{.3in}#1}}
+%\newcommand{\mytitle}{\longname \docmttype ~~- Draft 1}
+%\newenvironment
+%{reqlist}
+%{\begin{list} {} {} \rm \item[]}
+%{\end{list}}
 
 %===============================================================================
 % User-defined commands
 %-------------------------------------------------------------------------------
-\newcommand{\longname}{Performance Profiling }
-\newcommand{\funcname}{<ClassNm> }
-\newcommand{\shortname}{PP}
-\newcommand{\myauthors}{David Neckels}
+\renewcommand{\longname}{Performance Profiling }
+\renewcommand{\funcname}{PerfProf }
+\renewcommand{\shortname}{PP}
+\renewcommand{\myauthors}{David Neckels}
 %===============================================================================
 
-\begin{document}
+%\begin{document}
 
 \bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
 
 % Title page
-\input{../../../../scripts/doc_templates/templates/title_alldoc}
+%\input{../../../../scripts/doc_templates/templates/title_alldoc}
 
-\newpage
-\tableofcontents
+%\newpage
+%\tableofcontents
 
 \newpage
 \begin{htmlonly}
@@ -67,23 +67,23 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 
 %===============================================================================
 
-\section{Introduction}
+%\section{Introduction}
 %\input{../../../../scripts/doc_templates/templates/intro_reqdoc}
 
 %\section{\longname Background}
-\input{PerfProf_background}
+\input{../Infrastructure/PerfProf/doc/PerfProf_background}
 
-\section{\longname Terms}
-\input{PerfProf_terms}
+%\section{\longname Terms}
+%\input{PerfProf_terms}
 
-\section{Document Organization and Conventions}
+%\section{Document Organization and Conventions}
 %\input{../../../../scripts/doc_templates/templates/conv_reqdoc}
 
-\subsection{Requirement Attributes}
+%\subsection{Requirement Attributes}
 %\input{../../../../scripts/doc_templates/templates/attr_reqdoc}
 
-\section{\longname Abbreviations}
-\input{PerfProf_abbr}
+%\section{\longname Abbreviations}
+%\input{PerfProf_abbr}
 
 \newpage
 
@@ -97,18 +97,18 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \end{htmlonly}
 \part{\longname Requirements}
 
-\input{PerfProf_req}
+\input{../Infrastructure/PerfProf/doc/PerfProf_req}
 
-\section*{Glossary}
-\input{PerfProf_glos}
-\addcontentsline{toc}{section}{Glossary}
+%\section*{Glossary}
+%\input{PerfProf_glos}
+%\addcontentsline{toc}{section}{Glossary}
 
 %\section{References}
-\bibliography{comp} 
-\bibliographystyle{plain}
-\addcontentsline{toc}{section}{References}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{References}
 
-\end{document}
+%\end{document}
 
 
 
