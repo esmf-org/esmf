@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.4 2002/11/06 22:29:11 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.5 2002/11/07 13:51:20 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,14 +28,14 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Class> class ...
+! The code in this file implements the Regrid class ...
 !
 ! < Insert a paragraph or two explaining the function of this class. >
 !
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod    ! ESMF base class
-      use ESMF_GridMod    ! ESMF grid class
+!      use ESMF_GridMod    ! ESMF grid class
       implicit none
 
 !------------------------------------------------------------------------------
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid.F90,v 1.4 2002/11/06 22:29:11 jwolfe Exp $'
+      '$Id: ESMF_Regrid.F90,v 1.5 2002/11/07 13:51:20 cdeluca Exp $'
 
 !==============================================================================
 !
