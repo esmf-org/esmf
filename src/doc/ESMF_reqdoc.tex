@@ -88,10 +88,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 %\section{Scope}
 \input{ESMF_scope}
 
-\section{Terms}
-\input{ESMF_terms}
-
-\section{Document organization and conventions}
+\section{Organization and conventions of detailed requirements chapters}
 \input{../../scripts/doc_templates/templates/conv_reqdoc}
 
 \subsection{Requirement attributes}
@@ -121,6 +118,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \addcontentsline{toc}{part}{Superstructure: control}
 \end{htmlonly}
 \part{Superstructure: Control}
+\label{part:Superstructure:_Control}
 
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
@@ -238,6 +236,7 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
 \end{htmlonly}
 \part{Infrastructure Utilities: I/O}
+\label{part:Infrastructure Utilities:_I/O}
 
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
@@ -245,6 +244,20 @@ NCEP-ATM, SSI                 & Iredell \\ \\
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \input{../Infrastructure/IO/doc/IO_reqdoc}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Glossary}
+\end{htmlonly}
+\part{Glossary}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\section{Glossary}
+\input{ESMF_terms}
 
 \end{document}
 
