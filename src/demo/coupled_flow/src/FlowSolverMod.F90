@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.9 2004/03/18 23:21:24 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.10 2004/03/24 22:54:52 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -258,7 +258,8 @@
 !
       call ESMF_GridCompGet(gcomp, delayout=layout, grid=grid, rc=rc)
 
-      call ESMF_GridGet(grid, globalCellCountPerDim=global_nmax, &
+      call ESMF_GridGet(grid, horzRelLoc=ESMF_CELL_CENTER, &
+                              globalCellCountPerDim=global_nmax, &
                               minGlobalCoordPerDim=global_min_coord, &
                               maxGlobalCoordPerDim=global_max_coord, rc=rc)
 !
@@ -304,6 +305,8 @@
       call ESMF_StateAddData(export_state, "Q", rc)
       call ESMF_StateAddData(export_state, "FLAG", rc)
 
+! temporary fix
+      call ESMF_StateAddData(export_state, field_sie, rc)
       rc = ESMF_SUCCESS
 
       end subroutine Flow_Init1
