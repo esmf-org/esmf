@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.17 2003/10/22 01:17:18 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.18 2003/11/06 17:46:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,8 +51,8 @@ extern "C" {
                                     ESMF_KIND_I4 *daysPerYearDn,
                                     ESMF_KIND_I4 *daysPerYearDd, int *status) {
            int rc = (ptr)->ESMC_CalendarSetGeneric(
-              ((void*) monthsPerYear  == (void*)ESMC_BAD_POINTER ?
-                                          ESMC_NULL_POINTER : monthsPerYear),
+                       monthsPerYear,    // always present internal argument.
+
               ((void*) daysPerMonth   == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : daysPerMonth),
               ((void*) secondsPerDay  == (void*)ESMC_BAD_POINTER ?
