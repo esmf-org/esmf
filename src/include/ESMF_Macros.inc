@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.3 2002/10/28 23:54:03 nscollins Exp $
+$Id: ESMF_Macros.inc,v 1.4 2003/02/21 21:06:15 jwolfe Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,5 +39,7 @@ ends up being included multiple times.
 
 #define ESMF_MAXSTR 128
 #define ESMF_MAXDIM 7
+#define ESMF_MAXDECOMPDIM 2
+#define ESMF_MAXGRIDDIM 2
 
 #endif 
