@@ -1,4 +1,7 @@
 #!/usr/local/bin/perl
+#
+#  $Id: protex,v 1.4 2002/07/25 17:23:23 eschwab Exp $
+#
 #BOP
 #
 # !ROUTINE: ProTeX v. 2.00 - Translates DAO Prologues to LaTeX
@@ -111,7 +114,7 @@ Arg:
 }#   end if
 }# end foreach
 
-# If all inut arguments are options, then assume the
+# If all input arguments are options, then assume the
 # filename, "-", for the standard input
 # --------------------------------------------------
   if ( $NFiles == 0 ) { push (@ARGV, "-"); } 
@@ -127,6 +130,10 @@ Arg:
 # --------------------------
   @keys = ( "!INTERFACE:",
             "!USES:",
+            "!SUPERCLASSES:",
+            "!AGGREGATE CLASSES:",
+            "!ASSOCIATE CLASSES:",
+            "!FRIEND CLASSES:",
             "!PUBLIC TYPES:",
             "!PUBLIC MEMBER FUNCTIONS:",
             "!PUBLIC DATA MEMBERS:",
@@ -422,6 +429,61 @@ LINE:
               s/_/\\_/g;                        # Replace "_" with "\_"
               printf "\\subsubsection{%s}\n\n", $_;
               $have_name = 1;
+              next LINE;
+}#         end if
+}#      end if
+
+#       A new CLASS
+#       ------------
+        if ($Fld[2] eq '!CLASS:' ) { 
+           if ($prologue) {
+              shift @Fld;
+              shift @Fld;
+              $_ = join(' ', @Fld);
+              $name_is = $_;
+              s/_/\\_/g;                         # Replace "_" with "\_"
+              if ( $opt_n && $not_first ) { printf "\\newpage\n"; }
+              unless($opt_f) {printf "\\subsection{C++:  Class Interface %s (Source File: %s)}\n\n", $_, $FileBaseName;}
+              else           {printf "\\subsection{C++:  Class Interface %s }\n\n", $_;}
+              $have_name = 1;
+              $have_intf = 1;  # fake it, it does not need one.
+              $not_first = 1;
+              next LINE;
+}#         end if
+}#      end if
+
+#       A new Method
+#       -------------------------
+        if ($Fld[2] eq '!METHOD:' ) { 
+           if ($prologue) {
+              shift @Fld;
+              shift @Fld;
+              $_ = join(' ', @Fld);
+              $name_is = $_;
+              s/_/\\_/g;                         # Replace "_" with "\_"
+              if ( $opt_n && $not_first ) { printf "\\newpage\n"; }
+              unless ($opt_f) {printf "\\subsubsection{%s (Source File: %s)}\n\n", $_, $FileBaseName;}
+              else            {printf "\\subsubsection{%s }\n\n", $_;}
+              $have_name = 1;
+              $not_first = 1;
+              next LINE;
+}#         end if
+}#      end if
+
+#       A new function
+#       -------------------------
+        if ($Fld[2] eq '!FUNCTION:' ) { 
+           if ($prologue) {
+              shift @Fld;
+              shift @Fld;
+              $_ = join(' ', @Fld);
+              $name_is = $_;
+              s/_/\\_/g;                         # Replace "_" with "\_"
+              if ( $opt_n && $not_first ) { printf "\\newpage\n"; }
+              unless ($opt_f) {printf "\\subsubsection{%s (Source File: %s)}\n\n", $_, $FileBaseName;}
+              else            {printf "\\subsubsection{%s }\n\n", $_;}
+              $have_name = 1;
+              $not_first = 1;
               next LINE;
 }#         end if
 }#      end if
