@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.15 2003/04/25 22:26:05 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.16 2003/04/28 16:05:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.15 2003/04/25 22:26:05 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.16 2003/04/28 16:05:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -218,8 +218,10 @@
         }
         break;
       default:
-        printf("no code for PE count of %d\n", partnercount);
-        break;
+        printf("ERROR!! no code for PE count of %d\n", partnercount);
+        for (i=0; i<partnercount; i++)
+            commpartner[i] = -1;
+        return ESMF_FAILURE;
     }
 
     return ESMF_SUCCESS;
