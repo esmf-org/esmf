@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/25 23:13:40 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/03/25 23:21:31 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -14,14 +14,14 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/PhysGrid/doc
 
 DVIFILES  = \
-		${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi 
+		${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi \
 		${ESMC_DOCDIR}/PhysGrid_desdoc.dvi \
 		${ESMC_DOCDIR}/PhysGrid_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
-		${ESMC_DOCDIR}/PhysGrid_reqdoc 
+		${ESMC_DOCDIR}/PhysGrid_reqdoc \
 		${ESMC_DOCDIR}/PhysGrid_desdoc \
 		${ESMC_DOCDIR}/PhysGrid_refdoc
 
