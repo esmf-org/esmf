@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.6 2003/02/13 22:27:00 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.7 2003/04/02 22:14:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -156,6 +156,104 @@
         if (rcpresent) rc = ESMF_SUCCESS @\
  @\
         end function ESMF_ArrayCreateByPtr##mtypekind##mrank##D   @\
+ @\
+! < end macro - do not edit directly >  @\
+!------------------------------------------------------------------------------ @\
+
+
+
+#define ArrayCreateSpecMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!BOP @\
+! !IROUTINE: ESMF_ArrayCreateBySpec##mtypekind##mrank##D - make an ESMF array from a Spec @\
+ @\
+! !INTERFACE: @\
+      function ESMF_ArrayCreateBySpec##mtypekind##mrank##D(lengths, rc) @\
+! @\
+! !RETURN VALUE: @\
+      type(ESMF_Array) :: ESMF_ArrayCreateBySpec##mtypekind##mrank##D @\
+! @\
+! !ARGUMENTS: @\
+      integer, dimension(:), intent(in) :: lengths  @\
+      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Creates an {\tt Array} based on a spec and counts. @\
+! @\
+! The function return is an ESMF\_Array type. @\
+! @\
+! The arguments are: @\
+!  \begin{description} @\
+!  \item[lengths] @\
+!   An integer array of counts.  Must be the same length as the rank. @\
+! @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
+! @\
+ @\
+! @\
+!EOP @\
+! !REQUIREMENTS: @\
+ @\
+        ! local variables @\
+        type (ESMF_Array) :: array          ! what C++ is going to return @\
+        integer :: i                        ! local variable @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+        logical :: copyreq                  ! did user specify copy? @\
+ @\
+        type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
+        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
+ @\
+        ! Initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
+        if (present(rc)) then @\
+          rcpresent = .TRUE. @\
+          rc = ESMF_FAILURE @\
+        endif @\
+ @\
+        copyreq = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
+ @\
+!       ! call create routine @\
+        call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+                                             mrank, lengths, status) @\
+        if (status .ne. ESMF_SUCCESS) then @\
+          print *, "Array initial construction error" @\
+          return @\
+        endif @\
+ @\
+        allocate(localp( mlen ), stat=status) @\
+        if (status .ne. 0) then     ! f90 status, not ESMF @\
+          print *, "Array do_copy allocate error" @\
+          return @\
+        endif @\
+        call c_ESMC_ArraySetDealloc(array, status) @\
+        @\
+ @\
+!       ! set base address @\
+        call c_ESMC_ArraySetBaseAddr(array, localp( mloc ), status) @\
+        if (status .ne. ESMF_SUCCESS) then @\
+          print *, "Array base address construction error" @\
+          return @\
+        endif @\
+ @\
+!       ! save an (uninterpreted) copy of the f90 array information @\
+        wrap%##mtypekind##mrank##Dptr => localp @\
+        call c_ESMC_ArraySetF90Ptr(array, wrap, status) @\
+        if (status .ne. ESMF_SUCCESS) then @\
+          print *, "Array internal info save error" @\
+          return @\
+        endif @\
+ @\
+!       ! return value set by c_ESMC func above @\
+        ESMF_ArrayCreateBySpec##mtypekind##mrank##D = array @\
+        if (rcpresent) rc = ESMF_SUCCESS @\
+ @\
+        end function ESMF_ArrayCreateBySpec##mtypekind##mrank##D   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\

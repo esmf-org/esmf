@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.17 2003/04/02 21:04:11 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.18 2003/04/02 22:14:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,8 +139,7 @@
       public ESMF_ArrayCreate
       public ESMF_ArrayDestroy
  
-      public ESMF_ArraySpecCreate
-      !public ESMF_ArraySpecDestroy
+      public ESMF_ArraySpecInit
       public ESMF_ArraySpecGet
 
       public ESMF_ArraySetData, ESMF_ArrayGetData
@@ -159,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.17 2003/04/02 21:04:11 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.18 2003/04/02 22:14:52 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -177,7 +176,8 @@
 !
 !        !module procedure ESMF_ArrayCreateNewNoData
         module procedure ESMF_ArrayCreateNewBuffer
-!        !module procedure ESMF_ArrayCreateBySpecNoData
+        module procedure ESMF_ArrayCreateBySpec
+        module procedure ESMF_ArrayCreateBySpecNoData
 !        !module procedure ESMF_ArrayCreateBySpecBuffer
 
         module procedure ESMF_ArrayCreateByPtrI41D
@@ -192,6 +192,7 @@
         module procedure ESMF_ArrayCreateByPtrR82D
         module procedure ESMF_ArrayCreateByPtrR43D
         module procedure ESMF_ArrayCreateByPtrR83D
+
 
 ! ! TODO: ...to be expanded to all types, kinds, ranks
 
@@ -387,17 +388,17 @@ end function
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
 !
-!  \item[[lbounds]]
+!  \item[lbounds]
 !    The lower bounds for valid indices in the array.  This is a 1D
 !    integer array the same length as the rank.  If not specified,
 !    the default is 1 for each dimension.
 !
-!  \item[[ubounds]]
+!  \item[ubounds]
 !    The upper bounds for valid indices in the array.  This is a 1D
 !    integer array the same length as the rank.  If not specified,
 !    the default is the count for each dimension.
 !
-!  \item[[strides]]
+!  \item[strides]
 !    The strides for each rank of the array. This is a 1D
 !    integer array the same length as the rank.  If not specified,
 !    the default is the standard Fortran row-major ordering.
@@ -495,7 +496,7 @@ end function
 
 
 !       local vars
-        type (ESMF_Array), pointer :: a     ! pointer to new Array
+        type (ESMF_Array) :: a              ! new array object
         integer :: status                   ! local error status
         logical :: rcpresent                ! did user specify rc?
 
@@ -525,6 +526,84 @@ end function
         end function ESMF_ArrayCreateBySpec
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayCreateBySpecNoData -- Create a new Array from a spec
+
+! !INTERFACE:
+      function ESMF_ArrayCreateBySpecNoData(as, counts, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Array) :: ESMF_ArrayCreateBySpecNoData
+!
+! !ARGUMENTS:
+      type(ESMF_ArraySpec), intent(in) :: as
+      integer, intent(in), dimension(:) :: counts
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new Array and allocate space.
+!
+!  The return value is a new Array.
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!  \item[as]
+!    ArraySpec object.
+!
+!  \item[counts]
+!    Count of items in each dimension.  Must be the same length as the
+!    rank in the {\tt ArraySpec}.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+        ! Local vars
+        type (ESMF_Array) :: a              ! new array object
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        ! Initialize pointer
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        a%this = ESMF_NULL_POINTER
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call proper create routine
+        select case (as%rank)
+          !case (1)
+          case (2)
+            select case (as%type%dtype)
+              case (ESMF_DATA_REAL%dtype)
+               a = ESMF_ArrayCreateBySpecR42D(counts, rc)
+              case default
+               print *, "unsupported type"
+            end select
+          !case (3)
+          !case (4)
+          !case (5)
+          case default
+           print *, "unsupported rank"
+        end select
+
+        ! Set return values
+        ESMF_ArrayCreateBySpecNoData = a
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_ArrayCreateBySpecNoData
+
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
@@ -552,6 +631,37 @@ ArrayCreateMacro(real, R8, 2, COL2, LEN2, LOC2)
 ArrayCreateMacro(real, R4, 3, COL3, LEN3, LOC3)
 
 ArrayCreateMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+!! < start of macros which become actual function bodies after expansion >
+
+ArrayCreateSpecMacro(integer, I4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateSpecMacro(integer, I8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateSpecMacro(integer, I4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateSpecMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateSpecMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateSpecMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
+ArrayCreateSpecMacro(real, R4, 1, COL1, LEN1, LOC1)
+
+ArrayCreateSpecMacro(real, R8, 1, COL1, LEN1, LOC1)
+
+ArrayCreateSpecMacro(real, R4, 2, COL2, LEN2, LOC2)
+
+ArrayCreateSpecMacro(real, R8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateSpecMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateSpecMacro(real, R8, 3, COL3, LEN3, LOC3)
 
 
 !------------------------------------------------------------------------------
@@ -1045,13 +1155,12 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-     function ESMF_ArraySpecCreate(rank, type, kind, rc)
+     subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
                                    !counts, lbounds, ubounds, strides, rc)
 !
-! !RETURN VALUE:
-     type(ESMF_ArraySpec), pointer :: ESMF_ArraySpecCreate  
 !
 ! !ARGUMENTS:
+     type(ESMF_ArraySpec), intent(inout) :: as
      integer, intent(in) :: rank
      type(ESMF_DataType), intent(in) :: type
      type(ESMF_DataKind), intent(in) :: kind
@@ -1065,10 +1174,12 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !  Creates a description of the data -- the type, the dimensionality, etc.  
 !  This specification (basically an empty Array), can be
 !  used in an ArrayCreate call with data to create a full Array.
-!  The return value is a new ArraySpec.
 !    
 !  The arguments are:
 !  \begin{description}
+!
+!  \item[arrayspec]
+!    Uninitialized array spec.
 !
 !  \item[rank]
 !    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
@@ -1111,125 +1222,21 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 ! !REQUIREMENTS:
 
 
-!       local vars
-        type (ESMF_ArraySpec), pointer :: as     ! pointer to new Array
+        ! Local vars
         integer :: status                        ! local error status
         logical :: rcpresent                     ! did user specify rc?
 
-!       initialize pointer
+        ! Initialize pointer
         status = ESMF_FAILURE
         rcpresent = .FALSE.
-        nullify(as)
 
-!       initialize return code; assume failure until success is certain
+        ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
-!       allocate space for ArraySpec and call Construct method to initalize
-        allocate(as, stat=status)
-        if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
-          print *, "ArraySpec allocation error"
-          return
-        endif
-
-        call ESMF_ArraySpecConstruct(as, rank, type, kind, status)
-                                      !counts, lbounds, ubounds, strides, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ArraySpec construction error"
-          return
-        endif
-
-!       set return value
-        ESMF_ArraySpecCreate => as
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end function ESMF_ArraySpecCreate
-
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArraySpecConstruct(as, rank, type, kind, rc)
-                                          !counts, lbounds, ubounds, strides, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArraySpec), pointer :: as
-      integer, intent(in) :: rank
-      type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
-      !integer, dimension(:), intent(in), optional :: counts
-      !integer, dimension(:), intent(in), optional :: lbounds
-      !integer, dimension(:), intent(in), optional :: ubounds
-      !integer, dimension(:), intent(in), optional :: strides
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  ESMF routine to initialize the contents of a ArraySpec type.
-!  The corresponding internal routine is Destruct.
-!
-!  The arguments are:
-!  \begin{description}
-!
-!  \item[as]
-!    An allocated {\tt ArraySpec} type where the contents are uninitialized.
-!
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!
-!  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!
-!  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
-!%  \item[counts]
-!%    The size of each dimension in the Array.  This is a 1D integer array
-!%    the same length as the rank.
-!%
-!%  \item[[lbounds]]
-!%    The lower bounds for valid indices in the array.  This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are 1 for each dimension.
-!%
-!%  \item[[ubounds]]
-!%    The upper bounds for valid indices in the array.  This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are same as the count in each dimension.
-!%
-!%  \item[[strides]]
-!%    The strides for each rank of the array. This is a 1D
-!%    integer array the same length as the rank.  If not specified
-!%    the default values are the same as the default Fortran array strides.
-!%
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-
-!       local vars
-        integer :: i
-        integer :: status                        ! local error status
-        logical :: rcpresent                     ! did user specify rc?
-
-!       initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-
-!       set arrayspec contents
+        ! Set arrayspec contents
       
         as%rank = rank   
         as%type = type
@@ -1244,7 +1251,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArraySpecConstruct
+        end subroutine ESMF_ArraySpecInit
 
 
 
