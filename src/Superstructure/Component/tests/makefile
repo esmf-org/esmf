@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2004/12/15 23:00:28 nscollins Exp $ 
+# $Id: makefile,v 1.24.2.1 2005/03/02 23:13:50 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -15,25 +15,25 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/Component/tests
 
 TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
-		$(ESMC_TESTDIR)/ESMF_GridCompCreateUTest \
-		$(ESMC_TESTDIR)/ESMC_CompCreate \
 		$(ESMC_TESTDIR)/ESMF_CompRun \
-		$(ESMC_TESTDIR)/ESMC_CompRun \
-		$(ESMC_TESTDIR)/ESMF_CplCompCreateUTest
+		$(ESMC_TESTDIR)/ESMF_GridCompCreateUTest \
+		$(ESMC_TESTDIR)/ESMF_CplCompCreateUTest 
+		#$(ESMC_TESTDIR)/ESMC_CompCreate \
+		#$(ESMC_TESTDIR)/ESMC_CompRun \
 
 TESTS_RUN     =	RUN_ESMF_CompCreate \
-		RUN_ESMF_GridCompCreateUTest \
-		RUN_ESMF_CplCompCreateUTest \
-		RUN_ESMC_CompCreate \
 		RUN_ESMF_CompRun \
-		RUN_ESMC_CompRun
+		RUN_ESMF_GridCompCreateUTest \
+		RUN_ESMF_CplCompCreateUTest 
+		#RUN_ESMC_CompCreate \
+		#RUN_ESMC_CompRun
 
 TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
-		RUN_ESMF_GridCompCreateUTestUNI \
-		RUN_ESMF_CplCompCreateUTestUNI \
-		RUN_ESMC_CompCreateUNI \
 		RUN_ESMF_CompRunUNI \
-		RUN_ESMC_CompRunUNI
+		RUN_ESMF_GridCompCreateUTestUNI \
+		RUN_ESMF_CplCompCreateUTestUNI 
+		#RUN_ESMC_CompCreateUNI \
+		#RUN_ESMC_CompRunUNI
 
 
 include $(ESMF_DIR)/makefile
