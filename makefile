@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2001/12/11 23:20:05 dneckels Exp $
+# $Id: makefile,v 1.8 2002/09/20 15:06:09 jwolfe Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -21,7 +21,7 @@ build_libs:
 #-------------------------------------------------------------------------------
 # Basic targets to build ESMF libraries.
 #-------------------------------------------------------------------------------
-all       : info info_h chkalice_dir build_libs
+all       : info info_h chk_dir build_libs
 
 #-------------------------------------------------------------------------------
 # Prints information about the system and version of ESMF being compiled
@@ -42,7 +42,7 @@ info:
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; fi
 	-@grep ESMC_VERSION_NUMBER include/ESMC_Version.h | ${SED} "s/........//"
 	-@echo "-----------------------------------------"
-	-@echo "Using ESMF flags: ${ALICEFLAGS} ${PCONF}"
+	-@echo "Using ESMF flags: ${PCONF}"
 	-@echo "-----------------------------------------"
 	-@echo "Using configuration flags:"
 	-@grep "define " build/${ESMF_ARCH}/conf.h
@@ -74,7 +74,7 @@ info_h:
 	-@if [  "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo  "Fortran Compiler version:" >> MINFO ; ${C_FCV} >> MINFO 2>&1 ; fi
 	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using ESMF flags: ${ALICEFLAGS} ${PCONF}" >> MINFO
+	-@echo  "Using ESMF flags: ${PCONF}" >> MINFO
 	-@echo  "-----------------------------------------" >> MINFO
 	-@echo  "Using configuration flags:" >> MINFO
 	-@echo  "-----------------------------------------" >> MINFO
@@ -182,14 +182,12 @@ deletelibs: chkopts_basic
 
 
 BUILDFILES = build/common* build/*/base build/*/base_variables build/*/base.site \
-	     build/*/conf.h build/*/fix.h build/win32/makefile.dos bin/config/base*.in \
+	     build/*/conf.h build/*/fix.h bin/config/base*.in \
              build/*/buildtest
 
-DOCS	   = build/readme build/conf.defs
+DOCS	   = build/README build/conf.defs
 
-SCRIPTS    = maint/addlinks maint/builddist maint/buildlinks maint/wwwman \
-	     maint/xclude maint/crontab  \
-	     maint/autoftp include/foldinclude/generateincludes
+SCRIPTS    = 
 
 install:
 	-@if [ "${ESMF_LIB_INSTALL}" != "" ] ; then \
@@ -234,7 +232,7 @@ html: chkdir_doc tex
 # Clean recursively deletes files that each makefile wants
 # deleted.   Remove the .mod files here manually since the case
 # of mods is not really predictable.
-clean: chkopts
+clean: 
 	@rm -f ${ESMC_MODDIR}/*.mod
 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=clean_recursive  tree 
