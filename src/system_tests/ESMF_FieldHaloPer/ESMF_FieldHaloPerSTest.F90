@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.5 2004/02/09 17:53:51 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.6 2004/03/05 20:26:39 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -28,7 +28,10 @@
       ! halo width on each edge
       integer :: halo_width = 3
 
-      public :: verbose, periodic, halo_width
+      ! route handle for stored halo communication patterns
+      type(ESMF_RouteHandle) :: routehandle(4)
+
+      public :: verbose, periodic, halo_width, routehandle
 
     end module
 
@@ -391,10 +394,20 @@
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
+      routehandle(1) = ESMF_RouteHandleCreate(rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_FieldHaloStore(field(1), routehandle(1), rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
       fname = "Periodic in Y"
       thisgrid = grid(2)
       field(2) = ESMF_FieldCreate(thisgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      routehandle(2) = ESMF_RouteHandleCreate(rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_FieldHaloStore(field(2), routehandle(2), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       fname = "Periodic in both X and Y"
@@ -403,10 +416,20 @@
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
+      routehandle(3) = ESMF_RouteHandleCreate(rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_FieldHaloStore(field(3), routehandle(3), rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
       fname = "Not Periodic"
       thisgrid = grid(4)
       field(4) = ESMF_FieldCreate(thisgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      routehandle(4) = ESMF_RouteHandleCreate(rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_FieldHaloStore(field(4), routehandle(4), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Add the fields to the import state.
@@ -487,7 +510,7 @@
 
       ! Call Field method to halo data.  This updates the data in place.
       if (verbose) print *, "about to call Field Halo"
-      call ESMF_FieldHalo(field1, rc=rc)
+      call ESMF_FieldHalo(field1, routehandle(1), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       if (verbose) print *, "returned from Field Halo call"
 
@@ -499,7 +522,7 @@
 
       ! Call Field method to halo data.  This updates the data in place.
       if (verbose) print *, "about to call Field Halo"
-      call ESMF_FieldHalo(field1, rc=rc)
+      call ESMF_FieldHalo(field1, routehandle(2), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       if (verbose) print *, "returned from Field Halo call"
 
@@ -511,7 +534,7 @@
 
       ! Call Field method to halo data.  This updates the data in place.
       if (verbose) print *, "about to call Field Halo"
-      call ESMF_FieldHalo(field1, rc=rc)
+      call ESMF_FieldHalo(field1, routehandle(3), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       if (verbose) print *, "returned from Field Halo call"
 
@@ -523,7 +546,7 @@
 
       ! Call Field method to halo data.  This updates the data in place.
       if (verbose) print *, "about to call Field Halo"
-      call ESMF_FieldHalo(field1, rc=rc)
+      call ESMF_FieldHalo(field1, routehandle(4), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       if (verbose) print *, "returned from Field Halo call"
 
@@ -555,7 +578,7 @@
 
       ! Local variables
       type(ESMF_Field) :: field1
-      integer :: localrc, finalrc
+      integer :: localrc, finalrc, i
   
 
       if (verbose) print *, "Entering Finalize routine"
@@ -601,6 +624,13 @@
       endif
       call verifyhalo(field1, localrc)
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      do i=1, 4
+        call ESMF_FieldHaloRelease(routehandle(i), rc)
+        if (rc .ne. ESMF_SUCCESS) goto 30
+        call ESMF_RouteHandleDestroy(routehandle(i), rc)
+        if (rc .ne. ESMF_SUCCESS) goto 30
+      enddo
 
 30 continue
       ! come straight here if you cannot get the data from the state.
