@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.13 2004/04/16 15:40:36 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.14 2004/04/27 19:25:14 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -28,11 +28,11 @@
     ! Components
     type(ESMF_GridComp) :: compGridded
 
-    ! States and Layouts
-    type(ESMF_newDELayout) :: layoutTop
+    ! State, Virtual Machine, and DELayout
     type(ESMF_VM) :: vm
     type(ESMF_State) :: flowstate
-    integer :: de_id
+    type(ESMF_newDELayout) :: layoutTop
+    integer :: pet_id
 
     ! A common grid
     type(ESMF_Grid) :: grid
@@ -124,20 +124,11 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Initialize the ESMF Framework
-    call ESMF_Initialize(rc=rc)
+    ! Initialize the ESMF Framework and get the default Global VM
+    call ESMF_Initialize(vm=vm, rc=rc)
 
-    ! Get global VM 
-    call ESMF_VMGetGlobal(vm, rc)
-
-    ! Create a default layout and save our DE id number.
-    layoutTop = ESMF_newDELayoutCreate(vm, rc=rc)
-    call ESMF_newDELayoutGet(layoutTop, localDE=de_id, rc=rc)
-
-   
-    ! Create the Gridded component, passing in the default layout.
-    compGridded = ESMF_GridCompCreate("Coupled Flow Demo", delayout=layoutTop, rc=rc)
-
+    ! Create the Gridded component, passing in the default VM.
+    compGridded = ESMF_GridCompCreate(vm, "Coupled Flow Demo", rc=rc)
 
     print *, "Comp Creates finished"
 
@@ -195,6 +186,9 @@
       !
       ! Create the Grid and attach it to the Component
       !
+
+      ! Create a default layout for the grid based on the global VM
+      layoutTop = ESMF_newDELayoutCreate(vm, rc=rc)
 !BOP
 !
 ! !DESCRIPTION:
@@ -287,9 +281,12 @@
                "the generated data."
       print *, "**********************************************************"
 
+      ! Get our PET number from the VM
+      call ESMF_VMGet(vm, localPET=pet_id, rc=rc)
+
       ! This output goes to the console/screen (standard error) where
       ! hopefully the user will see it without needing to inspect the log file.
-      if (de_id .eq. 0) then
+      if (pet_id .eq. 0) then
         write(0, *) ""
         write(0, *) "SUCCESS!  Your ESMF Coupled Flow Application Demo ", &
                  "ran to completion!"

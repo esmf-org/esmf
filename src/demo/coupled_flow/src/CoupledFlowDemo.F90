@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.13 2004/04/16 15:40:37 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.14 2004/04/27 19:25:14 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -128,8 +128,7 @@
 !     \end{description}
 !
 !EOPI
-    integer :: i
-    integer :: ndes, delist(16)   ! 16 is max DEs we will handle right now.
+    integer :: npets
     integer :: mid, by2, quart, by4
 
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
@@ -142,41 +141,40 @@
     integer :: halo_width = 1
 
 
+    ! Get our vm and grid from the component
+    call ESMF_GridCompGet(gcomp, vm=vm, grid=gridTop, rc=rc)
+    call ESMF_GridGet(gridTop, delayout=layoutTop, rc=rc)
 
-    ! Get our layout and grid from the component
-    call ESMF_GridCompGet(gcomp, delayout=layoutTop, grid=gridTop, rc=rc)
-    call ESMF_VMGetGlobal(vm, rc)
-
-    ! Sanity check the number of DEs we were started on.
-    call ESMF_newDELayoutGet(layoutTop, deCount=ndes, rc=rc)
-    if (ndes .eq. 1) then
+    ! Sanity check the number of PETs we were started on.
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    if (npets .eq. 1) then
       mid = 1
       by2 = 1
       quart = 1
       by4 = 1
     else
-       if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
-           print *, "This demo needs to run at least 4-way and no more than 16-way."
-           print *, "The requested number of processors was ", ndes
+       if ((npets .lt. 4) .or. (npets .gt. 16)) then
+           print *, "This demo needs to run at least 4-way and no more "
+           print *, "  than 16-way, on a multiple of 4 processors."
+           print *, "The requested number of processors was ", npets
            rc = ESMF_FAILURE
            return
        endif
-       if (mod(ndes, 4) .ne. 0) then
+       if (mod(npets, 4) .ne. 0) then
            print *, "This demo needs to run on some multiple of 4 processors,"
            print *, " at least 4-way and no more than 16-way."
-           print *, "The requested number of processors was ", ndes
+           print *, "The requested number of processors was ", npets
            rc = ESMF_FAILURE
            return
        endif
-       mid = ndes/2
+       mid = npets/2
        by2 = 2
-       quart = ndes/4
+       quart = npets/4
        by4 = 4
      endif
 
     ! Set up the component layouts so they are different, so we can show
     !  we really are routing data between processors.
-    delist = (/ (i, i=0, ndes-1) /)
 
     ! Create the 2 model components and coupler.  The first component will
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
@@ -191,17 +189,17 @@
 !   different connectivity.
 !\begin{verbatim}
     cnameIN = "Injector model"
-    layoutIN = ESMF_newDELayoutCreate(vm, (/ mid, by2 /), rc=rc)
-    INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
+    !layoutIN = ESMF_newDELayoutCreate(vm, (/ mid, by2 /), rc=rc)
+    INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
 !\end{verbatim}
 !EOP
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_newDELayoutCreate(vm, (/ quart, by4 /), rc=rc)
-    FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
+    !layoutFS = ESMF_newDELayoutCreate(vm, (/ quart, by4 /), rc=rc)
+    FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, delayout=layoutTop, rc=rc)
+    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
 
 
     print *, "Comp Creates finished"

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.8 2004/04/16 15:40:37 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.9 2004/04/27 19:25:14 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -150,14 +150,11 @@
       !
       ! Local variables
       !
-      integer :: i, j
       type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       integer :: on_month, on_day, on_hour, on_min
       integer :: off_month, off_day, off_hour, off_min
       real :: in_energy, in_velocity, in_rho
-      integer :: myde
       type(injectdata), pointer :: datablock
       type(wrapper) :: wrap
       namelist /input/ on_month, on_day, on_hour, on_min, &
@@ -238,7 +235,8 @@
       !
       ! Query component for information.
       !
-      call ESMF_GridCompGet(gcomp, delayout=layout, grid=grid, rc=rc)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
+      call ESMF_GridGet(grid, delayout=layout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
          print *, "ERROR in injector_init: getting info from component"
          return

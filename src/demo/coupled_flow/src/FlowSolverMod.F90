@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.12 2004/04/20 21:25:05 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.13 2004/04/27 19:25:14 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -162,18 +162,13 @@
 !
 ! Local variables
 !
-      integer :: i, j
       type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coord
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coord
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
       integer :: counts(2)
-      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
@@ -256,9 +251,10 @@
 !
 ! Query component for information.
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, grid=grid, rc=rc)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
 
       call ESMF_GridGet(grid, horzRelLoc=ESMF_CELL_CENTER, &
+                              delayout=layout, &
                               globalCellCountPerDim=global_nmax, &
                               minGlobalCoordPerDim=global_min_coord, &
                               maxGlobalCoordPerDim=global_max_coord, rc=rc)
@@ -468,7 +464,7 @@
 ! First, get size of layout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
+      call ESMF_GridGet(grid, delayout=layout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
         return
@@ -1135,7 +1131,6 @@
       integer :: i, j
       real(kind=ESMF_KIND_R4), dimension(imax,jmax) :: rho_new
       real(kind=ESMF_KIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p
-      real(kind=ESMF_KIND_R4) :: dsiedx2, dsiedy2
 !
 ! Set initial values
 !
@@ -1595,12 +1590,11 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: ni, nj, i, j, de_id
+      integer :: i, j, de_id
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_newDELayout) :: layout
-      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -1617,7 +1611,8 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
+      call ESMF_GridGet(grid, delayout=layout, rc=status)
       call ESMF_newDELayoutGet(layout, localDE=de_id, rc=status)
 !
 ! Frame number from computation
