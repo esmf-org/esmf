@@ -22,6 +22,7 @@
 #include <pthread.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 
@@ -34,7 +35,7 @@
 
 // macros used within this source file
 #define VERBOSITY             (0)       // 0: off
-#define VMACHINE_TID_MPI_TAG  (10)      // mpi tag used to send/recv TID
+#define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
 // - communication identifiers
 #define VM_COMM_TYPE_MPI1     (0)
 #define VM_COMM_TYPE_PTHREAD  (1)
@@ -402,7 +403,7 @@ static void *vmachine_spawn(void *arg){
     // which ever thread of the other process woke up will try to receive tid
     MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_tid),
       sizeof(pthread_t), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
-      VMACHINE_TID_MPI_TAG, vm.default_mpi_c);
+      VM_TID_MPI_TAG, vm.default_mpi_c);
   }
   // when returning from this procedure this pet will terminate
   return NULL;
@@ -435,7 +436,7 @@ static void *vmachine_sigcatcher(void *arg){
   // receive the thread id of the blocker thread that needs to be woken up
   vmachine vm;  // need a handle to access the MPI_Comm of default vmachine
   MPI_Recv(&thread_wake, sizeof(pthread_t), MPI_BYTE, MPI_ANY_SOURCE, 
-    VMACHINE_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
+    VM_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
   // now wake up the correct blocker thread within this pid
 #if (VERBOSITY > 0)
   printf("It's the sigcatcher for pid %d again. I received the blocker tid\n"
@@ -482,6 +483,16 @@ static void *vmachine_block(void *arg){
 
 void *vmachine::vmachine_enter(class vmplan &vmp, 
   void *(fctp)(vmachine &, void *), void *cargo){
+#ifdef VM_DONT_SPAWN_PTHREADS
+  // Ensure that vmplan does not indicate multi-threading or multi-PE PET
+  for (int i=0; i<npets; i++){
+    if (vmp.spawnflag[i]!=1){
+      fprintf(stderr, "VM_ERROR: Cannot use multi-threaded or multi-PE PETs"
+        " in VM_DONT_SPAWN_PTHREADS mode.\n");
+      exit(0);
+    }
+  }
+#endif
   // enter a vm derived from current vm according to the vmplan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -914,8 +925,13 @@ void *vmachine::vmachine_enter(class vmplan &vmp,
     sarg[i].pref_intra_ssi = vmp.pref_intra_ssi;
     // cargo
     sarg[i].cargo = cargo;
-    // finally spawn of threads from this pet...
+#ifdef VM_DONT_SPAWN_PTHREADS
+    // use a simple function call
+    vmachine_spawn((void *)&sarg[i]);
+#else
+    // finally spawn threads from this pet...
     pthread_create(&(sarg[i].pthid), NULL, vmachine_spawn, (void *)&sarg[i]);
+#endif
   }
   // free all the temporary arrays.... (not sarg array!!!)
   delete [] new_lpid;
@@ -958,7 +974,9 @@ void vmachine::vmachine_exit(class vmplan &vmp, void *arg){
   vmachine_spawn_arg *sarg = (vmachine_spawn_arg *)arg;
   // pets that spawned will be blocked by pthread_join() call...
   for (int i=0; i<vmp.spawnflag[mypet]; i++){
+#ifndef VM_DONT_SPAWN_PTHREADS
     pthread_join(sarg[i].pthid, NULL);
+#endif
     // free arrays in sarg[i[ 
     delete [] sarg[i].lpid;
     delete [] sarg[i].pid;
