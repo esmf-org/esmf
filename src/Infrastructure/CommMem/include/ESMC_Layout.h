@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.h,v 1.7 2003/02/13 23:06:46 eschwab Exp $
+// $Id: ESMC_Layout.h,v 1.8 2003/02/21 05:13:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,6 +80,9 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     ESMC_CommHint_e commHint;  // hint about direction of the most performance
                                //   critical (frequent and/or voluminous)
                                //   communication direction: x, y or z
+
+                      // TODO: should these really be part of Layout, or 
+                      //       standalone ?
     ESMC_DE myDE;     // the DE on which this Layout copy (instance) resides
     ESMC_PE myPE;     // the PE on which this Layout copy (instance) resides
     ESMC_Comm comm;   // comm object for this DE (TODO: make property of DE ? )
@@ -129,6 +132,11 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 	~ESMC_Layout(void);
   
  // < declare the rest of the public interface methods here >
+  // TODO: make comm public and invoke directly on comm rather than at
+  //       Layout level ? (does not depend on any Layout knowledge)
+  //       Or remove comm from Layout (standalone) and remove these
+  //       entry points from Layout?
+
     int ESMC_LayoutAllGatherVI(int *sndArray, int  sndLen, 
                                int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_LayoutAllReduce(int *dataArray, int *result, int arrayLen,

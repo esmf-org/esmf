@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.12 2003/02/18 15:04:34 nscollins Exp $
+// $Id: ESMC_Layout.C,v 1.13 2003/02/21 05:13:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.12 2003/02/18 15:04:34 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.13 2003/02/21 05:13:10 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -520,11 +520,12 @@ cout << "ESMC_LayoutDestruct() invoked\n";
   //
   // initialize my DE, PE, Comm, and Machine model
   //
-  int argc = 0;    // pass into LayoutCreate ?
-  char **argv = 0; // pass into LayoutCreate ?
+  int argc = 0;    // TODO pass into LayoutCreate ?
+  char **argv = 0; // TODO pass into LayoutCreate ?
   int myDEid=0;
 
-  myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: pass into LayoutCreate ?
+  myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: auto determine proc or thread,
+                                     //       or get from config file ?
   comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
   myPE.ESMC_PEInit(&Mach);        // gets cpu, node ids from machine
   myDE.ESMC_DEGetESMFID(&myDEid);
@@ -1040,6 +1041,9 @@ cout << "~ESMC_Layout() invoked\n";
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+  // TODO: make comm public and invoke directly rather than at Layout level ?
+  //       (does not depend on any Layout knowledge)
+
   // perform Allgatherv operation across all DEs in the layout
   int rc;
   rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
@@ -1075,6 +1079,10 @@ cout << "~ESMC_Layout() invoked\n";
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
+  // TODO: make comm public and invoke directly rather than at Layout level ?
+  //       (does not depend on any Layout knowledge)
+
+  // TODO: put this loop logic in ESMC_Comm ?
   // perform reduction operation within our DE (given dataArray)
   int localResult = 0;
   for(int i=0; i<arrayLen; i++) {
