@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_F1Ex.F90,v 1.3 2003/12/02 16:51:15 svasquez Exp $
+! $Id: ESMF_DELayout_F1Ex.F90,v 1.4 2003/12/02 17:28:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
 ! to run 2 DEs (MPI processes) on one node
 !-----------------------------------------------------------------------------
 
-program ESMF_DELayout_FEx
+program ESMF_DELayout_F1Ex
 
 #include <ESMF_Macros.inc>
 
@@ -131,11 +131,11 @@ program ESMF_DELayout_FEx
   end if
 
   if (finalrc.EQ.ESMF_SUCCESS) then
-     print *, "PASS: ESMF_BundleCreateEx.F90"
+     print *, "PASS: ESMF_DELayout_F1Ex.F90"
   else
-     print *, "FAIL: ESMF_BundleCreateEx.F90"
+     print *, "FAIL: ESMF_DELayout_F1Ex.F90"
   end if
 
 
 
-end program ESMF_DELayout_FEx
+end program ESMF_DELayout_F1Ex
