@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/03/16 21:01:09 nscollins Exp $
+# $Id: makefile,v 1.6 2004/03/23 17:29:17 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -39,6 +39,8 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  = ESMF_LocalArray.F90
 CLOBBERDIRS =
+
+ESMF_LocalAlloc_C.F90:  ESMF_LocalArray.F90
 
 ESMF_LocalArray.F90: ESMF_LocalArray.cpp ESMF_LocalArrayMacros.h
 
