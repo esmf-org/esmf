@@ -1,7 +1,61 @@
-# $Id: base,v 1.2 2002/09/20 17:47:18 jwolfe Exp $ 
+# $Id: base,v 1.3 2003/02/05 18:29:33 nscollins Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
+
+libc: ${LIBNAME}(${OBJSC})
+libf: ${LIBNAME}(${OBJSF})
+
+#############
+
+.F90.o:
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
+
+.F.o:
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
+
+.f90.o:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mnofreeform ${ESMC_INCLUDE} $<
+
+.f.o:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -Mnofreeform ${ESMC_INCLUDE} $<
+
+.c.o:
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+
+.C.o:
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+
+.F90.a:
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mfreeform ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.F.a:
+	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} -Mfreeform ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.f90.a:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -Mpreprocess -Mnofreeform ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.f.a:
+	${FC} -c ${FOPTFLAGS} ${FFLAGS} -Mnofreeform ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.c.a:
+	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
+.C.a:
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
 
 #############
 
