@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/10/22 21:22:22 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/11/26 22:27:12 svasquez Exp $ 
 
 ALL:  examples
 
@@ -57,13 +57,7 @@ LOCDIR	  = src/Superstructure/Xform/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
-                 $(ESMF_EXDIR)/ESMC_CplEx \
-                 $(ESMF_EXDIR)/ESMC_GCompEx \
-                 $(ESMF_EXDIR)/ESMC_XformEx \
-                 $(ESMF_EXDIR)/ESMF_AppMainEx \
-                 $(ESMF_EXDIR)/ESMF_CplEx \
-                 $(ESMF_EXDIR)/ESMF_GCompEx \
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_XformEx \
                  $(ESMF_EXDIR)/ESMF_XformEx 
 
 #
@@ -72,23 +66,11 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
 # in this makefile.
 #
 
-EXAMPLES_RUN   = run_ESMC_AppMainEx \
-                 run_ESMC_CplEx \
-                 run_ESMC_GCompEx \
-                 run_ESMC_XformEx \
-                 run_ESMF_AppMainEx \
-                 run_ESMF_CplEx \
-                 run_ESMF_GCompEx \
+EXAMPLES_RUN   = run_ESMC_XformEx \
                  run_ESMF_XformEx   
 
 
-EXAPMLES_RUN_UNI = run_ESMC_AppMainEx_uni \
-                   run_ESMC_CplEx_uni \
-                   run_ESMC_GCompEx_uni \
-                   run_ESMC_XformEx_uni \
-                   run_ESMF_AppMainEx_uni \
-                   run_ESMF_CplEx_uni \
-                   run_ESMF_GCompEx_uni \
+EXAPMLES_RUN_UNI = run_ESMC_XformEx_uni \
                    run_ESMF_XformEx_uni   
 
 include $(ESMF_DIR)/makefile
@@ -101,33 +83,6 @@ CLOBBERDIRS =
 
 
 #
-# ESMC_AppMainEx
-#
-run_ESMC_AppMainEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
-
-run_ESMC_AppMainEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_AppMainEx > $(ESMF_EXDIR)/ESMC_AppMainEx.stdout
-
-#
-# ESMC_CplEx
-#
-run_ESMC_CplEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_CplEx > $(ESMF_EXDIR)/ESMC_CplEx.stdout
-
-run_ESMC_CplEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_CplEx > $(ESMF_EXDIR)/ESMC_CplEx.stdout
-
-#
-# ESMC_GCompEx
-#
-run_ESMC_GCompEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
-
-run_ESMC_GCompEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_GCompEx > $(ESMF_EXDIR)/ESMC_GCompEx.stdout
-
-#
 # ESMC_XformEx
 #
 run_ESMC_XformEx:
@@ -136,33 +91,6 @@ run_ESMC_XformEx:
 run_ESMC_XformEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_XformEx > $(ESMF_EXDIR)/ESMC_XformEx.stdout
 
-
-#
-# EMSF_AppMainEx
-#
-run_EMSF_AppMainEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_AppMainEx > $(ESMF_EXDIR)/EMSF_AppMainEx.stdout
-
-run_EMSF_AppMainEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_AppMainEx > $(ESMF_EXDIR)/EMSF_AppMainEx.stdout
-
-#
-# EMSF_CplEx
-#
-run_EMSF_CplEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_CplEx > $(ESMF_EXDIR)/EMSF_CplEx.stdout
-
-run_EMSF_CplEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_CplEx > $(ESMF_EXDIR)/EMSF_CplEx.stdout
-
-#
-# EMSF_GCompEx
-#
-run_EMSF_GCompEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/EMSF_GCompEx > $(ESMF_EXDIR)/EMSF_GCompEx.stdout
-
-run_EMSF_GCompEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/EMSF_GCompEx > $(ESMF_EXDIR)/EMSF_GCompEx.stdout
 
 #
 # EMSF_XformEx
