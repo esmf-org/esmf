@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.9 2004/06/14 16:47:13 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.10 2004/06/17 15:37:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       type (ESMF_Config) cf 
@@ -148,6 +148,11 @@
 
 ! REPORTING
 ! ------------
+      
+      !EX_UTest
+      write(failMsg, *) "Config Unit test failed"
+      write(name, *) "Config Unit Test"
+      call ESMF_Test((counter_success.eq.counter_total), name, failMsg, result, ESMF_SRCLINE)
       if  (counter_total > 0) then
          if( counter_success == counter_total ) then 
             print *,'ESMF_Config: All tests were successful'
