@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.201 2004/12/04 20:05:04 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.202 2004/12/07 17:19:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.201 2004/12/04 20:05:04 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.202 2004/12/07 17:19:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -5681,7 +5681,7 @@
       integer :: localrc, status             ! Error status, allocation status
       integer :: i, i1, j, n
       integer :: dimCount, oldDimCount, npets, npets2
-      integer :: newDEId, oldDEId, petId
+      integer :: newDEId, oldDEId, petId, coords(2)
       integer, dimension(:), allocatable :: decompIDs, newNDEs, oldNDEs
       integer, dimension(:), allocatable :: newCountPerDE1, newCountPerDE2
       integer, dimension(:), allocatable :: oldCountPerDE1, oldCountPerDE2
@@ -5698,6 +5698,11 @@
       if (ESMF_LogMsgFoundAllocError(status, &
                                      "space for new Grid object", &
                                      ESMF_CONTEXT, rc)) return
+
+      call ESMF_GridConstructNew(gp, "dummy", localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
 
       call ESMF_BaseCreate(gp%base, "Grid", "dummy", 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -5785,6 +5790,7 @@
       ! query the old delayout and allocate arrays based on its information
       call ESMF_DELayoutGet(oldDELayout, dimCount=oldDimCount, rc=localrc)
       allocate(decompIDs(oldDimCount), &
+                 newNDEs(oldDimCount), &
                  oldNDEs(oldDimCount), stat=localrc)
       oldNDEs = 1
       call ESMF_DELayoutGet(oldDELayout, deCountPerDim=oldNDEs, rc=localrc)
@@ -5816,46 +5822,60 @@
       npets2 = newNDEs(1)*newNDEs(2)           ! in case the division is not even
 
       ! now allocate a petlist and more for the new delayout
-      allocate(           petlist(npets2), &
+      allocate(       petlist(0:npets2-1), &
                       petTrack(0:npets-1), &
                newCountPerDE1(newNDEs(1)), &
                newCountPerDE2(newNDEs(2)), stat=localrc)
       petlist        = 0
       petTrack       = 1
-      newCountPerDE1 = 0
-      newCountPerDE2 = 0
-      do i = 1,oldNDEs(1)
-        newCountPerDE1(i) = oldCountPerDE1(i)
-      enddo
-      do j = 1,oldNDEs(2)
-        newCountPerDE2(j) = oldCountPerDE2(j)
+
+      ! set default petlist 
+      do j   = 1,newNDEs(2)
+        do i = 1,newNDEs(1)
+          newDEId = (j-1)*newNDEs(1) + i - 1
+          petlist(newDEId) = newDEId
+        enddo
       enddo
 
       ! figure out where the DEs from the old delayout need to be in the new one
       ! loop over the DEs from the old one
-      do j   = 1,oldNDEs(2)
-        do i = 1,oldNDEs(1)
-          oldDEId = (j-1)*oldNDEs(1) + i - 1
-          newDEId = (j-1)*newNDEs(1) + i - 1
-          petId   = oldDEId    ! TODO: if not 1-1, we need a call to get this
-          petlist(newDEId) = petId
-          petTrack(petId)  = 0
-        enddo
-      enddo
+   !   do j   = 1,oldNDEs(2)
+   !     do i = 1,oldNDEs(1)
+   !       oldDEId = (j-1)*oldNDEs(1) + i - 1
+   !       newDEId = (j-1)*newNDEs(1) + i - 1
+   !       petId   = oldDEId    ! TODO: if not 1-1, we need a call to get this
+   !       call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
+   !                                        coord=coords, pid=petId, rc=localrc)
+   !        petlist(newDEId) = newDEId
+   !        petTrack(petId)  = 0
+   !     enddo
+   !   enddo
 
       ! fill in the petlist with the remaining petIds
-      do j   = 1,newNDEs(2)
-        do i = oldNDEs(1)+1,newNDEs(1)
-          newDEId = (j-1)*newNDEs(1) + i - 1
-          do n = 0,npets-1
-            if (petTrack(n).ne.0) then
-              petId       = n
-              petTrack(n) = 0
-              exit
-            endif
-          enddo
-          petlist(newDEId) = petId
-        enddo
+   !   do j   = 1,newNDEs(2)
+   !     do i = oldNDEs(1)+1,newNDEs(1)
+   !       newDEId = (j-1)*newNDEs(1) + i - 1
+   !       do n = 0,npets-1
+   !         if (petTrack(n).ne.0) then
+   !           petId       = n
+   !           petTrack(n) = 0
+   !           exit
+   !         endif
+   !       enddo
+   !       petlist(newDEId) = petId
+   !     enddo
+   !   enddo
+
+      newCountPerDE1 = 0
+      newCountPerDE2 = 0
+      do i = 1,oldNDEs(1)
+        oldDEId = i - 1
+        call ESMF_DELayoutGetDELocalInfo(oldDELayout, de=oldDEId, &
+                                         coord=coords, pid=petId, rc=localrc)
+        newCountPerDE1(petId+1) = oldCountPerDE1(i)   ! TODO: fix for wild petlist
+      enddo
+      do j = 1,oldNDEs(2)
+        newCountPerDE2(j) = oldCountPerDE2(j)
       enddo
 
       ! check for errors -- did all the pets get used?

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.118 2004/12/06 17:20:03 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.119 2004/12/07 17:19:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.118 2004/12/06 17:20:03 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.119 2004/12/07 17:19:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -8947,7 +8947,7 @@
       if (grid%horzGridType.ne.ESMF_GRID_TYPE_XY_UNI .AND. &
           grid%horzGridType.ne.ESMF_GRID_TYPE_LATLON_UNI) then
         do i = 1,grid%dimCount
-          call c_ESMC_ArraySerialize(lrgrid%coords(i), buffer(1), length, &
+          call c_ESMC_LocalArraySerialize(lrgrid%coords(i), buffer(1), length, &
                                      offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -9000,8 +9000,8 @@
       type(ESMF_LogRectGrid), pointer :: lrgrid  ! lrgrid class
 
       ! allocate logRectGrid derived type
-      allocate(grid%gridSpecific%logRectGrid, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "logRectGrid", &
+      allocate(grid%gridSpecific%logRectGrid, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "logRectGrid", &
                                      ESMF_CONTEXT, rc)) return
       
       ! shortcut to internals
@@ -9022,8 +9022,11 @@
       ! loop over the arrays of coords
       if (grid%horzGridType.ne.ESMF_GRID_TYPE_XY_UNI .AND. &
           grid%horzGridType.ne.ESMF_GRID_TYPE_LATLON_UNI) then
+        allocate(lrgrid%coords(grid%dimCount), stat=status)
+        if (ESMF_LogMsgFoundAllocError(status, "logRectGrid", &
+                                     ESMF_CONTEXT, rc)) return
         do i = 1,grid%dimCount
-          call c_ESMC_ArrayDeserialize(lrgrid%coords(i), buffer(1), &
+          call c_ESMC_LocalArrayDeserialize(lrgrid%coords(i), buffer(1), &
                                        offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
