@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/05/02 01:19:51 eschwab Exp $
+# $Id: makefile,v 1.10 2003/05/07 21:24:49 nscollins Exp $
 
 ALL:  tests
 
@@ -29,7 +29,7 @@ TESTS_RUN_UNI = RUN_ESMF_ClockUTestUNI \
 #		RUN_ESMC_ClockUTestUNI 
 
 TESTS_RM      = ESMF_ClockUTest.rm \
-                ESMF_CalRangeUTest.rm
+		ESMF_CalRangeUTest.rm
 #               ESMC_ClockUTest.rm
 
 include ${ESMF_DIR}/makefile
