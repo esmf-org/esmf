@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.7 2004/06/15 07:21:12 cpboulder Exp $
+% $Id: LogErr_desc.tex,v 1.8 2004/06/22 20:08:54 cdeluca Exp $
 
 %
 
@@ -23,29 +23,19 @@
 
 
 The Log class consists of a variety of methods for writing error, warning, 
-
 and other messages to files or to standard out.  Options include the ability 
-
 to write to a single file or multiple files, to write from a root PE or 
-
 from all active PEs, and to halt at errors, at warnings, or never.  The 
-
 verbosity of ouput can be adjusted with a flag.  Multiple Logs can be created 
-
 within an application.  Logs may be given user-specified names, or, if desired, 
-
 a default Log can be used.  
 
 
 
 Log provides capabilities to write to a file immediately or store entries 
-
 in a buffer for writing either when the buffer is full, or when the user
-
 calls an {\tt ESMF\_LogFlush()} command.  The user can specify the number 
-
 of entries that a Log should contain when it is flushed.  For buffered output, 
-
 it's also possible to specify whether Log entries should be ordered or not.  
 
 

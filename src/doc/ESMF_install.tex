@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.37 2004/06/22 14:17:44 nscollins Exp $
+% $Id: ESMF_install.tex,v 1.38 2004/06/22 20:08:55 cdeluca Exp $
 
 \subsection{ESMF Download Options}
 
@@ -34,27 +34,28 @@ environment variables are:
 \begin{quote}
 \begin{description}
 
-  \item[ESMF\_ARCH] Value of uname -s.  For example, this will be AIX for IBM
-                 RS6000's.  There should be almost no reason for the
+  \item[ESMF\_ARCH] Variable that has the value of uname -s.  
+                 For example, this will be AIX for IBM
+                 RS6000's.  There should be no reason for the
                  user to set ESMF\_ARCH since the proper value should be
                  determined automatically.
 
-  \item[ESMF\_BOPT] Build option value of g (for debug) or O (for
-                 Optimize).  Default value will be O.
+  \item[ESMF\_BOPT] Build option value of g (for debug mode) or O (for
+                 optimize mode).  Default value will be O.
 
   \item[ESMF\_COMM] Defines which MPI communications library to use.  
                  Many times a machine will come with its own MPI 
                  library and in those cases the default setting 
-                 will be mpi.  Otherwise the default setting will be 
-                 mpiuni so that the mpiuni library will be used.
+                 will be the native mpi.  Otherwise the default setting 
+                 will be mpiuni so that the mpi stub library will be used.
                  Other possible settings are mpich and lam.
 
-  \item[ESMF\_COMPILER] Variable specifying which compiler to use.  Value
+  \item[ESMF\_COMPILER] Variable specifying which compiler to use.  Values
                  can be default, absoft, intel, lahey, pgi, or nag. 
                  If the value is default or ESMF\_COMPILER is 
                  left unset, then the default compiler 
                  will be used.  Exceptions for default values:  
-                 On Linux machines the default value 
+                 on Linux machines the default value 
                  is lahey and on Darwin machines it is absoft.
 
   \item[ESMF\_EXHAUSTIVE] Variable specifying how to compile the unit tests.
@@ -68,8 +69,9 @@ environment variables are:
                  the {\tt netCDF} I/O library.  However, because the location
                  of the library and include files varies widely from 
                  system to system the support for I/O is disabled by default.
-                 To enable support, edit build/common.mk and comment out the 2
-                 lines which set ESMF\_NO\_IOCODE to ON and set the CPP flag,
+                 To enable support, edit build/common.mk and comment out the 
+                 two lines which set ESMF\_NO\_IOCODE to ON and set the 
+                 CPP flag,
                  and recompile.
 
   \item[ESMF\_PREC] Precision value of 32 or 64.  When possible the
@@ -132,12 +134,15 @@ Build the library with the command:
 \begin{verbatim}
   gmake 
 \end{verbatim}
+or 
+\begin{verbatim}
+  gmake ESMF_BOPT=O
+\end{verbatim}
   for an optimized version or
 \begin{verbatim}
   gmake ESMF_BOPT=g  
 \end{verbatim}
   for the debug version.
-
 
 Build options that enable you to copy the library and *.mod files to
 specified directories are explained in Section~\ref{BuildOptions}. 
@@ -159,8 +164,8 @@ uni-processor targets are available as {\tt gmake run\_examples\_uni} or
 \subsubsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
 
-The documentation consists of a User's Guide, the Requirements Specification,
-and a Fortran API Reference Manual.  
+The documentation consists of an {\it ESMF User's Guide}, {\it ESMF Requirements 
+Document}, and {\it ESMF Reference Manual for Fortran}.  
 \noindent To build documentation:
 \begin{verbatim}
   gmake doc              ! Builds the manuals, including pdf and html.

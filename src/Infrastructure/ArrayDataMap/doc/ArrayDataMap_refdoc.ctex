@@ -1,4 +1,4 @@
-% $Id: ArrayDataMap_refdoc.ctex,v 1.5 2004/06/15 23:54:46 cdeluca Exp $
+% $Id: ArrayDataMap_refdoc.ctex,v 1.6 2004/06/22 20:08:53 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -33,7 +33,7 @@
 \newpage
 #endif
 
-\section{Array DataMap Class}
+\section{ArrayDataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -42,7 +42,7 @@
 \input{../Infrastructure/ArrayDataMap/doc/ArrayDataMap_desc}
 #endif
 
-\subsection{Array DataMap Options}
+\subsection{ArrayDataMap Options}
 #ifdef STANDALONE
 \input{ArrayDataMap_options}
 #elif defined(CONSTITUENT)

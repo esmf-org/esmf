@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.17 2004/06/22 14:17:44 nscollins Exp $
+% $Id: ESMF_use.tex,v 1.18 2004/06/22 20:08:55 cdeluca Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -55,7 +55,7 @@ link line.
 
 \subsubsection{Linking}
 
-To link a Fortran90 application to the ESMF libraries please 
+To link a Fortran application to the ESMF libraries please 
 refer to the {\tt link\_rules} files found in the following directories:
 
 \begin{verbatim}
@@ -68,20 +68,20 @@ refer to the {\tt link\_rules} files found in the following directories:
 \end{verbatim}
 
 In an effort to provide platform specific information for building ESMF 
-and linking the libraries with your application, a new sourceforge 
-site, esmfcontrib, has been created.
-To locate the platforms makefiles for specific institutions checkout 
+and linking the libraries with your application, a SourceForge 
+site, {\tt esmfcontrib}, has been created.
+To locate the platform makefiles for a specific institution, check out 
 the {\tt build\_config\_files} using the appropriate CVSROOT.
-The URL for the esmfcontrib Sourceforge site is:
+The URL for the {\tt esmfcontrib} SourceForge site is:
 
 \begin{verbatim}
         http://sourceforge.net/projects/esmfcontrib/
 \end{verbatim}
 
-Additionally, you may checkout all the platforms makefile fragments 
-for a particular institution from the esmfcontrib. For example to 
-checkout the makefile fragments for the platforms at the
-National Center for Atmospheric Research, ncar, change directories to
+Additionally, you may check out all the platform makefile fragments 
+for a particular institution from the {\tt esmfcontrib} site. For example, 
+to check out the available makefile fragments for platforms at the
+National Center for Atmospheric Research, {\tt ncar}, change directories to
 
 \begin{verbatim}
  	$ESMF_DIR/build_config
@@ -101,7 +101,8 @@ The following directories will be checked out:
 	Linux.lahey.longs
 \end{verbatim}
 
-To build using these makefiles you must set the environment variable ESMF\_SITE, to blackforest, bluesky, or longs.
+To build using these makefiles you must set the environment 
+variable {\tt ESMF\_SITE} to {\tt blackforest}, {\tt bluesky}, or {\tt longs}.
 
 At the present time, we have files for the following institutions:
 
@@ -113,7 +114,8 @@ At the present time, we have files for the following institutions:
 \end{verbatim}
 
 
-Users are encouraged to contribute pertinent information to the esmfcontrib respository.
+Users are encouraged to contribute pertinent information to the 
+{\tt esmfcontrib} respository.
 
 
 

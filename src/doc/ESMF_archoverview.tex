@@ -1,18 +1,18 @@
-% $Id: ESMF_archoverview.tex,v 1.11 2003/11/18 08:05:26 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.12 2004/06/22 20:08:55 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
-The ESMF architecture is characterized by the layering strategy shown in figure \ref{fig:TheESMFwich}. User code components that implement the {\it science} portions of an application, for example a sea ice or land model, are sandwiched 
-between two layers. The upper layer is denoted the {\bf Superstructure} layer 
-and the lower layer the {\bf Infrastructure} layer. The role of the {\bf Superstructure} layer is to provide a shell which encompasses user code and provides a context for interconnecting input and output
-data streams between components. The key elements of the {\bf Superstructure} layer are described in section \ref{sec:superstructure}.
+The ESMF architecture is characterized by the layering strategy shown in Figure \ref{fig:TheESMFwich}. User code components that implement the {\it science} portions of an application, for example a sea ice or land model, are sandwiched 
+between two layers. The upper layer is denoted the {\bf superstructure} layer 
+and the lower layer the {\bf infrastructure} layer. The role of the superstructure layer is to provide a shell which encompasses user code and provides a context for interconnecting input and output
+data streams between components. The key elements of the superstructure are described in section \ref{sec:superstructure}.
 These elements include classes that wrap user code, ensuring that all
-components present consistent interfaces. The {\bf Infrastructure} layer provides a foundation that developers of
+components present consistent interfaces. The infrastructure layer provides a foundation that developers of
 user components can use to speed construction and to ensure consistent, guaranteed behavior of components.
-The elements of the {\bf Infrastructure} layer include constructs to support parallel processing with data types tailored
+The elements of the infrastructure include constructs to support parallel processing with data types tailored
 to Earth science applications, specialized libraries to support consistent time and calendar management and
-performance, error handling and scalable I/O tools. The {\bf Infrastructure} layer is described in section \ref{sec:infrastructure}.
-A hierarchical combination of {\bf Superstructure}, user code components and Infrastructure are joined together to form an ESMF application.
+performance, error handling and scalable I/O tools. The infrastructure layer is described in section \ref{sec:infrastructure}.
+A hierarchical combination of superstructure, user code components, and infrastructure are joined together to form an ESMF application.
 
 
 
@@ -31,16 +31,17 @@ are always passed between components using a data structure
 called a State, which can store Fields, Bundles of Fields,
 and Arrays.  A GridComp stores no information about the internals 
 of the GridComps that it interacts with; this information is 
-passed in through the argument lists of its Initialize, Run, 
-and Finalize methods.  The information that is 
+passed in through the argument lists of its initialize, run, 
+and finalize methods.  The information that is 
 passed in through the argument list can be a State from 
 another GridComp, or it can be a function pointer that performs
 a computation or communication on a State.  These function 
-pointers are called Transforms, and they are created by 
-CplComps.  They are called inside the GridComp they are passed 
-into.  Although Transforms add some complexity to the framework 
-(and their use is not required), they are what enable ESMF to 
-accommodate virtually any model of communication between components. 
+pointers (not yet implemented) are called Transforms, and they 
+are created by CplComps.  They are called inside the GridComp they 
+are passed into.  Although Transforms add some complexity to the 
+framework (and their use is not required), they are what will
+enable ESMF to accommodate virtually any model of communication 
+between components. 
 
 {\bf Modularity means that an ESMF component stores nothing about 
 the internals of other components.  This allows components to be 
@@ -49,16 +50,16 @@ used more easily in multiple contexts.}
 \subsubsection{Flexibility}
 The ESMF does not dictate how models should be coupled, it
 simply provides tools for creating couplers.  For example, 
-both a hub-and-spokes (CCSM) type coupling strategy and  
+both a hub-and-spokes type coupling strategy and  
 pairwise strategies are supported.  The ESMF also allows model
-communications to occur mid-timestep, if desired (as between
-the CAM and the land model).  Sequential, concurrent, and mixed
+communications to occur mid-timestep, if desired.  Sequential, 
+concurrent, and mixed
 modes of execution are supported.  
 
 {\bf The ESMF does not impose restrictions on how data flows through 
 an application.  This accommodates scientific innovation - if you 
 want your atmospheric model to communicate with your sea ice model
-mid-timestep, ESMF will not stop you.  It may in fact make
+mid-timestep, ESMF will not stop you.  It may, in fact, make
 it easier.}
 
 \subsubsection{Scalability}
@@ -66,7 +67,7 @@ The ESMF allows applications to be composed hierarchically.
 For example, physics and dynamics modules can be defined as 
 separate GridComps, coupled together with a CplComp, and this 
 whole system can be nested within a single atmospheric GridComp.
-The atmospheric GridComp can be run standalone, or included
+The atmospheric GridComp can be run standalone, or can be included
 in a larger climate or data assimilation application.  See Figure
 \ref{fig:appunit} for an illustrative example.
 
@@ -134,43 +135,33 @@ without being discouragingly complicated.}
 
 \subsection{Superstructure}
 \label{sec:superstructure}
-The ESMF {\bf Superstructure} layers in an application furnish a unifying context within which user components are interconnected. For 
-example an atmospheric model may use a particular land-surface model in calculating simulated evaporative fluxes. 
-The flow of data and sequence of computation between atmospheric model term evaluations and land-surface model
-term evaluations would be prescribed in the {\bf Superstructure} layer. Under ESMF user code components are constructed or adapted
-to fit within this {\bf Superstructure} layer. This ensures that large components can be interchanged. There may still be issues
-of physical consistency between components, but ensuring that all components comply with the requirement to fit
-within an ESMF {\bf Superstructure} layer removes computational incompatibilities. 
-
-The {\bf Superstructure} layer provides
+The ESMF superstructure layers in an application furnish a unifying context within which user components are interconnected. The superstructure provides
 the foundation for a flexible mechanism to address physical consistency between components that may use different dimensions or units to represent the
-same quantity or that may partition physical data differently. Classes called {\it Gridded Components}, 
-{\it Coupler Components}, {\it Import States} and {\it Export States} are used within the {\bf Superstructure} layer
-to achieve this flexibility.
+same quantity or that may partition physical data differently. Classes called {\bf Gridded Components}, 
+{\bf Coupler Components}, and {\bf States} are used within the superstructure to achieve this flexibility.
 We describe these classes below:
 
 \subsubsection{Import and Export State Classes}
 User code components under ESMF use special interface objects for component to component data exchanges. These objects are 
-of type Import State and Export State. These special types support a variety of methods that allow user code components 
-to, for example, fill an export state object with data to be shared with other components or query an import state object to 
-determine its contents. In keeping with the overall requirements for high-performance it is permitted for Import State and
-Export State contents to use references or pointers to component data, so that costly data copies of potentially
-very large data structures can be avoided where possible. The content of an Import State and an Export State is 
+of type import State and export State. These special types support a variety of methods that allow user code components 
+to, for example, fill an export State object with data to be shared with other components or query an import State object to 
+determine its contents. In keeping with the overall requirements for high-performance it is permitted for import State and
+export State contents to use references or pointers to component data, so that costly data copies of potentially
+very large data structures can be avoided where possible. The content of an import State and an export State can be made 
 self-describing.
 
 \subsubsection{Interface Standards}
-The Import State and Export State abstractions are designed to be flexible enough
+The import State and export State abstractions are designed to be flexible enough
 that ESMF does not need to mandate a single standard for fields. For example ESMF does not prescribe the units
 of quantities exported or imported, instead it provides mechanics to describe the units, memory layout, grid coordinates 
-of the fields in Import States and Export States.  This allows the ESMF software to support a range of different policies for
+of the fields in States.  This allows the ESMF software to support a range of different policies for
 physical fields. The interoperability experiments that we are using to demonstrate ESMF make use of the emerging
 CF conventions \cite{ref:CF} for describing physical fields. This is a policy choice for that set of experiments. The ESMF 
-software itself can support arbitrary conventions for labeling and characterizing the content of Import and 
-Export States.
+software itself can support arbitrary conventions for labeling and characterizing the content of States.
 
 \subsubsection{Gridded Component Class}
-The Gridded Component class is used to for a user component that takes in one Import State and produces one
-Export State, both based on the same discrete grid. Examples of Gridded Components are major Earth system 
+The Gridded Component class is used to for a user component that takes in one import State and produces one
+export State, both based on the same discrete grid. Examples of Gridded Components are major Earth system 
 model components such as land-surface models, ocean models, atmospheric models and sea-ice models. Components 
 used for linear algebra manipulations in a state-estimation or data-assimilation optimization procedure are also 
 created as Gridded Components. In general the Import State and the Export State of a Gridded Component will 

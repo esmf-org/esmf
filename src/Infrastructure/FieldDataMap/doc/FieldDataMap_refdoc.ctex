@@ -1,4 +1,4 @@
-% $Id: FieldDataMap_refdoc.ctex,v 1.6 2004/06/04 12:58:24 nscollins Exp $ 
+% $Id: FieldDataMap_refdoc.ctex,v 1.7 2004/06/22 20:08:54 cdeluca Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -33,7 +33,7 @@
 \newpage
 #endif
 
-\section{Field DataMap Class}
+\section{FieldDataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-% $Id: ESMF_systemreq.tex,v 1.2 2004/06/22 14:17:44 nscollins Exp $
+% $Id: ESMF_systemreq.tex,v 1.3 2004/06/22 20:08:55 cdeluca Exp $
 
 \subsubsection{System Requirements}
 \label{sec:systemreq}
@@ -8,6 +8,8 @@ linking the ESMF software:
 \begin{itemize}
 \item a Fortran90 compiler and libraries;
 \item a C++ compiler;
+\item if the C++ compiler is not gcc, a \htmladdnormallink{gcc compiler}{http://gcc.gnu.org} - we need this for a 
+standard cpp preprocessor implementation;
 \item a MPI implementation compatible with these compilers (but see below);
 \item the \htmladdnormallink{GNU make}{http://www.gnu.org/software/make/make.html} utility; 
 \item the tar utility, for unpacking data files;
@@ -19,8 +21,7 @@ a single-process MPI-bypass library.  It allows applications which
 use MPI to be linked but only run single process.
 
 In order to build html and pdf version of the ESMF documentation, 
-\LaTeX, the latex2html conversion utility, and the dvipdf 
-utility must be installed.
+\htmladdnormallink{\LaTeX}{http://latex-project.org}, the \htmladdnormallink{latex2html}{http://www.latex2html.org} conversion utility, and the Unix/Linux dvipdf utility must be installed.
 
 
 

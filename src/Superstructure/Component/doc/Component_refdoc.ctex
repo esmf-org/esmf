@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.28 2004/05/13 14:25:48 nscollins Exp $
+% $Id: Component_refdoc.ctex,v 1.29 2004/06/22 20:08:54 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 #endif
 
 %%%%%%%%%%%%% Gridded Component Class %%%%%%%%%
-\section{Gridded Component Class}
+\section{GridComp Class}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -95,7 +95,7 @@
 
 
 %%%%%%%%%%%%% Coupler Class %%%%%%%%%
-\section{Coupler Component Class}
+\section{CplComp Class}
 
 \subsection{Description}
 #ifdef STANDALONE

@@ -155,7 +155,7 @@
 % Time Interval Class
 % -------------------
 \newpage
-\section{Time Interval Class}
+\section{TimeInterval Class}
 
 \subsection{Description}
 #ifdef STANDALONE

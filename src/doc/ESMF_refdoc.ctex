@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.54 2004/06/21 23:12:02 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.55 2004/06/22 20:08:55 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -27,7 +27,7 @@
 \newcommand{\longname}{ESMF }
 \newcommand{\funcname}{ESMF }
 \newcommand{\shortname}{REF}
-\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Byron Boville, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Earl Schwab, Shepard Smithline, Max Suarez, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Byron Boville, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Chuck Panaccione, Jim Rosinski, Earl Schwab, Shepard Smithline, Max Suarez, Spencer Swift, Gerhard Theurich, Silverio Vasquez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
 %===============================================================================
 \setlength{\textwidth}{6.5truein}
 \setlength{\textheight}{8.5truein}
