@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.2 2002/11/07 23:10:26 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.3 2002/12/06 16:43:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
+#include "ESMC_Alloc.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -32,6 +33,12 @@
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
+     void FTN(c_esmc_storeallocfunc)(void *func, int *status) {
+         *status = ESMC_AllocFuncStore(func);
+     }
+     void FTN(c_esmc_storedeallocfunc)(void *func, int *status) {
+         *status = ESMC_DeallocFuncStore(func);
+     }
      void FTN(c_esmc_arraycreate)(ESMC_Array *ptr, int rank, 
                                         enum ESMC_DataType type, 
                                         enum ESMC_DataKind kind,

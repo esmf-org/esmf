@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.5 2002/11/08 22:46:31 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.6 2002/12/06 16:43:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
+      use ESMF_AllocMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -117,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.5 2002/11/08 22:46:31 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.6 2002/12/06 16:43:59 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -415,6 +416,10 @@ end function
           rc = ESMF_FAILURE
         endif
 
+!       set up callback
+        call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4);
+
+!       call create routine
         call c_ESMC_ArrayCreateByPtr2D(ptr, f90ptr, ni, nj, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.1 2002/11/05 17:43:23 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.2 2002/12/06 16:43:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,6 +58,9 @@
     public ESMF_Allocate
     public ESMF_Deallocate
 
+! TEMP  - FIXME
+    public ESMF_Allocate2DR4    ! Rank=2, Real, Kind= *4
+
 ! These routines print the dope vector information from a given pointer, 
 !  and verify that a pointer is associated and valid.
     public ESMF_AllocValidate
@@ -69,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.1 2002/11/05 17:43:23 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.2 2002/12/06 16:43:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -161,7 +164,8 @@
 !
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real*4, dimension(:,:), pointer :: f90ptr
       integer, intent(in) :: ni
       integer, intent(in) :: nj
       integer, intent(out), optional :: rc               
@@ -191,10 +195,10 @@
 
 !     make sure the pointer isn't already associated w/ something
 !     if ok, start with a null ptr
-      if (associated(f90ptr)) then
-          print *, "ERROR in ESMF_Allocate: pointer already associated"
-          return
-      endif
+      !if (associated(f90ptr)) then
+      !    print *, "ERROR in ESMF_Allocate: pointer already associated"
+      !    return
+      !endif
       nullify(f90ptr)
 
 !     call the fortran intrinsic allocation function
@@ -220,7 +224,8 @@
 !
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real*4, dimension(:,:), pointer :: f90ptr
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -276,7 +281,8 @@
       subroutine ESMF_AllocValidate2DR4(f90ptr, opt, rc)
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real*4, dimension(:,:), pointer :: f90ptr
       character (len=*), intent(in), optional :: opt    
       integer, intent(out), optional :: rc            
 !
@@ -310,7 +316,8 @@
       subroutine ESMF_AllocPrint2DR4(f90ptr, opt, rc)
 !
 ! !ARGUMENTS:
-      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      real*4, dimension(:,:), pointer :: f90ptr
       character (len=*), intent(in) :: opt      
       integer, intent(out), optional :: rc           
 !
