@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.8 2003/05/07 04:34:30 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.9 2003/08/04 17:11:52 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -189,18 +189,17 @@
 
 %\subsection{Use and Examples}
 %#ifdef STANDALONE
-%\input{DataMap_fex}
+%\input{../../Data/doc/DataMap_fex}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/DataMap_fex}
+%\input{../Infrastructure/Data/doc/DataMap_fex}
 %#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_DataMap_fapi}
+\input{../../Data/doc/ESMF_DataMap_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/ESMF_DataMap_fapi}
+\input{../Infrastructure/Data/doc/ESMF_DataMap_fapi}
 #endif
-
 
 #ifdef STANDALONE
 \section{Review Status}
