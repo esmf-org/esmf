@@ -467,13 +467,14 @@ end function luavail
 
 	! The following call may be system dependent.
 
-#ifdef sysIRIX64
+#ifdef PARCH_IRIX64
   call flush(lu,ier)
 #else
-#if sysAIX 
+#ifdef PARCH_rs6000
   call flush_(lu)      ! Function defined in xlf reference document.
 #else
-  call flush(lu)
+  print *, "need to call flush here"
+  !call flush(lu)
 #endif
 #endif
 
