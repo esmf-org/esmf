@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.21 2003/01/16 22:29:26 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.22 2003/01/23 20:23:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.21 2003/01/16 22:29:26 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.22 2003/01/23 20:23:12 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -190,23 +190,6 @@
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_ArrayCreate} functions.   
 !
-!  There are 4 options for 
-!  specifying the type/kind/rank of the {\tt ESMF\_Array}:
-!  \begin{description}
-!  \item[List]
-!    The characteristics of the {\tt ESMF\_Array} are given explicitly
-!    by individual arguments to the create function.
-!  \item[ArraySpec]
-!    A previously created {\tt ESMF\_ArraySpec} object is given which
-!    describes the characteristics.
-!  \item[Fortran array]
-!    An existing Fortran array is used to describe the array.
-!    (Only available from the Fortran interface.)
-!  \item[Fortran 90 Pointer]
-!    An existing Fortran 90 array pointer is used to describe the array.
-!    (Only available from the Fortran interface.)
-!  \end{description}
-!  
 !  There are 4 options for setting the contents of the {\tt ESMF\_Array}
 !  at creation time:
 !  \begin{description}
@@ -224,6 +207,23 @@
 !    {\tt ESMF\_Array} will free the space when it is destroyed.
 !  \end{description}
 !
+!  If the {\tt ESMF\_Array} contains data, there are 4 options for 
+!  specifying the type/kind/rank of that data:
+!  \begin{description}
+!  \item[List]
+!    The characteristics of the {\tt ESMF\_Array} are given explicitly
+!    by individual arguments to the create function.
+!  \item[ArraySpec]
+!    A previously created {\tt ESMF\_ArraySpec} object is given which
+!    describes the characteristics.
+!  \item[Fortran array]
+!    An existing Fortran array is used to describe the array.
+!    (Only available from the Fortran interface.)
+!  \item[Fortran 90 Pointer]
+!    An existing Fortran 90 array pointer is used to describe the array.
+!    (Only available from the Fortran interface.)
+!  \end{description}
+!  
 !  
 !EOP 
 end interface
@@ -252,6 +252,31 @@ end interface
 !  
 !EOP 
 end interface
+
+!------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_ArrayDeallocateData -- Free the data contents
+
+! !INTERFACE:
+!    ! interface ESMF_ArrayDeallocateData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+!    !    module procedure ESMF_ArrayDeallocateData
+!    !    module procedure ESMF_ArrayDeallocateData1DI4
+!    !    module procedure ESMF_ArrayDeallocateData2DI4
+!    !    module procedure ESMF_ArrayDeallocateData2DI8
+!    !    module procedure ESMF_ArrayDeallocateData1DR8
+!    !    module procedure ESMF_ArrayDeallocateData2DR8
+! ! TODO: ...to be expanded to all types, kinds, ranks
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_ArrayDeallocateData} functions.   
+!  
+!EOP 
+! !end interface
 
 !------------------------------------------------------------------------------
 
@@ -522,6 +547,7 @@ end function
 
         type (ESMF_ArrWrapR82D) :: wrap     ! for passing f90 ptr to C++
         integer :: rank, lengths(2)         ! size info for the array
+        real (ESMF_IKIND_R8), dimension(:,:), pointer :: localp ! local copy
 
 !       !TODO: need a null pointer to assign to initialize ptr
         array%this = ESMF_NULL_POINTER
@@ -544,16 +570,29 @@ end function
         endif
 
 !       !TODO: add code to handle copyflag.  For now, default to NO_COPY
+        if (docopy .eq. ESMF_DO_COPY) then
+          allocate(localp(lengths(1), lengths(2)), stat=status)
+          if (status .ne. 0) then     ! f90 status, not ESMF
+            print *, "Array do_copy allocate error"
+            return
+          endif
+          call c_ESMC_ArraySetDealloc(array, status)
+          localp = f90ptr   ! this needs to be a real contents copy
+        else
+          call c_ESMC_ArraySetNoDealloc(array, status)
+          localp => f90ptr  ! simply a reference to existing space
+        endif
+       
 
 !       ! set base address
-        call c_ESMC_ArraySetBaseAddr(array, f90ptr(1,1), status)
+        call c_ESMC_ArraySetBaseAddr(array, localp(1,1), status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array base address construction error"
           return
         endif
 
 !       ! save an (uninterpreted) copy of the f90 array information
-        wrap%real8ptr2d => f90ptr
+        wrap%real8ptr2d => localp
         call c_ESMC_ArraySetF90Ptr(array, wrap, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array internal info save error"
@@ -782,6 +821,7 @@ end function
 !       local vars
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
+        logical :: needsdealloc=.FALSE.     ! do we need to free space?
 
 !       initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -789,14 +829,24 @@ end function
           rc = ESMF_FAILURE
         endif
 
-!       ! TODO: handle deallocate() if needed - is it always right
-!       !   to delete the data if the user still has a handle to it?
-!       !   maybe we need another arg to say deallocate or not?
+!       ! TODO: document the current rule - if we did the allocate in
+!       !   the case of ESMF_DO_COPY at create time, then we delete the
+!       !   space.  otherwise, the user needs to destroy the array first
+!       !   (we'll ignore the data) and then call deallocate themselves.
 
 !       call Destruct first, then free this memory
+        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
+        if (needsdealloc) then
+          call ESMF_ArrayDeallocateData(array, status)
+          if (status .ne. ESMF_SUCCESS) then
+            print *, "Array contents destruction error"
+            return
+          endif
+        endif
+
         call c_ESMC_ArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Array contents destruction error"
+          print *, "Array destruction error"
           return
         endif
 
@@ -861,8 +911,8 @@ end function
         ! or making a new array and a copy
 
         
-        wrap%real8ptr2d => f90ptr
         call c_ESMC_ArrayGetF90Ptr(array, wrap, rc)
+        f90ptr => wrap%real8ptr2d
 
         end subroutine ESMF_ArrayGetData2DR8
 
@@ -895,11 +945,40 @@ end function
         ! or making a new array and a copy
 
 
-        wrap%int4ptr1d => f90ptr
         call c_ESMC_ArrayGetF90Ptr(array, wrap, rc)
+        f90ptr => wrap%int4ptr1d
 
         end subroutine ESMF_ArrayGetData1DI4
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayDeallocateData(array, rc)
+!
+! !RETURN VALUE:
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array 
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!     Return an F90 pointer to the data buffer, or return an F90 pointer
+!     to a new copy of the data.
+!
+!EOP
+! !REQUIREMENTS:
+      type (ESMF_ArrWrapI41D) :: wrapI41D     ! for passing f90 ptr to C++
+      type (ESMF_ArrWrapR82D) :: wrapR82D     ! for passing f90 ptr to C++
+
+!    ! TODO: how do we get the right type here?
+      call c_ESMC_ArrayGetF90Ptr(array, wrapR82D, rc)
+      deallocate(wrapR82D%real8ptr2d)
+
+      call c_ESMC_ArrayGetF90Ptr(array, wrapI41D, rc)
+      deallocate(wrapI41D%int4ptr1d)
+
+      end subroutine ESMF_ArrayDeallocateData
 
 !------------------------------------------------------------------------------
 !BOP
