@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.7 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.8 2003/08/26 14:46:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.7 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.8 2003/08/26 14:46:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -220,11 +220,11 @@
       !
       
       ! method needs to be set based on order parm
-      call ESMF_RegridTypeSet(ESMF_RegridConsByFieldConserv,          &
-                              name=name, src_field = src_field,               &
-                                         dst_field = dst_field,               &
-                                         method = ESMF_RegridMethod_Conserv2, &
-                                         rc=status)
+      !call ESMF_RegridTypeSet(ESMF_RegridConsByFieldConserv,          &
+      !                        name=name, src_field = src_field,               &
+      !                                   dst_field = dst_field,               &
+      !                                   method = ESMF_RegridMethod_Conserv2, &
+      !                                   rc=status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
       
       !

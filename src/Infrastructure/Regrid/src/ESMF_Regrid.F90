@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.23 2003/08/25 22:48:58 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.24 2003/08/26 14:46:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.23 2003/08/25 22:48:58 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.24 2003/08/26 14:46:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -406,33 +406,43 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Given a source field and precomputed regridding information, this 
-!     routine regrids the source field to a new field on the destination
+!     Given a source array and precomputed regridding information, this 
+!     routine regrids the source array to a new array on the destination
 !     grid.  
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-   !type (ESMF_Array) ::
-   !   src_data   ! source data necessary for regrid gathered
-   !              !  from potentially distributed source field
+   ! get the first route from the table and run it to gather the
+   ! data values.
+ 
+   !call ESMF_RouteHandleGet(routehandle, rhandle1=rh, rc=status)
 
-   !*** gather remote data to local array
+   ! get the indirect indicies and weights from the routehandle
 
-   ! allocate local gathered source array
-   ! use route to gather data
-      
+   !call ESMF_RouteHandleGet(routehandle, transformvalues=tv, rc=status)
+   !call ESMF_TransformValues(tv, ?=srcindex, ?=dstindex, ?=weights)
+
+   ! get a real f90 pointer from all the arrays
+   !call ESMF_ArrayGetData(srcindex, i4ptr, ESMF_DATA_REF, rc)
+   !call ESMF_ArrayGetData(dstindex, i4ptr, ESMF_DATA_REF, rc)
+   !call ESMF_ArrayGetData(weights, r8ptr, ESMF_DATA_REF, rc)
+
+   !call ESMF_ArrayGetData(srcaddr, i4ptr, ESMF_DATA_REF, rc)
+   !call ESMF_ArrayGetData(dstaddr, i4ptr, ESMF_DATA_REF, rc)
+
+   ! TODO: apply the weights from src to destination
+
    !*** initialize dest field to zero
    
-   !dstfield = zero
+   !dstarrayptr = zero
 
    !*** do the regrid
 
    ! will look something like   
    !do n=1,num_links
-   !   dstfield(regrid%dst_add(n)) = dstfield(regrid%dst_add(n)) + &
-   !                                  srcfield(regrid%src_add(n))* &
-   !                                  regrid%weights(n)
+   !  dstarrayptr(dstindexptr(n)) = dstarrayptr(dstindexptr(n)) + &
+   !                                srcarrayptr(srcindexptr(n)) * weightptr(n))
    !end do
 
    ! set return codes
