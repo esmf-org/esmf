@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.114 2004/11/15 18:32:44 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.115 2004/11/16 17:00:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -233,7 +233,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.114 2004/11/15 18:32:44 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.115 2004/11/16 17:00:45 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -644,7 +644,7 @@ end function
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
-        type(ESMF_BlockingFlag):: blocking
+        logical :: blocking
         integer :: callrc
 
         ! Initialize return code; assume failure until success is certain
@@ -668,12 +668,11 @@ end function
         endif
 
         ! set the default mode to ESMF_BLOCKING
+        blocking = .true.
         if (present(blockingFlag)) then
-          blocking = blockingFlag
-        else
-          blocking = ESMF_BLOCKING
+          if (blockingFlag.eq.ESMF_NONBLOCKING) blocking=.false.
         endif
-
+        
         ! supply default objects if unspecified by the caller
         if (present(importState)) then
           is = importState
@@ -713,11 +712,13 @@ end function
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
           status)
-        if (blocking == ESMF_BLOCKING) then
+          
+        if (blocking) then
           call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
             compp%vm_cargo, callrc, status)
           status = callrc
         endif
+
 #if 0
         ! Old entry point, pre-VM
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, phase, &
