@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.28 2003/06/18 18:43:13 rstaufer Exp $
+! $Id: ESMF_Config.F90,v 1.29 2003/07/24 22:07:37 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -183,7 +183,7 @@
 ! !USES:
 
       use ESMF_DELayoutMod
-      use ESMF_LogErrMod
+      !use ESMF_LogErrMod    ! seems unneeded, at least for now.
 
       implicit none
       private
