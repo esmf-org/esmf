@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/07/28 17:39:14 jwolfe Exp $ 
+# $Id: makefile,v 1.8 2003/07/29 22:50:07 jwolfe Exp $ 
 
 ALL: 
 
@@ -14,44 +14,31 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/LogErr/examples
 
-# these should be examples, not tests, but leave like this
-# for now.
-TESTS_BUILD  = \
-	ESMF_TestErr \
-	ESMF_TestErr2 \
-	ESMF_TestErr3 \
-	ESMF_TestLog \
-	ESMF_TestLog2 \
+TESTEXAMPLES_3  = \
+	ESMF_TestErr  RUN_ESMF_TestErr  ESMF_TestErr.rm \
+	ESMF_TestErr2 RUN_ESMF_TestErr2 ESMF_TestErr2.rm \
+	ESMF_TestErr3 RUN_ESMF_TestErr3 ESMF_TestErr3.rm \
+	ESMF_TestLog  RUN_ESMF_TestLog  ESMF_TestLog.rm \
+	ESMF_TestLog2 RUN_ESMF_TestLog2 ESMF_TestLog2.rm
 
-TESTS_RUN  = \
-	RUN_ESMF_TestErr \
-	RUN_ESMF_TestErr2 \
-	RUN_ESMF_TestErr3 \
-	RUN_ESMF_TestLog \
-	RUN_ESMF_TestLog2 \
-
-TESTS_RUN_UNI  = \
-	RUN_ESMF_TestErrUNI \
-	RUN_ESMF_TestErr2UNI \
-	RUN_ESMF_TestErr3UNI \
-	RUN_ESMF_TestLogUNI \
-	RUN_ESMF_TestLog2UNI \
-
-TESTS_RM  = \
-	ESMF_TestErr.rm \
-	ESMF_TestErr2.rm \
-	ESMF_TestErr3.rm 
+TESTEXAMPLES_9  = \
+	ESMF_TestErr  RUN_ESMF_TestErrUNI  ESMF_TestErr.rm \
+	ESMF_TestErr2 RUN_ESMF_TestErr2UNI ESMF_TestErr2.rm \
+	ESMF_TestErr3 RUN_ESMF_TestErr3UNI ESMF_TestErr3.rm \
+	ESMF_TestLog  RUN_ESMF_TestLogUNI  ESMF_TestLog.rm \
+	ESMF_TestLog2 RUN_ESMF_TestLog2UNI ESMF_TestLog2.rm
 
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod 
+CLEANFILES  = 	*.o *.mod ESMF_TestErr ESMF_TestErr2 ESMF_TestErr3 \
+		ESMF_TestLog ESMF_TestLog2
 CLOBBERDIRS =
 
 
-examples: ESMF_TestErr ESMF_TestErr2 ESMF_TestErr3
+examples: ESMF_TestErr ESMF_TestErr2 ESMF_TestErr3 ESMF_TestLog ESMF_TestLog2
 
 ESMF_TestErrCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
