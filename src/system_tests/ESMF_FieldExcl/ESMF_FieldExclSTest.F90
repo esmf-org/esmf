@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.5 2004/10/07 17:51:27 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.6 2004/10/11 22:51:38 jwolfe Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -46,7 +46,6 @@
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
-    logical :: i_am_comp1, i_am_comp2
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -95,44 +94,23 @@
    
     ! give PETs (0 to splitnum-1) to comp1, (splitnum to npets-1) to comp2
     splitnum = npets / 2
-!!!! If running w/ PTHREADS, set both true.
-!!!! If not, set one true and one false.
-    ! with PThreads
-    i_am_comp1 = .TRUE.
-    i_am_comp2 = .TRUE.
-    ! without
-    !!if (pet_id .lt. splitnum) then
-    !!    i_am_comp1 = .TRUE.
-    !!    i_am_comp2 = .FALSE.
-    !!else
-    !!    i_am_comp1 = .FALSE.
-    !!    i_am_comp2 = .TRUE.
-    !!endif
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-!!!! TODO: when we want to run exclusive, use the following line instead.
-    if (i_am_comp1) then
-        comp1 = ESMF_GridCompCreate(vm, cname1, &
+    comp1 = ESMF_GridCompCreate(vm, cname1, &
                                 petList=(/ (i, i=0, splitnum-1) /), rc=rc)
-        !!comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
-        if (rc .ne. ESMF_SUCCESS) goto 10
-        print *, "Created component ", trim(cname1), "rc =", rc
-        call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Created component ", trim(cname1), "rc =", rc
+    call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
     !  call ESMF_GridCompPrint(comp1, "", rc)
-    endif
 
     cname2 = "user model 2"
-!!!! TODO: when we want to run exclusive, use the following line instead.
-    if (i_am_comp2) then
-        comp2 = ESMF_GridCompCreate(vm, cname2, &
+    comp2 = ESMF_GridCompCreate(vm, cname2, &
                                 petList=(/ (i, i=splitnum, npets-1) /), rc=rc)
-        !!comp2 = ESMF_GridCompCreate(vm, cname2, rc=rc)
-        if (rc .ne. ESMF_SUCCESS) goto 10
-        print *, "Created component ", trim(cname2), "rc =", rc
-        call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
-        !  call ESMF_GridCompPrint(comp2, "", rc)
-    endif
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Created component ", trim(cname2), "rc =", rc
+    call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
+    !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
@@ -147,17 +125,13 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    if (i_am_comp1) then
-      call ESMF_GridCompSetServices(comp1, userm1_register, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp SetServices finished, rc= ", rc
-    endif
+    call ESMF_GridCompSetServices(comp1, userm1_register, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp SetServices finished, rc= ", rc
 
-    if (i_am_comp2) then
-      call ESMF_GridCompSetServices(comp2, userm2_register, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp SetServices finished, rc= ", rc
-    endif
+    call ESMF_GridCompSetServices(comp2, userm2_register, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp SetServices finished, rc= ", rc
 
     call ESMF_CplCompSetServices(cpl, usercpl_register, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
@@ -199,19 +173,15 @@
  
     c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    if (i_am_comp1) then
-      call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 1 Initialize finished, rc =", rc
-    endif
+    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp 1 Initialize finished, rc =", rc
  
     c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    if (i_am_comp2) then
-      call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 2 Initialize finished, rc =", rc
-    endif
+    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp 2 Initialize finished, rc =", rc
  
     ! note that the coupler's import is comp1's export
     call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
@@ -226,21 +196,17 @@
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-      if (i_am_comp1) then
-        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
-        if (rc .ne. ESMF_SUCCESS) goto 10
-        print *, "Comp 1 Run returned, rc =", rc
-      endif
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Comp 1 Run returned, rc =", rc
 
       call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Run returned, rc =", rc
 
-      if (i_am_comp2) then
-        call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
-        if (rc .ne. ESMF_SUCCESS) goto 10
-        print *, "Comp 2 Run returned, rc =", rc
-      endif
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Comp 2 Run returned, rc =", rc
 
       call ESMF_ClockAdvance(clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
@@ -255,17 +221,13 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-    if (i_am_comp1) then
-      call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 1 Finalize finished, rc =", rc
-    endif
+    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp 1 Finalize finished, rc =", rc
 
-    if (i_am_comp2) then
-      call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 2 Finalize finished, rc =", rc
-    endif
+    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp 2 Finalize finished, rc =", rc
 
     call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
