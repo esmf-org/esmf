@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.13 2003/07/25 19:28:11 jwolfe Exp $
+// $Id: ESMC_LogErr.h,v 1.14 2003/08/14 14:31:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -171,7 +171,7 @@ inline void ESMC_Log::ESMC_LogSetFlush(
 // !IROUTINE: ESMC_LogGetFlush() - returns the flush variable 
 // !INTERFACE:
 
-ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
+inline ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
 
 // !ARGUMENTS
 //   none
@@ -239,7 +239,7 @@ inline void ESMC_Log::ESMC_LogSetVerbose(
 //
 // !INTERFACE:
 
-ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
+inline ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
 
 // !ARGUMENTS
 //   none
@@ -306,7 +306,7 @@ inline void ESMC_Log::ESMC_LogSetHaltOnErr(
 //
 // !INTERFACE:
 
-ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
+inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
 
 // !ARGUMENTS
 //   none
@@ -374,7 +374,7 @@ inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
 //
 // !INTERFACE:
 
-ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
+inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
 
 // !ARGUMENTS
 //   none
