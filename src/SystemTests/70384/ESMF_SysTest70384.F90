@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.3 2003/02/15 00:10:52 jwolfe Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.4 2003/02/18 15:05:57 nscollins Exp $
 !
 ! System test code #70384
 
@@ -22,7 +22,6 @@
     use ESMF_BaseMod
     use ESMF_IOMod
     use ESMF_LayoutMod
-    use ESMF_ClockMod
     use ESMF_ArrayMod
     use ESMF_StateMod
     
@@ -32,7 +31,7 @@
     integer :: nx, ny, nz, i, j, k, ni, nj, nk, nj2, nk2, rc, ii, jj, kk
     integer, dimension(6) :: delist
     integer :: result, len, base, de_id
-    integer :: i_max, j_max, k_max
+    integer :: i_max, j_max, k_max, miscount
     integer :: status
     integer :: ndex, ndey
     logical :: match
@@ -40,8 +39,6 @@
     integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
-    type(ESMF_Clock) :: clock1
-    integer :: timestep
     type(ESMF_Layout) :: layout1 
     type(ESMF_Array) :: array1, array1a, array2, array2a, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
@@ -73,12 +70,6 @@
     sname = "Atmosphere Export State"
     state1 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, sname, rc=rc)
     print *, "State Create finished, name = ", trim(sname), " rc =", rc
-
-    ! Create a Clock
-    !! TODO: this method doesn't exist yet?
-    !clock1 = ESMF_ClockCreate(rc=rc)
-    !print *, "Clock Create finished, rc =", rc
-    print *, "==> Clock create needs to be called here"
 
     print *, "Create section finished"
 
@@ -179,10 +170,7 @@
     call ESMF_StateGetData(state1, "default array name", array1a, rc=rc)
     print *, "Source Array retrieved from state"
     
-    timestep = 1
-    !! TODO: fool with clocks here
-
-    !! call transpose method here, output ends up in array2
+    !! Call transpose method here, output ends up in array2
     rank_trans(1) = 1
     rank_trans(2) = 2
     rank_trans(3) = 3
@@ -193,7 +181,7 @@
     call ESMF_ArrayPrint(array2, "", rc)
 
     !! Transpose back so we can compare contents
-    !! TODO: call transpose method again here, output ends up in array3
+    !! Call transpose method again here, output ends up in array3
     rank_trans(1) = 1
     rank_trans(2) = 2
     rank_trans(3) = 3
@@ -218,28 +206,36 @@
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Result from DE ", de_id
+    print *, "Result from DE_id ", de_id
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
     call ESMF_ArrayGetData(array1, srcptr, rc=rc)
     call ESMF_ArrayGetData(array3, resptr, rc=rc)
     match = .true.
+    miscount = 0
     do i=1, ni
       do j=1, nj
         do k=1, nk
-!          if (srcptr(i,j,k) .ne. resptr(i,j,k)) then
-          write(*,*) i,j,k,de_id,srcdata(i,j,k),resdata(i,j,k)
+           ! write(*,*) i,j,k,de_id,srcdata(i,j,k),resdata(i,j,k)
+           !if (srcptr(i,j,k) .ne. resptr(i,j,k)) then
+           !  print *, "array contents do not match: ", &
+           !          srcptr(i,j,k), ".ne.", resptr(i,j,k), "at", i,j,k,de_id
           if (srcdata(i,j,k) .ne. resdata(i,j,k)) then
-            print *, "array contents do not match: ", &
-!                       srcptr(i,j,k), ".ne.", resptr(i,j,k), "at", i,j,k,de_id
-                       srcdata(i,j,k), ".ne.", resdata(i,j,k), "at", i,j,k,de_id
+            print *, "array contents do not match at: (", i,j,k, ") on DE ", &
+                     de_id, ".  src=", srcdata(i,j,k), "dst=", resdata(i,j,k)
             match = .false.
+            miscount = miscount + 1
+            if (miscount .gt. 20) then
+              print *, "more than 20 matches, skipping rest of loop"
+              goto 10
+            endif
           endif
         enddo
       enddo
     enddo
     if (match) print *, "Array contents matched correctly!! DE_id = ",de_id
+10  continue
 
     print *, "Finalize section finished"
 
@@ -255,8 +251,6 @@
     call ESMF_ArrayDestroy(array1, rc)
     call ESMF_ArrayDestroy(array2, rc)
     call ESMF_ArrayDestroy(array3, rc)
-    !! TODO: comment this in when it exists
-    !call ESMF_ClockDestroy(clock1, rc)
     call ESMF_LayoutDestroy(layout1, rc)
     print *, "All Destroy routines done"
 
