@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.16 2003/04/11 04:31:04 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.17 2003/04/11 05:01:21 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -97,7 +97,7 @@
 %\part{Infrastructure Fields and Grids: Regridding}
 %\label{part:Infrastructure_Fields_and_Grids:_Regridding}
 
-%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
+%include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
 %====================================================================================================
 
@@ -146,14 +146,14 @@
 
 
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
-\end{htmlonly}
-\part{Infrastructure Utilities: Performance Profiling}
-\label{part:Infrastructure_Utilities:_Performance_Profiling}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Performance Profiling}
+%\label{part:Infrastructure_Utilities:_Performance_Profiling}
 
-#include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
+%include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
 %====================================================================================================
 \newpage
@@ -166,24 +166,24 @@
 #include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
 
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Machine}
-\end{htmlonly}
-\part{Infrastructure Utilities: Machine}
-\label{part:Infrastructure_Utilities:_Machine}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Machine}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Machine}
+%\label{part:Infrastructure_Utilities:_Machine}
 
-#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
+%include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
 
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Route}
-\end{htmlonly}
-\part{Infrastructure Utilities: Route}
-\label{part:Infrastructure_Utilities:_Route}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Route}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Route}
+%\label{part:Infrastructure_Utilities:_Route}
 
-#include "../Infrastructure/Route/doc/Route_refdoc.ctex"
+%include "../Infrastructure/Route/doc/Route_refdoc.ctex"
 
 
 %====================================================================================================
@@ -204,7 +204,7 @@
 %\part{Infrastructure Utilities: I/O}
 %\label{part:Infrastructure Utilities:_I/O}
 
-%#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
+%include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
 %====================================================================================================
 
