@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.11 2004/04/15 17:17:51 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.12 2004/04/27 22:59:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,11 +36,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.11 2004/04/15 17:17:51 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.12 2004/04/27 22:59:24 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0
+      integer :: result = 0, number
 !     ! Local variables
       integer :: i, x, y, rc, mycell, fieldcount
       type(ESMF_Grid) :: grid, grid2
@@ -240,7 +240,7 @@
       call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
 
       !NEX_UTest
-      write(failMsg, *) "Subroutine returned ESMF_FAILURE or incorrect name returned"
+      write(failMsg, *) "Did not return ESMF_SUCCESS or incorrect name returned"
       write(name, *) "Getting first Field from a Bundle Test continued"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname1.eq."pressure"), name, &
 							failMsg, result, ESMF_SRCLINE)
@@ -278,13 +278,29 @@
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Verify that the fourth Field names cannot be queried fron a Bundle
-      ! because there are ony three Fields in the Bundle
+      ! Verify that the fourth Field names cannot be queried from a Bundle
+      ! because there are only three Fields in the Bundle
       call ESMF_BundleGetField(bundle1, 4, returnedfield3, rc)
       write(failMsg, *) ""
       write(name, *) "Getting a non-existent Field from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Add an integer attribute to a Bundle Test
+      call ESMF_BundleAddAttribute(bundle1, name="Sides", value=65, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding an integer attribute to a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Get an integer attribute to a Bundle Test
+      call ESMF_BundleGetAttribute(bundle1, name="Sides", value=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an integer attribute from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
