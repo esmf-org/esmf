@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.8 2004/02/12 22:03:02 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.9 2004/02/23 16:11:02 nscollins Exp $
 
 
 !-------------------------------------------------------------------------
@@ -192,7 +192,7 @@
       end if
 !BOC
     else
-      print *, "Data marked as not needed", trim(statename)
+      print *, "Data marked as not needed", trim(dataname)
     endif
     call ESMF_StateDestroy(state3, rc)
     print *, "State Destroy returned", rc
