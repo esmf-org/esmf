@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.125 2004/01/20 23:12:11 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.126 2004/01/21 23:28:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,6 +75,7 @@
     !public ESMF_GridGetMetric
     public ESMF_GridSetMetric
     public ESMF_GridBoxIntersectRecv
+    public ESMF_GridBoxIntersectSend
     public ESMF_GridValidate
     !public ESMF_GridSearch
 
@@ -87,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.125 2004/01/20 23:12:11 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.126 2004/01/21 23:28:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2357,7 +2358,7 @@
       !-------------
       case(ESMF_GridStructure_LogRect)      ! logically rectangular
         call ESMF_LRGridBoxIntersectRecv(grid, localMinPerDim, localMaxPerDim, &
-                                         domainList, total, rc)
+                                         domainList, total, status)
 
       !-------------
       case(ESMF_GridStructure_LogRectBlock) ! blocked logically rectangular
@@ -2393,6 +2394,126 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridBoxIntersectRecv
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
+
+! !INTERFACE:
+      subroutine ESMF_GridBoxIntersectSend(dstGrid, srcGrid, &
+                                           localMinPerDim, localMaxPerDim, &
+                                           myAI, domainList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: dstGrid
+      type(ESMF_Grid) :: srcGrid
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
+                                                         ! array of local mins
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
+                                                         ! array of local maxs
+      type(ESMF_AxisIndex), dimension(:), intent(in) :: myAI
+      type(ESMF_DomainList), intent(inout) :: domainList ! domain list
+      integer, intent(out), optional :: rc               ! return code
+
+! !DESCRIPTION:
+!     This routine computes the DomainList necessary to cover a given "box"
+!     described by an array of min/max's.  This routine is for the case of
+!     a DE that is part of a source Grid determining which DEs it will send
+!     its data to.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[dstGrid]
+!          Destination {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
+!     \item[srcGrid]
+!          Source {\tt ESMF\_Grid} to use to calculate the resulting
+!          {\tt ESMF\_DomainList}.
+!     \item[localMinPerDim]
+!          Array of local minimum coordinates, one per rank of the array,
+!          defining the "box."
+!     \item[localMaxPerDim]
+!          Array of local maximum coordinates, one per rank of the array,
+!          defining the "box."
+!     \item[myAI]
+!          {\tt ESMF\_AxisIndex} for this DE on the sending (source)
+!          {\tt ESMF\_Grid}, assumed to be in global indexing.
+!     \item[domainList]
+!          Resulting {\tt ESMF\_DomainList} containing the set of
+!          {\tt ESMF\_Domains} necessary to cover the box.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      if ((.not. associated(dstGrid%ptr)) .or. &
+          (.not. associated(srcGrid%ptr))) then
+        print *, "Empty or Uninitialized Grid"
+        return
+      endif
+
+!     Call intersect routines based on GridStructure
+
+      select case(srcGrid%ptr%gridStructure)
+
+      !-------------
+      case(ESMF_GridStructure_Unknown)      ! unknown structure
+        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case(ESMF_GridStructure_LogRect)      ! logically rectangular
+        call ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, &
+                                         localMinPerDim, localMaxPerDim, &
+                                         myAI, domainList, status)
+
+      !-------------
+      case(ESMF_GridStructure_LogRectBlock) ! blocked logically rectangular
+        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case(ESMF_GridStructure_Unstruct)     ! unstructured grid
+        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case(ESMF_GridStructure_User)         ! user-defined grid
+        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+         print *, "ERROR in ESMF_GridBoxIntersectSend: Invalid grid structure"
+         status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
+                 "error in specific intersect code."
+        return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridBoxIntersectSend
 
 !------------------------------------------------------------------------------
 !BOP
