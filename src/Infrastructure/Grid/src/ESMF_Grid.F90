@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.107 2003/10/15 23:15:52 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.108 2003/10/16 17:52:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.107 2003/10/15 23:15:52 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.108 2003/10/16 17:52:04 nscollins Exp $'
 
 !==============================================================================
 !
@@ -284,8 +284,12 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridSetCoordFromArray
          module procedure ESMF_GridSetCoordFromBuffer
+#if (__IFC | __EFC)
+         ! don't include the following two in the interface def
+#else
          module procedure ESMF_GridSetCoordSpecd
          module procedure ESMF_GridSetCoordUniform
+#endif
          module procedure ESMF_GridSetCoordCopy
 
 ! !DESCRIPTION:
@@ -1881,7 +1885,7 @@
       ! set coordinates using total cell count
       countsPlus(1) = localCounts(1) + 2*gridBoundWidth
       countsPlus(2) = localCounts(2) + 2*gridBoundWidth
-      call ESMF_GridSetCoord(grid, physgridId, numDims, countsPlus, &
+      call ESMF_GridSetCoordUniform(grid, physgridId, numDims, countsPlus, &
                              gridBoundWidth, relloc, delta, localMinCoord, &
                              total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1889,7 +1893,7 @@
         return
       endif
       ! set coordinates using computational cell count
-      call ESMF_GridSetCoord(grid, physgridId, numDims, localCounts, &
+      call ESMF_GridSetCoordUniform(grid, physgridId, numDims, localCounts, &
                              0, relloc, delta, localMinCoord, &
                              total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -2166,7 +2170,7 @@
       i2 = localStart(1) + counts(1)
       j1 = localStart(2) + 1
       j2 = localStart(2) + counts(2)
-      call ESMF_GridSetCoord(grid, physgridId, numDims, counts, &
+      call ESMF_GridSetCoordSpecd(grid, physgridId, numDims, counts, &
                              gridBoundWidth, relloc, coord1(i1:i2), &
                              coord2(j1:j2), localMin, &
                              total=.true., rc=status)
@@ -2181,7 +2185,7 @@
       i2 = i1 + counts(1) - 1
       j1 = localStart(2) + 1 + gridBoundWidth
       j2 = j1 + counts(2) - 1
-      call ESMF_GridSetCoord(grid, physgridId, numDims, counts, 0, relloc, &
+      call ESMF_GridSetCoordSpecd(grid, physgridId, numDims, counts, 0, relloc, &
                              coord1(i1:i2), coord2(j1:j2), localMin, &
                              total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
