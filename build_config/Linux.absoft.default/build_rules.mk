@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.11 2004/06/07 17:06:43 slswift Exp $
+#  $Id: build_rules.mk,v 1.12 2004/06/22 19:40:19 nscollins Exp $
 #
 #  Linus.absoft.default.mk
 #
@@ -104,14 +104,16 @@ ifneq ($(ESMF_COMM),mpich)
 C_CC                = cc
 C_FC                = f95
 CXX_CC              = g++ -fPIC
-CXX_FC              = f95 -YEXT_NAMES=LCS -s 
+CXX_FC              = f95
+FFLAGS              = -YEXT_NAMES=LCS -s  -YEXT_SFX=_
 endif
 
 ifeq ($(ESMF_COMM),mpich)
 C_CC               = mpicc
 C_FC               = mpif90 
 CXX_CC             = mpiCC -fPIC
-CXX_FC             = mpif90 -YEXT_NAMES=LCS -s 
+CXX_FC             = mpif90
+FFLAGS             = -YEXT_NAMES=LCS -s 
 endif
 
 C_FC_MOD           = -p
@@ -130,7 +132,6 @@ O_COPTFLAGS	   = -O
 O_FOPTFLAGS	   = -O
 # ########################## Fortran compiler ##############################
 #
-FFLAGS          = -YEXT_NAMES=LCS -s 
 F_FREECPP       = -ffree
 F_FIXCPP        = -ffixed
 F_FREENOCPP     = -ffree
