@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.23 2004/06/21 21:50:36 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.24 2004/06/21 23:13:25 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -279,7 +279,6 @@
     enddo
     print *, "realptr data changed after nocopy set, now = ", realptr(3:6,7:9)
 
-    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
@@ -302,7 +301,6 @@
     write(name, *) "Compare Local Array 2D Real Data Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
-    !EX_UTest
     call ESMF_LocalArrayDestroy(array2, rc)
     print *, "array 2a destroy returned"
     deallocate(realptr)
@@ -453,7 +451,6 @@
 
     print *, "array 4a create returned"
 
-   !EX_UTest
     !write(failMsg, *) "Did returned ESMF_SUCCESS incorrectly"
     !write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
     !call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
