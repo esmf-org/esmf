@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.13 2004/03/11 20:16:15 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.14 2004/03/11 23:43:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.13 2004/03/11 20:16:15 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.14 2004/03/11 23:43:17 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -204,7 +204,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
 !
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpec(arrayspec, counts, halo_width, &
+      function ESMF_ArrayCreateBySpec(arrayspec, counts, haloWidth, &
                                       lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
@@ -213,7 +213,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: arrayspec
       integer, intent(in), dimension(:) :: counts
-      integer, intent(in), optional :: halo_width 
+      integer, intent(in), optional :: haloWidth 
       integer, dimension(:), intent(in), optional :: lbounds
       integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc 
@@ -229,7 +229,7 @@ end interface
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
-!  \item[{[halo_width]}] 
+!  \item[{[haloWidth]}] 
 !   Set the maximum width of the halo region on all edges. Defaults to 0.
 !  \item[{[lbounds]}] 
 !   An integer array of length rank, with the lower index for each dimension.
@@ -265,7 +265,7 @@ end interface
         
         ! Call the list function to make the array
         ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
-                                                       counts, halo_width, &
+                                                       counts, haloWidth, &
                                                        lbounds, ubounds, status)
         if (rcpresent) rc = status
 
@@ -278,7 +278,7 @@ end interface
 !
 ! !INTERFACE:
       function ESMF_ArrayCreateByList(rank, type, kind, counts, &
-                                      halo_width, lbounds, ubounds, rc)
+                                      haloWidth, lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateByList
@@ -288,7 +288,7 @@ end interface
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
-      integer, intent(in), optional :: halo_width 
+      integer, intent(in), optional :: haloWidth 
       integer, dimension(:), intent(in), optional :: lbounds
       integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc 
@@ -312,7 +312,7 @@ end interface
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
-!  \item[{[halo_width]}] 
+!  \item[{[haloWidth]}] 
 !   Set the maximum width of the halo region on all edges. Defaults to 0.
 !  \item[{[lbounds]}] 
 !   An integer array of length rank, with the lower index for each dimension.
@@ -344,8 +344,8 @@ end interface
         endif
 
         ! Always supply a halo value, setting it to 0 if not specified. 
-        if (present(halo_width)) then 
-          hwidth = halo_width 
+        if (present(haloWidth)) then 
+          hwidth = haloWidth 
         else 
           hwidth = 0 
         endif 
