@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.112 2003/10/20 15:36:42 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.113 2003/10/20 23:25:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.112 2003/10/20 15:36:42 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.113 2003/10/20 23:25:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1836,8 +1836,8 @@
       do i = 1,gridBoundWidth
         cellType1(i) = 1
         cellType2(i) = 1
-        cellType1(globalCounts(1)+i) = 1
-        cellType2(globalCounts(2)+i) = 1
+        cellType1(globalCounts(1)+gridBoundWidth+i) = 1
+        cellType2(globalCounts(2)+gridBoundWidth+i) = 1
       enddo
       ! set parameters based on grid type
       select case (grid%horz_gridtype)
@@ -2123,8 +2123,8 @@
       do i = 1,gridBoundWidth
         cellType1(i) = 1
         cellType2(i) = 1
-        cellType1(compCount(1)+i) = 1
-        cellType2(compCount(2)+i) = 1
+        cellType1(compCount(1)+gridBoundWidth+i) = 1
+        cellType2(compCount(2)+gridBoundWidth+i) = 1
       enddo
 
       ! set parameters based on grid type
