@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.29 2004/09/16 22:48:40 jwolfe Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.30 2004/10/05 16:04:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.29 2004/09/16 22:48:40 jwolfe Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.30 2004/10/05 16:04:42 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -90,7 +90,7 @@
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print *, "NUMBER_OF_PROCESSORS ", npets
+      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
       !NEX_UTest
       call ESMF_VMGetGlobal(vm, status)

@@ -147,7 +147,7 @@
 
     call ESMF_Initialize(vm=vm, rc=rc)
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    print *, "NUMBER_OF_PROCESSORS ", npets
+    print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
     
     !NEX_UTest
     call c_ESMF_SizePrint(sizetest1I(1), sizetest1I(2), 1, rc)
