@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.10 2004/10/28 22:11:26 nscollins Exp $
+#  $Id: build_rules.mk,v 1.11 2004/12/17 21:01:38 nscollins Exp $
 #
 #  Darwin.absoft.default.mk
 #
@@ -149,10 +149,12 @@ CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 #C_F90CXXLD         = f95 
 C_F90CXXLD         = g++
 C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
+#C_F90CXXLIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math -lU77
 #C_CXXF90LD         = f95
 C_CXXF90LD         = g++
 #C_CXXF90LIBS       = ${MPI_LIB}  
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math
+C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math 
+#C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L/Applications/Absoft/lib -lf90math -lfio -lf77math -lU77
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g

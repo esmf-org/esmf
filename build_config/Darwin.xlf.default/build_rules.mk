@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.9 2004/10/28 22:11:28 nscollins Exp $
+#  $Id: build_rules.mk,v 1.10 2004/12/17 21:01:39 nscollins Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -112,8 +112,8 @@ COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
 COM_MAXMEM_FLAG        = -qmaxmem=4000
 COM_NOWARN_FLAG        = -w
 COM_SPILL_FLAG         = -qspill=3000
-COM_OPT_FLAG           = -O3
-COM_ALL_OPT_FLAGS      = -O3 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
+COM_OPT_FLAG           = -O2
+COM_ALL_OPT_FLAGS      = -O2 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
 COM_PLAIN_FLAG         =
 
 #

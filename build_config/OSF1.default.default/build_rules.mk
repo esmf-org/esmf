@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.15 2004/12/14 17:57:34 theurich Exp $
+#  $Id: build_rules.mk,v 1.16 2004/12/17 21:01:40 nscollins Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -105,8 +105,8 @@ C_SYS_LIB		= -lutil -lFutil -lots
 G_COPTFLAGS		= -g -assume gfullpath -pthread
 G_FOPTFLAGS		= -g -assume gfullpath -pthread -reentrancy threaded -omp
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS		= -O3 -w -pthread
-O_FOPTFLAGS		= -O3 -w -pthread -reentrancy threaded -omp
+O_COPTFLAGS		= -O2 -w -pthread
+O_FOPTFLAGS		= -O2 -w -pthread -reentrancy threaded -omp
 #
 # C++ compiler 
 #
@@ -126,14 +126,14 @@ C_CXXF90LIBS       =
 GCXX_COPTFLAGS		= -g  -qfullpath
 GCXX_FOPTFLAGS		= -g  -qfullpath 
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
-OCXX_FOPTFLAGS		= -O3
+OCXX_COPTFLAGS		= -O2  -qmaxmem=4000 -qspill=3000
+OCXX_FOPTFLAGS		= -O2
 # -------------------------- BOPT - g_complex options ------------------------
 GCOMP_COPTFLAGS		= -g  -qfullpath
 GCOMP_FOPTFLAGS		= -g  -qfullpath
 # --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000
-OCOMP_FOPTFLAGS		= -O3
+OCOMP_COPTFLAGS		= -O2  -qmaxmem=4000 -qspill=3000
+OCOMP_FOPTFLAGS		= -O2
 ###############################################################################
 
 PARCH			= alpha

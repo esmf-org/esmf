@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.1 2004/12/08 21:36:17 jedwards Exp $
+#  $Id: build_rules.mk,v 1.2 2004/12/17 21:01:39 nscollins Exp $
 #
 #  
 #
@@ -72,8 +72,8 @@ COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
 COM_MAXMEM_FLAG        = -qmaxmem=4000
 COM_NOWARN_FLAG        = -w
 COM_SPILL_FLAG         = -qspill=3000
-COM_OPT_FLAG           = -O3
-COM_ALL_OPT_FLAGS      = -O3 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
+COM_OPT_FLAG           = -O2
+COM_ALL_OPT_FLAGS      = -O2 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
 COM_PLAIN_FLAG         =
 
 RESTRICTED_POINTERS	= -qkeyword=restrict

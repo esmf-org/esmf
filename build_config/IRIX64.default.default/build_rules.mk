@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2004/11/02 21:43:31 nscollins Exp $
+# $Id: build_rules.mk,v 1.16 2004/12/17 21:01:39 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -178,9 +178,9 @@ G_COPTFLAGS	   = -g
 G_FOPTFLAGS	   = -g 
 # ----------------------------- BOPT - O options -----------------------------
 #O_COPTFLAGS	   = -Ofast=ip27
-O_COPTFLAGS	   = -O3
+O_COPTFLAGS	   = -O2
 #O_FOPTFLAGS	   = -Ofast=ip27 -IPA:cprop=OFF -OPT:IEEE_arithmetic=1
-O_FOPTFLAGS	   = -O3
+O_FOPTFLAGS	   = -O2
 # ########################## Fortran compiler ##############################
 #
 F_FREECPP       = -freeform -cpp
@@ -197,14 +197,14 @@ CXX_SYS_LIB	   = -lfpe -lcomplex -lfortran -lftn -lfastm -lmalloc
 GCXX_COPTFLAGS	   = -g
 GCXX_FOPTFLAGS	   = -g
 # ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   = -O3 -OPT:Olimit=6500
-OCXX_FOPTFLAGS	   = -O3
+OCXX_COPTFLAGS	   = -O2 -OPT:Olimit=6500
+OCXX_FOPTFLAGS	   = -O2
 # -------------------------- BOPT - g_complex options ------------------------
 GCOMP_COPTFLAGS	   = -g 
 GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS	   = -O3 -OPT:Olimit=6500
-OCOMP_FOPTFLAGS	   = -O3
+OCOMP_COPTFLAGS	   = -O2 -OPT:Olimit=6500
+OCOMP_FOPTFLAGS	   = -O2
 ###############################################################################
 
 PARCH		   = IRIX
