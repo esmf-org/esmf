@@ -1,19 +1,48 @@
-% $Id: Regrid_background.tex,v 1.1 2002/03/14 05:11:12 cnh Exp $
+% $Id: Regrid_background.tex,v 1.2 2002/03/16 22:20:47 pwjones Exp $
 
 \section{Background}
 
-<Desciption of this class, module or utility set.>
+Many applications in Earth system modeling require
+communicating fields between different grids.  Such
+cases occur when coupling two models that utilize
+different grids (eg coupling atmosphere and ocean
+components of a climate model) or when a single model
+utilizes more than one grid (eg nested grids or multi-grid).
+Fields must then be interpolated or remapped
+from one grid to another.  We will refer to this process
+as {\em regridding}. Many different methods
+for performing regriddings are required.
+Regridding heat or water fluxes between models requires
+fluxes to be regridded in a way that conserves
+the total energy or water flux in the model.  In other
+cases, it is more important that higher-order
+regridding methods be used to prevent discontinuities
+in the interpolated fields or their gradients.
+
+In addition to moving fields between grids,
+models require moving ungridded data (eg observations)
+to and from model grids.  Transforming fields
+from physical space to spectral space is also
+a frequent operation.
+
+The ESMF Regridding facility (Regrid) will
+supply necessary functions and data structures for
+{\em quality} implementations of {\em bespoken} regridding
+operations.  Appropriate functions for all supported
+ESMF grids will be supplied.
 
 \subsection{Location}
 
-<Describe whether this software is in the infrastructure or superstructure,
-and other software modules that it interacts with.>
+The regridding and interpolation is part of the ESMF
+Infrastructure.  It will use information from Physical
+Grids (PhysGrid) to compute regridding information and
+use Distributed Grid (DistGrid) for performing
+data-motion related to regridding.  It will (presumably)
+be used by couplers(?) and fields (?).
 
 \subsection{Scope}
 
-<Discussion of scope and restrictions.>
-
-
-
-
+ESMF Regrid is meant to be used for mapping data
+between ESMF grids.  It is not meant to be a data
+assimilation system.
 
