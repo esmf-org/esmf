@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.86.2.3 2005/03/08 04:22:23 theurich Exp $
+#  $Id: common.mk,v 1.86.2.4 2005/03/08 16:29:57 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -108,14 +108,6 @@ endif
 #  ESMF_COMM set in site files.
 #
 
-# According to the above comment this is not the right place, but it's 
-# a quick fix for now... For how things are right now this will _not_ work
-# for those cases where the platform specific build_rules set ESMF_COMM to
-# mpiuni!
-ifeq ($(ESMF_COMM),mpiuni)
-CPPFLAGS       += -DESMF_MPIUNI
-endif
-
 # default compiler flag is optimized.
 ifndef ESMF_BOPT
 export ESMF_BOPT = O
@@ -132,7 +124,12 @@ include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/
 
 #-------------------------------------------------------------------------------
 
-
+#
+# Now the ESMF_COMM variable is valid and can be used
+ifeq ($(ESMF_COMM),mpiuni)
+CPPFLAGS       += -DESMF_MPIUNI
+endif
+#
 
 #-------------------------------------------------------------------------------
 #  Common variables
