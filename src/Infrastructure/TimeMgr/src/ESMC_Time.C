@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.50 2004/01/26 21:29:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.51 2004/01/27 20:53:09 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -239,7 +239,10 @@
       ESMF_KIND_I4 *sD,           // out - fractional seconds denominator
       ESMC_Calendar *calendar,    // out - associated calendar
       int           *timeZone,    // out - timezone (hours offset from UTC)
-      char          *timeString,  // out - ISO 8601 format YYYY-MM-DDThh:mm:ss
+      int            timeStringLen,     // in  - F90 time string size
+      int           *tempTimeStringLen, // out - temp F90 time string size
+      char          *tempTimeString,    // out - ISO 8601 format
+                                        //       YYYY-MM-DDThh:mm:ss
       int           *dayOfWeek,   // out - day of the week (Mon = 1, Sun = 7)
       ESMC_Time     *midMonth,    // out - middle of the month time instant
       ESMF_KIND_I4 *dayOfYear,    // out - day of the year as an integer
@@ -288,9 +291,10 @@
     if (timeZone != ESMC_NULL_POINTER) {
       *timeZone = this->timeZone;
     }
-    if (timeString != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetString(timeString) == ESMF_FAILURE)
+    if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
+      if (ESMC_TimeGetString(tempTimeString) == ESMF_FAILURE)
         return(ESMF_FAILURE);
+      *tempTimeStringLen = strlen(tempTimeString);
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
       if (ESMC_TimeGetDayOfWeek(dayOfWeek) == ESMF_FAILURE)

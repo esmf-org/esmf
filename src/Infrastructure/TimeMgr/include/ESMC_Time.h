@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.31 2004/01/26 21:28:20 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.32 2004/01/27 20:53:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,8 @@
                      ESMF_KIND_R8 *ns_r8=0,
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                      ESMC_Calendar *calendar=0, int *timeZone=0,
-                     char *timeString=0, int *dayOfWeek=0,
+                     int timeStringLen=0, int *tempTimeStringLen=0,
+                     char *tempTimeString=0, int *dayOfWeek=0,
                      ESMC_Time *midMonth=0,
                      ESMF_KIND_I4 *dayOfYear=0,
                      ESMF_KIND_R8 *dayOfYear_r8=0,

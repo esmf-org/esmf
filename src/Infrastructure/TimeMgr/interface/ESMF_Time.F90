@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.59 2004/01/26 21:28:35 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.60 2004/01/27 20:53:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.59 2004/01/26 21:28:35 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.60 2004/01/27 20:53:09 eschwab Exp $'
 
 !==============================================================================
 !
@@ -813,14 +813,33 @@
 ! !REQUIREMENTS:
 !     TMG2.1, TMG2.5.1, TMG2.5.6
 
+      ! temp time string for C++ to fill
+      character (len=ESMF_MAXSTR) :: tempTimeString
+
+      ! initialize time string lengths to zero for non-existent time string
+      integer :: timeStringLen = 0
+      integer :: tempTimeStringLen = 0
+
+      ! if used, get length of given timeString for C++ validation
+      if (present(timeString)) then
+        timeStringLen = len(timeString)
+      end if
+
       ! use optional args for any subset
       call c_ESMC_TimeGet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, calendar, timeZone, timeString, dayOfWeek, &
+                          sN, sD, calendar, timeZone, timeStringLen, &
+                          tempTimeStringLen, tempTimeString, dayOfWeek, &
                           MidMonth, dayOfYear, dayOfYear_r8, &
                           dayOfYear_intvl, rc)
-    
+
+      ! copy temp time string back to given time string to restore native F90
+      !   storage style
+      if (present(timeString)) then
+        timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+
       end subroutine ESMF_TimeGet
 
 !------------------------------------------------------------------------------
