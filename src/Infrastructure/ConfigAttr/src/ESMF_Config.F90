@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.25 2003/05/07 15:22:46 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.26 2003/05/07 19:26:52 lzaslavsky Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -84,9 +84,13 @@
 !    for a complete description of parameters for each routine/function}:
 !
 ! \begin{verbatim}
-!       cf = ESMF_ConfigCreate (layout, rc)
-!       call ESMF_ConfigLoadFile (cf, fname, rc = rc)
+!       cf = ESMF_ConfigCreate ( rc)
+!       call ESMF_ConfigLoadFile (cf, fname, layout, rc = rc)
 ! \end{verbatim}
+!
+!    Parameter {\tt layout} is optional. If it is passed, multiprocessor
+!    performance is optimized. Otherwise, resource file {\tt fname} is
+!    read by each processor.
 !
 !    The next step is to select the label (record) of interest, say
 !
@@ -149,11 +153,11 @@
 ! {\em Common Arguments:}
 !
 ! \begin{verbatim}
-! character*(*)      fname       file name
-! integer            rc        error return code (0 is OK)
-! character*(*)      label       label (key) to locate record
-! character*(*)      word        blank delimited string
-! character*(*)      string      a sequence of characters
+! character*(*) ::    fname       file name
+! integer       ::    rc          error return code (0 is OK)
+! character*(*) ::    label       label (key) to locate record
+! character*(*) ::    word        blank delimited string
+! character*(*) ::    string      a sequence of characters
 ! \end{verbatim}
 !
 ! See the Prologues in the next section for additional details.
@@ -174,14 +178,13 @@
 !
 ! !REVISION HISTORY:
 !
-!       2apr2003 Leonid Zaslavsky created from m_inpak90.F90
-
+!       2apr2003 Leonid Zaslavsky Created from m_inpak90.F90
+!       1may2003 Leonid Zaslavsky Corrected version 
 ! !USES:
 
       use ESMF_DELayoutMod
       use ESMF_LogErrMod
-!!!      use m_ioutil_Config 
-!!!      use m_stdio_Config
+
       implicit none
       private
 !------------------------------------------------------------------------------
@@ -196,17 +199,17 @@
        public :: ESMF_ConfigGetFloats  ! returns float array  
        public :: ESMF_ConfigGetInt     ! returns next integer number (function)
        public :: ESMF_ConfigGetInts    ! returns integer array
-       public :: ESMF_ConfigGetChar  ! returns next char or char array
-       public :: ESMF_ConfigGetString     ! retutns next string (word)
+       public :: ESMF_ConfigGetChar    ! returns next char or char array
+       public :: ESMF_ConfigGetString  ! retutns next string (word)
        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
-!                                  !counting disregarding type (function)
+!                                  ! counting disregarding type (function)
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !------------------------------------------------------------------------------
-       public :: ESMF_Config     ! WHY DO WE NEED IT PUBLIC?
-!EOPI
+       public :: ESMF_Config
+!EOP
 
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
@@ -242,14 +245,13 @@
 
 	integer,parameter :: MX_LU=255
 
-!-----------------------------------------------------------------------
 !------------------------------------------------------------------------------
 ! !OPEQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_Config
           sequence
           private              
-          character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file?
+          character(len=NBUF_MAX),pointer :: buffer    ! hold the whole file
           character(len=LSZ),     pointer :: this_line ! the current line
           integer :: nbuf                              ! actual size of buffer 
           integer :: next_line                         ! index_ for next line 
@@ -257,7 +259,7 @@
        end type ESMF_Config
 
      contains
-!-----------------------------------------------------------------------
+!
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
