@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.19 2003/02/12 14:57:14 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.20 2003/02/12 17:55:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,8 @@
                 ESMF_STATEFIELD = ESMF_StateObjectType(2), &
                 ESMF_STATEARRAY = ESMF_StateObjectType(3), &
                 ESMF_STATEDATANAME = ESMF_StateObjectType(4), &
-                ESMF_STATEOBJTYPEUNKNOWN = ESMF_StateObjectType(5)
+                ESMF_STATEINDIRECT = ESMF_StateObjectType(5), &
+                ESMF_STATEOBJTYPEUNKNOWN = ESMF_StateObjectType(6)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataNeeded
@@ -242,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.19 2003/02/12 14:57:14 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.20 2003/02/12 17:55:50 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1062,7 +1063,10 @@ end function
       integer :: status=ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
       type(ESMF_StateData), pointer :: nextitem
-      integer :: i, startbase
+      type(ESMF_Field) :: field
+      integer, pointer, dimension(:) :: bindex
+      integer :: i, j, startbase
+      integer :: count, fcount
 
       ! Initialize return code.  Assume failure until success assured.
       if(present(rc)) then
@@ -1084,6 +1088,13 @@ end function
 
       ! There is enough space now to add new bundles to the list.
            
+      allocate(bindex(bcount), stat=status)
+      if (status .ne. 0) then    ! F90 return code
+        print *, "Error: adding bundles to a state"
+        return
+      endif
+
+      fcount = 0
       do i=1, bcount
         nextitem => stypep%datalist(startbase + i)
         nextitem%otype = ESMF_STATEBUNDLE
@@ -1103,19 +1114,77 @@ end function
         endif
         nextitem%datap%bp = bundles(i)
 
-        !integer :: indirect_index
+        bindex(i) = startbase+i
         nextitem%needed = ESMF_STATEDATANOTNEEDED
         nextitem%ready = ESMF_STATEDATANOTREADY
         nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+
+        ! get a running count of all fields in all bundles
+        call ESMF_BundleGetFieldCount(bundles(i), count, status)
+        fcount = fcount + count
+
       enddo
   
-      ! TODO: make indirect entries for fields inside the bundles?
-
       stypep%datacount = startbase + bcount
 
+      ! TODO: make indirect entries for fields inside the bundles.
+      if (fcount .gt. 0) then
+  
+        call ESMF_StateTypeExtendList(stypep, fcount, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddBundleList: datalist 2nd allocate"
+          return
+        endif
+
+        startbase = stypep%datacount
+        do i=1, bcount
+
+          ! Add an entry for each field in a bundle
+          call ESMF_BundleGetFieldCount(bundles(i), count, status)
+
+          ! Skip empty fields
+          if (count .le. 0) cycle
+
+          ! For each field in the bundle...
+          do j=1, count
+  
+            nextitem => stypep%datalist(startbase + i)
+            nextitem%otype = ESMF_STATEINDIRECT
+    
+            ! get next field and query name
+            call ESMF_BundleGetFields(bundles(i), i, field, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+              return
+            endif
+
+            allocate(nextitem%namep, stat=status)
+            if (status .ne. 0) then    ! F90 return code
+              print *, "Error: adding field pointers to a state"
+              return
+            endif
+            call ESMF_FieldGetName(field, nextitem%namep)
+    
+            nullify(nextitem%datap)
+    
+            nextitem%indirect_index = bindex(i)
+
+            nextitem%needed = ESMF_STATEDATANOTNEEDED
+            nextitem%ready = ESMF_STATEDATANOTREADY
+            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+          enddo
+  
+        enddo
+
+      endif
+
+      deallocate(bindex, stat=status)
+      if (status .ne. 0) then    ! F90 return code
+        print *, "Error: adding bundles to a state"
+        return
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
-
 
       end subroutine ESMF_StateTypeAddBundleList
 
@@ -1627,7 +1696,7 @@ end function
 ! !IROUTINE: ESMF_StateTypeFindData - internal routine to find data item by name
 !
 ! !INTERFACE:
-      function ESMF_StateTypeFindData(stypep, dataname, dataitem, rc)
+      function ESMF_StateTypeFindData(stypep, dataname, dataitem, index, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_StateTypeFindData
@@ -1635,7 +1704,8 @@ end function
 ! !ARGUMENTS:
       type(ESMF_StateType), intent(in) :: stypep
       character (len=*), intent(in) :: dataname
-      type(ESMF_StateData), pointer :: dataitem
+      type(ESMF_StateData), pointer, optional :: dataitem
+      integer, intent(out), optional :: index
       integer, intent(out), optional :: rc             
 
 ! !DESCRIPTION:
@@ -1648,9 +1718,11 @@ end function
 !    {\tt StateType} to query.
 !   \item[dataname]
 !    Name of the data item to query.
-!   \item[dataitem]
+!   \item[{[dataitem]}]
 !    Pointer to the corresponding {\tt ESMF\_StateData} item if one is
 !    found with the right name.
+!   \item[{[index]}]
+!    Index number in datalist where this name was found.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !  \end{description}
@@ -1686,8 +1758,8 @@ end function
   
       if (itemfound) then
         ESMF_StateTypeFindData = .TRUE.
-        dataitem => stypep%datalist(itemindex) 
-
+        if (present(dataitem)) dataitem => stypep%datalist(itemindex) 
+        if (present(index)) index = itemindex
       else   ! item not found
         ESMF_StateTypeFindData = .FALSE.
         nullify(dataitem)
@@ -1743,7 +1815,7 @@ end function
       ESMF_StateIsNeeded = .FALSE.
       if (present(rc)) rc=ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
       if (.not. exists) then
           return
       endif
@@ -1839,7 +1911,7 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, dataitem, rc=status)
       if (.not. exists) then
           return
       endif
@@ -1890,7 +1962,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, status)
+      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
           return
       endif
@@ -1945,7 +2017,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, status)
+      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
           return
       endif
@@ -2000,7 +2072,7 @@ end function
       if (present(rc)) rc=ESMF_FAILURE
       ! TODO: do we need an empty array to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, status)
+      exists = ESMF_StateTypeFindData(state%statep, name, dataitem, rc=status)
       if (.not. exists) then
           return
       endif
