@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.10 2004/01/26 17:42:11 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.11 2004/01/28 20:26:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -726,11 +726,10 @@ end function
       endif
 
 
-      ! Set the Bundle name.  Construct a default name if one is not given.
-      call ESMF_SetName(btype%base, name, "Bundles", status)
-
+      ! Initialize the base object
+      call ESMF_BaseCreate(btype%base, "Bundle", name, 0, status)
       if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleConstructNoFields: SetName"
+        print *, "ERROR in ESMF_BundleConstructNoFields: BaseCreate"
         return
       endif
 
@@ -780,8 +779,10 @@ end function
 !EOPI
 
       logical :: rcpresent                        ! Return code present
+      integer :: status
 
       ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
       rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
@@ -789,13 +790,14 @@ end function
       endif
 
      btype%bundlestatus = ESMF_STATE_INVALID
+     call ESMF_BaseDestroy(btype%base, status)
 
      !
      ! TODO: code goes here
      !
 
 
-     if (rcpresent) rc = ESMF_SUCCESS
+     if (rcpresent) rc = status
 
 
      end subroutine ESMF_BundleDestruct
@@ -2698,22 +2700,22 @@ end function
 !  TODO: code goes here
 !
       character(len=ESMF_MAXSTR) :: bname, fname
-      type(ESMF_BundleType), pointer :: btypep
+      type(ESMF_BundleType), pointer :: btype
       type(ESMF_Field) :: field
       integer :: i
       integer :: status
 
       print *, "Bundle print:"
 
-      btypep => bundle%btypep
-      call ESMF_GetName(btypep%base, bname, status)
+      btype => bundle%btypep
+      call ESMF_GetName(btype%base, bname, status)
       print *, "  Bundle name = ", trim(bname)
     
-      print *, "  Field count = ", btypep%field_count
+      print *, "  Field count = ", btype%field_count
     
-      do i = 1, btypep%field_count
+      do i = 1, btype%field_count
   
-       call ESMF_FieldGetName(btypep%flist(i), fname, status)
+       call ESMF_FieldGetName(btype%flist(i), fname, status)
        if (status .eq. ESMF_FAILURE) then
          print *, "ERROR in ESMF_BundlePrint: Error getting Field name from Field ", i
          return
