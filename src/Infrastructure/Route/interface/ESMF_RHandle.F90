@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.15 2004/01/26 17:42:12 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.16 2004/01/28 21:46:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-#include "ESMF_Route.h"
+!!#include "ESMF_Route.h"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_RHandleMod - One line general statement about this class
@@ -128,7 +128,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.15 2004/01/26 17:42:12 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.16 2004/01/28 21:46:49 nscollins Exp $'
 
 !==============================================================================
 

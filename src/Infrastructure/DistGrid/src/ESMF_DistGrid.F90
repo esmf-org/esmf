@@ -20,8 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF_DistGrid.h"
-#include "ESMF_Macros.inc"
+!!#include "ESMF_DistGrid.h"   !! this seems unneeded
+#include "ESMF.h"
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_DistGridMod - contains Grid decompostion methods
@@ -41,7 +41,6 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_DELayoutMod
-      use ESMF_LocalArrayMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -213,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.89 2004/01/28 20:31:34 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.90 2004/01/28 21:46:48 nscollins Exp $'
 
 !==============================================================================
 !

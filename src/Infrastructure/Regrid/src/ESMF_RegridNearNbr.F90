@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.9 2004/01/07 22:35:23 jwolfe Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.10 2004/01/28 21:46:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_Macros.inc>
+#include "ESMF.h"
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_RegridNearNbrMod - Nearest-neighbor distance-weighted regrid
@@ -35,10 +35,11 @@
       use ESMF_BaseMod      ! ESMF base   class
       use ESMF_ArrayBaseMod ! ESMF array  class
       use ESMF_ArrayExpandMod ! ESMF array  class
-      use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_DistGridMod  ! ESMF distributed grid class
+      use ESMF_PhysGridMod  ! ESMF physical grid class
       use ESMF_GridMod      ! ESMF grid   class
       use ESMF_FieldMod     ! ESMF field  class
+      use ESMF_BundleMod
       use ESMF_RegridTypesMod ! ESMF regrid data structures
       implicit none
 
@@ -57,7 +58,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.9 2004/01/07 22:35:23 jwolfe Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.10 2004/01/28 21:46:49 nscollins Exp $'
 
 !==============================================================================
 !

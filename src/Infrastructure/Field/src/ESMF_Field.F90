@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.99 2004/01/28 20:30:08 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.100 2004/01/28 21:46:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,8 +51,6 @@
       use ESMF_GridMod
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
-      use ESMF_RouteMod
-      use ESMF_RHandleMod
       use ESMF_ArrayCommMod
       implicit none
 
@@ -119,7 +117,7 @@
       !private
        
         type (ESMF_Base) :: base             ! base class object
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
         type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
         type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
@@ -147,7 +145,7 @@
       type ESMF_Field
       sequence
       !private       
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type (ESMF_FieldType), pointer :: ftypep => NULL()
 #else
         type (ESMF_FieldType), pointer :: ftypep
@@ -216,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.99 2004/01/28 20:30:08 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.100 2004/01/28 21:46:48 nscollins Exp $'
 
 !==============================================================================
 !

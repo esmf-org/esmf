@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.61 2004/01/16 23:48:53 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.62 2004/01/28 21:46:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF_PhysGrid.h"
+!!#include "ESMF_PhysGrid.h"   ! this seems unnecessary
 #include "ESMF.h"
 !==============================================================================
 !BOPI
@@ -36,8 +36,8 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_DataMapMod
       use ESMF_LocalArrayMod
+      use ESMF_DataMapMod
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
       use ESMF_PhysCoordMod
@@ -337,7 +337,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.61 2004/01/16 23:48:53 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.62 2004/01/28 21:46:48 nscollins Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.5 2004/01/28 20:30:54 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.6 2004/01/28 21:46:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF_Grid.h"
+!!#include "ESMF_Grid.h"  ! unneeded
 #include "ESMF.h"
 !==============================================================================
 !BOPI
@@ -28,20 +28,21 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt ESMF\_LogRectGrid} class.  This class
-! provides a unified interface for both {\tt ESMF\_PhysGrid} and {\tt ESMF\_DistGrid}
-! information for model grids.  Functions for defining and computing {\tt ESMF\_Grid}
+! The code in this file implements the {\tt ESMF\_LogRectGrid} class.  
+! This class provides a unified interface for both {\tt ESMF\_PhysGrid} and 
+! {\tt ESMF\_DistGrid} information for model grids.  
+! Functions for defining and computing {\tt ESMF\_Grid}
 ! information are available through this class.
 !
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod        ! ESMF base class
-      use ESMF_LocalArrayMod  ! ESMF local array class
-      use ESMF_ArrayBaseMod
-      use ESMF_ArrayExpandMod
       use ESMF_IOMod          ! ESMF I/O class
+      use ESMF_LocalArrayMod  ! ESMF local array class
       use ESMF_DataMapMod     ! ESMF data map class
       use ESMF_DELayoutMod    ! ESMF layout class
+      use ESMF_ArrayBaseMod
+      use ESMF_ArrayExpandMod
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysCoordMod   ! ESMF physical coord class
       use ESMF_PhysGridMod    ! ESMF physical grid class
@@ -95,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.5 2004/01/28 20:30:54 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.6 2004/01/28 21:46:48 nscollins Exp $'
 
 !==============================================================================
 !

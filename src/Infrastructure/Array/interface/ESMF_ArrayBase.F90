@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.26 2004/01/28 20:33:10 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.27 2004/01/28 21:46:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,8 +43,6 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_LocalArrayMod
-      use ESMF_DataMapMod
-      use ESMF_DELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -71,7 +69,7 @@
       sequence
       private
         ! same size as data array
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type (ESMF_LocalArray), pointer :: maskvals => NULL()
 #else
         type (ESMF_LocalArray), pointer :: maskvals 
@@ -88,7 +86,7 @@
       type ESMF_Array
       sequence
         ! opaque pointer to the C++ class data
-#ifndef ESMF_NO_INITIALIZERS
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
         type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
 #else
         type(ESMF_Pointer) :: this
@@ -125,7 +123,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.26 2004/01/28 20:33:10 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.27 2004/01/28 21:46:48 nscollins Exp $'
 !
 !==============================================================================
 !
