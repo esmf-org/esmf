@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-#  $Id: protex,v 1.4 2002/07/25 17:23:23 eschwab Exp $
+#  $Id: protex,v 1.5 2002/10/09 20:40:24 eschwab Exp $
 #
 #BOP
 #
@@ -130,10 +130,6 @@ Arg:
 # --------------------------
   @keys = ( "!INTERFACE:",
             "!USES:",
-            "!SUPERCLASSES:",
-            "!AGGREGATE CLASSES:",
-            "!ASSOCIATE CLASSES:",
-            "!FRIEND CLASSES:",
             "!PUBLIC TYPES:",
             "!PUBLIC MEMBER FUNCTIONS:",
             "!PUBLIC DATA MEMBERS:",
