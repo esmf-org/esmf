@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.127 2005/02/28 16:38:19 nscollins Exp $
+//$Id: ESMC_Route.C,v 1.128 2005/03/01 00:07:09 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.127 2005/02/28 16:38:19 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.128 2005/03/01 00:07:09 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -415,6 +415,7 @@
     int myPET, theirPET;
     int needed;
     bool sendContig, recvContig, madeSendBuf, madeRecvBuf;
+    bool *madeSendBufList, *madeRecvBufList;
     ESMC_XPacket *sendXP, *recvXP;
     ESMC_XPacket **sendXPList, **recvXPList;
     int sendRank, recvRank, maxRank;
@@ -862,6 +863,12 @@
 // -----------------------------------------------------------
 
     if (options & ESMC_ROUTE_OPTION_ASYNC) {
+
+      myPET = vm->vmk_mypet();
+      rc = ct->ESMC_CommTableGetCount(&commCount);
+
+      sendXPCount = 0;
+      recvXPCount = 0;
       if (options & ESMC_ROUTE_OPTION_PACK_PET) {
         ct->ESMC_CommTableGetCount(&sendXPCount);
       }
@@ -869,12 +876,56 @@
         sendRT->ESMC_RTableGetTotalCount(&sendXPCount);
         recvRT->ESMC_RTableGetTotalCount(&recvXPCount); 
       }
-      if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {       // TODO: this is not right
-        sendRT->ESMC_RTableGetTotalCount(&sendXPCount);
-        recvRT->ESMC_RTableGetTotalCount(&recvXPCount); 
+      if (options & ESMC_ROUTE_OPTION_PACK_NOPACK) {
+        maxReps = 0;
+        for (i=0; i<commCount; i++) {
+
+          rc = ct->ESMC_CommTableGetPartner(i, &theirPET, &needed);
+          if (!needed) continue;
+
+          // find number of xpackets to be communicated with this PET
+          rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
+          rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
+
+          // loop over the XPs
+          maxXPCount = MAX(recvXPCount, sendXPCount);
+          for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
+
+            // load up the corresponding send/recv xpackets from the rtables
+            if (ixs < sendXPCount) {
+              rc = sendRT->ESMC_RTableGetEntry(theirPET, ixs, &sendXP);
+              rc = sendXP->ESMC_XPacketGet(&sendRank, &sendOffset,
+                                           &sendContigLength, sendStride,
+                                           sendRepCount);
+            } else {
+              sendXP = NULL;
+              sendRank = ESMF_MAXDIM;
+              ESMC_XPacketGetEmpty(&sendRank, &sendOffset,
+                                   &sendContigLength, sendStride,
+                                   sendRepCount);
+            }
+
+            if (ixr < recvXPCount) {
+              rc = recvRT->ESMC_RTableGetEntry(theirPET, ixr, &recvXP);
+              rc = recvXP->ESMC_XPacketGet(&recvRank, &recvOffset,
+                                           &recvContigLength, recvStride,
+                                           recvRepCount);
+            }
+            sendReps = 1; 
+            for (k=0; k<sendRank-1; k++) {
+                sendReps *= sendRepCount[k];
+            }
+            recvReps = 1; 
+            for (k=0; k<recvRank-1; k++) {
+                recvReps *= recvRepCount[k];
+            }
+            maxReps += MAX(sendReps, recvReps);
+          }          // maxXPCount loop
+        }            // loop over PETs
+        sendXPCount = recvXPCount = maxReps;
       }
-      xpCount = MAX(sendXPCount, recvXPCount);
-  //    xpCount = sendXPCount + recvXPCount;   TODO: is this right??  was there..
+
+      xpCount = MAX(sendXPCount, recvXPCount);             // assumes single sendRecv call
       if ((xpCount < 0) || (xpCount > (1<<24))) {
         sprintf(msgbuf, "computed bad xp counts: %d\n", xpCount);
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
@@ -894,8 +945,11 @@
         recvBufferList = new char*[xpCount];
       }
 
-      myPET = vm->vmk_mypet();
-      rc = ct->ESMC_CommTableGetCount(&commCount);
+      // allocate any necessary arrays for specific options
+      if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+        madeSendBufList = new bool[xpCount];
+        madeRecvBufList = new bool[xpCount];
+      }
 
 // -----------------------------------------------------------------------
 // For asynchronous communications we have separate loops to send and recv
@@ -920,7 +974,7 @@
         rc = ct->ESMC_CommTableGetPartner(i, &theirPET, &needed);
         if (!needed) continue;
 
-        // find total number of xpackets
+        // find number of xpackets to be communicated with this PET
 	rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
 	rc = sendRT->ESMC_RTableGetCount(theirPET, &sendXPCount);
 
@@ -960,6 +1014,7 @@
           // if my PET is both the sender and receiver, there is no need
           // to allocate a separate buffer; just point both at the single
           // send buffer.
+          handle[req] = NULL;
           if (myPET == theirPET) {
             recvBufferList[req] = sendBufferList[req];
           } else {
@@ -996,7 +1051,7 @@
           maxXPCount = MAX(recvXPCount, sendXPCount);
           for (m=0, ixs=0, ixr=0; m<maxXPCount; m++, ixs++, ixr++){
 
-            madeSendBuf = madeRecvBuf = false;
+            madeSendBufList[req] = madeRecvBufList[req] = false;
 
             // load up the corresponding send/recv xpackets from the rtables
             if (ixs < sendXPCount) {
@@ -1010,19 +1065,19 @@
               // otherwise create a buffer and pack it if necessary
               if (sendContigLength == sendStride[0]) {
                   sendContig = true;
-                  sendBuffer = (char *)sendAddr+(sendOffset*nbytes); 
+                  sendBufferList[req] = (char *)sendAddr+(sendOffset*nbytes); 
                   sendBufferSize = sendContigLength*sendRepCount[0] * nbytes;
               } else {
                   sendContig = false;
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, VMType, nbytes,
-                                              &sendBuffer, &sendBufferSize);
+                                              &sendBufferList[req], &sendBufferSize);
                   rc = ESMC_XPacketPackBuffer(1, &sendXP, VMType, nbytes,
-                                              sendAddr, sendBuffer);
-                  madeSendBuf = true;
+                                              sendAddr, sendBufferList[req]);
+                  madeSendBufList[req] = true;
               }
 
             } else {  // nothing to more send, but data will be received
-              sendBuffer = NULL;
+              sendBufferList[req] = NULL;
               sendBufferSize = 0;
             }
 
@@ -1038,7 +1093,7 @@
               // and receiver are the same PET.
               if (recvContigLength == recvStride[0]) {
                   recvContig = true;
-                  recvBuffer = (char *)recvAddr+(recvOffset*nbytes); 
+                  recvBufferList[req] = (char *)recvAddr+(recvOffset*nbytes); 
                   recvBufferSize = recvContigLength*recvRepCount[0] * nbytes;
               } else {
                   recvContig = false;
@@ -1047,50 +1102,39 @@
                   // finally need to be.
                   if (myPET != theirPET) {
                       rc = ESMC_XPacketMakeBuffer(1, &recvXP, VMType, nbytes,
-                                                  &recvBuffer, &recvBufferSize);
-                      madeRecvBuf = true;
+                                                  &recvBufferList[req], &recvBufferSize);
+                      madeRecvBufList[req] = true;
                   } else
                       recvBufferSize = sendBufferSize;
               }
 
             } else {   // nothing more to receive, but data will be sent
-              recvBuffer = NULL;
+              recvBufferList[req] = NULL;
               recvBufferSize = 0;
             }
 
             // the case where we are moving data around in the same PET 
+            handle[req] = NULL;
             if (myPET == theirPET) {
               // if the receive buffer is contig, you can move the data directly
               // to where it belongs.  this could be done with memcpy,
               // unpack, or sendrecv.  we're using the latter for now.
               if (recvContig) {
-                vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
-                                 recvBuffer, recvBufferSize, theirPET);
+                vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                                 recvBufferList[req], recvBufferSize, theirPET);
               } else {
                 // otherwise, the send buffer is a copy of what needs to be
                 // unpacked; no data movement is needed before unpacking.
-                recvBuffer = sendBuffer;
+                recvBufferList[req] = sendBufferList[req];
               }
             } else {
               // myPET != theirPET 
               // now move the data 
-              vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
-                               recvBuffer, recvBufferSize, theirPET);
+              vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                               recvBufferList[req], recvBufferSize, theirPET,
+                               &handle[req]);
             }
-           
-
-            // now if the receive buffer is not contig, we still need to
-            //  unpack the receive buffer
-            if ((recvBufferSize > 0) && (!recvContig)) {
-              rc = ESMC_XPacketUnpackBuffer(1, &recvXP, VMType, nbytes,
-                                            recvBuffer, recvAddr);
-            }
- 
-            // free buffers if allocated
-            if (madeSendBuf)
-              delete [] sendBuffer;
-            if (madeRecvBuf)
-              delete [] recvBuffer;
+            req ++;  
 
           }      // XP loop
 	}        // packing branch
@@ -1172,27 +1216,32 @@
             for (k=0; k<maxReps; k++) {
                 if (k < sendReps) {
                   // set up sendbuf 
-                  sendBuffer = (char *)sendAddr+(sendItemPtr*nbytes);
+                  sendBufferList[req] = (char *)sendAddr+(sendItemPtr*nbytes);
                 } else if (k == sendReps) {
-                  sendBuffer = NULL;
+                  sendBufferList[req] = NULL;
                   sendBufferSize = 0;
                 } 
 
                 if (k < recvReps) {
                   // set up recvbuf 
-                  recvBuffer = (char *)recvAddr+(recvItemPtr*nbytes);
+                  recvBufferList[req] = (char *)recvAddr+(recvItemPtr*nbytes);
                 } else if (k == recvReps) {
-                  recvBuffer = NULL;
+                  recvBufferList[req] = NULL;
                   recvBufferSize = 0;
                 } 
 
 
                 // time to exchange data
-                // if myPET == theirPET, sendrecv should use memcpy instead of
-                // calling real communication routines.
-                vm->vmk_sendrecv(sendBuffer, sendBufferSize, theirPET,
-                                 recvBuffer, recvBufferSize, theirPET);
-
+                handle[req] = NULL;
+                if (myPET == theirPET) {
+                  vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                                   recvBufferList[req], recvBufferSize, theirPET);
+                } else {
+                  vm->vmk_sendrecv(sendBufferList[req], sendBufferSize, theirPET,
+                                   recvBufferList[req], recvBufferSize, theirPET,
+                                   &handle[req]);
+                }
+                req ++;
 
                 if (k < sendReps) {
                     sendIndex[0]++;
@@ -1276,13 +1325,14 @@
           rc = ESMC_XPacketUnpackBuffer(recvXPCount, recvXPList, VMType, 
                                         nbytes, recvBufferList[req], recvAddr);
 
+          // delete the individual buffers for this transfer
+          delete [] recvXPList;
+          delete [] sendBufferList[req];
+          if (myPET != theirPET) 
+              delete [] recvBufferList[req];
+
           req++;
 
-          // delete the lists of pointers
-          delete [] recvXPList;
-//          delete [] sendBufferList;
-//          if (myPET != theirPET) 
-//              delete [] recvBufferList;
         }
 
 // -----------------------------------------------------------
@@ -1324,10 +1374,16 @@
            
             // now if the receive buffer is not contig, we still need to
             //  unpack the receive buffer
-            if (!recvContig) {
+            if (!recvContig) {         // up above we have added recvBufferSize > 0
               rc = ESMC_XPacketUnpackBuffer(1, &recvXP, VMType, nbytes,
                                             recvBufferList[req], recvAddr);
             }
+
+            // free buffers if allocated
+            if (madeSendBufList[req])
+              delete [] sendBufferList[req];
+            if (madeRecvBufList[req])
+              delete [] recvBufferList[req];
 
             req++;
  
@@ -1404,16 +1460,21 @@
           }        // XP loop
         }          // packing branch
       }            // communication (PET) loop, variable i
+
+      // if we are not using the local stack buffers, free these. 
+      if (xpCount > STACKLIMIT) {
+          delete [] handle; 
+          delete [] sendBufferList;
+          delete [] recvBufferList;
+      }
+      // free any necessary arrays for specific options
+      if (options & ESMC_ROUTE_OPTION_PACK_XP) {
+        delete [] madeSendBufList;
+        delete [] madeRecvBufList;
+      }
+
     }              // ASYNC branch
 
-
-
-    // if we are not using the local stack buffers, free these. 
-    if (xpCount > STACKLIMIT) {
-        delete [] handle; 
-        delete [] sendBufferList;
-        delete [] recvBufferList;
-    }
 
     //printf("End of Route run on PET %d\n", mypet);
     return rc;
