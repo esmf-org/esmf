@@ -1,4 +1,4 @@
-%  $Id: ESMF_builddetail.tex,v 1.2 2003/08/27 23:09:54 flanigan Exp $
+%  $Id: ESMF_builddetail.tex,v 1.3 2003/08/28 15:57:58 flanigan Exp $
 
 
 \subsection{Make System}
@@ -11,7 +11,7 @@ either for configuring different build options or other reasons.
 
 The ESMF build system is broken into two parts.  The first is the
 series of makefiles located with the source code.  The second is a set
-of makefile fragements files designed to be used by the source code
+of makefile fragments files designed to be used by the source code
 makefiles.  Makefile fragment files are files that contain makefile
 syntax defining build rules and actions, but do not constitute a
 complete build system.
@@ -36,7 +36,7 @@ can also be added to this directory for specific machines where the
 build settings are different from the standards of the architecture.
 One of the files in this directory will be included by the
 build/common.mk file depending the values of the environment variable
-EMSF\_ARCH and ESMF\_SITE.  See below for more details on environment
+ESMF\_ARCH and ESMF\_SITE.  See below for more details on environment
 variables.
 
 \item{{\bf Environment Variables}}
@@ -114,7 +114,7 @@ The top level makefile contains makefile settings specific for the
 source code that it is found in.
 
 Each directory in the source tree contains a Makefile which includes
-the top level makefile.  These local Makefiles include defintions that
+the top level makefile.  These local Makefiles include definitions that
 allow the local files and documents to be built.
 \end{itemize}
 
@@ -144,7 +144,7 @@ fragments follow this naming convention:
 \end{verbatim}
 
 Where ESMF\_ARCH and ESMF\_SITE are environment variables either set by
-the user or given defalut values by the build system. ESMF\_ARCH is the
+the user or given default values by the build system. ESMF\_ARCH is the
 current architecture and will have the value returned by the command
 uname -s.  ESMF\_SITE is the current machine or compiler name. If there
 are no site specific files for a particular architecture, then
@@ -165,14 +165,14 @@ is compiled.  The directives are used to determine among other things,
 the memory requirements of variable types and the system resources
 that are available.
 
-The ESMF build system provides preprossor directives in conf.h files
+The ESMF build system provides preprocessor directives in conf.h files
 that are included in the source code.  The path to the conf.h files is
 
 \begin{verbatim}
     build_config/conf/ESMF_ARCH.ESMF_PREC.ESMF_SITE/conf.h
 \end{verbatim}
 
-Where ESMF\_ARCH, ESMF\_PREC arnd ESMF\_SITE are environment variables 
+Where ESMF\_ARCH, ESMF\_PREC and ESMF\_SITE are environment variables 
 set by the user or given default values be the build system.  Based on 
 the settings of these environment variables, the build system provides
 a path to the correct conf.h file during source code compiles.
