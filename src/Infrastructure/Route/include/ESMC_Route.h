@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.32 2003/09/11 22:54:50 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.33 2003/09/24 22:19:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,9 +84,10 @@
    private:
      // name in base class
      int routeid;           // unique id, used later for cacheing
-     ESMC_DELayout *layout;   // layout which includes all src + dst de's
+     ESMC_DELayout *layout; // layout which includes all src + dst de's
      ESMC_RTable *sendRT;   // send route table
      ESMC_RTable *recvRT;   // receive route table
+     int recvitems;         // if >0, numitems needed in the destination array
      ESMC_CommTable *ct;    // communication scheduling table
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -103,6 +104,9 @@
     int ESMC_RouteSetSend(int dst_de, ESMC_XPacket *xp);
     int ESMC_RouteSetRecv(int src_de, ESMC_XPacket *xp);
     
+    int ESMC_RouteSetRecvItems(int nitems);
+    int ESMC_RouteGetRecvItems(void);
+
     // initialize the communication routines in this route object
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
                        ESMC_AxisIndex *AI_tot, int AI_count, 

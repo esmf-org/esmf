@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.68 2003/09/12 22:41:40 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.69 2003/09/24 22:19:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.68 2003/09/12 22:41:40 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.69 2003/09/24 22:19:20 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -158,6 +158,8 @@ static int maxroutes = 10;
     recvRT = ESMC_RTableCreate(myde, decount, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
+
+    recvitems = 0;
 
     ct = ESMC_CommTableCreate(myde, decount, &rc);
     if (rc == ESMF_FAILURE)
@@ -575,6 +577,64 @@ static int maxroutes = 10;
     return rc;
 
  } // end ESMC_RouteSetRecv
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RouteGetRecvItems - get size of receive buffer in N items
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteGetRecvItems(
+//
+// !RETURN VALUE:
+//    int number of items
+//
+// !ARGUMENTS:
+      void) {
+//
+// !DESCRIPTION:
+//     Normally for a route the receive buffer size is known in advance.
+//     But in some cases it may be useful to store the required receive size
+//     along with the route, in units of items (not bytecounts).  The caller
+//     can query for the size, allocate a receive buffer, and then call 
+//     RouteRun.
+//
+//EOP
+// !REQUIREMENTS:  
+    
+    return recvitems;
+
+ } // end ESMC_RouteGetRecvItems
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RouteSetRecvItems - set size of receive buffer in N items
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteSetRecvItems(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int nitems) {      // in - number of items
+//
+// !DESCRIPTION:
+//     Normally for a route the receive buffer size is known in advance.
+//     But in some cases it may be useful to store the required receive size
+//     along with the route, in units of items (not bytecounts).  The caller
+//     can query for the size, allocate a receive buffer, and then call 
+//     RouteRun.
+//
+//EOP
+// !REQUIREMENTS:  
+    
+    int rc;
+
+    this->recvitems = nitems;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RouteSetRecvItems
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1552,6 +1612,7 @@ static int maxroutes = 10;
     rc = sendRT->ESMC_RTablePrint(options);
     printf(" Recv table:\n");
     rc = recvRT->ESMC_RTablePrint(options);
+    printf(" Recv items: %d\n", recvitems);
     printf(" Comm table:\n");
     rc = ct->ESMC_CommTablePrint(options);
 

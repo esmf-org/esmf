@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.34 2003/09/12 22:40:44 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.35 2003/09/24 22:19:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.34 2003/09/12 22:40:44 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.35 2003/09/24 22:19:20 nscollins Exp $'
 
 !==============================================================================
 !
@@ -301,6 +301,122 @@
 
         end subroutine ESMF_RouteGet
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RouteSetRecvItems - Set size of recv buf in #items
+
+! !INTERFACE:
+      subroutine ESMF_RouteSetRecvItems(Route, nitems, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: nitems
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set the required size of the receive buffer for a Route in
+!     number of items (not in bytes).  In general a receive buffer is
+!     already allocated, but if not, the caller can first query the route
+!     for the size of the receive buffer, allocate it, and then call
+!     {\tt RouteRun} to move the data.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be modified.
+!     \item[nitems]
+!          Size of the receive buffer for this route, in number of items.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteSetRecvItems(route, nitems, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Set error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteSetRecvItems
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RouteGetRecvItems - Get size of recv buf in #items
+
+! !INTERFACE:
+      subroutine ESMF_RouteGetRecvItems(Route, nitems, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(out) :: nitems
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get the required size of the receive buffer for a Route in
+!     number of items (not in bytes).  In general a receive buffer is
+!     already allocated, but if not, the caller can first query the route
+!     for the size of the receive buffer, allocate it, and then call
+!     {\tt RouteRun} to move the data.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be modified.
+!     \item[nitems]
+!          Size of the receive buffer for this route, in number of items.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteGetRecvItems(route, nitems, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Get error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteGetRecvItems
 
 !------------------------------------------------------------------------------
 !BOP
