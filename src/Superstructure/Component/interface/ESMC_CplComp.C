@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.C,v 1.1 2003/09/23 15:19:26 nscollins Exp $
+// $Id: ESMC_CplComp.C,v 1.2 2004/03/18 21:49:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_CplComp.C,v 1.1 2003/09/23 15:19:26 nscollins Exp $";
+           "$Id: ESMC_CplComp.C,v 1.2 2004/03/18 21:49:29 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -70,8 +70,8 @@
 // !ARGUMENTS:
       char *name,
       ESMC_DELayout *layout,
-      enum ESMC_ModelType mtype,
-      char *configfile,
+      enum ESMC_GridCompType mtype,
+      char *configFile,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -87,8 +87,8 @@
     ESMC_CplComp *comp;
 
     comp = new ESMC_CplComp;
-    FTN(f_esmf_cplcompcreate)(comp, name, layout, NULL, configfile, 
-                             rc, strlen(name), strlen(configfile));
+    FTN(f_esmf_cplcompcreate)(comp, name, layout, NULL, configFile, 
+                             rc, strlen(name), strlen(configFile));
 
     return comp;
 
@@ -137,8 +137,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
       int phase)  {              // in: if > 0, which phase of init to invoke
 //
@@ -149,7 +149,7 @@
 
     int rc;
 
-    FTN(f_esmf_cplcompinitialize)(this, importstate, exportstate, clock, 
+    FTN(f_esmf_cplcompinitialize)(this, importState, exportState, clock, 
                                    &phase, &rc);
 
     return rc;
@@ -167,8 +167,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
       int phase)  {              // in: if > 0, which phase of run to invoke
 //
@@ -179,7 +179,7 @@
 
     int rc;
 
-    FTN(f_esmf_cplcomprun)(this, importstate, exportstate, clock, &phase, &rc);
+    FTN(f_esmf_cplcomprun)(this, importState, exportState, clock, &phase, &rc);
 
     return rc;
 
@@ -196,8 +196,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
       int phase)  {              // in: if > 0, which phase of finalize to invoke
 //
@@ -208,7 +208,7 @@
 
     int rc;
 
-    FTN(f_esmf_cplcompfinalize)(this, importstate, exportstate, clock, 
+    FTN(f_esmf_cplcompfinalize)(this, importState, exportState, clock, 
                                  &phase, &rc);
 
     return rc;

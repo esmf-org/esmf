@@ -1,4 +1,4 @@
-! $Id: ESMF_UserGComp.F90,v 1.4 2003/10/01 22:17:43 nscollins Exp $
+! $Id: ESMF_UserGComp.F90,v 1.5 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Test code which supplies a user-written component.
 
@@ -54,10 +54,10 @@
     end subroutine User_SetServices
 
 
-    subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
+    subroutine my_init(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importstate
-      type(ESMF_State) :: exportstate
+      type(ESMF_State) :: importState
+      type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
@@ -66,10 +66,10 @@
     end subroutine my_init
 
 
-    subroutine my_run(gcomp, importstate, exportstate, externalclock, rc)
+    subroutine my_run(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importstate
-      type(ESMF_State) :: exportstate
+      type(ESMF_State) :: importState
+      type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
       integer :: rc
      
@@ -78,10 +78,10 @@
     end subroutine my_run
 
 
-    subroutine my_final(gcomp, importstate, exportstate, externalclock, rc)
+    subroutine my_final(gcomp, importState, exportState, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importstate
-      type(ESMF_State) :: exportstate
+      type(ESMF_State) :: importState
+      type(ESMF_State) :: exportState
       type(ESMF_Clock) :: externalclock
       integer :: rc
      

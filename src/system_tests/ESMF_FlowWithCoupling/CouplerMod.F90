@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.5 2004/03/08 16:03:26 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.6 2004/03/18 21:49:30 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -58,9 +58,9 @@
 !   !   Initialization routine.
  
     
-  subroutine coupler_init(comp, importstate, exportstate, clock, rc)
+  subroutine coupler_init(comp, importState, exportState, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -75,21 +75,21 @@
       ! them as template for precomputing the data transfer pattern needed
       ! for redistribution during the run phase.
 
-      call ESMF_StateGetField(importstate, "SIE", srcfield, rc=rc)
-      call ESMF_StateGetField(exportstate, "SIE", dstfield, rc=rc)
+      call ESMF_StateGetField(importState, "SIE", srcfield, rc=rc)
+      call ESMF_StateGetField(exportState, "SIE", dstfield, rc=rc)
      
       ! Get layout from coupler component
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
 
       ! Now see which way we're going so we set the correct fields needed
       ! and compute the right routehandle
-      call ESMF_StateGetName(importstate, statename, rc)
+      call ESMF_StateGetName(importState, statename, rc)
       if (trim(statename) .eq. "FlowSolver Feedback") then
 
-        call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
 
         ! Precompute and return a routehandle which identifies this operation
         call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
@@ -99,10 +99,10 @@
 
       if (trim(statename) .eq. "Injection Feedback") then
 
-        call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
 
         ! Precompute and return a routehandle which identifies this operation
         call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
@@ -121,9 +121,9 @@
 !   !  The Run routine where data is coupled.
 !   !
  
-  subroutine coupler_run(comp, importstate, exportstate, clock, rc)
+  subroutine coupler_run(comp, importState, exportState, clock, rc)
       type(ESMF_CplComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -155,7 +155,7 @@
       ! since the transformations are symmetric.  But if we cared, here is
       ! one way of telling.
 
-      call ESMF_StateGetName(importstate, statename, rc)
+      call ESMF_StateGetName(importState, statename, rc)
       if (trim(statename) .eq. "Injection Feedback") then
           ! Injector to FlowSolver
           injecttoflow = .TRUE.
@@ -174,14 +174,14 @@
       do i=1, datacount
 
          ! check isneeded flag here
-         if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+         if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
              !print *, "skipping field ", trim(datanames(i)), " not needed"
              cycle
          endif
 
          !print *, "processing field ", trim(datanames(i)), " as needed"
-         call ESMF_StateGetField(importstate, datanames(i), srcfield, rc=status)
-         call ESMF_StateGetField(exportstate, datanames(i), dstfield, rc=status)
+         call ESMF_StateGetField(importState, datanames(i), srcfield, rc=status)
+         call ESMF_StateGetField(exportState, datanames(i), dstfield, rc=status)
 
          ! These are fields on different layouts - call Redist to rearrange
          !  the data using the Comm routines.  The handle identifies which
@@ -208,9 +208,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine coupler_final(comp, importstate, exportstate, clock, rc)
+    subroutine coupler_final(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer, intent(out) :: rc
 

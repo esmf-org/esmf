@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.13 2004/03/18 18:40:23 nscollins Exp $
+! $Id: user_model1.F90,v 1.14 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -82,9 +82,9 @@
 !   !   Initialization routine.
  
     
-    subroutine user_init(comp, importstate, exportstate, clock, rc)
+    subroutine user_init(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
@@ -151,8 +151,8 @@
         ! Set initial data values over whole array to our de id
         idata = real(de_id)
 
-        call ESMF_StateAddData(exportstate, humidity, rc)
-     !   call ESMF_StatePrint(exportstate, rc=rc)
+        call ESMF_StateAddData(exportState, humidity, rc)
+     !   call ESMF_StatePrint(exportState, rc=rc)
 
         print *, de_id, "User Comp 1 Init returning"
    
@@ -165,9 +165,9 @@
 !   !  The Run routine where data is computed.
 !   !
  
-    subroutine user_run(comp, importstate, exportstate, clock, rc)
+    subroutine user_run(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
@@ -185,10 +185,10 @@
 
         print *, "User Comp Run starting"
 
-        !!if (present(importstate)) print *, "importstate present"
-        !!if (.not.present(importstate)) print *, "importstate *not* present"
-        !!if (present(exportstate)) print *, "exportstate present"
-        !!if (.not.present(exportstate)) print *, "exportstate *not* present"
+        !!if (present(importState)) print *, "importState present"
+        !!if (.not.present(importState)) print *, "importState *not* present"
+        !!if (present(exportState)) print *, "exportState present"
+        !!if (.not.present(exportState)) print *, "exportState *not* present"
         !!if (present(clock)) print *, "clock present"
         !!if (.not.present(clock)) print *, "clock *not* present"
         !!if (present(rc)) print *, "rc present"
@@ -203,7 +203,7 @@
         print *, "run, scale_factor = ", mydatablock%scale_factor
 
         ! Get the Field and Bundle data from the State
-        call ESMF_StateGetData(exportstate, "humidity", humidity, rc=status)
+        call ESMF_StateGetData(exportState, "humidity", humidity, rc=status)
       
         ! get the grid and coordinates
         allocate(coordArray(2))
@@ -217,8 +217,8 @@
         call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
 
         ! update field values here
-        ! call ESMF_StateGetDataPointer(exportstate, "humidity", idata, rc=rc)
-        call ESMF_FieldGetArray(humidity, array1, rc=rc) 
+        ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
+        call ESMF_FieldGetData(humidity, array1, rc=rc) 
         ! Get a pointer to the start of the data
         call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 
@@ -231,7 +231,7 @@
           enddo
         enddo
 
-     !   call ESMF_StatePrint(exportstate, rc=status)
+     !   call ESMF_StatePrint(exportState, rc=status)
      !   call ESMF_FieldPrint(humidity, rc=status)
      !   call ESMF_ArrayPrint(array1, "", rc=status)
  
@@ -246,9 +246,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, importstate, exportstate, clock, rc)
+    subroutine user_final(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
@@ -259,10 +259,10 @@
 
         print *, "User Comp Final starting"
     
-        !!if (present(importstate)) print *, "importstate present"
-        !!if (.not.present(importstate)) print *, "importstate *not* present"
-        !!if (present(exportstate)) print *, "exportstate present"
-        !!if (.not.present(exportstate)) print *, "exportstate *not* present"
+        !!if (present(importState)) print *, "importState present"
+        !!if (.not.present(importState)) print *, "importState *not* present"
+        !!if (present(exportState)) print *, "exportState present"
+        !!if (.not.present(exportState)) print *, "exportState *not* present"
         !!if (present(clock)) print *, "clock present"
         !!if (.not.present(clock)) print *, "clock *not* present"
         !!if (present(rc)) print *, "rc present"

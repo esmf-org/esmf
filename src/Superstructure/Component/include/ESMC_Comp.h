@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.12 2004/02/23 20:52:45 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.13 2004/03/18 21:49:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,10 +31,10 @@
 #define ESMF_RUN 2
 #define ESMF_FINAL 3
 
-enum ESMC_CompType { ESMF_APPCOMP=1, ESMF_GRIDCOMP, ESMF_CPLCOMP, 
+enum ESMC_CompType { ESMF_COMPTYPE_GRID=1, ESMF_COMPTYPE_CPL, 
                      ESMF_COMPTYPE_UNKNOWN };
-enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
-                      ESMF_RIVER, ESMF_MODEL_UNKNOWN };
+enum ESMC_GridCompType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
+                      ESMF_RIVER, ESMF_GRIDCOMPTYPE_UNKNOWN };
 
 extern const char *ESMC_SetInit;
 extern const char *ESMC_SetRun;
@@ -132,7 +132,7 @@ extern const char *ESMC_SetReadRestart;
 
  ESMC_Comp *ESMC_CompCreate(char *name, ESMC_DELayout *layout,
                                       enum ESMC_CompType ctype,
-                                      enum ESMC_ModelType mtype,
+                                      enum ESMC_GridCompType mtype,
                                       char *filepath, int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
 

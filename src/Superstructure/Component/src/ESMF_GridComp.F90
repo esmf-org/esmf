@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.25 2004/03/18 16:37:37 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.26 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
       public ESMF_GridCompValidate
       public ESMF_GridCompPrint
  
-      ! These do argument processing, layout checking, and then
+      ! These do argument processing, delayout checking, and then
       !  call the user-provided routines.
       public ESMF_GridCompInitialize
       public ESMF_GridCompRun
@@ -103,11 +103,11 @@
 
 #ifdef ESMF_ENABLE_VM
       ! Procedures for VM-enabled mode      
-      public ESMF_GridCompVMDefMaxThreads
-      public ESMF_GridCompVMDefMinThreads
-      public ESMF_GridCompVMDefMaxPEs
+      public ESMF_GridCompSetVMMaxThreads
+      public ESMF_GridCompSetVMMinThreads
+      public ESMF_GridCompSetVMMaxPEs
       ! Return from user-provided routines
-      public ESMF_GridCompReturn
+      public ESMF_GridCompWait
 #endif
       
 !EOPI
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.25 2004/03/18 16:37:37 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.26 2004/03/18 21:49:29 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -160,44 +160,44 @@
 !==============================================================================
 
 !BOP
-! !IROUTINE: ESMF_GridCompCreate - Create a new Component
+! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateNew(name, layout, mtype, grid, config, clock, rc)
+      function ESMF_GridCompCreateNew(name, delayout, gridcomptype, grid, config, clock, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateNew
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_DELayout), intent(in) :: layout
-      type(ESMF_ModelType), intent(in) :: mtype 
+      type(ESMF_DELayout), intent(in) :: delayout
+      type(ESMF_GridCompType), intent(in) :: gridcomptype 
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Config), intent(in) :: config
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Component and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_GridComp} and set the decomposition characteristics.
 !
-!  The return value is a new Component.
+!  The return value is a new {\tt ESMF\_GridComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    Component name.
+!    GridComp name.
 !   \item[layout]
-!    Component layout.
-!   \item[mtype]
-!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    GridComp delayout.
+!   \item[gridcomptype]
+!    GridComp Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !   \item[grid]
-!    Default grid associated with this component.
+!    Default grid associated with this gridcomp.
 !   \item[config]
-!    Component-specific configuration object.  
+!    GridComp-specific configuration object.  
 !   \item[clock]
-!    Component-specific clock object.  
+!    GridComp-specific clock object.  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -225,15 +225,15 @@
         ! Allocate a new comp class
         allocate(compclass, stat=status)
         if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridComponentCreate: Allocate"
+          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
           return
         endif
 
-        ! Call construction method to initialize component internals
-        call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
-                      mtype, config=config, grid=grid, clock=clock, rc=status)
+        ! Call construction method to initialize gridcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+                      gridcomptype, config=config, grid=grid, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component construction error"
+          print *, "GridComp construction error"
           return
         endif
 
@@ -246,12 +246,12 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompCreate - Create a new Component from a Config file
+! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp from a Config file
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateConf(name, layout, mtype, grid, clock, &
-                                                        config, configfile, rc)
+      function ESMF_GridCompCreateConf(name, delayout, gridcomptype, grid, clock, &
+                                                        config, configFile, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateConf
@@ -259,37 +259,38 @@
 ! !ARGUMENTS:
       !external :: services
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      type(ESMF_ModelType), intent(in), optional :: mtype 
+      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(inout), optional :: clock
       type(ESMF_Config), intent(in), optional :: config
-      character(len=*), intent(in), optional :: configfile
+      character(len=*), intent(in), optional :: configFile
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Component and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_GridComp} using a configuration file
+!  and set the decomposition characteristics.
 !
-!  The return value is a new Component.
+!  The return value is a new {\tt ESMF\_GridComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[{[name]}]
-!    Component name.
+!    GridComp name.
 !   \item[{[layout]}]
-!    Component layout.
-!   \item[{[mtype]}]
-!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    GridComp delayout.
+!   \item[{[gridcomptype]}]
+!    GridComp Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !   \item[{[grid]}]
-!    Default grid associated with this component.
+!    Default grid associated with this gridcomp.
 !   \item[{[clock]}]
-!    Private clock associated with this component.
+!    Private clock associated with this gridcomp.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.   If specified, takes
 !    priority over filename.
-!   \item[{[configfile]}]
-!    Component-specific configuration filename. 
+!   \item[{[configFile]}]
+!    GridComp-specific configuration filename. 
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -317,17 +318,17 @@
         ! Allocate a new comp class
         allocate(compclass, stat=status)
         if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridComponentCreate: Allocate"
+          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
           return
         endif
    
-        ! Call construction method to initialize component internals
-        call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
-                                mtype=mtype, configfile=configfile, &
+        ! Call construction method to initialize gridcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+                                gridcomptype=gridcomptype, configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
                                 rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component construction error"
+          print *, "GridComp construction error"
           return
         endif
 
@@ -341,12 +342,12 @@
 #ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCompCreate - Create a new Component with VM enabled
+! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with VM enabled
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
       function ESMF_GridCompCreateVM(vm, &
-        name, layout, mtype, grid, clock, config, configfile, petlist, rc)
+        name, delayout, gridcomptype, grid, clock, config, configFile, petList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateVM
@@ -355,40 +356,40 @@
       !external :: services
       type(ESMF_VM),        intent(in)              :: vm
       character(len=*),     intent(in),    optional :: name
-      type(ESMF_DELayout),  intent(in),    optional :: layout
-      type(ESMF_ModelType), intent(in),    optional :: mtype 
+      type(ESMF_DELayout),  intent(in),    optional :: delayout
+      type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
       type(ESMF_Grid),      intent(in),    optional :: grid
       type(ESMF_Clock),     intent(inout), optional :: clock
       type(ESMF_Config),    intent(in),    optional :: config
-      character(len=*),     intent(in),    optional :: configfile
-      integer,              intent(in),    optional :: petlist(:)
+      character(len=*),     intent(in),    optional :: configFile
+      integer,              intent(in),    optional :: petList(:)
       integer,              intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Component and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_GridComp} and set the decomposition characteristics.
 !
-!  The return value is a new Component.
+!  The return value is a new {\tt ESMF\_GridComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    Component name.
+!    GridComp name.
 !   \item[{[name]}]
-!    Component name.
+!    GridComp name.
 !   \item[{[layout]}]
-!    Component layout.
-!   \item[{[mtype]}]
-!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    GridComp delayout.
+!   \item[{[gridcomptype]}]
+!    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !   \item[{[grid]}]
-!    Default grid associated with this component.
+!    Default grid associated with this gridcomp.
 !   \item[{[clock]}]
-!    Private clock associated with this component.
+!    Private clock associated with this gridcomp.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.   If specified, takes
 !    priority over filename.
-!   \item[{[configfile]}]
-!    Component-specific configuration filename. 
+!   \item[{[configFile]}]
+!    GridComp-specific configuration filename. 
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -416,17 +417,17 @@
         ! Allocate a new comp class
         allocate(compclass, stat=status)
         if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridComponentCreate: Allocate"
+          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
           return
         endif
    
-        ! Call construction method to initialize component internals
-        call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
-                                mtype=mtype, configfile=configfile, &
+        ! Call construction method to initialize gridcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, delayout, &
+                                gridcomptype=gridcomptype, configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
-                                vm=vm, petlist=petlist, rc=status)
+                                vm=vm, petList=petList, rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component construction error"
+          print *, "GridComp construction error"
           return
         endif
 
@@ -439,22 +440,22 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompDestroy - Release resources for a Component
+! !IROUTINE: ESMF_GridCompDestroy - Release resources for a GridComp
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompDestroy(component, rc)
+      subroutine ESMF_GridCompDestroy(gridcomp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp) :: component
+      type(ESMF_GridComp) :: gridcomp
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Component}.
+!     Releases all resources associated with the {\tt gridcomp}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[component]
-!      Destroy contents of this {\tt Component}.
+!     \item[gridcomp]
+!      Destroy contents of this {\tt GridComp}.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -475,25 +476,25 @@
         endif
 
         ! Check to see if already destroyed
-        if (.not.associated(component%compp)) then
-          print *, "Component already destroyed"
+        if (.not.associated(gridcomp%compp)) then
+          print *, "GridComp already destroyed"
           return
         endif
 
         ! call Destruct to release resources
-        call ESMF_CompDestruct(component%compp, status)
+        call ESMF_CompDestruct(gridcomp%compp, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component contents destruction error"
+          print *, "GridComp contents destruction error"
           return
         endif
 
-        ! Deallocate the component struct itself
-        deallocate(component%compp, stat=status)
+        ! Deallocate the gridcomp struct itself
+        deallocate(gridcomp%compp, stat=status)
         if (status .ne. 0) then
-          print *, "Component contents destruction error"
+          print *, "GridComp contents destruction error"
           return
         endif
-        nullify(component%compp)
+        nullify(gridcomp%compp)
  
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -502,33 +503,33 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompFinalize - Call the Component's finalize routine
+! !IROUTINE: ESMF_GridCompFinalize - Call the GridComp's finalize routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompFinalize(component, importstate, &
-                                           exportstate, clock, phase, rc)
+      recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
+                                           exportState, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_GridComp) :: gridcomp
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
+!  Call the associated user finalize code for {\tt gridcomp}.
 !
 !    
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[component]
-!    Component to call Finalize routine for.
-!   \item[{[importstate]}]  
+!   \item[gridcomp]
+!    GridComp to call Finalize routine for.
+!   \item[{[importState]}]  
 !    Import data for finalize.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !     Export data for finalize.
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
@@ -542,7 +543,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompFinalize(component%compp, importstate, exportstate, &
+        call ESMF_CompFinalize(gridcomp%compp, importState, exportState, &
                                               clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_GridCompFinalize
@@ -550,47 +551,47 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompGet - Query a Component for information
+! !IROUTINE: ESMF_GridCompGet - Query a GridComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompGet(component, name, layout, mtype, grid, clock, &
-                                                       configfile, config, rc)
+      subroutine ESMF_GridCompGet(gridcomp, name, delayout, gridcomptype, grid, clock, &
+                                                       configFile, config, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(in) :: component
+      type(ESMF_GridComp), intent(in) :: gridcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: layout
-      type(ESMF_ModelType), intent(out), optional :: mtype 
+      type(ESMF_DELayout), intent(out), optional :: delayout
+      type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
-      character(len=*), intent(out), optional :: configfile
+      character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns information about the component.  For queries where the caller
+!      Returns information about the gridcomp.  For queries where the caller
 !      only wants a single value, specify the argument by name.
-!      All the arguments after the component input are optional 
+!      All the arguments after the gridcomp input are optional 
 !      to facilitate this.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    Component to query.
+!    GridComp to query.
 !   \item[{[name]}]
-!    Component name.
+!    GridComp name.
 !   \item[{[layout]}]
-!    Component layout.
-!   \item[{[mtype]}]
-!    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
+!    GridComp delayout.
+!   \item[{[gridcomptype]}]
+!    GridComp Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
 !   \item[{[grid]}]
-!    Default grid associated with this component.
+!    Default grid associated with this gridcomp.
 !   \item[{[clock]}]
-!    Component-specific clock object.
-!   \item[{[configfile]}]
-!    Component-specific configuration object.
+!    GridComp-specific clock object.
+!   \item[{[configFile]}]
+!    GridComp-specific configuration object.
 !   \item[{[config]}]
 !    Already created {\tt Config} object. If specified, takes
 !    priority over filename.
@@ -603,40 +604,40 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(component%compp, name, layout, &
-                          mtype=mtype, grid=grid, clock=clock, &
-                          configfile=configfile, config=config, rc=rc)
+        call ESMF_CompGet(gridcomp%compp, name, delayout, &
+                          gridcomptype=gridcomptype, grid=grid, clock=clock, &
+                          configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_GridCompGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompInitialize - Call the Component's initialize routine
+! !IROUTINE: ESMF_GridCompInitialize - Call the GridComp's initialize routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompInitialize(component, importstate, &
-                                           exportstate, clock, phase, rc)
+      recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
+                                           exportState, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_GridComp) :: gridcomp
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
+!  Call the associated user initialization code for a gridcomp.
 !
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to call Initialization routine for.
-!   \item[{[importstate]}]  
+!   \item[gridcomp]
+!    GridComp to call Initialization routine for.
+!   \item[{[importState]}]  
 !    Import data for initialization.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !    Export data for initialization.
 !   \item[{[clock]}]  
 !    External clock for passing in time information.
@@ -650,7 +651,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompInitialize(component%compp, importstate, exportstate, &
+        call ESMF_CompInitialize(gridcomp%compp, importState, exportState, &
                                               clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_GridCompInitialize
@@ -658,24 +659,24 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_GridCompPrint - Print the contents of a Component
+! !IROUTINE:  ESMF_GridCompPrint - Print the contents of a GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompPrint(component, options, rc)
+      subroutine ESMF_GridCompPrint(gridcomp, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp) :: component
+      type(ESMF_GridComp) :: gridcomp
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a component.
+!      Routine to print information about an {\tt ESMF\_GridComp}.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to print.
+!   \item[gridcomp]
+!    GridComp to print.
 !   \item[{[options]}]
 !    Print options.
 !   \item[{[rc]}]
@@ -685,34 +686,34 @@
 !EOP
 ! !REQUIREMENTS:
 
-       print *, "Gridded Component:"
-       call ESMF_CompPrint(component%compp, options, rc)
+       print *, "Gridded GridComp:"
+       call ESMF_CompPrint(gridcomp%compp, options, rc)
 
        end subroutine ESMF_GridCompPrint
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompReadRestart - Call the Component's restore routine
+! !IROUTINE: ESMF_GridCompReadRestart - Call the GridComp's restore routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompReadRestart(component, iospec, clock, phase, rc)
+      recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp), intent(inout) :: component
+      type (ESMF_GridComp), intent(inout) :: gridcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user restore code for a component.
+!  Call the associated user restore code for a {\tt gridcomp}.
 !
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to call ReadRestart routine for.
+!   \item[gridcomp]
+!    GridComp to call ReadRestart routine for.
 !   \item[{[iospec]}]  
 !    I/O options.
 !   \item[{[clock]}]  
@@ -727,38 +728,38 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompReadRestart(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, rc)
 
         end subroutine ESMF_GridCompReadRestart
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompRun - Call the Component's run routine
+! !IROUTINE: ESMF_GridCompRun - Call the GridComp's run routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompRun(component, importstate, &
-                                           exportstate, clock, phase, rc)
+      recursive subroutine ESMF_GridCompRun(gridcomp, importState, &
+                                           exportState, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_GridComp) :: gridcomp
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user run code for a component.
+!  Call the associated user run code for the {\tt gridcomp}.
 !
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to call Run routine for.
-!   \item[{[importstate]}]  
+!   \item[gridcomp]
+!    GridComp to call Run routine for.
+!   \item[{[importState]}]  
 !    Import data for run.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !     Export data for run.
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
@@ -772,7 +773,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRun(component%compp, importstate, exportstate, &
+        call ESMF_CompRun(gridcomp%compp, importState, exportState, &
                                              clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_GridCompRun
@@ -780,50 +781,50 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSet - Set or reset information about the Component
+! !IROUTINE: ESMF_GridCompSet - Set or reset information about the GridComp
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompSet(component, name, layout, mtype, grid, clock, &
-                                                       configfile, config, rc)
+      subroutine ESMF_GridCompSet(gridcomp, name, delayout, gridcomptype, grid, clock, &
+                                                       configFile, config, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: component
+      type(ESMF_GridComp), intent(inout) :: gridcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      type(ESMF_ModelType), intent(in), optional :: mtype 
+      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
-      character(len=*), intent(in), optional :: configfile
+      character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Sets or resets information about the component.  When the caller
+!      Sets or resets information about the {\tt gridcomp}.  When the caller
 !      only wants to set a single value specify the argument by name.
-!      All the arguments after the component input are optional 
+!      All the arguments after the {\tt gridcomp} input are optional 
 !      to facilitate this.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to set value for.
+!   \item[gridcomp]
+!    GridComp to set value for.
 !   \item[{[name]}]
-!    Component name.
+!    GridComp name.
 !   \item[{[layout]}]
-!    Component layout.
-!   \item[{[mtype]}]
-!    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
+!    GridComp delayout.
+!   \item[{[gridcomptype]}]
+!    GridComp Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
 !   \item[{[grid]}]
-!    Default grid associated with this component.
+!    Default grid associated with this gridcomp.
 !   \item[{[clock]}]
-!    Private clock associated with this component.
+!    Private clock associated with this gridcomp.
 !   \item[{[config]}]
-!    Already created {\tt Config} object.   If specified, takes
+!    Already created {\tt ESMF\_Config} object.   If specified, takes
 !    priority over filename.
-!   \item[{[configfile]}]
-!    Component-specific configuration filename.
+!   \item[{[configFile]}]
+!    GridComp-specific configuration filename.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -831,31 +832,31 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompSet(component%compp, name, layout, &
-                          mtype=mtype, grid=grid, clock=clock, &
-                          configfile=configfile, config=config, rc=rc)
+        call ESMF_CompSet(gridcomp%compp, name, delayout, &
+                          gridcomptype=gridcomptype, grid=grid, clock=clock, &
+                          configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_GridCompSet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompValidate - Ensure the Component is internally consistent
+! !IROUTINE: ESMF_GridCompValidate - Ensure the GridComp is internally consistent
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompValidate(component, options, rc)
+      subroutine ESMF_GridCompValidate(gridcomp, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridComp) :: component
+      type(ESMF_GridComp) :: gridcomp
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to ensure a Component is valid.
+!      Routine to ensure {\tt gridcomp} is valid.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to validate.
+!   \item[gridcomp]
+!    GridComp to validate.
 !   \item[{[options]}]  
 !    Object to be validated.
 !   \item[{[rc]}]
@@ -865,7 +866,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-       call ESMF_CompValidate(component%compp, options, rc)
+       call ESMF_CompValidate(gridcomp%compp, options, rc)
 
        ! TODO: also need to validate grid if it's associated here
  
@@ -874,27 +875,27 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompWriteRestart - Call the Component's save routine
+! !IROUTINE: ESMF_GridCompWriteRestart - Call the GridComp's save routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_GridCompWriteRestart(component, iospec, clock, phase, rc)
+      recursive subroutine ESMF_GridCompWriteRestart(gridcomp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_GridComp), intent(inout) :: component
+      type (ESMF_GridComp), intent(inout) :: gridcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user save code for a component.
+!  Call the associated user save code for {\tt gridcomp}.
 !
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to call WriteRestart routine for.
+!   \item[gridcomp]
+!    GridComp to call WriteRestart routine for.
 !   \item[{[iospec]}]  
 !    I/O options.
 !   \item[{[clock]}]  
@@ -909,7 +910,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompWriteRestart(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, rc)
 
         end subroutine ESMF_GridCompWriteRestart
 
@@ -918,14 +919,14 @@
 #ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCompVMDefMaxThreads - Define a VM for this GridComp
+! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Define a VM for this GridComp
 
 ! !INTERFACE:
-  subroutine ESMF_GridCompVMDefMaxThreads(component, max, &
+  subroutine ESMF_GridCompSetVMMaxThreads(gridcomp, max, &
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: component
+    type(ESMF_GridComp), intent(in)            :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -937,8 +938,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[component] 
-!      gridded component object
+!     \item[gridcomp] 
+!      gridded gridcomp object
 !     \item[{[max]}] 
 !      Maximum threading level
 !     \item[{[pref\_intra\_process]}] 
@@ -952,7 +953,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -966,29 +966,28 @@
     endif
 
     ! call CompClass method
-    call ESMF_CompVMDefMaxThreads(component%compp, max, &
+    call ESMF_CompSetVMMaxThreads(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
     if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompVMDefMaxThreads error"
+      print *, "ESMF_CompSetVMMaxThreads error"
       return
     endif
 
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_GridCompVMDefMaxThreads
-!------------------------------------------------------------------------------
+  end subroutine ESMF_GridCompSetVMMaxThreads
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCompVMDefMinThreads - Define a VM for this GridComp
+! !IROUTINE: ESMF_GridCompSetVMMinThreads - Define a VM for this GridComp
 
 ! !INTERFACE:
-  subroutine ESMF_GridCompVMDefMinThreads(component, max, &
+  subroutine ESMF_GridCompSetVMMinThreads(gridcomp, max, &
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: component
+    type(ESMF_GridComp), intent(in)            :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1000,8 +999,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[component] 
-!      gridded component object
+!     \item[gridcomp] 
+!      gridded gridcomp object
 !     \item[{[max]}] 
 !      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
@@ -1015,7 +1014,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1029,29 +1027,29 @@
     endif
 
     ! call CompClass method
-    call ESMF_CompVMDefMinThreads(component%compp, max, &
+    call ESMF_CompSetVMMinThreads(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
     if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompVMDefMinThreads error"
+      print *, "ESMF_CompSetVMMinThreads error"
       return
     endif
 
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_GridCompVMDefMinThreads
+  end subroutine ESMF_GridCompSetVMMinThreads
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCompVMDefMaxPEs - Define a VM for this GridComp
+! !IROUTINE: ESMF_GridCompSetVMMaxPEs - Define a VM for this GridComp
 
 ! !INTERFACE:
-  subroutine ESMF_GridCompVMDefMaxPEs(component, max, &
+  subroutine ESMF_GridCompSetVMMaxPEs(gridcomp, max, &
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: component
+    type(ESMF_GridComp), intent(in)            :: gridcomp
     integer,             intent(in),  optional :: max
     integer,             intent(in),  optional :: pref_intra_process
     integer,             intent(in),  optional :: pref_intra_ssi
@@ -1063,8 +1061,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[component] 
-!      gridded component object
+!     \item[gridcomp] 
+!      gridded gridcomp object
 !     \item[{[max]}] 
 !      Maximum number of PEs per PET
 !     \item[{[pref\_intra\_process]}] 
@@ -1078,7 +1076,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1092,44 +1089,43 @@
     endif
 
     ! call CompClass method
-    call ESMF_CompVMDefMaxPEs(component%compp, max, &
+    call ESMF_CompSetVMMaxPEs(gridcomp%compp, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
     if (status .ne. ESMF_SUCCESS) then
-      print *, "ESMF_CompVMDefMaxPEs error"
+      print *, "ESMF_CompSetVMMaxPEs error"
       return
     endif
 
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_GridCompVMDefMaxPEs
+  end subroutine ESMF_GridCompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_GridCompReturn - Wait for a GridComp to return
+! !IROUTINE: ESMF_GridCompWait - Wait for a GridComp to return
 
 ! !INTERFACE:
-  subroutine ESMF_GridCompReturn(component, rc)
+  subroutine ESMF_GridCompWait(gridcomp, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in) ::            component
+    type(ESMF_GridComp), intent(in) ::            gridcomp
     integer, intent(out), optional  ::            rc           
 !
 ! !DESCRIPTION:
-!     Wait for a GridComp to return
+!     Wait for an {\tt ESMF\_GridComp} to return.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[component] 
-!      gridded component object
+!     \item[gridcomp] 
+!      gridded gridcomp object
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1143,7 +1139,7 @@
     endif
 
     ! call CompClass method
-    call ESMF_CompReturn(component%compp, status)
+    call ESMF_CompReturn(gridcomp%compp, status)
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_CompReturn error"
       return
@@ -1152,7 +1148,7 @@
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_GridCompReturn
+  end subroutine ESMF_GridCompWait
 !------------------------------------------------------------------------------
 #endif
 

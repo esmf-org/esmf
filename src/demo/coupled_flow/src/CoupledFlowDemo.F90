@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.7 2004/02/19 22:55:51 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.8 2004/03/18 21:49:30 cdeluca Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -101,11 +101,11 @@
 ! !IROUTINE: coupledflow_init - initialization routine
 
 ! !INTERFACE:
-      subroutine coupledflow_init(gcomp, importstate, exportstate, clock, rc)
+      subroutine coupledflow_init(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: gcomp
-     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -116,9 +116,9 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Importstate.
-!     \item[exportstate]
+!     \item[exportState]
 !          Exportstate.
 !     \item[clock] 
 !          External clock.
@@ -328,11 +328,11 @@
 ! !IROUTINE: coupledflow_run - run routine
 
 ! !INTERFACE:
-      subroutine coupledflow_run(comp, importstate, exportstate, clock, rc)
+      subroutine coupledflow_run(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
-     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -343,9 +343,9 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Importstate.
-!     \item[exportstate]
+!     \item[exportState]
 !          Exportstate.
 !     \item[clock] 
 !          External clock.
@@ -397,11 +397,11 @@ end subroutine coupledflow_run
 ! !IROUTINE:  coupledflow_final - user supplied finalize routine
 
 ! !INTERFACE:
-      subroutine coupledflow_final(comp, importstate, exportstate, clock, rc)
+      subroutine coupledflow_final(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
-     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -412,9 +412,9 @@ end subroutine coupledflow_run
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Importstate.
-!     \item[exportstate]
+!     \item[exportState]
 !          Exportstate.
 !     \item[clock] 
 !          External clock.

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.12 2004/02/01 13:59:46 nscollins Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.13 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -161,11 +161,11 @@
 !-------------------------------------------------------------------------
  
       c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
-      call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
       print *, "Comp 1 Initialize finished, rc =", rc
  
       c2imp = ESMF_StateCreate("comp2 import", ESMF_STATEIMPORT, cname2)
-      call ESMF_GridCompInitialize(comp2, importstate=c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
       print *, "Comp 2 Initialize finished, rc =", rc
  
       ! note that the coupler's import is comp1's export
@@ -180,13 +180,13 @@
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         print *, "Comp 1 Run returned, rc =", rc
   
         call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
         print *, "Coupler Run returned, rc =", rc
   
-        call ESMF_GridCompRun(comp2, importstate=c2imp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
         print *, "Comp 2 Run returned, rc =", rc
 
         call ESMF_ClockAdvance(clock, rc=rc)
@@ -201,10 +201,10 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
       print *, "Comp 1 Finalize finished, rc =", rc
 
-      call ESMF_GridCompFinalize(comp2, importstate=c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clock, rc=rc)
       print *, "Comp 2 Finalize finished, rc =", rc
 
       call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.4 2003/11/07 21:55:34 nscollins Exp $
+// $Id: ESMC_GridComp.h,v 1.5 2004/03/18 21:49:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,11 +74,11 @@
   public:
   int ESMC_GridCompSetServices(void (*)(ESMC_GridComp *, int *));
 
-  int ESMC_GridCompInitialize(ESMC_State *importstate, ESMC_State *exportstate, 
+  int ESMC_GridCompInitialize(ESMC_State *importState, ESMC_State *exportState, 
                               ESMC_Clock *clock, int phase);
-  int ESMC_GridCompRun(ESMC_State *importstate, ESMC_State *exportstate, 
+  int ESMC_GridCompRun(ESMC_State *importState, ESMC_State *exportState, 
                        ESMC_Clock *clock, int phase);
-  int ESMC_GridCompFinalize(ESMC_State *importstate, ESMC_State *exportstate, 
+  int ESMC_GridCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
                             ESMC_Clock *clock, int phase);
 
  // optional configuration methods
@@ -116,27 +116,27 @@
 // an ESMC_GridComp object.
 
  ESMC_GridComp *ESMC_GridCompCreate(char *name, ESMC_DELayout *layout,
-                                      enum ESMC_ModelType mtype,
+                                      enum ESMC_GridCompType mtype,
                                       ESMC_Grid *grid,
-                                      char *configfile, int *rc);
+                                      char *configFile, int *rc);
  int ESMC_GridCompDestroy(ESMC_GridComp *comp);
 
 
 // prototypes for fortran interface routines
 extern "C" {
  void FTN(f_esmf_gridcompcreate)(ESMC_GridComp *comp, char *name, 
-                         ESMC_DELayout *layout, ESMC_ModelType *mtype, 
+                         ESMC_DELayout *layout, ESMC_GridCompType *mtype, 
                          ESMC_Grid *grid, ESMC_Config *config, 
-                         char *configfile, int *rc, int nlen, int clen);
+                         char *configFile, int *rc, int nlen, int clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);
  void FTN(f_esmf_gridcompinitialize)(ESMC_GridComp *gcomp, 
-                         ESMC_State *importstate, ESMC_State *exportstate, 
+                         ESMC_State *importState, ESMC_State *exportState, 
                          ESMC_Clock *clock, int *phase, int *rc);
  void FTN(f_esmf_gridcomprun)(ESMC_GridComp *gcomp, 
-                         ESMC_State *importstate, ESMC_State *exportstate, 
+                         ESMC_State *importState, ESMC_State *exportState, 
                          ESMC_Clock *clock, int *phase, int *rc);
  void FTN(f_esmf_gridcompfinalize)(ESMC_GridComp *gcomp, 
-                         ESMC_State *importstate, ESMC_State *exportstate, 
+                         ESMC_State *importState, ESMC_State *exportState, 
                          ESMC_Clock *clock, int *phase, int *rc);
  void FTN(f_esmf_gridcompget)(const ESMC_GridComp *gcomp, int *rc);
  void FTN(f_esmf_gridcompset)(ESMC_GridComp *gcomp, int *rc);

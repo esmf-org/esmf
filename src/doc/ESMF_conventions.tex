@@ -1,5 +1,7 @@
-\section{Document Conventions}
+\section{Conventions}
 \label{sec:conventions}
+
+\subsection{Document Conventions}
 
 The following conventions for fonts and capitalization are used
 in this document. \newline
@@ -22,14 +24,53 @@ if the word is used in a more general context it remains in lower
 case.  We would write, for example, that an ESMF Field class 
 represents a physical field.  
 
-Diagrams are drawn using the Unified Modeling Language (UML).  UML is 
-a visual tool that can illustrate the structure of 
+Diagrams are drawn using the Unified Modeling Language (UML).  UML 
+is a visual tool that can illustrate the structure of 
 classes, define relationships between classes, and describe sequences
 of actions.  A reader interested in more detail can refer to a 
 text such as {\it The Unified Modeling Language Reference Manual.}
  \cite{uml}
 
+\subsection{Class Method Name, Argument, and Structure Conventions}
 
+There are conventions for how class methods are presented throughout 
+this document.  Although Fortran interfaces are not case-sensitive,
+we use case to help parse multi-word names.  We also use case to help
+make the presentation of Fortran interfaces consistent with the 
+presentation of C++ interfaces.  
+
+Method names begin with {\tt ESMF\_}, followed by the class name, 
+followed by the name of the operation being performed.  Each new 
+word is capitalized. 
+
+For method arguments that are multi-word, the first word is lower
+case and subsequent words begin with upper case.  ESMF class 
+names (including typed flags) are an exception.  When multi-word 
+class names appear in argument lists, all letters after the first 
+are lower case.  The first letter is lower case if the class is the
+first word in the argument and upper case otherwise.  For 
+example, in an argument list the DELayout class name may appear 
+as {\tt delayout} or {\tt srcDelayout}.
+
+Most Fortran calls in the ESMF are subroutines, with 
+any returned values passed through the interface.  For the sake of 
+convenience, some ESMF calls are written as functions.
+
+A typical ESMF call thus looks like this:
+
+\begin{verbatim}
+call ESMF_<ClassName><Operation>(classname, firstArgument, 
+           secondArgument, ..., rc)
+\end{verbatim}
+
+where \newline
+{\tt <ClassName>} is the class name, \newline
+{\tt <method>} is the name of the action to be performed, \newline 
+{\tt classname} is a variable of the derived type associated 
+with the class, \newline
+the {\tt arg*} arguments are whatever other variables are required 
+for the operation, \newline
+and {\tt rc} is a return code. \newline
 
 
 

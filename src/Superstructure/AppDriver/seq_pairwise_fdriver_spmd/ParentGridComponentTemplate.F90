@@ -1,4 +1,4 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.4 2003/11/11 18:22:22 nscollins Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.5 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -55,10 +55,10 @@
     end subroutine UserPComp_SetServices
 
 
-    subroutine my_init(gcomp, importstate, exportstate, parentclock, rc)
+    subroutine my_init(gcomp, importState, exportState, parentclock, rc)
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importstate
-      type(ESMF_State) :: exportstate
+      type(ESMF_State) :: importState
+      type(ESMF_State) :: exportState
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
@@ -115,10 +115,10 @@
     end subroutine my_init
 
 
-    subroutine my_run(gcomp, importstate, exportstate, parentclock, rc)
+    subroutine my_run(gcomp, importState, exportState, parentclock, rc)
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importstate
-      type(ESMF_State) :: exportstate
+      type(ESMF_State) :: importState
+      type(ESMF_State) :: exportState
       type(ESMF_Clock) :: parentclock
       integer :: rc
      
@@ -137,10 +137,10 @@
     end subroutine my_run
 
 
-    subroutine my_final(gcomp, importstate, exportstate, parentclock, rc)
+    subroutine my_final(gcomp, importState, exportState, parentclock, rc)
       type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: importstate
-      type(ESMF_State) :: exportstate
+      type(ESMF_State) :: importState
+      type(ESMF_State) :: exportState
       type(ESMF_Clock) :: parentclock
       integer :: rc
      

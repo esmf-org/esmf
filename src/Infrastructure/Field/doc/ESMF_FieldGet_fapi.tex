@@ -32,36 +32,47 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: ESMF\_FieldGet.F90,  Date: Mon Mar 15 14:58:14 MST 2004
+\markboth{Left}{Source File: ESMF\_FieldGet.F90,  Date: Thu Mar 18 14:23:52 MST 2004
 }
 
  
 %/////////////////////////////////////////////////////////////
-\subsubsection [ESMF\_FieldGetDataPointer] {ESMF\_FieldGetDataPointer -- Get an F90 pointer to the data contents}
+\subsubsection [ESMF\_FieldGetDataPointer] {ESMF\_FieldGetDataPointer -- Get a Fortran pointer to the data contents}
 
 
- 
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}      interface ESMF_FieldGetDataPointer
- \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
+\begin{verbatim}      interface ESMF_FieldGetDataPointer\end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
 \begin{verbatim}       ! < declarations of interfaces for each T/K/R >
   ------------------------------------------------------------------------------ 
    <This section created by macro - do not edit directly> 
+  module procedure ESMF_FieldGetDataPointer1DI1 
   module procedure ESMF_FieldGetDataPointer1DI2 
   module procedure ESMF_FieldGetDataPointer1DI4 
   module procedure ESMF_FieldGetDataPointer1DI8 
+  module procedure ESMF_FieldGetDataPointer2DI1 
   module procedure ESMF_FieldGetDataPointer2DI2 
   module procedure ESMF_FieldGetDataPointer2DI4 
   module procedure ESMF_FieldGetDataPointer2DI8 
+  module procedure ESMF_FieldGetDataPointer3DI1 
   module procedure ESMF_FieldGetDataPointer3DI2 
   module procedure ESMF_FieldGetDataPointer3DI4 
   module procedure ESMF_FieldGetDataPointer3DI8 
+  module procedure ESMF_FieldGetDataPointer4DI1 
   module procedure ESMF_FieldGetDataPointer4DI2 
   module procedure ESMF_FieldGetDataPointer4DI4 
   module procedure ESMF_FieldGetDataPointer4DI8 
+  module procedure ESMF_FieldGetDataPointer5DI1 
   module procedure ESMF_FieldGetDataPointer5DI2 
   module procedure ESMF_FieldGetDataPointer5DI4 
   module procedure ESMF_FieldGetDataPointer5DI8 
+  module procedure ESMF_FieldGetDataPointer6DI1 
+  module procedure ESMF_FieldGetDataPointer6DI2 
+  module procedure ESMF_FieldGetDataPointer6DI4 
+  module procedure ESMF_FieldGetDataPointer6DI8 
+  module procedure ESMF_FieldGetDataPointer7DI1 
+  module procedure ESMF_FieldGetDataPointer7DI2 
+  module procedure ESMF_FieldGetDataPointer7DI4 
+  module procedure ESMF_FieldGetDataPointer7DI8 
   module procedure ESMF_FieldGetDataPointer1DR4 
   module procedure ESMF_FieldGetDataPointer1DR8 
   module procedure ESMF_FieldGetDataPointer2DR4 
@@ -72,9 +83,12 @@
   module procedure ESMF_FieldGetDataPointer4DR8 
   module procedure ESMF_FieldGetDataPointer5DR4 
   module procedure ESMF_FieldGetDataPointer5DR8 
+  module procedure ESMF_FieldGetDataPointer6DR4 
+  module procedure ESMF_FieldGetDataPointer6DR8 
+  module procedure ESMF_FieldGetDataPointer7DR4 
+  module procedure ESMF_FieldGetDataPointer7DR8 
    < end macro - do not edit directly > 
   ------------------------------------------------------------------------------ 
- 
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -86,39 +100,40 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection [ESMF\_FieldGetDataPointer] {ESMF\_FieldGetDataPointer - Retrieve F90 pointer directly from a Field }
+\subsubsection [ESMF\_FieldGetDataPointer] {ESMF\_FieldGetDataPointer - Retrieve Fortran pointer directly from a Field }
 
 
   
 \bigskip{\sf INTERFACE:}
-\begin{verbatim}  ! Private name; call using ESMF_FieldGetDataPointer() 
-  subroutine ESMF_FieldGetDataPointer<type>(field, f90ptr, copyflag, rc) 
+\begin{verbatim}   ! Private name; call using ESMF_FieldGetDataPointer() 
+   subroutine ESMF_FieldGetDataPointer<rank><type><kind>(field, fptr, copyflag, rc) 
    \end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}  type(ESMF_Field), intent(in) :: field 
-  <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: f90ptr 
-  type(ESMF_CopyFlag), intent(in), optional :: copyflag 
-  integer, intent(out), optional :: rc 
+\begin{verbatim}   type(ESMF_Field), intent(in) :: field 
+   <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr 
+   type(ESMF_CopyFlag), intent(in), optional :: copyflag 
+   integer, intent(out), optional :: rc 
    \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
  
-   Retrieves data from a field, returning a direct F90 pointer to the start 
-   of the actual data array. 
+   Returns a direct Fortran pointer to the data in an {\tt ESMF\_Field}. 
    
    The arguments are: 
    \begin{description} 
    \item[field] 
    The {\tt ESMF\_Field} to query. 
-   \item[f90ptr] 
-   An unassociated Fortrn 90 pointer of the proper Type, Kind, and Rank as the data 
-   in the Field. When this call returns successfully, the pointer will now reference 
-   the data in the Field. This is either a reference or a copy, depending on the 
-   setting of the following argument. The default is to return a reference. 
+   \item[fptr] 
+   An unassociated Fortran pointer of the proper Type, Kind, and Rank as 
+   the data in the Field. When this call returns successfully, the pointer 
+   will now point to the data in the Field. This is either a reference or 
+   a copy, depending on the setting of the following argument. 
    \item[{[copyflag]}] 
-   Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, a separate 
-   copy of the data will be made and the pointer will point at the copy. 
+   Defaults to {\tt ESMF\_DATA\_REF}. If set to {\tt ESMF\_DATA\_COPY}, 
+   a separate copy of the data will be allocated and the pointer will point 
+   at the copy. If a new copy of the data is made, the caller is 
+   responsible for deallocating the space. 
    \item[{[rc]}] 
    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
    \end{description} 
-    
+   
 %...............................................................

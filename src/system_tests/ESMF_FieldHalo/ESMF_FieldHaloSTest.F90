@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.13 2004/03/18 18:40:17 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.14 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -106,7 +106,7 @@
 !
     import = ESMF_StateCreate("gridded comp import", ESMF_STATEIMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompInitialize(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Init returned"
@@ -116,7 +116,7 @@
 !     Run section
 !
 
-    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Run returned"
@@ -125,7 +125,7 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_GridCompFinalize(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Finalize returned without error"
@@ -219,12 +219,12 @@
 !  Init section
 !-------------------------------------------------------------------------
 !
-    subroutine myinit(comp, importstate, exportstate, clock, rc)
+    subroutine myinit(comp, importState, exportState, clock, rc)
       use ESMF_Mod
       use shared
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -298,9 +298,9 @@
       print *, "Field Create returned"
 
       ! Add the field to the import state.
-      call ESMF_StateAddData(importstate, field1, rc)
+      call ESMF_StateAddData(importState, field1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StatePrint(importstate, "", rc)
+      call ESMF_StatePrint(importState, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get pointer to the actual data
@@ -345,12 +345,12 @@
 !-------------------------------------------------------------------------
 !
 
-    subroutine myrun(comp, importstate, exportstate, clock, rc)
+    subroutine myrun(comp, importState, exportState, clock, rc)
       use ESMF_Mod
       use shared
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -360,12 +360,12 @@
 
       print *, "Entering Run routine"
 
-      call ESMF_StatePrint(importstate, "", rc)
+      call ESMF_StatePrint(importState, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get the field from the import state
       print *, "About to get field from import state"
-      call ESMF_StateGetData(importstate, "DE id", field1, rc=rc);
+      call ESMF_StateGetData(importState, "DE id", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "Returned from getting field from import state"
       call ESMF_FieldPrint(field1, "", rc)
@@ -395,12 +395,12 @@
 !-------------------------------------------------------------------------
 
 
-    subroutine myfinal(comp, importstate, exportstate, clock, rc)
+    subroutine myfinal(comp, importState, exportState, clock, rc)
       use ESMF_Mod
       use shared
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -430,7 +430,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get Field from import state
-      call ESMF_StateGetData(importstate, "DE id", field1, rc=rc);
+      call ESMF_StateGetData(importState, "DE id", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldGetGrid(field1, grid=grid1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30

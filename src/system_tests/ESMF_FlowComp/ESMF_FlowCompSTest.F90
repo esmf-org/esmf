@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowCompSTest.F90,v 1.6 2004/01/29 04:51:38 eschwab Exp $
+! $Id: ESMF_FlowCompSTest.F90,v 1.7 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! System test FlowComp
 !  Description on Sourceforge under System Test #74558
@@ -137,7 +137,7 @@
  
       c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, &
+      call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, &
                                    rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Component Initialize finished, rc =", rc
@@ -150,7 +150,7 @@
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Component Run returned, rc =", rc
 
@@ -167,7 +167,7 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Component Finalize finished, rc =", rc
 

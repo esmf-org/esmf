@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.12 2004/03/11 18:20:12 jwolfe Exp $
+! $Id: ESMF_GCompEx.F90,v 1.13 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -45,9 +45,9 @@
 !   !  Gridded Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
     
-    subroutine GComp_Init(comp, importstate, exportstate, clock, rc)
+    subroutine GComp_Init(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -56,8 +56,8 @@
         ! This is where the model specific setup code goes.  
  
         ! If the initial Export state needs to be filled, do it here.
-        !call ESMF_StateAddData(exportstate, field, rc)
-        !call ESMF_StateAddData(exportstate, bundle, rc)
+        !call ESMF_StateAddData(exportState, field, rc)
+        !call ESMF_StateAddData(exportState, bundle, rc)
         print *, "Gridded Comp Init returning"
    
     end subroutine GComp_Init
@@ -66,9 +66,9 @@
 !   !  The Run routine where data is exchanged.
 !   !
  
-    subroutine GComp_Run(comp, importstate, exportstate, clock, rc)
+    subroutine GComp_Run(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -88,9 +88,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine GComp_Final(comp, importstate, exportstate, clock, rc)
+    subroutine GComp_Final(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -126,7 +126,7 @@
     integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname, cname1, cname2
     type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
-    type(ESMF_State) :: importstate, exportstate
+    type(ESMF_State) :: importState, exportState
     type(ESMF_GridComp) :: gcomp
         
 !-------------------------------------------------------------------------
@@ -140,15 +140,15 @@
     delist1 = (/ (i, i=0,3) /)
     layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
     cname = "Atmosphere Model Gridded Component"
-    gcomp = ESMF_GridCompCreate(cname, layout1, configfile="setup.rc", rc=rc)  
+    gcomp = ESMF_GridCompCreate(cname, layout1, configFile="setup.rc", rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc)
     print *, "Comp Create returned, name = ", trim(cname)
     ! Create the necessary import and export states used to pass data
     !  between components.
-    importstate = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
-    exportstate = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
+    importState = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
+    exportState = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
@@ -170,13 +170,13 @@
      
     ! Call the Init routine.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_GridCompInitialize(gcomp, importstate, exportstate, clock=tclock, rc=rc)
+    call ESMF_GridCompInitialize(gcomp, importState, exportState, clock=tclock, rc=rc)
     print *, "Comp Initialize complete"
 
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-        call ESMF_GridCompRun(gcomp, importstate, exportstate, clock=tclock, rc=rc)
+        call ESMF_GridCompRun(gcomp, importState, exportState, clock=tclock, rc=rc)
         call ESMF_ClockAdvance(tclock, timestep)
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
@@ -184,7 +184,7 @@
     print *, "Comp Run complete"
 
     ! Give the component a chance to write out final results, clean up.
-    call ESMF_GridCompFinalize(gcomp, importstate, exportstate, clock=tclock, rc=rc)
+    call ESMF_GridCompFinalize(gcomp, importState, exportState, clock=tclock, rc=rc)
     print *, "Comp Finalize complete"
 
     ! Destroy components.

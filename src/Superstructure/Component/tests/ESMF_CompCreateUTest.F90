@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateUTest.F90,v 1.1 2004/03/05 23:27:33 svasquez Exp $
+! $Id: ESMF_CompCreateUTest.F90,v 1.2 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@
 !   !  Test creation of a Component
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, mtype=ESMF_ATM, &
-                                             configfile="grid.rc", rc=rc)  
+                                             configFile="grid.rc", rc=rc)  
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Component Test"

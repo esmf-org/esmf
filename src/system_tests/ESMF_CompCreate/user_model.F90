@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.1 2003/10/09 20:56:10 cdeluca Exp $
+! $Id: user_model.F90,v 1.2 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -84,9 +84,9 @@
 !   !   first Initialization routine.
  
     
-    subroutine user_init1(comp, importstate, exportstate, clock, rc)
+    subroutine user_init1(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -100,9 +100,9 @@
 !   !   second and main Initialization routine.
  
     
-    subroutine user_init2(comp, importstate, exportstate, clock, rc)
+    subroutine user_init2(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -117,7 +117,7 @@
         ! This is where the model specific setup code goes.  
 
         call ESMF_GridCompPrint(comp, "", rc)
-        call ESMF_StatePrint(exportstate, "", rc)
+        call ESMF_StatePrint(exportState, "", rc)
 
         print *, "init, ready to call get data ptr"
         nullify(mydatablock)
@@ -131,8 +131,8 @@
 
         ! Add an empty "humidity" field to the export state.
         humidity = ESMF_FieldCreateNoData(name="humidity", rc=rc)
-        call ESMF_StateAddData(exportstate, humidity, rc)
-        call ESMF_StatePrint(exportstate, rc=rc)
+        call ESMF_StateAddData(exportState, humidity, rc)
+        call ESMF_StatePrint(exportState, rc=rc)
 
         print *, "User Comp Init returning"
    
@@ -145,9 +145,9 @@
 !   !  The Run routine where data is computed.
 !   !
  
-    subroutine user_run(comp, importstate, exportstate, clock, rc)
+    subroutine user_run(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -166,8 +166,8 @@
         ! one component to the import before this call.  For now, copy the
         ! field from the export state to import state by hand.
         if (onetime .gt. 0) then
-          call ESMF_StateGetData(exportstate, "humidity", humidity, rc=status)
-          call ESMF_StateAddData(importstate, humidity, rc=status)
+          call ESMF_StateGetData(exportState, "humidity", humidity, rc=status)
+          call ESMF_StateAddData(importState, humidity, rc=status)
           onetime = 0
         endif
 
@@ -181,15 +181,15 @@
         print *, "run, local data =", mydatablock%index, &
                         mydatablock%scale_factor, mydatablock%flag
    
-        call ESMF_StatePrint(importstate, rc=status)
-        call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
+        call ESMF_StatePrint(importState, rc=status)
+        call ESMF_StateGetData(importState, "humidity", humidity, rc=status)
         call ESMF_FieldPrint(humidity, "", rc=status)
 
         ! This is where the model specific computation goes.
 
         ! Here is where the output state is updated.
-        !call ESMF_StateAddData(exportstate, humidity, rc=status)
-        call ESMF_StatePrint(exportstate, rc=status)
+        !call ESMF_StateAddData(exportState, humidity, rc=status)
+        call ESMF_StatePrint(exportState, rc=status)
  
         print *, "User Comp Run returning"
 
@@ -202,9 +202,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, importstate, exportstate, clock, rc)
+    subroutine user_final(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp) :: comp
-        type(ESMF_State) :: importstate, exportstate
+        type(ESMF_State) :: importState, exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2004/03/18 18:40:24 nscollins Exp $
+! $Id: user_model1.F90,v 1.8 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,9 +83,9 @@
 !   !   Initialization routine.
  
     
-    subroutine user_init(comp, importstate, exportstate, clock, rc)
+    subroutine user_init(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
@@ -149,8 +149,8 @@
         ! Set initial data values over exclusive domain to the de identifier
         idata = de_id
 
-        call ESMF_StateAddData(exportstate, humidity, rc)
-        call ESMF_StatePrint(exportstate, rc=rc)
+        call ESMF_StateAddData(exportState, humidity, rc)
+        call ESMF_StatePrint(exportState, rc=rc)
 
         print *, "User Comp Init returning"
    
@@ -163,9 +163,9 @@
 !   !  The Run routine where data is computed.
 !   !
  
-    subroutine user_run(comp, importstate, exportstate, clock, rc)
+    subroutine user_run(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 
@@ -186,7 +186,7 @@
         print *, "run, scale_factor = ", mydatablock%scale_factor
 
         ! Get the Field and Bundle data from the State
-        call ESMF_StateGetData(exportstate, "humidity", humidity, rc=status)
+        call ESMF_StateGetData(exportState, "humidity", humidity, rc=status)
       
         ! update field values here
         call ESMF_FieldGetArray(humidity, array1, rc=rc) 
@@ -197,7 +197,7 @@
         idata = idata + 10
      
 
-        call ESMF_StatePrint(exportstate, rc=status)
+        call ESMF_StatePrint(exportState, rc=status)
         call ESMF_FieldPrint(humidity, rc=status)
         call ESMF_ArrayPrint(array1, "", rc=status)
  
@@ -212,9 +212,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, importstate, exportstate, clock, rc)
+    subroutine user_final(comp, importState, exportState, clock, rc)
         type(ESMF_GridComp), intent(inout) :: comp
-        type(ESMF_State), intent(inout) :: importstate, exportstate
+        type(ESMF_State), intent(inout) :: importState, exportState
         type(ESMF_Clock), intent(in) :: clock
         integer, intent(out) :: rc
 

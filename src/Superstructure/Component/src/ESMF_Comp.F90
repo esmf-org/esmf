@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.76 2004/03/18 16:37:37 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.77 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,28 +64,27 @@
         integer :: ctype
       end type
 
-      type(ESMF_CompType), parameter :: ESMF_APPCOMPTYPE = ESMF_CompType(1), &
-                                        ESMF_GRIDCOMPTYPE = ESMF_CompType(2), &
-                                        ESMF_CPLCOMPTYPE = ESMF_CompType(3)
+      type(ESMF_CompType), parameter :: ESMF_COMPTYPE_GRID = ESMF_CompType(1), &
+                                        ESMF_COMPTYPE_CPL = ESMF_CompType(2)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_ModelType
+!     ! ESMF_GridCompType
 !
 !     ! Model type: Atmosphere, Land, Ocean, SeaIce, River runoff.
 !
-      type ESMF_ModelType
+      type ESMF_GridCompType
       sequence
       private
-        integer :: mtype
+        integer :: gridcomptype
       end type
 
-      type(ESMF_ModelType), parameter :: &
-                  ESMF_ATM = ESMF_ModelType(1), &
-                  ESMF_LAND = ESMF_ModelType(2), &
-                  ESMF_OCEAN = ESMF_ModelType(3), &
-                  ESMF_SEAICE = ESMF_ModelType(4), &
-                  ESMF_RIVER = ESMF_ModelType(5), &
-                  ESMF_OTHER = ESMF_ModelType(6)
+      type(ESMF_GridCompType), parameter :: &
+                  ESMF_ATM = ESMF_GridCompType(1), &
+                  ESMF_LAND = ESMF_GridCompType(2), &
+                  ESMF_OCEAN = ESMF_GridCompType(3), &
+                  ESMF_SEAICE = ESMF_GridCompType(4), &
+                  ESMF_RIVER = ESMF_GridCompType(5), &
+                  ESMF_OTHER = ESMF_GridCompType(6)
 
 !------------------------------------------------------------------------------
 !     ! ESMF Entry Point Names
@@ -112,7 +111,7 @@
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
-         type(ESMF_DELayout) :: layout            ! component layout
+         type(ESMF_DELayout) :: delayout          ! component delayout
          type(ESMF_Clock) :: clock                ! private component clock
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
@@ -120,10 +119,10 @@
          integer :: runphasecount                 ! max runs, for error check
          logical :: multiphasefinal               ! multiple init, run, final
          integer :: finalphasecount               ! max finals, for error check
-         character(len=ESMF_MAXSTR) :: configfile ! resource filename
-         character(len=ESMF_MAXSTR) :: dirpath    ! relative dirname, app only
+         character(len=ESMF_MAXSTR) :: configFile ! resource filename
+         character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
-         type(ESMF_ModelType) :: mtype            ! model type, gcomp only
+         type(ESMF_GridCompType) :: gridcomptype            ! model type, gcomp only
 #ifdef ESMF_ENABLE_VM
          type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
          integer            :: npetlist           ! number of PETs in petlist
@@ -152,14 +151,14 @@
       ! Has framework init routine been run?
       logical :: frameworknotinit = .true. 
  
-      ! A 1 x N global layout, currently only for debugging but maybe
+      ! A 1 x N global delayout, currently only for debugging but maybe
       !  has more uses?
       type(ESMF_DELayout) :: GlobalLayout
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Config   ! TODO: move to its own file 
-      public ESMF_ModelType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
+      public ESMF_GridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
                              ESMF_SEAICE, ESMF_RIVER, ESMF_OTHER
       public ESMF_SETINIT, ESMF_SETRUN, ESMF_SETFINAL, ESMF_SINGLEPHASE
       
@@ -168,7 +167,7 @@
 
       public ESMF_CompClass
       public ESMF_CompType
-      public ESMF_APPCOMPTYPE, ESMF_GRIDCOMPTYPE, ESMF_CPLCOMPTYPE 
+      public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
 
 !------------------------------------------------------------------------------
 
@@ -201,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.76 2004/03/18 16:37:37 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.77 2004/03/18 21:49:29 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -242,20 +241,20 @@ function ESMF_ctne(ct1, ct2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_ModelTypes to see if they're the same
+! function to compare two ESMF_GridCompTypes to see if they're the same
 
 function ESMF_mteq(mt1, mt2)
  logical ESMF_mteq
- type(ESMF_ModelType), intent(in) :: mt1, mt2
+ type(ESMF_GridCompType), intent(in) :: mt1, mt2
 
- ESMF_mteq = (mt1%mtype .eq. mt2%mtype)
+ ESMF_mteq = (mt1%gridcomptype .eq. mt2%gridcomptype)
 end function
 
 function ESMF_mtne(mt1, mt2)
  logical ESMF_mtne
- type(ESMF_ModelType), intent(in) :: mt1, mt2
+ type(ESMF_GridCompType), intent(in) :: mt1, mt2
 
- ESMF_mtne = (mt1%mtype .ne. mt2%mtype)
+ ESMF_mtne = (mt1%gridcomptype .ne. mt2%gridcomptype)
 end function
 
 
@@ -270,8 +269,8 @@ end function
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      subroutine ESMF_CompConstruct(compp, ctype, name, layout, mtype, &
-                          dirpath, configfile, config, grid, clock, &
+      subroutine ESMF_CompConstruct(compp, ctype, name, delayout, gridcomptype, &
+                          dirPath, configFile, config, grid, clock, &
 #ifdef ESMF_ENABLE_VM                          
                           vm, petlist, &
 #endif                          
@@ -281,10 +280,10 @@ end function
       type (ESMF_CompClass), pointer :: compp
       type (ESMF_CompType), intent(in) :: ctype
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      type(ESMF_ModelType), intent(in), optional :: mtype 
-      character(len=*), intent(in), optional :: dirpath
-      character(len=*), intent(in), optional :: configfile
+      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
+      character(len=*), intent(in), optional :: dirPath
+      character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
@@ -306,17 +305,17 @@ end function
 !    ESMF\_CPLCOMP.
 !   \item[{[name]}]
 !    Component name.
-!   \item[{[layout]}]
-!    Component layout.
-!   \item[{[mtype]}]
+!   \item[{[delayout]}]
+!    Component delayout.
+!   \item[{[gridcomptype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
-!   \item[{[dirpath]}]
+!   \item[{[dirPath]}]
 !    Directory where component-specfic configuration or data files
 !    are located.
-!   \item[{[configfile]}]
+!   \item[{[configFile]}]
 !    File containing configuration information, either absolute filename
-!    or relative to {\tt dirpath}.
+!    or relative to {\tt dirPath}.
 !   \item[{[config]}]
 !    Already created {\tt config} object.
 !   \item[{[grid]}]
@@ -334,7 +333,7 @@ end function
         ! Local vars
         integer :: status                            ! local error status
         logical :: rcpresent                         ! did user specify rc?
-        character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirpath
+        character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
 
         ! Has the Full ESMF Framework initialization been run?
         ! This only happens once per process at the start.
@@ -367,50 +366,50 @@ end function
           return
         endif
 
-        ! either store or create a layout
-        if (present(layout)) then
-          compp%layout = layout
+        ! either store or create a delayout
+        if (present(delayout)) then
+          compp%delayout = delayout
         else
-          ! Create a default 1xN layout over all processors.
-          compp%layout = ESMF_DELayoutCreate(rc=status) 
+          ! Create a default 1xN delayout over all processors.
+          compp%delayout = ESMF_DELayoutCreate(rc=status) 
         endif 
 
         ! for gridded components, the model type it represents
-        if (present(mtype)) then
-	  compp%mtype = mtype
+        if (present(gridcomptype)) then
+	  compp%gridcomptype = gridcomptype
         else
-	  compp%mtype = ESMF_OTHER
+	  compp%gridcomptype = ESMF_OTHER
         endif
 
         ! for config files, store a directory path and subsequent opens can
         !  be relative to this or absolute.
-        if (present(dirpath)) then
-          compp%dirpath = dirpath
+        if (present(dirPath)) then
+          compp%dirPath = dirPath
         else
-          compp%dirpath = "."
+          compp%dirPath = "."
         endif
 
         ! sort out what happens if both a already created config object and
         ! a config filename are given.  the current rules are:  a config object
         ! gets priority over a name if both are specified.
-        if (present(configfile) .and. present(config)) then
+        if (present(configFile) .and. present(config)) then
             print *, "Warning: only 1 of Config object or filename should be given."
             print *, "Using Config object; ignoring Config filename."
             compp%config = config
 
         ! name of a specific config file.  open it and store the config object.
-        else if (present(configfile)) then
-          compp%configfile = configfile
+        else if (present(configFile)) then
+          compp%configFile = configFile
           compp%config = ESMF_ConfigCreate(status)
-          call ESMF_ConfigLoadFile(compp%config, configfile, rc=status)
+          call ESMF_ConfigLoadFile(compp%config, configFile, rc=status)
           ! TODO: rationalize return codes from config with ESMF codes
           if (status .ne. 0) then
-              ! try again with the dirpath concatinated on front
-              fullpath = trim(dirpath) // '/' // trim(configfile)
+              ! try again with the dirPath concatinated on front
+              fullpath = trim(dirPath) // '/' // trim(configFile)
               call ESMF_ConfigLoadFile(compp%config, fullpath, rc=status)
               if (status .ne. 0) then
                   print *, "ERROR: loading config file, unable to open either"
-                  print *, " name = ", trim(configfile), " or name = ", trim(fullpath)
+                  print *, " name = ", trim(configFile), " or name = ", trim(fullpath)
                   return
               endif
           endif
@@ -558,14 +557,14 @@ end function
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompInitialize(compp, importstate, &
-                                                exportstate, clock, phase, rc)
+      recursive subroutine ESMF_CompInitialize(compp, importState, &
+                                                exportState, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -579,9 +578,9 @@ end function
 !
 !   \item[compp]
 !    Component to call Initialization routine for.
-!   \item[{[importstate]}]  
+!   \item[{[importState]}]  
 !    Import data for initialization.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !    Export data for initialization.
 !   \item[{[clock]}]  
 !    External clock for passing in time information.
@@ -600,7 +599,7 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp layout
+        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
@@ -615,20 +614,20 @@ end function
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
+        ! proper delayout.
 	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+	call ESMF_DELayoutGetDEID(compp%delayout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this layout"
+          print *, "Global DE ", gde_id, " is not present in this delayout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! TODO: handle optional args, do framework setup for this comp.
-        if (present(importstate)) then
-          is = importstate
+        if (present(importState)) then
+          is = importState
           isdel = .FALSE.
         else
           ! create an empty state
@@ -636,8 +635,8 @@ end function
           isdel = .TRUE.
         endif
 
-        if (present(exportstate)) then
-          es = exportstate
+        if (present(exportState)) then
+          es = exportState
           esdel = .FALSE.
         else
           ! create an empty state
@@ -728,7 +727,7 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp layout
+        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
@@ -741,16 +740,16 @@ end function
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
+        ! proper delayout.
 	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+	call ESMF_DELayoutGetDEID(compp%delayout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this layout"
+          print *, "Global DE ", gde_id, " is not present in this delayout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -819,7 +818,7 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp layout
+        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
@@ -832,16 +831,16 @@ end function
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
+        ! proper delayout.
 	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+	call ESMF_DELayoutGetDEID(compp%delayout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this layout"
+          print *, "Global DE ", gde_id, " is not present in this delayout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -874,14 +873,14 @@ end function
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompFinalize(compp, importstate, exportstate, &
+      recursive subroutine ESMF_CompFinalize(compp, importState, exportState, &
                                       clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -894,9 +893,9 @@ end function
 !  \begin{description}
 !   \item[compp]
 !    Component to call Finalize routine for.
-!   \item[{[importstate]}]  
+!   \item[{[importState]}]  
 !    Import data for finalize.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !    Export data for finalize.
 !   \item[{[clock]}]  
 !    External clock for passing in time information.
@@ -916,7 +915,7 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp layout
+        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
@@ -929,16 +928,16 @@ end function
         endif
 
         ! See if this is currently finalizening on a DE which is part of the
-        ! proper Layout.
+        ! proper delayout.
 	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+	call ESMF_DELayoutGetDEID(compp%delayout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this layout"
+          print *, "Global DE ", gde_id, " is not present in this delayout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -949,7 +948,7 @@ end function
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETFINAL, phase, &
-                                compw, importstate, exportstate, clock, status)
+                                compw, importState, exportState, clock, status)
         
 #ifdef ESMF_ENABLE_VM
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
@@ -976,14 +975,14 @@ end function
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CompRun(compp, importstate, exportstate, &
+      recursive subroutine ESMF_CompRun(compp, importState, exportState, &
                                                             clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -997,9 +996,9 @@ end function
 !
 !   \item[compp]
 !    Component to call Run routine for.
-!   \item[{[importstate]}]  
+!   \item[{[importState]}]  
 !     Import data for run.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !     Export data for run.
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
@@ -1019,7 +1018,7 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         integer :: gde_id                       ! the global DE
-        integer :: lde_id                       ! the DE in the subcomp layout
+        integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
@@ -1032,16 +1031,16 @@ end function
         endif
 
         ! See if this is currently running on a DE which is part of the
-        ! proper Layout.
+        ! proper delayout.
 	call ESMF_DELayoutGetDEID(GlobalLayout, gde_id, status)
-	call ESMF_DELayoutGetDEID(compp%layout, lde_id, status)
+	call ESMF_DELayoutGetDEID(compp%delayout, lde_id, status)
         if (status .ne. ESMF_SUCCESS) then
           ! this is not our DE
-          print *, "Global DE ", gde_id, " is not present in this layout"
+          print *, "Global DE ", gde_id, " is not present in this delayout"
           if (rcpresent) rc = ESMF_SUCCESS
           return
         endif
-        !print *, "Global DE ", gde_id, " is ", lde_id, " in this layout"
+        !print *, "Global DE ", gde_id, " is ", lde_id, " in this delayout"
 
         ! TODO: handle optional args, do framework setup for this comp.
 
@@ -1052,7 +1051,7 @@ end function
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, compw, &
-                                       importstate, exportstate, clock, status)
+                                       importState, exportState, clock, status)
         
 #ifdef ESMF_ENABLE_VM
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
@@ -1084,18 +1083,18 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, layout, mtype, grid, &
-                                        clock, dirpath, configfile, config, rc)
+      subroutine ESMF_CompGet(compp, name, delayout, gridcomptype, grid, &
+                                        clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: layout
-      type(ESMF_ModelType), intent(out), optional :: mtype 
+      type(ESMF_DELayout), intent(out), optional :: delayout
+      type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
-      character(len=*), intent(out), optional :: dirpath
-      character(len=*), intent(out), optional :: configfile
+      character(len=*), intent(out), optional :: dirPath
+      character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
       integer, intent(out), optional :: rc             
 
@@ -1125,12 +1124,12 @@ end function
           call ESMF_GetName(compp%base, name, status)
         endif
 
-        if (present(layout)) then
-          layout = compp%layout
+        if (present(delayout)) then
+          delayout = compp%delayout
         endif
 
-        if (present(mtype)) then
-          mtype = compp%mtype
+        if (present(gridcomptype)) then
+          gridcomptype = compp%gridcomptype
         endif
 
         if (present(grid)) then
@@ -1141,12 +1140,12 @@ end function
           clock = compp%clock
         endif
 
-        if (present(dirpath)) then
-          dirpath = compp%dirpath
+        if (present(dirPath)) then
+          dirPath = compp%dirPath
         endif
 
-        if (present(configfile)) then
-          configfile = compp%configfile
+        if (present(configFile)) then
+          configFile = compp%configFile
         endif
 
         if (present(config)) then
@@ -1165,18 +1164,18 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, layout, mtype, grid, &
-                                        clock, dirpath, configfile, config, rc)
+      subroutine ESMF_CompSet(compp, name, delayout, gridcomptype, grid, &
+                                        clock, dirPath, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      type(ESMF_ModelType), intent(in), optional :: mtype 
+      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
-      character(len=*), intent(in), optional :: dirpath
-      character(len=*), intent(in), optional :: configfile
+      character(len=*), intent(in), optional :: dirPath
+      character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
       integer, intent(out), optional :: rc             
 
@@ -1206,12 +1205,12 @@ end function
           call ESMF_SetName(compp%base, name, "Component", status)
         endif
 
-        if (present(layout)) then
-          compp%layout = layout
+        if (present(delayout)) then
+          compp%delayout = delayout
         endif
 
-        if (present(mtype)) then
-          compp%mtype = mtype
+        if (present(gridcomptype)) then
+          compp%gridcomptype = gridcomptype
         endif
 
         if (present(grid)) then
@@ -1222,12 +1221,12 @@ end function
           compp%clock = clock
         endif
 
-        if (present(dirpath)) then
-          compp%dirpath = dirpath
+        if (present(dirPath)) then
+          compp%dirPath = dirPath
         endif
 
-        if (present(configfile)) then
-          compp%configfile = configfile
+        if (present(configFile)) then
+          compp%configFile = configFile
         endif
 
         if (present(config)) then
@@ -1303,7 +1302,7 @@ end function
         type (ESMF_CompClass) :: a
 
 !       this is just to stop compiler warnings
-        a%mtype = ESMF_OTHER
+        a%gridcomptype = ESMF_OTHER
 
         ESMF_CompRead = a 
  
@@ -1411,7 +1410,7 @@ end function
        call ESMF_GetName(compp%base, cname, status)
        print *, "  name = ", trim(cname)
        
-       call ESMF_DELayoutPrint(compp%layout, "", status)
+       call ESMF_DELayoutPrint(compp%delayout, "", status)
 
        ! TODO: add more info here
 
@@ -1507,7 +1506,7 @@ end function
       ! Create a global DELayout
       GlobalLayout = ESMF_DELayoutCreate(status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "Error creating global layout"
+          print *, "Error creating global delayout"
           return
       endif
 
@@ -1588,10 +1587,10 @@ end function
 #ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompVMDefMaxThreads - Define a VM for this Component
+! !IROUTINE: ESMF_CompSetVMMaxThreads - Define a VM for this Component
 
 ! !INTERFACE:
-  subroutine ESMF_CompVMDefMaxThreads(compp, max, &
+  subroutine ESMF_CompSetVMMaxThreads(compp, max, &
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
@@ -1647,15 +1646,15 @@ end function
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_CompVMDefMaxThreads
+  end subroutine ESMF_CompSetVMMaxThreads
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompVMDefMinThreads - Define a VM for this Component
+! !IROUTINE: ESMF_CompSetVMMinThreads - Define a VM for this Component
 
 ! !INTERFACE:
-  subroutine ESMF_CompVMDefMinThreads(compp, max, &
+  subroutine ESMF_CompSetVMMinThreads(compp, max, &
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
@@ -1686,7 +1685,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
     logical :: rcpresent
@@ -1711,15 +1709,15 @@ end function
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_CompVMDefMinThreads
+  end subroutine ESMF_CompSetVMMinThreads
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompVMDefMaxPEs - Define a VM for this Component
+! !IROUTINE: ESMF_CompSetVMMaxPEs - Define a VM for this Component
 
 ! !INTERFACE:
-  subroutine ESMF_CompVMDefMaxPEs(compp, max, &
+  subroutine ESMF_CompSetVMMaxPEs(compp, max, &
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
@@ -1775,15 +1773,15 @@ end function
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_CompVMDefMaxPEs
+  end subroutine ESMF_CompSetVMMaxPEs
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompReturn - Wait for component to return
+! !IROUTINE: ESMF_CompWait - Wait for component to return
 
 ! !INTERFACE:
-  subroutine ESMF_CompReturn(compp, rc)
+  subroutine ESMF_CompWait(compp, rc)
 !
 ! !ARGUMENTS:
     type (ESMF_CompClass), pointer ::             compp
@@ -1825,7 +1823,7 @@ end function
     ! Set return values
     if (rcpresent) rc = ESMF_SUCCESS
  
-  end subroutine ESMF_CompReturn
+  end subroutine ESMF_CompWait
 !------------------------------------------------------------------------------
 #endif
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.19 2004/03/18 16:37:37 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.20 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,13 +10,13 @@
 !
 !==============================================================================
 !
-!     ESMF Coupler Component module
+!     ESMF Coupler Cplcomp module
       module ESMF_CplCompMod
 !
 !==============================================================================
 !
-! This file contains the Coupler Component class definition and all 
-!   Coupler Component class methods.
+! This file contains the Coupler Cplcomp class definition and all 
+!   Coupler Cplcomp class methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -24,12 +24,12 @@
 #include "ESMF.h"
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_CplCompMod - Coupler Component class.
+! !MODULE: ESMF_CplCompMod - Coupler Cplcomp class.
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the Fortran interfaces to the
-! {\tt Coupler Component} class and associated functions and subroutines.  
+! {\tt Coupler Cplcomp} class and associated functions and subroutines.  
 !
 !
 ! !USES:
@@ -52,7 +52,7 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_CplComp
 !
-!     ! Component wrapper
+!     ! Cplcomp wrapper
 
       type ESMF_CplComp
       sequence
@@ -79,7 +79,7 @@
       public ESMF_CplCompValidate
       public ESMF_CplCompPrint
  
-      ! These do argument processing, layout checking, and then
+      ! These do argument processing, delayout checking, and then
       !  call the user-provided routines.
       public ESMF_CplCompInitialize
       public ESMF_CplCompRun
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.19 2004/03/18 16:37:37 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.20 2004/03/18 21:49:29 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -106,7 +106,7 @@
 !
 !==============================================================================
 !BOPI
-! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Component
+! !IROUTINE: ESMF_CplCompCreate - Create a Coupler Cplcomp
 !
 ! !INTERFACE:
       interface ESMF_CplCompCreate
@@ -117,7 +117,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
-!     Coupler {\tt Component}.  The difference is whether an already
+!     Coupler {\tt Cplcomp}.  The difference is whether an already
 !     created configuration object is passed in, or a filename of a new
 !     config file which needs to be opened.
 !
@@ -148,11 +148,11 @@
 !------------------------------------------------------------------------------
 
 !BOP
-! !IROUTINE: ESMF_CplCompCreate - Create a new Component
+! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateNew(name, layout, config, clock, rc)
+      function ESMF_CplCompCreateNew(name, delayout, config, clock, rc)
 !
 ! !RETURN VALUE:
       ! Private name; call using ESMF_CplCompCreate()      
@@ -160,26 +160,26 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_DELayout), intent(in) :: layout
+      type(ESMF_DELayout), intent(in) :: delayout
       type(ESMF_Config), intent(in) :: config
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Component and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp and set the decomposition characteristics.
 !
-!  The return value is a new Component.
+!  The return value is a new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    Component name.
+!    CplComp name.
 !   \item[layout]
-!    Component layout.
+!    CplComp delayout.
 !   \item[config]
-!    Component-specific configuration object.  
+!    CplComp-specific configuration object.  
 !   \item[clock]
-!    Component-specific clock object.  
+!    CplComp-specific clock object.  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -207,15 +207,15 @@
         ! Allocate a new comp class
         allocate(compclass, stat=status)
         if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplComponentCreate: Allocate"
+          print *, "ERROR in ESMF_CplCompCreate: Allocate"
           return
         endif
 
-        ! Call construction method to initialize component internals
-        call ESMF_CompConstruct(compclass, ESMF_CPLCOMPTYPE, name, layout, &
+        ! Call construction method to initialize cplcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
                                     config=config, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component construction error"
+          print *, "CplComp construction error"
           return
         endif
 
@@ -228,11 +228,11 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompCreate - Create a new Component from a Config file
+! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp from a Config file
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateConf(name, layout, config, configfile, &
+      function ESMF_CplCompCreateConf(name, delayout, config, configFile, &
                                       clock, rc)
 !
 ! !RETURN VALUE:
@@ -240,30 +240,30 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_DELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
-      character(len=*), intent(in), optional :: configfile
+      character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Component and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
 !
-!  The return value is a new Component.
+!  The return value is a new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[{[name]}]
-!    Component name.
+!    CplComp name.
 !   \item[{[layout]}]
-!    Component layout.
+!    CplComp delayout.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
-!   \item[{[configfile]}]
-!    Component-specific configuration filename. 
+!   \item[{[configFile]}]
+!    CplComp-specific configuration filename. 
 !   \item[{[clock]}]
-!    Component-specific clock.
+!    CplComp-specific clock.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -291,16 +291,16 @@
         ! Allocate a new comp class
         allocate(compclass, stat=status)
         if(status .NE. 0) then
-          print *, "ERROR in ESMF_CplComponentCreate: Allocate"
+          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
           return
         endif
    
-        ! Call construction method to initialize component internals
-        call ESMF_CompConstruct(compclass, ESMF_CPLCOMPTYPE, name, layout, &
-                                configfile=configfile, config=config, &
+        ! Call construction method to initialize cplcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+                                configFile=configFile, config=config, &
                                 clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component construction error"
+          print *, "CplComp construction error"
           return
         endif
 
@@ -312,22 +312,22 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompDestroy - Release resources for a Component
+! !IROUTINE: ESMF_CplCompDestroy - Release resources for a CplComp
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompDestroy(component, rc)
+      subroutine ESMF_CplCompDestroy(cplcomp, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
+      type(ESMF_CplComp) :: cplcomp
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Component}.
+!     Releases all resources associated with this {\tt CplComp}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[component]
-!       Destroy contents of this {\tt Component}.
+!     \item[cplcomp]
+!       Destroy contents of this {\tt CplComp}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -348,25 +348,25 @@
         endif
 
         ! Check to see if already destroyed
-        if (.not.associated(component%compp)) then  
-          print *, "Component already destroyed"
+        if (.not.associated(cplcomp%compp)) then  
+          print *, "CplComp already destroyed"
           return
         endif
 
         ! call Destruct to release resources
-        call ESMF_CompDestruct(component%compp, status)
+        call ESMF_CompDestruct(cplcomp%compp, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component contents destruction error"
+          print *, "CplComp contents destruction error"
           return
         endif
 
-        ! Deallocate the component struct itself
-        deallocate(component%compp, stat=status)
+        ! Deallocate the cplcomp struct itself
+        deallocate(cplcomp%compp, stat=status)
         if (status .ne. 0) then
-          print *, "Component contents destruction error"
+          print *, "CplComp contents destruction error"
           return
         endif
-        nullify(component%compp)
+        nullify(cplcomp%compp)
  
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -375,32 +375,32 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompFinalize - Call the Component's finalize routine
+! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
 
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompFinalize(component, importstate, &
-                                              exportstate, clock, phase, rc)
+    recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
+                                              exportState, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_CplComp) :: cplcomp
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
+!  Call the associated user finalize code for a cplcomp.
 !
 !    
 !  The arguments are: 
 !  \begin{description} 
-!   \item[component]
-!    Component to call Finalize routine for.
-!   \item[{[importstate]}]
+!   \item[cplcomp]
+!    CplComp to call Finalize routine for.
+!   \item[{[importState]}]
 !       ESMF\_State containing import data for coupling.
-!   \item[{[exportstate]}]
+!   \item[{[exportState]}]
 !       ESMF\_State containing export data for coupling.
 !   \item[{[clock]}]  External clock for passing in time information.
 !   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
@@ -412,48 +412,48 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompFinalize(component%compp, importstate=importstate, &
-                      exportstate=exportstate, clock=clock, phase=phase, rc=rc)
+        call ESMF_CompFinalize(cplcomp%compp, importState=importState, &
+                      exportState=exportState, clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_CplCompFinalize
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompGet - Query a Component for information
+! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompGet(component, name, layout, clock, &
-                                                       configfile, config, rc)
+      subroutine ESMF_CplCompGet(cplcomp, name, delayout, clock, &
+                                                       configFile, config, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(in) :: component
+      type(ESMF_CplComp), intent(in) :: cplcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: layout
+      type(ESMF_DELayout), intent(out), optional :: delayout
       type(ESMF_Clock), intent(out), optional :: clock
-      character(len=*), intent(out), optional :: configfile
+      character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Returns information about the component.  For queries where the caller
+!      Returns information about the cplcomp.  For queries where the caller
 !      only wants a single value, specify the argument by name.
-!      All the arguments after the component input are optional 
+!      All the arguments after the cplcomp input are optional 
 !      to facilitate this.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to query.
+!   \item[cplcomp]
+!    CplComp to query.
 !   \item[{[name]}]
-!    Component name.
+!    CplComp name.
 !   \item[{[layout]}]
-!    Component layout.
+!    CplComp delayout.
 !   \item[{[clock]}]
-!    Component-specific clock.
-!   \item[{[configfile]}]
-!    Component-specific configuration filename.
+!    CplComp-specific clock.
+!   \item[{[configFile]}]
+!    CplComp-specific configuration filename.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -464,39 +464,39 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(component%compp, name, layout, clock=clock, &
-                          configfile=configfile, config=config, rc=rc)
+        call ESMF_CompGet(cplcomp%compp, name, delayout, clock=clock, &
+                          configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompInitialize - Call the Component's initialize routine
+! !IROUTINE: ESMF_CplCompInitialize - Call the CplComp's initialize routine
 
 ! !INTERFACE:
-      recursive subroutine ESMF_CplCompInitialize(component, importstate, &
-                                                  exportstate, clock, phase, rc)
+      recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
+                                                  exportState, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_CplComp) :: cplcomp
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
+!  Call the associated user initialization code for a cplcomp.
 !
 !    
 !  The arguments are: 
 !  \begin{description} 
-!   \item[component]
-!    Component to call Initialization routine for.
-!   \item[{[importstate]}]  
+!   \item[cplcomp]
+!    CplComp to call Initialization routine for.
+!   \item[{[importState]}]  
 !       ESMF\_State containing source data for coupling.
-!   \item[{[exportstate]}]  
+!   \item[{[exportState]}]  
 !       ESMF\_State containing destination data for coupling.
 !   \item[{[clock]}]  External clock for passing in time information.
 !   \item[{[phase]}]  If multiple-phase init, which phase number this is.
@@ -508,8 +508,8 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompInitialize(component%compp, importstate=importstate, &
-                                 exportstate=exportstate, clock=clock,     &
+        call ESMF_CompInitialize(cplcomp%compp, importState=importState, &
+                                 exportState=exportState, clock=clock,     &
                                  phase=phase, rc=rc)
 
         end subroutine ESMF_CplCompInitialize
@@ -517,24 +517,24 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a Component
+! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompPrint(component, options, rc)
+      subroutine ESMF_CplCompPrint(cplcomp, options, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
+      type(ESMF_CplComp) :: cplcomp
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a component.
+!      Routine to print information about a cplcomp.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to print.
+!   \item[cplcomp]
+!    CplComp to print.
 !   \item[{[options]}]
 !    Options on print.
 !   \item[{[rc]}]
@@ -544,33 +544,33 @@
 !EOP
 ! !REQUIREMENTS:
 
-       print *, "Coupler Component:"
-       call ESMF_CompPrint(component%compp, options, rc)
+       print *, "Coupler CplComp:"
+       call ESMF_CompPrint(cplcomp%compp, options, rc)
 
        end subroutine ESMF_CplCompPrint
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompReadRestart -- Call the Component's restore routine
+! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
 
 ! !INTERFACE:
-     recursive subroutine ESMF_CplCompReadRestart(component, iospec, clock, phase, rc)
+     recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp), intent(inout) :: component
+      type (ESMF_CplComp), intent(inout) :: cplcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user restore code for a component.
+!  Call the associated user restore code for a cplcomp.
 !    
 !  The arguments are: 
 !  \begin{description} 
-!   \item[component]
-!    Component to call ReadRestart routine for.
+!   \item[cplcomp]
+!    CplComp to call ReadRestart routine for.
 !   \item[{[iospec]}]
 !    {\tt IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
@@ -585,38 +585,38 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompReadRestart(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, rc)
 
         end subroutine ESMF_CplCompReadRestart
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompRun - Call Component run routine with two States
+! !IROUTINE: ESMF_CplCompRun - Call CplComp run routine with two States
 
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompRun(component, importstate, exportstate, &
+    recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
                                                                   clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_CplComp) :: cplcomp
+      type (ESMF_State), intent(inout), optional :: importState
+      type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user run code for a component.
+!  Call the associated user run code for a cplcomp.
 !
 !    
 !  The arguments are: 
 !  \begin{description} 
-!   \item[component]
-!    Component to call Run routine for.
-!   \item[{[importstate]}]
+!   \item[cplcomp]
+!    CplComp to call Run routine for.
+!   \item[{[importState]}]
 !     ESMF\_State containing import data for coupling.
-!   \item[{[exportstate]}]
+!   \item[{[exportState]}]
 !     ESMF\_State containing export data for coupling.
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
@@ -630,49 +630,49 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRun(component%compp, importstate=importstate,  &
-                      exportstate=exportstate, clock=clock, phase=phase, rc=rc)
+        call ESMF_CompRun(cplcomp%compp, importState=importState,  &
+                      exportState=exportState, clock=clock, phase=phase, rc=rc)
 
         end subroutine ESMF_CplCompRun
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompSet - Set or reset information about the Component
+! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompSet(component, name, layout, clock, &
-                                                       configfile, config, rc)
+      subroutine ESMF_CplCompSet(cplcomp, name, delayout, clock, &
+                                                       configFile, config, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: component
+      type(ESMF_CplComp), intent(inout) :: cplcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_DELayout), intent(in), optional :: delayout
       type(ESMF_Clock), intent(in), optional :: clock
-      character(len=*), intent(in), optional :: configfile
+      character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
       integer, intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
-!      Sets or resets information about the component.  When the caller
+!      Sets or resets information about the cplcomp.  When the caller
 !      only wants to set a single value specify the argument by name.
-!      All the arguments after the component input are optional 
+!      All the arguments after the cplcomp input are optional 
 !      to facilitate this.
 !
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to set information for. 
+!   \item[cplcomp]
+!    CplComp to set information for. 
 !   \item[{[name]}]
-!    Component name.
+!    CplComp name.
 !   \item[{[layout]}]
-!    Component layout.
+!    CplComp delayout.
 !   \item[{[clock]}]
-!    Component-specific clock.
-!   \item[{[configfile]}]
-!    Component-specific configuration filename.
+!    CplComp-specific clock.
+!   \item[{[configFile]}]
+!    CplComp-specific configuration filename.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -683,30 +683,30 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompSet(component%compp, name, layout, clock=clock, &
-                          configfile=configfile, config=config, rc=rc)
+        call ESMF_CompSet(cplcomp%compp, name, delayout, clock=clock, &
+                          configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompSet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompValidate -- Ensure the Component is internally consistent
+! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompValidate(component, options, rc)
+      subroutine ESMF_CplCompValidate(cplcomp, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
+      type(ESMF_CplComp) :: cplcomp
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to ensure a Component is valid.
+!      Routine to ensure a CplComp is valid.
 !
 !  The arguments are:
 !  \begin{description}
-!   \item[component]
-!    Component to validate.
+!   \item[cplcomp]
+!    CplComp to validate.
 !   \item[{[options]}]
 !    Object to be validated.
 !   \item[{[rc]}]
@@ -716,33 +716,33 @@
 !EOP
 ! !REQUIREMENTS:
 
-       call ESMF_CompValidate(component%compp, options, rc)
+       call ESMF_CompValidate(cplcomp%compp, options, rc)
  
        end subroutine ESMF_CplCompValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompWriteRestart -- Call the Component's checkpoint routine
+! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
 
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompWriteRestart(component, iospec, clock, phase, rc)
+    recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
-      type (ESMF_CplComp), intent(inout) :: component
+      type (ESMF_CplComp), intent(inout) :: cplcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user checkpoint code for a component.
+!  Call the associated user checkpoint code for a cplcomp.
 !    
 !  The arguments are: 
 !  \begin{description} 
 !  
-!   \item[component]
-!    Component to call WriteRestart routine for.
+!   \item[cplcomp]
+!    CplComp to call WriteRestart routine for.
 !   \item[{[iospec]}]
 !    {\tt IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
@@ -757,7 +757,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompWriteRestart(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, rc)
 
         end subroutine ESMF_CplCompWriteRestart
 

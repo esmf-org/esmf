@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.10 2004/02/06 23:30:28 nscollins Exp $
+! $Id: ESMF_UserMain.F90,v 1.11 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -45,7 +45,7 @@
     type(ESMF_State) :: atmimport, ocnexport
 
     character(ESMF_MAXSTR) :: tname, gname1, gname2, cname
-    character(1024) :: configfile
+    character(1024) :: configFile
         
 !-------------------------------------------------------------------------
 !   ! Test 1:
@@ -59,8 +59,8 @@
     !  Create the top level Gridded Component
 
     tname = "Test Application"
-    configfile="/home/nancy/models/startup.conf"
-    topcomp = ESMF_GridCompCreate(name=tname, configfile=configfile, rc=rc)
+    configFile="/home/nancy/models/startup.conf"
+    topcomp = ESMF_GridCompCreate(name=tname, configFile=configFile, rc=rc)
 
     ! Query for the layout and config objects
     call ESMF_GridCompGet(topcomp, layout=tlayout, config=tconfig)
@@ -138,7 +138,7 @@
     !   call ESMF_CplCompInitialize(comp, import, export, clock, phase, rc)
 
 
-    call ESMF_GridCompInitialize(oceangridcomp, exportstate=ocnexport, &
+    call ESMF_GridCompInitialize(oceangridcomp, exportState=ocnexport, &
                                                     clock=tclock, rc=rc)
     call ESMF_GridCompInitialize(atmgridcomp, atmimport, clock=tclock, rc=rc)
     call ESMF_CplCompInitialize(cplcomp, ocnexport, atmimport, tclock, rc=rc)
@@ -154,7 +154,7 @@
 
     do
    
-        call ESMF_GridCompRun(oceangridcomp, exportstate=ocnexport, 
+        call ESMF_GridCompRun(oceangridcomp, exportState=ocnexport, 
                                                          clock=tclock, rc=rc)
 
         call ESMF_CplCompRun(cplcomp, ocnexport, atmimport, tclock, rc=rc)
@@ -178,11 +178,11 @@
     !   call ESMF_CplCompFinalize(comp, import, export, clock, phase, rc)
 
 
-    call ESMF_GridCompFinalize(oceangridcomp, exportstate=ocnexport, &
+    call ESMF_GridCompFinalize(oceangridcomp, exportState=ocnexport, &
                                                     clock=tclock, rc=rc)
     call ESMF_CplCompFinalize(cplcomp, ocnexport, atmimport, clock=tclock, &
                                                                    rc=rc)
-    call ESMF_GridCompFinalize(component=atmgridcomp, importstate=atmimport, &
+    call ESMF_GridCompFinalize(component=atmgridcomp, importState=atmimport, &
                                                     clock=tclock, rc=rc)
     print *, "Finalization complete"
 

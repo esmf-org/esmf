@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.4 2004/03/08 16:19:31 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.5 2004/03/18 21:49:30 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -78,13 +78,13 @@
 ! !IROUTINE: coupler_init - coupler init routine
 
 ! !INTERFACE:
-      subroutine coupler_init(comp, importstate, exportstate, clock, rc)
+      subroutine coupler_init(comp, importState, exportState, clock, rc)
 
       use global_data
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -95,9 +95,9 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Nested state object containing import data.
-!     \item[exportstate]
+!     \item[exportState]
 !          Nested state object containing export data.
 !     \item[clock] 
 !          External clock.
@@ -121,15 +121,15 @@
     ! Get layout from coupler component
     call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
 
-    call ESMF_StateGetName(importstate, statename, rc=rc)
-    call ESMF_StateGetField(importstate, "SIE", src_field, rc=rc)
-    call ESMF_StateGetField(exportstate, "SIE", dst_field, rc=rc)
+    call ESMF_StateGetName(importState, statename, rc=rc)
+    call ESMF_StateGetField(importState, "SIE", src_field, rc=rc)
+    call ESMF_StateGetField(exportState, "SIE", dst_field, rc=rc)
 
     if (trim(statename) .eq. "FlowSolver Feedback") then
-      call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
 
       fromFlow_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
@@ -138,10 +138,10 @@
     endif
 
     if (trim(statename) .eq. "Injection Feedback") then
-      call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
 
       fromInject_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
@@ -159,13 +159,13 @@
 ! !IROUTINE: coupler_run - coupler run routine
 
 ! !INTERFACE:
-      subroutine coupler_run(comp, importstate, exportstate, clock, rc)
+      subroutine coupler_run(comp, importState, exportState, clock, rc)
 
       use global_data
 !
 ! !ARGUMENTS:
      type(ESMF_CplComp), intent(inout) :: comp
-     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -176,9 +176,9 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Nested state object containing import data.
-!     \item[exportstate]
+!     \item[exportState]
 !          Nested state object containing export data.
 !     \item[clock] 
 !          External clock.
@@ -212,7 +212,7 @@
         ! In this case, the coupling is symmetric - you call Redist either way
         ! we only care about the coupling direction in order to get
         ! the right routehandle selected.
-        call ESMF_StateGetName(importstate, statename, rc=rc)
+        call ESMF_StateGetName(importState, statename, rc=rc)
         if (trim(statename) .eq. "FlowSolver Feedback") then
             routehandle = fromFlow_rh 
         else
@@ -222,7 +222,7 @@
         do i=1, datacount
 
            ! check isneeded flag here
-           if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+           if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
                !print *, "skipping field ", trim(datanames(i)), " not needed"
                cycle
            endif
@@ -241,8 +241,8 @@
 !   an Export State and the other is an Import State.
 !
 !\begin{verbatim}
-           call ESMF_StateGetData(importstate, datanames(i), srcfield, rc=rc)
-           call ESMF_StateGetData(exportstate, datanames(i), dstfield, rc=rc)
+           call ESMF_StateGetData(importState, datanames(i), srcfield, rc=rc)
+           call ESMF_StateGetData(exportState, datanames(i), dstfield, rc=rc)
 !\end{verbatim}
 !
 !   The Route routine uses information contained in the Fields and the
@@ -269,13 +269,13 @@
 ! !IROUTINE:  coupler_final - finalization routine
 
 ! !INTERFACE:
-      subroutine coupler_final(comp, importstate, exportstate, clock, rc)
+      subroutine coupler_final(comp, importState, exportState, clock, rc)
 
       use global_data
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp) :: comp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -286,9 +286,9 @@
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Nested state object containing import data.
-!     \item[exportstate]
+!     \item[exportState]
 !          Nested state object containing export data.
 !     \item[clock] 
 !          External clock.

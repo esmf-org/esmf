@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.13 2004/02/11 17:27:35 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.14 2004/03/18 21:49:29 cdeluca Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -46,10 +46,10 @@
 !   !  Coupler Component created by higher level calls, here is the
 !   !   Initialization routine.
     
-    subroutine CPL_Init(comp, importstate, exportstate, clock, rc)
+    subroutine CPL_Init(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importstate
-        type(ESMF_State) :: exportstate
+        type(ESMF_State) :: importState
+        type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
         integer :: rc
         type(ESMF_State) :: nestedstate
@@ -60,11 +60,11 @@
         ! Precompute any needed values, fill in any inital values
         !  needed in Import States
 
-        call ESMF_StateGetState(importstate, "substate 1", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 1", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importstate, "substate 2", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 2", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importstate, "substate 3", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 3", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
 
         print *, "Coupler Init returning"
@@ -75,10 +75,10 @@
 !   !  The Run routine where data is exchanged.
 !   !
  
-    subroutine CPL_Run(comp, importstate, exportstate, clock, rc)
+    subroutine CPL_Run(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importstate
-        type(ESMF_State) :: exportstate
+        type(ESMF_State) :: importState
+        type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -89,11 +89,11 @@
         ! Add whatever code needed here to transform Export state data
         !  into Import states for the next timestep.  
 
-        call ESMF_StateGetState(importstate, "substate 1", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 1", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importstate, "substate 2", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 2", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importstate, "substate 3", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 3", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
 
         print *, "Coupler Run returning"
@@ -104,10 +104,10 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine CPL_Final(comp, importstate, exportstate, clock, rc)
+    subroutine CPL_Final(comp, importState, exportState, clock, rc)
         type(ESMF_CplComp) :: comp
-        type(ESMF_State) :: importstate
-        type(ESMF_State) :: exportstate
+        type(ESMF_State) :: importState
+        type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
         integer :: rc
 
@@ -118,11 +118,11 @@
         ! Add whatever code needed here to compute final values and
         !  finish the computation.
 
-        call ESMF_StateGetState(importstate, "substate 1", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 1", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importstate, "substate 2", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 2", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
-        call ESMF_StateGetState(importstate, "substate 3", nestedstate, rc)
+        call ESMF_StateGetState(importState, "substate 3", nestedstate, rc)
         call ESMF_StatePrint(nestedstate, rc=rc)
 
         print *, "Coupler Final returning"
@@ -152,7 +152,7 @@
     integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname
     type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
-    type(ESMF_State) :: importstate, exportstate
+    type(ESMF_State) :: importState, exportState
     type(ESMF_CplComp) :: cpl
         
 !-------------------------------------------------------------------------
@@ -170,7 +170,7 @@
     layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
 
     cname = "Atmosphere Model Coupler"
-    cpl = ESMF_CplCompCreate(cname, layout1, configfile="setup.rc", rc=rc)  
+    cpl = ESMF_CplCompCreate(cname, layout1, configFile="setup.rc", rc=rc)  
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_CplCompSetServices(cpl, CPL_SetServices, rc)
@@ -180,8 +180,8 @@
     ! Create the necessary import and export states used to pass data
     !  between components.
 
-    exportstate = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
-    importstate = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
+    exportState = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
+    importState = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
 
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
@@ -204,13 +204,13 @@
      
     ! Call the Init routine.  There is an optional index number
     !  for those components which have multiple entry points.
-    call ESMF_CplCompInitialize(cpl, exportstate, importstate, tclock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, exportState, importState, tclock, rc=rc)
     print *, "Comp Initialize complete"
 
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
-        call ESMF_CplCompRun(cpl, exportstate, importstate, tclock, rc=rc)
+        call ESMF_CplCompRun(cpl, exportState, importState, tclock, rc=rc)
         call ESMF_ClockAdvance(tclock, timestep)
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
@@ -218,7 +218,7 @@
     print *, "Comp Run complete"
 
     ! Give the component a chance to write out final results, clean up.
-    call ESMF_CplCompFinalize(cpl, exportstate, importstate, tclock, rc=rc)
+    call ESMF_CplCompFinalize(cpl, exportState, importState, tclock, rc=rc)
     print *, "Comp Finalize complete"
 
     ! Destroy components.

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.3 2003/11/09 00:07:55 nscollins Exp $
+// $Id: ESMC_GridComp.C,v 1.4 2004/03/18 21:49:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.3 2003/11/09 00:07:55 nscollins Exp $";
+           "$Id: ESMC_GridComp.C,v 1.4 2004/03/18 21:49:29 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -97,9 +97,9 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 // !ARGUMENTS:
       char *name,
       ESMC_DELayout *layout,
-      enum ESMC_ModelType mtype,
+      enum ESMC_GridCompType mtype,
       ESMC_Grid *grid,
-      char *configfile,
+      char *configFile,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -116,7 +116,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     comp = new ESMC_GridComp;
     FTN(f_esmf_gridcompcreate)(comp, name, layout, &mtype, grid, NULL, 
-                         configfile, rc, strlen(name), strlen(configfile));
+                         configFile, rc, strlen(name), strlen(configFile));
 
     return comp;
 
@@ -165,8 +165,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
       int phase)  {              // in: if > 0, which phase of init to invoke
 //
@@ -177,7 +177,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcompinitialize)(this, importstate, exportstate, clock, 
+    FTN(f_esmf_gridcompinitialize)(this, importState, exportState, clock, 
                                    &phase, &rc);
 
     return rc;
@@ -195,8 +195,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
       int phase)  {              // in: if > 0, which phase of run to invoke
 //
@@ -207,7 +207,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcomprun)(this, importstate, exportstate, clock, &phase, &rc);
+    FTN(f_esmf_gridcomprun)(this, importState, exportState, clock, &phase, &rc);
 
     return rc;
 
@@ -224,8 +224,8 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_State *importstate,   // in/out: required data
-      ESMC_State *exportstate,   // in/out: produced data
+      ESMC_State *importState,   // in/out: required data
+      ESMC_State *exportState,   // in/out: produced data
       ESMC_Clock *clock,         // in: model clock
       int phase)  {              // in: if > 0, which phase of finalize to invoke
 //
@@ -236,7 +236,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 
     int rc;
 
-    FTN(f_esmf_gridcompfinalize)(this, importstate, exportstate, clock, 
+    FTN(f_esmf_gridcompfinalize)(this, importState, exportState, clock, 
                                  &phase, &rc);
 
     return rc;

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.10 2004/03/18 18:40:17 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.11 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -150,7 +150,7 @@
 !
     import = ESMF_StateCreate("gridded comp import", ESMF_STATEIMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_GridCompInitialize(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Init returned"
@@ -160,13 +160,13 @@
 !     Run section
 !
 
-    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompRun(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Run returned"
@@ -175,7 +175,7 @@
 !-------------------------------------------------------------------------
 !     Finalize section
 
-    call ESMF_GridCompFinalize(comp1, importstate=import, rc=rc)
+    call ESMF_GridCompFinalize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     if (verbose) print *, "Comp Finalize returned without error"
@@ -257,12 +257,12 @@
 !  Init section
 !-------------------------------------------------------------------------
 !
-    subroutine myinit(comp, importstate, exportstate, clock, rc)
+    subroutine myinit(comp, importState, exportState, clock, rc)
       use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -433,16 +433,16 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Add the fields to the import state.
-      call ESMF_StateAddData(importstate, field(1), rc)
+      call ESMF_StateAddData(importState, field(1), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddData(importstate, field(2), rc)
+      call ESMF_StateAddData(importState, field(2), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddData(importstate, field(3), rc)
+      call ESMF_StateAddData(importState, field(3), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_StateAddData(importstate, field(4), rc)
+      call ESMF_StateAddData(importState, field(4), rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      if (verbose) call ESMF_StatePrint(importstate, "", rc)
+      if (verbose) call ESMF_StatePrint(importState, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       do k=1, 4
@@ -486,12 +486,12 @@
 !-------------------------------------------------------------------------
 !
 
-    subroutine myrun(comp, importstate, exportstate, clock, rc)
+    subroutine myrun(comp, importState, exportState, clock, rc)
       use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -500,12 +500,12 @@
 
       if (verbose) print *, "Entering Run routine"
 
-      if (verbose) call ESMF_StatePrint(importstate, "", rc)
+      if (verbose) call ESMF_StatePrint(importState, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importstate, "Periodic in X", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Periodic in X", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -517,7 +517,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importstate, "Periodic in Y", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Periodic in Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -529,7 +529,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importstate, "Periodic in both X and Y", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Periodic in both X and Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -541,7 +541,7 @@
 
       ! Get the field from the import state
       if (verbose) print *, "About to get field from import state"
-      call ESMF_StateGetData(importstate, "Not Periodic", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Not Periodic", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Call Field method to halo data.  This updates the data in place.
@@ -567,12 +567,12 @@
 !-------------------------------------------------------------------------
 
 
-    subroutine myfinal(comp, importstate, exportstate, clock, rc)
+    subroutine myfinal(comp, importState, exportState, clock, rc)
       use ESMF_Mod
       use global_data
 
       type(ESMF_GridComp) :: comp
-      type(ESMF_State) :: importstate, exportstate
+      type(ESMF_State) :: importState, exportState
       type(ESMF_Clock) :: clock
       integer :: rc
 
@@ -590,7 +590,7 @@
 
 
       ! Get Fields from import state
-      call ESMF_StateGetData(importstate, "Periodic in X", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Periodic in X", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30
@@ -599,7 +599,7 @@
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
-      call ESMF_StateGetData(importstate, "Periodic in Y", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Periodic in Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30
@@ -608,7 +608,7 @@
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
-      call ESMF_StateGetData(importstate, "Periodic in both X and Y", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Periodic in both X and Y", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30
@@ -617,7 +617,7 @@
       if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
-      call ESMF_StateGetData(importstate, "Not Periodic", field1, rc=rc);
+      call ESMF_StateGetData(importState, "Not Periodic", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then 
         finalrc = ESMF_FAILURE
         goto 30

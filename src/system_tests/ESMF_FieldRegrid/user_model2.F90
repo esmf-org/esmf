@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.12 2004/03/18 18:40:23 nscollins Exp $
+! $Id: user_model2.F90,v 1.13 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -75,9 +75,9 @@
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
  
-    subroutine user_init(comp, importstate, exportstate, clock, rc)
+    subroutine user_init(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 
@@ -151,8 +151,8 @@
       call ESMF_FieldGetArray(humidity, array1, rc)
       call ESMF_ArrayGetData(array1, idata, rc=rc)
 
-      call ESMF_StateAddData(importstate, humidity, rc)
-   !   call ESMF_StatePrint(importstate, rc=rc)
+      call ESMF_StateAddData(importState, humidity, rc)
+   !   call ESMF_StatePrint(importState, rc=rc)
 
       print *, de_id, "User Comp 2 Init returning"
    
@@ -165,9 +165,9 @@
 !   !  The Run routine where data is computed.
 !   !
  
-    subroutine user_run(comp, importstate, exportstate, clock, rc)
+    subroutine user_run(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 
@@ -179,8 +179,8 @@
       print *, "User Comp Run starting"
 
       ! Get information from the component.
-  !    call ESMF_StatePrint(importstate, rc=status)
-      call ESMF_StateGetData(importstate, "humidity", humidity, rc=status)
+  !    call ESMF_StatePrint(importState, rc=status)
+      call ESMF_StateGetData(importState, "humidity", humidity, rc=status)
   !    call ESMF_FieldPrint(humidity, "", rc=status)
     
       ! This is where the model specific computation goes.
@@ -199,9 +199,9 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-    subroutine user_final(comp, importstate, exportstate, clock, rc)
+    subroutine user_final(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 
@@ -230,7 +230,7 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetData(importstate, "humidity", field, rc=rc);
+      call ESMF_StateGetData(importState, "humidity", field, rc=rc);
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30

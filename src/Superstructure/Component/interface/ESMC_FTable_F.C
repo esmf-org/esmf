@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.11 2004/02/24 14:33:10 theurich Exp $
+// $Id: ESMC_FTable_F.C,v 1.12 2004/03/18 21:49:29 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,7 +120,7 @@ extern "C" {
 
      void FTN(c_esmc_ftablesetstateargs)(ESMC_FTable **ptr, char *type,
                          int *phase, void *comp, 
-                         void *importstate, void *exportstate,
+                         void *importState, void *exportState,
 	                 void *clock, int *status, int slen) {
 
          char *fname;
@@ -131,8 +131,8 @@ extern "C" {
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;
-         alist[1] = (void *)importstate;
-         alist[2] = (void *)exportstate;
+         alist[1] = (void *)importState;
+         alist[2] = (void *)exportState;
          alist[3] = (void *)clock;
          alist[4] = (void *)status;
 

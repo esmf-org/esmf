@@ -21,36 +21,6 @@ optional arguments extensively to simplify our interfaces.
 The modules for ESMF are bundled together and can be accessed with a 
 single {\tt USE} statement, {\tt USE ESMF\_Mod}.
 
-There is a consistent naming convention for classes throughout the
-framework.  Most Fortran calls in the ESMF are subroutines, with 
-any returned values passed through the interface.  For the sake of 
-convenience, some ESMF calls are written as functions.
-
-The standard format for an ESMF Fortran call is:
-\begin{verbatim}
-call ESMF_<Class><Method>(class, firstArgument, secondArgument, ..., rc)
-\end{verbatim}
-
-where \newline
-{\tt <class>} is the class name, \newline
-{\tt <method>} is the name of the action to be performed, \newline 
-{\tt class\_instance} is a variable of the derived type associated 
-with the class, \newline
-the {\tt arg*} arguments are whatever other variables are required 
-for the operation, \newline
-and {\tt rc} is a return code. \newline
-
-{\bf EXAMPLE}
-
-For example, to get the maximum halo widths in an ESMF Array called
-{\tt myArray} the call would be:
-
-\begin{verbatim}
-
-<to be corrected> call ESMF_ArrayGet(array, maxHaloWidth=width)
-
-\end{verbatim}
-
 \subsection{Standard Methods and Interface Rules}
 
 ESMF defines a set of standard methods and interface rules that

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.4 2004/03/18 18:40:17 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.5 2004/03/18 21:49:30 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -115,11 +115,11 @@
 ! !IROUTINE: User Initialization routine, phase 1
 
 ! !INTERFACE:
-      subroutine injector_init1(gcomp, importstate, exportstate, clock, rc)
+      subroutine injector_init1(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out) :: rc
 !
@@ -135,9 +135,9 @@
 !     \begin{description}
 !     \item[gcomp]
 !          Argument 1.
-!     \item[importstate]
+!     \item[importState]
 !          Argument 2.
-!     \item[exportstate]
+!     \item[exportState]
 !          Argument 2.
 !     \item[clock]
 !          Optional object name.
@@ -257,24 +257,24 @@
       !  needed will be copied over to the export state for coupling.
       !  These are empty and will be filled in by the first run of the 
       !  Coupler.
-      call ESMF_StateAddData(importstate, field_sie, rc)
-      call ESMF_StateAddData(importstate, field_u, rc)
-      call ESMF_StateAddData(importstate, field_v, rc)
-      call ESMF_StateAddData(importstate, field_rho, rc)
-      call ESMF_StateAddData(importstate, field_p, rc)
-      call ESMF_StateAddData(importstate, field_q, rc)
-      call ESMF_StateAddData(importstate, field_flag, rc)
+      call ESMF_StateAddData(importState, field_sie, rc)
+      call ESMF_StateAddData(importState, field_u, rc)
+      call ESMF_StateAddData(importState, field_v, rc)
+      call ESMF_StateAddData(importState, field_rho, rc)
+      call ESMF_StateAddData(importState, field_p, rc)
+      call ESMF_StateAddData(importState, field_q, rc)
+      call ESMF_StateAddData(importState, field_flag, rc)
 
       ! This is adding names only to the export list, marked by default
       !  as "not needed". The coupler will mark the ones needed based
       !  on the requirements of the component(s) this is coupled to.
-      call ESMF_StateAddData(exportstate, "SIE", rc)
-      call ESMF_StateAddData(exportstate, "U", rc)
-      call ESMF_StateAddData(exportstate, "V", rc)
-      call ESMF_StateAddData(exportstate, "RHO", rc)
-      call ESMF_StateAddData(exportstate, "P", rc)
-      call ESMF_StateAddData(exportstate, "Q", rc)
-      call ESMF_StateAddData(exportstate, "FLAG", rc)
+      call ESMF_StateAddData(exportState, "SIE", rc)
+      call ESMF_StateAddData(exportState, "U", rc)
+      call ESMF_StateAddData(exportState, "V", rc)
+      call ESMF_StateAddData(exportState, "RHO", rc)
+      call ESMF_StateAddData(exportState, "P", rc)
+      call ESMF_StateAddData(exportState, "Q", rc)
+      call ESMF_StateAddData(exportState, "FLAG", rc)
 
 end subroutine injector_init1
 
@@ -283,11 +283,11 @@ end subroutine injector_init1
 ! !IROUTINE:  injector_init2 - second phase of injector init
 
 ! !INTERFACE:
-      subroutine injector_init2(gcomp, importstate, exportstate, clock, rc)
+      subroutine injector_init2(gcomp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: gcomp
-     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -300,9 +300,9 @@ end subroutine injector_init1
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Importstate.
-!     \item[exportstate]
+!     \item[exportState]
 !          Exportstate.
 !     \item[clock] 
 !          External clock.
@@ -335,12 +335,12 @@ end subroutine injector_init1
       do i=1, datacount
 
          ! check isneeded flag here
-         if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+         if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
              cycle
          endif
 
-         call ESMF_StateGetData(importstate, datanames(i), thisfield, rc=rc)
-         call ESMF_StateAddData(exportstate, thisfield, rc=rc)
+         call ESMF_StateGetData(importState, datanames(i), thisfield, rc=rc)
+         call ESMF_StateAddData(exportState, thisfield, rc=rc)
 
       enddo
 
@@ -351,11 +351,11 @@ end subroutine injector_init1
 ! !IROUTINE:  injector_run - injector run routine
 
 ! !INTERFACE:
-      subroutine injector_run(comp, importstate, exportstate, clock, rc)
+      subroutine injector_run(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
      type(ESMF_GridComp), intent(inout) :: comp
-     type(ESMF_State), intent(inout) :: importstate, exportstate
+     type(ESMF_State), intent(inout) :: importState, exportState
      type(ESMF_Clock), intent(inout) :: clock
      integer, intent(out) :: rc
 !
@@ -369,9 +369,9 @@ end subroutine injector_init1
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Importstate.
-!     \item[exportstate]
+!     \item[exportState]
 !          Exportstate.
 !     \item[clock] 
 !          External clock.
@@ -411,10 +411,10 @@ end subroutine injector_init1
 
 
         ! Get the Field and Bundle data from the State that we might update
-        call ESMF_StateGetData(importstate, "SIE", local_sie, rc=rc)
-        call ESMF_StateGetData(importstate, "V", local_v, rc=rc)
-        call ESMF_StateGetData(importstate, "RHO", local_rho, rc=rc)
-        call ESMF_StateGetData(importstate, "FLAG", local_flag, rc=rc)
+        call ESMF_StateGetData(importState, "SIE", local_sie, rc=rc)
+        call ESMF_StateGetData(importState, "V", local_v, rc=rc)
+        call ESMF_StateGetData(importState, "RHO", local_rho, rc=rc)
+        call ESMF_StateGetData(importState, "FLAG", local_flag, rc=rc)
       
         ! Get the Field and Bundle data from the State, and a pointer to
         !  the existing data (not a copy).
@@ -467,12 +467,12 @@ end subroutine injector_init1
         do i=1, datacount
 
            ! check isneeded flag here
-           if (.not. ESMF_StateIsNeeded(importstate, datanames(i), rc)) then 
+           if (.not. ESMF_StateIsNeeded(importState, datanames(i), rc)) then 
                cycle
            endif
 
-           call ESMF_StateGetData(importstate, datanames(i), thisfield, rc=rc)
-           call ESMF_StateAddData(exportstate, thisfield, rc=rc)
+           call ESMF_StateGetData(importState, datanames(i), thisfield, rc=rc)
+           call ESMF_StateAddData(exportState, thisfield, rc=rc)
 
         enddo
 
@@ -483,11 +483,11 @@ end subroutine injector_init1
 ! !IROUTINE:  injector_final - finalize routine
 
 ! !INTERFACE:
-      subroutine injector_final(comp, importstate, exportstate, clock, rc)
+      subroutine injector_final(comp, importState, exportState, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: comp
-      type(ESMF_State), intent(inout) :: importstate, exportstate
+      type(ESMF_State), intent(inout) :: importState, exportState
       type(ESMF_Clock), intent(inout) :: clock
       integer, intent(out) :: rc
 !
@@ -499,9 +499,9 @@ end subroutine injector_init1
 !     \begin{description}
 !     \item[comp] 
 !          Component.
-!     \item[importstate]
+!     \item[importState]
 !          Importstate.
-!     \item[exportstate]
+!     \item[exportState]
 !          Exportstate.
 !     \item[clock] 
 !          External clock.

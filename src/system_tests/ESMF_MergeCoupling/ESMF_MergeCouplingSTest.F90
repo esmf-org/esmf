@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.1 2004/03/11 00:05:28 nscollins Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.2 2004/03/18 21:49:30 cdeluca Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -184,19 +184,19 @@
  
       c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
  
       c2exp = ESMF_StateCreate("comp2 export", ESMF_STATEEXPORT, cname2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp2, exportstate=c2exp, clock=clock, rc=rc)
+      call ESMF_GridCompInitialize(comp2, exportState=c2exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Initialize finished, rc =", rc
  
       c3imp = ESMF_StateCreate("comp3 import", ESMF_STATEIMPORT, cname3, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_GridCompInitialize(comp3, importstate=c3imp, clock=clock, rc=rc)
+      call ESMF_GridCompInitialize(comp3, importState=c3imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1a Initialize finished, rc =", rc
 
@@ -216,11 +216,11 @@
 
       do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-        call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 1 Run returned, rc =", rc
   
-        call ESMF_GridCompRun(comp2, exportstate=c2exp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp2, exportState=c2exp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 2 Run returned, rc =", rc
   
@@ -228,7 +228,7 @@
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Coupler Run returned, rc =", rc
   
-        call ESMF_GridCompRun(comp3, importstate=c3imp, clock=clock, rc=rc)
+        call ESMF_GridCompRun(comp3, importState=c3imp, clock=clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         print *, "Comp 2 Run returned, rc =", rc
 
@@ -245,15 +245,15 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-      call ESMF_GridCompFinalize(comp1, exportstate=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Finalize finished, rc =", rc
 
-      call ESMF_GridCompFinalize(comp2, exportstate=c2exp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(comp2, exportState=c2exp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 2 Finalize finished, rc =", rc
 
-      call ESMF_GridCompFinalize(comp3, importstate=c3imp, clock=clock, rc=rc)
+      call ESMF_GridCompFinalize(comp3, importState=c3imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 3 Finalize finished, rc =", rc
 
