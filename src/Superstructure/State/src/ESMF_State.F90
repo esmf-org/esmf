@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.48 2004/06/08 09:27:21 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.49 2004/06/08 14:09:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.48 2004/06/08 09:27:21 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.49 2004/06/08 14:09:23 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2984,6 +2984,7 @@ end function
        character (len=1024) :: outbuf
        integer :: localrc                          ! local error status
        integer :: i
+       character(len=ESMF_MAXSTR) :: msgbuf
 
        defaultopts = "brief"
        ! Initialize return code; assume failure until success is certain
@@ -2992,7 +2993,8 @@ end function
        ! TODO: Add code here
        ! print num of states, state type, etc
 
-       print *, "StatePrint: "  
+       write(msgbuf,*) "StatePrint: "  
+       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
        if (.not.associated(state%statep)) then 
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
@@ -3001,23 +3003,26 @@ end function
        sp => state%statep
 
        call ESMF_BasePrint(sp%base, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
+       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-       if (sp%st .eq. ESMF_STATEIMPORT) print *, "  Import State"
-       if (sp%st .eq. ESMF_STATEEXPORT) print *, "  Export State"
-       if (sp%st .eq. ESMF_STATELIST) print *, "  State List"
+       if (sp%st .eq. ESMF_STATEIMPORT) write(msgbuf, *) "  Import State"
+       if (sp%st .eq. ESMF_STATEEXPORT) write(msgbuf, *) "  Export State"
+       if (sp%st .eq. ESMF_STATELIST) write(msgbuf, *) "  State List"
        if (sp%st .eq. ESMF_STATEINVALID) then
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
                                   ESMF_CONTEXT, rc)) return
        endif
-       print *, "  Number of members: ", sp%datacount
+       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
+       write(msgbuf, *) "  Number of members: ", sp%datacount
+       if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
       
        do i=1, sp%datacount
          dp => sp%datalist(i)
 
-         print *, "  Item ", i, ":"
+         write(msgbuf, *) "  Item ", i, ":"
+         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
          outbuf = "    Name= " // trim(dp%namep) // ", "
 
          select case (dp%otype%ot)
@@ -3044,7 +3049,7 @@ end function
              outbuf = trim(outbuf) //  " marked as NOT needed."
          end select
 
-        print *, trim(outbuf)
+        if (ESMF_LogWrite(outbuf, ESMF_LOG_INFO)) continue
 
         ! TODO: finish printing more info here
         !type(ESMF_StateDataReady) :: ready
@@ -3052,7 +3057,7 @@ end function
 
         !type(ESMF_DataHolder), pointer :: datap
 
-        !print *, trim(outbuf)
+        !write(msgbuf, *) trim(outbuf)
 
        enddo
 
@@ -3468,8 +3473,9 @@ end function
 
         if (present(itemcount)) then
           if (count .ne. itemcount) then
-            print *, "itemcount does not match lists given"
-            return
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "itemcount does not match lists given", &
+                                  ESMF_CONTEXT, rc)) return
           endif
         endif
 
@@ -3963,21 +3969,17 @@ end function
  
       ! How does this happen?  is ftodo some sort of static?
       if (allocated(ftodo)) then
-        print *, "ftodo already allocated"
+        ! print *, "ftodo already allocated"
         deallocate(ftodo, stat=localrc)
-        if (localrc .ne. 0) then    ! F90 return code
-          print *, "status = ", localrc
-          print *, "Error: 1b deallocating fields to a state"
-          return
-        endif
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "deallocating fields from a state", &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       allocate(ftodo(fcount), stat=localrc)
-      if (localrc .ne. 0) then    ! F90 return code
-        print *, "status = ", localrc
-        print *, "Error: 1 adding fields to a state"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "adding fields to a state", &
+                                  ESMF_CONTEXT, rc)) return
       ftodo(1:fcount) = 0
 
       ! Initialize counters to 0, indices to 1
@@ -3988,14 +3990,16 @@ end function
       do i=1, fcount
 
         call ESMF_FieldValidate(fields(i), "", localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "Bad Field ", i
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
           deallocate(ftodo, stat=localrc)
           return
         endif
         call ESMF_FieldGet(fields(i), name=fname, rc=localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddFieldList: get field name"
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) then
           deallocate(ftodo, stat=localrc)
           return
         endif
@@ -4019,8 +4023,9 @@ end function
             ! Check to see if this is a placeholder, and if so, replace it
             if (dataitem%otype .eq. ESMF_STATEDATANAME) then
                 allocate(dataitem%datap, stat=localrc)
-                if (localrc .ne. 0) then    ! F90 return code
-                  print *, "Error: 2 adding fields to a state"
+                if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "adding fields to a state", &
+                                  ESMF_CONTEXT, rc)) then
                   deallocate(ftodo, stat=localrc)
                   return
                 endif
@@ -4067,10 +4072,9 @@ end function
                                   ESMF_CONTEXT, rc)) return
 
             allocate(nextitem%datap, stat=localrc)
-            if (localrc .ne. 0) then    ! F90 return code
-              print *, "Error: 4 adding fields to a state"
-              return
-            endif
+            if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "adding fields to a state", &
+                                  ESMF_CONTEXT, rc)) return
             nextitem%datap%fp = fields(i)
  
             nextitem%needed = stypep%needed_default
@@ -4088,10 +4092,9 @@ end function
 
       ! Get rid of temp flag array
       deallocate(ftodo, stat=localrc)
-      if (localrc .ne. 0) then    ! F90 return code
-        print *, "Error: 5 adding fields to a state"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                  "adding fields to a state", &
+                                  ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4162,7 +4165,6 @@ end function
       ! get a count of all fields in all bundles
       fruncount = 0
       do i=1, bcount
-        !print *, "calling bundle validate "
         call ESMF_BundleValidate(bundles(i), "", localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4548,10 +4550,9 @@ end function
     
         ! See if this name is already in the state
         exists = ESMF_StateTypeFindData(stypep, sname, .false., dataitem, sindex, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddStateList: looking for preexisting entry"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -4699,12 +4700,14 @@ end function
   
       ! Check for invalid state pointers
       if (.not.associated(stypep)) then
-        print *, "Error: invalid or uninitialized state object"
-        return
+          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                              "Error: invalid or uninitialized state object", &
+                                  ESMF_CONTEXT, rc)) return
       endif
       if (stypep%statestatus .ne. ESMF_STATE_READY) then
-        print *, "Error: invalid or uninitialized state object"
-        return
+         if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                              "Error: invalid or uninitialized state object", &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! For each item in the array, check the name
@@ -4816,10 +4819,9 @@ end function
         ! See if this name is already in the state
         exists = ESMF_StateTypeFindData(stypep, namelist(i), .false., &
                                         dataitem, nindex, localrc)
-        if (localrc .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddNameList: looking for preexisting entry"
-          return
-        endif
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -4835,10 +4837,9 @@ end function
             if (dataitem%otype .ne. ESMF_STATEDATANAME) then
               if (associated(dataitem%datap)) then
                 deallocate(dataitem%datap, stat=localrc)
-                if (localrc .ne. 0) then    ! F90 return code
-                  print *, "Error: removing an entry from a state"
-                  return
-                endif
+                if (ESMF_LogMsgFoundAllocError(localrc, &
+                                            "removing an entry from a state", &
+                                             ESMF_CONTEXT, rc)) return
                 nullify(dataitem%datap)
               endif
             endif
@@ -4863,10 +4864,9 @@ end function
 
       ! We now know how many total new items need to be added
       call ESMF_StateTypeExtendList(stypep, newcount, localrc)
-      if (localrc .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_StateTypeAddNameList: datalist allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
 
       ! There is enough space now to add new names to the list.
