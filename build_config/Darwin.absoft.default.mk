@@ -1,4 +1,4 @@
-#  $Id: Darwin.absoft.default.mk,v 1.1 2003/09/29 19:50:23 flanigan Exp $
+#  $Id: Darwin.absoft.default.mk,v 1.2 2003/10/16 23:22:53 nscollins Exp $
 #
 #  Darwin.absoft.default.mk
 #
@@ -129,6 +129,7 @@ CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = g++
 CXX_FLINKER	   = g++
 CXX_CCV		   = ${CXX_CC} --version
+LOCAL_INCLUDE      =
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
