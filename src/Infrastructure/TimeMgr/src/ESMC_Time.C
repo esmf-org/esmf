@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.53 2004/02/04 02:13:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.54 2004/02/06 22:46:15 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -156,25 +156,47 @@
     // convert date to base time according to calendar type
     // TODO: fractional, sub-seconds
     // TODO: create two calendar conversion method entry points ?
-    if ((yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) &&
-         mm != ESMC_NULL_POINTER && dd != ESMC_NULL_POINTER) {
-      if (this->calendar != ESMC_NULL_POINTER) {
-        ESMF_KIND_I8 argYY = (yy != ESMC_NULL_POINTER) ? *yy : *yy_i8;
-        if (this->calendar->ESMC_CalendarConvertToTime(argYY, *mm, *dd, 0, this)
+
+    // is a yy/mm/dd style date specified?
+    if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
+        mm != ESMC_NULL_POINTER || dd    != ESMC_NULL_POINTER) {
+
+      // calendar required
+      if (this->calendar == ESMC_NULL_POINTER) goto ESMC_TIMESET_FAILURE;
+
+      // year required
+      if (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER)
+        goto ESMC_TIMESET_FAILURE;
+
+      // day without a month is not good
+      if (dd != ESMC_NULL_POINTER && mm == ESMC_NULL_POINTER)
+        goto ESMC_TIMESET_FAILURE;
+
+      // use only one specified year (yy and yy_i8 are mutually exclusive)
+      ESMF_KIND_I8 argYY = (yy != ESMC_NULL_POINTER) ? *yy : *yy_i8;
+      
+      // use month and day specified, otherwise use defaults
+      int argMM=1, argDD=1;  // defaults
+      if (mm != ESMC_NULL_POINTER) argMM = *mm;
+      if (dd != ESMC_NULL_POINTER) argDD = *dd;
+
+      // do the conversion
+      if (this->calendar->ESMC_CalendarConvertToTime(argYY, argMM, argDD,
+                                                     0, this)
             == ESMF_FAILURE) goto ESMC_TIMESET_FAILURE;
-      } else goto ESMC_TIMESET_FAILURE;
-    }
-    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
+
+    // is a Julian-days style date specified?
+    } else if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
       if (this->calendar != ESMC_NULL_POINTER) {
         ESMF_KIND_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
         if (this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, argD, this) ==
             ESMF_FAILURE) goto ESMC_TIMESET_FAILURE;
       } else goto ESMC_TIMESET_FAILURE;
-    }
-    if (d_r8 != ESMC_NULL_POINTER) {
+    } else if (d_r8 != ESMC_NULL_POINTER) {
       // integer part
       if (this->calendar != ESMC_NULL_POINTER) {
-        if (this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, (int) *d_r8,
+        if (this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, 
+                                                       (ESMF_KIND_I8) *d_r8,
             this) == ESMF_FAILURE) goto ESMC_TIMESET_FAILURE;
       } else goto ESMC_TIMESET_FAILURE;
 
@@ -183,13 +205,12 @@
       if (this->calendar != ESMC_NULL_POINTER) {
         secPerDay = this->calendar->secondsPerDay;
       }
-
       // fractional part
       this->s +=
               (ESMF_KIND_I8) (modf(*d_r8, ESMC_NULL_POINTER) * secPerDay);
     }
     
-    // use base class for sub-day values
+    // use base class to convert sub-day values
     ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                      ms_r8, us_r8, ns_r8, sD, sN);
 
