@@ -1,4 +1,4 @@
-! $Id: ESMF_Overloads.F90,v 1.1 2004/01/26 17:57:56 nscollins Exp $
+! $Id: ESMF_Overloads.F90,v 1.2 2004/01/28 00:29:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,8 +10,8 @@
 !
 !==============================================================================
 !
-!     ESMF Base2 Module
-      module ESMF_Base2Mod
+!     ESMF Objects Module
+      module ESMF_ObjectsMod
 !
 !==============================================================================
 !
@@ -42,12 +42,15 @@
       use ESMF_FieldMod 
       implicit none
 
+!! COMMENTED OUT FOR NOW.
+#if 0
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-    public ESMF_AttributeSetCharacter
-    public ESMF_AttributeGetCharacter
+    !public ESMF_AttributeSetCharacter
+    !public ESMF_AttributeGetCharacter
     public ESMF_AttributeSetInteger
     public ESMF_AttributeGetInteger
     !public ESMF_AttributeSetReal
@@ -67,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Overloads.F90,v 1.1 2004/01/26 17:57:56 nscollins Exp $'
+      '$Id: ESMF_Overloads.F90,v 1.2 2004/01/28 00:29:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -208,7 +211,7 @@
 
         ! pass thru f90/c++ interface - this requires first entry of object
         ! is a base type.
-        call c_ESMF_AttributeSetChar(field, name, value, status)
+        call c_ESMC_AttributeSetChar(field, name, value, status)
 
         if (rcpresent) rc = status
 
@@ -376,7 +379,6 @@
 
       end subroutine ESMF_FieldAttrGetInt
 
-#if 0
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_Validate - Check internal consistency of any object.
@@ -496,4 +498,4 @@
 !------------------------------------------------------------------------------
 #endif
 
-      end module ESMF_Base2Mod
+      end module ESMF_ObjectsMod
