@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $
+! $Id: ESMF_XPacket.F90,v 1.3 2003/03/11 23:15:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,16 +70,13 @@
       public ESMF_XPacketGet                    ! get and set values
       public ESMF_XPacketSet
  
-      public ESMF_XPacketValidate
-      public ESMF_XPacketPrint
- 
 !
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.2 2003/03/11 22:57:20 nscollins Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.3 2003/03/11 23:15:57 nscollins Exp $'
 
 !==============================================================================
 
@@ -288,122 +285,9 @@
 
         end subroutine ESMF_XPacketSet
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_XPacketValidate - Check internal consistency of a XPacket
-
-! !INTERFACE:
-      subroutine ESMF_XPacketValidate(xpacket, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_XPacket), intent(in) :: xpacket       
-      character (len=*), intent(in), optional :: options    
-      integer, intent(out), optional :: rc            
-!
-! !DESCRIPTION:
-!     Validates that a XPacket is internally consistent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[xpacket] 
-!          Class to be queried.
-!     \item[{[options]}]
-!          Validation options.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-!
-       character (len=6) :: defaultopts      ! default validate options
-       integer :: status                     ! local error status
-       logical :: rcpresent
-
-       ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
-       endif
-
-       defaultopts = "quick"
-
-       if (present(options)) then
-           call c_ESMC_XPacketValidate(xpacket, options, status)   
-       else
-           call c_ESMC_XPacketValidate(xpacket, defaultopts, status)
-       endif
-
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "XPacket validate error"
-         return
-       endif
-
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-
-       end subroutine ESMF_XPacketValidate
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_XPacketPrint - Print the contents of a XPacket
-
-! !INTERFACE:
-      subroutine ESMF_XPacketPrint(xpacket, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_XPacket), intent(in) :: xpacket      
-      character (len=*), intent(in), optional :: options      
-      integer, intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!      Print information about a XPacket.  
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[xpacket] 
-!          Class to be queried.
-!     \item[{[options]}]
-!          Print options that control the type of information and level of 
-!          detail.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-       character (len=6) :: defaultopts      ! default print options
-       integer :: status                     ! local error status
-       logical :: rcpresent
-
-       ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
-       endif
-
-       defaultopts = "brief"
-
-       if(present(options)) then
-           call c_ESMC_XPacketPrint(xpacket, options, status)   
-       else
-           call c_ESMC_XPacketPrint(xpacket, defaultopts, status)
-       endif
-
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "XPacket print error"
-         return
-       endif
-
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
- 
-       end subroutine ESMF_XPacketPrint
+! TODO: maybe it's worth putting a Print method back at some point.
 
 !------------------------------------------------------------------------------
 

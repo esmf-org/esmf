@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket_F.C,v 1.2 2003/03/11 22:57:20 nscollins Exp $
+// $Id: ESMC_XPacket_F.C,v 1.3 2003/03/11 23:15:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,13 +51,6 @@ extern "C" {
        //    *status = (*ptr)->ESMC_XPacketSet(value);
        //}
 
-       void FTN(c_esmc_xpacketvalidate)(ESMC_XPacket **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_XPacketValidate(opts);
-       }
-
-       void FTN(c_esmc_xpacketprint)(ESMC_XPacket **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_XPacketPrint(opts);
-       }
 
 };
 
