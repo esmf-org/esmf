@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.21 2004/03/18 00:07:28 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.22 2004/03/18 00:18:11 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -64,10 +64,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Field_usage}
-\input{Field_CreateEx_fapi}
+\input{FieldCreateEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_usage}
-\input{../Infrastructure/Field/doc/Field_CreateEx_fapi}
+\input{../Infrastructure/Field/doc/FieldCreateEx_fapi}
 #endif
 
 \subsection{Restrictions}
