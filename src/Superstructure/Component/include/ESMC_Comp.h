@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.3 2003/02/27 21:28:25 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.4 2003/03/04 15:01:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,8 +90,8 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
     int ESMC_CompSetConfig(const ESMC_CompConfig *config);
 
  // accessor methods for class members
-    //int ESMC_CompGet<Value>(<value type> *value) const;
-    //int ESMC_CompSet<Value>(<value type>  value);
+    //int ESMC_CompGet(<value type> *value) const;
+    //int ESMC_CompSet(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_CompValidate(const char *options) const;
