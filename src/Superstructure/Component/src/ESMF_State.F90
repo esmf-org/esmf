@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.30 2003/04/14 14:51:41 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.31 2003/04/14 15:21:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,13 +148,15 @@
 !     !  The ObjectType is one level up, because this structure is not
 !     !  allocated until it is actually needed.  This is a private type.
 
+!     ! state has to be different because it's a forward reference.
+
       type ESMF_DataHolder
       sequence
       private
           type(ESMF_Bundle) :: bp
           type(ESMF_Field)  :: fp 
           type(ESMF_Array)  :: ap
-          type(ESMF_State)  :: sp
+          type(ESMF_StateType), pointer  :: spp
       end type
 
 !------------------------------------------------------------------------------
@@ -256,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.30 2003/04/14 14:51:41 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.31 2003/04/14 15:21:22 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2017,7 +2019,7 @@ end function
             endif
 
             dataitem%otype = ESMF_STATESTATE
-            dataitem%datap%sp = states(i)
+            dataitem%datap%spp = states(i)%statep
         
             dataitem%needed = ESMF_STATEDATAISNEEDED
             dataitem%ready = ESMF_STATEDATAREADYTOREAD
@@ -2067,7 +2069,7 @@ end function
               print *, "Error: adding state to a state"
               return
             endif
-            nextitem%datap%sp = states(i)
+            nextitem%datap%spp = states(i)%statep
  
             nextitem%needed = ESMF_STATEDATAISNEEDED
             nextitem%ready = ESMF_STATEDATAREADYTOREAD
@@ -3027,7 +3029,7 @@ end function
           return
       endif
 
-      nestedstate = dataitem%datap%sp
+      nestedstate%statep = dataitem%datap%spp
 
       if (present(rc)) rc=ESMF_SUCCESS
 
