@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.13 2004/06/15 13:34:41 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.14 2004/10/08 14:34:09 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -29,13 +29,11 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc
-    integer :: timestep
-    integer, dimension(2) :: delist
+    integer :: rc
     character(ESMF_MAXSTR) :: sname, bname, fname
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1, field2
-    type(ESMF_Bundle) :: bundle1, bundle2, bundle3, qbundle
+    type(ESMF_Bundle) :: bundle1, bundle2, qbundle
     type(ESMF_State) :: state1, state2, state3, state4, state5
         
 !-------------------------------------------------------------------------
