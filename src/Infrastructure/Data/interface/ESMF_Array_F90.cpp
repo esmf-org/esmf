@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.32 2003/06/19 20:01:45 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.33 2003/06/23 16:41:10 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Array} class and 
+! The code in this file implements the {\tt ESMF\_Array} class and 
 !  associated functions and subroutines.  
 !
 ! C and C++ arrays are simple pointers to memory.
@@ -160,7 +160,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.32 2003/06/19 20:01:45 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.33 2003/06/23 16:41:10 rstaufer Exp $'
 
 !==============================================================================
 ! 
@@ -239,10 +239,10 @@ ArrayInterfaceMacro(ArrayCreateByFullPtr)
 !    (Only available from the Fortran interface.)
 !  \end{description}
 !  
-!  The concept of an ``empty'' {\tt Array} does not exist.  To make an
+!  The concept of an ``empty'' {\tt ESMF\_Array} does not exist.  To make an
 !  ESMF object which stores the Type/Kind/Rank information create an
 !  {\tt ESMF\_ArraySpec} object which can then be used repeatedly in
-!  subsequent {\tt Array} Create calls.
+!  subsequent {\tt ESMF\_Array} Create calls.
 !  
 end interface
 !EOP 
@@ -321,7 +321,7 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Array and allocate data space, which remains uninitialized.
+!  Create a new {\tt ESMF\_Array and allocate data space, which remains uninitialized.
 !  The return value is a new Array.
 !    
 !  The arguments are:
@@ -402,7 +402,7 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Array and allocate data space, which remains uninitialized.
+!  Create a new {\tt ESMF\_Array} and allocate data space, which remains uninitialized.
 !  The return value is a new Array.
 !    
 !  The arguments are:
@@ -468,9 +468,9 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Take a partially created {\tt Array} and T/K/R information and call the
+!  Take a partially created {\tt ESMF\_Array} and T/K/R information and call the
 !   proper subroutine to create an F90 pointer, allocate space, and set the
-!   corresponding values in the {\tt Array} object.
+!   corresponding values in the {\tt ESMF\_Array} object.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -994,13 +994,13 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Array}.
+!     Releases all resources associated with this {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item[array]
-!       Destroy contents of this {\tt Array}.
+!       Destroy contents of this {\tt ESMF\_Array}.
 !
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1085,9 +1085,9 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used only with the version of ArrayCreate which creates an empty 
-!      Array and allows the Data to be specified later.  Otherwise it is an 
-!      error to replace the data contents associated with a Array.  
+!      Used only with the version of {\tt ESMF\_ArrayCreate} which creates an empty 
+!      {\tt ESMF\_Array} and allows the Data to be specified later.  Otherwise it is an 
+!      error to replace the data contents associated with a {\tt ESMF\_Array}.  
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1110,7 +1110,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used to annotate an Array with information used to map local to global
+!      Used to annotate an {\tt ESMF\_Array} with information used to map local to global
 !      indicies.  
 !
 !EOP
@@ -1137,7 +1137,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used to retrieve the index annotation from an Array.
+!      Used to retrieve the index annotation from an {\tt ESMF\_Array}.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1166,7 +1166,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to redistribute an Array.
+! Used to redistribute an {\tt ESMF\_Array}.
 !
 !
 !EOP
@@ -1214,7 +1214,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to halo an Array.
+! Used to halo an {\tt ESMF\_Array}.
 !
 !
 !EOP
@@ -1280,7 +1280,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
+! Used to gather a distributed {\tt ESMF\_Array} into a global {\tt ESMF\_Array} on all {\tt ESMF\_DE}s.
 !
 !
 !EOP
@@ -1348,7 +1348,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
+! Used to gather a distributed {\tt ESMF\_Array} into a global {\tt ESMF\_Array} on all {\tt ESMF\_DE}s.
 !
 !
 !EOP
@@ -1416,7 +1416,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to scatter a single Array into a distributed Array across all DEs.
+! Used to scatter a single {\tt ESMF\_Array} into a distributed {\tt ESMF\_Array} across all {\tt ESMF\_DE}s.
 !
 !
 !EOP
@@ -1479,7 +1479,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Used to alter the local memory ordering (layout) of this Array.
+!      Used to alter the local memory ordering (layout) of this {\tt ESMF\_Array}.
 !
 !  !TODO: remove this note before generating user documentation
 !
@@ -1516,7 +1516,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 ! !DESCRIPTION:
 !  Creates a description of the data -- the type, the dimensionality, etc.  
 !  This specification can be
-!  used in an ArrayCreate call with data to create a full Array.
+!  used in an {\tt ESMF\_ArrayCreate} call with data to create a full {\tt ESMF\_Array}.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -1528,12 +1528,12 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
 !
 !  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
+!    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
@@ -1598,7 +1598,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !
 ! !DESCRIPTION:
-!      Returns information about the array.  For queries where the caller
+!      Returns information about the {\tt ESMF\_Array}.  For queries where the caller
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the array input are optional to facilitate this.
 !
@@ -1663,7 +1663,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !
 ! !DESCRIPTION:
-!      Returns the name of the array.  If the array was created without
+!      Returns the name of the {\tt ESMF\_Array}.  If the array was created without
 !      specifying a name, the framework will have assigned it a unique one.
 !
 !EOP
@@ -1707,24 +1707,24 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Return information about the contents of a ArraySpec type.
+!  Return information about the contents of a {\tt ESMF\_ArraySpec} type.
 !
 !  The arguments are:
 !  \begin{description}
 !
 !  \item[as]
-!    An {\tt ArraySpec} object.
+!    An {\tt ESMF\_ArraySpec} object.
 !
 !  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
+!    {\tt ESMF\_Array} rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
 !
 !  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
+!    {\tt ESMF\_Array} type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
 !    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
 !    {\tt ESMF\_DATA\_CHARACTER}.
 !
 !  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_Array} kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
@@ -1787,17 +1787,17 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
-!     Allocate data contents for an array created from the C++ interface. 
+!     Allocate data contents for an {\tt ESMF\_Array} created from the C++ interface. 
 !     The arguments are: 
 !     \begin{description} 
 !     \item[array]  
-!          A partially created {\tt Array} object. 
+!          A partially created {\tt ESMF\_Array} object. 
 !     \item[rank]  
-!          The {\tt Array} rank.  
+!          The {\tt ESMF\_Array} rank.  
 !     \item[type]  
-!          The {\tt Array} type (integer, real/float, etc).  
+!          The {\tt ESMF\_Array} type (integer, real/float, etc).  
 !     \item[kind]  
-!          The {\tt Array} kind (short/2, long/8, etc).  
+!          The {\tt ESMF\_Array} kind (short/2, long/8, etc).  
 !     \item[counts]  
 !          An integer array, size {\tt rank}, of each dimension length. 
 !     \item[{[rc]}]  
@@ -1936,17 +1936,17 @@ AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
-!     Deallocate data contents for an array created from the C++ interface. 
+!     Deallocate data contents for an {\tt ESMF\_Array} created from the C++ interface. 
 !     The arguments are: 
 !     \begin{description} 
 !     \item[array]  
-!          A partially created {\tt Array} object. 
+!          A partially created {\tt ESMF\_Array} object. 
 !     \item[rank]  
-!          The {\tt Array} rank.  
+!          The {\tt ESMF\_Array} rank.  
 !     \item[type]  
-!          The {\tt Array} type (integer, real/float, etc).  
+!          The {\tt ESMF\_Array} type (integer, real/float, etc).  
 !     \item[kind]  
-!          The {\tt Array} kind (short/2, long/8, etc).  
+!          The {\tt ESMF\_Array} kind (short/2, long/8, etc).  
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
@@ -2117,7 +2117,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Array from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_Array} from the last call to Checkpoint.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -2243,7 +2243,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
+!      Routine to print information about a {\tt ESMF\_Array}.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -2302,7 +2302,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
+!      Routine to print information about a {\tt ESMF\_Array}.
 !
 !EOP
 ! !REQUIREMENTS:
