@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.11 2003/04/29 01:17:10 nscollins Exp $
+! $Id: ESMF_GridUTest.F90,v 1.12 2003/06/05 17:48:34 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.11 2003/04/29 01:17:10 nscollins Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.12 2003/06/05 17:48:34 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -91,6 +91,8 @@
 !     always run. When the environment variable, EXHAUSTIVE, is set to ON then
 !     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 !     to OFF, then only the sanity unit tests.
+!     Special strings (Non-exhaustive and exhaustive) have been
+!     added to allow a script to count the number and types of unit tests.
 !--------------------------------------------------------------------------------
 
       call ESMF_FrameworkInitialize(status)
@@ -113,6 +115,7 @@
       name = "test grid 1"
       halo_width = 1
 
+      !NEX
       ! Creating a layout test
       layout = ESMF_DELayoutCreate(rc=rc)
       write(name, *) "Creating a DELayout Test"
@@ -132,6 +135,7 @@
 			     halo_width=halo_width, &
                              name=name, rc=status)
 
+      !NEX
       write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
@@ -161,6 +165,7 @@
 
 #endif
 
+      !NEX
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -169,6 +174,7 @@
       !------------------------------------------------------------------------
 
 
+      !NEX
       ! Test destroy subroutine
       call  ESMF_GridDestroy(grid, rc=rc)
       write(failMsg, *) ""
@@ -179,6 +185,7 @@
 
       !----------------------------------------------------------------------
 
+      !NEX
       ! Test creation ofempty 
       grid1 =  ESMF_GridCreate( rc=rc)
       write(failMsg, *) ""
