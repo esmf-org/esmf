@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/07/09 17:51:09 nscollins Exp $
+# $Id: makefile,v 1.3 2004/08/04 20:52:18 nscollins Exp $
 
 all: build_release
 
@@ -11,7 +11,7 @@ RELEASE_ARCHCOPYFILES = README
 
 include $(ESMF_DIR)/makefile
 
-DIRS     = example CoupledFlowSrc CoupledFlowExe lib mod
+DIRS     = example CoupledFlowSrc CoupledFlowExe lib mod include
 
 CLEANDIRS   =
 CLEANFILES  =
