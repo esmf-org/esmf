@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.1 2003/09/17 22:59:11 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.2 2003/09/23 15:27:31 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -228,7 +228,7 @@
        character(len=*), parameter :: myname='ESMF_ConfigMod'
 
 
-!    Defines standar i/o units.
+!    Defines standard i/o units.
 
         integer, parameter :: stdin  = 5
         integer, parameter :: stdout = 6
