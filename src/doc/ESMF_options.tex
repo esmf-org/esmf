@@ -1,0 +1,67 @@
+% $Id: ESMF_options.tex,v 1.1 2004/03/23 05:00:11 cdeluca Exp $
+
+\section{General Options and Global Parameters}
+
+\subsection{Flags}
+
+\subsubsection{ESMF\_AllocFlag}
+
+{\sf DESCRIPTION:\\}  
+Indicates whether to allocate data or not.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_DO\_ALLOCATE]
+      Allocate data. 
+\item [ESMF\_NO\_ALLOCATE]
+      Do not allocate data at this time. 
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
+
+\subsubsection{ESMF\_BlockingFlag}
+
+{\sf DESCRIPTION:\\}  
+Indicates whether to block during a communication call.
+
+Valid values are:
+\begin{description}
+
+\item [ESMF\_BLOCKING]
+      Wait for completion of the call before returning. 
+\item [ESMF\_NONBLOCKING]
+      Return immediately. 
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
+
+
+\subsubsection{ESMF\_CopyFlag}
+
+{\sf DESCRIPTION:\\}
+Indicates whether to reference a data item or make a copy of it.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_DATA\_COPY]
+      Copy the data item to another buffer.
+\item [ESMF\_DATA\_REF]
+      Reference the data item.
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
+
+
+
+
+
+
+
+
+
+
+
+

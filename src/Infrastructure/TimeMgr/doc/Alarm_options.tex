@@ -1,0 +1,27 @@
+% $Id: Alarm_options.tex,v 1.1 2004/03/23 05:00:11 cdeluca Exp $
+
+\subsection{Options}
+
+\subsubsection{ESMF\_AlarmListType}
+
+{\sf DESCRIPTION:\\}
+Specifies the characteristics of Alarms that populate
+a retrieved Alarm list.
+
+Valid values are:
+\begin{description}
+
+\item [ESMF\_ALARMLIST\_ALL] 
+      All alarms.
+
+\item [ESMF\_ALARMLIST\_RINGING] 
+      Only ringing alarms.
+
+\item [ESMF\_ALARMLIST\_NEXTRINGING] 
+      Alarms that will ring before or at the next timestep.
+
+\item [ESMF\_ALARMLIST\_PREVRINGING] 
+      Alarms that rang at or since the last timestep.
+
+\end{description}
+

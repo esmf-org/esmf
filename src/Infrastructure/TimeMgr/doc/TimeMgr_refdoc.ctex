@@ -78,7 +78,7 @@
 \input{../Infrastructure/TimeMgr/doc/Calendar_desc}
 #endif
 
-\subsection{Description}
+\subsection{Calendar Options}
 #ifdef STANDALONE
 \input{Calendar_options}
 #elif defined(CONSTITUENT)
@@ -248,6 +248,13 @@
 \input{Alarm_desc}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Alarm_desc}
+#endif
+
+\subsection{Alarm Options}
+#ifdef STANDALONE
+\input{Alarm_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Alarm_options}
 #endif
 
 \subsection{Use and Examples}

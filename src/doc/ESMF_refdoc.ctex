@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.43 2004/03/18 05:24:24 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.44 2004/03/23 05:00:11 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -69,7 +69,11 @@
 \newpage
 %\section{API Overview}
 \input{ESMF_api}
-%\subsection{Design and Implementation Notes}
+
+%\section{General Options and Global Parameters}
+\input{ESMF_options}
+
+%\subsection{Overall Design and Implementation Notes}
 \input{ESMF_implnotes}
 
 \newpage

@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.15 2004/03/22 19:02:30 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.16 2004/03/23 05:00:11 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -40,6 +40,13 @@
 \input{Bundle_desc}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Bundle/doc/Bundle_desc}
+#endif
+
+\subsection{Bundle Options}
+#ifdef STANDALONE
+\input{Bundle_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Bundle/doc/Bundle_options}
 #endif
 
 \subsection{Use and Examples}
