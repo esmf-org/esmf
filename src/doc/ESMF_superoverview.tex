@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.13 2004/04/22 15:44:35 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.14 2004/04/22 16:07:19 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,9 +31,9 @@ or the creation of nested higher resolution regions
 within a coarser grid.  The objective is to couple components at varying 
 scales both flexibly and efficiently.  ESMF encourages a hierachical
 application structure, in which large components branch into 
-smaller sub-components.  ESMF also makes it easier for the same 
-component to be used in multiple contexts without changes to its 
-source code.
+smaller sub-components (see Figure \ref{fig:tree}).  ESMF also makes 
+it easier for the same component to be used in multiple contexts 
+without changes to its source code.
 
 \begin{center}  
 \begin{tabular}{|p{6in}|}
@@ -54,7 +54,7 @@ maximum portability and reconfigurability.\\[.03in] \hline
 \caption{ESMF enables applications such as a seasonal forecast
 model to be structured hierarchically, and reconfigured and 
 extended easily.}
-\label{fig:appunit}
+\label{fig:tree}
 \scalebox{1.0}{\includegraphics{ESMF_tree.eps}}
 \end{figure}
 \end{center}
