@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.17 2003/08/21 19:57:51 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.18 2003/08/22 21:34:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,6 +51,31 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
+!     ! ESMF_HaloDirection
+! 
+!     ! Object for specifiying halo directions (mostly a placeholder for now)
+
+      type ESMF_HaloDirection
+      sequence
+      private
+        integer :: edges
+      end type
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_Mask
+! 
+!     ! Class for storing information about masked regions.
+
+      type ESMF_Mask
+      sequence
+      private
+        ! same size as data array
+        type (ESMF_LocalArray), pointer :: maskvals => NULL()
+      end type
+
+
+!------------------------------------------------------------------------------
 !     ! ESMF_Array
 !
 !     ! Array data type.  All information is kept on the C++ side inside
@@ -63,8 +88,8 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF
-      public ESMF_ArraySpec, ESMF_Array
+      public ESMF_HaloDirection, ESMF_Mask
+      public ESMF_Array
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -78,12 +103,13 @@
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
       public ESMF_ArrayGetAllAxisIndices
 
-      public ESMF_ArrayHaloStore,  ESMF_ArrayHaloRelease
-      public ESMF_ArrayRedist, ESMF_ArrayRegrid, ESMF_ArrayHalo
+      public ESMF_ArrayHaloStore, ESMF_ArrayHalo, ESMF_ArrayHaloRelease
+      public ESMF_ArrayRedistStore, ESMF_ArrayRedist, ESMF_ArrayRedistRelease
+      public ESMF_ArrayRegridStore, ESMF_ArrayRegrid, ESMF_ArrayRegridRelease
 
       public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
-      !public ESMF_ArrayReduce, ESMF_ArrayAllReduce
-      !public ESMF_ArrayBroadcast, ESMF_ArrayAlltoAll
+      !!public ESMF_ArrayReduce, ESMF_ArrayAllReduce
+      !!public ESMF_ArrayBroadcast, ESMF_ArrayAlltoAll
 
       public ESMF_ArrayCheckpoint
       public ESMF_ArrayRestore
@@ -99,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.17 2003/08/21 19:57:51 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.18 2003/08/22 21:34:22 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -385,20 +411,26 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRegrid(srcarray, dstarray, srcgrid, srcdatamap, &
-                                  dstgrid, dstdatamap, parentlayout, async, rc) 
+      subroutine ESMF_ArrayRegridStore(srcarray, srcgrid, srcdatamap, &
+                                       dstgrid, dstdatamap, parentlayout, &
+                                       routehandle, regridtype, &
+                                       srcmask, dstmask, blocking, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
-      type(ESMF_Array), intent(inout) :: dstarray
       type(ESMF_Grid), intent(in) :: srcgrid
       type(ESMF_DataMap), intent(in) :: srcdatamap
       type(ESMF_Grid), intent(in) :: dstgrid
       type(ESMF_DataMap), intent(in) :: dstdatamap
       type(ESMF_DELayout) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(in), optional :: regridtype
+      type(ESMF_Mask), intent(in), optional :: srcmask
+      type(ESMF_Mask), intent(in), optional :: dstmask
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -407,8 +439,6 @@ end subroutine
 !     \begin{description}
 !     \item [srcarray]
 !           {\tt ESMF\_Array} containing source data.
-!     \item [dstarray]
-!           {\tt ESMF\_Array} containing results.
 !     \item [srcgrid]
 !           {\tt ESMF\_Grid} which corresponds to how the data in the
 !           source array has been decomposed.  
@@ -427,7 +457,17 @@ end subroutine
 !           of the Coupler if the regridding is inter-component, but could
 !           also be the individual layout for a component if the
 !           regridding is intra-component.
-!     \item [{[async]}]
+!     \item [routehandle]
+!           Returned value which identifies the precomputed Route and other
+!           necessary information.
+!     \item [{[regridtype]}]
+!           Type of regridding to do.  A set of predefined types are
+!           supplied.
+!     \item [{[srcmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!     \item [{[dstmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -447,9 +487,6 @@ end subroutine
         integer :: size_rank_trans
         integer :: size_decomp
 
-! TODO: add code here
-! TODO: query grids and datamaps to get what is needed for redist
-
         ! assume failure until success certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -458,18 +495,161 @@ end subroutine
           rc = ESMF_FAILURE
         endif
 
-        ! query things implemented in F90 and pass them to the C++ side,
-        !  assume we can directly reference members in the class.
-        !call c_ESMC_ArrayRegrid()
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayRegrid returned error"
-          return
-        endif
+        ! TODO: add code here
+        !  The form of this code depends on how we organize the interfaces
+        !  between the Regrid code and this code.  This is the lowest level
+        !  public interface to the Regrid code, so anything we do below
+        !  here will be internal interfaces and not public.  The interfaces
+        !  need to be as useful to the regrid code as possible.
+
+
+        ! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayRegridStore
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayRegrid(srcarray, dstarray, routehandle, &
+                                  srcmask, dstmask, blocking, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: srcarray
+      type(ESMF_Array), intent(inout) :: dstarray
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      type(ESMF_Mask), intent(in), optional :: srcmask
+      type(ESMF_Mask), intent(in), optional :: dstmask
+      type(ESMF_Async), intent(inout), optional :: blocking
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform a {\tt Regrid} operation over the data in an {\tt ESMF\_Array}.
+!     This routine updates the data inside the {\tt ESMF\_Array} in place.
+!     It uses a precomputed {\tt ESMF\_Route} for the communications
+!     pattern.
+!
+!     \begin{description}
+!     \item [srcarray]
+!           {\tt ESMF\_Array} containing source data to be regridded.
+!     \item [dstarray]
+!           {\tt ESMF\_Array} containing locations to put regridded data.
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} has been precomputed.
+!     \item [{[srcmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!     \item [{[dstmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      type(ESMF_LocalArray) :: srclocalarray, dstlocalarray
+      type(ESMF_Route) :: route
+
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+ 
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+
+      ! Execute the communications call.
+      srclocalarray = srcarray  ! this is only a cast
+      dstlocalarray = dstarray  ! ditto
+      call ESMF_RouteRun(route, srclocalarray, dstlocalarray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayRegrid: RouteRun returned failure"
+        return
+      endif
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayRegrid
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayRegridRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Release the information stored about this Regrid operation.
+!
+!     \begin{description}
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} associated with Regrid that is no longer
+!           needed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!
+!EOP
+
+      call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+
+      end subroutine ESMF_ArrayRegridRelease
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayRedistStore(srcarray, srcgrid, srcdatamap, &
+                                       dstgrid, dstdatamap, parentlayout, &
+                                       routehandle, blocking, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(in) :: srcarray
+      type(ESMF_Grid), intent(in) :: srcgrid
+      type(ESMF_DataMap), intent(in) :: srcdatamap
+      type(ESMF_Grid), intent(in) :: dstgrid
+      type(ESMF_DataMap), intent(in) :: dstdatamap
+      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Release the information stored about this Halo operation.
+!
+!     \begin{description}
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} associated with Halo that is no longer
+!           needed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!
+!EOP
+
+      ! TODO: add code here
+
+      end subroutine ESMF_ArrayRedistStore
 
 !------------------------------------------------------------------------------
 !BOP
@@ -561,6 +741,35 @@ end subroutine
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
+      subroutine ESMF_ArrayRedistRelease(routehandle, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Release the information stored about this Redist operation.
+!
+!     \begin{description}
+!     \item [routehandle]
+!           {\tt ESMF\_RouteHandle} associated with Redist that is no longer
+!           needed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!
+!EOP
+
+      call ESMF_RouteHandleDestroy(routehandle, rc=rc)
+
+      end subroutine ESMF_ArrayRedistRelease
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
       subroutine ESMF_ArrayRedistDeprecated(array, layout, global_start, &
                                   global_dimlengths, rank_trans, olddecompids, &
                                   decompids, redistarray, rc)
@@ -613,79 +822,18 @@ end subroutine
         end subroutine ESMF_ArrayRedistDeprecated
 
 !------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
-      type(ESMF_RouteHandle), intent(in) :: routehandle
-      type(ESMF_Async), intent(inout), optional :: blocking
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Perform a {\tt Halo} operation over the data in an {\tt ESMF\_Array}.
-!     This routine updates the data inside the {\tt ESMF\_Array} in place.
-!     It uses a precomputed {\tt ESMF\_Route} for the communications
-!     pattern.
-!
-!     \begin{description}
-!     \item [array]
-!           {\tt ESMF\_Array} containing data to be halo'd.
-!     \item [route]
-!           {\tt ESMF\_RouteHandle} has been precomputed.
-!     \item [{[blocking]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-      integer :: status         ! local error status
-      logical :: rcpresent      ! did user specify rc?
-      type(ESMF_LocalArray) :: local_array
-      type(ESMF_Route) :: route
-
-      ! initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
- 
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
-
-      ! Execute the communications call.
-      local_array = array
-      call ESMF_RouteRun(route, local_array, local_array, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayHalo: RouteRun returned failure"
-        return
-      endif
-
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArrayHaloNew
-
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloStore(array, grid, datamap, routehandle, &
-                                     blocking, rc)
+                                     halodirection, blocking, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_DataMap), intent(in) :: datamap
       type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
       type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc
 !
@@ -707,6 +855,9 @@ end subroutine
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} is returned to be used during the
 !           execution of the Halo.
+!     \item [{[halodirection]}]
+!           {\tt ESMF\_HaloDirection} to indicate which of the boundaries
+!           should be updated.  If not specified, all boundaries are updated.
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -841,6 +992,69 @@ end subroutine
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
+      subroutine ESMF_ArrayHaloNew(array, routehandle, blocking, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      type(ESMF_RouteHandle), intent(in) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform a {\tt Halo} operation over the data in an {\tt ESMF\_Array}.
+!     This routine updates the data inside the {\tt ESMF\_Array} in place.
+!     It uses a precomputed {\tt ESMF\_Route} for the communications
+!     pattern.
+!
+!     \begin{description}
+!     \item [array]
+!           {\tt ESMF\_Array} containing data to be halo'd.
+!     \item [route]
+!           {\tt ESMF\_RouteHandle} has been precomputed.
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+      integer :: status         ! local error status
+      logical :: rcpresent      ! did user specify rc?
+      type(ESMF_LocalArray) :: local_array
+      type(ESMF_Route) :: route
+
+      ! initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+ 
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
+
+      ! Execute the communications call.
+      local_array = array
+      call ESMF_RouteRun(route, local_array, local_array, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayHalo: RouteRun returned failure"
+        return
+      endif
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayHaloNew
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
       subroutine ESMF_ArrayHaloRelease(routehandle, rc)
 !
 ! !ARGUMENTS:
@@ -915,6 +1129,7 @@ end subroutine
 
         end subroutine ESMF_ArrayHaloDeprecated
 
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -1129,7 +1344,7 @@ end subroutine
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
