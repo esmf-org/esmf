@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.61 2004/05/27 21:22:04 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.62 2004/06/07 06:57:53 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,7 +15,8 @@
 // !DESCRIPTION:
 //
 // The LogErr class (defined in ESMC\_Log.C and declared in
-// the companion file ESMC\_LogErr.h) provides the user a way to write {\tt ESMC\_Log} data.
+// the companion file ESMC\_LogErr.h) provides the user a way to write 
+// {\tt ESMC\_Log} data.
 //
 // insert any higher level, 3rd party or system includes here
 
@@ -47,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.61 2004/05/27 21:22:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.62 2004/06/07 06:57:53 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -68,7 +69,7 @@ bool ESMC_Log::ESMC_LogAllocError(
       
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Allocation error with no message and no cpp macros
 //EOP
 {
     bool result=false;
@@ -97,12 +98,13 @@ bool ESMC_Log::ESMC_LogAllocError(
     int *rcToReturn      
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Allocation error with no message but with cpp macros
 //EOP
 {
 	bool result=false;
 	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,method);
+	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,
+	method);
 	result=true;
 	return result;
 }
@@ -124,7 +126,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
       
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Allocation error with message and no cpp macros
 //EOP
 {
     bool result=false;
@@ -139,7 +141,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 
 //----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+// !IROUTINE: ESMC_LogMsgAllocErr - LogAllocErr
 //
 // !INTERFACE:
 
@@ -157,7 +159,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
     int *rcToReturn      
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Allocation error with message and cpp macros
 //EOP
 {
     bool result=false;
@@ -188,58 +190,24 @@ void ESMC_Log::ESMC_LogOpen(
    )
 //
 // !DESCRIPTION:
-// {\tt ESMC\_LogOpen} takes two
-// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
-// ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
-// ESMF\_LogConstants.h, set whether one file should be written for all 
-// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
-// be written (ESMF\_MULT\_LOG\_FILE).
-//
-// The second argument is a string and is used to form the name of the
-// logfile.
-//
-// This routine is called from native C or C++ code. C I/O libraries are used.
+// {\tt ESMC\_LogOpen} opens a new log file and sets the deafult filename
 //
 //EOP
 // 
-//
-
 {
     strcpy(nameLogErrFile,filename);
-   /*if (!ESMC_LogNameValid(name,ESMF_FALSE) ) {
-      printf("File name is already being used.\n");
-      ESMC_LogExit();
-   } 
-   switch(numLogFile) {
-    
-   case ESMF_SINGLE_LOG_FILE:
-       oneLogErrFile=ESMF_TRUE;
-       
-       break;
-      
-   case ESMF_MULT_LOG_FILE:
-       oneLogErrFile=ESMF_FALSE;
-       strcpy(nameLogErrFile,name);
-       break;
-
-   default:
-     ESMC_LogExit();
-  }
-  if (oneLogErrFile == ESMF_FALSE) ESMC_LogFormName();
-  logErrCFilePtr[numCFiles]=fopen(nameLogErrFile,"a+");
-  numFilePtr=numCFiles;
-  numCFiles++;
-  if (logErrCFilePtr[numCFiles] == NULL) {
-     printf("Could not open file.");
-     ESMC_LogExit();
-  }*/
-     
-}   //end ESMC_LogOpen
-
+}   
+//----------------------------------------------------------------------------
+//
+//
+//BOP
+// !IROUTINE:  ESMC_LogSetFilename -  sets filename of a log that is open
+//
+// !INTERFACE:
 int ESMC_LogSetFilename(
 //
 // !RETURN VALUE:
-//   none
+//  int
 //
 // !ARGUMENTS:
 
@@ -248,27 +216,22 @@ int ESMC_LogSetFilename(
    )
 //
 // !DESCRIPTION:
-// {\tt ESMC\_LogOpen} takes two
-// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
-// ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
-// ESMF\_LogConstants.h, set whether one file should be written for all 
-// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
-// be written (ESMF\_MULT\_LOG\_FILE).
-//
-// The second argument is a string and is used to form the name of the
-// logfile.
-//
-// This routine is called from native C or C++ code. C I/O libraries are used.
+// {\tt ESMC\_LogSetFilename} sets the filename to the opened log.
 //
 //EOP
 // 
-//
-
 {
     strcpy(ESMC_LogDefault.nameLogErrFile,filename);
     return ESMF_SUCCESS;
-}   //end ESMC_LogInitialize
+}   
 
+//----------------------------------------------------------------------------
+//
+//
+//BOP
+// !IROUTINE:  ESMC_LogFinalize -  Finalizes an open log
+//
+// !INTERFACE:
 int ESMC_LogFinalize(
 //
 // !RETURN VALUE:
@@ -279,25 +242,12 @@ int ESMC_LogFinalize(
    )
 //
 // !DESCRIPTION:
-// {\tt ESMC\_LogOpen} takes two
-// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
-// ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
-// ESMF\_LogConstants.h, set whether one file should be written for all 
-// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
-// be written (ESMF\_MULT\_LOG\_FILE).
-//
-// The second argument is a string and is used to form the name of the
-// logfile.
-//
-// This routine is called from native C or C++ code. C I/O libraries are used.
-//
+// {\tt ESMC\_LogFinalize} finalizes an open log.
 //EOP
 // 
-//
-
 {
     return ESMF_SUCCESS;
-}   //end ESMC_LogInitialize
+} 
 
 //----------------------------------------------------------------------------
 //BOP
@@ -316,34 +266,14 @@ void ESMC_Log::ESMC_LogClose(
    )
 //
 // ! DESCRIPTION:
-// This routine simply closes the log file(s).  It also removes
-// file from the global file array. The routine is called from native
-// C/C++ code (File is closed with C I/O libraries.)
+// This routine simply closes the log file(s).  
 //
 //EOP
 
 {
-  /*int i,j;
-
-   if (standardOut == ESMF_FALSE) {
-     if (logErrCFilePtr[numFilePtr] != NULL) {
-       fclose(logErrCFilePtr[numFilePtr]);
-     }
-    for( i=0; i< numCFiles; i++)
-      if (strcmp(nameLogErrFile,listOfCFileNames[i])  == 0) {
-       for(j=i+1;j<numCFiles; j++)
-          strcpy(listOfCFileNames[j-1],listOfCFileNames[j]);
-       for(j=i+1;j<numCFiles; j++)
-	  logErrCFilePtr[j-1]=logErrCFilePtr[j];
-       numCFiles--;
-       break;
-      } 
-   }*/
+  
 }
 
-
-
- 
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_logWrite - write to log file
@@ -353,14 +283,16 @@ void ESMC_Log::ESMC_LogClose(
 bool ESMC_Log::ESMC_LogWrite(
 
 // !RETURN VALUE:
-//  none
+//  bool
 //
 // !ARGUMENTS:
 	    char msg[],	  // Log Entry
     	int logtype   // Log Type   
       )
 // !DESCRIPTION:
-// Prints log messsge
+// Prints log messsge and returns true if successful.  It takes two arguments -
+// msg which is a user message and log type.  This method does not use cpp
+// macros
 //EOP
 {
     int y,mn,d,h,m,s,ms;
@@ -399,11 +331,16 @@ bool ESMC_Log::ESMC_LogWrite(
     return true;
 }
 
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_logWrite - write to log file
+//
+// !INTERFACE:
 
 bool ESMC_Log::ESMC_LogWrite(
 
 // !RETURN VALUE:
-//  none
+//  bool
 //
 // !ARGUMENTS:
     char msg[],	// Log Entry
@@ -413,7 +350,8 @@ bool ESMC_Log::ESMC_LogWrite(
     char method[]
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Prints log messsge and returns true if successful.  It takes two arguments -
+// msg which is a user message and log type.  This method uses cpp macros
 //EOP
 {
     int y,mn,d,h,m,s,ms;
@@ -461,14 +399,15 @@ bool ESMC_Log::ESMC_LogWrite(
 bool ESMC_Log::ESMC_LogFoundError(
 
 // !RETURN VALUE:
-//  none
+//  bool
 //
 // !ARGUMENTS:
     int rcToCheck,
     int *rcToReturn
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log.  This method does not use cpp macros.
 //EOP
 {
     bool result=false;
@@ -491,7 +430,7 @@ bool ESMC_Log::ESMC_LogFoundError(
 bool ESMC_Log::ESMC_LogFoundError(
 
 // !RETURN VALUE:
-//  none
+//  bool
 //
 // !ARGUMENTS:
     int rcToCheck,
@@ -501,7 +440,8 @@ bool ESMC_Log::ESMC_LogFoundError(
     int *rcToReturn
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log.  This method uses cpp macros.
 //EOP
 {
     bool result=false;
@@ -523,7 +463,7 @@ bool ESMC_Log::ESMC_LogFoundError(
 bool ESMC_Log::ESMC_LogMsgFoundError(
 
 // !RETURN VALUE:
-//  none
+//  bool
 //
 // !ARGUMENTS:
     int rcToCheck,
@@ -531,7 +471,9 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
     int *rcToReturn
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log with a user supplied mesage.  This method does not use cpp 
+// macros.
 //EOP
 {
     bool result=false;
@@ -552,11 +494,10 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
 //
 // !INTERFACE:
 
-
 bool ESMC_Log::ESMC_LogMsgFoundError(
 
 // !RETURN VALUE:
-//  none
+//  bool
 //
 // !ARGUMENTS:
     int rcToCheck,
@@ -567,7 +508,8 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
     int *rcToReturn
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Returns true if rcToCheck does not equal ESMF\_SUCCESS and writes the error
+// to the log with a user supplied mesage.  This method uses cpp macros.
 //EOP
 {
     bool result=false;
@@ -583,8 +525,6 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
     }
     return result;
 }
-
-
 
 //----------------------------------------------------------------------------
 //BOP
@@ -608,7 +548,7 @@ void ESMC_TimeStamp(
       
     )
 // !DESCRIPTION:
-// Prints log messsge, line number, file, directory
+// Returns time stamp values so that microsecond precision can be used.
 //EOP
 {
     time_t tm;
@@ -634,13 +574,13 @@ void ESMC_TimeStamp(
 char *ESMC_LogGetErrMsg(
 
 // !RETURN VALUE:
-//  none
+//  char
 //
 // !ARGUMENTS:
     int rc
     )
 // !DESCRIPTION:
-// Gets error message corresponding to rc
+// Returns error message corresponding to rc
 //EOP
 {
     if (rc == ESMF_SUCCESS) return("Success ");

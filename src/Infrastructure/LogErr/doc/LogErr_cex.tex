@@ -1,4 +1,4 @@
-% $Id: LogErr_cex.tex,v 1.3 2003/09/04 22:24:21 cdeluca Exp $
+% $Id: LogErr_cex.tex,v 1.4 2004/06/07 06:57:53 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -11,74 +11,62 @@
 %\subsection{C++ Use and Examples}
 
 %<Detailed examples of F90 usage of the class.>
-\subsubsection{Example 1. Simple Example.}
+\subsubsection{Example Code}
 
-In this example we use the default ESMF\_Log\_World object and illustrate
-the ESMF\_LogGetUnit()to write to the log file aLog.txt.
+In this example we set the default log file to aLog.txt and then call the 
+various methods to write to the log.  The first step is to include 
+ESMC\_LogErr.h and ESMF\_LogMacros.inc.  Next, we define ESMC\_Method to 
+the corresponding method.
 
 {\tt
 \begin{verbatim}
-#include "ESMC_LogErr.inc"
-ESMC_Log_World.ESMC_LogOpen(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"aLog.txt")
-fprintf(ESMC_Log_Wold.ESMC_GetFileHandle(),"This is a test");
-ESMC_Log_World.ESMC_LogClose();
+#include "ESMC_LogErr.h"
+#include "ESMF_LogMacros.inc"
+#define ESMC_METHOD "TestLog1Ex"
+
+int main() {
+int *rc;
+    
+    ESMC_LogSetFilename("aLog1.txt");
+    ESMC_LogDefault.ESMC_LogWrite("LogWrite",ESMC_LOG_WARN);
+    ESMC_LogDefault.ESMC_LogFoundError(ESMF_TRUE,rc);
+	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_TRUE,"Log Msg Found Error",rc);
+    ESMC_LogDefault.ESMC_LogAllocError(rc);
+	ESMC_LogDefault.ESMC_LogMsgAllocError("Log Msg Alloc Error",rc);
+}
 \end{verbatim}
 \tt}
 
-\subsubsection{Example 2. Simple Error Handling.}
+\subsubsection{Example 1. ESMC\_LogSetFilename}
 
-Here we illustrate simple error handling.  We define an error handler - anErr -
-and error output goes to the
-file anErr.txt.  There are four options that can be set with ESMF\_LogSet()
-and we set them all here: verbose (whether an
-error message should be written for anErr), flush (whether output should be
-flushed), haltOnErr and haltOnWarn (whether the code should halt on
-an error or warning).  While the values set here are the default
-values, so they need not be set with ESMC\_Set(), the example illustrates how
-to use ESMC\_SET().  Note that verbose, flush, haltOnErr, and haltOnWarn are symbolic
-constants defined in ESMC\_LogErr.inc.
-{\tt
-\begin{verbatim}
-#include "ESMC_LogErr.inc"
-ESMC_Log anErr;
-int returnCode;
-anErr.ESMC_LogSet(verbose,ESMF_TRUE,flush,ESMF_TRUE,haltOnErr,
-                  ESMF_TRUE,haltOnWarn,ESMF_FALSE);
-anErr.ESMC_LogOpenFile(ESMF_SINGLE_LOG_FILE,"anErr.txt");
-returnCode=foo();
-if (returnCode == ESMF_FATAL) anErr.ESMC_LogErr(ESMF_FATAL); 
-anErr.ESMC_LogCloseFile();
-\end{verbatim}
-\tt}
+The default log is already set by ESMF during initialization.  However, if a user
+wants to write to a different log, then ESMC\_LogSetFilename is used.  A fully 
+qualified path and filename are required.  If only the filename is given then
+the log file will be created in the same directory as the method calling the
+ESMC\_LogSetFilename.
 
-\subsubsection{Example 3. More error handling. }
+\subsubsection{Example 2. ESMC\_LogWrite}
 
-In this example, we illustrate more complex error handling.  We use
-ESMF\_LogGet() to get the value of verbose and if it's set to ESMF\_TF\_TRUE
-then turn off verbose midway through the code.  This allows you to put in lots
-of debugging code, and then if you want to turn them off, you can just call
-an ESMF\_LogSet() rather than commenting out all the error handling calls.
-{\tt
-\begin{verbatim}
-#include "ESMC_LogErr.inc"
+ESMC\_LogWrite is the basic method for writing to the log.  All it requires is a
+message and log type.
 
-\begin{verbatim}
-#include "ESMC_LogErr.inc" 
-ESMC_Log anErr;
-ESMC_Logical myVerbosity;
-char myMsg[32]="This will be written out.";
-int returnCode; 
-anErr.ESMC_LogSet(verbose,ESMF_TRUE,flush,ESMF_FALSE,
-                 haltOnErr,ESMF_TRUE, haltOnWarn,ESMF_FALSE)
-anErr.ESMC_LogOpenFile(ESMF_SINGLE_LOG_FILE,"anErr.txt")
-returnCode=foo();
-if (returnCode == ESMF_FATAL) anErr.ESMC_LogErrMsg(anErr, returnCode,myMsg) 
-anErr.ESMF_LogGet(verbose,myVerbosity)
-if (myVerbosity==ESMF_TRUE) anErr.ESMF_LogSet(verbose=ESMF_FALSE)
-myMsg="This will not be written out."
-returnCode=foo()
-if (returnCode == ESMF_FATAL) anErr.ESMF_LogErrMsg(anErr, returnCode,myMsg)
-anErr.ESMF_LogCloseFile()
-\end{verbatim}
-\tt}
+\subsubsection{Example 3. ESMC\_LogFoundError}
 
+ESMC\_LogFoundError allows the user to pass a return code to check and if the 
+return code is associated with an error it will write the corresponding error
+message to the log.  It will also pass back the return code in rc.
+
+\subsubsection{Example 4. ESMC\_LogMsgFoundError}
+
+ESMC\_LogMsgFoundError does the same as ESMC\_LogFoundError but allows the user
+to add his/her own message as well.
+
+\subsubsection{Example 5. ESMC\_LogAllocError}
+
+ESMC\_LogAllocError writes an allocation error to the log and returns a return
+code rc.
+
+\subsubsection{Example 6. ESMC\_LogMsgAllocError}
+
+ESMC\_LogMsgAllocError does the same as ESMC\_LogAllocError but allows the user
+to add his/her own message as well.
