@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.36 2003/07/25 05:17:07 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.37 2003/07/25 16:46:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.36 2003/07/25 05:17:07 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.37 2003/07/25 16:46:44 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -386,13 +386,13 @@
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time is defined to be 2:00 am on a particular date, then
-!     ESMF_TimeGet(h_i4=hours, s_i4=seconds) would return
-!       hours = 2, seconds = 0,
-!     whereas ESMF_TimeGet(s_i4=seconds) would return
-!       seconds = 7200.
+!     {\tt ESMF\_TimeGet(h\_i4 = hours, s\_i4 = seconds)} would return
+!       {\tt hours = 2}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeGet(s\_i4=seconds)} would return
+!       {\tt seconds = 7200}.
 !
-!     See {\tt ../include/ESMC\_BaseTime.h and ../include/ESMC\_Time.h} for
-!     complete description.
+!     See {\tt ../include/ESMC\_BaseTime.h} and {\tt ../include/ESMC\_Time.h} 
+!     for complete description.
 !     
 !     The arguments are:
 !     \begin{description}

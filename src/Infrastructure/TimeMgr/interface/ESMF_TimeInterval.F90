@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.27 2003/07/25 05:17:07 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.28 2003/07/25 16:46:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.27 2003/07/25 05:17:07 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.28 2003/07/25 16:46:44 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -396,10 +396,10 @@
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time interval is defined to be 1 day, then
-!     ESMF_TimeIntervalGet(d_i4=days, s_i4=seconds) would return
-!       days = 1, seconds = 0,
-!     whereas ESMF_TimeIntervalGet(s_i4=seconds) would return
-!       seconds = 86400.
+!     {\tt ESMF\_TimeIntervalGet(d\_i4 = days, s\_i4 = seconds)} would return
+!       {\tt days = 1}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeIntervalGet(s\_i4 = seconds)} would return
+!       {\tt seconds = 86400}.
 !
 !     See {\tt ../include/ESMC\_BaseTime.h} and
 !     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
@@ -408,13 +408,13 @@
 !     \begin{description}
 !     \item[timeInterval]
 !          The object instance to query.
-!     \item[{[yy_i4]}]
+!     \item[{[yy\_i4]}]
 !          Integer years (>= 32-bit).
-!     \item[{[yy_i8]}]
+!     \item[{[yy\_i8]}]
 !          Integer years (large, >= 64-bit).
-!     \item[{[mo_i4]}]
+!     \item[{[mo\_i4]}]
 !          Integer months (>= 32-bit).
-!     \item[{[mo_i8]}]
+!     \item[{[mo\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d\_i4]}]
 !          Integer Julian days (>= 32-bit).
@@ -533,13 +533,13 @@
 !     \begin{description}
 !     \item[timeInterval]
 !          The object instance to initialize.
-!     \item[{[yy_i4]}]
+!     \item[{[yy\_i4]}]
 !          Integer years (>= 32-bit).
-!     \item[{[yy_i8]}]
+!     \item[{[yy\_i8]}]
 !          Integer years (large, >= 64-bit).
-!     \item[{[mo_i4]}]
+!     \item[{[mo\_i4]}]
 !          Integer months (>= 32-bit).
-!     \item[{[mo_i8]}]
+!     \item[{[mo\_i8]}]
 !          Integer months (large, >= 64-bit).
 !     \item[{[d\_i4]}]
 !          Integer Julian days (>= 32-bit).

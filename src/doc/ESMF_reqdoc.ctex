@@ -1,4 +1,4 @@
-% $Id: ESMF_reqdoc.ctex,v 1.13 2003/07/24 20:43:27 cdeluca Exp $
+% $Id: ESMF_reqdoc.ctex,v 1.14 2003/07/25 16:46:45 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -220,19 +220,19 @@
 
 #include "../Infrastructure/PerfProf/doc/PerfProf_reqdoc.ctex"
 
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-\end{htmlonly}
-\part{Infrastructure Utilities: Log}
-\label{part:Infrastructure_Utilities:_Log}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Log}
+%\label{part:Infrastructure_Utilities:_Log}
 
-\setcounter{section}{0}
-\renewcommand{\thesection}{\shortname\arabic{section}}
-\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/LogErr/doc/LogErr_reqdoc.ctex"
+%#include "../Infrastructure/LogErr/doc/LogErr_reqdoc.ctex"
 
 \newpage
 \begin{htmlonly}
@@ -264,7 +264,7 @@
 
 
 \setcounter{section}{0}
-\renewcommand{\thesection}{arabic{section}}
+\renewcommand{\thesection}{\arabic{section}}
 
 \newpage
 \begin{htmlonly}
@@ -279,7 +279,7 @@
 \addcontentsline{toc}{section}{References}
 
 \setcounter{section}{0}
-\renewcommand{\thesection}{arabic{section}}
+\renewcommand{\thesection}{}
 
 \newpage
 \begin{htmlonly}

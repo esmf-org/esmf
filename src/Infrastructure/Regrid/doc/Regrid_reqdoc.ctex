@@ -1,4 +1,4 @@
-% $Id: Regrid_reqdoc.ctex,v 1.5 2003/07/24 20:43:26 cdeluca Exp $
+% $Id: Regrid_reqdoc.ctex,v 1.6 2003/07/25 16:46:44 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -94,14 +94,14 @@
 
 \newpage
 
+#ifdef CONSTITUENT
+\section{Regrid requirements}
+#endif
+
 \setcounter{section}{0}
 \renewcommand{\thesection}{\shortname\arabic{section}}
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
-
-#ifdef CONSTITUENT
-\section{Regrid requirements}
-#endif
 
 #ifdef STANDALONE
 \input{Regrid_req}
