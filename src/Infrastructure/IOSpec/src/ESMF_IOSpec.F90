@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.4 2004/03/22 20:29:06 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.5 2004/03/22 20:50:11 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -49,7 +49,7 @@
                           ESMF_IO_FILEFORMAT_UNSPECIFIED=ESMF_IOFileFormat(0), &
                           ESMF_IO_FILEFORMAT_NETCDF=ESMF_IOFileFormat(1), &
                           ESMF_IO_FILEFORMAT_HDF=ESMF_IOFileFormat(2), &
-                          ESMF_IO_FILEFORMAT_BINARY_ESMF_IOFileFormat(3)
+                          ESMF_IO_FILEFORMAT_BINARY=ESMF_IOFileFormat(3)
 
       ! What type of I/O - Read only, write only, R/W, append with truncation
       type ESMF_IORWType
