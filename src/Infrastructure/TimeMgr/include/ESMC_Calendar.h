@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.28 2004/01/30 23:14:02 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.29 2004/01/31 00:18:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -227,15 +227,15 @@ class ESMC_Calendar {
                                                            ESMC_CAL_NOCALENDAR,
                                        int*              rc=0);
 
-    ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
-                                       const char   *name=0,
-                                       int          *monthsPerYear=0,
-                                       int          *daysPerMonth=0,
-                                       ESMF_KIND_I4 *secondsPerDay=0,
-                                       ESMF_KIND_I4 *daysPerYear=0,
-                                       ESMF_KIND_I4 *daysPerYearDn=0,
-                                       ESMF_KIND_I4 *daysPerYearDd=0,
-                                       int          *rc=0);
+    ESMC_Calendar *ESMC_CalendarCreateCustom(int           nameLen,
+                                             const char   *name=0,
+                                             int          *monthsPerYear=0,
+                                             int          *daysPerMonth=0,
+                                             ESMF_KIND_I4 *secondsPerDay=0,
+                                             ESMF_KIND_I4 *daysPerYear=0,
+                                             ESMF_KIND_I4 *daysPerYearDn=0,
+                                             ESMF_KIND_I4 *daysPerYearDd=0,
+                                             int          *rc=0);
 
     // friend function to de-allocate calendar
     int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
