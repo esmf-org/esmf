@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.59 2004/04/09 20:13:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.60 2004/04/27 22:59:01 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -590,7 +590,8 @@
     struct tm wallClock;
 
     // get wall clock (system) time
-    // TODO:  use POSIX real-time function to get nanosecond resolution
+    // TODO:  Use POSIX real-time clock_gettime() function to get nanosecond
+    //        resolution.  Use BSD gettimeofday() to get microsecond resolution
     if (time(&tm) < 0) return (ESMF_FAILURE);
     wallClock = *localtime(&tm);          
     ESMF_KIND_I8 yy_i8 = wallClock.tm_year + 1900;
