@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.24 2004/09/03 16:23:34 jwolfe Exp $
+! $Id: ESMF_LogErr.F90,v 1.25 2004/09/03 16:49:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -866,8 +866,8 @@ end subroutine ESMF_LogSet
     		ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
             if (status.eq.0) then
 	        do j=1, log%findex
-    		    if (log%LOG_ENTRY(j)%lineflag .eq. .TRUE.) then								
-    		        if (log%LOG_ENTRY(j)%methodflag .eq. .TRUE.) then
+    		    if (log%LOG_ENTRY(j)%lineflag) then								
+    		        if (log%LOG_ENTRY(j)%methodflag) then
     			    WRITE(log%unitnumber,122) &
                                   log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
                                   log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
@@ -883,7 +883,7 @@ end subroutine ESMF_LogSet
                                   log%LOG_ENTRY(j)%msg
     		        endif	
                     else
-    		        if (log%LOG_ENTRY(j)%methodflag .eq. .TRUE.) then
+    		        if (log%LOG_ENTRY(j)%methodflag) then
     		            WRITE(log%unitnumber,132) &
                                   log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
                                   log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
@@ -1013,21 +1013,14 @@ end subroutine ESMF_LogFlush
     endif    	 
     if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTWARNING).and. (msgtype .gt. ESMF_LOG_WARNING)) then
         ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%stopprogram=.TRUE.
-	call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
+	call ESMF_LogFlush(ESMF_LogDefault, rc=rc2)
     endif	
-    if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
+    if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) &
+        call ESMF_LogFlush(ESMF_LogDefault, rc=rc2)
     ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1
 
    if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
 end module ESMF_LogErrMod
-
-
-
-
-
-
-
-
 
