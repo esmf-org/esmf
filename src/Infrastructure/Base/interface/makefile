@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.6 2003/03/25 00:17:44 flanigan Exp $ 
+# $Id: makefile,v 1.7 2003/10/21 23:14:10 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = ESMF_Base.F90
+SOURCEF	  = ESMF_Base.F90 ESMF_Base_C.F90
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

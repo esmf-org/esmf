@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.31 2003/09/11 22:42:40 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.32 2003/10/21 23:14:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,11 +135,16 @@ struct ESMC_Domain {
 };
 
 // collection of AxisIndices per axis, to describe an n-dim cube
-struct ESMC_DomainList {
+class ESMC_DomainList {
+  public:   // TODO: fix this
     int num_domains;
     int current_size;
     int total_points;
     struct ESMC_Domain *domains;
+
+    int  ESMC_DomainListGetDE(int domainnum);
+    struct ESMC_AxisIndex ESMC_DomainListGetAI(int domainnum, int ainum);
+    
 };
 
 // !PRIVATE TYPES:
@@ -237,5 +242,11 @@ ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
 // return byte counts for DataKinds
 int ESMC_DataKindSize(ESMC_DataKind dk);
+
+extern "C" {
+void FTN(f_esmf_domainlistgetde)(ESMC_DomainList **, int *, int *, int *);
+void FTN(f_esmf_domainlistgetai)(ESMC_DomainList **, int *, int *, 
+                                                    ESMC_AxisIndex **ai, int *);
+}
 
 #endif  // ESMC_BASE_H
