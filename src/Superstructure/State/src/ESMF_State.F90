@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.39 2004/03/24 18:31:09 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.40 2004/05/20 17:49:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
+      use ESMF_LogErrMod
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_FieldMod
@@ -287,7 +288,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.39 2004/03/24 18:31:09 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.40 2004/05/20 17:49:12 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -612,6 +613,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneArray"
 !BOP
 ! !IROUTINE: ESMF_StateAddArray - Add an Array to a State
 !
@@ -639,7 +642,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       type(ESMF_Array) :: temp_list(1)
 
@@ -650,6 +652,8 @@ end function
       end subroutine ESMF_StateAddOneArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddArrayList"
 !BOP
 ! !IROUTINE: ESMF_StateAddArray - Add a list of Arrays to a State
 !
@@ -679,13 +683,14 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_StateTypeAddArrayList(state%statep, acount, arrays, rc)
 
         end subroutine ESMF_StateAddArrayList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddIntAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set an integer Attribute
 !
@@ -717,31 +722,23 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, 1, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddIntAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddIntListAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set an integer list Attribute
 !
@@ -776,38 +773,31 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer :: limit
+      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
   
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_RANK, "count longer than list", rc)
           return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, count, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddIntListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddRealAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set a real Attribute
 !
@@ -839,31 +829,23 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+                                    ESMF_DATA_REAL, 1, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddRealAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddRealListAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set a real list Attribute
 !
@@ -880,8 +862,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real list attribute to an {\tt ESMF\_State}.
-!
+!     Attaches a real list attribute to an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -899,38 +880,31 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       integer :: limit
+      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_RANK, "count longer than list", rc)
           return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+                                    ESMF_DATA_REAL, count, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddRealListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddLogicalAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set a logical Attribute 
 !
@@ -946,8 +920,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical attribute to an {\tt ESMF\_State}.
-!
+!     Attaches an logical attribute to an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -963,31 +936,23 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, 1, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddLogicalAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddLogicalListAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set a logical list Attribute
 !
@@ -1004,8 +969,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical list attribute to an {\tt ESMF\_State}.
-!
+!     Attaches an logical list attribute to an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1023,38 +987,31 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       integer :: limit
+      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_RANK, "count longer than list", rc)
           return
       endif
 
       call c_ESMC_AttributeSetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, count, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddLogicalListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddCharAttr"
 !BOP
 ! !IROUTINE: ESMF_StateAddAttribute - Set a character Attribute
 !
@@ -1070,7 +1027,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to an {\tt ESMF\_State}.
+!     Attaches a character attribute to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1086,30 +1043,22 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_AttributeSetChar(state%statep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateAddAttribute"
-        return
-      endif 
+      call c_ESMC_AttributeSetChar(state%statep%base, name, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddCharAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneBundle"
 !BOP
 ! !IROUTINE: ESMF_StateAddBundle - Add a Bundle to a State
 !
@@ -1137,7 +1086,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       type(ESMF_Bundle) :: temp_list(1)
 
@@ -1148,6 +1096,8 @@ end function
       end subroutine ESMF_StateAddOneBundle
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddBundleList"
 !BOP
 ! !IROUTINE: ESMF_StateAddBundle - Add a list of Bundles to a State
 !
@@ -1177,13 +1127,14 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_StateTypeAddBundleList(state%statep, bcount, bundles, rc)
 
         end subroutine ESMF_StateAddBundleList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneField"
 !BOP
 ! !IROUTINE: ESMF_StateAddField - Add a Field to a State
 !
@@ -1211,7 +1162,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       type(ESMF_Field) :: temp_list(1)
 
@@ -1222,6 +1172,8 @@ end function
       end subroutine ESMF_StateAddOneField
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddFieldList"
 !BOP
 ! !IROUTINE: ESMF_StateAddField - Add a list of Fields to a State
 !
@@ -1251,13 +1203,14 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       call ESMF_StateTypeAddFieldList(state%statep, fcount, fields, rc)
 
       end subroutine ESMF_StateAddFieldList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneName"
 !BOP
 ! !IROUTINE: ESMF_StateAddNameOnly - Add a name to a State as a placeholder
 !
@@ -1289,7 +1242,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       character(len=ESMF_MAXSTR) :: temp_list(1)
       
@@ -1300,6 +1252,8 @@ end function
       end subroutine ESMF_StateAddOneName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddNameList"
 !BOP
 ! !IROUTINE: ESMF_StateAddNameOnly - Add a list of names to a State 
 !
@@ -1336,13 +1290,13 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: 
 
       call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
-
       end subroutine ESMF_StateAddNameList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddOneState"
 !BOP
 ! !IROUTINE: ESMF_StateAddState - Add a State to a State
 !
@@ -1370,7 +1324,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
 
       type(ESMF_State) :: temp_list(1)
 
@@ -1381,6 +1334,8 @@ end function
       end subroutine ESMF_StateAddOneState
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateAddStateList"
 !BOP
 ! !IROUTINE: ESMF_StateAddState - Add a list of States to a State
 !
@@ -1410,13 +1365,14 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_StateTypeAddStateList(state%statep, scount, nestedstates, rc)
 
         end subroutine ESMF_StateAddStateList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateCreate"
 !BOP
 ! !IROUTINE: ESMF_StateCreate - Create a new State
 
@@ -1444,9 +1400,7 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new State and set the decomposition characteristics.
-!
-!  The return value is a new State.
+!  Create a new {\tt ESMF\_State} and optionally add initial objects to it.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -1454,19 +1408,20 @@ end function
 !    Name of this {\tt ESMF\_State} object.   A default name will be generated
 !    if none is specified.
 !   \item[{[statetype]}]
-!    Import or Export {\tt State}.  Values can be {\tt ESMF\_STATEIMPORT},
-!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.  The default is
-!    {\tt ESMF\_STATELIST}.
+!    Import or Export {\tt ESMF\_State}.  Valid values are 
+!    {\tt ESMF\_STATEIMPORT}, {\tt ESMF\_STATEEXPORT}, 
+!    or {\tt ESMF\_STATELIST} The default is {\tt ESMF\_STATELIST}.
 !   \item[{[bundles]}]
-!    An array of Bundles.
+!    A list (fortran array) of {\tt ESMF\_Bundle}s.
 !   \item[{[fields]}]
-!    An array of Fields.
+!    A list (fortran array) of {\tt ESMF\_Field}s.
 !   \item[{[arrays]}]
-!    An array of Arrays.
+!    A list (fortran array) of {\tt ESMF\_Array}s.
 !   \item[{[nestedstates]}]
-!    An array of States to be nested inside the outer {\tt ESMF\_State}.
+!    A list (fortran array) of {\tt ESMF\_State}s to be nested 
+!    inside the outer {\tt ESMF\_State}.
 !   \item[{[names]}]
-!    An array of name placeholders.
+!    A list (fortran array) of character string name placeholders.
 !   \item[{[itemcount]}]
 !    The total number of Bundles, Fields, Arrays, States, and Names to be added.
 !    If not specified the lengths of each array will be used to compute the
@@ -1500,49 +1455,37 @@ end function
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
 
-!       local vars
+        ! local vars
         type (ESMF_StateType), pointer :: stypep
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
+        integer :: localrc                          ! local error status
 
-        status = ESMF_FAILURE 
-        rcpresent = .FALSE.
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) rc = ESMF_FAILURE
 
-!       Initialize the pointers to null.
+        ! Initialize the pointers to null.
         nullify(ESMF_StateCreate%statep)
         nullify(stypep)
 
-!       Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        allocate(stypep, stat=status)
-        if(status .NE. 0) then     ! this is an F90 rc, not esmf's
-          print *, "ERROR in ESMF_StateCreateEmpty: allocation"
-          return
-        endif
+        allocate(stypep, stat=localrc)
+        if (EM_LogMsgFoundAllocError(localrc, "State type", rc)) return
       
         call ESMF_StateConstruct(stypep, statename, statetype, &
                    bundles, fields, arrays, nestedstates, names, itemcount, &
                    dataneeded, dataready, datavalid, datareqrestart, rc)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "State construction error"
-          return
-        endif
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-!       set return values
+        ! Set return values
         ESMF_StateCreate%statep => stypep 
-        if (rcpresent) rc = status
+        if (present(rc)) rc = ESMF_FAILURE
 
         end function ESMF_StateCreate
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateDestroy"
 !BOP
 ! !IROUTINE: ESMF_StateDestroy - Release resources for a State
 !
@@ -1554,7 +1497,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt State}.
+!     Releases all resources associated with this {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1565,53 +1508,41 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! Local vars
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-
-        status = ESMF_FAILURE 
-        rcpresent = .FALSE.
-
+        integer :: localrc                   ! local error status
+        logical :: dummy
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Simple sanity checks
         if (.not.associated(state%statep)) then
-          print *, "calling destroy on uninitialized or already destroyed state"
+          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, "State uninitialized or already destroyed", rc)
           return
         endif
         if (state%statep%st .eq. ESMF_STATEINVALID) then
-          print *, "calling destroy on uninitialized or already destroyed state"
+          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, "State uninitialized or already destroyed", rc)
           return
         endif
 
         ! Call Destruct to release resources
-        call ESMF_StateDestruct(state%statep, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "State contents destruction error"
-          return
-        endif
+        call ESMF_StateDestruct(state%statep, localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Release space
- 	deallocate(state%statep, stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "State contents destruction error"
-          return
-        endif
+ 	deallocate(state%statep, stat=localrc)
+        if (EM_LogMsgFoundAllocError(localrc, "deallocate State", rc)) return
         nullify(state%statep)
 
         ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StateDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGet"
 !BOP
 ! !IROUTINE: ESMF_StateGet - Get information about a State
 !
@@ -1630,7 +1561,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the requested information about this {\tt State}.
+!      Returns the requested information about this {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -1658,9 +1589,7 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS:
-
-      integer :: i, status
+      integer :: i, localrc
       type(ESMF_StateType), pointer :: stypep
       type(ESMF_StateData), pointer :: nextitem
 
@@ -1676,7 +1605,7 @@ end function
         return
       endif
 
-      if (present(name)) call c_ESMC_GetName(stypep%base, name, status)
+      if (present(name)) call c_ESMC_GetName(stypep%base, name, localrc)
       if (present(statetype)) statetype = stypep%st
 
       ! TODO: indirect entries for Fields inside of Bundles complicates
@@ -1705,6 +1634,8 @@ end function
       end subroutine ESMF_StateGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetArray"
 !BOP
 ! !IROUTINE: ESMF_StateGetArray - Retrieve a data Array from a State
 !
@@ -1751,14 +1682,15 @@ end function
 !  \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
       type(ESMF_State) :: top
       logical :: exists
-      integer :: status
+      integer :: localrc
+      character(len=ESMF_MAXSTR) :: errmsg
+      logical :: dummy
 
-      status = ESMF_FAILURE
+      localrc = ESMF_FAILURE
        
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
@@ -1766,17 +1698,17 @@ end function
 
       if (present(statename)) then
           exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
-                                                          dataitem, rc=status)
+                                                          dataitem, rc=localrc)
+          if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
           if (.not. exists) then
-              print *, "ESMF_StateGetArray: no nested state named ", &
-                         statename, "found.  Omit the 'statename' argument to find the arrayname directly from the state"
-              if (present(rc)) rc = status
+              print errmsg, "no nested state named", trim(statename), "found"
+              dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
               return
           endif
     
           if (dataitem%otype .ne. ESMF_STATESTATE) then
-              print *, "ESMF_StateGetArray: ", statename, "found, but not type State"
-              if (present(rc)) rc = status
+              print errmsg, trim(statename), "found but not type State"
+              dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
               return
           endif
           
@@ -1787,26 +1719,29 @@ end function
 
 
       exists = ESMF_StateTypeFindData(top%statep, arrayname, .true., &
-                                                          dataitem, rc=status)
+                                                          dataitem, rc=localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
       if (.not. exists) then
-          print *, "ESMF_StateGetArray: no array named ", arrayname
-          if (present(rc)) rc = status
+          print errmsg, "no Array found named", trim(arrayname)
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEARRAY) then
-          print *, "ESMF_StateGetArray: ", arrayname, "found, but not type Array"
-          if (present(rc)) rc = status
+          print errmsg, trim(arrayname), "found but not type Array"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
           return
       endif
 
       array = dataitem%datap%ap
 
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetArray
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetIntAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer Attribute 
 !
@@ -1838,31 +1773,23 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, 1, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetIntAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetIntListAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve an integer list Attribute
 !
@@ -1898,38 +1825,31 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       integer :: limit
+      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_RANK, "count longer than list", rc)
           return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, count, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_INTEGER, count, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetIntListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetRealAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real Attribute
 !
@@ -1961,31 +1881,23 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_REAL, 1, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetRealAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetRealListAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a real list Attribute
 !
@@ -2020,38 +1932,31 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       integer :: limit
+      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_RANK, "count longer than list", rc)
           return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_REAL, count, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetRealListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetLogicalAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical Attribute
 !
@@ -2083,31 +1988,23 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, 1, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetLogicalAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetLogicalListAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a logical list Attribute
 !
@@ -2142,38 +2039,31 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       integer :: limit
+      logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_StateGetAttribute: count longer than value list"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_RANK, "count longer than list", rc)
           return
       endif
 
       call c_ESMC_AttributeGetValue(state%statep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+                                    ESMF_DATA_LOGICAL, count, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetLogicalListAttr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetCharAttr"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttribute - Retrieve a character Attribute
 !
@@ -2205,31 +2095,23 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_AttributeGetChar(state%statep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttribute"
-        return
-      endif 
+      call c_ESMC_AttributeGetChar(state%statep%base, name, value, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetCharAttr
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetAttributeCount"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttributeCount - Query the number of Attributes
 !
@@ -2257,30 +2139,22 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
-      call c_ESMC_AttributeGetCount(state%statep%base, count, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttributeCount"
-        return
-      endif 
+      call c_ESMC_AttributeGetCount(state%statep%base, count, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetAttributeCount
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetAttrInfoByName"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttributeInfo - Query State Attributes by name
 !
@@ -2317,36 +2191,28 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       type(ESMF_DataType) :: localDt
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetAttrInfoName(state%statep%base, name, &
-                                           localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttributeInfo"
-        return
-      endif 
+                                           localDt, localCount, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       if (present(type)) type = localDt
       if (present(count)) count = localCount
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetAttrInfoByName
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetAttrInfoByNum"
 !BOP
 ! !IROUTINE: ESMF_StateGetAttributeInfo - Query State Attributes by number
 !
@@ -2385,38 +2251,30 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                           ! Error status
       character(len=ESMF_MAXSTR) :: localName
       type(ESMF_DataType) :: localDt
       integer :: localCount
 
       ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
 
       call c_ESMC_AttributeGetAttrInfoNum(state%statep%base, num, &
-                                         localName, localDt, localCount, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_StateGetAttributeInfo"
-        return
-      endif 
+                                        localName, localDt, localCount, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       if (present(name)) name = localName
       if (present(type)) type = localDt
       if (present(count)) count = localCount
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetBundle"
 !BOP
 ! !IROUTINE: ESMF_StateGetBundle - Retrieve a Bundle from a State
 !
@@ -2433,7 +2291,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Bundle} from an {\tt ESMF\_State} by name.  
-!      If the {\tt State} is a simple {\tt ESMF\_State} only the
+!      If the {\tt state} is a simple {\tt ESMF\_State} only the
 !      {\tt bundlename} is required.
 !      If the {\tt state} contains multiple {\tt ESMF\_States} 
 !      an additional argument, the {\tt statename}, is required to 
@@ -2449,43 +2307,42 @@ end function
 !      \item[bundlename]
 !       Name of {\tt ESMF\_Bundle} to return.
 !      \item[bundle]
-!        Returned {\tt ESMF\_Bundle}.
-!       \item[{[statename]}]
-!        Optional.  An error if specified when the {\tt state} argument is a
-!        a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
-!        multiple nested {\tt ESMF\_State}s, and therefore the exact 
-!        {\tt ESMF\_State} must be selected by this {\tt statename}.
-!       \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!       Returned {\tt ESMF\_Bundle}.
+!      \item[{[statename]}]
+!       Optional.  An error if specified when the {\tt state} argument is a
+!       a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
+!       multiple nested {\tt ESMF\_State}s, and therefore the exact 
+!       {\tt ESMF\_State} must be selected by this {\tt statename}.
+!      \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
+      integer :: localrc
       type(ESMF_StateData), pointer :: dataitem
       type(ESMF_State) :: top
+      character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      integer :: status
+      logical :: dummy
 
-      status = ESMF_FAILURE
-       
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty bundle to mark failure?
 
       if (present(statename)) then
           exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
-                                                          dataitem, rc=status)
+                                                          dataitem, rc=localrc)
+          if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
           if (.not. exists) then
-              print *, "ESMF_StateGetBundle: no nested state named ", &
-                         statename, "found.  Omit the 'statename' argument to find the bundlename directly from the state"
-              if (present(rc)) rc = status
+              print errmsg, "no nested state named", trim(statename), "found"
+              dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
               return
           endif
     
           if (dataitem%otype .ne. ESMF_STATESTATE) then
-              print *, "ESMF_StateGetBundle: ", statename, "found, but not type State"
-              if (present(rc)) rc = status
+              print errmsg, trim(statename), "found but not type State"
+              dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
               return
           endif
           
@@ -2496,26 +2353,29 @@ end function
 
 
       exists = ESMF_StateTypeFindData(top%statep, bundlename, .true., &
-                                                          dataitem, rc=status)
+                                                          dataitem, rc=localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
       if (.not. exists) then
-          print *, "ESMF_StateGetBundle: no bundle named ", bundlename
-          if (present(rc)) rc = status
+          print errmsg, "no Bundle found named", trim(bundlename)
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEBUNDLE) then
-          print *, "ESMF_StateGetBundle: ", bundlename, "found, but not type Bundle"
-          if (present(rc)) rc = status
+          print errmsg, trim(bundlename), "found but not type Bundle"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
           return
       endif
 
       bundle = dataitem%datap%bp
 
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetBundle
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetField"
 !BOP
 ! !IROUTINE: ESMF_StateGetField - Retrieve a Field from a State
 !
@@ -2532,9 +2392,9 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Field} from an {\tt ESMF\_State} by name.  
-!      If the {\tt State} is a simple {\tt ESMF\_State}, only the
+!      If {\tt state} is a simple {\tt ESMF\_State}, only the
 !      {\tt fieldname} is required.
-!      If the {\tt ESMF\_State} contains multiple {\tt States}, 
+!      If {\tt state} contains nested {\tt ESMF\_States} 
 !      an additional argument, the {\tt statename}, is required to 
 !      specify which nested State to select.  {\tt ESMF\_State}s can
 !      be nested to any depth, but this routine only searches for immediate
@@ -2559,32 +2419,31 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
       type(ESMF_State) :: top
+      character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      integer :: status
+      integer :: localrc
+      logical :: dummy
 
-      status = ESMF_FAILURE
-       
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty field to mark failure?
 
       if (present(statename)) then
           exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
-                                                          dataitem, rc=status)
+                                                          dataitem, rc=localrc)
+          if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
           if (.not. exists) then
-              print *, "ESMF_StateGetField: no nested state named ", &
-                         statename, "found.  Omit the 'statename' argument to find the bundlename directly from the state"
-              if (present(rc)) rc = status
+              print errmsg, "no nested state named", trim(statename), "found"
+              dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
               return
           endif
     
           if (dataitem%otype .ne. ESMF_STATESTATE) then
-              print *, "ESMF_StateGetField: ", statename, "found, but not type State"
-              if (present(rc)) rc = status
+              print errmsg, trim(statename), "found but not type State"
+              dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
               return
           endif
           
@@ -2595,26 +2454,30 @@ end function
 
 
       exists = ESMF_StateTypeFindData(top%statep, fieldname, .true., &
-                                                          dataitem, rc=status)
+                                                          dataitem, rc=localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
       if (.not. exists) then
-          print *, "ESMF_StateGetField: no field named ", fieldname
-          if (present(rc)) rc = status
+          print errmsg, "no Field found named", trim(fieldname)
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATEFIELD) then
           if (dataitem%otype .eq. ESMF_STATEINDIRECT) then
               ! TODO: how do we return the info that this is inside a bundle?
-              print *, "found indirect pointer to bundle, need to do what?"
+              dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                       "extracting Fields directly from Bundles in a State", &
+                       ESMF_CONTEXT, rc)
+              return
           endif
-          if (present(rc)) rc = status
-          print *, "ESMF_StateGetField: ", fieldname, "found, but not type Field"
+          print errmsg, trim(fieldname), "found but not type Field"
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_INCOMP, errmsg, rc)
           return
       endif
 
       field = dataitem%datap%fp
 
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetField
 
@@ -2625,6 +2488,8 @@ end function
 !!  but this has shifted around so many times, i'm not removing this code
 !!  until we're sure...
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetFromList"
 !BOPI
 ! !IROUTINE: ESMF_StateGetFromList -- Get a State by name from an array of States
 !
@@ -2655,17 +2520,18 @@ end function
 !      \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
-      integer :: status
+      integer :: localrc
       integer :: nstates, i
       type(ESMF_StateType), pointer :: stypep
       character (len=ESMF_MAXSTR) :: tryname
+      character(len=ESMF_MAXSTR) :: errmsg
+      logical :: dummy
 
       ! assume failure until success assured
+      if (present(rc)) rc = ESMF_FAILURE
+
       ESMF_StateGetFromList%statep => NULL()
-      status = ESMF_FAILURE
-      if (present(rc)) rc=ESMF_FAILURE
    
 
       nstates = size(statelist)
@@ -2674,35 +2540,42 @@ end function
         stypep => statelist(i)%statep
   
         if (.not. associated(stypep)) then
-          print *, "uninitialized State in list, number", i
+          print errmsg, "uninitialized State in statelist, number", i
+          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, errmsg, rc)
           return
         endif
   
         if (stypep%st .eq. ESMF_STATEINVALID) then
-          print *, "invalid State in list, number", i
+          print errmsg, "invalid State in statelist, number", i
+          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, errmsg, rc)
           return
         endif
   
-        call c_ESMC_GetName(stypep%base, tryname, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "cannot get name from State number", i, "in list"
+        call c_ESMC_GetName(stypep%base, tryname, localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
+          print errmsg, "cannot get name from State number", i, "in list"
+          dummy=EM_LogMsgFoundError(localrc, errmsg, rc)
           return
         endif
   
         if (statename .eq. tryname) then
           ESMF_StateGetFromList%statep => stypep
-          if (present(rc)) rc=ESMF_SUCCESS
+          if (present(rc)) rc = ESMF_SUCCESS
           return
         endif
   
       enddo
 
-      print *, "State with name", statename, "not found in list of States"
+      print errmsg, "State with name", trim(statename), &
+                     "not found in list of States"
+      dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
 
       end function ESMF_StateGetFromList
 #endif
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetNeeded"
 !BOP
 ! !IROUTINE: ESMF_StateGetNeeded - Query whether a data item is needed
 !
@@ -2736,29 +2609,32 @@ end function
 !      \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status
+      integer :: localrc
+      logical :: dummy
 
-      status = ESMF_FAILURE
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., &
+                                      dataitem, rc=localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
       if (.not. exists) then
-          if (present(rc)) rc = status
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, trim(dataname), rc)
           return
       endif
 
       needed = dataitem%needed
 
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetNeeded
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateGetState"
 !BOP
 ! !IROUTINE: ESMF_StateGetState - Retrieve a State nested in a State
 !
@@ -2793,37 +2669,41 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
+      character(len=ESMF_MAXSTR) :: errmsg
       logical :: exists
-      integer :: status
+      integer :: localrc
+      logical :: dummy
 
-      status = ESMF_FAILURE
-       
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
 
       exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
-                                                         dataitem, rc=status)
+                                                         dataitem, rc=localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
       if (.not. exists) then
-          print *, "ESMF_StateGetState: no state named", statename
-          if (present(rc)) rc = status
+          print errmsg, "no nested state named", trim(statename), "found"
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
           return
       endif
 
       if (dataitem%otype .ne. ESMF_STATESTATE) then
+          print errmsg, trim(statename), "found but not type State"
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, errmsg, rc)
           return
       endif
 
       nestedstate%statep => dataitem%datap%spp
 
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateGetState
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateIsNeeded"
 !BOP
 ! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if data item needed
 !
@@ -2857,39 +2737,36 @@ end function
 !      \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status
+      integer :: localrc
+      logical :: dummy
 
-      status = ESMF_FAILURE
       ! Assume no unless we find it and it is needed.
+      if (present(rc)) rc = ESMF_FAILURE
       ESMF_StateIsNeeded = .FALSE.
-      if (present(rc)) rc=ESMF_FAILURE
 
       ! TODO: decide on the behavior:
       ! should it be an error to ask about a state which doesn't exist?
       ! if the 3rd arg below is .true. then it's an error, if it's .false.
       ! then it's not.  for now, it's an error.
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., &
+                                      dataitem, rc=localrc)
       if (.not. exists) then
-          if (present(rc)) rc = status
+          dummy=EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)
           return
       endif
 
-      if (dataitem%needed .eq. ESMF_STATEDATAISNEEDED) then
-        ESMF_StateIsNeeded = .TRUE.
-      endif
+      if (dataitem%needed .eq. ESMF_STATEDATAISNEEDED) ESMF_StateIsNeeded = .TRUE.
   
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_StateIsNeeded
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StatePrint"
 !BOP
 ! !IROUTINE: ESMF_StatePrint - Print the internal data for a State
 !
@@ -2916,45 +2793,40 @@ end function
 !
 
 !EOP
-! !REQUIREMENTS:
 
 !
-! TODO: code goes here
+! TODO: this needs more code added to be complete
 !
        character (len=6) :: defaultopts
        type(ESMF_StateType), pointer :: sp
        type(ESMF_StateData), pointer :: dp
        character (len=ESMF_MAXSTR) :: sname
        character (len=1024) :: outbuf
-       integer :: status                          ! local error status
-       logical :: rcpresent
+       integer :: localrc                          ! local error status
        integer :: i, nitems
+       logical :: dummy
 
        defaultopts = "brief"
-!      Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+       ! Initialize return code; assume failure until success is certain
+       if (present(rc)) rc = ESMF_FAILURE
 
-!      ! TODO: Add code here
+       ! TODO: Add code here
        ! print num of states, state type, etc
 
        print *, "StatePrint: "  
        if (.not.associated(state%statep)) then 
-           print *, "Not a valid State object"
+           dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, "Uninitialized or already destroyed State", rc)
            return
        endif
        sp => state%statep
 
-       call ESMF_BasePrint(sp%base, rc=status)
+       call ESMF_BasePrint(sp%base, rc=localrc)
+       if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
        if (sp%st .eq. ESMF_STATEIMPORT) print *, "  Import State"
        if (sp%st .eq. ESMF_STATEEXPORT) print *, "  Export State"
        if (sp%st .eq. ESMF_STATELIST) print *, "  State List"
        if (sp%st .eq. ESMF_STATEINVALID) then
-           print *, "  Invalid State"
+           dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, "Uninitialized or already destroyed State", rc)
            return
        endif
        print *, "  Number of members: ", sp%datacount
@@ -3002,12 +2874,14 @@ end function
        enddo
 
 
-!      set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+       ! Set return values
+       if (present(rc)) rc = ESMF_SUCCESS
 
        end subroutine ESMF_StatePrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateReadRestart"
 !BOP
 ! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
@@ -3038,7 +2912,6 @@ end function
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -3055,6 +2928,8 @@ end function
         end function ESMF_StateReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateSetNeeded"
 !BOP
 ! !IROUTINE: ESMF_StateSetNeeded - Set if a data item is needed
 !
@@ -3086,30 +2961,31 @@ end function
 !       \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
       logical :: exists
-      integer :: status
-
-      status = ESMF_FAILURE
+      integer :: localrc
+      logical :: dummy
 
       ! Assume failure until we know we will succeed
-      if (present(rc)) rc=ESMF_FAILURE
+      if (present(rc)) rc = ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., dataitem, rc=status)
+      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., &
+                                      dataitem, rc=localrc)
       if (.not. exists) then
-          if (present(rc)) rc = status
+          dummy=EM_LogMsgFoundError(ESMF_RC_NOT_FOUND, dataname, rc)
           return
       endif
 
       dataitem%needed = needed
 
-      if (present(rc)) rc=ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateSetNeeded
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateValidate"
 !BOP
 ! !IROUTINE: ESMF_StateValidate -- Validate the internal data for a State
 !
@@ -3136,44 +3012,40 @@ end function
 !
 !
 !EOP
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts
-       type(ESMF_StateType), pointer :: sp
-       type(ESMF_StateData), pointer :: dp
-       character (len=ESMF_MAXSTR) :: sname
-       character (len=1024) :: outbuf
-       integer :: status                          ! local error status
-       logical :: rcpresent
-       integer :: i, nitems
+      character (len=6) :: defaultopts
+      type(ESMF_StateType), pointer :: sp
+      type(ESMF_StateData), pointer :: dp
+      character (len=ESMF_MAXSTR) :: sname
+      character (len=1024) :: outbuf
+      integer :: status                          ! local error status
+      integer :: i, nitems
+      logical :: dummy
 
-       defaultopts = "brief"
-!      Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+      defaultopts = "brief"
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (.not.associated(state%statep)) then
-          print *, "Uninitialized or Destroyed State"
+          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, "State uninitialized or already destroyed", rc)
           return
       endif
 
       if (state%statep%st .eq. ESMF_STATEINVALID) then
-          print *, "Uninitialized or Destroyed Field"
+          dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, "State uninitialized or already destroyed", rc)
           return
       endif
 
-       if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
-       end subroutine ESMF_StateValidate
+      end subroutine ESMF_StateValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTransform"
 !BOPI
 ! !IROUTINE: ESMF_StateTransform - Apply a Transform to State Data
 !
@@ -3213,7 +3085,6 @@ end function
 !
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -3224,8 +3095,9 @@ end function
 
         end subroutine ESMF_StateTransform
 
-
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateWrite"
 !BOP
 ! !IROUTINE: ESMF_StateWrite -- Write all or part of a State
 !
@@ -3256,11 +3128,11 @@ end function
 !EOP
         ! FIXME: hardcoded for interopability test
         type(ESMF_Field) :: fred
-        integer :: status
+        integer :: localrc
 
         if (present(itemname)) then
-            call ESMF_StateGetField(state, fieldname=itemname, field=fred, rc=status)
-            call ESMF_FieldWrite(fred, iospec=iospec, rc=status) 
+            call ESMF_StateGetField(state, fieldname=itemname, field=fred, rc=localrc)
+            call ESMF_FieldWrite(fred, iospec=iospec, rc=localrc) 
         endif
   
 
@@ -3268,6 +3140,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateWriteRestart"
 !BOPI
 ! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
 !
@@ -3296,7 +3170,6 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
 !
 ! TODO: code goes here
@@ -3309,6 +3182,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateConstruct"
 !BOPI
 ! !IROUTINE: ESMF_StateConstruct -- Construct a new State
 
@@ -3388,24 +3263,15 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
         ! Local vars
         integer :: count
         integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-
-        status = ESMF_FAILURE 
-        rcpresent = .FALSE.
-
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-  
+        if (present(rc)) rc = ESMF_FAILURE
+        status = ESMF_FAILURE 
+
         ! Quick sanity check on the values
 
         count = 0
@@ -3519,12 +3385,14 @@ end function
         endif
 
 
-!       ! Set return values
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! Set return values
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StateConstruct
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateConstructEmpty"
 !BOPI
 ! !IROUTINE: ESMF_StateConstructEmpty -- Create a new State specifying no data
 
@@ -3556,22 +3424,12 @@ end function
 !       \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
         ! Local vars
         integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-
-        status = ESMF_FAILURE 
-        rcpresent = .FALSE.
-
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
         ! Initialize the base object, set the name, etc.
         call ESMF_BaseCreate(stypep%base, "State", statename, 0, status)
@@ -3591,12 +3449,14 @@ end function
         stypep%datacount = 0
         nullify(stypep%datalist)
 
-!       set return values
-        if (rcpresent) rc = ESMF_SUCCESS
+        ! set return values
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StateConstructEmpty
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateDestruct"
 !BOPI
 ! !IROUTINE: ESMF_StateDestruct -- Internal routine to deallocate space
 !
@@ -3619,24 +3479,19 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
         ! Local vars
         type(ESMF_StateData), pointer :: nextitem
         integer :: i
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-
-        status = ESMF_FAILURE 
-        rcpresent = .FALSE.
+        integer :: localrc                   ! local error status
 
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        if (present(rc)) rc = ESMF_FAILURE
 
-        ! TODO: add code here
+        ! mark object invalid, and free each of the blocks associated
+        ! with each entry.  note that we are not freeing the objects
+        ! themselves; they could be added to multiple states.  it is
+        ! the user's responsibility to delete them when finished.
         stypep%st = ESMF_STATEINVALID
         stypep%statestatus = ESMF_STATE_INVALID
         if (stypep%datacount .gt. 0) then
@@ -3644,11 +3499,8 @@ end function
             ! free anything allocated here
             nextitem => stypep%datalist(i)
             if (associated(nextitem%datap)) then
-              deallocate(nextitem%datap, stat=status)
-              if(status .NE. 0) then     ! this is an F90 rc, not esmf's
-                 print *, "ERROR in ESMF_StateDestruct: datap deallocation"
-                 return
-              endif
+              deallocate(nextitem%datap, stat=localrc)
+              if (EM_LogMsgFoundAllocError(localrc, "data item",  rc)) return
               nullify(nextitem%datap)
             endif
           enddo
@@ -3657,28 +3509,24 @@ end function
 
         ! Now release the entire list
         if (associated(stypep%datalist)) then
-          deallocate(stypep%datalist, stat=status)
-          if(status .NE. 0) then     ! this is an F90 rc, not esmf's
-            print *, "ERROR in ESMF_StateDestruct: deallocation"
-            return
-          endif
+          deallocate(stypep%datalist, stat=localrc)
+          if (EM_LogMsgFoundAllocError(localrc, "data list",  rc)) return
           nullify(stypep%datalist)
         endif
         stypep%alloccount = 0
 
         ! Release the base object
-        call ESMF_BaseDestroy(stypep%base, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateDestruct: BaseDestroy failed"
-          return
-        endif
+        call ESMF_BaseDestroy(stypep%base, localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StateDestruct
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeAddArrayList"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeAddArrayList - Add a list of Arrays to a StateType
 !
@@ -3707,31 +3555,27 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
-
-      integer :: status                   ! local error status
-      logical :: rcpresent                ! did user specify rc?
+      integer :: localrc                  ! local error status
       type(ESMF_StateData), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: aname
+      character(len=ESMF_MAXSTR) :: errmsg
       integer, allocatable, dimension(:) :: atodo
       integer :: i, j
       integer :: newcount, aindex
       logical :: exists
+      logical :: dummy
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE 
-      rcpresent = .FALSE.
-      
+      if (present(rc)) rc = ESMF_FAILURE
       aname = ""
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (acount .le. 0) return
+      if (acount .le. 0) then
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_BAD, "acount must be >= 0", rc)
+          return
+      endif
       
       ! Add the arrays to the state, checking for name clashes
       !  and name placeholders
@@ -3743,22 +3587,16 @@ end function
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
 
-      ! How does this happen?  is atodo some sort of static?
+      ! How can this happen?  is atodo some sort of static?
       if (allocated(atodo)) then
-        print *, "atodo already allocated"
-        deallocate(atodo, stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "status = ", status
-          print *, "Error: 1b deallocating arrays to a state"
-          return
-        endif
-      endif
-
-      allocate(atodo(acount), stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding arrays to a state"
+        dummy=EM_LogMsgFoundAllocError(ESMF_RC_INTNRL_INCONS, "atodo already allocated", rc)
+        deallocate(atodo, stat=localrc)
         return
       endif
+
+      allocate(atodo(acount), stat=localrc)
+      if (EM_LogMsgFoundAllocError(ESMF_RC_INTNRL_INCONS, "adding Arrays to a State", rc)) return
+
       atodo(1:acount) = 0
 
       ! Initialize counters to 0, indices to 1
@@ -3768,24 +3606,24 @@ end function
       ! For each array...
       do i=1, acount
 
-        call ESMF_ArrayValidate(arrays(i), "", status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Bad Array ", i
-          deallocate(atodo, stat=status)
-          return
+        call ESMF_ArrayValidate(arrays(i), "", localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
+            print errmsg, "item", i
+            dummy=EM_LogMsgFoundError(localrc, errmsg, rc)
+            deallocate(atodo, stat=localrc)
+            return
         endif
-        call ESMF_ArrayGet(arrays(i), name=aname, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddArrayList: get array name"
-          deallocate(atodo, stat=status)
+        call ESMF_ArrayGet(arrays(i), name=aname, rc=localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) then
+          deallocate(atodo, stat=localrc)
           return
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, aname, .false., dataitem, aindex, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddArrayList: looking for preexisting entry"
-          deallocate(atodo, stat=status)
+        exists = ESMF_StateTypeFindData(stypep, aname, .false., &
+                                        dataitem, aindex, localrc)
+        if (EM_LogMsgFoundError(localrc, "looking for preexisting entry", rc)) then
+          deallocate(atodo, stat=localrc)
           return
         endif
    
@@ -3798,11 +3636,10 @@ end function
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
             if (dataitem%otype .eq. ESMF_STATEDATANAME) then
-                allocate(dataitem%datap, stat=status)
-                if (status .ne. 0) then    ! F90 return code
-                  print *, "Error: adding arrays to a state"
-                  deallocate(atodo, stat=status)
-                  return
+                allocate(dataitem%datap, stat=localrc)
+                if (EM_LogMsgFoundAllocError(localrc, "adding array over name", rc)) then
+                    deallocate(atodo, stat=localrc)
+                    return
                 endif
             endif
 
@@ -3822,11 +3659,8 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_StateTypeAddArrayList: datalist allocate"
-        return
-      endif
+      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
 
       ! There is enough space now to add new arrays to the list.
@@ -3841,17 +3675,11 @@ end function
             nextitem%otype = ESMF_STATEARRAY
 
             ! Add name
-            call ESMF_ArrayGet(arrays(i), name=nextitem%namep, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddArrayList: get array name"
-              return
-            endif
+            call ESMF_ArrayGet(arrays(i), name=nextitem%namep, rc=localrc)
+            if (EM_LogMsgFoundError(localrc, "getting name from array", rc)) return
 
-            allocate(nextitem%datap, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding array to a state"
-              return
-            endif
+            allocate(nextitem%datap, stat=localrc)
+            if (EM_LogMsgFoundAllocError(localrc, "adding array to state", rc)) return
             nextitem%datap%ap = arrays(i)
  
             nextitem%needed = stypep%needed_default
@@ -3868,17 +3696,16 @@ end function
 10    continue
 
       ! Get rid of temp flag arrays
-      deallocate(atodo, stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding arrays to a state"
-        return
-      endif
+      deallocate(atodo, stat=localrc)
+      if (EM_LogMsgFoundAllocError(localrc, "deallocating internal list, 1c", rc)) return
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateTypeAddArrayList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeAddFieldList"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeAddFieldList - Add a list of Fields to a StateType
 !
@@ -3907,30 +3734,26 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
-      integer :: status                   ! local error status
-      logical :: rcpresent                ! did user specify rc?
+      integer :: localrc                   ! local error status
       type(ESMF_StateData), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: fname
       integer, allocatable, dimension(:) :: ftodo
       integer :: i, j
       integer :: newcount, findex
       logical :: exists
+      logical :: dummy
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE 
-      rcpresent = .FALSE.
-      
+      if (present(rc)) rc = ESMF_FAILURE 
       fname = ""
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-  
+
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (fcount .le. 0) return
+      if (fcount .le. 0) then
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_BAD, "fcount must be >= 0", rc)
+          return
+      endif
       
       ! Add the fields to the state, checking for name clashes
       !  and name placeholders
@@ -3945,17 +3768,17 @@ end function
       ! How does this happen?  is ftodo some sort of static?
       if (allocated(ftodo)) then
         print *, "ftodo already allocated"
-        deallocate(ftodo, stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "status = ", status
+        deallocate(ftodo, stat=localrc)
+        if (localrc .ne. 0) then    ! F90 return code
+          print *, "status = ", localrc
           print *, "Error: 1b deallocating fields to a state"
           return
         endif
       endif
 
-      allocate(ftodo(fcount), stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "status = ", status
+      allocate(ftodo(fcount), stat=localrc)
+      if (localrc .ne. 0) then    ! F90 return code
+        print *, "status = ", localrc
         print *, "Error: 1 adding fields to a state"
         return
       endif
@@ -3968,24 +3791,24 @@ end function
       ! For each field...
       do i=1, fcount
 
-        call ESMF_FieldValidate(fields(i), "", status)
-        if (status .ne. ESMF_SUCCESS) then
+        call ESMF_FieldValidate(fields(i), "", localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
           print *, "Bad Field ", i
-          deallocate(ftodo, stat=status)
+          deallocate(ftodo, stat=localrc)
           return
         endif
-        call ESMF_FieldGet(fields(i), name=fname, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
+        call ESMF_FieldGet(fields(i), name=fname, rc=localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddFieldList: get field name"
-          deallocate(ftodo, stat=status)
+          deallocate(ftodo, stat=localrc)
           return
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, fname, .false., dataitem, findex, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddFieldList: looking for preexisting entry"
-          deallocate(ftodo, stat=status)
+        exists = ESMF_StateTypeFindData(stypep, fname, .false., &
+                                        dataitem, findex, localrc)
+        if (EM_LogMsgFoundError(localrc, "looking for preexisting entry", rc)) then
+          deallocate(ftodo, stat=localrc)
           return
         endif
    
@@ -3998,10 +3821,10 @@ end function
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
             if (dataitem%otype .eq. ESMF_STATEDATANAME) then
-                allocate(dataitem%datap, stat=status)
-                if (status .ne. 0) then    ! F90 return code
+                allocate(dataitem%datap, stat=localrc)
+                if (localrc .ne. 0) then    ! F90 return code
                   print *, "Error: 2 adding fields to a state"
-                  deallocate(ftodo, stat=status)
+                  deallocate(ftodo, stat=localrc)
                   return
                 endif
             endif
@@ -4023,8 +3846,8 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, status)
-      if (status .ne. ESMF_SUCCESS) then
+      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_StateTypeAddFieldList: datalist allocate"
         return
       endif
@@ -4042,14 +3865,14 @@ end function
             nextitem%otype = ESMF_STATEFIELD
 
             ! Add name
-            call ESMF_FieldGet(fields(i), name=nextitem%namep, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
+            call ESMF_FieldGet(fields(i), name=nextitem%namep, rc=localrc)
+            if (localrc .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddFieldList: get field name"
               return
             endif
 
-            allocate(nextitem%datap, stat=status)
-            if (status .ne. 0) then    ! F90 return code
+            allocate(nextitem%datap, stat=localrc)
+            if (localrc .ne. 0) then    ! F90 return code
               print *, "Error: 4 adding fields to a state"
               return
             endif
@@ -4069,17 +3892,19 @@ end function
 10    continue
 
       ! Get rid of temp flag array
-      deallocate(ftodo, stat=status)
-      if (status .ne. 0) then    ! F90 return code
+      deallocate(ftodo, stat=localrc)
+      if (localrc .ne. 0) then    ! F90 return code
         print *, "Error: 5 adding fields to a state"
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateTypeAddFieldList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeAddBundleList"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeAddBundleList - Add a list of Bundles to a StateType
 !
@@ -4108,10 +3933,8 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
-      integer :: status                   ! local error status
-      logical :: rcpresent                ! did user specify rc?
+      integer :: localrc                   ! local error status
       type(ESMF_StateData), pointer :: nextitem, dataitem
       type(ESMF_Field) :: field
       character(len=ESMF_MAXSTR) :: bname, fname
@@ -4120,20 +3943,19 @@ end function
       integer :: i, j
       integer :: fcount, fruncount, newcount
       logical :: exists, fneedsdealloc
+      logical :: dummy
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE 
-      rcpresent = .FALSE.
+      if (present(rc)) rc = ESMF_FAILURE
       fneedsdealloc = .FALSE.
       fname = ""
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (bcount .le. 0) return
+      if (bcount .le. 0) then
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_BAD, "bcount must be >= 0", rc)
+          return
+      endif
       
       ! Add the bundles to the state, checking for name clashes
       !  and name placeholders
@@ -4145,36 +3967,27 @@ end function
       fruncount = 0
       do i=1, bcount
         print *, "calling bundle validate "
-        call ESMF_BundleValidate(bundles(i), "", status)
-        print *, "status is ", status
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Invalid bundle ", i
-          return
-        endif
-        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Cannot get Field count from bundle ", i
-          return
-        endif
+        call ESMF_BundleValidate(bundles(i), "", localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
         fruncount = fruncount + fcount
       enddo
 
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
-      allocate(btodo(bcount), stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding bundles to a state"
-        return
-      endif
+      allocate(btodo(bcount), stat=localrc)
+      if (EM_LogMsgFoundAllocError(localrc, "btodo", rc)) return
+
+      ! IMPORTANT: from here down, do not return on error, but goto 10
+      !  to at least try to deallocate the temp storage.
+
       btodo(1:bcount) = 0
 
       if (fruncount .ge. 0) then
-        allocate(ftodo(fruncount), stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "Error: adding bundles to a state"
-          return
-        endif
+        allocate(ftodo(fruncount), stat=localrc)
+        if (EM_LogMsgFoundAllocError(localrc, "ftodo", rc)) goto 10
         fneedsdealloc = .TRUE.
         ftodo(1:fruncount) = 0
       endif
@@ -4188,18 +4001,13 @@ end function
       ! For each bundle...
       do i=1, bcount
 
-        call ESMF_BundleGet(bundles(i), name=bname, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: get bundle name"
-          return
-        endif
+        call ESMF_BundleGet(bundles(i), name=bname, rc=localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, bname, .false., dataitem, bindex, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: looking for preexisting entry"
-          return
-        endif
+        exists = ESMF_StateTypeFindData(stypep, bname, .false., &
+                                        dataitem, bindex, localrc)
+        if (EM_LogMsgFoundError(localrc, "looking for preexisting entry", rc)) goto 10
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -4210,11 +4018,10 @@ end function
             ! It does already exist.  
             ! Check to see if this is a placeholder, and if so, replace it
             if (dataitem%otype .eq. ESMF_STATEDATANAME) then
-                allocate(dataitem%datap, stat=status)
-                if (status .ne. 0) then    ! F90 return code
-                  print *, "Error: adding bundles to a state"
-                  return
-                endif
+                allocate(dataitem%datap, stat=localrc)
+                if (ESMF_LogMsgFoundAllocError(localrc, &
+                               "adding bundles to a state", &
+                               ESMF_CONTEXT, rc)) goto 10
             endif
 
             dataitem%otype = ESMF_STATEBUNDLE
@@ -4227,35 +4034,23 @@ end function
         endif
 
         ! and now the same for each field in the bundle
-        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
-          return
-        endif
-    
+        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
         do j=1, fcount
             ! get next field and query name
-            call ESMF_BundleGetField(bundles(i), j, field, status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
-              return
-            endif
+            call ESMF_BundleGetField(bundles(i), j, field, localrc)
+            if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
-            call ESMF_FieldPrint(field, "", status)
+            ! what is this?  leftover debugging code?
+            !call ESMF_FieldPrint(field, "", localrc)
 
-            call ESMF_FieldGet(field, name=fname, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddBundleList: get name from field"
-              return
-            endif
+            call ESMF_FieldGet(field, name=fname, rc=localrc)
+            if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
     
             exists = ESMF_StateTypeFindData(stypep, fname, .false., dataitem, &
-                                                              findex, status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
-              return
-            endif
+                                                              findex, localrc)
+            if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
             ! If the field is going to have to be added later,
             !  keep track of whether it belongs to a bundle which has to
@@ -4274,11 +4069,10 @@ end function
    
                 ! If there was previously associated data, deallocate it.
 	        if (associated(dataitem%datap)) then
-                    deallocate(dataitem%datap, stat=status)
-                    if (status .ne. 0) then    ! F90 return code
-                      print *, "Error: adding bundles to a state"
-                      return
-                    endif
+                    deallocate(dataitem%datap, stat=localrc)
+                    if (ESMF_LogMsgFoundAllocError(localrc, &
+                                                 "deallocating old object", &
+                                                 ESMF_CONTEXT, rc)) goto 10
                     nullify(dataitem%datap)
                 endif
 
@@ -4309,14 +4103,11 @@ end function
       ! If all things to be added are replacing existing entries, 
       !  we are done now.  But this cannot be a simple return here;
       !  we have to delete the temporary arrays first.  Go to the subr end.
-      if (newcount .eq. 0) goto 10
+      if (newcount .eq. 0)  goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, status)
-      if (status .ne. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_StateTypeAddBundleList: datalist allocate"
-        return
-      endif
+      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
 
       ! There is enough space now to add new bundles & fields to the list.
@@ -4332,24 +4123,20 @@ end function
             nextitem%otype = ESMF_STATEBUNDLE
 
             ! Add name
-            call ESMF_BundleGet(bundles(i), name=nextitem%namep, rc=status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddBundleList: get bundle name"
-              return
-            endif
+            call ESMF_BundleGet(bundles(i), name=nextitem%namep, rc=localrc)
+            if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
-            allocate(nextitem%datap, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding bundles to a state"
-              return
-            endif
-            nextitem%datap%bp = bundles(i)
- 
-            nextitem%needed = stypep%needed_default
-            nextitem%ready = stypep%ready_default
-            nextitem%valid = stypep%stvalid_default
-            nextitem%reqrestart = stypep%reqrestart_default
- 
+            allocate(nextitem%datap, stat=localrc)
+            if (ESMF_LogMsgFoundAllocError(localrc, &
+                                          "adding bundles to a state",  &
+                                           ESMF_CONTEXT, rc)) goto 10
+           nextitem%datap%bp = bundles(i)
+
+           nextitem%needed = stypep%needed_default
+           nextitem%ready = stypep%ready_default
+           nextitem%valid = stypep%stvalid_default
+           nextitem%reqrestart = stypep%reqrestart_default
+
             ! save the current datalist index for the fields code below
             bindex = stypep%datacount
 
@@ -4358,11 +4145,8 @@ end function
         ! Whether it was found in pass 1 or just added above, we still
         !  have to go through each field and see if any of them need to
         !  be added or updated.
-        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_StateTypeAddBundleList: get field count from bundle"
-          return
-        endif
+        call ESMF_BundleGet(bundles(i), fieldCount=fcount, rc=localrc)
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
         ! Skip empty bundles
         if (fcount .le. 0) cycle
@@ -4378,13 +4162,11 @@ end function
             nextitem%otype = ESMF_STATEINDIRECT
     
             ! get next field and query name
-            call ESMF_BundleGetField(bundles(i), i, field, status)
-            if (status .ne. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
-              return
-            endif
+            call ESMF_BundleGetField(bundles(i), i, field, localrc)
+            if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
 
-            call ESMF_FieldGet(field, name=nextitem%namep, rc=status)
+            call ESMF_FieldGet(field, name=nextitem%namep, rc=localrc)
+            if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) goto 10
     
             nullify(nextitem%datap)
     
@@ -4408,10 +4190,11 @@ end function
           !  value to set.
           else if (ftodo(fruncount) .eq. -2) then
             exists = ESMF_StateTypeFindData(stypep, fname, .true., dataitem, &
-                                                              findex, status)
+                                                              findex, localrc)
 
             if (.not. exists) then
-              print *, "Error: internally inconsistent"
+              dummy=EM_LogMsgFoundError(ESMF_RC_INTNRL_INCONS, "field/bundle lists", rc)
+              goto 10
             endif
             dataitem%indirect_index = bindex
           endif
@@ -4424,28 +4207,35 @@ end function
 
       ! We come here from above if there were no new entries that needed
       ! to be added.  We can just clean up and exit.
+      ! If not, rc should be already set, and goto 10 to delete before
+      ! returning the original error code.
+      if (present(rc)) rc = ESMF_SUCCESS
+
 10    continue
 
-      ! Get rid of temp flag arrays
-      deallocate(btodo, stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding bundles to a state"
-        return
+      ! Get rid of temp flag arrays.  only report yet another error if up to
+      ! here we think everything is ok.  otherwise report the original error
+      ! and ignore any wimpering from dealloc.
+  
+      deallocate(btodo, stat=localrc)
+      if ((localrc .ne. 0) .and. (rc .eq. ESMF_SUCCESS)) then         ! F90 rc
+        dummy=EM_LogMsgFoundAllocError(localrc, "deallocating internal bundlelist", rc)
       endif
       if (fneedsdealloc) then
-        deallocate(ftodo, stat=status)
-        if (status .ne. 0) then    ! F90 return code
-          print *, "Error: adding bundles to a state"
-          return
+        deallocate(ftodo, stat=localrc)
+        if ((localrc .ne. 0) .and. (rc .eq. ESMF_SUCCESS)) then      ! F90 rc
+          dummy=EM_LogMsgFoundAllocError(localrc, "deallocating internal fieldlist", rc)
         endif
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      ! do not reset rc here - it should already have a valid value.
 
       end subroutine ESMF_StateTypeAddBundleList
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeAddStateList"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeAddStateList - Add a list of States to a StateType
 !
@@ -4474,31 +4264,26 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
 
       integer :: status                   ! local error status
-      logical :: rcpresent                ! did user specify rc?
       type(ESMF_StateData), pointer :: nextitem, dataitem
       character(len=ESMF_MAXSTR) :: sname
       integer, allocatable, dimension(:) :: stodo
       integer :: i, j
       integer :: newcount, sindex
       logical :: exists
+      logical :: dummy
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE 
-      rcpresent = .FALSE.
-      
+      if (present(rc)) rc = ESMF_FAILURE
       sname = ""
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (scount .le. 0) return
+      if (scount .le. 0) then
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_BAD, "scount must be >= 0", rc)
+          return
+      endif
       
       ! Add the states to the state, checking for name clashes
       !  and name placeholders
@@ -4625,11 +4410,13 @@ end function
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateTypeAddStateList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeFindData"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeFindData - internal routine to find data item by name
 !
@@ -4676,21 +4463,15 @@ end function
 !      \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
 
-      integer :: status                   ! local error status
-      logical :: rcpresent                ! did user specify rc?
+      integer :: localrc                   ! local error status
       integer :: i, dcount, itemindex
       logical :: itemfound
       type(ESMF_StateData), pointer :: nextitem
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE 
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      localrc = ESMF_FAILURE 
+      if (present(rc)) rc = ESMF_FAILURE
 
       itemfound = .FALSE.
   
@@ -4720,22 +4501,24 @@ end function
         ESMF_StateTypeFindData = .TRUE.
         if (present(dataitem)) dataitem => stypep%datalist(itemindex) 
         if (present(index)) index = itemindex
-        status = ESMF_SUCCESS
+        localrc = ESMF_SUCCESS
       else   ! item not found
         ESMF_StateTypeFindData = .FALSE.
         nullify(dataitem)
         if (expected) then 
-          status = ESMF_FAILURE
+          localrc = ESMF_FAILURE
         else
-          status = ESMF_SUCCESS
+          localrc = ESMF_SUCCESS
         endif
       endif
 
-      if(rcpresent) rc = status
+      if (present(rc)) rc = localrc
 
       end function ESMF_StateTypeFindData
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeAddDataNameList"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeAddDataNameList - internal routine
 !
@@ -4768,28 +4551,23 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
-      integer :: status                   ! local error status
-      logical :: rcpresent                ! did user specify rc?
+      integer :: localrc                   ! local error status
       type(ESMF_StateData), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
       integer :: i, j
       integer :: newcount, nindex
-      logical :: exists
+      logical :: exists, dummy
 
       ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE 
-      rcpresent = .FALSE.
-      
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      if (present(rc)) rc = ESMF_FAILURE
   
       ! Return with error if list is empty.  
       ! TODO: decide if this should *not* be an error.
-      if (ncount .le. 0) return
+      if (ncount .le. 0) then
+          dummy=EM_LogMsgFoundError(ESMF_RC_ARG_BAD, "ncount must be >= 0", rc)
+          return
+      endif
       
       ! Add the fields to the state, checking for name clashes
       !  and name placeholders
@@ -4800,11 +4578,8 @@ end function
       ! Allocate some flags to mark whether this is a new item which
       !  needs to be added to the end of the list, or if it replaces an
       !  existing entry or placeholder.  Set all entries to 0.
-      allocate(ntodo(ncount), stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding names to a state"
-        return
-      endif
+      allocate(ntodo(ncount), stat=localrc)
+      if (EM_LogMsgFoundAllocError(localrc, "adding names to a state", rc)) return
       ntodo(1:ncount) = 0
 
       ! Initialize counters to 0, indices to 1
@@ -4815,8 +4590,9 @@ end function
       do i=1, ncount
 
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, namelist(i), .false., dataitem, nindex, status)
-        if (status .ne. ESMF_SUCCESS) then
+        exists = ESMF_StateTypeFindData(stypep, namelist(i), .false., &
+                                        dataitem, nindex, localrc)
+        if (localrc .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateTypeAddNameList: looking for preexisting entry"
           return
         endif
@@ -4834,8 +4610,8 @@ end function
             !  how people want this to behave.
             if (dataitem%otype .ne. ESMF_STATEDATANAME) then
               if (associated(dataitem%datap)) then
-                deallocate(dataitem%datap, stat=status)
-                if (status .ne. 0) then    ! F90 return code
+                deallocate(dataitem%datap, stat=localrc)
+                if (localrc .ne. 0) then    ! F90 return code
                   print *, "Error: removing an entry from a state"
                   return
                 endif
@@ -4862,8 +4638,8 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, status)
-      if (status .ne. ESMF_SUCCESS) then
+      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_StateTypeAddNameList: datalist allocate"
         return
       endif
@@ -4899,18 +4675,17 @@ end function
 10    continue
 
       ! Get rid of temp flag array
-      deallocate(ntodo, stat=status)
-      if (status .ne. 0) then    ! F90 return code
-        print *, "Error: adding names to a state"
-        return
-      endif
+      deallocate(ntodo, stat=localrc)
+      if (EM_LogMsgFoundAllocError(localrc, "adding names to a state", rc)) return
 
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateTypeAddDataNameList
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateTypeExtendList"
 !BOPI
 ! !IROUTINE: ESMF_StateTypeExtendList - internal routine
 !
@@ -4938,19 +4713,17 @@ end function
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
-
 
       type(ESMF_StateData), dimension(:), pointer :: temp_list
       type(ESMF_StateData), pointer :: nextitem
       integer :: i
       integer :: allocsize 
       integer :: newsize
-      integer :: status                            ! local error status
+      integer :: localrc                           ! local error status
       integer, parameter :: chunksize = 16         ! extend list by this
  
-      ! Assume failure until success assured.
-      status = ESMF_FAILURE
+      ! Assume failure until success assured.  rc is not optional here.
+      localrc = ESMF_FAILURE
       rc = ESMF_FAILURE
 
       ! Not an error to be called with 0 items - just return w/o error.
@@ -4963,11 +4736,8 @@ end function
       if (stypep%alloccount .eq. 0) then
 
           allocsize = itemcount + chunksize - mod(itemcount,chunksize)
-          allocate(stypep%datalist(allocsize), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_StateTypeExtendList: datalist allocate"
-            return
-          endif
+          allocate(stypep%datalist(allocsize), stat=localrc)
+          if (EM_LogMsgFoundAllocError(localrc, "datalist", rc)) return
           stypep%alloccount = allocsize
 
       ! Extend an existing list to the right length, including copy
@@ -4975,11 +4745,8 @@ end function
 
           newsize = stypep%datacount + itemcount
           allocsize = newsize + chunksize - mod(newsize,chunksize)
-          allocate(temp_list(allocsize), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_StateTypeExtendList: datalist reallocate"
-            return
-          endif
+          allocate(temp_list(allocsize), stat=localrc)
+          if (EM_LogMsgFoundAllocError(localrc, "datalist realloc", rc)) return
   
           ! Preserve old contents
           do i = 1, stypep%datacount
@@ -4987,11 +4754,8 @@ end function
           enddo
   
           ! Delete old list
-          deallocate(stypep%datalist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_StateTypeExtendList: datalist deallocate"
-            return
-          endif
+          deallocate(stypep%datalist, stat=localrc)
+          if (EM_LogMsgFoundAllocError(localrc, "datalist dealloc", rc)) return
   
           ! Now make this the permanent list
           stypep%datalist => temp_list
