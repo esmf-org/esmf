@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23.2.3 2005/03/04 20:10:45 nscollins Exp $
+# $Id: build_rules.mk,v 1.23.2.4 2005/03/04 21:09:37 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -71,11 +71,26 @@ endif
 ifeq ($(ESMF_COMM),lam)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include
-MPI_LIB        = -L${MPI_HOME} -llamf77mpi -lmpi -llam
+MPI_LIB        = -L${MPI_HOME}/lib -llamf77mpi -lmpi -llam
 MPIRUN         =  ${MPI_HOME}/bin/mpirun
 else
 MPI_INCLUDE    = 
 MPI_LIB        = -llamf77mpi -lmpi -llam
+MPIRUN         =  mpirun
+endif
+endif
+
+# This section is set up for vendor supplied MPI (e.g. SGI Altix).
+# It is assumed to be in a system-standard location, but can be overridden
+# by setting MPI_HOME to another location.
+ifeq ($(ESMF_COMM),mpi)
+ifdef MPI_HOME
+MPI_INCLUDE    = -I${MPI_HOME}/include
+MPI_LIB        = -L${MPI_HOME}/lib -lmpi -lmpi++
+MPIRUN         =  ${MPI_HOME}/bin/mpirun
+else
+MPI_INCLUDE    =
+MPI_LIB        = -lmpi -lmpi++
 MPIRUN         =  mpirun
 endif
 endif
@@ -89,7 +104,7 @@ endif
 ifeq ($(ESMF_COMM),mpich)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPI_LIB        = -L${MPI_HOME} -lmpich
+MPI_LIB        = -L${MPI_HOME}/lib -lmpich
 MPIRUN         =  ${MPI_HOME}/bin/mpirun $(ESMF_NODES)
 else
 MPI_INCLUDE    = -DESMF_MPICH=1
@@ -106,7 +121,7 @@ endif
 ifeq ($(ESMF_COMM),mpich2)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
-MPI_LIB        = -L${MPI_HOME} -lmpich
+MPI_LIB        = -L${MPI_HOME}/lib -lmpich
 MPIRUN         =  ${MPI_HOME}/bin/mpirun $(ESMF_NODES)
 else
 MPI_INCLUDE    = -DESMF_MPICH=1
