@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.107 2004/04/06 12:30:38 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.108 2004/04/06 18:19:04 theurich Exp $'
 
 !==============================================================================
 !
@@ -663,7 +663,7 @@
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 #ifdef ESMF_ENABLE_VM      
-      type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_newDELayout), intent(in) :: delayout
 #endif
 !
 ! !DESCRIPTION:
@@ -714,6 +714,10 @@
                                                nDEsUse
       type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
+#ifdef ESMF_ENABLE_VM
+      integer:: ndim
+      type(ESMF_Logical):: otoFlag, lrFlag
+#endif
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -738,8 +742,22 @@
       endif
 
       ! Allocate resources based on number of DE's
+#ifdef ESMF_ENABLE_VM
+      call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
+        logRectFlag=lrFlag, rc=status)
+      if (otoFlag /= ESMF_TRUE) stop    ! ensure this is 1-to-1 layout
+      if (ndim /= 2) stop               ! ensure this is 2D Layout
+      if (lrFlag /= ESMF_TRUE) stop     ! ensure this is logical rectangular l.
+      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs, rc=status)
+      ! now need to do some shifting to satisfy funny stuff here...
+      nDEs(2) = nDEs(1)
+      nDEs(1) = nDEs(0)
+      nDEs(0) = 1
+      print *, 'newDELayout: ', nDEs(0), nDEs(1), nDEs(2)
+#else
       nDEs(0) = 1
       call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), status)
+#endif      
       nDE = nDEs(1) * nDEs(2)
       if((status .NE. ESMF_SUCCESS) .or. (nDE .le. 0)) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
@@ -765,10 +783,10 @@
         enddo
       endif
 
-#ifdef ESMF_ENABLE_VM      
-      if(present(delayout)) then
-        dgtype%delayout  = delayout
-      endif
+#ifdef ESMF_ENABLE_VM
+      dgtype%delayout  = delayout
+      print *, 'ESMF_DistGridConstructInternal: Insert DELayout into DistGrid'
+      call ESMF_newDELayoutPrint(delayout)
 #endif
 
       ! Calculate values for computational cells
@@ -903,7 +921,11 @@
                                   globalCellCount, globalCellCountPerDim, &
                                   globalStartPerDEPerDim, maxLocalCellCount, &
                                   maxLocalCellCountPerDim, &
-                                  name, total, rc)
+                                  name, total, rc &
+#ifdef ESMF_ENABLE_VM
+                                  , delayout &
+#endif
+                                  )
 !
 ! !ARGUMENTS:
       type(ESMF_DistGrid), target, intent(in) :: distgrid
@@ -916,6 +938,10 @@
       character (len = *), intent(out), optional :: name
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc              
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(out), optional :: delayout
+#endif      
+
 !
 ! !DESCRIPTION:
 !     Returns information from the {\tt ESMF\_DistGrid} object.
@@ -952,7 +978,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
-      integer :: i, j, nDEs(2)
+      integer :: i, j, nDEs(2), nndes
       type(ESMF_DistGridGlobal), pointer :: glob
       type(ESMF_DistGridType), pointer :: dgtype
 
@@ -989,8 +1015,13 @@
       if(present(globalStartPerDEPerDim)) then
                  ! TODO: add check that globalStartPerDEPerDim is large enough
                  !       or use the size of the array for the loop limit
+#ifdef ESMF_ENABLE_VM
+        call ESMF_newDELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
+#else              
         call ESMF_DELayoutGetSize(dgtype%layout, nDEs(1), nDEs(2), rc)
-        do i = 1, nDEs(1)*nDEs(2)
+        nndes = nDEs(1)*nDEs(2)
+#endif        
+        do i = 1, nndes
           do j = 1,dgtype%dimCount
             globalStartPerDEPerDim(i,j) = glob%globalStartPerDEPerDim(i,j)
           enddo
@@ -1014,6 +1045,10 @@
             return
          endif
       endif
+
+#ifdef ESMF_ENABLE_VM
+      if(present(delayout)) delayout = dgtype%delayout
+#endif
 
       if(rcpresent) rc = ESMF_SUCCESS
  
@@ -1721,7 +1756,9 @@
       integer :: DEID, localCellCount, localCellCountForDim
       integer :: compCellCount, compCellCountForDim
       integer :: i, myDEx, myDEy, nDEx, nDEy
-
+#ifdef ESMF_ENABLE_VM
+      integer :: localDe, deCountPerDim(2), coord(2)
+#endif
 !     Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -1730,6 +1767,17 @@
         rc = ESMF_FAILURE
       endif
 
+#ifdef ESMF_ENABLE_VM
+      call ESMF_newDELayoutGet(dgtype%delayout, localDe=localDe, &
+        deCountPerDim=deCountPerDim, rc=status)
+      call ESMF_newDELayoutGetDE(dgtype%delayout, de=localDe, coord=coord, &
+        rc=status)
+      ! bring things into the form that the local code expects them in
+      nDEx = deCountPerDim(1)
+      nDEy = deCountPerDim(2)
+      myDEx = coord(1)+1
+      myDEy = coord(2)+1
+#else
 !      call ESMF_DELayoutGetDEid(dgtype%layout, DEID, status)
 !      if((status .NE. ESMF_SUCCESS) .or. (DEID .lt. 0)) then
 !        print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
@@ -1746,7 +1794,11 @@
         print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DE position"
         return
       endif
+#endif
+
       DEID = (myDEy-1)*nDEx + myDEx
+
+      print *, 'ESMF_DistGridSetDEInternal: ', nDEx, nDEy, myDEx, myDEy, DEID
 
       dgtype%myDEComp%MyDE  = DEID
       dgtype%myDETotal%MyDE = DEID
@@ -1886,7 +1938,7 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       type(ESMF_DistGridGlobal), pointer :: glob
-      integer :: nDEs(2), i, j
+      integer :: nDEs(2), i, j, nndes
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -1905,8 +1957,13 @@
 
       ! Get information from distgrid derived type
       ! TODO:  add check for array size or use size for loop limit
+#ifdef ESMF_ENABLE_VM
+      call ESMF_newDELayoutGet(dgtype%delayout, deCount=nndes, rc=rc)
+#else              
       call ESMF_DELayoutGetSize(dgtype%layout, nDEs(1), nDEs(2), rc)
-      do i = 1,nDEs(1)*nDEs(2)
+      nndes = nDEs(1)*nDEs(2)
+#endif        
+      do i = 1,nndes
         do j = 1,dgtype%dimCount
           cellCountPerDEPerDim(i,j) = glob%cellCountPerDEPerDim(i,j)
         enddo
