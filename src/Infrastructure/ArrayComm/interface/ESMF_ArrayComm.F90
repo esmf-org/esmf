@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.5 2003/12/08 18:53:30 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.6 2003/12/09 20:40:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.5 2003/12/08 18:53:30 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.6 2003/12/09 20:40:40 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -781,6 +781,7 @@
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
+      integer, dimension(ESMF_MAXGRIDDIM) :: localMaxDimCount
 
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -795,7 +796,8 @@
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
       allocate(localAxisLengths(nDEs,ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(grid, global_cell_dim=global_cell_dim, &
-                        local_axis_length=localAxisLengths, rc=status)
+                        local_axis_length=localAxisLengths, &
+                        local_cell_max_dim=localMaxDimCount, rc=rc)
 !     call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayAllGatherGrid: GridGet returned failure"
@@ -838,8 +840,8 @@
         size_decomp = size(decompids)
         size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
         call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
-                                   localAxisLengths, size_axislengths, &
-                                   global_dimlengths, array_out, status)
+                                   localAxisLengths, global_dimlengths, &
+                                   localMaxDimCount, array_out, status)
 
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayAllGather returned error"
@@ -890,7 +892,7 @@
         size_decomp = size(decompids)
         size_axislengths = size(localAxisLengths,1) * size(localAxisLengths,2)
         call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
-                                   localAxisLengths, size_axislengths, &
+                                   localAxisLengths, &
                                    globalDimLengths, local_maxlengths, &
                                    array_out, status)
 

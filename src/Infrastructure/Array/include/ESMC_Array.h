@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.20 2003/12/08 23:13:39 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.21 2003/12/09 20:41:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,7 +178,7 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                        int decompids[], int size_decomp, ESMC_Logical periodic[]);
     int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[],
                             int size_decomp, int localAxisCounts[],
-                            int size_axislengths, int global_dimlengths[],
+                            int global_dimlengths[],
                             int local_maxlength[], ESMC_Array **Array_out);
     int ESMC_ArrayGather(ESMC_DELayout *layout, int decompids[], 
                             int size_decomp, int global_dimlengths[],
