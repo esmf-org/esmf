@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.78 2003/08/13 21:49:00 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.79 2003/08/14 21:54:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.78 2003/08/13 21:49:00 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.79 2003/08/14 21:54:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2297,14 +2297,20 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridLocalToGlobalIndex(grid, local1D, global1D, &
-                                             local2D, global2D, rc)
+                                             local2D, global2D, &
+                                             localAI1D, globalAI1D, &
+                                             localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: local1D
+      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) ::  local1D
       integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: global1D
-      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: local2D
+      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) ::  local2D
       integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: global2D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
+      type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D
+      type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: globalAI2D
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2327,6 +2333,14 @@
 !     \item[{[global2D]}]
 !          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers corresponding to
 !          local identifiers.
+!     \item[{[localAI1D]}]
+!          One-dimensional array of local AxisIndices to be translated.
+!     \item[{[globalAI1D]}]
+!          One-dimensional array of global AxisIndices corresponding to local AIs.
+!     \item[{[localAI2D]}]
+!          Two-dimensional array of local AxisIndices to be translated.
+!     \item[{[globalAI2D]}]
+!          Two-dimensional array of global AxisIndices corresponding to local AIs.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2347,7 +2361,9 @@
 !     to the application level
       call ESMF_DistGridLocalToGlobalIndex(grid%ptr%distgrid%ptr, &
                                            local1D, global1D, &
-                                           local2D, global2D, status)
+                                           local2D, global2D, &
+                                           localAI1D, globalAI1D, &
+                                           localAI2D, globalAI2D, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: distgrid local to global"
         return
