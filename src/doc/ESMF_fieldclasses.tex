@@ -2,16 +2,20 @@
 
 \subsection{Introduction}
 
-Purpose: Uniform access to data, regardless of platform, memory
-hierarchy, data decomposition.
+The purpose of a Gridded Component is to provide the application
+with uniform access to computational data, regardless of hardware
+platform, memory hierarchy, or data decomposition.
 
-Methods to get global information about a dataset, get coordinate
-and topology information, and methods
-to get a pointer to the start of a data subset for local processing. 
+It provides methods to query global information about a dataset, 
+get coordinate and topology information, and 
+get a pointer to the start of a data subset for local processing. 
 
-Grid carries coordinate and decomposition information, Data Array carries actual
-data values, Field ties them together.  Bundles allow multiple
-fields on the same grid to be manipulated as a single unit.
+The major subobjects of a Gridded Component are Bundles,
+Fields, Physical Grids, Distributed Grids, and Data Arrays.
+The Physical Grid carries global coordinate information,
+the Distributed Grid manages decomposition information, 
+the Data Array carries the actual
+data values, and Fields and Bundles tie them together.
 
 \subsection{Overview}
 
@@ -30,11 +34,12 @@ setting, retrieving, and querying the constituent Fields, it provides
 methods for configuring and querying memory layouts for the Data objects
 and some limited collective operations on all Fields in a Bundle.
 
-A Grid object is responsible for
-maintaining all information about the global coordinates and about how
+A Physical Grid object is responsible for
+maintaining information about the global coordinates.
+A Distributed Grid maintains and manages
 the decomposition of the whole problem is spread across multiple
 processing elements.  
-See Section~\ref{??} for more information about Grid objects.  
+
 The Field object uses information from the Grid object to provide
 two different types of views of the field to the calling code.
 One is a unified logical view of the entire Field as a whole,
@@ -43,29 +48,22 @@ running on a single processing element to query and retrieve a pointer
 to the subset of the Field which is local to that processing element,
 and to make requests that result in data being updated among neigboring
 subsets (e.g. Halo updates).
-% and to request updates of Halo regions when synchronizing with
-% processing elements handling neighboring subsets.
-
-A Field must contain a Grid object to be valid even if the data does not
-have any spatial location.  This is to allow subsetting across multiple
-processors and to ensure that Validation routines can distinguish between
-Fields with no coordinate information and invalid Field objects.
 
 A Data object is responsible for maintaining
 information about the individual value type (e.g. float, integer), 
 the physical representation (e.g. Cray format float vs IEEE), the 
 individual data item length (e.g. scalar, vector, vector length), 
 data count, and memory ordering information such as Fortran vs C order 
-for multidimensional arrays.  
-The Data objects utilize an Ordering subobject to store the
+for multidimensional arrays.  Data objects can be homogeneous or
+contain heterogeneous data values, for example if supporting
+packed data for a Bundle object.
+The Data objects utilize an Ordering object to store the
 memory layout information and to manage memory reordering requests.
-Data methods include returning a pointer to the start of the data
+If the data are packed, the Ordering object maintains the information
+about the order of the Fields in the single data array.
+Data methods include querying the various information about the
+data, returning a pointer to the start of the data
 array, and methods for reordering and subsetting the data.
-
-The Attribute object can be associated with any object in the system,
-and maintains a list of (name,value) pairs.  Fields are required to
-have at least a unique name, so all Field objects will have an associated
-Attribute object.
 
 
 \subsection{Examples}
@@ -87,46 +85,26 @@ the following object hierarchy:
 \item [Description] A Bundle contains one or more Fields which are defined on the
 same Grid.  It allows the application to manipulate multiple fields in an identical
 manner with a single set of calls.  It also allows the option of interleaving data
-from multiple fields into a Packed Data Array (see Section~\ref{packeddataarray}) for
-more efficient memory access patterns.
+from multiple fields into a single Data Array for more efficient memory access patterns.
 \item [Function] The Bundle class is an aggregation of the Field class.  It provides methods 
 for getting and setting fields.  It provides methods for querying information about the
 underlying grid.  It provides methods for requesting the packing of data, the
 reordering of that packed data, and detaching and attaching the data.
 \end{description}
 
-\subsubsection{Packed Data Array (ESMF\_PackedData)}
-\label{sec:packeddataarray} 
-\begin{description}
-\item [Description] A Packed Data Array contains data from one or more Fields, where the
-data items are interleaved in memory. The application may use a packed array to increase
-locality of reference while iterating the array, or for ease in subsetting multiple
-data values in one operation.
-\item [Function] The PackedData class provides methods for packing and querying arrays,
-subsetting the data, and repacking the data in a different order.  The PackedData object
-contains one or more Data Array objects which maintain information about the 
-types, format, etc.\ of individual data items, but they do not contain
-pointers to the data buffer; the PackedData object contains this pointer.
-An Ordering object contains information about the structure of the packing.
-A PackedData object is contained by a Bundle object.  
-Application access is through Bundle methods.
-
-Packed Data Arrays differ from simpler Data Arrays in that the data
-items are no longer homogeneous; each individual item is a composite type.
-\end{description}
 
 \subsubsection{Field (ESMF\_Field)}
 \label{sec:field} 
 \begin{description} 
 \item [Description] A Field represents a single physical field or the components of a 
 vector field.  It is the basic data carrying object in the system.  It includes both
-the data and the grid on which the data is defined.  The main application interfaces
+the data and the grid on which the data are defined.  The main application interfaces
 for accessing data are here.
 \item [Function] The Field object is a composition of the Data Array object, an optional
 Mask object, an optional IOspec object, and it aggregates a Grid object.  It provides
 methods for getting, setting, and querying the data array, the grid, the mask and
 the I/O spec.  It provides methods for detaching and attaching data from the field.
-While data is detached it is the responsibility of the application.  A Field object
+While data are detached it is the responsibility of the application.  A Field object
 provides methods for subsetting, regridding, and reordering memory layout of data.
 \end{description}
 
@@ -145,20 +123,30 @@ for getting and setting valid values.
 \label{sec:dataarray} 
 \begin{description}
 \item [Description] A Data Array is a list of data values plus information about
-the data itself.
-\item [Function] The Data class contains the data as well as information about the data,
-including the data type (e.g. float,
-integer), the machine type (e.g. IEEE float, Cray float), data count, data dimensionality
-(e.g. scalar, vector).  It provides methods for querying all information about the data,
-returning a pointer to the memory location of the start of the data, and conversion routines
-for altering the characteristics of the data.  Information about how the data array is laid
-out in memory is contained in an Ordering class.
+the data values.
+\item [Function] The Data class contains the data as well as information 
+about the data, including the data type (e.g. float,
+integer), the machine type (e.g. IEEE float, Cray float), 
+data count, data dimensionality (e.g. scalar, vector).  
+It provides methods for querying information about the data,
+returning a pointer to the memory location of the start of the data, 
+and conversion routines for altering the characteristics of the data.  
+Information about how the data array is laid
+out in memory is managed by the Ordering class.
 
-Data Arrays can be associated with a Field object or with a PackedData object.
-Data associated with a Field object contains only a single variable.  Data associated
-with a PackedData object can have data from multiple Fields packed into a single
-buffer.  The information about the multi-field packing is contained in an
-Ordering object.
+Data Arrays can contain either homogeneous or composite data types 
+(e.g records or structures).
+Data Arrays can be associated with a Field object or with a Bundle object.
+Data associated with a Field object consist of only a single variable.  
+Data associated
+with a Bundle object can have data from multiple Fields packed into a single
+buffer with the items interleaved in memory.  
+The application may use a packed array to increase
+locality of reference while iterating the array, 
+or for ease in subsetting multiple data values in one operation.
+Information about the multi-field packing and methods to reorder the
+data are managed by the Ordering class.
+
 \end{description}
 
 \subsubsection{Ordering (ESMF\_Ordering)}
@@ -168,7 +156,7 @@ Ordering object.
 linearized in memory.  This includes multidimensional array index information (e.g. C-order
 vs Fortran-order), vector or tensor data item ordering information (e.g. all Xs then all
 Ys vs [X,Y], [X,Y] tuples), and for Arrays associated with a Bundle object which contain
-data for multiple fields, interleave information about how multiple field data is 
+data for multiple fields, interleave information about how multiple field data are 
 packed into a single buffer.
 \item [Function] An Ordering object is associated with a single Data object.  It provides
 methods to query the current memory organization and methods to reorder the Data object.
@@ -178,7 +166,7 @@ methods to query the current memory organization and methods to reorder the Data
 \label{sec:ordering} 
 \begin{description}
 \item [Description] A Grid is the general representation of the coordinate information for
-the computation.  It contains both the logical presenatation of the grid as well as the
+the computation.  It contains both the logical presentation of the grid as well as the
 decomposition of the grid into subgrids for processing in parallel on a
 multiprocessor system.
 \item [Function] The Grid class is the composition of a PhysGrid and a DistGrid object.  
@@ -192,7 +180,7 @@ Field and Bundle classes for obtaining coordinate, indexing, and decomposition i
 \item [Description] A Physical Grid is a discrete representation of a continuous physical space.
 There are a multitude of types of physical grids.
 The grid contains the physical coordinates, usually indicating where data values are located, but
-it could be a parametric description of the actual locations.  
+it could also be a parametric description of the actual locations.  
 \item [Function] The PhysGrid class maintains a global index space for coordinate information.
 It provides methods for creating a variety of grid types, including both reading grid information
 and generating grids from parameters.  It provides methods for regridding, or translating

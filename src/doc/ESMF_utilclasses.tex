@@ -2,21 +2,95 @@
 
 \subsection{Introduction}
 
-Utilities that may be utilitized by any other class in the ESMF.  
+Utility routines may be utilitized by any other class in the ESMF
+library.  
+Selected of these routines are available to be called by user code as well.
 Collecting these functions into a base-level utility set helps to 
 avoid circular referencing.
 
-These routines are callable by user level code as well.
-
-Other stuff for in here: log, error
-
-More on time manager.
+The functions provided by the utility objects vary in scope and
+complexity.  Some are lightweight classes which maintain no
+internal state; others have state and exist for the lifetime of
+the application.  Some run within a single process; others
+exist per processor and may communicate to other instantiations
+of itself on different processors.
 
 \subsection{Overview}
 
-<< some stuff here >>
+<< these have very little in common.  are these short paragraphs
+useful as an intro or are they just duplicating effort in the
+class details??  nsc.  >>
+
+The Layout object is used by any part of the library which needs
+to decompose a task/problem/dataset into subsets.
+The decomposition must allow for mapping certain subsets onto the
+underlying machine model in a preferential way; e.g. keeping
+vertical blocks of a 3D decomposition on processors which share
+a memory pool.
+It is required to interact with both the Processing Element lists
+and the Machine Model in order to accomplish this preferential
+decomposition.
+
+The abstraction of a Processor Element provides a layer between
+the underlying hardware processor ID and the application's view
+of how to address individual processors.  It also maintains
+grouping information to indicate collections of processors which
+share some characteristic or resource.
+
+The Machine Model encapsulates all information about the
+hardware configuration, memory structure, and available
+communications protocols and bandwith.  It furnishes this
+information to other parts of the library which can
+make decisions about partitioning or selection of algorithms
+based on the amount and types of resources available.
+
+The Basic Communications routines provide a uniform interface to
+the variety of interprocess communication mechanisms available
+on different hardware platforms.  
+The basic functions include methods to send
+and receive data, such as scatter, gather, send, receive,
+reduction methods such as sum, global min/max, and methods
+to synchronize such as barrier.
+<< needs more text here?  nsc. >>
+
+The Time Manager provides all general purpose time methods, both
+for computing time instants (dates and times) and time intervals
+(the difference between 2 time instants).   It also supports 
+setting and handling alarm events, either one-shot or repeating.
+Supported calendars include Gregorian, Julian, no-leap, 360-day, 
+generic, and no-calendar.
+Time intervals can range from the very brief -- any rational fraction
+of a second -- to geologic time scales.
+The Time Manager also allows the user to control the format of
+time instants and intervals as they are returned.
+
+Many parts of the library are required to maintain unique name
+spaces for their objects.  The Name Registry supplies methods
+for defining name spaces and adding and querying names in those
+spaces.  In general there is will be one Registry object per
+process, but if the namespace spans processes then Registry objects
+will have to do global communication in order to verify names
+are unique within the entire application.
+
+The Error Handler provides both uniform handling of errors and
+a way for user code to select how errors will be handled.
+An integer error code can be returned from the library to the
+calling code, or the library can print an error message and exit.
+
+The Log Utility manages the complexity of serializing diagnostic
+messages produced by a multiprocess application.  It provides
+methods for uniformly formatting the messages to facilitate
+post-processing by filters and automated tools.
+
+Attributes are a list of (name, value) pairs associated with
+any object in the library.  The value can be of any data type.
+There are methods for listing, setting, and querying attribute lists.
+
 
 \subsection{Class Details}
+
+<< i did add sections below on log and error, but don't know if they're
+detailed enough.  also added some to the time mgr.  nsc. >> 
 
 \subsubsection{Layout (ESMF\_Layout)}
 \label{sec:layout} 
@@ -66,7 +140,7 @@ The MachineModel class does expose some limited query methods to the application
 to allow for the possibility of making run-time choices of algorithms based on hardware type.
 \end{description}
 
-\subsubsection{ (ESMF\_Machine)} 
+\subsubsection{Machine (ESMF\_Machine)} 
 \begin{description}
 \item [Note] << is this the same as my MachineModel above??  nsc. >>
 \item [Description] The Machine class provides a representation of 
@@ -84,6 +158,7 @@ latency through active tests.
 \end{description}
 
 \subsubsection{Basic Communications (ESMF\_BasicComm)}
+\label{sec:basiccomm} 
 \begin{description}
 \item [Description] This library is a wrapper for MPI and other vendor-supplied 
 message passing libraries.
@@ -92,14 +167,83 @@ and efficient communications for the ESMF.  Methods include scatter, gather, sen
 receive, synchronize. 
 \end{description}
 
-\subsubsection{Time Manager (ESMF\_Date, ESMF\_DT)}
+\subsubsection{Time Manager (ESMF\_TimeMgr)}
+\label{sec:timemgr} 
 \begin{description}
-\item [Description] The date and time interval methods in the ESMF provide date
-calculations based on a number of different calendars.
+\item [Description] The Time Manager provides time services to other objects
+in the ESMF library and to application code.  It provides either absolute
+time functions called Instants, or time differences called Intervals.
+\item [Function] The Time Manager provides all general purpose time methods. 
+It provides methods for supporting a variety of calendar time and dates,
+for computing time intervals and instants from the very brief -- any 
+rational fraction of a second -- to geologic time scales, and for
+setting and handling alarm events, either one-time or repeating.
+\end{description}
 
+\subsubsection{Registry (ESMF\_Registry)}
+\label{sec:registry} 
+\begin{description}
+\item [Description] A Registry maintains a list of (name, ID) pairs per 
+namespace.  It supports the many classes in the system which are
+required to have unique names, either per address space or over the entire
+application.  
+\item [Function] The Registry class supports multiple namespaces (e.g. per
+field, per component, per exchange packet pool).  It provides methods to
+create, query, and list namespaces and define their scope.  
+Within a namespace it provides methods to
+verify a name exists, add a (name, ID) pair if the name is unique,
+generate a new unique name, retrieve an ID by name, and list existing names.
+\end{description}
+
+\subsubsection{Error Handler (ESMF\_Error)}
+\label{sec:error} 
+\begin{description}
+\item [Description] The Error Handler allows the application to control 
+the behavior of the library in case of error.  The library can return
+control to the calling code with an integer error code and allow the
+caller to handle the error.  An Error Print routine can
+supply uniform text error messsage in addition to the integer error code.
+Alternatively, the Error Handler can print an error message and exit.
+\item [Function] The Error Handler class provides methods for selecting
+the behavior of the library in case of error, methods to return uniform
+text in addition to integer error codes, and methods to print the file
+name, line number, and a description of the error before exiting the process.
+\end{description}
+
+\subsubsection{Log (ESMF\_Log)}
+\label{sec:log} 
+\begin{description}
+\item [Description] The Log utility is intended to organize diagnostic
+output, which may be generated in parallel at unpredictable times in
+a multiprocessor environment.  It also attempts to organize
+the diagnostic output so that searches and filters may be easily constructed. 
+\item [Function] The Log class will be for diagnostic output. 
+The bandwidth is assumed to be moderate to small, i.e. it will not be used 
+to output large streams of numerical model output data.  
+It provides methods for writing to the log, for specifying uniform
+formatting information, for selecting a single unified log vs.\  a log 
+file per processor.
+\end{description}
+
+\subsubsection{Attributes (ESMF\_Attribute)}
+\label{sec:attribute} 
+\begin{description}
+\item [Description] Attributes are lists of (name, value) pairs associated with
+any object in the library.  The value can be of any data type.  Many
+objects in the system are required to have names, so those objects will
+have at least a ("Name", string) attribute.
+\item [Function] The Attribute class supports methods for listing,
+setting, and querying attribute lists.
 \end{description}
 
 
+
+% \subsubsection{Foo (ESMF\_Foo)}
+% \label{sec:Foo} 
+% \begin{description}
+% \item [Description] A Foo is ...
+% \item [Function] The Foo class ...
+% \end{description}
 
 
 
