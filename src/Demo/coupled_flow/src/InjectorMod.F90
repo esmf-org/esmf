@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.3 2003/08/06 21:20:00 jwolfe Exp $
+! $Id: InjectorMod.F90,v 1.4 2003/08/29 22:07:09 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -220,14 +220,14 @@
       ! initialize start time to 12May2003, 3:00 pm
       ! for testing, initialize start time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_start_time, &
-                        yr_i4=2003, mm_i4=on_month, dd_i4=on_day, &
-                        h_i4=on_hour, m_i4=on_min, s_i4=0, &
+                        yr=2003, mm=on_month, dd=on_day, &
+                        h=on_hour, m=on_min, s=0, &
                         calendar=datablock%gregorianCalendar, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_stop_time, &
-                        yr_i4=2003, mm_i4=off_month, dd_i4=off_day, &
-                        h_i4=off_hour, m_i4=off_min, s_i4=0, &
+                        yr=2003, mm=off_month, dd=off_day, &
+                        h=off_hour, m=off_min, s=0, &
                         calendar=datablock%gregorianCalendar, rc=rc)
 
 
@@ -433,7 +433,7 @@ end subroutine injector_init1
         ! Update values.  Flag = 10 means override values with our own.
 
         ! Check time to see if we are still injecting
-        call ESMF_ClockGetCurrTime(clock, currtime, rc)
+        call ESMF_ClockGet(clock, currTime=currtime, rc=rc)
         if ((currtime .ge. datablock%inject_start_time) .and. &
             (currtime .le. datablock%inject_stop_time)) then
 

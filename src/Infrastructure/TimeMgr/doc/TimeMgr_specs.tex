@@ -4,36 +4,36 @@
 \hline
 Unit & Meaning \\
 \hline\hline
-{\bf yr\_<i4|i8>} & Year. \\
+{\bf <yr|yr\_i8>} & Year. \\
 \hline
-{\bf mm\_i4} & Month (1-12). \\
+{\bf mm} & Month (1-12). \\
 \hline
-{\bf dd\_<i4|r8>} & Day. \\
+{\bf dd} & Day of the month. \\
 \hline
-{\bf d\_<i4|i8>} & Integer Julian day. \\
+{\bf <d|d\_i8|d\_r8>} & Julian day. \\
 \hline
-{\bf h\_<i4|r8>} & Hour. \\
+{\bf <h|h\_r8>} & Hour. \\
 \hline
-{\bf m\_<i4|r8>} & Minute. \\
+{\bf <m|m\_r8>} & Minute. \\
 \hline
-{\bf s\_<i4|i8|r8>} & Second. \\
+{\bf <s|s\_i8|s\_r8>} & Second. \\
 \hline
-{\bf ms\_<i4|r8>} & Millisecond. \\
+{\bf <ms|ms\_r8>} & Millisecond. \\
 \hline
-{\bf us\_<i4|r8>} & Microsecond. \\
+{\bf <us|us\_r8>} & Microsecond. \\
 \hline
-{\bf ns\_<i4|r8>} & Nanosecond. \\
+{\bf <ns|ns\_r8>} & Nanosecond. \\
 \hline
 {\bf O} & Time zone offset in integer number of hours and minutes. \\
 \hline
 {\bf <unit>N} & Numerator for times of the form <unit> {\bf $ + 
 \frac{{\rm <unit>N}}{{\rm <unit>D}}$}, where <unit>s are integers. For example, 
-{\bf s\_i4N} is an integer second numerator.  This format provides 
+{\bf sN} is an integer second numerator.  This format provides 
 a mechanism for supporting exact behavior. \\
 \hline
 {\bf <unit>D} & Denominator for times of the form <unit> {\bf $ + 
 \frac{{\rm <unit>N}}{{\rm <unit>D}}$}, where <unit>s are integers. For example, 
-{\bf s\_i4D} is an integer second denominator.
+{\bf sD} is an integer second denominator.
 \\
 \hline
 \end{tabular}

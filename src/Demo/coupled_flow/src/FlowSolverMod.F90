@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.9 2003/08/06 21:19:30 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.10 2003/08/29 22:07:09 eschwab Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -654,7 +654,7 @@
 !
 ! initialize timestep from ESMF Clock
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, status)
+      call ESMF_ClockGet(clock, timeStep=time_step, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
@@ -745,7 +745,7 @@
 ! 
 ! Get timestep from clock
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
@@ -1614,7 +1614,7 @@
 !
 ! Frame number from computation
 !
-      call ESMF_ClockGetAdvanceCount(clock, frame, status)
+      call ESMF_ClockGet(clock, advanceCount=frame, rc=status)
 !
 ! And now test output to a file
 !

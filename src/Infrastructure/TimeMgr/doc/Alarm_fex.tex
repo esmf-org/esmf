@@ -1,4 +1,4 @@
-% $Id: Alarm_fex.tex,v 1.5 2003/08/18 15:10:26 cdeluca Exp $
+% $Id: Alarm_fex.tex,v 1.6 2003/08/29 22:12:05 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -8,12 +8,12 @@ type(ESMF_Alarm) :: alarm1, alarm2
 
 ! Initialize one to be a one-shot
 type(ESMF_Time) :: alarmTime
-call ESMF_TimeSet(alarmTime, yr_i4=2002, mm_i4=8, dd_i4=30, calendar=gregorian)
+call ESMF_TimeSet(alarmTime, yr=2002, mm=8, dd=30, calendar=gregorian)
 call ESMF_AlarmSet(alarm1, ringTime=alarmTime)
 
 ! Initialize other to ring on an interval
 type(ESMF_TimeInterval) :: alarmInterval
-call ESMF_TimeIntervalInit(alarmInterval, dd_i4=1)
+call ESMF_TimeIntervalInit(alarmInterval, dd=1)
 call ESMF_AlarmInit(alarm2, ringInterval=alarmInterval)
 
 ! Associate alarms with clock

@@ -1,4 +1,4 @@
-% $Id: Calendar_fex.tex,v 1.5 2003/08/15 17:10:43 eschwab Exp $
+% $Id: Calendar_fex.tex,v 1.6 2003/08/29 22:12:05 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -10,5 +10,5 @@ type(ESMF_Calendar) :: gregorian
 call ESMF_CalendarSet(gregorian, ESMF_GREGORIAN)
 
 ! pass it to a time instant
-call ESMF_TimeSet(startTime, yr_i4=2002, mm_i4=8, dd_i4=1, gregorian)
+call ESMF_TimeSet(startTime, yr=2002, mm=8, dd=1, gregorian)
 \end{verbatim}

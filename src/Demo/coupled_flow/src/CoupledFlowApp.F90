@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.7 2003/08/06 21:18:46 jwolfe Exp $
+! $Id: CoupledFlowApp.F90,v 1.8 2003/08/29 22:07:09 eschwab Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -167,23 +167,23 @@
 !\end{verbatim}
 !     Next we initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
-      call ESMF_TimeIntervalSet(timeStep, s_i4=2, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
 !\end{verbatim}
 !     And then we set the start time and stop time to input values for the month,
 !     day, and hour (assuming the year to be 2003):
 !\begin{verbatim}
-      call ESMF_TimeSet(startTime, yr_i4=2003, mm_i4=s_month, dd_i4=s_day, &
-                        h_i4=s_hour, m_i4=s_min, s_i4=0, &
+      call ESMF_TimeSet(startTime, yr=2003, mm=s_month, dd=s_day, &
+                        h=s_hour, m=s_min, s=0, &
                         calendar=gregorianCalendar, rc=rc)
 
-      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=e_month, dd_i4=e_day, &
-                        h_i4=e_hour, m_i4=e_min, s_i4=0, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=e_month, dd=e_day, &
+                        h=e_hour, m=e_min, s=0, &
                         calendar=gregorianCalendar, rc=rc)
 !\end{verbatim}
 !     With the time interval, start time, and stop time set above, the Clock can
 !     now be created:
 !\begin{verbatim}
-      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
 !\end{verbatim}
 !     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
 !     current time from the start time by the timestep.
