@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.2 2003/09/25 15:10:23 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.3 2003/10/23 17:35:59 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -411,7 +411,7 @@
       logical :: rcpresent
       integer :: i, j, n, x, y, nx, ny
       integer, dimension(1,2) :: local, global
-      double precision :: s_
+      real(ESMF_KIND_R8) :: s_
       type(ESMF_Grid) :: grid
       type(ESMF_DElayout) :: layout
 !
@@ -720,7 +720,7 @@
       integer :: i, j
       integer :: counter = 0
       integer :: print_count = 0
-      double precision :: s_
+      real(ESMF_KIND_R8) :: s_
       integer :: datacount
       character(len=ESMF_MAXSTR), dimension(7) :: datanames
       type(ESMF_Field) :: thisfield
