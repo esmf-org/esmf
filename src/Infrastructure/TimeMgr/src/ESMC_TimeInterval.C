@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.46 2004/03/10 03:05:00 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.47 2004/03/19 00:39:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.46 2004/03/10 03:05:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.47 2004/03/19 00:39:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -114,16 +114,22 @@
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
+    this->startTime.ESMC_TimeSet((ESMF_KIND_I8) 0);
+    this->endTime.ESMC_TimeSet((ESMF_KIND_I8) 0);
+    this->calendar = ESMC_NULL_POINTER;
     
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    // absolute or calendar-specific interval ?
+    // absolute or calendar-specific interval
+    // TODO:  when more than one given, check that calendar is the same
     if (startTime != ESMC_NULL_POINTER) {
       this->startTime = *startTime;
+      this->calendar = startTime->calendar;
     }
     if (endTime != ESMC_NULL_POINTER) {
       this->endTime = *endTime;
+      this->calendar = endTime->calendar;
     }
     if (calendar != ESMC_NULL_POINTER) {
       this->calendar = *calendar;
@@ -237,13 +243,485 @@
 
     // TODO: fractional, sub-seconds
 
-    // Inititialize time-to-convert value to pass to base time class get().
+    // relative calendar interval
+    //  TODO:  When calendar, startTime, endTime specified, can convert 
+    //         between relative and absolute units.  Relative and absolute
+    //         parts are additive (e.g. d=1, h=48 equals 3 days).
+
+    // TODO: put calendar logic under test for any non-zero yy, mm, d ?
+
+    // TODO: reduce size of this method by creating seperate methods on
+    //       ESMC_TimeInterval and ESMC_Calendar ?
+
+    //---------------------------------------------------------------------
+    // Determine startTime, endTime, and/or calendar, if any, we have to
+    //   work with.
+    //---------------------------------------------------------------------
+
+    // get any calendar specified in Get() or Set(), on which to perform
+    //   calendar (yy, mm, d) conversions
+    ESMC_Calendar *conversionCalendar = ESMC_NULL_POINTER;
+    if (startTimeIn != ESMC_NULL_POINTER) {
+      conversionCalendar = startTimeIn->calendar;
+    } else if (endTimeIn != ESMC_NULL_POINTER) {
+      conversionCalendar = endTimeIn->calendar;
+    } else if (calendarIn != ESMC_NULL_POINTER) {
+      conversionCalendar = *calendarIn;
+    } else if (this->calendar != ESMC_NULL_POINTER) {
+      conversionCalendar = this->calendar;
+    }
+
+    // if no calendar info, then if any relative calendar unit was Set(),
+    //   must Get() it back, otherwise impossible conversion is implied.
+    if (conversionCalendar == ESMC_NULL_POINTER) {
+      // if yy was set, must get it
+      if (this->yy != 0 &&
+          (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER))
+            return(ESMF_FAILURE);
+      // if mm was set, must get it
+      if (this->mm != 0 &&
+          (mm == ESMC_NULL_POINTER && mm_i8 == ESMC_NULL_POINTER))
+            return(ESMF_FAILURE);
+// TODO: require calendar for d <-> h,m,s conversions ? or default to 86400 ?
+      // if d was set, must get it
+//    if (this->d != 0 &&
+//        (d == ESMC_NULL_POINTER && d_i8 == ESMC_NULL_POINTER))
+//          return(ESMF_FAILURE);
+    }
+
+    // get any startTime and/or endTime specified in Get() or Set()
+    ESMC_Time conversionStartTime = this->startTime;
+    ESMC_Time conversionEndTime   = this->endTime;
+    if (startTimeIn != ESMC_NULL_POINTER) {
+      conversionStartTime = *startTimeIn;
+    }
+    if (endTimeIn != ESMC_NULL_POINTER) {
+      conversionEndTime = *endTimeIn;
+    }
+
+    //---------------------------------------------------------------------
+    // Reduce this time interval's units to the smallest and least number
+    //   of units possible
+    //---------------------------------------------------------------------
+
+    // Note:  Don't return ESMF_FAILURE in this section; just reduce what we
+    //        can.  Failure is determined in the conversion section below
+    //        which tries to satisfy the user's request for specific units.
+
+    // Inititialize time-to-convert values.  These are used to reduce this time
+    // interval's units from which to convert to user-requested units.  
     // Represents remaining unconverted time; any years, months or days
-    //   requested will be removed from this time.  In this way, a requested
-    //   unit is bounded by the next higher requested unit.
+    //   requested will be removed from these values.  In this way, a requested
+    //   unit is bounded (normalized) by the next higher requested unit.
+    ESMF_KIND_I8       yyToConvert = this->yy;
+    ESMF_KIND_I8       mmToConvert = this->mm;
+    ESMF_KIND_I8        dToConvert = this->d;
     ESMF_KIND_I8 baseTimeToConvert = this->s;
 
-    // absolute or calendar-specific interval
+    ESMC_Time calculatedEndTime;   // from conversionStartTime
+    ESMC_Time calculatedStartTime; // from conversionEndTime
+
+    // reduce any yy,mm,d to base time units (seconds) if possible,
+    //   or at least to months and/or days if not
+    if (conversionCalendar != ESMC_NULL_POINTER) {
+      switch (conversionCalendar->calendarType)
+      {
+        case ESMC_CAL_GREGORIAN:
+        case ESMC_CAL_NOLEAP:
+          // use startTime to reduce yy,mm,d to seconds
+          if (conversionStartTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+            ESMC_Time calculatedEndTime = conversionStartTime + *this;
+            ESMC_TimeInterval baseTimeInterval =
+                                       calculatedEndTime - conversionStartTime;
+            baseTimeToConvert = baseTimeInterval.s;
+            yyToConvert = mmToConvert = dToConvert = 0;
+                                        // yy, mm, d all reduced; only have
+                                        //   baseTimeToConvert remaining
+
+          // use endTime to reduce yy,mm,d to seconds
+          } else if (conversionEndTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+            ESMC_Time calculatedStartTime = conversionEndTime - *this;
+            ESMC_TimeInterval baseTimeInterval =
+                                       conversionEndTime - calculatedStartTime;
+            baseTimeToConvert = baseTimeInterval.s;
+            yyToConvert = mmToConvert = dToConvert = 0;
+                                        // yy, mm, d all reduced; only have
+                                        //   baseTimeToConvert remaining
+
+          } else { // no startTime or endTime available, reduce what we can
+                   //   to (mm, s)
+            if (conversionCalendar->calendarType == ESMC_CAL_GREGORIAN) {
+              // cannot reduce yy or mm to seconds, but can reduce yy to mm
+              if (yyToConvert != 0) {
+                mmToConvert += yyToConvert * conversionCalendar->monthsPerYear;
+                yyToConvert = 0;
+              }
+            } else { // ESMC_CAL_NOLEAP
+              // reduce yy to seconds
+              if (yyToConvert != 0) {
+                baseTimeToConvert +=
+                              yyToConvert * conversionCalendar->secondsPerYear;
+                yyToConvert = 0;
+              }
+              // cannot reduce mm to seconds
+            }
+            // reduce d to seconds
+            if (dToConvert != 0) {
+              baseTimeToConvert +=
+                               dToConvert * conversionCalendar->secondsPerDay;
+              dToConvert = 0;
+            }
+            // we now have mmToConvert and baseTimeToConvert (mm, s);
+            //   yyToConvert and dToConvert have been reduced
+          }
+          break;
+        case ESMC_CAL_360DAY:
+          if (yyToConvert != 0) {
+            baseTimeToConvert +=
+                          yyToConvert * conversionCalendar->secondsPerYear;
+            yyToConvert = 0;
+          }
+          if (mmToConvert != 0) {
+            baseTimeToConvert +=
+                          mmToConvert * 30 * conversionCalendar->secondsPerDay;
+            mmToConvert = 0;
+          }
+          if (dToConvert  != 0) {
+            baseTimeToConvert +=
+                          dToConvert * conversionCalendar->secondsPerDay;
+            dToConvert = 0;
+          }
+          // yy, mm, d all reduced; only have baseTimeToConvert remaining
+          break;
+        case ESMC_CAL_JULIANDAY:
+          // ignore years and months
+
+          // reduce days to seconds
+          if (dToConvert  != 0) {
+            baseTimeToConvert +=
+                          dToConvert * conversionCalendar->secondsPerDay;
+            dToConvert = 0;
+          }
+          break;
+        case ESMC_CAL_NOCALENDAR:
+          // ignore years, months and days
+          break;
+        case ESMC_CAL_CUSTOM:
+          // TODO:
+          break;
+        default:
+          // unknown calendar type
+          break;
+      };
+    } else { // no calendar specified
+      // TODO:  default days to 86400 seconds ?
+      // reduce days to seconds
+      if (dToConvert != 0) {
+          baseTimeToConvert += dToConvert * SECONDS_PER_DAY;
+          dToConvert = 0;
+      }
+    }
+
+    //---------------------------------------------------------------------
+    // convert from reduced units to user-requested units, keeping them
+    //   bound (normalized) to the next larger requested unit
+    //---------------------------------------------------------------------
+
+    // convert from reduced units to any user-requested years
+    if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER) {
+      // total relative and absolute years
+      ESMF_KIND_I8 years = yyToConvert;
+      yyToConvert = 0;
+      if (conversionCalendar != ESMC_NULL_POINTER) {
+        switch (conversionCalendar->calendarType)  
+        {
+          case ESMC_CAL_GREGORIAN:
+          case ESMC_CAL_NOLEAP:
+            {
+              // TODO: use TimeInterval operators (/) and (-) when ready ?
+
+              // get years using startTime, if available
+              if (conversionStartTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+                ESMC_TimeInterval oneYear(0, 0, 1, 1);
+                ESMC_Time iTime = conversionStartTime + oneYear;
+                years = 0;
+                while (iTime <= calculatedEndTime) {
+                  years++;
+                  iTime += oneYear;
+                }
+
+                // move conversionStartTime up to end of last year converted
+                conversionStartTime = iTime - oneYear;
+
+                // calculate remaining baseTimeToConvert (remove years we got)
+                ESMC_TimeInterval baseTimeInterval =
+                                       calculatedEndTime - conversionStartTime;
+                baseTimeToConvert = baseTimeInterval.s;
+
+              // else get years using endTime, if available
+              } else if (conversionEndTime.ESMC_TimeValidate() == ESMF_SUCCESS){
+                ESMC_TimeInterval oneYear(0, 0, 1, 1);
+                ESMC_Time iTime = calculatedStartTime + oneYear;
+                years = 0;
+                while (iTime <= conversionEndTime) {
+                  years++;
+                  iTime += oneYear;
+                }
+
+                // move calculatedStartTime up to end of last year converted
+                calculatedStartTime = iTime - oneYear;
+
+                // calculate remaining baseTimeToConvert (remove years we got)
+                ESMC_TimeInterval baseTimeInterval =
+                                       conversionEndTime - calculatedStartTime;
+                baseTimeToConvert = baseTimeInterval.s;
+
+              } else { // no startTime or endTime available, convert what we can
+                       //   from (mm, s)
+                years = 0;
+                // convert mm for either ESMC_CAL_GREGORIAN or ESMC_CAL_NOLEAP
+                if (mmToConvert != 0) {
+                  years = mmToConvert / conversionCalendar->monthsPerYear;
+                  mmToConvert % conversionCalendar->monthsPerYear;
+                } 
+
+                // convert remaining seconds to years
+                if (conversionCalendar->calendarType == ESMC_CAL_NOLEAP) {
+                  years +=
+                         baseTimeToConvert / conversionCalendar->secondsPerYear;
+                  baseTimeToConvert %= conversionCalendar->secondsPerYear;
+
+                } else { // ESMC_CAL_GREGORIAN
+                  // note: can't use abs() or labs() since result is (long long)
+                  //       could use ISO llabs() if supported on all platforms
+                  if (baseTimeToConvert >= conversionCalendar->secondsPerYear ||
+                      baseTimeToConvert <= -conversionCalendar->secondsPerYear){
+                    // baseTimeToConvert >= 1 year => can't determine leap years
+                    //   without startTime or endTime !
+                    return (ESMF_FAILURE);
+                  }
+                }
+              }
+            }
+            break;
+          case ESMC_CAL_360DAY:
+            years = baseTimeToConvert / conversionCalendar->secondsPerYear;
+            baseTimeToConvert %= conversionCalendar->secondsPerYear;
+            break;
+          case ESMC_CAL_JULIANDAY:
+          case ESMC_CAL_NOCALENDAR:
+            // years not defined!
+            return(ESMF_FAILURE);
+            break;
+          case ESMC_CAL_CUSTOM:
+            // TODO:
+            break;
+          default:
+            // unknown calendar type
+            break;
+        };
+      } // else { // no calendar specified
+        // will just return yy as specified by the user in Set(); other units
+        // cannont be converted to years.  TODO:  return rc = ESMF_WARNING ?
+   // }
+
+      // return requested years value
+      if (yy != ESMC_NULL_POINTER) {
+        // ensure fit in given int
+        if (years < INT_MIN || years > INT_MAX) return(ESMF_FAILURE);
+        *yy = (ESMF_KIND_I4) years;  // >= 32-bit
+      }
+      if (yy_i8 != ESMC_NULL_POINTER) {
+        *yy_i8 = years;  // >= 64-bit
+      }
+    }
+
+    // convert from remaining reduced units to any user-requested months
+    if (mm != ESMC_NULL_POINTER || mm_i8 != ESMC_NULL_POINTER) {
+      // total relative months
+      ESMF_KIND_I8 months = mmToConvert;
+      mmToConvert = 0;
+      if (conversionCalendar != ESMC_NULL_POINTER) {
+        switch (conversionCalendar->calendarType)  
+        {
+          case ESMC_CAL_GREGORIAN:
+          case ESMC_CAL_NOLEAP:
+
+            // TODO: use TimeInterval operators (/) and (-) when ready ?
+
+            // get months using startTime, if available
+            if (conversionStartTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+              ESMC_TimeInterval oneMonth(0, 0, 1, 0, 1);
+              ESMC_Time iTime = conversionStartTime + oneMonth;
+              months = 0;
+              while (iTime <= calculatedEndTime) {
+                months++;
+                iTime += oneMonth;
+              }
+
+              // move conversionStartTime up to end of last month converted
+              conversionStartTime = iTime - oneMonth;
+
+              // calculate remaining baseTimeToConvert (remove months we got)
+              ESMC_TimeInterval baseTimeInterval =
+                                     calculatedEndTime - conversionStartTime;
+              baseTimeToConvert = baseTimeInterval.s;
+
+            // else get months using endTime, if available
+            } else if (conversionEndTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+              ESMC_TimeInterval oneMonth(0, 0, 1, 0, 1);
+              ESMC_Time iTime = calculatedStartTime + oneMonth;
+              months = 0;
+              while (iTime <= conversionEndTime) {
+                months++;
+                iTime += oneMonth;
+              }
+
+              // move calculatedStartTime up to end of last month converted
+              calculatedStartTime = iTime - oneMonth;
+
+              // calculate remaining baseTimeToConvert (remove months we got)
+              ESMC_TimeInterval baseTimeInterval =
+                                     conversionEndTime - calculatedStartTime;
+              baseTimeToConvert = baseTimeInterval.s;
+
+            } else { // no startTime or endTime available, convert what we can
+              if (baseTimeToConvert >= (28 * conversionCalendar->secondsPerDay)
+                                    ||
+                 baseTimeToConvert <= (-28 * conversionCalendar->secondsPerDay))
+                  // note: can't use abs() or labs() since result is (long long)
+                  //       could use ISO llabs() if supported on all platforms
+              {
+                // can't determine months without startTime or endTime !
+                // TODO:  leave alone and let d,h,m,s be more than a month ?
+                //        (unbounded or unnormalized ?) with ESMF_WARNING ?
+                return (ESMF_FAILURE);
+              }
+            }
+            break;
+          case ESMC_CAL_360DAY:
+            months =
+              baseTimeToConvert / (30 * conversionCalendar->secondsPerDay);
+            baseTimeToConvert %= (30 * conversionCalendar->secondsPerDay);
+            break;
+          case ESMC_CAL_JULIANDAY:
+          case ESMC_CAL_NOCALENDAR:
+            // months not defined!
+            return(ESMF_FAILURE);
+            break;
+          case ESMC_CAL_CUSTOM:
+            // TODO:
+            break;
+          default:
+            // unknown calendar type
+            break;
+        };
+      } // else { // calendar not defined
+        // will just return mm as specified by the user in Set(); other units
+        // cannot be converted to months.  TODO:  return rc = ESMF_WARNING ?
+   // }
+      
+      // return requested months value
+      if (mm != ESMC_NULL_POINTER) {
+        // ensure fit in given int
+        if (months < INT_MIN || months > INT_MAX) return(ESMF_FAILURE);
+        *mm = (ESMF_KIND_I4) months;  // >= 32-bit
+      }
+      if (mm_i8 != ESMC_NULL_POINTER) {
+        *mm_i8 = months;   // >= 64-bit
+      }
+    }
+
+    // convert from remaining reduced units to any user-requested days
+    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
+      // total relative and absolute days
+      ESMF_KIND_I8 days = dToConvert; // relative part 
+      dToConvert = 0;           // TODO: don't need dtConvert, always = 0?
+
+      // don't need to check for years (yyToConvert) to convert to days
+      //   since for all calendar types (except custom TODO), years will
+      //   have already been reduced to either months (mmToConvert) or
+      //   seconds (baseTimeToConvert).
+
+      // check for any months to convert to days
+      if (conversionCalendar != ESMC_NULL_POINTER) {
+        switch (conversionCalendar->calendarType)  
+        {
+          case ESMC_CAL_GREGORIAN:
+            if (mmToConvert != 0) {
+              // no startTime or endTime available, can't do
+              return (ESMF_FAILURE);
+            }
+            break;
+          case ESMC_CAL_NOLEAP:
+            if (mmToConvert != 0) {
+              // no startTime or endTime available, can only do if months
+              // are an integral number of years
+              //   note: can't use abs() or labs() since result is (long long)
+              //         could use ISO llabs() if supported on all platforms
+              if ( (mmToConvert >=  conversionCalendar->monthsPerYear || 
+                    mmToConvert <= -conversionCalendar->monthsPerYear) &&
+                    mmToConvert  %  conversionCalendar->monthsPerYear == 0) {
+                days += (mmToConvert / conversionCalendar->monthsPerYear) *
+                                       conversionCalendar->daysPerYear.d;
+                mmToConvert = 0;
+              } else {
+                // can't do
+                return (ESMF_FAILURE);
+              }
+            }
+            break;
+          case ESMC_CAL_360DAY:
+          case ESMC_CAL_JULIANDAY:
+          case ESMC_CAL_NOCALENDAR:
+            // nothing to do: 360Day => months already reduced to seconds;
+            //   JulianDay and NoCalendar => months don't apply
+            break;
+          case ESMC_CAL_CUSTOM:
+            // TODO:
+            break;
+          default:
+            // unknown calendar type
+            break;
+        };
+      } else { // no calendar available
+        if (mmToConvert != 0) {
+          // can't convert months to days without calendar!
+          return(ESMF_FAILURE);
+        }
+      }
+
+      // get number of seconds in a day
+      int secPerDay = SECONDS_PER_DAY;  // TODO: default to Earth-type calendar?
+      if (conversionCalendar != ESMC_NULL_POINTER) {
+        secPerDay = conversionCalendar->secondsPerDay;
+      }
+
+      days += baseTimeToConvert / secPerDay;  // absolute part
+                           // TODO: assign, not add, if dtToConvert always = 0 ?
+      baseTimeToConvert %= secPerDay;  // remove days from base conversion time
+                                       // to get remaining sub-day units (h,m,s)
+
+      // return requested days value
+      if (d != ESMC_NULL_POINTER) {
+        // ensure fit in given int
+        if (days < INT_MIN || days > INT_MAX) return(ESMF_FAILURE);
+        *d = (ESMF_KIND_I4) days;  // >= 32-bit
+      }
+      if (d_i8 != ESMC_NULL_POINTER) {
+        *d_i8 = days;  // >= 64-bit
+      }
+    }
+
+    // use base class to get sub-day values (h,m,s) on remaining
+    //   unconverted base time
+    if (ESMC_BaseTimeGet(baseTimeToConvert, h, m, s, s_i8, ms, us, ns,
+                         h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD) ==
+                         ESMF_FAILURE) return(ESMF_FAILURE);
+
+    // return any requested properties startTime, endTime, calendar
+    // TODO: return error if this-><values> are unintialized (depends on F95
+    //       initializers)
     if (startTime != ESMC_NULL_POINTER) {
       *startTime = this->startTime;
     }
@@ -254,61 +732,7 @@
       *calendar = this->calendar;
     }
 
-    // relative calendar interval
-    //  TODO:  When calendar, startTime, endTime specified, can convert 
-    //         between relative and absolute units.  Relative and absolute
-    //         parts are additive (e.g. d=1, h=48 equals 3 days).
-
-    // TODO: yy and mm need similar logic as d below
-
-    if (yy != ESMC_NULL_POINTER) {
-      // ensure fit in given int
-      if (this->yy < INT_MIN || this->yy > INT_MAX) return(ESMF_FAILURE);
-      *yy = (ESMF_KIND_I4) this->yy;  // >= 32-bit
-    }
-    if (yy_i8 != ESMC_NULL_POINTER) {
-      *yy_i8 = this->yy;  // >= 64-bit
-    }
-
-    if (mm != ESMC_NULL_POINTER) {
-      // ensure fit in given int
-      if (this->mm < INT_MIN || this->mm > INT_MAX) return(ESMF_FAILURE);
-      *mm = (ESMF_KIND_I4) this->mm;  // >= 32-bit
-    }
-    if (mm_i8 != ESMC_NULL_POINTER) {
-      *mm_i8 = this->mm;   // >= 64-bit
-    }
-
-    // TODO: use Calendar-defined SecondsPerDay; default to 86400 (earth-cal)
-    //       (really can't do if calendar, hence days, is undefined!)
-    // get number of seconds in a day
-    int secPerDay = SECONDS_PER_DAY;  // default to Earth-type calendar
-//  if (calendar != ESMC_NULL_POINTER) {  // TODO: or startTime or endTime
-//    secPerDay = calendar->secondsPerDay;
-//  }
-    baseTimeToConvert += this->d * secPerDay;
-
-    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
-      // total relative and absolute days
-      ESMF_KIND_I8 days = baseTimeToConvert / secPerDay;
-      if (d != ESMC_NULL_POINTER) {
-        // ensure fit in given int
-        if (days < INT_MIN || days > INT_MAX) return(ESMF_FAILURE);
-        *d = (ESMF_KIND_I4) days;  // >= 32-bit
-      }
-      if (d_i8 != ESMC_NULL_POINTER) {
-        *d_i8 = days;  // >= 64-bit
-      }
-      // remove days from base time to get remaining sub-day units (h,m,s)
-      baseTimeToConvert %= secPerDay;
-    }
-
-    // use base class to get sub-day values (h,m,s) on remaining
-    //   unconverted base time
-    if (ESMC_BaseTimeGet(baseTimeToConvert, h, m, s, s_i8, ms, us, ns,
-                         h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD) ==
-                         ESMF_FAILURE) return(ESMF_FAILURE);
-
+    // if requested, return time interval in string format
     if (timeString != ESMC_NULL_POINTER) {
       if (ESMC_TimeIntervalGetString(timeString) == ESMF_FAILURE)
         return(ESMF_FAILURE);
@@ -370,10 +794,9 @@
 
  }  // end ESMC_TimeIntervalGet
 
-#if 0
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalSet - shallow class initializer 1
+// !IROUTINE:  ESMC_TimeIntervalSet - direct property initializer
 //
 // !INTERFACE:
       int ESMC_TimeInterval::ESMC_TimeIntervalSet(
@@ -382,15 +805,20 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,     // in - integer seconds
-      ESMF_KIND_I4 sN,    // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD,    // in - fractional seconds, denominator
-      ESMF_KIND_I8 yy,    // in - calendar interval number of years
-      ESMF_KIND_I8 mm)    // in - calendar interval number of months
-      ESMF_KIND_I8 d)  {  // in - calendar interval number of days
+      ESMF_KIND_I8 s,            // in - integer seconds
+      ESMF_KIND_I4 sN,           // in - fractional seconds, numerator
+      ESMF_KIND_I4 sD,           // in - fractional seconds, denominator
+      ESMF_KIND_I8 yy,           // in - calendar interval number of years
+      ESMF_KIND_I8 mm,           // in - calendar interval number of months
+      ESMF_KIND_I8 d,            // in - calendar interval number of days
+      ESMC_Time *startTime,      // in - interval startTime
+      ESMC_Time *endTime,        // in - interval endTime
+      ESMC_Calendar *calendar) { // in - associated calendar
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt ESMC\_TimeInterval} with given values
+//      Initialzes a {\tt TimeInterval} with given values.  Used to avoid
+//      constructor to cover case when initial entry is from F90, since
+//      destructor is called automatically when leaving scope to return to F90.
 //
 //EOP
 // !REQUIREMENTS:
@@ -402,12 +830,21 @@
       this->mm = mm;
       this->d  = d;
 
+      if (startTime != ESMC_NULL_POINTER) {
+        this->startTime = *startTime;
+      } else this->startTime.ESMC_TimeSet((ESMF_KIND_I8) 0);
+
+      if (endTime != ESMC_NULL_POINTER) {
+        this->endTime = *endTime;
+      } else this->endTime.ESMC_TimeSet((ESMF_KIND_I8) 0);
+
+      this->calendar = calendar;
+
       return(ESMF_SUCCESS);
     }
     else return(ESMF_FAILURE);
 
 }  // end ESMC_TimeIntervalSet
-#endif
 
 //-------------------------------------------------------------------------
 //BOP
@@ -434,7 +871,8 @@
 
     // check individual components (should be all positive or all negative)
     //   note: can't use abs() or labs() since these will be (long long)
-    //         (64-bit) on some platforms
+    //         (64-bit) on some platforms.  Could use ISO llabs() if
+    //         supported on all platforms
     if (s  < 0) absValue.s  *= -1;
     if (sN < 0) absValue.sN *= -1;
     if (yy < 0) absValue.yy *= -1;
@@ -471,7 +909,8 @@
 
     // check individual components (should be all positive or all negative)
     //   note: can't use abs() or labs() since these will be (long long)
-    //         (64-bit) on some platforms
+    //         (64-bit) on some platforms.  Could use ISO llabs() if
+    //         supported on all platforms
     if (s  > 0) negAbsValue.s  *= -1;
     if (sN > 0) negAbsValue.sN *= -1;
     if (yy > 0) negAbsValue.yy *= -1;
@@ -1243,6 +1682,9 @@
    yy = 0;
    mm = 0;
    d  = 0;
+   calendar = ESMC_NULL_POINTER;
+   // startTime, endTime initialized via their own constructor when
+   // time interval instantiated.
 
 } // end ESMC_TimeInterval
 
@@ -1257,9 +1699,15 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 s,     // in - integer seconds
-      ESMF_KIND_I4 sN,    // in - fractional seconds, numerator
-      ESMF_KIND_I4 sD) :  // in - fractional seconds, denominator
+      ESMF_KIND_I8 s,             // in - integer seconds
+      ESMF_KIND_I4 sN,            // in - fractional seconds, numerator
+      ESMF_KIND_I4 sD,            // in - fractional seconds, denominator
+      ESMF_KIND_I8 yy,            // in - calendar interval number of years
+      ESMF_KIND_I8 mm,            // in - calendar interval number of months
+      ESMF_KIND_I8 d,             // in - calendar interval number of days
+      ESMC_Time *startTime,       // in - interval start time
+      ESMC_Time *endTime,         // in - interval end time
+      ESMC_Calendar *calendar) :  // in - calendar
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInterval} via {\tt ESMC\_BaseTime}
@@ -1268,34 +1716,22 @@
 //EOP
 // !REQUIREMENTS:
 
-    ESMC_BaseTime(s, sN, sD) {  // pass to base class constructor
+   ESMC_BaseTime(s, sN, sD) {  // pass to base class constructor
 
-} // end ESMC_TimeInterval
+   this->yy = yy;
+   this->mm = mm;
+   this->d  = d;
 
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeInterval - native C++ constructor
-//
-// !INTERFACE:
-     ESMC_TimeInterval::ESMC_TimeInterval(
-//
-// !RETURN VALUE:
-//    none
-//
-// !ARGUMENTS:
-      ESMF_KIND_I8 yy,    // in - calendar interval number of years
-      ESMF_KIND_I8 mm,    // in - calendar interval number of months
-      ESMF_KIND_I8 d) {   // in - calendar interval number of days
-//
-// !DESCRIPTION:
-//      Initializes a {\tt ESMC\_TimeInterval} via calendar units
-//
-//EOP
-// !REQUIREMENTS:
+   // startTime, endTime initialized via their own constructor when
+   // time interval instantiated; override with user values here
+   if (startTime != ESMC_NULL_POINTER) {
+     this->startTime = *startTime;
+   }
+   if (endTime != ESMC_NULL_POINTER) {
+     this->endTime = *endTime;
+   }
 
-    this->yy = yy;
-    this->mm = mm;
-    this->d  = d;
+   this->calendar = calendar;
 
 } // end ESMC_TimeInterval
 
