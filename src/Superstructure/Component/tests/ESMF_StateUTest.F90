@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.2 2003/03/21 18:59:14 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.3 2003/03/21 21:52:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.2 2003/03/21 18:59:14 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.3 2003/03/21 21:52:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! Some common definitions.  This requires the C preprocessor.
@@ -50,7 +50,7 @@
       integer :: x, y, rc
       character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
       type(ESMF_Field) :: field1
-      type(ESMF_Bundle) :: bundle1, bundle2
+      type(ESMF_Bundle) :: bundle1, bundle2(1)
       type(ESMF_State) :: state1, state2, state3, state4
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -207,6 +207,31 @@ print *, "StateUnitTest EXHAUSTIVE"
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      ! Test printing of State
+      call  ESMF_StatePrint(state1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an export State with Bundle
+      ! This code crashes, it will be commented out until
+      ! bug 707751 is fixed.
+      ! bundlename = "Humidity"
+      ! compname = "Atmosphere2"
+      ! statename = " Export State"
+      ! x = 1
+      ! bundle2(1) = ESMF_BundleCreate(bundlename, rc=rc)
+      ! state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, x, &
+				!bundles=bundle2, statename=statename, rc=rc)
+      ! write(failMsg, *) ""
+      ! write(name, *) "Creating an export State with a Bundle Test"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      !name, failMsg, result, ESMF_SRCLINE)
+      ! call  ESMF_StatePrint(state2, rc=rc)
+
+      !------------------------------------------------------------------------
       ! Test Destruction of State
       call  ESMF_StateDestroy(state1, rc)
       write(failMsg, *) ""
