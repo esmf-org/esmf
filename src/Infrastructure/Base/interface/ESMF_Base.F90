@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.81 2004/02/19 00:14:25 svasquez Exp $
+! $Id: ESMF_Base.F90,v 1.82 2004/02/19 16:39:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@
  
 #include "ESMF.h"
 
-!BOP
+!BOPI
 ! !MODULE: ESMF_BaseMod - Base class for all ESMF classes
 !
 ! !DESCRIPTION:
@@ -42,10 +42,14 @@
 
 !------------------------------------------------------------------------------
 !
-!    ! Global integer parameters, used frequently
-
 !     ! WARNING: 
 !     !  constants MUST match corresponding values in ../include/ESMC_Macros.h
+!
+!EOPI
+!BOP
+
+!    ! PUBLIC TYPES:
+!    ! Global integer parameters
 
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
       integer, parameter :: ESMF_MAXSTR = 128
@@ -53,6 +57,8 @@
                             ESMF_MAXDECOMPDIM = 3, &
                             ESMF_MAXGRIDDIM = 3
      
+!EOP
+
       integer, parameter :: ESMF_MAJOR_VERSION = 1
       integer, parameter :: ESMF_MINOR_VERSION = 0
       integer, parameter :: ESMF_REVISION      = 5
@@ -249,6 +255,7 @@
      end type
 
 !------------------------------------------------------------------------------
+!BOP
 !
 ! !PUBLIC TYPES:
 
@@ -283,6 +290,7 @@
       public ESMF_Domain, ESMF_DomainList
       public ESMF_AxisIndex
 
+!EOP
 !
 ! !DESCRIPTION:
 !     The following routines apply to any type in the system.  
@@ -353,14 +361,13 @@
       public operator(.eq.), operator(.ne.), assignment(=)
 !
 !
-!EOP
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_DomainListAdd
 
@@ -374,7 +381,7 @@
 !     These functions are meant to ease the task of creating multidimensional
 !     domains.
 !
-!EOP
+!EOPI
       end interface 
 
 
@@ -382,7 +389,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.81 2004/02/19 00:14:25 svasquez Exp $'
+               '$Id: ESMF_Base.F90,v 1.82 2004/02/19 16:39:29 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -563,7 +570,7 @@ end function
 !
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_BaseCreate - Create and initialize a Base object
 !
 ! !INTERFACE:
@@ -600,7 +607,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 
       logical :: rcpresent                          ! Return code present   
       integer :: status, allocNAttrs
@@ -627,7 +634,7 @@ end function
       end subroutine ESMF_BaseCreate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_BaseDestroy - Release resources from a Base object
 !
 ! !INTERFACE:
@@ -649,7 +656,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 
       logical :: rcpresent                          ! Return code present   
       integer :: status
@@ -666,102 +673,6 @@ end function
       if (rcpresent) rc = status
 
       end subroutine ESMF_BaseDestroy
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_SetName - set the name of this object
-!
-! !INTERFACE:
-      subroutine ESMF_SetName(base, name, namespace, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Base) :: base                 
-      character (len = *), intent(in), optional :: name   
-      character (len = *), intent(in), optional :: namespace
-      integer, intent(out), optional :: rc     
-
-!
-! !DESCRIPTION:
-!     Associate a name with any object in the system.
-!
-!     \begin{description}
-!     \item [base]
-!           In the Fortran interface, this must in fact be a {\tt Base}
-!           derived type object.  It is expected that all specialized 
-!           derived types will include a {\tt Base} object as the first
-!           entry.
-!     \item [{[name]}]
-!           Object name.  An error will be returned if a duplicate name 
-!           is specified.  If a name is not given a unique name will be
-!           generated and can be queried by the {\tt ESMF\_GetName} routine.
-!     \item [{[namespace]}]
-!           Object namespace (e.g. "Application", "Component", "Grid", etc).
-!           If given, the name will be checked that it is unique within
-!           this namespace.  If not given, the generated name will be 
-!           unique within this namespace.  If namespace is not specified,
-!           a default "global" namespace will be assumed and the same rules
-!           for names will be followed.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-! 
-
-!
-!EOP
-! !REQUIREMENTS:  FLD1.5, FLD1.5.3
-      logical :: rcpresent                          ! Return code present   
-      integer :: status
-
-      ! Initialize return code
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! TODO: remove this once everyone is initializing their Base objects.
-      ! cheat for old code for now.
-      if (base%this .eq. ESMF_NULL_POINTER) then
-          call ESMF_BaseCreate(base, namespace, name, 0, status)
-          if (rcpresent) rc = status
-          return
-      endif
-      ! end cheat
-
-      call c_ESMC_SetName(base, namespace, name, status)
-
-      if (rcpresent) rc = status
-
-      end subroutine ESMF_SetName
-
-!-------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_GetName - get the name of this object
-!
-! !INTERFACE:
-      subroutine ESMF_GetName(base, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Base), intent(in) :: base
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Return the name of any type in the system.
-
-!
-!EOP
-! !REQUIREMENTS:  FLD1.5, FLD1.5.3
-      integer :: status
-
-      call c_ESMC_GetF90Name(base, name, status)
-      if (present(rc)) rc = status
-
-      end subroutine ESMF_GetName
-
 
 !-------------------------------------------------------------------------
 !BOP
@@ -1062,6 +973,103 @@ end function
       end subroutine ESMF_AttributeCopyAll
 
 !-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_SetName - set the name of this object
+!
+! !INTERFACE:
+      subroutine ESMF_SetName(base, name, namespace, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base) :: base                 
+      character (len = *), intent(in), optional :: name   
+      character (len = *), intent(in), optional :: namespace
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Associate a name with any object in the system.
+!
+!     \begin{description}
+!     \item [base]
+!           In the Fortran interface, this must in fact be a {\tt Base}
+!           derived type object.  It is expected that all specialized 
+!           derived types will include a {\tt Base} object as the first
+!           entry.
+!     \item [{[name]}]
+!           Object name.  An error will be returned if a duplicate name 
+!           is specified.  If a name is not given a unique name will be
+!           generated and can be queried by the {\tt ESMF\_GetName} routine.
+!     \item [{[namespace]}]
+!           Object namespace (e.g. "Application", "Component", "Grid", etc).
+!           If given, the name will be checked that it is unique within
+!           this namespace.  If not given, the generated name will be 
+!           unique within this namespace.  If namespace is not specified,
+!           a default "global" namespace will be assumed and the same rules
+!           for names will be followed.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+! 
+
+!
+!EOP
+! !REQUIREMENTS:  FLD1.5, FLD1.5.3
+      logical :: rcpresent                          ! Return code present   
+      integer :: status
+
+      ! Initialize return code
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! TODO: remove this once everyone is initializing their Base objects.
+      ! cheat for old code for now.
+      if (base%this .eq. ESMF_NULL_POINTER) then
+          call ESMF_BaseCreate(base, namespace, name, 0, status)
+          if (rcpresent) rc = status
+          return
+      endif
+      ! end cheat
+
+      call c_ESMC_SetName(base, namespace, name, status)
+
+      if (rcpresent) rc = status
+
+      end subroutine ESMF_SetName
+
+!-------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_GetName - get the name of this object
+!
+! !INTERFACE:
+      subroutine ESMF_GetName(base, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in) :: base
+      character (len = *), intent(out) :: name
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Return the name of any type in the system.
+
+!
+!EOP
+! !REQUIREMENTS:  FLD1.5, FLD1.5.3
+      integer :: status
+
+      call c_ESMC_GetF90Name(base, name, status)
+      if (present(rc)) rc = status
+
+      end subroutine ESMF_GetName
+
+
+!-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !  Print routine
 !-------------------------------------------------------------------------
@@ -1107,7 +1115,7 @@ end function
 !=========================================================================
 ! Domain List routines.
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_DomainListCreate - create domain list
 
@@ -1126,7 +1134,7 @@ end function
 ! Create a domain list.  Initializes the array of domains.  Preallocates
 ! some storage, hopefully enough.
 !
-!EOP
+!EOPI
       integer :: status
       type(ESMF_Domain), dimension(:), pointer :: domains
 
@@ -1142,7 +1150,7 @@ end function
       end function ESMF_DomainListCreate
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_DomainListDestroy - destroy domain list
 
@@ -1156,7 +1164,7 @@ end function
 ! !DESCRIPTION:
 ! Deallocate memory used by creation routine.
 !
-!EOP
+!EOPI
       integer :: status
 
       deallocate(domainlist%domains, stat=status)
@@ -1164,7 +1172,7 @@ end function
       end subroutine ESMF_DomainListDestroy
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_DomainListPrint - print domain list
 
@@ -1179,7 +1187,7 @@ end function
 ! Dump the contents of a domain list to screen, i.e. for 
 ! debugging during development.
 !
-!EOP
+!EOPI
       integer :: status, i, j
       integer :: min, max, stride
 
@@ -1200,7 +1208,7 @@ end function
       end subroutine ESMF_DomainListPrint
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_DomainListAdd2d - Add a 2d domainlist
 
@@ -1223,7 +1231,7 @@ end function
 !    Convenience function for adding a 2d domain.  Avoids the 
 !    unnecessary hassle of creating a domain, etc...
 !
-!EOP
+!EOPI
       type(ESMF_Domain) :: newdomain          ! temp variable to use
       
       newdomain%rank = 2
@@ -1235,7 +1243,7 @@ end function
       end subroutine ESMF_DomainListAdd2d
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_DomainListAdd3d - Add a 3d domainlist
 
@@ -1262,7 +1270,7 @@ end function
 !    Convenience function for adding a 3d domain.  Avoids the 
 !    unnecessary hassle of creating a domain, etc...
 !
-!EOP
+!EOPI
       type(ESMF_Domain) :: newdomain          ! temp variable to use
       
       newdomain%rank = 3
@@ -1275,7 +1283,7 @@ end function
       end subroutine ESMF_DomainListAdd3d
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_DomainListAddObj - Add a domain object 
 
@@ -1292,7 +1300,7 @@ end function
 !   the memory management issues, i.e. it reallocs the list if it has grown
 !   too large. 
 !
-!EOP
+!EOPI
       type(ESMF_Domain), dimension(:), allocatable, target :: temp_domains
       integer :: new_size         ! New number of domains to alloc
       integer :: status, i
@@ -1331,7 +1339,7 @@ end function
 !=========================================================================
 ! Misc utility routines, perhaps belongs in a utility file?
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AxisIndexSet - initialize an AxisIndex object
 
@@ -1348,8 +1356,7 @@ end function
 !   Set the contents of an AxisIndex type.
 
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
       ai%min = min
       ai%max = max
@@ -1360,7 +1367,7 @@ end function
       end subroutine ESMF_AxisIndexSet
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_AxisIndexGet - get contents of an AxisIndex object
 !
@@ -1376,8 +1383,7 @@ end function
 !   Get the contents of an AxisIndex type.
 
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
       if (present(max)) min = ai%min
       if (present(max)) max = ai%max
@@ -1389,7 +1395,7 @@ end function
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_SetPointer - set an opaque value
 
@@ -1407,15 +1413,15 @@ end function
 !   Set the contents of an opaque pointer type.
 
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
+
       ptype%ptr = contents
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_SetPointer
 
 !-------------------------------------------------------------------------
-!BOP
+!BOPI
 !
 ! !IROUTINE:  ESMF_SetNullPointer - set an opaque value
 
@@ -1432,8 +1438,8 @@ end function
 !   Set the contents of an opaque pointer type.
 
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
+
       integer*8, parameter :: nullp = 0
 
       ptype%ptr = nullp
@@ -1441,7 +1447,7 @@ end function
 
       end subroutine ESMF_SetNullPointer
 !------------------------------------------------------------------------- 
-!BOP 
+!BOPI
 !  !IROUTINE:  ESMF_GetPointer - get an opaque value 
 !  
 ! !INTERFACE: 
@@ -1459,8 +1465,8 @@ end function
 !   Get the contents of an opaque pointer type.
 
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
+
       ESMF_GetPointer = ptype%ptr
       if (present(rc)) rc = ESMF_SUCCESS
 
