@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.10 2003/02/21 18:16:07 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.11 2003/02/21 18:49:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.10 2003/02/21 18:16:07 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.11 2003/02/21 18:49:32 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1190,7 +1190,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayGet(array, rank, type, kind, &
+      subroutine ESMF_ArrayGet(array, rank, type, kind, lengths, &
                                lbounds, ubounds, strides, base, rc)
 !
 ! !ARGUMENTS:
@@ -1198,6 +1198,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
+      integer, dimension(:), intent(out), optional :: lengths
       integer, dimension(:), intent(out), optional :: lbounds
       integer, dimension(:), intent(out), optional :: ubounds
       integer, dimension(:), intent(out), optional :: strides
@@ -1227,17 +1228,23 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 
 
       if (present(rank)) then
-         call c_ESMC_ArrayGetRank(array, rank)
+         call c_ESMC_ArrayGetRank(array, rank, status)
+         ! TODO: test status
       endif
 
       if (present(type)) then
-         call c_ESMC_ArrayGetType(array, type)
+         call c_ESMC_ArrayGetType(array, type, status)
       endif
 
       if (present(kind)) then
-         call c_ESMC_ArrayGetKind(array, kind)
+         call c_ESMC_ArrayGetKind(array, kind, status)
       endif
 
+      if (present(lengths)) then
+         call c_ESMC_ArrayGetLengths(array, lengths, status)
+      endif
+
+   
       ! TODO: add these methods
       !integer, dimension(:), intent(out), optional :: lbounds
       !integer, dimension(:), intent(out), optional :: ubounds
