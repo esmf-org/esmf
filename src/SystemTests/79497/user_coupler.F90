@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.4 2003/08/01 22:03:53 nscollins Exp $
+! $Id: user_coupler.F90,v 1.5 2003/08/21 19:58:43 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -22,6 +22,9 @@
     
     public usercpl_register
         
+    ! global data
+    type(ESMF_RouteHandle), save :: routehandle
+
     contains
 
 !-------------------------------------------------------------------------
@@ -63,7 +66,9 @@
       ! Local variables
       integer :: itemcount
       type(ESMF_State) :: state1, state2
-      type(ESMF_Field) :: humidity
+      type(ESMF_Field) :: humidity1, humidity2
+      type(ESMF_DELayout) :: cpllayout
+
 
       print *, "User Coupler Init starting"
 
@@ -76,16 +81,26 @@
       call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
       call ESMF_StatePrint(state2, rc=rc)
 
-      ! These are fields on different Grids - call RegridCreate to set
-      ! up the Regrid structure
-      !! nsc - we currently do not have an explicit regrid object
-      !!  comment this out until we work out the interfaces.
-      !!  (the current code does internal caching of precomputed regrids)
-      !!regrid = ESMF_RegridCreateFromField(humidity1, humidity2, &
-      !!                                    method=ESMF_RegridMethod_Bilinear, &
-      !!                                    name="humidity1_to_2", rc=rc)
+      ! Get input data
+      call ESMF_StateGetData(state1, "humidity", humidity1, rc=rc)
+      call ESMF_FieldPrint(humidity1, rc=rc)
 
-! TODO:  send cpllayout to Regrid?  not in argument list
+      ! Get location of output data
+      call ESMF_StateGetData(state2, "humidity", humidity2, rc=rc)
+      call ESMF_FieldPrint(humidity1, rc=rc)
+
+      ! Get layout from coupler component
+      call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+
+
+      ! These are fields on different Grids - call RegridStore to set
+      ! up the Regrid structure
+
+      call ESMF_FieldRegridStore(humidity1, humidity2, cpllayout, &
+                                 routehandle, &
+                                 regridtype=ESMF_RegridMethod_Bilinear, &
+                                 rc=rc)
+
 
       print *, "User Coupler Init returning"
    
@@ -128,13 +143,9 @@
       call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
-      !  the data.  nsc - i think even if we make a regrid object, that
-      !  this will still be a field method and take a regrid argument?
-      !!call ESMF_RegridRunField(humidity1, humidity2, regrid, status)
-      call ESMF_FieldRegrid(humidity1, humidity2, cpllayout, &
-      !!                    method=ESMF_RegridMethod_Bilinear, &
-      !!                    name="humidity1_to_2", &
-                            rc=status)
+      !  and move the data.  The communication and weights have been
+      !  precomputed during the init phase.
+      call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=status)
 
       ! Set output data
       call ESMF_StateAddData(mydest, humidity2, rc=status)
@@ -167,9 +178,8 @@
       call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
       call ESMF_StatePrint(state2, rc=rc)
    
-      !! right now regrids are cached by the system, no need to
-      !! delete.
-      !call ESMF_RegridDestroy(regrid, rc)
+      ! Release resources stored for the Regridding.
+      call ESMF_FieldRegridRelease(routehandle, rc)
 
       print *, "User Coupler Final returning"
    

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.5 2003/08/05 21:20:18 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.6 2003/08/21 19:58:43 nscollins Exp $
 !
 ! System test code #79497
 
@@ -250,7 +250,7 @@
 
         ! Normal ESMF Test output
         write(failMsg, *) "System Test failure"
-        write(testname, *) "System Test 79497: Components on Exclusive DE sets"
+        write(testname, *) "System Test 79497: Field Regrid"
   
         call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                           testname, failMsg, testresult, ESMF_SRCLINE)
