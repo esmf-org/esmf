@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.37 2004/06/21 23:30:38 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.37.2.1 2004/07/22 20:52:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -146,7 +146,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.37 2004/06/21 23:30:38 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.37.2.1 2004/07/22 20:52:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -511,7 +511,7 @@ contains
 !        Upon return this holds {\tt ESMF\_TRUE} if the specified 
 !        {\tt ESMF\_DELayout} object is logically rectangular, {\tt ESMF\_FALSE}
 !        otherwise.
-!     \item[{[localDe]}]
+!     \item[{[deCountPerDim]}]
 !        If the specified {\tt ESMF\_DELayout} object is logically rectangular
 !        then upon return this holds the number of DEs along each dimension.
 !     \item[{[rc]}] 
