@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.15 2004/06/07 19:14:26 theurich Exp $
+// $Id: ESMC_DELayout.C,v 1.16 2004/06/08 02:53:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -7,9 +7,13 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
-
+//
+//==============================================================================
+#define ESMC_FILENAME "ESMC_DELayout.C"
+//==============================================================================
+//
 // ESMC DELayout method implementation (body) file
-
+//
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -20,7 +24,6 @@
 //-----------------------------------------------------------------------------
 
 // insert any higher level, 3rd party or system includes here
-#include <iostream.h>  // cout
 #include <stdio.h>
 #include <string.h>
 #include <ESMC_Start.h>
@@ -30,10 +33,13 @@
 // associated class definition file
 #include <ESMC_DELayout.h>
 
+// LogErr headers
+#include "ESMC_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.15 2004/06/07 19:14:26 theurich Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.16 2004/06/08 02:53:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -45,6 +51,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutCreate()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutCreate
 //
@@ -76,29 +84,26 @@ ESMC_DELayout *ESMC_DELayoutCreate(
 
   // decide whether this is a 1D or an ND layout
   if (ndim==0){
+    // special case of a 1D layout where deCount will equal petCount
     try {
       layout = new ESMC_DELayout;
-      *rc = layout->ESMC_DELayoutConstruct1D(vm, 0, DEtoPET, len,
-        cyclic);
+      *rc = layout->ESMC_DELayoutConstruct1D(vm, 0, DEtoPET, len, cyclic);
       return(layout);
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-      *rc = ESMF_FAILURE;
+      // LogErr catches the allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DELayout.", rc);  
       return(ESMC_NULL_POINTER);
     }
   }else if(ndim==1){
     try {
       layout = new ESMC_DELayout;
-      *rc = layout->ESMC_DELayoutConstruct1D(vm, *nDEs, DEtoPET, len,
-        cyclic);
+      *rc = layout->ESMC_DELayoutConstruct1D(vm, *nDEs, DEtoPET, len, cyclic);
       return(layout);
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_DELayoutCreate() memory allocation failed\n";
-      *rc = ESMF_FAILURE;
+      // LogErr catches the allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DELayout.", rc);  
       return(ESMC_NULL_POINTER);
     }
   }else{
@@ -109,9 +114,8 @@ ESMC_DELayout *ESMC_DELayoutCreate(
       return(layout);
     }
     catch (...) {
-      // TODO:  call ESMF log/err handler
-      cerr << "ESMC_DELayoutCreate1D() memory allocation failed\n";
-      *rc = ESMF_FAILURE;
+      // LogErr catches the allocation error
+      ESMC_LogDefault.ESMC_LogMsgAllocError("for new ESMC_DELayout.", rc);  
       return(ESMC_NULL_POINTER);
     }
   }
@@ -120,6 +124,8 @@ ESMC_DELayout *ESMC_DELayoutCreate(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDestroy()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutDestroy
 //
@@ -131,18 +137,20 @@ int ESMC_DELayoutDestroy(
 //
 // !ARGUMENTS:
 //
-  ESMC_DELayout *layout){     // in - ESMC_DELayout to destroy
+  ESMC_DELayout **layout){      // in - ESMC_DELayout to destroy
 //
 // !DESCRIPTION:
 //
 //EOP
 //-----------------------------------------------------------------------------
-  if (layout != ESMC_NULL_POINTER) {
-    layout->ESMC_DELayoutDestruct();
-    delete layout;
-    layout = ESMC_NULL_POINTER;
+  if (*layout != ESMC_NULL_POINTER) {
+    (*layout)->ESMC_DELayoutDestruct();
+    delete (*layout);
+    *layout = ESMC_NULL_POINTER;
     return(ESMF_SUCCESS);
   }else{
+    ESMC_LogDefault.ESMC_LogWrite("Cannot delete bad DELayout object.", 
+      ESMC_LOG_ERROR);
     return(ESMF_FAILURE);
   }
 }
@@ -150,6 +158,8 @@ int ESMC_DELayoutDestroy(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutConstruct1D()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutConstruct1D
 //
@@ -259,6 +269,8 @@ int ESMC_DELayout::ESMC_DELayoutConstruct1D(ESMC_VM &vm, int nDEs,
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutConstructND()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutConstructND
 //
@@ -339,6 +351,8 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDestruct()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutDestruct
 //
@@ -369,6 +383,8 @@ int ESMC_DELayout::ESMC_DELayoutDestruct(void){
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGet()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGet
 //
@@ -424,6 +440,8 @@ int ESMC_DELayout::ESMC_DELayoutGet(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetDE()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGetDE
 //
@@ -477,6 +495,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDE(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGetDEMatch()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGetDEMatch
 //
@@ -523,6 +543,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDEMatch(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutPrint()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutPrint
 //
@@ -567,6 +589,8 @@ int ESMC_DELayout::ESMC_DELayoutPrint(){
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutValidate()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutValidate
 //
@@ -617,6 +641,8 @@ int ESMC_DELayout::ESMC_DELayoutValidate(){
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutCopy()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutCopy
 //
@@ -684,6 +710,8 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutCopy()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutCopy
 //
@@ -715,6 +743,8 @@ int ESMC_DELayout::ESMC_DELayoutCopy(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutExchange()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutExchange
 //
@@ -753,6 +783,8 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutExchange()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutExchange
 //
@@ -789,6 +821,8 @@ int ESMC_DELayout::ESMC_DELayoutExchange(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutBcast()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutBcast
 //
@@ -818,6 +852,8 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutBcast()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutBcast
 //
@@ -849,6 +885,8 @@ int ESMC_DELayout::ESMC_DELayoutBcast(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutScatter()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutScatter
 //
@@ -911,6 +949,8 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutScatter()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutScatter
 //
@@ -940,6 +980,8 @@ int ESMC_DELayout::ESMC_DELayoutScatter(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGather()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGather
 //
@@ -1002,6 +1044,8 @@ int ESMC_DELayout::ESMC_DELayoutGather(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGather()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGather
 //
@@ -1031,6 +1075,8 @@ int ESMC_DELayout::ESMC_DELayoutGather(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGatherV()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGatherV
 //
@@ -1094,6 +1140,8 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutGatherV()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGatherV
 //
@@ -1133,6 +1181,8 @@ int ESMC_DELayout::ESMC_DELayoutGatherV(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutAllGlobalReduce()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutAllGlobalReduce
 //
@@ -1237,10 +1287,12 @@ int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
     }
     break;
   case ESMF_MIN:
-    printf("Reduce operation ESMF_MIN is not yet implemented\n");
+    ESMC_LogDefault.ESMC_LogWrite("ESMF_MIN is not yet implemented.", 
+      ESMC_LOG_ERROR);
     break;
   case ESMF_MAX:
-    printf("Reduce operation ESMF_MIN is not yet implemented\n");
+    ESMC_LogDefault.ESMC_LogWrite("ESMF_MAX is not yet implemented.", 
+      ESMC_LOG_ERROR);
     break;
   }
   // now each PET holds the reduced result for all its DEs
@@ -1264,6 +1316,8 @@ int ESMC_DELayout::ESMC_DELayoutAllGlobalReduce(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutFindDEtoPET()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutFindDEtoPET
 //
@@ -1318,6 +1372,8 @@ int ESMC_DELayout::ESMC_DELayoutFindDEtoPET(int npets){
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutFillLocal()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutFillLocal
 //
@@ -1350,6 +1406,8 @@ int ESMC_DELayout::ESMC_DELayoutFillLocal(int mypet){
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDataCreate()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutDataCreate
 //
@@ -1375,9 +1433,8 @@ void **ESMC_DELayoutDataCreate(
     return(array);
   }
   catch (...) {
-    // TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutDataCreate() memory allocation failed\n";
-    *rc = ESMF_FAILURE;
+    // LogErr catches the allocation error
+    ESMC_LogDefault.ESMC_LogMsgAllocError("for new DELayoutData object.", rc);  
     return(ESMC_NULL_POINTER);
   }
 }
@@ -1385,6 +1442,8 @@ void **ESMC_DELayoutDataCreate(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDataAdd()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutDataAdd
 //
@@ -1411,6 +1470,8 @@ int ESMC_DELayoutDataAdd(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_DELayoutDataDestroy()"
 //BOP
 // !IROUTINE:  ESMC_DELayoutDataDestroy
 //
