@@ -1,34 +1,24 @@
-% $Id: DELayout_desc.tex,v 1.2 2004/06/09 12:32:20 theurich Exp $
+% $Id: DELayout_desc.tex,v 1.3 2004/06/09 13:31:33 theurich Exp $
 
-The ESMF DELayout layer is an integral part of ESMF's ``Communication and Memory Kernel'' (CMK) which consists of two classes, ESMF\_VM and ESMF\_DELayout.
-\begin{center}  
-\begin{tabular}{|p{6in}|}
-\hline
-\vspace{.01in}
-{\bf Key Features} \\[.01in]
-Problem decomposition in terms of virtual decomposition elements.\\
-Mapping of virtual problem decomposition onto an ESMF virtual machine.\\[.03in] \hline
-\end{tabular}
-\end{center}
+The DELayout class provides an additional layer of abstraction on top of the virtual machine (ESMF\_VM) layer. There are three key aspects the DELayout class deals with.
 
-Problem decomposition is expressed in terms of {\bf decomposition elements} (DEs) and {\bf connection weights} (CWs) between DEs. The application writer provides ESMF with valuable information about the decompostion of the problem when creating a DELayout object. From an ESMF perspective the DEs are the smallest units into which the application writer divides the problem. The DEs should be thought of as virtual or logical units, not necessarily having a 1-to-1 correspondence to a physical processing element (PE) of an ESMF\_VM object or the underlying physical machine. Consequently the number of DEs in an ESMF\_DELayout object is not limited by the number of available PEs, which generally is a runtime parameter, but can be chosen to best match the physical problem.
+\begin{enumerate}
 
-The ESMF\_DELayout not only keeps track of the number of DEs into which a problem is decomposed, but furthermore allows to specify a problem topology by means of CWs, i.e. connection weights, between DEs. A CW connects any two DEs and ascribes an integer between 0 and 100 to this connection, 0 indicating that these DEs will never communicate with each other whereas 100 indicating that communication between these DEs is most active. Clearly the communication weight is a relative measure meaningful only for purpose of comparing communications within a given ESMF\_DELayout. The significance of the CWs is to provide ESMF with the information necessary to automatically map the virtual problem decomposition onto an ESMF virtual machine.
+\item Problem decomposition via logical {\it decomposition elements} (DEs).
 
-Each ESMF component is executed by an ESMF\_VM object, also called a {\em virtual machine}. The virtual machine provides access to {\bf Persistent Execution Threads} (PETs) and {\bf virtual memory spaces}. Details on how the ESMF virtual machine object manages these resources are provided in the ESMF\_VM reference document. In addition to the problem decomposition description an ESMF\_DELayout object also holds DE-to-PET mapping information and thus describes which thread of execution is responsible for a certain portion of the problem and consequently in which virtual memory space the data associated with a certain DE is located.
+\item Support of load balancing in terms of computational and connection weights on and between the DEs. 
 
-The DE-to-PET mapping can either be prescribed by the application writer or may be left to ESMF. If left to ESMF the framwork will try to find the best possible match between an ESMF\_DELayout and an ESMF\_VM object, i.e between the {\em problem topology} and the {\em resource topology}.
+\item Mapping of the logical problem decomposition onto an ESMF virtual machine.
 
-Notice that a single ESMF component may contain multiple ESMF\_DELayouts, all of which will map onto the same ESMF\_VM instance. 
+\end{enumerate}
 
+It is critical to understand that {\it no} user data is associated with DELayout objects! DELayouts are {\it control} objects which store important decomposition information and provide crutial functionality to ESMF applications to deal with various aspects of logical problem decomposition. Data objects, such as Arrays and Fields, which hold user data, rely on the DELayout class to provide decomposition functionality.
 
-In a typical ESMF application the application writer will create one ESMF\_DELayout for each ESMF\_Grid object, provide the ESMF\_DELayout during ESMF\_Grid creation and destroy the ESMF\_DELayout object immediately there after. The ESMF\_Grid object will hold a copy of the provided ESMF\_DELayout and a reference to this copy can be obtained using ESMF\_Grid methods anytime it is required.
+The application writer uses the DELayout to decompose the computational problem in terms of logical {\it decomposition elements} (DEs). From an ESMF perspective the DEs are the smallest units of decomposition. DEs are logical units, not necessarily having a 1-to-1 correspondence to the PETs of a VM or their physical processing elements (PEs) in the underlying physical machine. Consequently there are no restrictions on the number of DEs possed by the VM or the available physical machine resources. Hence, the application writer may chose the number of DEs to best match the computational problem and the employed algorithm.
 
-The ESMF\_DELayout creation methods require a reference to the ESMF\_VM object of the current component. This reference is stored in the ESMF\_DELayout object (and its copies) and will be used in methods that require access to the virtual machine.
+A DELayout object not only keeps track of the number of DEs into which a problem is decomposed, but furthermore allows to specify a problem topology by means of computational weights on each DE and connection weights between DEs. Both types of weights are relative measures, meaningful only for comparison {\it within} the same DELayout object. The purpose of these weights is to provide load balancing information and to allow for a best possible DE-to-PET mapping of a DELayout onto the component's VM.
 
+It is possible for the application writer to overwrite the framwork's DE-to-PET mapping. This allows for user level load balancing schemes and offers an entry point for user codes that already deal with the issue of mapping the {\em computational problem topology} onto the {\em resource topology}.
 
-
-%\begin{center}
-%\includegraphics{TimeMgr_desc.eps}
-%\end{center}
+Notice that a single ESMF component may contain multiple ESMF\_DELayouts, all of which may describe the decomposition of different computational problems or different compositions of the same computational problem. However, all DELayouts within a component map onto the same ESMF\_VM instance of the component.
 

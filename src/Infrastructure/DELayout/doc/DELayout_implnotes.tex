@@ -1,28 +1,18 @@
-% $Id: DELayout_implnotes.tex,v 1.1 2004/06/09 12:32:20 theurich Exp $
+% $Id: DELayout_implnotes.tex,v 1.2 2004/06/09 13:31:33 theurich Exp $
 
 %\subsection{Design and Implementation Notes}
 
-The DELayout class provides an additional layer of abstraction on top of the virtual machine (ESMF\_VM) layer. There are three key aspects the DELayout class deals with.
-
-\begin{enumerate}
-
-\item Problem decomposition via logical {\it decomposition elements} (DEs).
-
-\item Support of load balancing in terms of computational and connection weights on and between the DEs. 
-
-\item Mapping of the logical problem decomposition onto an ESMF virtual machine.
-
-\end{enumerate}
+The DELayout class stores information about the DEs and their connectivity, thus holding an abstraction of the computational problem. Furthermore a DELayout object holds DE-to-PET mapping info, which maps {\it every} DE to {\it exactly one} PET of the underlying VM. The DELayout is associated with the VM of the context in which the DELayout was created.
 
 %\begin{center}
 %\scalebox{0.6}{\includegraphics{VM_design.eps}}
 %\end{center}
 
 
-{\bf Definition of terms used in the diagram}
+%{\bf Definition of terms used in the diagram}
 
-\begin{itemize}
+%\begin{itemize}
 
-\item DE: Decomposition element.
+%\item DE: Decomposition element.
 
-\end{itemize}
+%\end{itemize}
