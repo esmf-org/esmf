@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.5 2004/10/25 22:20:41 nscollins Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.6 2004/11/03 16:32:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
     layout2 = ESMF_DELayoutCreate(vm, (/ numdes, 1 /), rc=rc)
 
     mincoords = (/  0.0,  0.0 /)
-    mincoords = (/ 20.0, 30.0 /)
+    maxcoords = (/ 20.0, 30.0 /)
     srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
