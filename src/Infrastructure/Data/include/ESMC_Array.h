@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.26 2003/04/17 21:30:22 jwolfe Exp $
+// $Id: ESMC_Array.h,v 1.27 2003/04/17 21:40:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -244,8 +244,9 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 
 // these are functions, but not class methods.
 ESMC_Array *ESMC_ArrayCreate(int rank, enum ESMC_DataType dt,
-                             enum ESMC_DataKind dk, void *base,
-                             int *offsets, int *lengths, int *strides, int *rc);
+                             enum ESMC_DataKind dk, void *base = NULL,
+                             int *offsets = NULL, int *lengths = NULL, 
+                             int *strides = NULL, int *rc = NULL);
 int ESMC_ArrayDestroy(ESMC_Array *array);
 ESMC_Array *ESMC_ArrayCreate_F(int rank, enum ESMC_DataType dt,
                                enum ESMC_DataKind dk, void *base,
