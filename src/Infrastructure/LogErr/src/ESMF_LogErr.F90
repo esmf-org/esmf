@@ -22,6 +22,7 @@
 #include "ESMF.h"
 #include "ESMF_Macros.inc"
 #include "ESMF_LogConstants.inc"
+#include "ESMF_ErrReturnCodes.inc"
 
 !BOPI
 !============================================================================
@@ -238,7 +239,7 @@ end subroutine ESMF_LogOpen
 	character(len=7)                :: lt
 	character(len=32)               :: f
 	character(len=32)               ::tmethod,tfile
-	integer			      	::status,tline
+	integer			      	        ::status,tline
 	integer                         ::ok
 	integer	                        ::i
 	integer                         ::h,m,s,ms,y,mn,dy
@@ -423,17 +424,17 @@ end function ESMF_LogMsgFoundError
 ! !IROUTINE: ESMF_LogFoundAllocError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
-	function ESMF_LogFoundAllocError(status,line,file,method)
+	function ESMF_LogFoundAllocError(rcToCheck,line,file,method,rcToReturn)
 !
 ! !RETURN VALUE:
 	logical                                 ::ESMF_LogFoundAllocError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                     :: status
+	integer, intent(in)                     :: rcToCheck
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
-	
+	integer, intent(out),optional            :: rcToReturn
 
 ! !DESCRIPTION:
 !      This function returns a logical true for return codes that indicate an error
@@ -441,7 +442,7 @@ end function ESMF_LogMsgFoundError
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [status]
+!      \item [rcToCheck]
 !            Return code to check.
 !      \item [line]
 !            cpp provided line number.
@@ -449,21 +450,29 @@ end function ESMF_LogMsgFoundError
 !            cpp provided file string.
 !      \item [method]
 !            cpp provided method string.
+!      \item [rcToReturn]
+!            Return code to Return.
 !      
 !      \end{description}
 ! 
 !EOP
     logical :: logrc
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+	integer::msglen=0
 	
     ESMF_LogFoundAllocError=.FALSE.
-    if (status .NE. 0) then
-	logrc = ESMF_LogWrite("Alloc Error ",ESMF_LOG_ERROR,line,file,method)
-	if (.not. logrc) then
+    if (present(rcToReturn)) rcToReturn=rcToCheck
+    if (rcToCheck .NE. 0) then
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
+        allocmsg=tempmsg(1:msglen)
+	    logrc = ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method)
+	    if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
         endif
-	ESMF_LogFoundAllocError=.TRUE.
+	    ESMF_LogFoundAllocError=.TRUE.
     endif	
        
 end function ESMF_LogFoundAllocError
@@ -473,18 +482,18 @@ end function ESMF_LogFoundAllocError
 ! !IROUTINE: ESMF_LogMsgFoundAllocError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
-	function ESMF_LogMsgFoundAllocError(status,msg,line,file,method)
+	function ESMF_LogMsgFoundAllocError(rcToCheck,msg,line,file,method,rcToReturn)
 !
 ! !RETURN VALUE:
 	logical                                 ::ESMF_LogMsgFoundAllocError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                     :: status
+	integer, intent(in)                     :: rcToCheck
 	character(len=*), intent(in)            :: msg
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
-	
+    integer, intent(out),optional            :: rcToReturn	
 
 ! !DESCRIPTION:
 !      This function returns a logical true for return codes that indicate an error
@@ -492,7 +501,7 @@ end function ESMF_LogFoundAllocError
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [status]
+!      \item [rcToCheck]
 !            Return code to check.
 !      \item [msg]
 !            User-provided context string.
@@ -502,21 +511,29 @@ end function ESMF_LogFoundAllocError
 !            cpp provided file string.
 !      \item [method]
 !            cpp provided method string.
+!      \item [rcToReturn]
+!            Return code to Return.
 !      
 !      \end{description}
 ! 
 !EOP
     logical :: logrc
-	
+    character(len=ESMF_MAXSTR)::tempmsg
+    character(len=ESMF_MAXSTR)::allocmsg
+	integer::msglen=0
+    
     ESMF_LogMsgFoundAllocError=.FALSE.
-    if (status .NE. 0) then
-	logrc = ESMF_LogWrite("Alloc Error "//msg,ESMF_LOG_ERROR,line,file,method)
-	if (.not. logrc) then
+    if (present(rcToReturn)) rcToReturn=rcToCheck
+    if (rcToCheck .NE. 0) then
+        call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
+        allocmsg=tempmsg(1:msglen)
+	    logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method)
+	    if (.not. logrc) then
             print *, "Error writing previous error to log file"
             ! what now?  we're already in the error code...
             ! just fall through and return i guess.
         endif
-	ESMF_LogMsgFoundAllocError=.TRUE.
+	    ESMF_LogMsgFoundAllocError=.TRUE.
     endif	
        
 end function ESMF_LogMsgFoundAllocError
