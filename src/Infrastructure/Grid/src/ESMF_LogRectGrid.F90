@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.14 2004/02/10 21:59:38 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.15 2004/02/10 23:47:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.14 2004/02/10 21:59:38 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.15 2004/02/10 23:47:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2307,7 +2307,7 @@
         enddo
       endif
       j1 = localStart(1) + 1
-      j2 = localStart(1) + countsPerDEDim1(myDE(1)) + 1
+      j2 = localStart(1) + countsPerDEDim1(myDE(1))
       localMin(1) = minval(coord1(j1:j2))
       localMax(1) = maxval(coord1(j1:j2))
 
@@ -2317,7 +2317,7 @@
         enddo
       endif
       j1 = localStart(2) + 1
-      j2 = localStart(2) + countsPerDEDim2(myDE(2)) + 1
+      j2 = localStart(2) + countsPerDEDim2(myDE(2))
       localMin(2) = minval(coord2(j1:j2))
       localMax(2) = maxval(coord2(j1:j2))
 
@@ -2327,48 +2327,49 @@
       counts(1) = compCount(1) + 2*gridBoundWidth
       counts(2) = compCount(2) + 2*gridBoundWidth
 
-      ! allocate and load coords -- plus one for extra vertex
-      allocate(coordUse1(counts(1)+1), stat=status)
-      if (status .ne. 0) then
-        print *, "allocation error, counts(1) =", counts(1)+1
-        return
-      endif
-      allocate(coordUse2(counts(2)+1), stat=status)
-      if (status .ne. 0) then
-        print *, "allocation error, counts(2) =", counts(2)+1
-        return
-      endif
-
-      do i = 1,compCount(1)
-        coordUse1(i+1+gridBoundWidth) = coord1(i)
-      enddo
-      do i = gridBoundWidth,1,-1
-        coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
-      enddo
-      do i = compCount(1),compCount(1)+gridBoundWidth
-        coordUse1(i+1) = coordUse1(i) &
-                       + (coord1(compCount(1))-coord1(compCount(1)-1))
-      enddo
-      do i = 1,compCount(2)
-        coordUse2(i+1+gridBoundWidth) = coord2(i)
-      enddo
-      do i = gridBoundWidth,1,-1
-        coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
-      enddo
-      do i = compCount(2),compCount(2)+gridBoundWidth
-        coordUse2(i+1) = coordUse2(i) &
-                       + (coord2(compCount(2))-coord2(compCount(2)-1))
-      enddo
-
-      ! allocate and load cell type masks
-      allocate(cellType1(counts(1)), stat=status)
+      ! allocate and load coords
+      allocate(coordUse1(counts(1)), stat=status)
       if (status .ne. 0) then
         print *, "allocation error, counts(1) =", counts(1)
         return
       endif
-      allocate(cellType2(counts(2)), stat=status)
+      allocate(coordUse2(counts(2)), stat=status)
       if (status .ne. 0) then
         print *, "allocation error, counts(2) =", counts(2)
+        return
+      endif
+
+      do i = 1,compCount(1)
+        coordUse1(i+gridBoundWidth) = coord1(i)
+      enddo
+      do i = gridBoundWidth,1,-1
+        coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
+      enddo
+      do i = compCount(1)+gridBoundWidth,compCount(1)+2*gridBoundWidth-1
+        coordUse1(i+1) = coordUse1(i) &
+                       + (coord1(compCount(1))-coord1(compCount(1)-1))
+      enddo
+      do i = 1,compCount(2)
+        coordUse2(i+gridBoundWidth) = coord2(i)
+      enddo
+      do i = gridBoundWidth,1,-1
+        coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
+      enddo
+      do i = compCount(2)+gridBoundWidth,compCount(2)+2*gridBoundWidth-1
+        coordUse2(i+1) = coordUse2(i) &
+                       + (coord2(compCount(2))-coord2(compCount(2)-1))
+      enddo
+
+      ! allocate and load cell type masks -- these are by cell and not vertex,
+      ! so the counts are all one less
+      allocate(cellType1(counts(1)-1), stat=status)
+      if (status .ne. 0) then
+        print *, "allocation error, counts(1) =", counts(1)-1
+        return
+      endif
+      allocate(cellType2(counts(2)-1), stat=status)
+      if (status .ne. 0) then
+        print *, "allocation error, counts(2) =", counts(2)-1
         return
       endif
       cellType1 = 0
@@ -2376,8 +2377,8 @@
       do i = 1,gridBoundWidth
         cellType1(i) = 1
         cellType2(i) = 1
-        cellType1(compCount(1)+gridBoundWidth+i) = 1
-        cellType2(compCount(2)+gridBoundWidth+i) = 1
+        cellType1(compCount(1)-1+gridBoundWidth+i) = 1
+        cellType2(compCount(2)-1+gridBoundWidth+i) = 1
       enddo
 
       ! set parameters based on grid type
@@ -2439,8 +2440,8 @@
       j1 = localStart(2) + 1
       j2 = localStart(2) + counts(2) + 1
       call ESMF_LRGridSetCoord(grid, physGridId, numDims, counts, &
-                               gridBoundWidth, relloc, coord1(i1:i2), &
-                               coord2(j1:j2), total=.true., rc=status)
+                               gridBoundWidth, relloc, coordUse1(i1:i2), &
+                               coordUse2(j1:j2), total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: Grid set coord"
         return
@@ -2453,7 +2454,7 @@
       j1 = localStart(2) + 1 + gridBoundWidth
       j2 = j1 + counts(2)
       call ESMF_LRGridSetCoord(grid, physGridId, numDims, counts, 0, relloc, &
-                               coord1(i1:i2), coord2(j1:j2), total=.false., &
+                               coordUse1(i1:i2), coordUse2(j1:j2), total=.false., &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: Grid set coord"
@@ -4412,7 +4413,7 @@
       endif
 
       gp => grid%ptr
-      if (gp%gridstatus /= ESMF_GridStatus_Ready) then
+      if (gp%gridStatus /= ESMF_GridStatus_Ready) then
         return
       endif
 
