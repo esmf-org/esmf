@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.24 2004/12/01 18:50:46 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.25 2004/12/04 01:46:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.24 2004/12/01 18:50:46 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.25 2004/12/04 01:46:46 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,8 @@
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1, clock2
       type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4
-      type(ESMF_Alarm) :: alarmList(10)
+      type(ESMF_Alarm) :: alarm5(200)
+      type(ESMF_Alarm) :: alarmList(201)
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
       logical :: willRingNext
       integer :: alarmCount, nstep, sstep, i, npets
@@ -1012,6 +1013,86 @@
       call ESMF_Test((bool.and.rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm list re-allocation within clock, part 1
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Alarm list reallocation Test 1"
+      call ESMF_TimeIntervalSet(timeStep, ms=10, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, ms=100, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
+                        ms=200, calendar=gregorianCalendar, rc=rc)
+
+      ! fill up clock's alarmList
+      do i=1,200
+        alarm5(i) = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                     ringInterval=alarmStep, rc=rc)
+      enddo
+
+      ! add one more alarm than there is space for (200), forcing a
+      !   reallocation to 400 alarms
+      ! also, set 201st alarm to be the first to ring upon the 1st timestep
+      call ESMF_TimeSet(alarmTime, yy=1999, mm=12, dd=31, h=23, m=59, s=59, &
+                        ms=10, calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(name="201st Alarm", clock=clock2, &
+                                ringTime=alarmTime, ringInterval=alarmStep, &
+                                rc=rc)
+
+      ! see if the 201st alarm was successfully added to the clock
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm list re-allocation within clock, part 2
+      write(failMsg, *) " Did not return 201 alarms and name '201st Alarm'"
+      write(name, *) "Alarm list reallocation Test 2"
+      call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_ALL, alarmList, &
+                                  alarmCount, rc=rc)
+      call ESMF_AlarmGet(alarmList(alarmCount), name=aName, rc=rc)
+
+      print *, "alarmCount = ", alarmCount
+      print *, "201st alarm name = ", aName
+
+      ! see if we have 201 alarms and if the 201st alarm has the right name!
+      call ESMF_Test((alarmCount.eq.201).and.(aName.eq."201st Alarm") &
+                      .and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Alarm list re-allocation within clock, part 3
+      write(failMsg, *) " Did not return 201st alarm ringing"
+      write(name, *) "Alarm list reallocation Test 3"
+      call ESMF_ClockAdvance(clock2, rc=rc)
+      call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_RINGING, alarmList, &
+                                  alarmCount, rc=rc)
+      ! double check ringing with Alarm API call
+      isringing = ESMF_AlarmIsRinging(alarm4, rc=rc)
+
+      print *, "alarmCount = ", alarmCount
+      call ESMF_AlarmGet(alarmList(alarmCount), name=aName, rc=rc)
+      print *, "Ringing alarm name = ", trim(aName), ", is ringing = ", &
+            isringing
+
+      ! see if the 201st alarm is the only one ringing
+      call ESMF_Test(isringing.and.(alarmCount.eq.1) &
+                     .and.(aName.eq."201st Alarm") &
+                     .and.(rc.eq.ESMF_SUCCESS), &
+                     name, failMsg, result, ESMF_SRCLINE)
+
+      ! cleanup
+      do i=1,200
+        call ESMF_AlarmDestroy(alarm5(i), rc=rc)
+      enddo
       call ESMF_AlarmDestroy(alarm4, rc=rc)
       call ESMF_ClockDestroy(clock2, rc=rc)
 
