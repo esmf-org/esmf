@@ -1,4 +1,4 @@
-% $Id: HWMonitor_rest.tex,v 1.1 2002/11/14 18:05:42 cdeluca Exp $
+% $Id: HWMonitor_rest.tex,v 1.2 2002/11/20 15:24:05 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,8 +15,8 @@
 The HWMonitor class is restricted for use on machines that either
 have PCL or PAPI available. The design uses the platform independent
 interface of these libraries for the actual interface to the hardware
-monitoring. Also some platforms may not have some of the requested hardware
-counters available. This may be because a given platform does not have 
-the hardware requested (Level 2 data cache for example), or it may be because
-hardware monitoring is not available. In either case only the available
-statistics will be provided.
+monitoring. On initialization the class asks if a set of basic counters
+are available on this machine through the middleware interface of PCL or 
+PAPI. The code will abort if the complete set is not available. Since, the
+set asked for should be available on any machine that has hardware monitoring,
+this is not considered too restrictive.

@@ -32,7 +32,7 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: ESMC\_HWMonitor.C,  Date: Mon Nov 18 12:40:26 MST 2002
+\markboth{Left}{Source File: ESMC\_HWMonitor.C,  Date: Tue Nov 19 10:13:29 MST 2002
 }
 
  
@@ -90,6 +90,91 @@
  
 \mbox{}\hrulefill\ 
  
+\subsubsection{ESMC\_HWMonitorGetFLOPS - return Floating point Operations per }
+
+
+   second.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_HWMonitor::ESMC_HWMonitorGetFLOPS(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Get the floating point operations per second for this code segment.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_HWMonitorGetCacheUtilRate - return cache utilization}
+
+
+   rate.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_HWMonitor::ESMC_HWMonitorGetCacheUtilRate(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Get the cache utilization rate for this code segment.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_HWMonitorGetCacheMissRate - return cache miss}
+
+
+   rate.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_HWMonitor::ESMC_HWMonitorGetCacheMissRate(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Get the cache miss rate for this code segment.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_HWMonitorGetFPUUtilRate - return FPU Utililization miss}
+
+
+   rate.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_HWMonitor::ESMC_HWMonitorGetFPUUtilRate(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Get the FPU utilization rate for this code segment.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_HWMonitorGetCycles - return number of CPU cycles in}
+
+
+   a code segment.
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_HWMonitor::ESMC_HWMonitorGetCycles(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Get the number of code cycles for this code segment.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
 \subsubsection{ESMC\_HWMonitorBegin - Begin hardware monitoring}
 
 
@@ -117,22 +202,6 @@
 
 
         Ends hardware monitoring for a code segment.
-   
-%/////////////////////////////////////////////////////////////
- 
-\mbox{}\hrulefill\ 
- 
-\subsubsection{ESMC\_HWMonitorReport - Report hardware monitoring to log.}
-
-
-  
-\bigskip{\sf INTERFACE:}
-\begin{verbatim}       ESMC_HWMonitor::ESMC_HWMonitorReport(void) {\end{verbatim}{\em RETURN VALUE:}
-\begin{verbatim}      none\end{verbatim}
-{\sf DESCRIPTION:\\ }
-
-
-        Reports hardware monitoring for code segments timed.
    
 %/////////////////////////////////////////////////////////////
  

@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.3 2002/11/18 20:06:53 ekluz Exp $
+// $Id: ESMC_HWMonitor.C,v 1.4 2002/11/20 15:24:05 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.3 2002/11/18 20:06:53 ekluz Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.4 2002/11/20 15:24:05 ekluz Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -127,6 +127,174 @@
 
  } // end ESMC_HWMonitorPrint
 
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetFLOPS - return Floating point Operations per 
+// second.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetFLOPS(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the floating point operations per second for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetFLOPS
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetL1CacheUtilRate - return L1-cache utilization
+// rate.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetL1CacheUtilRate(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the level 1 cache utilization rate for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetL1CacheUtilRate
+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetL1CacheMissRate - return cache miss
+// rate.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetL1CacheMissRate(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the level-1 cache miss rate for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetL1CacheMissRate
+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetL2CacheUtilRate - return L2-cache utilization
+// rate.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetL2CacheUtilRate(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the level 2 cache utilization rate for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetL2CacheUtilRate
+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetL2CacheMissRate - return cache miss
+// rate.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetL2CacheMissRate(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the level-2 cache miss rate for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetL2CacheMissRate
+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetFPUUtilRate - return FPU Utililization miss
+// rate.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetFPUUtilRate(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the FPU utilization rate for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetFPUUtilRate
+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_HWMonitorGetCycles - return number of CPU cycles in
+// a code segment.
+//
+// !INTERFACE:
+      int ESMC_HWMonitor::ESMC_HWMonitorGetCycles(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//      Get the number of code cycles for this code segment.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+//
+//  code goes here
+//
+
+ } // end ESMC_HWMonitorGetCycles
+
+
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_HWMonitorBegin - Begin hardware monitoring
@@ -172,28 +340,6 @@
 
  } // end ESMC_HWMonitorEnd
 
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_HWMonitorReport - Report hardware monitoring to log.
-//
-// !INTERFACE:
-      ESMC_HWMonitor::ESMC_HWMonitorReport(void) {
-//
-// !RETURN VALUE:
-//    none
-//
-// !DESCRIPTION:
-//      Reports hardware monitoring for code segments timed.
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here
-//
-
- } // end ESMC_HWMonitorReport
 
 //-------------------------------------------------------------------------
 //BOP

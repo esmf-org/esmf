@@ -1,4 +1,4 @@
-% $Id: HWMonitor_design.tex,v 1.2 2002/11/18 20:06:52 ekluz Exp $
+% $Id: HWMonitor_design.tex,v 1.3 2002/11/20 15:24:05 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,14 +16,14 @@ per second, data cache utilization and miss rates, floating point unit
 utilization, and cycle counts are the desired statistics to be reported.
 The HWMonitor class is meant to be created by the CodeSeg
 class. There are three important methods for HWMonitor: Init, BeginMonitoring,
-EndMonitoring, and Report. The Init method does the initialization needed
+EndMonitoring, and the Get methods. The Init method does the initialization needed
 to figure out which hardware monitoring counters need to be used and verify
 that they are available. It also prepares arrays for the counters that
 will be activated. BeginMonitoring turns performance monitoring on, for
 a given code segment. EndMonitoring turns performance monitoring off, for
-a given code segment. The Report method then gives a report on the statistics
-for the code segment timed. The Init and Report methods should not be
-called in threaded sections and should return a error if they are. The BeginMonitoring
+a given code segment. The Get methods then allows the user to query the statistics
+for the code segment timed. The Init method should not be
+called in threaded sections and should return a error if it is. The BeginMonitoring
 and EndMonitoring methods can be called from within threaded sections. However,
 they can not be called in code sections that are partially threaded and
 partially unthreaded. If these methods determine that the user has put calls
@@ -62,8 +62,9 @@ computed and this difference is added to the accum array. When using PCL,
 PCL\_read is used to get the counter results, and when using PAPI, PAPI\_read\_counters
 is used to get the counter results.
 
-More information on the Report method. The report method sends the results
-of the hardware timing to the Log file using the Log methods. The report method
-will take the values in the accum array to figure out the underlying rates that
-will be reported.
+More information on the Get methods. There are five Get methods: GetFLOPS, GetCacheUtilRate,
+GetCacheMissRate, GetFPUUtilRate, and GetCycles. These get methods use the current values
+in the accum array to return the respective statistic for the code segment being timed.
+They are designed to be queried by the PerfPrint method in order to report on these
+statistics for all threads and PE's.
 

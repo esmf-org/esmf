@@ -1,4 +1,4 @@
-% $Id: PerfProf_desdoc.ctex,v 1.4 2002/11/18 20:06:52 ekluz Exp $
+% $Id: PerfProf_desdoc.ctex,v 1.5 2002/11/20 15:24:05 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,6 +98,84 @@
 \input{comppath/class_rest}
 #endif
 
+\section{Perf Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Perf_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/Perf_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Perf_design}
+#elif defined(CONSTITUENT)
+\input{comppath/Perf_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Perf_def}
+#elif defined(CONSTITUENT)
+\input{comppath/Perf_def}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{Perf_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/Perf_rest}
+#endif
+
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{Perf_chapi}
+%\input{Perf_ccapi}
+%#elif defined(CONSTITUENT)
+%\input{comppath/Perf_chapi}
+%\input{comppath/Perf_ccapi}
+%#endif
+
+\section{Segment Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Segment_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/Segment_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Segment_design}
+#elif defined(CONSTITUENT)
+\input{comppath/Segment_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Segment_def}
+#elif defined(CONSTITUENT)
+\input{comppath/Segment_def}
+#endif
+
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{Segment_rest}
+#elif defined(CONSTITUENT)
+\input{comppath/Segment_rest}
+#endif
+
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{Segment_chapi}
+%\input{Segment_ccapi}
+%#elif defined(CONSTITUENT)
+%\input{comppath/Segment_chapi}
+%\input{comppath/Segment_ccapi}
+%#endif
+
 \section{HWMonitor Design}
 
 \subsection{Description}
@@ -145,13 +223,13 @@
 \input{comppath/HWMonitor_ccapi}
 #endif
 
-\section{<Name1> F90 Interface}
+\section{Perf F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{class_fex}
+\input{Perf_fex}
 #elif defined(CONSTITUENT)
-\input{comppath/class_fex}
+\input{comppath/Perf_fex}
 #endif
 
 \subsection{Parameters and Definitions}

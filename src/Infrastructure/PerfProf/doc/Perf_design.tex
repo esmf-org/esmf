@@ -1,0 +1,41 @@
+% $Id: Perf_design.tex,v 1.1 2002/11/20 15:24:05 ekluz Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+%\subsection{Design}
+
+The Perf class has four high level interfaces accessable by the user:
+PerfInit, PerfStart, PerfEnd, and PerfPrint. PerfInit does the needed
+initialization, and sets the monitoring, and doHW flags. If the monitoring
+flag is set to false by the user performance monitoring will be turned
+off. If the doHW flag is set, it's value will be used as the default value
+to determine if hardware performance monitoring is done. Inidividual code
+segments that are timed can also turn hardware monitoring on or off for
+a particular code segment. PerfStart begins timing a code segment, PerfEnd
+ends timing a code segment. PerfPrint prints a report on the timing results
+for all code segments timed.
+
+More information on PerfInit. PerfInit sets MaxThreads the Maximum number of 
+threads that will be used, and allocates an array of Segments that is two
+dimensional in code segment and thread.
+
+More information on PerfStart. When called PerfStart figures out if the given
+code segment has been activated before or not. If it hasn't it increments
+the codeSegment counter and begins timing and Hardware monitoring of this
+code segment. If the code segment was active before, if it's still active
+it triggers an error, since this means a PerfStart has been called more than
+once, without a PerfEnd imbetween. If it's not active it activates timing
+for this code segment.
+
+More information on PerfEnd. PerfEnd deactivates a code segment, and calls
+the SegmentEnd method to accumulate the relevent counters.
+
+More information on PerfPrint. PerfPrint figures out the maximum, minimum, and
+average times across both threads and distributed PE's. The results are then printed
+to the Log file.
