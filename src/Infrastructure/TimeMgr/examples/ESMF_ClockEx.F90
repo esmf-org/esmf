@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.7 2003/04/17 17:16:42 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.8 2003/04/19 00:13:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.7 2003/04/17 17:16:42 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.8 2003/04/19 00:13:01 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -50,12 +50,9 @@
       type(ESMF_Time) :: stopTime
 
       ! temp variables for Get functions
-      integer :: D
       double precision :: d_
-      integer :: YR, MM, DD, H, M
-      integer :: S
+      integer :: YR, MM, DD, D, H, M, S
       type(ESMF_TimeInterval) :: time_step
-      type(ESMF_Time) :: timeZero
       type(ESMF_TimeInterval) :: time_diff
       integer(ESMF_IKIND_I8) :: advanceCount
 
@@ -127,11 +124,5 @@
       call ESMF_TimeIntervalGet(time_diff, D=D, S=S, rc=rc)
       print *, "Difference between start and stop times = ", D, " days, ", &
                 S, " seconds."
-
-      S = 0
-      call ESMF_TimeInit(timeZero, S=S, Sn=0, Sd=1, &
-                         cal=gregorianCalendar, rc=rc)
-      call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
-      print *, "Time Zero = ", YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       end program ESMF_ClockEx
