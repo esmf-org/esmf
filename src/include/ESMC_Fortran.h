@@ -1,4 +1,4 @@
-/* $Id: ESMC_Fortran.h,v 1.2 2001/11/15 22:56:38 dneckels Exp $ */
+/* $Id: ESMC_Fortran.h,v 1.3 2002/02/20 17:38:10 rhallberg Exp $ */
 
 #include "conf.h"
 
@@ -7,11 +7,11 @@
 
 /* String utilities */
 #ifdef ESMC_HAVE_MIXED_LEN
-#define ESMC_END_LEN(len)
-#define ESMC_MIXED_LEN(len)  ,int len
+# define ESMC_END_LEN(len)
+# define ESMC_MIXED_LEN(len)  ,int len
 #else
-#define ESMC_END_LEN(len)   ,int len
-#define ESMC_MIXED_LEN(len)
+# define ESMC_END_LEN(len)   ,int len
+# define ESMC_MIXED_LEN(len)
 #endif
 
 
