@@ -1,4 +1,4 @@
-% $Id: Grid_options.tex,v 1.8 2004/06/01 20:36:45 jwolfe Exp $
+% $Id: Grid_options.tex,v 1.9 2004/06/13 05:25:42 cdeluca Exp $
 
 % \subsubsection{ESMF\_GridStructure}
 % 
@@ -71,6 +71,103 @@
 %          Unknown or undefined grid.
 
 % \end{description}
+
+\subsubsection{ESMF\_CoordIndex}
+
+{\sf DESCRIPTION:\\}
+The Grid class can be set to different default indexing of coordinates.  This
+parameter describes indexing options supported by ESMF.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_COORD\_INDEX\_LOCAL]
+         The coordinates are indexed locally.  
+
+   \item [ESMF\_COORD\_INDEX\_GLOBAL]
+         The coordinates are indexed globally.
+
+   \item [ESMF\_COORD\_INDEX\_UNKNOWN]
+         Unknown or undefined coordinate indexing.
+\end{description}
+
+\subsubsection{ESMF\_CoordOrder}
+
+{\sf DESCRIPTION:\\}
+The Grid class can be set to different default ordering of coordinates, for
+example KIJ.  This parameter describes ordering options supported by ESMF.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_COORD\_ORDER\_XYZ]
+         The coordinates are ordered XYZ.  This is equivalent to IJK ordering.
+         For a 2D grid, this defaults to IJ mapping.
+
+   \item [ESMF\_COORD\_ORDER\_XZY]
+         The coordinates are ordered XZY.  For a 2D grid, this defaults to IJ 
+         mapping to XY.
+
+   \item [ESMF\_COORD\_ORDER\_YXZ]
+         IJK maps to YXZ.  For a 2D grid, this defaults to IJ mapping to YX.
+
+   \item [ESMF\_COORD\_ORDER\_YZX]
+         IJK maps to YZX.  For a 2D grid, this defaults to ??
+
+   \item [ESMF\_COORD\_ORDER\_ZXY]
+         IJK maps to ZXY.
+
+   \item [ESMF\_COORD\_ORDER\_ZYX]
+         IJK maps to ZYX.
+
+   \item [ESMF\_COORD\_ORDER\_UNKNOWN]
+         Unknown or undefined coordinate ordering.
+\end{description}
+
+\subsubsection{ESMF\_CoordSystem}
+
+{\sf DESCRIPTION:\\}
+Supported coordinate systems.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_COORD\_SYSTEM\_USER]
+         User-defined coordinate system.
+
+   \item [ESMF\_COORD\_SYSTEM\_SPHERICAL]
+         Spherical coordinates (longitude, latitude).
+
+   \item [ESMF\_COORD\_SYSTEM\_CARTESIAN]
+         Cartesian coordinates (x,y).
+
+   \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL] 
+         Cylindrical coordinates.
+
+%  \item [ESMF\_COORD\_SYSTEM\_LATFOURIER]
+%        Mixed latitude/Fourier spectral space.
+%  \item [ESMF\_COORD\_SYSTEM\_SPECTRAL]
+%        Wavenumber space.
+   \item [ESMF\_COORD\_SYSTEM\_DEPTH]
+         Vertical z coordinate depth (0 at top surface).
+
+   \item [ESMF\_COORD\_SYSTEM\_HEIGHT]
+         Vertical z coordinate height (0 at bottom).
+
+%  \item [ESMF\_COORD\_SYSTEM\_PRESSURE]
+%        Vertical pressure coordinate.
+%  \item [ESMF\_COORD\_SYSTEM\_SIGMA] 
+%        Vertical sigma coordinate.
+%  \item [ESMF\_COORD\_SYSTEM\_THETA]
+%        Vertical theta coordinate.
+%  \item [ESMF\_COORD\_SYSTEM\_ETA]
+%        Vertical eta coordinate.
+%  \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
+%        Vertical density coordinate.
+%  \item [ESMF\_COORD\_SYSTEM\_HYBRID]
+%        Hybrid vertical coordinates.
+%  \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN] 
+%        Lagrangian coordinates.
+   \item [ESMF\_COORD\_SYSTEM\_UNKNOWN]
+         Unknown or undefined coordinate system.
+\end{description}
 
 \subsubsection{ESMF\_GridHorzStagger}
 
@@ -243,103 +340,6 @@ Valid values are:
 
 \end{description}
 
-\subsubsection{ESMF\_CoordOrder}
-
-{\sf DESCRIPTION:\\}
-The Grid class can be set to different default ordering of coordinates, for
-example KIJ.  This parameter describes ordering options supported by ESMF.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_COORD\_ORDER\_XYZ]
-         The coordinates are ordered XYZ.  This is equivalent to IJK ordering.
-         For a 2D grid, this defaults to IJ mapping.
-
-   \item [ESMF\_COORD\_ORDER\_XZY]
-         The coordinates are ordered XZY.  For a 2D grid, this defaults to IJ 
-         mapping to XY.
-
-   \item [ESMF\_COORD\_ORDER\_YXZ]
-         IJK maps to YXZ.  For a 2D grid, this defaults to IJ mapping to YX.
-
-   \item [ESMF\_COORD\_ORDER\_YZX]
-         IJK maps to YZX.  For a 2D grid, this defaults to ??
-
-   \item [ESMF\_COORD\_ORDER\_ZXY]
-         IJK maps to ZXY.
-
-   \item [ESMF\_COORD\_ORDER\_ZYX]
-         IJK maps to ZYX.
-
-   \item [ESMF\_COORD\_ORDER\_UNKNOWN]
-         Unknown or undefined coordinate ordering.
-\end{description}
-
-\subsubsection{ESMF\_CoordIndex}
-
-{\sf DESCRIPTION:\\}
-The Grid class can be set to different default indexing of coordinates.  This
-parameter describes indexing options supported by ESMF.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_COORD\_INDEX\_LOCAL]
-         The coordinates are indexed locally.  
-
-   \item [ESMF\_COORD\_INDEX\_GLOBAL]
-         The coordinates are indexed globally.
-
-   \item [ESMF\_COORD\_INDEX\_UNKNOWN]
-         Unknown or undefined coordinate indexing.
-\end{description}
-
-\subsubsection{ESMF\_CoordSystem}
-
-{\sf DESCRIPTION:\\}
-Supported coordinate systems.
-
-Valid values are:
-\begin{description}
-   \item [ESMF\_COORD\_SYSTEM\_USER]
-         User-defined coordinate system.
-
-   \item [ESMF\_COORD\_SYSTEM\_SPHERICAL]
-         Spherical coordinates (longitude, latitude).
-
-   \item [ESMF\_COORD\_SYSTEM\_CARTESIAN]
-         Cartesian coordinates (x,y).
-
-   \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL] 
-         Cylindrical coordinates.
-
-%  \item [ESMF\_COORD\_SYSTEM\_LATFOURIER]
-%        Mixed latitude/Fourier spectral space.
-%  \item [ESMF\_COORD\_SYSTEM\_SPECTRAL]
-%        Wavenumber space.
-   \item [ESMF\_COORD\_SYSTEM\_DEPTH]
-         Vertical z coordinate depth (0 at top surface).
-
-   \item [ESMF\_COORD\_SYSTEM\_HEIGHT]
-         Vertical z coordinate height (0 at bottom).
-
-%  \item [ESMF\_COORD\_SYSTEM\_PRESSURE]
-%        Vertical pressure coordinate.
-%  \item [ESMF\_COORD\_SYSTEM\_SIGMA] 
-%        Vertical sigma coordinate.
-%  \item [ESMF\_COORD\_SYSTEM\_THETA]
-%        Vertical theta coordinate.
-%  \item [ESMF\_COORD\_SYSTEM\_ETA]
-%        Vertical eta coordinate.
-%  \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
-%        Vertical density coordinate.
-%  \item [ESMF\_COORD\_SYSTEM\_HYBRID]
-%        Hybrid vertical coordinates.
-%  \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN] 
-%        Lagrangian coordinates.
-   \item [ESMF\_COORD\_SYSTEM\_UNKNOWN]
-         Unknown or undefined coordinate system.
-\end{description}
-
 
 % \subsubsection{ESMF\_GridMaskType}
 % 
@@ -374,3 +374,13 @@ Valid values are:
    \item [ESMF\_REGION\_TYPE\_UNKNOWN]
          Unknown or undefined region type.
 \end{description}
+
+
+
+
+
+
+
+
+
+

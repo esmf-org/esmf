@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.9 2004/06/13 00:41:31 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.10 2004/06/13 05:25:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,17 +51,17 @@ implicit none
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !------------------------------------------------------------------------------
-!     ! ESMF_LogFileType
-type ESMF_LogFileType
+!     ! ESMF_LogMsgType
+type ESMF_LogMsgType
     sequence
     integer                                 :: ftype
 end type
 
 !     ! Log File Types
-type(ESMF_LogFileType), parameter           ::  &
-    ESMF_LOG_INFO  = ESMF_LogFileType(1), &
-    ESMF_LOG_WARNING = ESMF_LogFileType(2), &
-    ESMF_LOG_ERROR = ESMF_LogFileType(3)
+type(ESMF_LogMsgType), parameter           ::  &
+    ESMF_LOG_INFO  = ESMF_LogMsgType(1), &
+    ESMF_LOG_WARNING = ESMF_LogMsgType(2), &
+    ESMF_LOG_ERROR = ESMF_LogMsgType(3)
      
 !     ! Log Entry                            
 type ESMF_LOGENTRY
@@ -83,7 +83,7 @@ type ESMF_Log
     type(ESMF_Logical)                      ::  flush
     integer                                     halt
     type(ESMF_LOGENTRY), dimension(1)       ::  LOG_ENTRY
-    type(ESMF_LogFileType)                  ::  logtype
+    type(ESMF_LogMsgType)                  ::  logtype
     integer                                     maxElements
     character(len=32)                           nameLogErrFile 
     type(ESMF_Logical)                      ::  rootOnly
@@ -132,19 +132,19 @@ contains
 ! !IROUTINE: ESMF_LogClose - Close Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogClose(aLog,rc)
+    subroutine ESMF_LogClose(log,rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)			            :: aLog
+    type(ESMF_Log)			            :: log
     integer, intent(out),optional	    :: rc
 
 ! !DESCRIPTION:
-!      This routine closes the file(s) associated with {\tt aLog}.
+!      This routine closes the file(s) associated with {\tt log}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [aLog]
+!      \item [log]
 !            Log object.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -158,13 +158,13 @@ contains
 	if (present(rc)) then
 	  	rc=ESMF_FAILURE
 	endif
-	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
+	if (log%FileIsOpen .eq. ESMF_TRUE) then
 		!call DATE_AND_TIME(d,t)
-		!WRITE(aLog%unitnumber,100) d,t,"INFO     Log Close"
+		!WRITE(log%unitnumber,100) d,t,"INFO     Log Close"
 		!100 FORMAT(a8,2x,a10,2x,a)
-		!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
-		!CLOSE(UNIT=aLog%stdOutUnitNumber)
-		aLog%FileIsOpen=ESMF_FALSE
+		!if (log%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
+		!CLOSE(UNIT=log%stdOutUnitNumber)
+		log%FileIsOpen=ESMF_FALSE
 		if (present(rc)) rc=ESMF_SUCCESS
 	endif	
 	
@@ -331,16 +331,16 @@ end function ESMF_LogFoundError
 ! !IROUTINE: ESMF_LogGet - Returns information about a log object
 
 ! !INTERFACE: 
-	subroutine ESMF_LogGet(aLog,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
+	subroutine ESMF_LogGet(log,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log), intent(in) 		                :: aLog
+	type(ESMF_Log), intent(in) 		                :: log
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
 	integer, intent(out),optional		            :: halt
-	type(ESMF_LogFileType), intent(in),optional	    :: logtype
+	type(ESMF_LogMsgType), intent(in),optional	    :: logtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -352,7 +352,7 @@ end function ESMF_LogFoundError
 !      The arguments are:
 !      \begin{description}
 !
-!      \item [aLog]
+!      \item [log]
 !            Log object.
 !      \item [verbose]
 !            Verbose flag.
@@ -375,25 +375,25 @@ end function ESMF_LogFoundError
 	  rc=ESMF_FAILURE
 	endif
 	if (present(verbose)) then
-	  verbose=aLog%verbose
+	  verbose=log%verbose
 	endif
 	if (present(flush)) then
-	  flush=aLog%flush
+	  flush=log%flush
 	endif
 	if (present(rootOnly)) then
-	  rootOnly=aLog%rootOnly
+	  rootOnly=log%rootOnly
 	endif
 	if (present(halt)) then
-	  halt=aLog%halt
+	  halt=log%halt
 	endif
 	!if (present(logtype)) then
-	!  logtype=aLog%logtype
+	!  logtype=log%logtype
 	!endif
 	if (present(stream)) then
-	  stream=aLog%stream
+	  stream=log%stream
 	endif
 	if (present(maxElements)) then
-	  maxElements=aLog%maxElements
+	  maxElements=log%maxElements
 	endif	
 	if (present(rc)) then
 	  rc=ESMF_SUCCESS 
@@ -576,10 +576,10 @@ end function ESMF_LogMsgFoundError
 ! !IROUTINE: ESMF_LogOpen - Open Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(aLog, filename, rc)
+    subroutine ESMF_LogOpen(log, filename, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)			        :: aLog
+    type(ESMF_Log)			        :: log
     character(len=*)			    :: filename
     integer, intent(out),optional	:: rc
 
@@ -590,7 +590,7 @@ end function ESMF_LogMsgFoundError
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [aLog]
+!      \item [log]
 !            Log object.
 !      \item [filename]
 !            Name of file.
@@ -605,18 +605,18 @@ end function ESMF_LogMsgFoundError
 	character(len=8) 			:: d
 	
 	if (present(rc)) rc=ESMF_FAILURE
-	aLog%FileIsOpen=ESMF_FALSE
-	aLog%nameLogErrFile=filename
-	aLog%unitnumber=ESMF_LOG_FORT_STDOUT
-	do i=aLog%unitnumber, ESMF_LOG_UPPER
+	log%FileIsOpen=ESMF_FALSE
+	log%nameLogErrFile=filename
+	log%unitnumber=ESMF_LOG_FORT_STDOUT
+	do i=log%unitnumber, ESMF_LOG_UPPER
         inquire(unit=i,iostat=status)
         if (status .eq. 0) then
-            aLog%FileIsOpen = ESMF_TRUE
+            log%FileIsOpen = ESMF_TRUE
             exit
         endif
    	enddo 
-	if (aLog%FileIsOpen .eq. ESMF_FALSE) return
-	aLog%unitNumber = i  
+	if (log%FileIsOpen .eq. ESMF_FALSE) return
+	log%unitNumber = i  
 	if (present(rc)) rc=ESMF_SUCCESS	
     
 end subroutine ESMF_LogOpen	
@@ -626,16 +626,16 @@ end subroutine ESMF_LogOpen
 ! !IROUTINE: ESMF_LogSet - Sets Log Parameters
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSet(aLog,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
+	subroutine ESMF_LogSet(log,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log)		 				:: aLog
+	type(ESMF_Log)		 				:: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
 	integer, intent(in),optional			        :: halt
-	type(ESMF_LogFileType), intent(in),optional     :: logtype
+	type(ESMF_LogMsgType), intent(in),optional     :: logtype
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -646,7 +646,7 @@ end subroutine ESMF_LogOpen
 !      The arguments are:
 !      \begin{description}
 !
-!      \item [aLog]
+!      \item [log]
 !            Log object.
 !      \item [verbose]
 !            Verbose flag.
@@ -666,13 +666,13 @@ end subroutine ESMF_LogOpen
 ! 
 !EOPI 
 	if (present(rc)) rc=ESMF_FAILURE
-	if (present(verbose)) aLog%verbose=verbose
-	if (present(flush)) aLog%flush=flush
-	if (present(rootOnly)) aLog%rootOnly=rootOnly
-	if (present(halt)) aLog%halt=halt
-	if (present(logtype)) aLog%logtype=logtype
-	if (present(stream)) aLog%stream=stream
-	if (present(maxElements)) aLog%maxElements=maxElements
+	if (present(verbose)) log%verbose=verbose
+	if (present(flush)) log%flush=flush
+	if (present(rootOnly)) log%rootOnly=rootOnly
+	if (present(halt)) log%halt=halt
+	if (present(logtype)) log%logtype=logtype
+	if (present(stream)) log%stream=stream
+	if (present(maxElements)) log%maxElements=maxElements
 	if (present(rc)) rc=ESMF_SUCCESS 
 end subroutine ESMF_LogSet
 
@@ -688,7 +688,7 @@ end subroutine ESMF_LogSet
 	logical                                 ::ESMF_LogWrite
 ! !ARGUMENTS:
 	character(len=*), intent(in)            :: msg
-	type(ESMF_LogFileType), intent(in)      :: logtype
+	type(ESMF_LogMsgType), intent(in)      :: logtype
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
@@ -759,13 +759,13 @@ end subroutine ESMF_LogSet
     			WRITE(ESMF_LogDefault%unitnumber,122) d," ",h,&
                                 m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
     				tline," ",trim(tmethod)," ",trim(msg)
-			!if (aLog%verbose .eq. ESMF_TRUE) print *, &
+			!if (log%verbose .eq. ESMF_TRUE) print *, &
                         ! d,"  ",t,"  ", lt,"    ",tfile,tline,"  ",tmethod,msg
     		    else
     			WRITE(ESMF_LogDefault%unitnumber,123) d," ",h,&
                                 m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
     				tline," ",trim(msg)
-			!if (aLog%verbose .eq. ESMF_TRUE) print *, &
+			!if (log%verbose .eq. ESMF_TRUE) print *, &
                         ! d,"  ",t,"  ", lt,"    ",tfile,tline,"  ",msg
     		    endif	
             else
@@ -773,12 +773,12 @@ end subroutine ESMF_LogSet
     		    WRITE(ESMF_LogDefault%unitnumber,132) d," ",h,&
                         m,s,".",ms," ",trim(lt)," ",&
     			" ",trim(tmethod)," ",trim(msg)
-		    !if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+		    !if (log%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
     		    !lt,"    ","  ",tmethod,msg
     		else
     		    WRITE(ESMF_LogDefault%unitnumber,133) d," ",h,&
                         m,s,".",ms," ",trim(lt)," "," ",trim(msg)
-		    !if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+		    !if (log%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
     		    !lt,"    ","  ",msg
     		endif	
     	    endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.49 2004/06/08 22:37:17 cdeluca Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.50 2004/06/13 05:25:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.49 2004/06/08 22:37:17 cdeluca Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.50 2004/06/13 05:25:42 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -105,7 +105,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayRedist - Redistribute a distributed array
+! !IROUTINE: ESMF_ArrayRedist - Redistribute an Array
 !
 ! !INTERFACE:
       interface ESMF_ArrayRedist
@@ -154,7 +154,7 @@
 #if 0
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_ArrayAllGather - gather a distributed Array
+! !IROUTINE: ESMF_ArrayAllGather - Gather an Array and put results on all DEs
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayAllGather
@@ -253,7 +253,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayGather"
 !BOP
-! !IROUTINE: ESMF_ArrayGather - Gather a distributed Array
+! !IROUTINE: ESMF_ArrayGather - Gather an Array onto one DE
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayGather(array, grid, datamap, rootDE, gatheredArray, rc)
@@ -566,7 +566,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloNew"
 !BOP
-! !IROUTINE: ESMF_ArrayHalo - Perform a halo operation
+! !IROUTINE: ESMF_ArrayHalo - Halo an Array
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayHalo()
@@ -641,7 +641,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloRelease"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloRelease - release the information stored about this Halo operation
+! !IROUTINE: ESMF_ArrayHaloRelease - Release resources stored for halo operation
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloRelease(routehandle, rc)
@@ -672,7 +672,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayHaloStore"
 !BOP
-! !IROUTINE: ESMF_ArrayHaloStore - Store a halo operation
+! !IROUTINE: ESMF_ArrayHaloStore - Store resources for a halo operation
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayHaloStore(array, grid, datamap, routehandle, &
@@ -977,7 +977,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistRelease"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistRelease - Release the information stored about this Redist operation
+! !IROUTINE: ESMF_ArrayRedistRelease - Release resources stored for redist operation
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistRelease(routehandle, rc)
@@ -1009,7 +1009,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayRedistStore"
 !BOP
-! !IROUTINE: ESMF_ArrayRedistStore - Compute information about a data Redistribution
+! !IROUTINE: ESMF_ArrayRedistStore - Store resources for a redist operation
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
@@ -1308,4 +1308,12 @@
         end subroutine ESMF_ArrayScatter
 
        end module ESMF_ArrayCommMod
+
+
+
+
+
+
+
+
 

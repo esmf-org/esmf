@@ -1,4 +1,4 @@
-% $Id: LogErr_fex.tex,v 1.6 2004/06/07 06:57:53 cpboulder Exp $
+% $Id: LogErr_fex.tex,v 1.7 2004/06/13 05:25:42 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@ Options will be set later.
 
 In this example we use the default {\tt ESMF\_Log\_World} object and 
 illustrate the {\tt ESMF\_LogGetUnit} to write to the log file 
-{\tt aLog.txt}.
+{\tt log.txt}.
 
 {\tt
 \begin{verbatim}
@@ -32,7 +32,7 @@ program test_log
   implicit none
   integer myDE
   .....
-  call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"aLog.txt")
+  call ESMF_LogOpenFile(ESMF_Log_World,ESMF_SINGLE_LOG_FILE,"log.txt")
   if (myDE .eq. 0) write(ESMF_LogGetUnit(ESMF_Log_World),*) "This is a test."
   call ESMF_LogCloseFile(ESMF_Log_World)
 
@@ -108,25 +108,25 @@ by using two ESMF\_Log file handles.  One writes to multiple files and the
 other writes to one master file. Writing to multiple files is important 
 when you want output from each DE saved to an individual file. 
 As illustrated in the example below, while the name of the file is set to
-aLogMult.txt, the Log tool will automatically append the DE rank to
+logMult.txt, the Log tool will automatically append the DE rank to
 the name. Consequently, if you run this example on, say, six
-DEs, six files will be produced: aLogMaster.txt.1, aLogMaster.txt.2,
-aLogMaster.txt.3, aLogMaster.txt.4, aLogMaster.txt.5, aLogMaster.txt.6.
+DEs, six files will be produced: logMaster.txt.1, logMaster.txt.2,
+logMaster.txt.3, logMaster.txt.4, logMaster.txt.5, logMaster.txt.6.
 
 {\tt
 \begin{verbatim}
 
-type(ESMF_Log) :: aLogMaster, aLogMult
+type(ESMF_Log) :: logMaster, logMult
 integer myDE
 
-call ESMF_LogOpenFile(aLogMaster,ESMF_SINGLE_LOG_FILE,"aLogMas.txt")
-call ESMF_LogOpenFile(aLogMult,ESMF_MULT_LOG_FILE,"aLogMult.txt")
-if (myDE .eq. 0) write(ESMF_LogGetUnit(aLogMaster),*) "We are writing to the master file."
-write(ESMF_LogGetUnit(aLogMult),*) "We are writing to the multiple files."
-call ESMF_LogCloseFile(aLogMaster)
-write(ESMF_LogGetUnit(aLogMult),*) "While we closed &
-the master file, we are still writing to the aLogMult file handle. "
-call ESMF_LogCloseFile(aLogMult)
+call ESMF_LogOpenFile(logMaster,ESMF_SINGLE_LOG_FILE,"logMas.txt")
+call ESMF_LogOpenFile(logMult,ESMF_MULT_LOG_FILE,"logMult.txt")
+if (myDE .eq. 0) write(ESMF_LogGetUnit(logMaster),*) "We are writing to the master file."
+write(ESMF_LogGetUnit(logMult),*) "We are writing to the multiple files."
+call ESMF_LogCloseFile(logMaster)
+write(ESMF_LogGetUnit(logMult),*) "While we closed &
+the master file, we are still writing to the logMult file handle. "
+call ESMF_LogCloseFile(logMult)
 
 \end{verbatim}
 \tt}

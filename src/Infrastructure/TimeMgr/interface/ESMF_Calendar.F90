@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.69 2004/06/11 20:24:53 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.70 2004/06/13 05:25:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -133,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.69 2004/06/11 20:24:53 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.70 2004/06/13 05:25:43 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -549,7 +549,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarDestroy
+! !IROUTINE: ESMF_CalendarDestroy - Free resources associated with a Calendar
 !
 ! !INTERFACE:
       subroutine ESMF_CalendarDestroy(calendar, rc)

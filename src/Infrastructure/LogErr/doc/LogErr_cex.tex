@@ -1,4 +1,4 @@
-% $Id: LogErr_cex.tex,v 1.4 2004/06/07 06:57:53 cpboulder Exp $
+% $Id: LogErr_cex.tex,v 1.5 2004/06/13 05:25:42 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -13,7 +13,7 @@
 %<Detailed examples of F90 usage of the class.>
 \subsubsection{Example Code}
 
-In this example we set the default log file to aLog.txt and then call the 
+In this example we set the default log file to log.txt and then call the 
 various methods to write to the log.  The first step is to include 
 ESMC\_LogErr.h and ESMF\_LogMacros.inc.  Next, we define ESMC\_Method to 
 the corresponding method.
@@ -27,7 +27,7 @@ the corresponding method.
 int main() {
 int *rc;
     
-    ESMC_LogSetFilename("aLog1.txt");
+    ESMC_LogSetFilename("log1.txt");
     ESMC_LogDefault.ESMC_LogWrite("LogWrite",ESMC_LOG_WARN);
     ESMC_LogDefault.ESMC_LogFoundError(ESMF_TRUE,rc);
 	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_TRUE,"Log Msg Found Error",rc);

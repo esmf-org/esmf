@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.15 2004/06/10 23:39:45 cdeluca Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.16 2004/06/13 05:25:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.15 2004/06/10 23:39:45 cdeluca Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.16 2004/06/13 05:25:42 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -404,7 +404,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayDataMapPrint"
 !BOP
-! !IROUTINE: ESMF_ArrayDataMapPrint - Print a ArrayDataMap type
+! !IROUTINE: ESMF_ArrayDataMapPrint - Print an ArrayDataMap
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayDataMapPrint(datamap, options, rc)
@@ -562,7 +562,10 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayDataMapSetDefExplicit"
 !BOP
+! !IROUTINE:  ESMF_ArrayDataMapSetDefault - Set ArrayDataMap default values
+
 ! !INTERFACE:
+      ! Private name; call using ESMF_ArrayDataMapSetDefault()
       subroutine ESMF_ArrayDataMapSetDefExplicit(datamap, dataRank, &
                                                  dataIndexList, counts, rc)
 !
@@ -786,7 +789,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayDataMapSetInvalid"
 !BOP
-! !IROUTINE:  ESMF_ArrayDataMapSetInvalid - set contents of a ArrayDataMap to uninitialized value.
+! !IROUTINE:  ESMF_ArrayDataMapSetInvalid - Set ArrayDataMap to invalid status
 
 ! !INTERFACE:
       subroutine ESMF_ArrayDataMapSetInvalid(datamap, rc)
@@ -822,7 +825,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayDataMapValidate"
 !BOP
-! !IROUTINE: ESMF_ArrayDataMapValidate - Validate internal state of an ArrayDataMap
+! !IROUTINE: ESMF_ArrayDataMapValidate - Check validity of an ArrayDataMap
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayDataMapValidate(datamap, options, rc)
@@ -1164,5 +1167,12 @@ end function
 
 
         end module ESMF_ArrayDataMapMod
+
+
+
+
+
+
+
 
 

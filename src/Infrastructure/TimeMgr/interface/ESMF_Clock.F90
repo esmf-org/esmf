@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.56 2004/06/11 20:16:24 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.57 2004/06/13 05:25:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.56 2004/06/11 20:16:24 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.57 2004/06/13 05:25:44 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -390,7 +390,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockDestroy
+! !IROUTINE: ESMF_ClockDestroy - Free all resources associated with a Clock
 !
 ! !INTERFACE:
       subroutine ESMF_ClockDestroy(clock, rc)
@@ -574,7 +574,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockGetAlarmList - Get a list of alarms from a clock
+! !IROUTINE: ESMF_ClockGetAlarmList - Get a list of Alarms from a Clock
 
 ! !INTERFACE:
       subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &

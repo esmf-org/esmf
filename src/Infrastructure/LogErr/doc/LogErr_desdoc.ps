@@ -781,12 +781,12 @@ b(Again,)23 b(if)h(your)e(preocessor)65 4047 y(is)f(not)f(w)o(orking)e
 4525 y Fd(5.1)99 b(Use)25 b(and)g(Examples)65 4681 y
 Ff(5.1.1)81 b(Example)20 b(1.)25 b(Simple)c(Example.)65
 4828 y Fe(In)f(this)g(e)o(xample)f(we)i(initialize)f(a)h(Log)e(object)h
-(\(aLog\))e(and)i(write)g(a)h(simple)f(message)g(to)h(standard)e(out.)p
+(\(log\))e(and)i(write)g(a)h(simple)f(message)g(to)h(standard)e(out.)p
 Black Black 65 4979 a Fc(#include)48 b("ESMF_LogMacros.inc")65
 5070 y(#include)g("ESMF_LogConstants.inc")65 5162 y(#include)g
-("ESMF_ErrConstants.inc")65 5253 y(type\(ESMF_Log\))f(::)i(aLog)65
-5344 y(intger)f(int_num=86)65 5436 y(call)h(ESMF_LogInit\(aLog\))65
-5527 y(call)g(ESMF_LogInfo\(aLog,"Hi)d(there)j(agent)f(\045d)i(,)g
+("ESMF_ErrConstants.inc")65 5253 y(type\(ESMF_Log\))f(::)i(log)65
+5344 y(intger)f(int_num=86)65 5436 y(call)h(ESMF_LogInit\(log\))65
+5527 y(call)g(ESMF_LogInfo\(log,"Hi)d(there)j(agent)f(\045d)i(,)g
 (int_num\))p Black 1994 5789 a Fe(5)p Black eop
 %%Page: 6 7
 6 6 bop Black Black 65 523 a Ff(5.1.2)81 b(Example)20
@@ -810,12 +810,12 @@ b(Initially,)48 b(we)i(halt)f(execution)f(on)h(warnings,)f(continue)h
 (reverse)e(this.)p Black Black 65 2355 a(#include)g
 ("ESMF_LogMacros.inc")65 2446 y(#include)g("ESMF_LogConstants.inc")65
 2538 y(#include)g("ESMF_ErrConstants.inc")65 2629 y(type\(ESMF_Log\))f
-(::)i(anErr,aLog)65 2720 y(integer)f(returnCode)65 2812
+(::)i(anErr,log)65 2720 y(integer)f(returnCode)65 2812
 y(call)h(ESMF_LogInit\(anErr,haltOnErr=ESMF_)o(LOG_FA)o(LSE,h)o(altOn)o
 (Warn=E)o(SMF_T)o(RUE,)43 b(&)961 2903 y(flush_ESMF_LOG_TRUE\))65
-2994 y(call)49 b(ESMF_LogInit\(aLog\))65 3086 y(call)g
+2994 y(call)49 b(ESMF_LogInit\(log\))65 3086 y(call)g
 (ESMF_LogOpenFile\(anErr,ESMF_SINGLE)o(_LOG_F)o(ILE,")o(anErr)o
-(.txt"\))65 3177 y(write\(LogWrite\(aLog\),*\)'We)c(are)k(about)g(to)g
+(.txt"\))65 3177 y(write\(LogWrite\(log\),*\)'We)c(are)k(about)g(to)g
 (execute)g(foo.')65 3268 y(returnCode=foo\(\))65 3360
 y(if)g(\(returnCode)f(==)h(ESMF_FATAL\))f(then)164 3451
 y(call)h(ESMF_LogErrMsg\(anErr,)d(ESMF_FATAL,"Encountered)g(an)j
@@ -873,10 +873,10 @@ b(!An)49 b(ESMF_Log)g(object)f(will)h(halt)g(on)h(encountering)463
 p 65 3578 3900 4 v 65 3670 a(!PUBLIC)f(MEMBER)h(Functions)65
 3884 y Ff(5.2.1)81 b(ESMF_LogInit)20 b(-)h(initialize)f(an)g(err)o(or)g
 (object.)65 4128 y Fb(INTERF)-7 b(A)n(CE:)p Black Black
-115 4286 a Fc(subroutine)47 b(ESMF_LogInit\(aLog,verbose,)e
+115 4286 a Fc(subroutine)47 b(ESMF_LogInit\(log,verbose,)e
 (flush,standardOut,haltOnErr,haltOnWarn)o(\))65 4444
 y Fa(ARGUMENTS:)p Black Black 164 4601 a Fc(type\(ESMF_Log\),)i
-(intent\(in\))h(::)i(aLog)164 4693 y(integer,)f
+(intent\(in\))h(::)i(log)164 4693 y(integer,)f
 (intent\(inout\),optional::verbose,)44 b(flush,)k
 (standardOut,haltOnErr,haltOnWarn)65 4850 y Fb(DESCRIPTION:)65
 5033 y Fc(Most)h(of)g(the)g(Fortran)g(wrapper)g(routines)f(for)h(the)g
@@ -983,16 +983,16 @@ y Fb(DESCRIPTION:)65 2655 y Fc(Prints)h(a)i(real)f(number;)g(see)g
 (ESMF_LogPrintChar\(\))d(for)j(a)h(longer)f(discussion)65
 2868 y Ff(5.2.8)81 b(ESMF_LogCloseFile)20 b(-)g(closes)h(a)f(\002le)h
 (fr)o(om)e(F)n(ortran)g(code)65 3012 y Fc(!INTERFACE)48
-b(subroutine)g(ESMF_LogCloseFile\(aLog\))65 3194 y Fa(ARGUMENTS:)p
-Black Black 314 3343 a Fc(typdef\(ESMF\\_Log\))e(::)k(aLog)65
+b(subroutine)g(ESMF_LogCloseFile\(log\))65 3194 y Fa(ARGUMENTS:)p
+Black Black 314 3343 a Fc(typdef\(ESMF\\_Log\))e(::)k(log)65
 3583 y Fb(DESCRIPTION:)65 3766 y Fc(Calls)f(the)g(method)g
-(ESMC_LogCloseFileForWrite)c(to)k(close)g(aLog's)g(log)g(file.)p
+(ESMC_LogCloseFileForWrite)c(to)k(close)g(log's)g(log)g(file.)p
 65 3857 V 65 4070 a Ff(5.2.9)81 b(ESMF_LogOpenFile)20
 b(-)g(opens)h(a)f(log)g(\002le)65 4305 y Fb(INTERF)-7
 b(A)n(CE:)p Black Black 214 4454 a Fc(subroutine)48 b
-(ESMF_LogOpenFile\(aLog,)e(numFile,)i(name\))65 4603
+(ESMF_LogOpenFile\(log,)e(numFile,)i(name\))65 4603
 y Fa(ARGUMENTS:)p Black Black 264 4752 a Fc(typdef\(ESMF\\_Log\))f(::)i
-(aLog)264 4843 y(integer)f(::)i(numFile)547 b(!!)49 b(set)g(to)h
+(log)264 4843 y(integer)f(::)i(numFile)547 b(!!)49 b(set)g(to)h
 (either)e(ESMF_SINGLE_FILE)1709 4934 y(!!)h(or)g(ESMF_MULTIPLE_FILE)264
 5026 y(characlter\(len=*\))e(::)i(name)199 b(!!)49 b(name)g(of)h(file)
 65 5175 y Fb(DESCRIPTION:)65 5357 y Fc(This)f(routine)f(finds)h(the)g
@@ -1004,15 +1004,15 @@ y Fa(ARGUMENTS:)p Black Black 264 4752 a Fc(typdef\(ESMF\\_Log\))f(::)i
 11 11 bop Black Black 65 523 a Ff(5.2.10)80 b(ESMF_LogInf)n(o)20
 b(-)h(writes)f(miscellaneous)h(inf)n(ormation)e(to)65
 667 y Fc(a)49 b(log)h(file)65 858 y Fb(INTERF)-7 b(A)n(CE:)p
-Black Black 264 1016 a Fc(ESMF\\_LogInfo\(aLog,)46 b(fmt,)j(...\))65
+Black Black 264 1016 a Fc(ESMF\\_LogInfo\(log,)46 b(fmt,)j(...\))65
 1174 y Fa(ARGUMENTS:)p Black Black 264 1332 a Fc
-(typedef\(ESMF\\_LogInfo\))d(::)j(aLog)149 b(!)49 b(log)h(object)264
+(typedef\(ESMF\\_LogInfo\))d(::)j(log)149 b(!)49 b(log)h(object)264
 1423 y(character\(len=*\))d(::)i(fmt)448 b(!c-style)48
 b(character)g(descriptior)65 1581 y Fb(DESCRIPTION:)65
 1763 y Fc(This)h(routine)f(allows)h(the)g(user)g(to)h(write)f
 (miscellaneous)e(information)h(the)h(Log)g(file.)99 b(It)65
 1855 y(uses)49 b(a)g(printf)g(style)g(character)f(descriptor,)g(e.g.)99
-b(ESMF_LogInfo\(aLog,"Hi)46 b(there,)i(a)i(character)65
+b(ESMF_LogInfo\(log,"Hi)46 b(there,)i(a)i(character)65
 1946 y(string.)98 b(The)49 b(routine)g(takes)g(a)g(variable)g(number)f
 (of)i(arguments,)e(so)h(that)g(any)g(number)g(of)65 2037
 y(data)g(items)g(can)g(be)g(written)g(to)g(the)h(Log)f(file.)99
@@ -1022,9 +1022,9 @@ b(field)h(widths,)g(precisions,)e(and)j(flags)65 2220
 y(are)f(ignored.)p 65 2311 3900 4 v 65 2526 a Ff(5.2.11)80
 b(ESMF_LogW)-5 b(ar)o(nMsg)20 b(-)g(writes)h(a)f(war)o(ning)g(message)g
 (to)g(the)g(log)g(\002le)65 2770 y Fb(INTERF)-7 b(A)n(CE:)p
-Black Black 264 2928 a Fc(subroutine)48 b(ESMF\\_LogWarnMsg\(aLog,)e
+Black Black 264 2928 a Fc(subroutine)48 b(ESMF\\_LogWarnMsg\(log,)e
 (errCode,)i(line,file,dir,msg\))65 3085 y Fa(ARGUMENTS:)p
-Black Black 364 3243 a Fc(typdef\(ESMF\\_Log\)::aLog)364
+Black Black 364 3243 a Fc(typdef\(ESMF\\_Log\)::log)364
 3334 y(integer)g(::)i(errCode)447 b(!integer)48 b(value)h(for)g(error)g
 (code)364 3426 y(character\(len=*\))d(::)k(msg)199 b(!msg)49
 b(written)f(to)i(log)f(file)364 3517 y(integer)f(::)i(line)597
@@ -1053,60 +1053,60 @@ b(ESMF_LogW)-5 b(ar)o(n)20 b(-)g(writes)g(a)h(war)o(nng)e(message)i(to)
 e(log)h(\002le)65 5503 y Fb(INTERF)-7 b(A)n(CE:)p Black
 1973 5789 a Fe(11)p Black eop
 %%Page: 12 13
-12 12 bop Black Black Black Black 364 523 a Fc(ESMF\\_LogWarn\(aLog,)46
+12 12 bop Black Black Black Black 364 523 a Fc(ESMF\\_LogWarn\(log,)46
 b(errCode\))65 666 y Fa(ARGUMENTS:)p Black Black 314
-809 a Fc(typdef\(ESMF\\_Log\))g(::)k(aLog)314 900 y(integer)e(::)i
+809 a Fc(typdef\(ESMF\\_Log\))g(::)k(log)314 900 y(integer)e(::)i
 (errCode)65 1043 y Fb(DESCRIPTION:)65 1226 y Fc(This)f(routine)f(is)i
 (identical)e(to)h(ESMF_LogWarnMsg,)e(except)i(a)g(msg)h(is)f(not)g
 (written)g(to)g(the)65 1317 y(log)g(file.)p 65 1408 3900
 4 v 65 1620 a Ff(5.2.13)80 b(ESMF_LogFlush)21 b(-)f(\003ushes)i(output)
 65 1849 y Fb(INTERF)-7 b(A)n(CE:)p Black Black 364 1992
-a Fc(ESMF\\_logflush\(aLog\))65 2134 y Fa(ARGUMENTS:)p
-Black Black 364 2277 a Fc(typdef\(ESMF\\_Log\))46 b(::)k(aLog)65
+a Fc(ESMF\\_logflush\(log\))65 2134 y Fa(ARGUMENTS:)p
+Black Black 364 2277 a Fc(typdef\(ESMF\\_Log\))46 b(::)k(log)65
 2420 y Fb(DESCRIPTION:)65 2603 y Fc(This)f(routine)f(calls)h(the)g(Log)
 h(method)e(ESMC_LogFlush\(\))f(which)i(sets)g(a)h(flag)f(that)g(causes)
 65 2694 y(all)g(output)g(from)g(the)g(buffers.)p 65 2786
 V 65 2997 a Ff(5.2.14)80 b(ESMF_LogNotFlush)20 b(-)h(pr)o(e)o(v)o(ents)
 e(output)h(fr)o(om)g(being)g(\003ushed)65 3226 y Fb(INTERF)-7
-b(A)n(CE:)p Black Black 364 3369 a Fc(ESMF\\_LogNotFlush\(aLog\))65
+b(A)n(CE:)p Black Black 364 3369 a Fc(ESMF\\_LogNotFlush\(log\))65
 3512 y Fa(ARGUMENTS:)p Black Black 364 3655 a Fc(typdef\(ESMF\\_Log\))
-46 b(::)k(aLog)65 3797 y Fb(DESCRIPTION:)65 3980 y Fc(This)f(routine)f
+46 b(::)k(log)65 3797 y Fb(DESCRIPTION:)65 3980 y Fc(This)f(routine)f
 (calls)h(the)g(Log)h(method)e(ESMC_LogNotFlush\(\))f(which)i(sets)g(a)g
 (flag)g(that)h(turns)65 4071 y(off)f(flushing.)98 b(By)49
 b(default,)g(this)g(flag)g(is)g(set.)p 65 4163 V 65 4374
 a Ff(5.2.15)80 b(ESMF_LogV)-8 b(erbose)20 b(-)g(causes)h(output)f(to)g
 (be)h(written)f(to)g(the)g(Log)65 4603 y Fb(INTERF)-7
-b(A)n(CE:)p Black Black 314 4746 a Fc(ESMF\\_LogVerbose\(aLog\))65
+b(A)n(CE:)p Black Black 314 4746 a Fc(ESMF\\_LogVerbose\(log\))65
 4889 y Fa(ARGUMENTS:)p Black Black 364 5032 a Fc(typdef\(ESMF\\_Log\))
-46 b(::)k(aLog)65 5175 y Fb(DESCRIPTION:)65 5357 y Fc(This)f(routine)f
+46 b(::)k(log)65 5175 y Fb(DESCRIPTION:)65 5357 y Fc(This)f(routine)f
 (sets)h(a)h(flag)f(that)g(causes)g(all)g(output)g(associated)f(with)h
-(the)g(aLog)g(ESMC_Log)65 5449 y(handle)f(to)i(be)f(written.)p
+(the)g(log)g(ESMC_Log)65 5449 y(handle)f(to)i(be)f(written.)p
 65 5540 V Black 1973 5789 a Fe(12)p Black eop
 %%Page: 13 14
 13 13 bop Black Black 65 523 a Ff(5.2.16)80 b(ESMF_LogNotV)-8
 b(erbose)19 b(-)h(causes)h(output)f(not)g(to)g(be)h(written)f(to)g(the)
 g(Log)65 734 y Fb(INTERF)-7 b(A)n(CE:)p Black Black 314
-860 a Fc(ESMF\\_LogVerbose\(aLog\))65 985 y Fa(ARGUMENTS:)p
-Black Black 364 1110 a Fc(typdef\(ESMF\\_Log\))46 b(::)k(aLog)65
+860 a Fc(ESMF\\_LogVerbose\(log\))65 985 y Fa(ARGUMENTS:)p
+Black Black 364 1110 a Fc(typdef\(ESMF\\_Log\))46 b(::)k(log)65
 1235 y Fb(DESCRIPTION:)65 1418 y Fc(This)f(routine)f(sets)h(a)h(flag)f
-(that)g(forces)g(all)g(output)g(associated)f(with)h(the)g(aLog)g
+(that)g(forces)g(all)g(output)g(associated)f(with)h(the)g(log)g
 (ESMC_Log)65 1509 y(handle)f(from)h(being)g(written.)p
 65 1600 3900 4 v 65 1808 a Ff(5.2.17)80 b(LogWrite)20
 b(-)g(F)n(ortran)f(style)h(method)h(to)f(write)g(to)g(log)g(\002le.)65
 2019 y Fb(INTERF)-7 b(A)n(CE:)p Black Black 364 2145
-a Fc(LogWrite\(aLog\))65 2270 y Fa(ARGUMENTS:)p Black
-Black 314 2395 a Fc(typdef\(ESMF\\_Log\))46 b(::)k(aLog)65
+a Fc(LogWrite\(log\))65 2270 y Fa(ARGUMENTS:)p Black
+Black 314 2395 a Fc(typdef\(ESMF\\_Log\))46 b(::)k(log)65
 2520 y Fb(DESCRIPTION:)65 2703 y Fc(This)f(function)f(called)h(from)g
 (with)g(a)h(Fortran)e(write)h(statement,)f(e.g.)99 b
-(write\(LogWrite\(aLog\),*\)"Hi".)65 2794 y(The)49 b(LogWrite)f
+(write\(LogWrite\(log\),*\)"Hi".)65 2794 y(The)49 b(LogWrite)f
 (function)h(appends)f(some)h(header)g(information)f(\(time,date)g
 (etc.\))98 b(to)50 b(what)65 2885 y(ever)f(is)g(printed)g(out)g(from)g
 (the)g(write,)g(e.g.)99 b(Hi.)p 65 2977 V 65 3184 a Ff(5.2.18)80
 b(ESMF_LogErrMsg)21 b(-)f(writes)h(a)f(err)g(message)h(to)e(the)i(log)f
 (\002le)65 3396 y Fb(INTERF)-7 b(A)n(CE:)p Black Black
-264 3521 a Fc(subroutine)48 b(ESMF\\_LogErrMsg\(aLog,)e(errCode,)i
+264 3521 a Fc(subroutine)48 b(ESMF\\_LogErrMsg\(log,)e(errCode,)i
 (line,file,dir,msg\))65 3646 y Fa(ARGUMENTS:)p Black
-Black 364 3771 a Fc(typdef\(ESMF\\_Log\)::aLog)364 3862
+Black 364 3771 a Fc(typdef\(ESMF\\_Log\)::log)364 3862
 y(integer)g(::)i(errCode)447 b(!integer)48 b(value)h(for)g(error)g
 (code)364 3954 y(character\(len=*\))d(::)k(msg)199 b(!msg)49
 b(written)f(to)i(log)f(file)364 4045 y(integer)f(::)i(line)597
@@ -1136,16 +1136,16 @@ y(can)f(halt)g(on)g(warnings.)p 65 5540 V Black 1973
 14 14 bop Black Black 65 523 a Ff(5.2.19)80 b(ESMF_LogErr)21
 b(-)f(writes)h(a)f(war)o(nng)f(message)i(to)f(log)f(\002le)65
 767 y Fb(INTERF)-7 b(A)n(CE:)p Black Black 364 925 a
-Fc(ESMF\\_LogErr\(aLog,)46 b(errCode\))65 1083 y Fa(ARGUMENTS:)p
-Black Black 314 1240 a Fc(typdef\(ESMF\\_Log\))g(::)k(aLog)314
+Fc(ESMF\\_LogErr\(log,)46 b(errCode\))65 1083 y Fa(ARGUMENTS:)p
+Black Black 314 1240 a Fc(typdef\(ESMF\\_Log\))g(::)k(log)314
 1332 y(integer)e(::)i(errCode)65 1489 y Fb(DESCRIPTION:)65
 1672 y Fc(This)f(routine)f(is)i(identical)e(to)h(ESMF_LogErrMsg,)e
 (except)i(a)h(msg)f(is)g(not)h(written)e(to)i(the)65
 1763 y(log)f(file.)p 65 1855 3900 4 v 65 2069 a Ff(5.2.20)80
 b(ESMF_LogHaltOnErr)19 b(-)i(pr)o(ogram)e(halts)h(on)g(encountering)g
 (an)g(err)o(or)65 2313 y Fb(INTERF)-7 b(A)n(CE:)p Black
-Black 364 2471 a Fc(subroutine)48 b(ESMF_LogHaltOnErr\(aLog\))214
-2562 y(!ARGUMENTS;)364 2654 y(typdef\(ESMF\\_Log\))e(::)k(aLog)65
+Black 364 2471 a Fc(subroutine)48 b(ESMF_LogHaltOnErr\(log\))214
+2562 y(!ARGUMENTS;)364 2654 y(typdef\(ESMF\\_Log\))e(::)k(log)65
 2811 y Fb(DESCRIPTION:)65 2994 y Fc(This)f(routine)f(calls)h(a)h(Log)f
 (method)g(that)g(sets)g(a)h(flag)f(to)g(stop)g(execution)f(on)i
 (reaching)e(an)65 3085 y(error.)98 b(This)49 b(is)h(the)f(default)g
@@ -1153,27 +1153,27 @@ Black 364 2471 a Fc(subroutine)48 b(ESMF_LogHaltOnErr\(aLog\))214
 a Ff(5.2.21)80 b(ESMF_LogNotHaltOnErr)18 b(-)j(pr)o(ogram)e(does)h(not)
 g(halt)65 3536 y Fc(on)49 b(encountering)f(an)h(error)65
 3727 y Fb(INTERF)-7 b(A)n(CE:)p Black Black 364 3884
-a Fc(subroutine)48 b(ESMF\\_LogNotHaltOnErr\(aLog\))65
+a Fc(subroutine)48 b(ESMF\\_LogNotHaltOnErr\(log\))65
 4042 y Fa(ARGUMENTS:)p Black Black 364 4200 a Fc(typdef\(ESMF\\_Log\))e
-(::)k(aLog)65 4357 y Fb(DESCRIPTION:)65 4540 y Fc(This)f(routine)f
+(::)k(log)65 4357 y Fb(DESCRIPTION:)65 4540 y Fc(This)f(routine)f
 (calls)h(a)h(Log)f(method)g(that)g(sets)g(a)h(flag)f(to)g(prevent)g
 (the)g(program)f(from)h(stopping)65 4631 y(reaching)f(an)h(error.)p
 65 4723 V 65 4937 a Ff(5.2.22)80 b(ESMF_LogHaltOnW)-5
 b(ar)o(n)18 b(-)j(pr)o(ogram)d(halts)j(on)f(encountering)g(a)g(war)o
 (ning)65 5181 y Fb(INTERF)-7 b(A)n(CE:)p Black Black
-364 5339 a Fc(subroutine)48 b(ESMF\\_LogHaltOnWarn\(aLog\))65
+364 5339 a Fc(subroutine)48 b(ESMF\\_LogHaltOnWarn\(log\))65
 5497 y Fa(ARGUMENTS:)p Black 1973 5789 a Fe(14)p Black
 eop
 %%Page: 15 16
 15 15 bop Black Black Black Black 364 523 a Fc(typdef\(ESMF\\_Log\))46
-b(::)k(aLog)65 660 y Fb(DESCRIPTION:)65 842 y Fc(This)f(routine)f
+b(::)k(log)65 660 y Fb(DESCRIPTION:)65 842 y Fc(This)f(routine)f
 (calls)h(a)h(Log)f(method)g(that)g(sets)g(a)h(flag)f(to)g(stop)g
 (execution)f(on)i(reaching)e(a)65 934 y(warning.)p 65
 1025 3900 4 v 65 1235 a Ff(5.2.23)80 b(ESMF_LogNotHaltOnW)-5
 b(ar)o(n)17 b(-)k(pr)o(ogram)d(does)j(not)f(halt)65 1379
 y Fc(on)49 b(encountering)f(a)h(warning)65 1471 y(!INTERFACE;)e
-(subroutine)h(ESMF_LogNotHaltOnWarn\(aLog\))d Fa(ARGUMENTS:)p
-Black Black 364 1686 a Fc(typdef\(ESMF\\_Log\))h(::)k(aLog)65
+(subroutine)h(ESMF_LogNotHaltOnWarn\(log\))d Fa(ARGUMENTS:)p
+Black Black 364 1686 a Fc(typdef\(ESMF\\_Log\))h(::)k(log)65
 1914 y Fb(DESCRIPTION:)65 2096 y Fc(This)f(routine)f(calls)h(a)h(Log)f
 (method)g(that)g(sets)g(a)h(flag)f(to)g(prevent)g(the)g(program)f(from)
 h(stopping)65 2188 y(reaching)f(an)h(error.)65 2456 y
@@ -1181,7 +1181,7 @@ Fi(6)119 b(LogErr)29 b(C++)i(Interface)65 2654 y Fd(6.1)99
 b(Use)25 b(and)g(Examples)65 2798 y Fc(<Detailed)48 b(examples)g(of)i
 (F90)f(usage)g(of)g(the)g(class.>)65 3008 y Ff(6.1.1)81
 b(Example)20 b(1.)25 b(Simple)c(Example.)65 3153 y Fc(In)49
-b(this)g(example)g(we)g(initialize)f(a)i(Log)f(object)g(\(aLog\))f(and)
+b(this)g(example)g(we)g(initialize)f(a)i(Log)f(object)g(\(log\))f(and)
 i(write)f(a)g(simple)g(message)f(to)65 3244 y(standard)g(out.)p
 Black Black 65 3392 a(#include)g("/home/sjs/ESMF/esmf/src/Infrastruct)o
 (ure/L)o(ogErr)o(/inclu)o(de/ES)o(MF_Lo)o(gMacro)o(s.inc)o(")65
@@ -1190,9 +1190,9 @@ o(/inclu)o(de/ES)o(MF_Lo)o(gErr.C)o(")65 3575 y(#include)g
 ("/home/sjs/ESMF/esmf/src/Infrastruct)o(ure/L)o(ogErr)o(/inclu)o(de/ES)
 o(MF_Lo)o(gConst)o(ants.)o(inc")65 3666 y(#include)g
 ("/home/sjs/ESMF/esmf/src/Infrastruct)o(ure/L)o(ogErr)o(/inclu)o(de/ES)
-o(MF_Er)o(rConst)o(ants.)o(inc")65 3757 y(ESMC_Log)g(aLog;)65
-3849 y(int)h(int_num=88;)65 3940 y(aLog.ESMC_LogInit\(\);)65
-4031 y(aLog.ESMC_LogInfo\(aLog,"Hi)c(there)k(agent)f(\045d)i(,)g
+o(MF_Er)o(rConst)o(ants.)o(inc")65 3757 y(ESMC_Log)g(log;)65
+3849 y(int)h(int_num=88;)65 3940 y(log.ESMC_LogInit\(\);)65
+4031 y(log.ESMC_LogInfo\(log,"Hi)c(there)k(agent)f(\045d)i(,)g
 (int_num\);)65 4241 y Ff(6.1.2)81 b(Example)20 b(2.)25
 b(Simple)c(Err)o(or)f(Handling)o(.)65 4386 y Fc(Here)49
 b(we)g(illustrate)f(simple)h(error)g(handling.)98 b(Error)49
@@ -1229,11 +1229,11 @@ o(MF_Lo)o(gMacro)o(s.inc)o(")65 1207 y(#include)g
 ("/home/sjs/ESMF/esmf/src/Infrastruct)o(ure/L)o(ogErr)o(/inclu)o(de/ES)
 o(MF_Lo)o(gConst)o(ants.)o(inc")65 1298 y(#include)g
 ("/home/sjs/ESMF/esmf/src/Infrastruct)o(ure/L)o(ogErr)o(/inclu)o(de/ES)
-o(MF_Er)o(rConst)o(ants.)o(inc")65 1390 y(ESMC_Log)g(anErr,aLog;)65
+o(MF_Er)o(rConst)o(ants.)o(inc")65 1390 y(ESMC_Log)g(anErr,log;)65
 1481 y(int)h(returnCode;)65 1572 y(anErr.ESMC_LogInit\(anErr,ESMF_LOG_)
 o(FALSE)o(,ESMF_)o(TRUE,)o(ESMF_)o(LOG_TR)o(UE\))65 1664
-y(aLog.ESMC_LogInit\(\))65 1755 y(anErr.ESMC_LogOpenFile\(ESMF_SINGLE)o
-(_LOG_)o(FILE,")o(anErr)o(.txt")o(\))65 1846 y(aLog.ESMC_LogInfo\('We)d
+y(log.ESMC_LogInit\(\))65 1755 y(anErr.ESMC_LogOpenFile\(ESMF_SINGLE)o
+(_LOG_)o(FILE,")o(anErr)o(.txt")o(\))65 1846 y(log.ESMC_LogInfo\('We)d
 (are)j(about)g(to)g(execute)g(foo.'\);)65 1938 y(returnCode=foo\(\))65
 2029 y(if)g(\(returnCode)f(==)h(ESMF_FATAL\))98 b({)164
 2120 y(anErr.ESMC_LogErrMsg\(ESMF_FATAL,"Enco)o(untere)o(d)44
@@ -1567,7 +1567,7 @@ y(!Description:)214 1393 y(This)g(is)h(method)e(is)i(used)f(in)g
 1485 y(ESMC\\_LogInterface.C\))d(to)k(write)e(data)h(to)h(the)f(log)g
 (file.)99 b(This)49 b(routine)214 1576 y(is)h(used)f(with)g(the)g
 (standard)f(Fortran)h(write)g(function,)f(eg.)214 1667
-y(write\(logwrite\(aLog\),*\))e('Hi)j('.)214 1758 y(The)g(routine)g
+y(write\(logwrite\(log\),*\))e('Hi)j('.)214 1758 y(The)g(routine)g
 (writes)g(header)f(data,)h(and)214 1850 y(then)g(returns)g(a)g(unit)g
 (number)g(to)h(the)f(Fortran)f(write)h(function.)p 65
 1976 3900 4 v 65 2184 a Ff(6.2.15)80 b(ESMC_LogF)n(ormName)19

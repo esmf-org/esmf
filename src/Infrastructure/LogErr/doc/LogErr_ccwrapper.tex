@@ -41,7 +41,7 @@
    These wrapper function are called by the FORTRAN routines defined in the file 
    ESMF\_LogErr.F90.  The structure is:
     
-      ESMF\_LogFoo(aLog) --->  C\_ESMF\_LogFoo(aLog)  ----> aLog.ESMC\_LogFoo()
+      ESMF\_LogFoo(log) --->  C\_ESMF\_LogFoo(log)  ----> log.ESMC\_LogFoo()
    In other words, these routines actually call the C++ methods.  You can't call
    the C++ methods directly from FORTRAN.  You must go thru this intermediate step.
    
@@ -57,11 +57,11 @@
 \begin{verbatim} 
  void FTN(c_esmf_logclosefile)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}         ESMC_Log* aLog)\end{verbatim}
+\begin{verbatim}         ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
-   Calls the method {\tt ESMC\_LogCloseFileForWrite} to close aLog's 
+   Calls the method {\tt ESMC\_LogCloseFileForWrite} to close log's 
    log file.
    
 %/////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}    void FTN(c_esmf_logopenfile)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}         ESMC_Log *aLog, 
+\begin{verbatim}         ESMC_Log *log, 
          int *numFiles, 
          char name[], 
          int namelen)\end{verbatim}
@@ -96,14 +96,14 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}    void FTN(esmf_loginfo)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_Log* aLog,
+\begin{verbatim}       ESMC_Log* log,
        char* fmt,...)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
     This routine allows the user to write miscellaneous information the
     {\tt ESMC\_Log} file. It uses a printf style character descriptor, e.g. 
-    {\tt ESMC\_LogInfo}(aLog,"Hi there, %s ", shep), where shep here would be
+    {\tt ESMC\_LogInfo}(log,"Hi there, %s ", shep), where shep here would be
     a character string. The routine takes a variable number of arguments,
     so that any number of data items can be written to the {\tt ESMC\_Log} file.
     Currently, only character, strings, integers, and reals are supported.
@@ -120,7 +120,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      void FTN(c_esmf_logwarnmsg)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}   none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_Log *aLog,
+\begin{verbatim}       ESMC_Log *log,
        int *errCode,
        int *line,
        char file[],
@@ -147,7 +147,7 @@
 \begin{verbatim}       void FTN(c_esmf_logwarn)(
    !RETURN VALUES:
    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}        ESMC_Log *aLog,
+\begin{verbatim}        ESMC_Log *log,
         int *errCode,
         int *line,
         char file[],
@@ -172,7 +172,7 @@
 \begin{verbatim}        void FTN(c_esmf_logsetflush)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}       none\end{verbatim}{\em ARGUMENTS:}
 \begin{verbatim}    
-       ESMC_Log* aLog)\end{verbatim}
+       ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -189,7 +189,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      void FTN(c_esmf_logsetnotflush)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_Log* aLog)
+\begin{verbatim}       ESMC_Log* log)
  \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -208,12 +208,12 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}     void FTN(c_esmf_logsetverbose)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}      ESMC_Log* aLog)\end{verbatim}
+\begin{verbatim}      ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
       This routine sets a flag that causes all output associated with
-      the aLog {\tt ESMC\_Log} handle to be written. 
+      the log {\tt ESMC\_Log} handle to be written. 
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
@@ -225,12 +225,12 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      void FTN(c_esmf_logsetnotverbose)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      NONE\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog) \end{verbatim}
+\begin{verbatim}     ESMC_Log* log) \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
       This routine sets a flag that forces all output associated with
-      the aLog {\tt ESMC\_Log} handle from being written. 
+      the log {\tt ESMC\_Log} handle from being written. 
 %/////////////////////////////////////////////////////////////
  
 \mbox{}\hrulefill\ 
@@ -243,12 +243,12 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      int  FTN(c_esmf_loggetunit)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      A Fortran Unit Number\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}      ESMC_Log *aLog)\end{verbatim}
+\begin{verbatim}      ESMC_Log *log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
       This function called from with a Fortran write statement, e.g.
-      write(LogWrite(aLog),*)"Hi".  The {\tt ESMC\_LogWrite} function
+      write(LogWrite(log),*)"Hi".  The {\tt ESMC\_LogWrite} function
       appends some
       header information (time,date etc.) to what ever is printed out
       from the write, e.g. Hi. 
@@ -263,7 +263,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}     void FTN(c_esmf_logerrmsg)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log *aLog,
+\begin{verbatim}     ESMC_Log *log,
      int *errCode,
      int *line, 
      char file[],
@@ -290,7 +290,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}      void FTN(c_esmf_logerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}      ESMC_Log *aLog,
+\begin{verbatim}      ESMC_Log *log,
       int *errCode,
       int *line, 
       char file[],
@@ -315,7 +315,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}     void FTN(esmf_logsethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -334,7 +334,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}    void FTN(c_esmf_logsetnothaltonerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -353,7 +353,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim} void FTN(c_esmf_logsethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -371,7 +371,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}     void FTN(c_esmf_logsetnothaltonwarn)( \end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}     none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}       ESMC_Log* aLog)
+\begin{verbatim}       ESMC_Log* log)
                         \end{verbatim}
 {\sf DESCRIPTION:\\ }
 
@@ -390,7 +390,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim} void FTN(c_esmf_loggetverbose)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog, ESMC_Logical* verbose)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log, ESMC_Logical* verbose)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -407,7 +407,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim} void FTN(c_esmf_loggetflush)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog, ESMC_Logical* flush)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log, ESMC_Logical* flush)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -424,7 +424,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim} void FTN(c_esmf_loggethaltonerr)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog,ESMC_Logical* haltOnErr)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log,ESMC_Logical* haltOnErr)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 
@@ -441,7 +441,7 @@
 \bigskip{\sf INTERFACE:}
 \begin{verbatim} void FTN(c_esmf_loggethaltonwarn)(\end{verbatim}{\em RETURN VALUE:}
 \begin{verbatim}    none\end{verbatim}{\em ARGUMENTS:}
-\begin{verbatim}     ESMC_Log* aLog,ESMC_Logical* haltOnWarn)\end{verbatim}
+\begin{verbatim}     ESMC_Log* log,ESMC_Logical* haltOnWarn)\end{verbatim}
 {\sf DESCRIPTION:\\ }
 
 

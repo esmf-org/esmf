@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.59 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.60 2004/06/13 05:25:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.59 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.60 2004/06/13 05:25:44 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -354,7 +354,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return time interval remainder
+! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return TimeInterval remainder
 !
 ! !INTERFACE:
       interface MOD

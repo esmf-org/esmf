@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.56 2004/06/11 20:24:53 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.57 2004/06/13 05:25:43 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.56 2004/06/11 20:24:53 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.57 2004/06/13 05:25:43 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -354,7 +354,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmDestroy
+! !IROUTINE: ESMF_AlarmDestroy - Free all resources associated with an Alarm
 !
 ! !INTERFACE:
       subroutine ESMF_AlarmDestroy(alarm, rc)
@@ -1023,7 +1023,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmWasPrevRinging - Check if Alarm was ringing on the previous clock timestep
+! !IROUTINE:  ESMF_AlarmWasPrevRinging - Check if Alarm was ringing on the previous Clock timestep
 
 ! !INTERFACE:
       function ESMF_AlarmWasPrevRinging(alarm, rc)
@@ -1061,7 +1061,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmWillRingNext - Check if Alarm will ring upon the next clock timestep
+! !IROUTINE:  ESMF_AlarmWillRingNext - Check if Alarm will ring upon the next Clock timestep
 
 ! !INTERFACE:
       function ESMF_AlarmWillRingNext(alarm, timeStep, rc)

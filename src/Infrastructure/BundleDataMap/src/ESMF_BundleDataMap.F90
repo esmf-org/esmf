@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.19 2004/06/10 23:39:48 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.20 2004/06/13 05:25:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.19 2004/06/10 23:39:48 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.20 2004/06/13 05:25:42 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -411,7 +411,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleDataMapSetInvalid"
 !BOP
-! !IROUTINE:  ESMF_BundleDataMapSetInvalid - Set BundleDataMap to invalid state
+! !IROUTINE:  ESMF_BundleDataMapSetInvalid - Set BundleDataMap to invalid status
 
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapSetInvalid(bundledatamap, rc)
@@ -422,7 +422,7 @@ end function
 !
 ! !DESCRIPTION:
 !      ESMF routine to set the contents of an {\tt ESMF\_BundleDataMap}
-!      to an uninitialized value.
+!      to an invalid status.
 !
 !     The arguments are:
 !     \begin{description}

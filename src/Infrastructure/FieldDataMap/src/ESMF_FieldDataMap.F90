@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.18 2004/06/10 23:39:49 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.19 2004/06/13 05:25:42 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.18 2004/06/10 23:39:49 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.19 2004/06/13 05:25:42 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -580,7 +580,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldDataMapSetInvalid"
 !BOP
-! !IROUTINE:  ESMF_FieldDataMapSetInvalid - Set contents of a FieldDataMap to uninitialized value.
+! !IROUTINE:  ESMF_FieldDataMapSetInvalid - Set FieldDataMap to an invalid status
 
 ! !INTERFACE:
       subroutine ESMF_FieldDataMapSetInvalid(fielddatamap, rc)
@@ -591,7 +591,7 @@
 !
 ! !DESCRIPTION:
 !     Set the contents of an {\tt ESMF\_FieldDataMap}
-!     to an uninitialized value.
+!     to an invalid status.
 !
 !     The arguments are:
 !     \begin{description}
