@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayTest.F90,v 1.2 2003/01/16 22:29:26 nscollins Exp $
+! $Id: ESMF_ArrayTest.F90,v 1.3 2003/01/23 20:31:41 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -18,6 +18,7 @@
     program ESMF_ArrayTest
     
 !   ! Other ESMF modules which are needed by Arrays
+    use ESMF_BaseMod
     use ESMF_IOMod
     use ESMF_ArrayMod
     implicit none
@@ -27,14 +28,15 @@
     integer :: i, j, ni, nj
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
-    real(selected_real_kind(6,45)), dimension(:,:), pointer :: realptr, realptr2
-    integer(selected_int_kind(5)), dimension(:), pointer :: intptr, intptr2
+    real(ESMF_IKIND_R8), dimension(:,:), pointer :: realptr, realptr2
+    integer(ESMF_IKIND_I4), dimension(:), pointer :: intptr, intptr2
 
     
 !-------------------------------------------------------------------------------
 !   ! Test 1:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
+    print *, ">>> Test 1:"
  
 !   ! Allocate and set initial data values
     ni = 15 
@@ -62,6 +64,8 @@
 !   ! Test 2:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
+    print *, ">>> Test 2:"
+ 
  
 !   ! Allocate and set initial data values
     ni = 35 
@@ -84,6 +88,8 @@
 !   ! Test 2a:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
+    print *, ">>> Test 2a:"
+ 
  
 !   ! Allocate and set initial data values
     ni = 22 
@@ -106,6 +112,8 @@
 !   ! Test 3:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 2D.
+    print *, ">>> Test 3:"
+ 
  
 !   ! Allocate and set initial data values
     ni = 5 
@@ -124,6 +132,13 @@
     call ESMF_ArrayPrint(array2, "foo", rc)
     print *, "array 2 print returned"
 
+    do i=1,ni
+     do j=1,nj
+       realptr(i,j) = (i*2) + ((j-1)*ni) 
+     enddo
+    enddo
+    print *, "realptr data changed after nocopy set, now = ", realptr
+
     call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2
@@ -136,6 +151,8 @@
 !   ! Test 4:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Real, 2D.
+    print *, ">>> Test 4:"
+ 
  
 !   ! Allocate and set initial data values
     ni = 15 
@@ -159,7 +176,47 @@
 
 !-------------------------------------------------------------------------------
 !   ! Test 5:
+!   !  Create based on an existing, allocated F90 pointer. 
+!   !  Data is type Real, 2D.  DO_COPY set
+    print *, ">>> Test 5:"
+ 
+ 
+!   ! Allocate and set initial data values
+    ni = 15 
+    nj = 13 
+    allocate(realptr(ni,nj))
+    do i=1,ni
+     do j=1,nj
+       realptr(i,j) = i + ((j-1)*ni) + 0.1
+     enddo
+    enddo
+
+    array2 = ESMF_ArrayCreate(realptr, ESMF_DO_COPY, rc)
+    print *, "array 2 create returned"
+
+    call ESMF_ArrayPrint(array2, "foo", rc)
+    print *, "array 2 print returned"
+
+    do i=1,ni
+     do j=1,nj
+       realptr(i,j) = (i*2) + ((j-1)*ni) 
+     enddo
+    enddo
+    print *, "realptr data changed after docopy set, now = ", realptr
+
+    call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
+    print *, "array 2 getdata returned"
+    print *, "realptr2 data = ", realptr2
+
+    call ESMF_ArrayDestroy(array2)
+    print *, "array 2 destroy returned"
+
+
+!-------------------------------------------------------------------------------
+!   ! Test 6:
 !   !  Create based on an array specification.
+    ! print *, ">>> Test 6:"
+ 
 
     arank = 2
 !   !   arrayspec = ESMF_ArraySpecCreate(arank, ESMF_DATA_REAL, ESMF_KIND_R4, &
