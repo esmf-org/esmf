@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.2 2003/02/28 18:00:20 eschwab Exp $
+// $Id: ESMC_Test.C,v 1.3 2003/03/06 17:33:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,    
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Test.C,v 1.2 2003/02/28 18:00:20 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Test.C,v 1.3 2003/03/06 17:33:42 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -51,11 +51,12 @@
 //    ESMF_SUCCESS or ESMF_FAILURE
 //
 // !ARGUMENTS:
-      int condition,
-      char *failMsg,
-      int *result,
-      char *file,
-      int line) {
+      int condition,  // in - the test pass/fail condition
+      char *name,     // in - the test name
+      char *failMsg,  // in - optional message printed on test failure
+      int *result,    // in/out - cumulative failure count
+      char *file,     // in - test filename
+      int line) {     // in - test line number in test filename
 // 
 // !DESCRIPTION:
 //    Prints PASS/FAIL based on passed-in condition.  If FAIL, prints
@@ -64,17 +65,18 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
- if (result == 0 || failMsg == 0 || file == 0) {
+ if (name == 0 || result == 0 || failMsg == 0 || file == 0) {
    cout << "FAIL " << __FILE__ << ", line " << __LINE__ <<
            ", null pointer(s) passed in" << endl;
    return(ESMF_FAILURE);
  }
 
  if (condition) {
-   cout << "PASS " << file << ", line " << line << endl;
+   cout << "PASS " << name << ", " << file << ", line " << line << endl;
  }
  else {
-   cout << "FAIL " << file << ", line " << line << ", " << failMsg << endl;
+   cout << "FAIL " << name << ", " << file << ", line " << line << 
+           ", " << failMsg << endl;
    (*result)++; // count total failures; 0 = all pass
  }
  return(ESMF_SUCCESS);
