@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.45 2004/03/05 00:50:02 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.46 2004/03/10 03:05:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,13 +26,15 @@
  #include <float.h>
  #include <string.h>
 
+ #include <ESMC_Time.h>
+
  // associated class definition file
  #include <ESMC_TimeInterval.h>
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.45 2004/03/05 00:50:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.46 2004/03/10 03:05:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -85,7 +87,12 @@
       ESMF_KIND_R8 *us_r8,     // in - floating point microseconds
       ESMF_KIND_R8 *ns_r8,     // in - floating point nanoseconds
       ESMF_KIND_I4 *sN,        // in - fractional seconds numerator
-      ESMF_KIND_I4 *sD) {      // in - fractional seconds denominator
+      ESMF_KIND_I4 *sD,        // in - fractional seconds denominator
+      ESMC_Time *startTime,    // in - starting time for absolute calendar
+                               //      interval
+      ESMC_Time *endTime,      // in - ending time for absolute calendar
+                               //      interval
+      ESMC_Calendar **calendar) { // in - calendar for calendar interval
 //
 // !DESCRIPTION:
 //      Initialzes a {\tt ESMC\_TimeInterval} with values given in F90
@@ -110,6 +117,17 @@
     
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
+
+    // absolute or calendar-specific interval ?
+    if (startTime != ESMC_NULL_POINTER) {
+      this->startTime = *startTime;
+    }
+    if (endTime != ESMC_NULL_POINTER) {
+      this->endTime = *endTime;
+    }
+    if (calendar != ESMC_NULL_POINTER) {
+      this->calendar = *calendar;
+    }
 
     // relative calendar interval
     //  TODO:  when calendar, startTime, endTime specified, convert to
@@ -197,7 +215,18 @@
       ESMF_KIND_R8 *ns_r8,      // out - floating point nanoseconds
       ESMF_KIND_I4 *sN,         // out - fractional seconds numerator
       ESMF_KIND_I4 *sD,         // out - fractional seconds denominator
-      char *timeString) const { // out - ISO 8601 format PyYmMdDThHmMsS
+      ESMC_Time *startTime,     // out - starting time of absolute calendar
+                                //       interval
+      ESMC_Time *endTime,       // out - ending time of absolute calendar
+                                //       interval
+      ESMC_Calendar **calendar, // out - calendar of calendar interval
+      ESMC_Time *startTimeIn,   // in  - starting time for calendar interval
+                                //       unit conversions
+      ESMC_Time *endTimeIn,     // in  - ending time for calendar interval
+                                //       unit conversions
+      ESMC_Calendar **calendarIn, // in  - calendar for calendar interval
+                                  //       unit conversions
+      char *timeString) const {   // out - ISO 8601 format PyYmMdDThHmMsS
 //
 // !DESCRIPTION:
 //      Gets a {\tt ESMC\_TimeInterval}'s values in user-specified format.
@@ -213,6 +242,17 @@
     //   requested will be removed from this time.  In this way, a requested
     //   unit is bounded by the next higher requested unit.
     ESMF_KIND_I8 baseTimeToConvert = this->s;
+
+    // absolute or calendar-specific interval
+    if (startTime != ESMC_NULL_POINTER) {
+      *startTime = this->startTime;
+    }
+    if (endTime != ESMC_NULL_POINTER) {
+      *endTime = this->endTime;
+    }
+    if (calendar != ESMC_NULL_POINTER) {
+      *calendar = this->calendar;
+    }
 
     // relative calendar interval
     //  TODO:  When calendar, startTime, endTime specified, can convert 

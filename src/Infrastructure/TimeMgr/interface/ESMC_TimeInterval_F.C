@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.28 2004/03/05 00:54:20 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.29 2004/03/10 03:05:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,8 @@ extern "C" {
                                  ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                  ESMF_KIND_R8 *ns_r8,
                                  ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                 int *status) {
+                                 ESMC_Time *startTime, ESMC_Time *endTime,
+                                 ESMC_Calendar **calendar, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalSet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -72,7 +73,10 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(us_r8),
                        ESMC_NOT_PRESENT_FILTER(ns_r8),
                        ESMC_NOT_PRESENT_FILTER(sN),
-                       ESMC_NOT_PRESENT_FILTER(sD) );
+                       ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(startTime),
+                       ESMC_NOT_PRESENT_FILTER(endTime),
+                       ESMC_NOT_PRESENT_FILTER(calendar) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -89,6 +93,10 @@ extern "C" {
                                  ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                  ESMF_KIND_R8 *ns_r8,
                                  ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                 ESMC_Time *startTime, ESMC_Time *endTime,
+                                 ESMC_Calendar **calendar, 
+                                 ESMC_Time *startTimeIn, ESMC_Time *endTimeIn,
+                                 ESMC_Calendar **calendarIn, 
                                  char *timeString, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
@@ -113,6 +121,12 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(ns_r8),
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
+                       ESMC_NOT_PRESENT_FILTER(startTime),
+                       ESMC_NOT_PRESENT_FILTER(endTime),
+                       ESMC_NOT_PRESENT_FILTER(calendar), 
+                       ESMC_NOT_PRESENT_FILTER(startTimeIn),
+                       ESMC_NOT_PRESENT_FILTER(endTimeIn),
+                       ESMC_NOT_PRESENT_FILTER(calendarIn),
                        ESMC_NOT_PRESENT_FILTER(timeString) );
           if (ESMC_PRESENT(status)) *status = rc;
        }

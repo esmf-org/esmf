@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.48 2004/03/05 00:55:34 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.49 2004/03/10 03:05:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,34 +49,18 @@
       use ESMF_FractionMod
       use ESMF_CalendarMod
 
+      ! type definition for this module
+      use ESMF_TimeIntervalTypeMod
+
       implicit none
 !
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_TimeInterval
+!     ! ESMF_TimeInterval definition in ESMF_TimeIntervalTypeMod to resolve
+!     ! mutual dependency with ESMF_TimeInterval
 !
-!     ! F90 class type to match C++ TimeInterval class in size only;
-!     !  all dereferencing within class is performed by C++ implementation
-
-!     ! Equivalent sequence and kind to C++:
-
-      type ESMF_TimeInterval
-      sequence                             ! match C++ storage order
-      private                              !   (members opaque on F90 side)
-        type(ESMF_BaseTime)   :: baseTime  ! inherit base class
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-        integer(ESMF_KIND_I8) :: yy = 0    ! calendar interval number of years
-        integer(ESMF_KIND_I8) :: mm = 0    ! calendar interval number of months
-        integer(ESMF_KIND_I8) :: d  = 0    ! calendar interval number of days
-#else
-        integer(ESMF_KIND_I8) :: yy        ! calendar interval number of years
-        integer(ESMF_KIND_I8) :: mm        ! calendar interval number of months
-        integer(ESMF_KIND_I8) :: d         ! calendar interval number of days
-#endif
-      end type
-
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_TimeInterval
@@ -120,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.48 2004/03/05 00:55:34 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.49 2004/03/10 03:05:01 eschwab Exp $'
 
 !==============================================================================
 !
@@ -873,7 +857,8 @@
                                       ms, us, ns, &
                                       d_r8, h_r8, m_r8, s_r8, &
                                       ms_r8, us_r8, ns_r8, &
-                                      sN, sD, rc)
+                                      sN, sD, &
+                                      startTime, endTime, calendar, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeInterval
@@ -899,6 +884,9 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8
       integer(ESMF_KIND_I4),   intent(in),  optional :: sN
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD
+      type(ESMF_Time),         intent(in),  optional :: startTime
+      type(ESMF_Time),         intent(in),  optional :: endTime
+      type(ESMF_Calendar),     intent(in),  optional :: calendar
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -909,7 +897,7 @@
 !     integers to maintain precision.  Hence, user-specified floating point
 !     values are converted internally to integers.
 !
-!     Ranges are limited only by machine word size.  Defaults are 0,
+!     Ranges are limited only by machine word size.  Numeric defaults are 0,
 !     except for sD, which is 1.
 !
 !     The arguments are:
@@ -962,6 +950,27 @@
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
 !          Default = 1.
+!     \item[{[startTime]}]
+!          Starting time of an absolute calendar interval (yy, mm, and/or d);
+!          pins a calendar interval to a specific point in time.  If not set,
+!          and endTime and calendar also not set, calendar interval "floats"
+!          across all calendars and times.
+!          Mutually exclusive with calendar since it contains a calendar.
+!     \item[{[endTime]}]
+!          Ending time of an absolute calendar interval (yy, mm, and/or d);
+!          pins a calendar interval to a specific point in time.  If not set,
+!          and startTime and calendar also not set, calendar interval "floats"
+!          across all calendars and times.
+!          Mutually exclusive with calendar since it contains a calendar.
+!     \item[{[calendar]}]
+!          {\tt Calendar} used to give better definition to calendar interval
+!          (yy, mm, and/or d) for arithmetic, comparison, and conversion
+!          operations.  Allows calendar interval to "float" across all times
+!          on a specific calendar.
+!          Default = NULL; if startTime and endTime also not specified, calendar
+!          interval "floats" across all calendars and times.
+!          Mutually exclusive with startTime and endTime since they contain
+!          a calendar.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -974,7 +983,8 @@
       call c_ESMC_TimeIntervalSet(timeInterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
-                                  us_r8, ns_r8, sN, sD, rc)
+                                  us_r8, ns_r8, sN, sD, &
+                                  startTime, endTime, calendar, rc)
 
       end subroutine ESMF_TimeIntervalSet
 
@@ -993,6 +1003,8 @@
                                       d_r8, h_r8, m_r8, s_r8, &
                                       ms_r8, us_r8, ns_r8, &
                                       sN, sD, &
+                                      startTime,   endTime,   calendar, &
+                                      startTimeIn, endTimeIn, calendarIn, &
                                       timeString, rc)
 
 ! !ARGUMENTS:
@@ -1019,6 +1031,12 @@
       real(ESMF_KIND_R8),      intent(out), optional :: ns_r8
       integer(ESMF_KIND_I4),   intent(out), optional :: sN
       integer(ESMF_KIND_I4),   intent(out), optional :: sD
+      type(ESMF_Time),         intent(out), optional :: startTime
+      type(ESMF_Time),         intent(out), optional :: endTime
+      type(ESMF_Calendar),     intent(out), optional :: calendar
+      type(ESMF_Time),         intent(in),  optional :: startTimeIn  ! Input
+      type(ESMF_Time),         intent(in),  optional :: endTimeIn    ! Input
+      type(ESMF_Calendar),     intent(in),  optional :: calendarIn   ! Input
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: rc
 
@@ -1091,6 +1109,29 @@
 !          Integer numerator portion of fractional seconds (sN/sD).
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
+!     \item[{[startTime]}]
+!          Starting time, if set, of an absolute calendar interval
+!          (yy, mm, and/or d).
+!     \item[{[endTime]}]
+!          Ending time, if set, of an absolute calendar interval
+!          (yy, mm, and/or d).
+!     \item[{[calendar]}]
+!          Associated {\tt Calendar}, if any.
+!     \item[{[startTimeIn]}]
+!          INPUT argument:  pins a calendar interval to a specific point
+!          in time to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
+!          previously set.  Mutually exclusive with endTimeIn and calendarIn.
+!     \item[{[endTimeIn]}]
+!          INPUT argument:  pins a calendar interval to a specific point
+!          in time to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
+!          previously set.  Mutually exclusive with startTimeIn and calendarIn.
+!     \item[{[calendarIn]}]
+!          INPUT argument:  pins a calendar interval to a specific calendar
+!          to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
+!          and endTimeIn since they contain a calendar.
 !     \item[timeString]
 !          The string to return.
 !     \item[{[rc]}]
@@ -1105,7 +1146,10 @@
       call c_ESMC_TimeIntervalGet(timeInterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
-                                  us_r8, ns_r8, sN, sD, timeString, rc)
+                                  us_r8, ns_r8, sN, sD, &
+                                  startTime,   endTime,   calendar, &
+                                  startTimeIn, endTimeIn, calendarIn, &
+                                  timeString, rc)
     
       end subroutine ESMF_TimeIntervalGet
 

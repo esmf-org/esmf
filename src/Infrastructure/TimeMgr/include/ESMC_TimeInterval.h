@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.29 2004/03/05 00:50:02 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.30 2004/03/10 03:05:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -67,6 +67,7 @@ class ESMC_TimeInterval;
 // !USES:
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMC_BaseTime.h>       // inherited BaseTime class
+ #include <ESMC_Time.h>
 
 // !PUBLIC TYPES:
  class ESMC_TimeInterval;
@@ -79,6 +80,10 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
   private:
+    ESMC_Time startTime;  // for absolute calendar intervals
+    ESMC_Time endTime;    // for absolute calendar intervals
+    ESMC_Calendar *calendar;  // for calendar intervals on a 
+                              //   specific calendar
     ESMF_KIND_I8 yy;      // for relative Calendar intervals:  number of years
     ESMF_KIND_I8 mm;      // for relative Calendar intervals:  number of months
     ESMF_KIND_I8 d;       // for relative Calendar intervals:  number of days
@@ -105,7 +110,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
                              ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
                              ESMF_KIND_R8 *ns_r8=0,
-                             ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0);
+                             ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
+                             ESMC_Time *startTime=0, ESMC_Time *endTime=0,
+                             ESMC_Calendar **calendar=0);
 
     int ESMC_TimeIntervalGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                              ESMF_KIND_I4 *mm=0, ESMF_KIND_I8 *mm_i8=0,
@@ -119,6 +126,10 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
                              ESMF_KIND_R8 *ns_r8=0,
                              ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
+                             ESMC_Time *startTime=0, ESMC_Time *endTime=0,
+                             ESMC_Calendar **calendar=0,
+                             ESMC_Time *startTimeIn=0, ESMC_Time *endTimeIn=0,
+                             ESMC_Calendar **calendarIn=0,
                              char *timeString=0) const;
 
     // native C++ interface -- via variable argument lists
