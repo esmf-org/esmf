@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.22 2004/12/30 19:54:52 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.23 2004/12/30 20:17:31 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -237,19 +237,20 @@ PETs in the current VM must make the same distributed object
 creation calls.   When a Coupler Component running on a superset
 of a Gridded Component's PETs needs to make communication calls
 involving objects created by the Gridded Component,
-an ESMF-supplied function called {\bf reconcile} creates proxy
+an ESMF-supplied function called {\tt ESMF\_StateReconcile()} creates proxy
 objects in those PETs which had no previous information about the
 distributed objects.  Proxy objects contain no local data but
-can be used in communication calls (such as Regrid or Redistribution)
-to describe
-the remote source for data being moved to the current PET,
+can be used in communication calls (such as regrid or redistribution)
+to describe the remote source for data being moved to the current PET,
 or as a remote destination for local data being moved from this PET.
+Figure \ref{fig:reconcile} is a simple schematic that shows the 
+sequence of events in a reconcile call.
 
 \begin{center}
 \begin{figure}
 \caption{An {\tt ESMF\_StateReconcile()} call creates proxy 
-objects for use in communication calls.  Such a call would normally
-be made during Coupler initialization.}
+objects for use in subsequent communication calls.  The reconcile 
+call would normally be made during Coupler initialization.}
 \label{fig:reconcile}
 \scalebox{1.0}{\includegraphics{ESMF_reconcile.eps}}
 \end{figure}
