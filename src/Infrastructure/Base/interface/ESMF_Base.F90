@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.62 2003/09/04 22:41:41 cdeluca Exp $
+! $Id: ESMF_Base.F90,v 1.63 2003/09/04 22:56:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -131,8 +131,8 @@
                    ESMF_KIND_I8 = selected_int_kind(18), &
                    ESMF_KIND_R4 = selected_real_kind(3,25), &
                    ESMF_KIND_R8 = selected_real_kind(6,45), &
-                   ESMF_KIND_C8 = selected_real_kind(3,25), &
-                   ESMF_KIND_C16 = selected_real_kind(6,45)
+                   ESMF_C8 = selected_real_kind(3,25), &
+                   ESMF_C16 = selected_real_kind(6,45)
 
 !------------------------------------------------------------------------------
 
@@ -239,7 +239,7 @@
              ESMF_R4, ESMF_R8, ESMF_C8, ESMF_C16
 
       public ESMF_KIND_I1, ESMF_KIND_I2, ESMF_KIND_I4, ESMF_KIND_I8, & 
-             ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
+             ESMF_KIND_R4, ESMF_KIND_R8, ESMF_C8, ESMF_C16
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
@@ -353,7 +353,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.62 2003/09/04 22:41:41 cdeluca Exp $'
+               '$Id: ESMF_Base.F90,v 1.63 2003/09/04 22:56:04 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.26 2003/09/04 18:57:55 cdeluca Exp $
+// $Id: ESMC_Comm.C,v 1.27 2003/09/04 22:56:04 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.26 2003/09/04 18:57:55 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.27 2003/09/04 22:56:04 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -95,7 +95,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
    // ESMF_I1 ESMF_I2 ESMF_I4 ESMF_I8 ESMF_R4
   {0, MPI_CHAR,    MPI_SHORT,   MPI_INT,     MPI_LONG,    MPI_FLOAT,
 
-   // ESMF_R8 ESMF_KIND_C8 ESMF_KIND_C16
+   // ESMF_R8 ESMF_C8 ESMF_C16
       MPI_DOUBLE,  MPI_DOUBLE, MPI_LONG_DOUBLE };
    // MPI_DOUBLE,  MPI_COMPLEX, MPI_DOUBLE_COMPLEX }; // for MPI implementations
                                                       // that support COMPLEX

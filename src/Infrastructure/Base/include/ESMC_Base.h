@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.27 2003/09/04 22:41:41 cdeluca Exp $
+// $Id: ESMC_Base.h,v 1.28 2003/09/04 22:56:04 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,8 +63,8 @@ enum ESMC_DataKind { ESMF_I1=1,
                      ESMF_I8,
                      ESMF_R4,
                      ESMF_R8,
-                     ESMF_KIND_C8,
-                     ESMF_KIND_C16 };
+                     ESMF_C8,
+                     ESMF_C16 };
 
 // ESMF platform-dependent data types
 #ifdef ESMF_IS_32BIT_MACHINE
