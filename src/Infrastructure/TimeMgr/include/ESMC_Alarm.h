@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.7 2003/03/29 01:41:16 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.8 2003/04/02 17:24:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -86,6 +86,8 @@
 
  // class definition type
 class ESMC_Alarm {
+//class ESMC_Alarm : public ESMC_Base { // TODO: inherit from ESMC_Base class
+                                        // when fully aligned with F90 equiv
 
   private:   // corresponds to F90 module 'type ESMF_Alarm' members
     ESMC_TimeInterval RingInterval; // (TMG 4.5.2)
@@ -159,28 +161,28 @@ class ESMC_Alarm {
     // for persistence/checkpointing
 
     // restore state
-    int ESMC_Read(ESMC_TimeInterval *ringInterval,
-                  ESMC_Time         *ringTime,
-                  ESMC_Time         *prevRingTime,
-                  ESMC_Time         *stopTime,
-                  bool              ringing,
-                  bool              enabled,
-                  int               id);
+    virtual int ESMC_Read(ESMC_TimeInterval *ringInterval,
+                          ESMC_Time         *ringTime,
+                          ESMC_Time         *prevRingTime,
+                          ESMC_Time         *stopTime,
+                          bool              ringing,
+                          bool              enabled,
+                          int               id);
 
     // save state
-    int ESMC_Write(ESMC_TimeInterval *ringInterval,
-                   ESMC_Time         *ringTime,
-                   ESMC_Time         *prevRingTime,
-                   ESMC_Time         *stopTime,
-                   bool              *ringing,
-                   bool              *enabled,
-                   int               *id) const;
+    virtual int ESMC_Write(ESMC_TimeInterval *ringInterval,
+                           ESMC_Time         *ringTime,
+                           ESMC_Time         *prevRingTime,
+                           ESMC_Time         *stopTime,
+                           bool              *ringing,
+                           bool              *enabled,
+                           int               *id) const;
 
     // internal validation
-    int ESMC_Validate(const char *options=0) const;
+    virtual int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_Print(const char *options=0) const;
+    virtual int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Alarm(void);

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.6 2003/03/29 01:41:20 eschwab Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.7 2003/04/02 17:24:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -247,21 +247,21 @@ extern "C" {
 
        void FTN(c_esmc_basetimeread)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *S,
                                      int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_Read(*S, *Sn, *Sd);
+           *status = (ptr)->ESMC_BaseTime::ESMC_Read(*S, *Sn, *Sd);
        }
 
        void FTN(c_esmc_basetimewrite)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *S,
                                       int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_Write(S, Sn, Sd);
+           *status = (ptr)->ESMC_BaseTime::ESMC_Write(S, Sn, Sd);
        }
 
        void FTN(c_esmc_basetimevalidate)(ESMC_BaseTime *ptr, const char *opts,
                                          int *status) {
-           *status = (ptr)->ESMC_Validate(opts);
+           *status = (ptr)->ESMC_BaseTime::ESMC_Validate(opts);
        }
 
        void FTN(c_esmc_basetimeprint)(ESMC_BaseTime *ptr, const char *opts,
                                       int *status) {
-           *status = (ptr)->ESMC_Print(opts);
+           *status = (ptr)->ESMC_BaseTime::ESMC_Print(opts);
        }
 };

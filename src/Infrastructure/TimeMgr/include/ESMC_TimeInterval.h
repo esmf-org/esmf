@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.7 2003/03/29 01:41:19 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.8 2003/04/02 17:24:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,8 +77,9 @@
 
  // class definition type
 class ESMC_TimeInterval : public ESMC_BaseTime { 
-                                             // inherits ESMC_BaseTime & Base
-                                             // classes
+                                             // inherits ESMC_BaseTime
+                                             // TODO: (& ESMC_Base class when
+                                             // fully aligned with F90 equiv)
   private:
     // set for Calendar intervals only
     ESMC_Calendar *Calendar;    // associated calendar for Calendar intervals
@@ -149,20 +150,20 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_Read(ESMF_IKIND_I8 S, int Sn, int Sd,
-                  ESMC_Calendar *cal);
-    int ESMC_Write(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                   ESMC_Calendar *cal) const;
+    virtual int ESMC_Read(ESMF_IKIND_I8 S, int Sn, int Sd,
+                          ESMC_Calendar *cal);
+    virtual int ESMC_Write(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                           ESMC_Calendar *cal) const;
 
     // internal validation
-    int ESMC_Validate(const char *options=0) const;
+    virtual int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_Print(const char *options=0) const;
+    virtual int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMF_IKIND_I8 S, int Sn, int Sd);
+    ESMC_TimeInterval(ESMF_IKIND_I8 S, int Sn, int Sd, ESMC_Calendar *Cal=0);
     ~ESMC_TimeInterval(void);
 
  // < declare the rest of the public interface methods here >

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.8 2003/03/29 01:41:20 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.9 2003/04/02 17:24:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -89,8 +89,10 @@
  
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_Validate
-      public ESMF_Print
+      public ESMF_AlarmRead
+      public ESMF_AlarmWrite
+      public ESMF_AlarmValidate
+      public ESMF_AlarmPrint
 
 ! !PRIVATE MEMBER FUNCTIONS:
       private ESMF_AlarmEQ
@@ -99,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.8 2003/03/29 01:41:20 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.9 2003/04/02 17:24:55 eschwab Exp $'
 
 !==============================================================================
 !
@@ -668,15 +670,121 @@
 
 !------------------------------------------------------------------------------
 !
-! This section defines the overridden Validate and Print methods inherited
+! This section defines the overridden Read, Write, Validate and Print methods
 ! from the ESMF_Base class
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Validate - Validate an Alarm's properties
+! !IROUTINE: ESMF_AlarmRead - resotres an alarm
 
 ! !INTERFACE:
-      subroutine ESMF_Validate(alarm, opts, rc)
+      subroutine ESMF_AlarmRead(alarm, RingInterval, RingTime, &
+                           PrevRingTime, StopTime, Ringing, &
+                           Enabled, ID, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_TimeInterval), intent(in) :: RingInterval
+      type(ESMF_Time), intent(in) :: RingTime
+      type(ESMF_Time), intent(in) :: PrevRingTime
+      type(ESMF_Time), intent(in) :: StopTime
+      logical, intent(in) :: Ringing
+      logical, intent(in) :: Enabled
+      integer, intent(in) :: ID
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Restores an {\tt Alarm}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to restore
+!     \item[RingInterval]
+!          The ring interval for repeating alarms
+!     \item[RingTime]
+!          Ring time for one-shot or first repeating alarm
+!     \item[PrevRingTime]
+!          The {\tt Alarm}'s previous ring time
+!     \item[StopTime]
+!          Stop time for repeating alarms
+!     \item[Ringing]
+!          The {\tt Alarm}'s ringing state
+!     \item[Enabled]
+!          Alarm enabled/disabled
+!     \item[ID]
+!          The {\tt Alarm}'s ID
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+      call c_ESMC_AlarmRead(alarm, RingInterval, RingTime, &
+                            PrevRingTime, StopTime, Ringing, &
+                            Enabled, ID, rc)
+
+      end subroutine ESMF_AlarmRead
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmWrite - saves an alarm
+
+! !INTERFACE:
+      subroutine ESMF_AlarmWrite(alarm, RingInterval, RingTime, &
+                            PrevRingTime, StopTime, Ringing, &
+                            Enabled, ID, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(inout) :: alarm
+      type(ESMF_TimeInterval), intent(out) :: RingInterval
+      type(ESMF_Time), intent(out) :: RingTime
+      type(ESMF_Time), intent(out) :: PrevRingTime
+      type(ESMF_Time), intent(out) :: StopTime
+      logical, intent(out) :: Ringing
+      logical, intent(out) :: Enabled
+      integer, intent(out) :: ID
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Saves an {\tt Alarm}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to save
+!     \item[RingInterval]
+!          Ring interval for repeating alarms
+!     \item[RingTime]
+!          Ring time for one-shot or first repeating alarm
+!     \item[PrevRingTime]
+!          The {\tt Alarm}'s previous ring time
+!     \item[StopTime]
+!          Stop time for repeating alarms
+!     \item[Ringing]
+!          The {\tt Alarm}'s ringing state
+!     \item[Enabled]
+!          Alarm enabled/disabled
+!     \item[ID]
+!          The {\tt Alarm}'s ID
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+      call c_ESMC_AlarmWrite(alarm, RingInterval, RingTime, &
+                             PrevRingTime, StopTime, Ringing, &
+                             Enabled, ID, rc)
+
+      end subroutine ESMF_AlarmWrite
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmValidate - Validate an Alarm's properties
+
+! !INTERFACE:
+      subroutine ESMF_AlarmValidate(alarm, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
@@ -702,14 +810,14 @@
       
       call c_ESMC_AlarmValidate(alarm, opts, rc)
     
-      end subroutine ESMF_Validate
+      end subroutine ESMF_AlarmValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Print - Print out an Alarm's properties
+! !IROUTINE:  ESMF_AlarmPrint - Print out an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Print(alarm, opts, rc)
+      subroutine ESMF_AlarmPrint(alarm, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
@@ -736,7 +844,7 @@
       
       call c_ESMC_AlarmPrint(alarm, opts, rc)   
 
-      end subroutine ESMF_Print
+      end subroutine ESMF_AlarmPrint
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.11 2003/03/29 01:41:21 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.12 2003/04/02 17:24:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -84,10 +84,10 @@
 
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_Read
-      public ESMF_Write
-      public ESMF_Validate
-      public ESMF_Print
+      public ESMF_TimeRead
+      public ESMF_TimeWrite
+      public ESMF_TimeValidate
+      public ESMF_TimePrint
 
 ! !PRIVATE MEMBER FUNCTIONS:
 
@@ -107,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.11 2003/03/29 01:41:21 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.12 2003/04/02 17:24:56 eschwab Exp $'
 
 !==============================================================================
 
@@ -1162,10 +1162,10 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Read - Restore a time instant's properties
+! !IROUTINE:  ESMF_TimeRead - Restore a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Read(time, S, Sn, Sd, cal, tz, rc)
+      subroutine ESMF_TimeRead(time, S, Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
@@ -1183,15 +1183,15 @@
 !     \begin{description}
 !     \item[time]
 !          Time instant to restore
-!     \item[{[S]}]
+!     \item[S]
 !          64-bit integer seconds
-!     \item[{[Sn]}]
+!     \item[Sn]
 !          Integer fractional seconds - numerator
-!     \item[{[Sd]}]
+!     \item[Sd]
 !          Integer fractional seconds - denominator
-!     \item[{[cal]}]
+!     \item[cal]
 !          Associated {\tt Calendar}
-!     \item[{[tz]}]
+!     \item[tz]
 !          Associated timezone (hours offset from GMT, e.g. EST = -5)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1203,22 +1203,22 @@
    
       call c_ESMC_TimeRead(time, S, Sn, Sd, cal, tz, rc)
 
-      end subroutine ESMF_Read
+      end subroutine ESMF_TimeRead
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Write - Save a time instant's properties
+! !IROUTINE:  ESMF_TimeWrite - Save a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Write(time, S, Sn, Sd, cal, tz, rc)
+      subroutine ESMF_TimeWrite(time, S, Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      integer(ESMF_IKIND_I8), intent(in) :: S
-      integer, intent(in) :: Sn
-      integer, intent(in) :: Sd
-      type(ESMF_Calendar), intent(in) :: cal
-      integer, intent(in) :: tz
+      integer(ESMF_IKIND_I8), intent(out) :: S
+      integer, intent(out) :: Sn
+      integer, intent(out) :: Sd
+      type(ESMF_Calendar), intent(out) :: cal
+      integer, intent(out) :: tz
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1228,15 +1228,15 @@
 !     \begin{description}
 !     \item[time]
 !          Time instant to save
-!     \item[{[S]}]
+!     \item[S]
 !          64-bit integer seconds
-!     \item[{[Sn]}]
+!     \item[Sn]
 !          Integer fractional seconds - numerator
-!     \item[{[Sd]}]
+!     \item[Sd]
 !          Integer fractional seconds - denominator
-!     \item[{[cal]}]
+!     \item[cal]
 !          Associated {\tt Calendar}
-!     \item[{[tz]}]
+!     \item[tz]
 !          Associated timezone (hours offset from GMT, e.g. EST = -5)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1248,14 +1248,14 @@
    
       call c_ESMC_TimeWrite(time, S, Sn, Sd, cal, tz, rc)
 
-      end subroutine ESMF_Write
+      end subroutine ESMF_TimeWrite
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Validate - Validate a time instant's properties
+! !IROUTINE:  ESMF_TimeValidate - Validate a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Validate(time, opts, rc)
+      subroutine ESMF_TimeValidate(time, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
@@ -1281,14 +1281,14 @@
    
       call c_ESMC_TimeValidate(time, opts, rc)
 
-      end subroutine ESMF_Validate
+      end subroutine ESMF_TimeValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Print - Print out a time instant's properties
+! !IROUTINE:  ESMF_TimePrint - Print out a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Print(time, opts, rc)
+      subroutine ESMF_TimePrint(time, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
@@ -1315,7 +1315,7 @@
    
       call c_ESMC_TimePrint(time, opts, rc)
 
-      end subroutine ESMF_Print
+      end subroutine ESMF_TimePrint
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.8 2003/04/02 17:24:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.8 2003/04/02 17:24:56 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -62,9 +62,15 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-    RingInterval = *ringInterval;
-    RingTime = *ringTime;
-    StopTime = *stopTime;
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
+    Ringing = false;
+    Enabled = true;
+    
+    if (ringInterval != 0) RingInterval = *ringInterval;
+    if (ringTime != 0)     RingTime     = *ringTime;
+    if (stopTime != 0)     StopTime     = *stopTime;
     Enabled = enabled;
 
     return(ESMF_SUCCESS);
@@ -589,14 +595,15 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    cout << "Alarm:" << endl;
-    cout << "RingInterval = " << RingInterval.ESMC_Print(options)  << endl;
-    cout << "RingTime = "     << RingTime.ESMC_Print(options) << endl;
-    cout << "PrevRingTime = " << PrevRingTime.ESMC_Print(options) << endl;
-    cout << "StopTime = "     << StopTime.ESMC_Print(options) << endl;
+    cout << "Alarm ----------------------------------" << endl;
+    cout << "RingInterval = " << endl; RingInterval.ESMC_Print(options);
+    cout << "RingTime = "     << endl; RingTime.ESMC_Print(options);
+    cout << "PrevRingTime = " << endl; PrevRingTime.ESMC_Print(options);
+    cout << "StopTime = "     << endl; StopTime.ESMC_Print(options);
     cout << "Ringing = "      << Ringing << endl;
     cout << "Enabled = "      << Enabled << endl;
     cout << "ID = "           << ID << endl;
+    cout << "end Alarm ------------------------------" << endl << endl;
 
     // TODO print AlarmMutex ?
 
@@ -624,9 +631,8 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here TODO
-//
+   Ringing = false;
+   Enabled = true;
 
  } // end ESMC_Alarm
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.9 2003/03/29 01:41:21 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.10 2003/04/02 17:24:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.9 2003/03/29 01:41:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.10 2003/04/02 17:24:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -60,6 +60,11 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
+    NumAlarms = 0;
 
     if (timeStep  != 0) TimeStep  = *timeStep;
     if (startTime != 0) StartTime = *startTime;
@@ -306,17 +311,22 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    cout << "Clock:" << endl;
-    cout << "TimeStep = "     << TimeStep.ESMC_Print(options)  << endl;
-    cout << "StartTime = "    << StartTime.ESMC_Print(options) << endl;
-    cout << "StopTime = "     << StopTime.ESMC_Print(options) << endl;
-    cout << "RefTime = "      << RefTime.ESMC_Print(options) << endl;
-    cout << "CurrTime = "     << CurrTime.ESMC_Print(options) << endl;
-    cout << "PrevTime = "     << PrevTime.ESMC_Print(options) << endl;
+    cout << "Clock ----------------------------------" << endl;
+    cout << "TimeStep = "  << endl; TimeStep.ESMC_Print(options);
+    cout << "StartTime = " << endl; StartTime.ESMC_Print(options);
+    cout << "StopTime = "  << endl; StopTime.ESMC_Print(options);
+    cout << "RefTime = "   << endl; RefTime.ESMC_Print(options);
+    cout << "CurrTime = "  << endl; CurrTime.ESMC_Print(options);
+    cout << "PrevTime = "  << endl; PrevTime.ESMC_Print(options);
     cout << "AdvanceCount = " << AdvanceCount << endl;
     cout << "NumAlarms = "    << NumAlarms << endl;
     cout << "AlarmList = " << endl;
-    for (int i=0; i<NumAlarms; i++) cout << AlarmList[i]->ESMC_Print(options);
+    for (int i=0; i<NumAlarms; i++) {
+      cout << AlarmList[i]->ESMC_Alarm::ESMC_Print(options);
+                         // ^^^^^^^^^^^^ TODO: override virtual function
+                         // mechanism to support F90 interface
+    }
+    cout << "end Clock ------------------------------" << endl << endl;
 
     // TODO print ClockMutex ?
 

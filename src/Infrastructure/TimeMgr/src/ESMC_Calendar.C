@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -58,6 +58,15 @@
 //EOP
 // !REQUIREMENTS:
 
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
+    for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
+    SecondsPerDay  = 0;
+    DaysPerYear.D  = 0;
+    DaysPerYear.Dn = 0;
+    DaysPerYear.Dd = 1;
+    
     int rc; // return code 
 
     Type = type;
@@ -85,6 +94,7 @@
         case ESMC_CAL_JULIAN:
             // Days is the highest resolution of time, i.e. there is no
             //   concept of months or years ??
+            for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
             SecondsPerDay  = SECONDS_PER_DAY;
             DaysPerYear.D  = 0;
             DaysPerYear.Dn = 0;
@@ -94,7 +104,7 @@
 
         case ESMC_CAL_360DAY:
             // 12 months of 30 days each
-            for (int i=1; i<=MONTHSPERYEAR; i++) DaysPerMonth[i] = 30;
+            for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 30;
             SecondsPerDay  = 86400;
             DaysPerYear.D  = 360;
             DaysPerYear.Dn = 0;
@@ -104,6 +114,7 @@
 
         case ESMC_CAL_NOCALENDAR:
             // no calendar needed, convert base time up to days only
+            for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
             SecondsPerDay  = 0;
             DaysPerYear.D  = 0;
             DaysPerYear.Dn = 0;
@@ -149,9 +160,24 @@
 //EOP
 // !REQUIREMENTS:
 
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
+    for (int i=0; i<MONTHSPERYEAR; i++) this->DaysPerMonth[i] = 0;
+    this->SecondsPerDay  = 0;
+    this->DaysPerYear.D  = 0;
+    this->DaysPerYear.Dn = 0;
+    this->DaysPerYear.Dd = 1;
+    
+    if (DaysPerMonth == 0) {
+      cout << "ESMC_Calendar::ESMC_CalendarInitGeneric():  DaysPerMonth "
+           << "pointer passed in is zero.";
+      return(ESMF_FAILURE);
+    }
+
     Type = ESMC_CAL_GENERIC;
 
-    for(int i=1; i<=MONTHSPERYEAR; i++)
+    for(int i=0; i<MONTHSPERYEAR; i++)
     { 
            this->DaysPerMonth[i] = DaysPerMonth[i];
     }
@@ -314,7 +340,7 @@
     }
 
     Type = type;
-    for (int i=1; i<= MONTHSPERYEAR; i++)
+    for (int i=0; i<MONTHSPERYEAR; i++)
     {
         DaysPerMonth[i] = daysPerMonth[i];    
     }
@@ -359,7 +385,7 @@
     }
 
     *type = Type;
-    for (int i=1; i<= MONTHSPERYEAR; i++)
+    for (int i=0; i<MONTHSPERYEAR; i++)
     {
         daysPerMonth[i] = DaysPerMonth[i];    
     }
@@ -415,15 +441,16 @@
 //EOP
 // !REQUIREMENTS: 
 
-    cout << "Calendar:" << endl;
+    cout << "Calendar -------------------------------" << endl;
     cout << "Type = " << Type << endl;
     cout << "DaysPerMonth = " << endl;
-    for (int i=1; i<= MONTHSPERYEAR; i++) cout << DaysPerMonth[i] << " ";
+    for (int i=0; i<MONTHSPERYEAR; i++) cout << DaysPerMonth[i] << " ";
     cout << endl;
     cout << "SecondsPerDay = " << SecondsPerDay  << endl;
     cout << "DaysPerYear = "   << DaysPerYear.D  << endl;
     cout << "DaysPerYearDn = " << DaysPerYear.Dn << endl;
     cout << "DaysPerYearDd = " << DaysPerYear.Dd << endl;
+    cout << "end Calendar ---------------------------" << endl << endl;
     
     return(ESMF_SUCCESS);
 
@@ -449,8 +476,12 @@
 //EOP
 // !REQUIREMENTS: 
 
-    // TODO default calendar type is none ??
-    ESMC_CalendarInit(ESMC_CAL_NOCALENDAR);
+    Type = ESMC_CAL_NOCALENDAR;
+    for (int i=0; i<MONTHSPERYEAR; i++) DaysPerMonth[i] = 0;
+    SecondsPerDay  = 0;
+    DaysPerYear.D  = 0;
+    DaysPerYear.Dn = 0;
+    DaysPerYear.Dd = 1;
 
 } // end ESMC_Calendar
 

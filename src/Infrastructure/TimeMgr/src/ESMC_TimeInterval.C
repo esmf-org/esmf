@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.8 2003/04/02 17:24:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -111,12 +111,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: validate inputs (individual and combos), set basetime values
-
-    // initialize time interval basetime values
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
     this->S  = 0;
     this->Sn = 0;
     this->Sd = 1;
+    Calendar = 0;
+    
+    // TODO: validate inputs (individual and combos), set basetime values
 
     if (cal != 0) {
       Calendar = cal;
@@ -260,9 +263,12 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "TimeInterval:" << endl;
+    cout << "TimeInterval ---------------------------" << endl;
     ESMC_BaseTime::ESMC_Print(options);
-    if (Calendar != 0) Calendar->ESMC_Print(options);
+    if (Calendar != 0) Calendar->ESMC_Calendar::ESMC_Print(options);
+                               //^^^^^^^^^^^^^^^TODO: override virtual function
+                               // mechanism to support F90 interface ?
+    cout << "end TimeInterval -----------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
 
@@ -288,7 +294,11 @@
 //EOP
 // !REQUIREMENTS:
 
-    // uses default base class constructor
+//   ESMC_BaseTime(0, 0, 1) {  // use base class constructor
+   S  = 0;
+   Sn = 0;
+   Sd = 0;
+   Calendar = 0;
 
 } // end ESMC_TimeInterval
 
@@ -303,10 +313,10 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,    // in - integer seconds
-      int Sn,             // in - fractional seconds, numerator
-      int Sd) :           // in - fractional seconds, denominator
-    ESMC_BaseTime(S, Sn, Sd) {  // invoke ESMC_BaseTime base class constructor
+      ESMF_IKIND_I8 S,       // in - integer seconds
+      int Sn,                // in - fractional seconds, numerator
+      int Sd,                // in - fractional seconds, denominator
+      ESMC_Calendar *Cal) :  // in - optional calendar
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInterval} via {\tt ESMC\_BaseTime}
@@ -314,6 +324,9 @@
 //
 //EOP
 // !REQUIREMENTS:
+
+    ESMC_BaseTime(S, Sn, Sd) {  // pass to base class constructor
+    Calendar = Cal;
 
 } // end ESMC_TimeInterval
 

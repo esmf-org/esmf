@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.7 2003/03/29 01:41:21 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.8 2003/04/02 17:24:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,8 +81,10 @@
 
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_Validate
-      public ESMF_Print
+      public ESMF_TimeIntervalRead
+      public ESMF_TimeIntervalWrite
+      public ESMF_TimeIntervalValidate
+      public ESMF_TimeIntervalPrint
 
 ! !PRIVATE MEMBER FUNCTIONS:
  
@@ -111,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.7 2003/03/29 01:41:21 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.8 2003/04/02 17:24:56 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1236,15 +1238,99 @@
 
 !------------------------------------------------------------------------------
 !
-! This section defines the overridden Validate and Print methods inherited 
+! This section defines the overridden Read, Write, Validate and Print methods
 ! from the ESMF_Base class
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Validate - Validate a time interval's properties
+! !IROUTINE:  ESMF_TimeIntervalRead - Restore a time interval's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Validate(timeinterval, opts, rc)
+      subroutine ESMF_TimeIntervalRead(timeinterval, S, Sn, Sd, cal, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer(ESMF_IKIND_I8), intent(in) :: S
+      integer, intent(in) :: Sn
+      integer, intent(in) :: Sd
+      type(ESMF_Calendar), intent(in) :: cal
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Perform a restore on a {\tt TimeInterval}'s properties
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          Time interval to restore
+!     \item[S]
+!          64-bit integer seconds
+!     \item[Sn]
+!          Integer fractional seconds - numerator
+!     \item[Sd]
+!          Integer fractional seconds - denominator
+!     \item[cal]
+!          Associated {\tt Calendar}
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+   
+      call c_ESMC_TimeIntervalRead(timeinterval, S, Sn, Sd, cal, rc)
+
+      end subroutine ESMF_TimeIntervalRead
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalWrite - Save a time interval's properties
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalWrite(timeinterval, S, Sn, Sd, cal, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer(ESMF_IKIND_I8), intent(out) :: S
+      integer, intent(out) :: Sn
+      integer, intent(out) :: Sd
+      type(ESMF_Calendar), intent(out) :: cal
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Perform a save on a {\tt TimeInterval}'s properties
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          Time interval to save
+!     \item[S]
+!          64-bit integer seconds
+!     \item[Sn]
+!          Integer fractional seconds - numerator
+!     \item[Sd]
+!          Integer fractional seconds - denominator
+!     \item[cal]
+!          Associated {\tt Calendar}
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+   
+      call c_ESMC_TimeIntervalWrite(timeinterval, S, Sn, Sd, cal, rc)
+
+      end subroutine ESMF_TimeIntervalWrite
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a time interval's properties
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalValidate(timeinterval, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
@@ -1270,14 +1356,14 @@
     
       call c_ESMC_TimeIntervalValidate(timeinterval, opts, rc)
 
-      end subroutine ESMF_Validate
+      end subroutine ESMF_TimeIntervalValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Print - Print out a time interval's properties
+! !IROUTINE:  ESMF_TimeIntervalPrint - Print out a time interval's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Print(timeinterval, opts, rc)
+      subroutine ESMF_TimeIntervalPrint(timeinterval, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
@@ -1304,7 +1390,7 @@
     
       call c_ESMC_TimeIntervalPrint(timeinterval, opts, rc)
 
-      end subroutine ESMF_Print
+      end subroutine ESMF_TimeIntervalPrint
 
 !------------------------------------------------------------------------------
 

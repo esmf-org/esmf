@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.10 2003/03/29 01:41:19 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.11 2003/04/02 17:24:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,8 +70,9 @@
  // class configuration type:  not needed for Time
 
  // class definition type
- class ESMC_Time : public ESMC_BaseTime { // inherits ESMC_Time & Base
-                                          // classes
+ class ESMC_Time : public ESMC_BaseTime { // inherits ESMC_BaseTime 
+                                          // TODO: (& ESMC_Base class when
+                                          // fully aligned with F90 equiv)
   private:   // corresponds to F90 module 'type ESMF_Time' members 
     class ESMC_Calendar *Calendar;    // associated calendar
     int Timezone;                     // Offset from GMT
@@ -126,21 +127,21 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_Read(ESMF_IKIND_I8 S, int Sn, int Sd,
-                  ESMC_Calendar *cal, int timeZone);
-    int ESMC_Write(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                   ESMC_Calendar *cal, int *timeZone) const;
+    virtual int ESMC_Read(ESMF_IKIND_I8 S, int Sn, int Sd,
+                          ESMC_Calendar *cal, int timeZone);
+    virtual int ESMC_Write(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                           ESMC_Calendar *cal, int *timeZone) const;
 
     // internal validation
-    int ESMC_Validate(const char *options=0) const;
+    virtual int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_Print(const char *options=0) const;
+    virtual int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Time(void);
     ESMC_Time(ESMF_IKIND_I8 S, int Sn, int Sd, ESMC_Calendar *cal,
-              int timezone);
+              int timezone=0);
     ~ESMC_Time(void);
 
  // < declare the rest of the public interface methods here >

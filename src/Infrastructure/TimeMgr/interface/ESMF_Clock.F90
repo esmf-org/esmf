@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.9 2003/03/29 01:41:20 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.10 2003/04/02 17:24:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,14 +93,16 @@
 
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_Validate
-      public ESMF_Print
+      public ESMF_ClockRead
+      public ESMF_ClockWrite
+      public ESMF_ClockValidate
+      public ESMF_ClockPrint
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.9 2003/03/29 01:41:20 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.10 2003/04/02 17:24:55 eschwab Exp $'
 
 !==============================================================================
 
@@ -720,15 +722,129 @@
 
 !------------------------------------------------------------------------------
 !
-! This section defines the overridden Validate and Print methods inherited
+! This section defines the overridden Read, Write, Validate and Print methods
 ! from the ESMF_Base class
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Validate - Validate a Clock's properties
+! !IROUTINE: ESMF_ClockRead - Restores a clock
 
 ! !INTERFACE:
-      subroutine ESMF_Validate(clock, opts, rc)
+      subroutine ESMF_ClockRead(clock, TimeStep, StartTime, StopTime, &
+                           RefTime, CurrTime, PrevTime, AdvanceCount, &
+                           AlarmList, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_TimeInterval), intent(in) :: TimeStep
+      type(ESMF_Time), intent(in) :: StartTime
+      type(ESMF_Time), intent(in) :: StopTime
+      type(ESMF_Time), intent(in) :: RefTime
+      type(ESMF_Time), intent(in) :: CurrTime
+      type(ESMF_Time), intent(in) :: PrevTime
+      integer(ESMF_IKIND_I8), intent(in) :: AdvanceCount
+      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(in) :: AlarmList
+      integer, intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Restore a {\tt Clock}
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to restore
+!     \item[TimeStep]
+!          The {\tt Clock}'s time step interval
+!     \item[StartTime]
+!          The {\tt Clock}'s starting time
+!     \item[StopTime]
+!          The {\tt Clock}'s stopping time
+!     \item[RefTime]
+!          The {\tt Clock}'s reference time
+!     \item[CurrTime]
+!          The {\tt Clock}'s current time
+!     \item[PrevTime]
+!          The {\tt Clock}'s previous time
+!     \item[AdvanceCount]
+!          The number of times the {\tt Clock} has been advanced
+!     \item[AlarmList]
+!          The {\tt Clock}'s {\tt Alarm} list
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+! !REQUIREMENTS:
+!EOP
+
+      call c_ESMC_ClockRead(clock, TimeStep, StartTime, StopTime, &
+                            RefTime, CurrTime, PrevTime, AdvanceCount, &
+                            AlarmList, rc)
+    
+      end subroutine ESMF_ClockRead
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockWrite - Saves a clock
+
+! !INTERFACE:
+      subroutine ESMF_ClockWrite(clock, TimeStep, StartTime, StopTime, &
+                            RefTime, CurrTime, PrevTime, AdvanceCount, &
+                            AlarmList, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_TimeInterval), intent(out) :: TimeStep
+      type(ESMF_Time), intent(out) :: StartTime
+      type(ESMF_Time), intent(out) :: StopTime
+      type(ESMF_Time), intent(out) :: RefTime
+      type(ESMF_Time), intent(out) :: CurrTime
+      type(ESMF_Time), intent(out) :: PrevTime
+      integer(ESMF_IKIND_I8), intent(out) :: AdvanceCount
+      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out) :: AlarmList
+      integer, intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Save a {\tt Clock}
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to save
+!     \item[TimeStep]
+!          The {\tt Clock}'s time step interval
+!     \item[StartTime]
+!          The {\tt Clock}'s starting time
+!     \item[StopTime]
+!          The {\tt Clock}'s stopping time
+!     \item[RefTime]
+!          The {\tt Clock}'s reference time
+!     \item[CurrTime]
+!          The {\tt Clock}'s current time
+!     \item[PrevTime]
+!          The {\tt Clock}'s previous time
+!     \item[AdvanceCount]
+!          The number of times the {\tt Clock} has been advanced
+!     \item[AlarmList]
+!          The {\tt Clock}'s {\tt Alarm} list
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+! !REQUIREMENTS:
+!EOP
+
+      call c_ESMC_ClockWrite(clock, TimeStep, StartTime, StopTime, &
+                             RefTime, CurrTime, PrevTime, AdvanceCount, &
+                             AlarmList, rc)
+    
+      end subroutine ESMF_ClockWrite
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_ClockValidate - Validate a Clock's properties
+
+! !INTERFACE:
+      subroutine ESMF_ClockValidate(clock, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout) :: clock
@@ -754,14 +870,14 @@
     
       call c_ESMC_ClockValidate(clock, opts, rc)
     
-      end subroutine ESMF_Validate
+      end subroutine ESMF_ClockValidate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_Print - Print out a Clock's properties
+! !IROUTINE:  ESMF_ClockPrint - Print out a Clock's properties
 
 ! !INTERFACE:
-      subroutine ESMF_Print(clock, opts, rc)
+      subroutine ESMF_ClockPrint(clock, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout) :: clock
@@ -788,7 +904,7 @@
       
       call c_ESMC_ClockPrint(clock, opts, rc)   
 
-      end subroutine ESMF_Print
+      end subroutine ESMF_ClockPrint
 
 !------------------------------------------------------------------------------
 

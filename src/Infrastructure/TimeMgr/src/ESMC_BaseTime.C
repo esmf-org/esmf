@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1265,10 +1265,11 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "BaseTime:" << endl;
+    cout << "BaseTime -------------------------------" << endl;
     cout << "S = "  << S  << endl;
     cout << "Sn = " << Sn << endl;
-    cout << "Sd = " << Sd << endl << endl;
+    cout << "Sd = " << Sd << endl;
+    cout << "end BaseTime ---------------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
 
@@ -1294,7 +1295,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_BaseTimeInit(0, 0, 1);
+    S  = 0;
+    Sn = 0;
+    Sd = 1;
 
 }  // end ESMC_BaseTime
 
@@ -1319,7 +1322,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_BaseTimeInit(S, Sn, Sd);
+    this->S  = S;
+    this->Sn = Sn;
+    this->Sd = Sd;
 
 }  // end ESMC_BaseTime
 

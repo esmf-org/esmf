@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.11 2003/04/02 17:24:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -143,27 +143,28 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: validate inputs (individual and combos), set basetime values
-
-    // initialize basetime values
+    // TODO: ensure initialization if called via F90 interface;
+    //       cannot call constructor, because destructor is subsequently
+    //       called automatically, returning initialized values to garbage.
     this->S  = 0;
     this->Sn = 0;
     this->Sd = 1;
+    
+    // TODO: validate inputs (individual and combos), set basetime values
 
     // set calendar type
     if (cal != 0) {
       Calendar = cal;
     }
     else {
+      Calendar = 0;
       // TODO: log err
       cout << "ESMC_Time::ESMC_TimeInit(): calendar not set" << endl;
       return (ESMF_FAILURE);
     }
 
     // set timezone
-    if (tz != 0) {
-      Timezone = *tz;
-    }
+    Timezone = (tz != 0) ? *tz : 0;
 
     // convert date to base time according to calendar type
     // TODO: create two calendar conversion method entry points ?
@@ -650,10 +651,13 @@
 //EOP
 // !REQUIREMENTS:  
 
-    cout << "Time:" << endl;
+    cout << "Time -----------------------------------" << endl;
     ESMC_BaseTime::ESMC_Print(options);
-    if (Calendar != 0) Calendar->ESMC_Print(options);
+    if (Calendar != 0) Calendar->ESMC_Calendar::ESMC_Print(options);
+                               //^^^^^^^^^^^^^^^TODO: override virtual function
+                               // mechanism to support F90 interface ?
     cout << "Timezone = " << Timezone << endl;
+    cout << "end Time -------------------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
 
@@ -678,7 +682,12 @@
 //EOP
 // !REQUIREMENTS:  
 
-   // ESMC_TimeInit(0, 0, 1, 0, 0); // use variable args Init TODO
+//   ESMC_BaseTime(0, 0, 1) {   // use base class constructor
+   S  = 0;
+   Sn = 0;
+   Sd = 0;
+   Calendar = 0;
+   Timezone = 0;
 
  }  // end ESMC_Time
 
@@ -693,11 +702,11 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 S,              // in - integer seconds
-      int Sn,             // in - fractional seconds, numerator
-      int Sd,             // in - fractional seconds, denominator
-      ESMC_Calendar *Cal,   // in - associated calendar
-      int Tz) {             // in - timezone
+      ESMF_IKIND_I8 S,     // in - integer seconds
+      int Sn,              // in - fractional seconds, numerator
+      int Sd,              // in - fractional seconds, denominator
+      ESMC_Calendar *Cal,  // in - associated calendar
+      int Tz) :            // in - timezone
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Time} via {\tt ESMC\_TimeInit}
@@ -705,7 +714,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // ESMC_TimeInit(S, Sn, Sd, Cal, Tz); // use variable args Init TODO
+   ESMC_BaseTime(S, Sn, Sd) {   // use base class constructor
+   Calendar = Cal;
+   Timezone = Tz;
 
  }  // end ESMC_Time
 
