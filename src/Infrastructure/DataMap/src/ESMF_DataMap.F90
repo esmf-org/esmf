@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.16 2004/03/09 18:59:50 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.17 2004/03/09 19:06:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.16 2004/03/09 18:59:50 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.17 2004/03/09 19:06:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -654,7 +654,7 @@ end function
 !	    The number of array dimensions.
 !           
 !     \item [{[dataIorder]}] 
-!           An {\tt ESMF_IndexOrder} object which describes one of several
+!           An {\tt ESMF\_IndexOrder} object which describes one of several
 !           predefined Index Orders.  There is another version of the Init
 !           call which allows a more general form of the indexing; this is
 !           a convenience routine for the most common cases.
@@ -756,7 +756,7 @@ end function
 !           The number of array dimensions.
 !
 !     \item [{[dataIorder]}]
-!           An {\tt ESMF_IndexOrder} object which describes one of several
+!           An {\tt ESMF\_IndexOrder} object which describes one of several
 !           predefined Index Orders.  There is another version of the Init
 !           call which allows a more general form of the indexing; this is
 !           a convenience routine for the most common cases.
