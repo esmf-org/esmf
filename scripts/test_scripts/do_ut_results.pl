@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.5 2004/08/02 21:32:57 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.6 2004/08/02 21:35:20 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -40,7 +40,6 @@ getopts("d:", \%options);
 	}
 	# Get count of executable Unit Tests found
 	$u_t_count=grep (/UTest/, @ex_files);
-	print $u_t_count;
 	# Get executable Unit tests files
 	@u_t_ex=grep (/UTest/, @ex_files);
 
