@@ -1,4 +1,4 @@
-% $Id: HWMonitor_design.tex,v 1.1 2002/11/14 18:05:42 cdeluca Exp $
+% $Id: HWMonitor_design.tex,v 1.2 2002/11/18 20:06:52 ekluz Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,48 @@ that they are available. It also prepares arrays for the counters that
 will be activated. BeginMonitoring turns performance monitoring on, for
 a given code segment. EndMonitoring turns performance monitoring off, for
 a given code segment. The Report method then gives a report on the statistics
-for the code segment timed.
+for the code segment timed. The Init and Report methods should not be
+called in threaded sections and should return a error if they are. The BeginMonitoring
+and EndMonitoring methods can be called from within threaded sections. However,
+they can not be called in code sections that are partially threaded and
+partially unthreaded. If these methods determine that the user has put calls
+partially threaded and partially unthreaded sections -- then a warning message
+will be sent to the LogErr file.
 
+More information on the Init method. The init method figures out the PCL or
+PAPI integer event types and fills the counter array with the event type that
+corresponds to the hw\_option\_names numerated type. Since, many of the events
+that will be reported are actually rates, there may be two event-types that
+need to be recorded for a single item. After the counter array is filled PCL\_init
+is called when using PCL, or PAPI\_start\_counters is called when using PAPI.
+If one of the desired events is unavailable on a given machine, an error
+code will be returned and the function will abort. Technically, we could
+add events individually, and keep track of which events are available. Since
+we are tracking very common events we expect that if hardware counters are
+available on a machine -- the counters we are tracking will all work or all fail.
+When using PCL, the PCLinit call needs to be done for all possible threads.
+So in this case PCLinit will be called for each thread. Note, that if later
+the number of threads increases beyond the value used in initialization -- this
+will be a problem and the code will need to abort. Also when using PCL memory
+for the desc pointer will need to be allocated. For all performance libraries the 
+Init method also initializes the accum array to zero.
+
+More information on the BeginMonitoring method. BeginMonitoring stores the initial
+counter values in the initial array. Later when EndMonitoring is called the initial
+array will be used to figure out the difference in the counters over the code 
+section being timed. When using PCL, PCLread will be used and when using PAPI, 
+PAPI\_read\_counters is used to store the initial counter values into the initial array 
+for each event type in the counter array.
+
+More information on the EndMonitoring method. When EndMonitoring is called
+the counters are again checked to find the results at the end of the code
+section. The difference between the counters and the initial array is then
+computed and this difference is added to the accum array. When using PCL,
+PCL\_read is used to get the counter results, and when using PAPI, PAPI\_read\_counters
+is used to get the counter results.
+
+More information on the Report method. The report method sends the results
+of the hardware timing to the Log file using the Log methods. The report method
+will take the values in the accum array to figure out the underlying rates that
+will be reported.
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.2 2002/11/14 22:35:18 ekluz Exp $
+// $Id: ESMC_HWMonitor.C,v 1.3 2002/11/18 20:06:53 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.2 2002/11/14 22:35:18 ekluz Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.3 2002/11/18 20:06:53 ekluz Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -89,7 +89,7 @@
 //
 // !DESCRIPTION:
 //      Validates that a HWMonitor is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -116,7 +116,7 @@
 //
 // !DESCRIPTION:
 //      Print information about a HWMonitor.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n

@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.h,v 1.1 2002/11/14 18:14:36 cdeluca Exp $
+// $Id: ESMC_HWMonitor.h,v 1.2 2002/11/18 20:06:53 ekluz Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMF HW_Monitor C++ definition include file
+// ESMF HWMonitor C++ definition include file
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
- #ifndef ESMC_HW_Monitor_H
- #define ESMC_HW_Monitor_H
+ #ifndef ESMC_HWMonitor_H
+ #define ESMC_HWMonitor_H
 
 //-------------------------------------------------------------------------
 
@@ -26,16 +26,22 @@
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
  #include <ESMC_PerfProf.h> 
+#if ( defined HAS_PCL )
+ #include <pcl.h> 
+#elif ( defined HAS_PAPI )
+#else
+#endif
+
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_HW_Monitor - one line general statement about this class
+// !CLASS:  ESMC_HWMonitor - one line general statement about this class
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ HW_Monitor members and declares method 
-// signatures (prototypes).  The companion file ESMC_HW_Monitor.C contains
-// the definitions (full code bodies) for the HW_Monitor methods.
+// The code in this file defines the C++ HWMonitor members and declares method 
+// signatures (prototypes).  The companion file ESMC\_HWMonitor.C contains
+// the definitions (full code bodies) for the HWMonitor methods.
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
@@ -47,23 +53,24 @@
                         // composites, associates, friends)
 
 // !PUBLIC TYPES:
- class ESMC_HW_MonitorConfig;
- class ESMC_HW_Monitor;
+ class ESMC_HWMonitorConfig;
+ class ESMC_HWMonitor;
 
 // !PRIVATE TYPES:
 
  // class configuration type
- class ESMC_HW_MonitorConfig {
+ class ESMC_HWMonitorConfig {
    private:
  //   < insert resource items here >
  };
 
  // class definition type
- class ESMC_HW_Monitor : public ESMC_Base {    // inherits from ESMC_Base class
+ class ESMC_HWMonitor : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
- //  < insert class members here >  corresponds to type ESMF_HW_Monitor members
+ //  < insert class members here >  corresponds to type ESMF_HWMonitor members
  //                                 in F90 modules
+#define MAX_COUNTER 10
     int flo;             // Floating point operations
     int L1_cache_util;   // Level 1 cache utilization
     int L1_cache_miss;   // Level 1 cache miss
@@ -75,6 +82,26 @@
     int fp_stalled;      // Number of cycles floating point unit is stalled
     int cycle;           // Number of cycles
 
+    typedef enum {
+        hw_flo           = 1,
+        hw_L1_cache_util = 2,
+        hw_L1_cache_miss = 3,
+        hw_L2_cache_util = 4,
+        hw_L2_cache_miss = 5,
+        hw_fpu_util      = 6,
+        hw_loads         = 7,
+        hw_instructions  = 8,
+        hw_fp_stalled    = 9,
+        hw_cycle         = 10
+    } hw_option_names;
+
+    int counter[MAX_COUNTER]; // Events to do hardware counting on
+    int ncounter;             // Number of events to count
+    int initial[MAX_COUNTER]; // Initial results after Begin
+    int accum[MAX_COUNTER];   // Accumulated results after End
+#if ( defined HAS_PCL )
+    PCL_DESC_TYPE *desc;      // PCL description type
+#endif
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -86,30 +113,30 @@
 
   public:
  // the following methods apply to deep classes only
-    ESMC_HW_Monitor *ESMC_HW_MonitorCreate(args, int rc);// interface only, deep class
-    int ESMC_HW_MonitorDestroy(void);            // interface only, deep class
-    int ESMC_HW_MonitorConstruct(args);          // internal only, deep class
-    int ESMC_HW_MonitorDestruct(void);           // internal only, deep class
+    ESMC_HWMonitor *ESMC_HWMonitorCreate(args, int rc);// interface only, deep class
+    int ESMC_HWMonitorDestroy(void);            // interface only, deep class
+    int ESMC_HWMonitorConstruct(args);          // internal only, deep class
+    int ESMC_HWMonitorDestruct(void);           // internal only, deep class
 
  // or
  // the following method applies to a shallow class
-    int ESMC_HW_MonitorInit(args);         // shallow class only
+    int ESMC_HWMonitorInit(args);         // shallow class only
 
  // optional configuration methods
-    int ESMC_HW_MonitorGetConfig(ESMC_HW_MonitorConfig *config) const;
-    int ESMC_HW_MonitorSetConfig(const ESMC_HW_MonitorConfig *config);
+    int ESMC_HWMonitorGetConfig(ESMC_HWMonitorConfig *config) const;
+    int ESMC_HWMonitorSetConfig(const ESMC_HWMonitorConfig *config);
 
  // accessor methods for class members
-    int ESMC_HW_MonitorGet<Value>(<value type> *value) const;
-    int ESMC_HW_MonitorSet<Value>(<value type>  value);
+    int ESMC_HWMonitorGet<Value>(<value type> *value) const;
+    int ESMC_HWMonitorSet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_HW_MonitorValidate(const char *options) const;
-    int ESMC_HW_MonitorPrint(const char *options) const;
+    int ESMC_HWMonitorValidate(const char *options) const;
+    int ESMC_HWMonitorPrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_HW_Monitor(args);
-	~ESMC_HW_Monitor(args);
+	ESMC_HWMonitor(args);
+	~ESMC_HWMonitor(args);
   
  // < declare the rest of the public interface methods here >
   
@@ -122,6 +149,6 @@
 //EOP
 //-------------------------------------------------------------------------
 
- };   // end class ESMC_HW_Monitor
+ };   // end class ESMC_HWMonitor
 
- #endif  // ESMC_HW_Monitor_H
+ #endif  // ESMC_HWMonitor_H
