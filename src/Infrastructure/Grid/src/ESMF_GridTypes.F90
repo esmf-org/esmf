@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.32 2004/06/09 17:47:30 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.32.2.1 2004/07/22 20:56:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -494,7 +494,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.32 2004/06/09 17:47:30 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.32.2.1 2004/07/22 20:56:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -587,7 +587,7 @@
 
       integer :: localrc                          ! Error status
       integer :: i
-      character (len = ESMF_MAXSTR) :: defaultname ! default grid name
+      !character (len = ESMF_MAXSTR) :: defaultname ! default grid name
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1594,7 +1594,7 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: localrc                          ! Error status
+      !integer :: localrc                          ! Error status
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
