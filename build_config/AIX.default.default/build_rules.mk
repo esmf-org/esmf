@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.11 2004/03/16 22:03:15 nscollins Exp $
+#  $Id: build_rules.mk,v 1.12 2004/03/18 20:43:21 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -113,6 +113,7 @@ C_64BIT			= -q64
 REAL8			= -qrealsize=8
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # C and Fortran compiler
+C_CC			= mpcc_r 
 C_FC			= mpxlf90_r 
 C_FC_MOD		= -I
 C_CLINKER		= mpcc_r -bmaxdata:0x70000000  -qcheck 
