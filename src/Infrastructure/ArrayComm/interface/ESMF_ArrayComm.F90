@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.26 2004/03/18 22:39:38 cdeluca Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.27 2004/03/19 23:30:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.26 2004/03/18 22:39:38 cdeluca Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.27 2004/03/19 23:30:15 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -187,7 +187,7 @@
         endif
  
 ! extract necessary information from the grid
-      call ESMF_GridGet(grid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
       allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
@@ -405,7 +405,7 @@
 
       ! get layout from the grid in order to get the number of DEs
       call ESMF_ArrayGet(array, rank=datarank, rc=status)
-      call ESMF_GridGet(grid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
 
@@ -699,7 +699,7 @@
       integer :: size_decomp, size_AI
       integer :: nDEs, my_DE
       integer :: gridrank, datarank
-      integer :: i, numDims
+      integer :: i, dimCount
       logical :: hascachedroute    ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
@@ -718,7 +718,7 @@
     
       ! Extract layout information from the Grid
       call ESMF_GridGetDELayout(grid, layout, status)
-      call ESMF_GridGet(grid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
       call ESMF_DELayoutGetDEid(layout, my_DE, status)
@@ -1045,7 +1045,7 @@
                                               srcStartPerDEPerDim
       integer :: nDEs, dstMyDE, srcMyDE
       integer :: gridrank, datarank
-      integer :: i, numDims
+      integer :: i, dimCount
       logical :: hascachedroute     ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
@@ -1062,7 +1062,7 @@
       ! Extract layout information from the Grids
       call ESMF_GridGetDELayout(dstGrid, dstLayout, status)
       call ESMF_GridGetDELayout(srcGrid, srcLayout, status)
-      call ESMF_GridGet(srcGrid, numDims=gridrank, rc=status)
+      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
 
       ! Our DE number in the layout and the total number of DEs
       call ESMF_DELayoutGetDEid(dstLayout, dstMyDE, status)
