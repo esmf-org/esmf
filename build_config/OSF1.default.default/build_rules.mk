@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.18 2005/01/26 23:03:26 theurich Exp $
+#  $Id: build_rules.mk,v 1.19 2005/03/02 04:56:14 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -55,7 +55,7 @@ MPIRUN           = ${ESMF_TOP_DIR}/scripts/mpirun.alpha
 MPI64_LIB        = 
 
 # For pthreads (or omp)
-THREAD_LIB        = -pthread -lrt
+THREAD_LIB        =
 
 
 ############################################################
@@ -102,11 +102,21 @@ C_CCV			= $(C_CC) -V
 C_FCV			= $(C_FC) -version
 C_SYS_LIB		= -lutil -lFutil -lots
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= -g -assume gfullpath -pthread
-G_FOPTFLAGS		= -g -assume gfullpath -pthread -reentrancy threaded -omp
+G_COPTFLAGS		= -g -assume gfullpath
+G_FOPTFLAGS		= -g -assume gfullpath
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS		= -O2 -w -pthread
-O_FOPTFLAGS		= -O2 -w -pthread -reentrancy threaded -omp
+O_COPTFLAGS		= -O2 -w
+O_FOPTFLAGS		= -O2 -w
+
+#
+# conditionally add pthread compiler flags
+ifeq ($(ESMF_PTHREADS),on)
+G_COPTFLAGS    +=  -pthread
+G_FOPTFLAGS    +=  -pthread -reentrancy threaded
+O_COPTFLAGS    +=  -pthread
+O_FOPTFLAGS    +=  -pthread -reentrancy threaded
+endif
+
 #
 # C++ compiler 
 #
@@ -118,12 +128,20 @@ CXX_CLINKER	   = cxx
 CXX_FLINKER	   = f90
 CXX_CCV		   = $(CXX_CC) -V
 CXX_SYS_LIB	   = -lcomplex -lutil -lFutil -lots
-C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx 
+#
 C_F90CXXLD         = f90
+C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx -lrt
 C_CXXF90LD         = cxx
-C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor
+C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor -lrt
 # for older Fortran compilers (551, 551A - 551F) the previous line must be replaced by:
-#C_CXXF90LIBS       = -L/usr/opt/F551/usr/shlib -lfor
+#C_CXXF90LIBS       = -L/usr/opt/F551/usr/shlib -lfor -lrt
+
+# conditionally add pthread compiler flags
+ifeq ($(ESMF_PTHREADS),on)
+C_CXXF90LD   +=  -pthread
+C_F90CXXLD   +=  -pthread -reentrancy threaded
+endif
+
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
 GCXX_FOPTFLAGS		= -g  -qfullpath 
