@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.34 2004/10/27 00:04:52 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.35 2004/12/09 00:24:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,12 +36,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.34 2004/10/27 00:04:52 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.35 2004/12/09 00:24:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: rc, fieldcount, count, countlist(2)
-      integer :: number, npets
+      integer :: number
       type(ESMF_Grid) :: grid, grid2
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
@@ -71,9 +71,7 @@
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      call ESMF_TestStart(npets, ESMF_SRCLINE)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !NEX_UTest
       !  Verify that an empty Bundle can be created
@@ -167,6 +165,7 @@
 
       !EX_UTest
       ! Creating a layout
+      call ESMF_VMGetGlobal(vm, rc=rc)
       layout = ESMF_DELayoutCreate(vm, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Create a Layout Test"
@@ -504,6 +503,5 @@
 #endif
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
 
       end program ESMF_BundleUTest

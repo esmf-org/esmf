@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.12 2004/12/07 18:40:12 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.13 2004/12/09 00:24:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,11 +31,10 @@
     implicit none
     
 !   ! Local variables
-    integer :: rc, npets
+    integer :: rc
     integer , pointer:: pointer
     character(ESMF_MAXSTR) :: cname, bname
     type(ESMF_GridComp) :: comp1
-    type(ESMF_VM):: vm
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -66,9 +65,7 @@
 !   added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
         
-    call ESMF_Initialize(vm=vm, rc=rc)
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    call ESMF_TestStart(npets, ESMF_SRCLINE)
+    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
 
 !-------------------------------------------------------------------------
@@ -221,7 +218,6 @@
 #endif
 
     call ESMF_TestEnd(result, ESMF_SRCLINE)
-    call ESMF_Finalize(rc)
 
     end program ESMF_GridCompCreateUTest
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.5 2004/11/02 19:59:42 nscollins Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.6 2004/12/09 00:24:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.5 2004/11/02 19:59:42 nscollins Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.6 2004/12/09 00:24:29 nscollins Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -60,28 +60,30 @@
       type(ESMF_Grid) :: grid1, grid2
       real(ESMF_KIND_R8) :: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
-      integer :: npets, pet_id, countsPerDE1(4), countsPerDE2(2)
+      integer :: npets, countsPerDE1(4), countsPerDE2(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       type(ESMF_GridHorzStagger) :: horz_stagger
       type(ESMF_RouteHandle) :: routehandle
 
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
-      call ESMF_TestStart(npets, ESMF_SRCLINE)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+      if (.not. ESMF_TestMinPETs(8, ESMF_SRCLINE)) goto 10
 
 
-      ! Query component for VM and create a layout with the right breakdown
+      ! Query for Global VM and create a layout with the right breakdown
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
       delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
       write(failMsg, *) "creating a delayout rc =", rc
       write(name, *) "Creating a DELayout"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Set up a 2D real arrayspec
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                              kind=ESMF_R8)
@@ -90,7 +92,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Add a "humidity" field to the export state.
       countsPerDE1 = (/ 15, 15, 15, 15 /)
       countsPerDE2 = (/ 40, 0 /)
@@ -113,7 +115,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_GridDistribute(grid1, delayout=delayout, &
                                  countsPerDEDim1=countsPerDE1, &
                                  countsPerDEDim2=countsPerDE2, &
@@ -123,7 +125,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Create the field and have it create the array internally
       humidity1 = ESMF_FieldCreate(grid1, arrayspec, &
                                    horzRelloc=ESMF_CELL_CENTER, &
@@ -134,7 +136,7 @@
 
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Add a "humidity" field to the import state.
       countsPerDE1 = (/ 10, 6, 12, 12 /)
       countsPerDE2 = (/ 0, 50 /)
@@ -162,7 +164,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_GridDistribute(grid2, delayout=delayout, &
                                  countsPerDEDim1=countsPerDE1, &
                                  countsPerDEDim2=countsPerDE2, &
@@ -173,7 +175,7 @@
       
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       ! Create the field and have it create the array internally
       humidity2 = ESMF_FieldCreate(grid2, arrayspec, &
                                      horzRelloc=ESMF_CELL_NFACE, &
@@ -193,8 +195,8 @@
       ! up the Regrid structure
 
       !------------------------------------------------------------------------
-      !NEX_UTest
-      call ESMF_FieldRegridStore(humidity1, humidity2, delayout, &
+      !NEX_UTest_Multi_Proc_Only
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=rc)
@@ -203,14 +205,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
       write(failMsg, *) "regrid run rc =", rc
       write(name, *) "regrid run rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegridRelease(routehandle, rc=rc)
       write(failMsg, *) "regrid release rc =", rc
       write(name, *) "regrid release rc =", rc
@@ -220,8 +222,8 @@
       ! add more tests here.
 
       !------------------------------------------------------------------------
-      !EX_UTest
-      call ESMF_FieldRegridStore(humidity1, humidity2, delayout, &
+      !EX_UTest_Multi_Proc_Only
+      call ESMF_FieldRegridStore(humidity1, humidity2, vm, &
                                  routehandle, &
                                  regridmethod=ESMF_REGRID_METHOD_NEAR_NBR, &
                                  rc=rc)
@@ -231,9 +233,12 @@
 
 #endif
 
+10    continue
+
+      ! TODO: we would like to set the program return value for use by
+      ! the makefile, but is there no way to do this in F90?
       ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
+
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
   
       end program ESMF_RegridTest

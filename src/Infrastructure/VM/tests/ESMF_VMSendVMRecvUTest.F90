@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.7 2004/11/24 16:16:02 theurich Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.8 2004/12/09 00:25:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.7 2004/11/24 16:16:02 theurich Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.8 2004/12/09 00:25:20 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -64,18 +64,10 @@
 !------------------------------------------------------------------------------
 
 
-      print *, "*************VM SEND RECEIVE UNIT TESTS***************************"
-      print *
-
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
-      call ESMF_TestStart(petCount, ESMF_SRCLINE)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! exit early if we have less than 4 procs
-!      if (petCount .lt. 4) then
-!        print *, "This test cannot run with less than 4 processors"
-!        goto 10
-!      endif
+      if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
  
       ! Allocate localData
       count = 1
@@ -89,6 +81,8 @@
       dst = localPet + 1
       if (dst > petCount -1) dst = 0
       
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
@@ -122,9 +116,8 @@
       print *, "LocalData is ", localData(1)
       call ESMF_Test((localData(1).eq.src + 100), name, failMsg, result, ESMF_SRCLINE)
 
-10    print *, "end of VM Send Receive test"
+10    continue
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
 
       end program ESMF_VMSendVMRecvUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.32 2004/11/08 22:13:18 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.33 2004/12/09 00:25:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,11 +34,11 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.32 2004/11/08 22:13:18 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.33 2004/12/09 00:25:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: x, rc, num, number, npets
+      integer :: x, rc, num, number
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: statename, bundlename, bname
       character(ESMF_MAXSTR) :: fieldname, fname, aname, arrayname
@@ -48,7 +48,6 @@
       type(ESMF_Array) :: array1, array2(2), array3, array3a, noarray
       type(ESMF_NeededFlag) :: needed
       real, dimension(:,:), pointer :: f90ptr1
-      type(ESMF_VM):: vm
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -71,9 +70,7 @@
 !-------------------------------------------------------------------------------
 
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      call ESMF_TestStart(npets, ESMF_SRCLINE)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       
       !------------------------------------------------------------------------
       
@@ -719,7 +716,6 @@
       ! return result  ! TODO: no way to do this in F90 ?
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
  
   
       end program ESMF_StateUTest

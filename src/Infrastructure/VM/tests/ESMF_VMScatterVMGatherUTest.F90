@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.4 2004/11/19 22:17:20 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.5 2004/12/09 00:25:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.4 2004/11/19 22:17:20 svasquez Exp $'
+      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.5 2004/12/09 00:25:20 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -64,19 +64,15 @@
 !------------------------------------------------------------------------------
 
 
-      print *, "*************VM SCATTER GATHER UNIT TESTS***************************"
-      print *
-
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
-      call ESMF_TestStart(petCount, ESMF_SRCLINE)
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       ! exit early if we have less than 4 procs
-      if (petCount .lt. 4) then
-        print *, "This test cannot run with less than 4 processors"
-        goto 10
-      endif
+      if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
  
+      ! get global vm information
+      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGet(vm, localPet, petCount=petCount, rc=rc)
+
       scatterRoot = 0
       gatherRoot = petCount - 1
       ! allocate data arrays
@@ -217,9 +213,8 @@
       enddo
 
 
-10    print *, "end of VM Scatter Gather Test"
+10    continue
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
-      call ESMF_Finalize(rc)
 
       end program ESMF_VMScatterVMGatherUTest
