@@ -1,4 +1,4 @@
-# $Id: common,v 1.35 2003/04/08 19:39:25 svasquez Exp $ 
+# $Id: common,v 1.36 2003/04/08 20:29:36 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -64,13 +64,13 @@ vpathlib:
 
 # Builds library
 lib:: chk_dir ${SOURCE}
-	if [ "${STOREH}" != "" ] ; then \
+	@if [ "${STOREH}" != "" ] ; then \
 	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} storeh; fi
-	if [ "${SOURCEC}" != "" ] ; then \
+	@if [ "${SOURCEC}" != "" ] ; then \
 	   $(MAKE) -f ${MAKEFILE} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libc; fi
-	if [ "${SOURCEF}" != "" ] ; then \
+	@if [ "${SOURCEF}" != "" ] ; then \
 		$(MAKE) -f ${MAKEFILE}  ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} libf; fi
-	if [ "${OBJS}" != " " ] ; then \
+	@if [ "${OBJS}" != " " ] ; then \
 		${RANLIB}  ${LIBNAME}; \
 		${RM} -f ${OBJS}; \
 	fi
