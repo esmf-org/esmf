@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.22 2005/01/12 22:04:15 eschwab Exp $
+! $Id: CoupledFlowApp.F90,v 1.23 2005/01/12 22:20:04 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -158,7 +158,7 @@
 !
 !     The following piece of code provides an example of Clock creation used in
 !     the Demo.  Note that the Gregorian calendar was set as the default in
-!     the ESMF_Initialize() call above.  As shown in this example, we first
+!     the ESMF\_Initialize() call above.  As shown in this example, we first
 !     initialize a time interval (timestep) to 2 seconds:
 !\begin{verbatim}
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
