@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.37 2004/11/09 17:53:45 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.38 2004/11/09 19:01:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.37 2004/11/09 17:53:45 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.38 2004/11/09 19:01:46 theurich Exp $'
 
 !==============================================================================
 
@@ -230,6 +230,7 @@ module ESMF_VMMod
       module procedure ESMF_VMRecvR4
       module procedure ESMF_VMRecvR8
       module procedure ESMF_VMRecvLogical
+      module procedure ESMF_VMRecvCharacter
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -270,6 +271,7 @@ module ESMF_VMMod
       module procedure ESMF_VMSendR4
       module procedure ESMF_VMSendR8
       module procedure ESMF_VMSendLogical
+      module procedure ESMF_VMSendCharacter
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -290,6 +292,7 @@ module ESMF_VMMod
       module procedure ESMF_VMSendRecvR4
       module procedure ESMF_VMSendRecvR8
       module procedure ESMF_VMSendRecvLogical
+      module procedure ESMF_VMSendRecvCharacter
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -1759,6 +1762,86 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMRecvCharacter()"
+!BOP
+! !IROUTINE: ESMF_VMRecv - Receive Character
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
+  subroutine ESMF_VMRecvCharacter(vm, recvData, count, src, blockingflag, &
+    commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    character(*),             intent(in)              :: recvData
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: src
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Receive contigous data of type character from a PET within the
+!   same {\tt ESMF\_VM} object. 
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[recvData] 
+!        Contigous data array for data to be received.
+!   \item[count] 
+!        Number of elements to be received.
+!   \item[src] 
+!        Id of the source PET within the {\tt ESMF\_VM} object.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    size = count * 1 ! 1 byte
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMRecv(vm, recvData, size, src, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMRecvCharacter
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterI4()"
 !BOP
 ! !IROUTINE: ESMF_VMScatter - Scatter 4-byte integers
@@ -2426,6 +2509,86 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendCharacter()"
+!BOP
+! !IROUTINE: ESMF_VMSend - Send Character
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
+  subroutine ESMF_VMSendCharacter(vm, sendData, count, dst, blockingflag, &
+    commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    character(*),             intent(in)              :: sendData
+    integer,                  intent(in)              :: count
+    integer,                  intent(in)              :: dst
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Send contigous data of type character to a PET within the same
+!   {\tt ESMF\_VM} object. 
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData] 
+!        Contigous data array holding data to be send.
+!   \item[count] 
+!        Number of elements to be send.
+!   \item[dst] 
+!        Id of the destination PET within the {\tt ESMF\_VM} object.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    size = count ! 1 byte
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMSend(vm, sendData, size, dst, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMSendCharacter
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvI4()"
 !BOP
 ! !IROUTINE: ESMF_VMSendRecv - SendRecv 4-byte integers
@@ -2789,6 +2952,98 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMSendRecvLogical
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMSendRecvCharacter()"
+!BOP
+! !IROUTINE: ESMF_VMSendRecv - SendRecv Character
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMSendRecv()
+  subroutine ESMF_VMSendRecvCharacter(vm, sendData, sendCount, dst, &
+    recvData, recvCount, src, blockingflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    character(*),             intent(in)              :: sendData
+    integer,                  intent(in)              :: sendCount
+    integer,                  intent(in)              :: dst
+    character(*),             intent(in)              :: recvData
+    integer,                  intent(in)              :: recvCount
+    integer,                  intent(in)              :: src
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
+    integer,                  intent(out),  optional  :: rc           
+!
+! !DESCRIPTION:
+!   Send contigous data of type character to a PET within the same
+!   {\tt ESMF\_VM} object while receiving contigous data of kind 
+!   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData] 
+!        Contigous data array holding data to be send.
+!   \item[sendCount] 
+!        Number of elements to be send.
+!   \item[dst] 
+!        Id of the destination PET within the {\tt ESMF\_VM} object.
+!   \item[recvData] 
+!        Contigous data array for data to be received.
+!   \item[recvCount] 
+!        Number of elements to be received.
+!   \item[src] 
+!        Id of the source PET within the {\tt ESMF\_VM} object.
+!   \item[{[blockingflag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commhandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingflag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: sendSize, recvSize
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
+        call ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)
+        return
+      endif
+    endif
+
+    sendSize = sendCount ! 1 byte
+    recvSize = recvCount ! 1 byte
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
+      recvData, recvSize, src, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMSendRecvCharacter
 !------------------------------------------------------------------------------
 
 
