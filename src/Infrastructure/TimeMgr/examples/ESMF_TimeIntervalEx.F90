@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.18 2004/01/26 21:29:56 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.19 2004/02/05 22:33:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -245,7 +245,7 @@
 !\begin{verbatim}
       ! multiply by double precision real
       multiplier = 2.25
-      timeInterval3 = timeInterval1 * multiplier
+      timeInterval3 = multiplier * timeInterval1
       call ESMF_TimeIntervalGet(timeInterval3, d=d, h=h, m=m, s=s, rc=rc)
 !\end{verbatim}
 !EOP
