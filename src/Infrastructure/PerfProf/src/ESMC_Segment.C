@@ -1,4 +1,4 @@
-// $Id: ESMC_Segment.C,v 1.2 2003/04/02 19:51:51 flanigan Exp $
+// $Id: ESMC_Segment.C,v 1.3 2003/07/07 16:57:00 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Segment.C,v 1.2 2003/04/02 19:51:51 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_Segment.C,v 1.3 2003/07/07 16:57:00 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -57,10 +57,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF\_SegmentConstruct, does any additional cleanup before the
-//      original Segment object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_SegmentDestroy, which calls
-//      ESMC\_SegmentDestruct.  Define for deep classes only.
+//      {\tt ESMF\_SegmentConstruct}, does any additional cleanup before the
+//      original {\tt ESMC\_Segment} object is freed.  Intended for internal ESMF
+//      use only; end-users use {\tt ESMC\_SegmentDestroy}, which calls
+//      {\tt ESMC\_SegmentDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -87,10 +87,10 @@
       const char *arg3) {  // in
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes Segment values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_Segment} values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC\_SegmentCreate.
+//      Construct/Destruct.  Can be overloaded like {\tt ESMC\_SegmentCreate}.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -115,7 +115,7 @@
       ESMC_SegmentConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Segment object was configured with.
+//    Returns the set of resources the {\tt ESMC\_Segment} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -140,7 +140,7 @@
       const ESMC_SegmentConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the Segment object with set of resources given.
+//    Configures the {\tt ESMC\_Segment} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -165,8 +165,8 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Segment is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Validates that a {\tt ESMC\_Segment} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -192,8 +192,8 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a Segment.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      Print information about a {\tt ESMC\_Segment}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
