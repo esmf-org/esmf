@@ -8,6 +8,8 @@ int main() {
     float real_num=3.5;
     char teststring[10]="xxxx";
     char ch ='s';
+    aLog.ESMC_LogOpen("aLog1.txt);
+    alog.ESMC_LogWrite(ESMF_LOG_WARN,"Test message");
 /*
     aLog.ESMC_LogInit();
     aLog2.ESMC_LogInit();

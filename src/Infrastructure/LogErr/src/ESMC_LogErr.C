@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.25 2004/04/21 19:30:48 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.26 2004/04/21 19:56:15 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.25 2004/04/21 19:30:48 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.26 2004/04/21 19:56:15 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -171,16 +171,14 @@ int ESMC_Log::ESMC_LogWrite(
 //
 // !ARGUMENTS:
       char msg[],	// Log Entry
-      int logtype,// Log Type   
-      char module[],
-      char method[]
+      int logtype// Log Type   
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 { 
     ESMC_LogFile = fopen(nameLogErrorFile, "a+");
- 	  fprintf(ESMC_LogFile, __DATE__, __TIME__,__LINE__);
+ 	  fprintf(ESMC_LogFile, __DATE__, __TIME__,__LINE__,msg);
     fclose(ESMC_LogFile);
 }
 /*
