@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.34 2004/10/14 20:14:08 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.35 2004/10/14 20:23:36 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -971,6 +971,7 @@ end subroutine ESMF_LogSet
     integer                         ::h,m,s,ms,y,mn,dy
     integer			    ::rc2
     
+    ESMF_LogDefault%dirty = ESMF_TRUE
     call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
     call DATE_AND_TIME(d,t)	
     if (present(rc)) rc=ESMF_FAILURE
@@ -1021,7 +1022,6 @@ end subroutine ESMF_LogSet
         ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
     ESMF_LogDefault%flushed = ESMF_FALSE
-    ESMF_LogDefault%dirty = ESMF_TRUE
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
