@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.14 2003/06/20 17:45:54 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.15 2003/07/28 15:19:49 jwolfe Exp $
 !
 ! System test code #74558
 
@@ -114,17 +114,17 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize time interval to 1 second
-      call ESMF_TimeIntervalSet(time_step, s_=1.0D0, rc=rc)
+      call ESMF_TimeIntervalSet(time_step, s_r8=1.0D0, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize start time to 3/28/2003 10:00
-      call ESMF_TimeSet(startTime, YR=2003, MM=3, DD=28, H=10, M=0, &
-                        cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(startTime, yr_i4=2003, mm_i4=3, dd_i4=28, h_i4=10, &
+                        m_i4=0, calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize stop time to 3/28/2003 10:01
-      call ESMF_TimeSet(stopTime, YR=2003, MM=3, DD=28, H=10, M=1, &
-                        cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=3, dd_i4=28, h_i4=10, &
+                        m_i4=1, calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! initialize the clock with the above values

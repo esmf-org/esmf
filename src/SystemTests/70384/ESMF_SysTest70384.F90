@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.18 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.19 2003/07/28 15:19:02 jwolfe Exp $
 !
 ! System test code #70384
 
@@ -26,7 +26,8 @@
     ! Local variables
     integer :: nx, ny, nz, i, j, k, ni, nj, nk, nj2, nk2, rc, ii, jj, kk
     integer, dimension(:), allocatable :: delist
-    integer :: result, len, base, de_id
+    integer, dimension(3) :: global_start
+    integer :: result, len, base, de_id, de_x, de_y
     integer :: i_max, j_max, k_max, miscount
     integer :: status
     integer :: ndex, ndey, ndes
@@ -121,6 +122,15 @@
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
+    ! Get our position in the layout
+    call ESMF_DELayoutGetDEPosition(layout1, de_x, de_y, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+
+    ! Calculate global_starts -- would otherwise come from a grid call
+    global_start(1) = ni*(de_x-1)
+    global_start(2) = nj*(de_y-1)
+    global_start(3) = 0
+
     ! Create arrays, set and get axis info here before initializing
     ! the data.
 
@@ -140,10 +150,10 @@
     decompids1(2) = 2
     decompids1(3) = 0
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
-                                 indexlist1, rc)
+                                   indexlist1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids1, &
-                                 indexlist3, rc)
+                                   indexlist3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     global_counts(1) = ni*ndex
     global_counts(2) = nj*ndey
@@ -152,27 +162,27 @@
     decompids2(2) = 0
     decompids2(3) = 2
     call ESMF_DELayoutSetAxisIndex(layout1, global_counts, decompids2, &
-                                 indexlist2, rc)
+                                   indexlist2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
-    call ESMF_ArraySetAxisIndex(array1, ESMF_DOMAIN_LOCAL, indexlist1, rc)
+    call ESMF_ArraySetAxisIndex(array1, totalindex=indexlist1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array2, ESMF_DOMAIN_LOCAL, indexlist2, rc)
+    call ESMF_ArraySetAxisIndex(array2, totalindex=indexlist2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array3, ESMF_DOMAIN_LOCAL, indexlist3, rc)
+    call ESMF_ArraySetAxisIndex(array3, totalindex=indexlist3, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Generate global cell numbers, where cell numbering scheme goes
     ! across the global mesh, rows first
     i_max = indexlist1(1)%max
     j_max = indexlist1(2)%max
-    do k=1,indexlist1(3)%r-indexlist1(3)%l+1
-      kk = k+indexlist1(3)%gstart
-      do j=1,indexlist1(2)%r-indexlist1(2)%l+1
-        jj = j+indexlist1(2)%gstart
-        do i=1,indexlist1(1)%r-indexlist1(1)%l+1
-          ii = i+indexlist1(1)%gstart
+    do k=1,indexlist1(3)%max-indexlist1(3)%min+1
+      kk = k+global_start(3)
+      do j=1,indexlist1(2)%max-indexlist1(2)%min+1
+        jj = j+global_start(2)
+        do i=1,indexlist1(1)%max-indexlist1(1)%min+1
+          ii = i+global_start(1)
           srcdata(i, j, k) = i_max*j_max*(kk-1) + i_max*(jj-1) + ii
         enddo
       enddo

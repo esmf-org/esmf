@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.9 2003/04/24 16:43:18 nscollins Exp $
+! $Id: FlowMod.F90,v 1.10 2003/07/28 15:19:59 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real :: x_min, x_max, y_min, y_max
-      integer :: i_max, j_max
+      integer, dimension(ESMF_MAXGRIDDIM) :: counts
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
@@ -78,8 +78,8 @@
 !
 ! Create the Grid
 !
-        i_max = 40
-        j_max = 20
+        counts(1) = 40
+        counts(2) = 20
         x_min = 0.0
         x_max = 200.0
         y_min = 0.0
@@ -92,7 +92,7 @@
         vert_coord_system = ESMF_CoordSystem_Unknown
         halo_width = 1
 
-        grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+        grid = ESMF_GridCreate(counts=counts, &
                                x_min=x_min, x_max=x_max, &
                                y_min=y_min, y_max=y_max, &
                                layout=layout, &
@@ -102,7 +102,6 @@
                                vert_stagger=vert_stagger, &
                                horz_coord_system=horz_coord_system, &
                                vert_coord_system=vert_coord_system, &
-                               halo_width=halo_width, &
                                name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
@@ -348,7 +347,7 @@
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=rc)
+      call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
@@ -388,7 +387,7 @@
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=rc)
+      call ESMF_TimeIntervalGet(time_step, s_r8=s_, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
