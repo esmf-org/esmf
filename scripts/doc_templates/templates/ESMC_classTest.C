@@ -1,4 +1,4 @@
-// $Id: ESMC_classTest.C,v 1.2 2003/02/28 04:20:56 eschwab Exp $
+// $Id: ESMC_classTest.C,v 1.3 2003/03/06 17:31:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_classTest.C,v 1.2 2003/02/28 04:20:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_classTest.C,v 1.3 2003/03/06 17:31:14 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -46,6 +46,9 @@
 
    // individual test result code
    int rc;
+
+   // individual test name
+   char name[ESMF_MAXSTR];
 
    // individual test failure message
    char failMsg[ESMF_MAXSTR];
@@ -60,82 +63,93 @@
    // test dynamic allocation of ESMC_<Class>
    //   also tests default constructor
    <class>_ptr = ESMC_<Class>Create(args, &rc);
+   sprintf(name, "ESMC_<Class>Create"); 
    sprintf(failMsg, "rc = %d, <class>_ptr = %p, args = %f",
            rc, <class>_ptr, args);
    ESMC_Test((<class>_ptr!=0 && rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
     
    // test internal dynamic allocation within statically allocated
    //   ESMC_<Class>
    rc = <class>_ptr->ESMC_<Class>Construct(args);
+   sprintf(name, "ESMC_<Class>Construct"); 
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test initialization of members of statically allocated ESMC_<Class>
    //   may want to read back values via Get methods for comparison
    rc = <class>_ptr->ESMC_<Class>Init(args);
+   sprintf(name, "ESMC_<Class>Init"); 
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test setting of configuration values
    ESMC_<Class>Config config_set;
    rc = <class>_ptr->ESMC_<Class>SetConfig(config_set);
+   sprintf(name, "ESMC_<Class>SetConfig"); 
    sprintf(failMsg, "rc = %d, config_set = %f", rc, config_set);
    ESMC_Test((rc==ESMF_SUCCESS), 
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test getting of configuration values,
    //  compare to values set previously
    ESMC_<Class>Config config_get;
    rc = <class>_ptr->ESMC_<Class>GetConfig(&config_get);
+   sprintf(name, "ESMC_<Class>GetConfig"); 
    sprintf(failMsg, "rc = %d, config_get = %f", rc, config_get);
    ESMC_Test((rc==ESMF_SUCCESS && config_get == config_set),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test setting of ESMC_<Class> members values
    <value type> value_set;
    rc = <class>_ptr->ESMC_<Class>Set<Value>(value_set);
+   sprintf(name, "ESMC_<Class>Set<Value>"); 
    sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test getting of ESMC_<Class> members values,
    //   compare to values set previously
    <value type> value_get;
    rc = <class>_ptr->ESMC_<Class>Get<Value>(&value_get);
+   sprintf(name, "ESMC_<Class>Get<Value>"); 
    sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
    ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
     
    // test validate method via option string
    char validate_options[ESMF_MAXSTR];
    rc = <class>_ptr->ESMC_<Class>Validate(validate_options);
+   sprintf(name, "ESMC_<Class>Validate"); 
    sprintf(failMsg, "rc = %d, validate_options = %s", rc, validate_options);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test print method via option string
    char print_options[ESMF_MAXSTR];
    rc = <class>_ptr->ESMC_<Class>Print(print_options);
+   sprintf(name, "ESMC_<Class>Print"); 
    sprintf(failMsg, "rc = %d, print_options = %s", rc, print_options);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test internal dynamic deallocation within statically allocated 
    //   ESMC_<Class>
    rc = <class>_ptr->ESMC_<Class>Destruct();
+   sprintf(name, "ESMC_<Class>Destruct"); 
    sprintf(failMsg, "rc = %d", rc);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test dynamic deallocation of ESMC_<Class>
    //   also tests destructor
    rc = ESMC_<Class>Destroy(<class>_ptr);
+   sprintf(name, "ESMC_<Class>Destroy"); 
    sprintf(failMsg, "rc = %d, <class>_ptr = %p", rc, <class>_ptr);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // return number of failures to environment; 0 = success (all pass)
    return(result);
