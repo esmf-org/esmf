@@ -1,11 +1,11 @@
-% $Id: newDELayout_usage.tex,v 1.1 2004/03/23 16:37:15 theurich Exp $
+% $Id: newDELayout_usage.tex,v 1.2 2004/03/23 18:51:22 theurich Exp $
 
 \subsection{Practical aspects of using ESMF\_DELayout}
 In a typical ESMF application the application writer will create one ESMF\_DELayout for each ESMF\_Grid object, provide the ESMF\_DELayout during ESMF\_Grid creation and destroy the ESMF\_DELayout object immediately there after. The ESMF\_Grid object will hold a copy of the provided ESMF\_DELayout and a reference to this copy can be obtained using ESMF\_Grid methods anytime it is required.
 
 The ESMF\_DELayout creation method requires a reference to the ESMF\_VM object of the current component. This reference is stored in the ESMF\_DELayout object (and its copies) and will be used in methods that require access to the virtual machine.
 
-Typically the application writer will not need to use any of the DELayout methods directly after creating and destroying. All of the functionality provided by ESMF\_DELayout will be available through higher classes such as ESMF\_Grid and ESMF\_Field. However, in order to facilitate code migration to ESMF we do provide several ESMF\_DELayout methods which may be of interest to the application writer. There are four groups of methos available in the user API of the ESMF\_DELayout class:
+Typically the application writer will not need to use any of the DELayout methods directly after creating and destroying. All of the functionality provided by ESMF\_DELayout will be available through higher classes such as ESMF\_Grid and ESMF\_Field. However, in order to facilitate code migration to ESMF we do provide several ESMF\_DELayout methods which may be of interest to the application writer. The available user API can be divided into four groups:
 \begin{itemize}
 \item {\em Get} methods which allow access to internal information,
 \item {\em Print} method which allows internal information to be printed (debugging),

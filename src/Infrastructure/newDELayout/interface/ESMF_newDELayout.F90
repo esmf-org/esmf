@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.9 2004/03/23 16:36:16 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.10 2004/03/23 18:51:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,12 +24,13 @@
 
 !==============================================================================
 !BOP
-! !MODULE: ESMF_newDELayout - The newDELayout
+! !MODULE: ESMF_newDELayoutMod
 !
 
 !   F90 API wrapper of C++ implemenation of newDELayout
 !
 !------------------------------------------------------------------------------
+
 ! !USES:
       use ESMF_BaseMod                          ! ESMF base class
       use ESMF_VMMod                            ! ESMF VM
@@ -129,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.9 2004/03/23 16:36:16 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.10 2004/03/23 18:51:22 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -139,7 +140,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCreate -- Generic interface to create a DELayout
+! !IROUTINE: ESMF_newDELayoutCreate -- Generic interface
 
 ! !INTERFACE:
       interface ESMF_newDELayoutCreate
@@ -179,7 +180,7 @@
       
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutDataCreate -- Generic interface create DELayoutData
+! !IROUTINE: ESMF_newDELayoutDataCreate -- Generic interface
 
 ! !INTERFACE:
       interface ESMF_newDELayoutDataCreate
@@ -205,7 +206,7 @@ contains
         
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_newDELayoutCreateND - Create ND DELayout
+! !IROUTINE: ESMF_newDELayoutCreateND - Create N-dimensional DELayout
 
 ! !INTERFACE:
   function ESMF_newDELayoutCreateND(vm, nDEs, DEtoPET, cyclic, rc)
@@ -221,7 +222,7 @@ contains
       type(ESMF_newDELayout) :: ESMF_newDELayoutCreateND
 !
 ! !DESCRIPTION:
-!     Create ND DELayout
+!     Create N-dimensional DELayout
 !
 !     The arguments are:
 !     \begin{description}
