@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.57 2004/04/23 00:23:08 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.58 2004/04/27 22:57:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.57 2004/04/23 00:23:08 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.58 2004/04/27 22:57:52 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1450,125 +1450,6 @@ int ESMC_Calendar::count=0;
     return(diff);
 
 }  // end ESMC_CalendarDecrement
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CalendarIntervalMagnitude - determine the magnitude of a Calendar time interval
-//
-// !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarIntervalMagnitude(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_TimeInterval &timeInterval) const {   // in
-
-//
-// !DESCRIPTION:
-//     Determines the magnitude of a given {\tt ESMC\_TimeInterval} by reducing
-//     to the smallest and least number of units possible, ideally only seconds.//     Takes into account the time interval's calendar and its start time
-//     and/or end time, if set.
-//
-//EOP
-// !REQUIREMENTS:
-
-    // Note:  Don't return ESMF_FAILURE; just reduce what we can.  Failure is
-    //        determined by the method which tries to satisfy the user's
-    //        request.
-
-    // reduce any yy,mm,d to base time units (seconds) if possible,
-    //   or at least to months and/or days if not
-    switch (calendarType)
-    {
-      case ESMC_CAL_GREGORIAN:
-      case ESMC_CAL_NOLEAP:
-        // use startTime to reduce yy,mm,d to seconds
-        if (timeInterval.startTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
-          timeInterval.endTime = timeInterval.startTime + timeInterval;
-          ESMC_TimeInterval ti = timeInterval.endTime - timeInterval.startTime;
-          timeInterval.s = ti.s;
-          //TODO: timeInterval = timeInterval.endTime - timeInterval.startTime;
-          //      should just copy base class part wholesale, rather than
-          //      individual properties (including fraction sN/sD); breaks
-          //      encapsulation principle.
-          timeInterval.yy = timeInterval.mm = timeInterval.d = 0;
-                            // yy, mm, d all reduced to base seconds
-
-        // use endTime to reduce yy,mm,d to seconds
-        } else if (timeInterval.endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
-          timeInterval.startTime = timeInterval.endTime - timeInterval;
-          ESMC_TimeInterval ti = timeInterval.endTime - timeInterval.startTime;
-          timeInterval.s = ti.s;
-          //TODO: timeInterval = timeInterval.endTime - timeInterval.startTime;
-          //      should just copy base class part wholesale, rather than
-          //      individual properties (including fraction sN/sD); breaks
-          //      encapsulation principle.
-          timeInterval.yy = timeInterval.mm = timeInterval.d = 0;
-                            // yy, mm, d all reduced to base seconds
-
-        } else { // no startTime or endTime available, reduce what we can
-                 //   to (mm, s)
-          if (calendarType == ESMC_CAL_GREGORIAN) {
-            // cannot reduce yy or mm to seconds, but can reduce yy to mm
-            if (timeInterval.yy != 0) {
-              timeInterval.mm += timeInterval.yy * monthsPerYear;
-              timeInterval.yy = 0;
-            }
-          } else { // ESMC_CAL_NOLEAP
-            // reduce yy to seconds
-            if (timeInterval.yy != 0) {
-              timeInterval.s += timeInterval.yy * secondsPerYear;
-              timeInterval.yy = 0;
-            }
-            // cannot reduce mm to seconds
-          }
-          // reduce d to seconds
-          if (timeInterval.d != 0) {
-            timeInterval.s += timeInterval.d * secondsPerDay;
-            timeInterval.d = 0;
-          }
-          // we now have (mm, s); yy and d have been reduced
-        }
-        break;
-      case ESMC_CAL_360DAY:
-        if (timeInterval.yy != 0) {
-          timeInterval.s += timeInterval.yy * secondsPerYear;
-          timeInterval.yy = 0;
-        }
-        if (timeInterval.mm != 0) {
-          timeInterval.s += timeInterval.mm * 30 * secondsPerDay;
-          timeInterval.mm = 0;
-        }
-        if (timeInterval.d != 0) {
-          timeInterval.s += timeInterval.d * secondsPerDay;
-          timeInterval.d = 0;
-        }
-        // yy, mm, d all reduced to base seconds
-        break;
-      case ESMC_CAL_JULIANDAY:
-        // ignore years and months
-
-        // reduce days to seconds
-        if (timeInterval.d != 0) {
-          timeInterval.s += timeInterval.d * secondsPerDay;
-          timeInterval.d = 0;
-        }
-        break;
-      case ESMC_CAL_NOCALENDAR:
-        // ignore years, months and days
-        break;
-      case ESMC_CAL_CUSTOM:
-        // TODO:
-        break;
-      default:
-        // unknown calendar type
-        break;
-    };
-
-    return(ESMF_SUCCESS);
-
-}  // end ESMC_CalendarIntervalMagnitude
 
 //-------------------------------------------------------------------------
 //BOP
