@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.1 2003/03/19 15:56:48 shep_smith Exp $
+// $Id: ESMC_LogErr.C,v 1.2 2003/03/28 21:34:16 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,16 +17,6 @@
 // The LogErr class (defined in ESMC_Log.C and declared in
 // the companion file ESMC_LogErr.h) provides the user a way to write Log data.
 //
-// The following public methods are defined: ESMC_LogInfo (native C/C++ 
-// method for writing to information to a log file),
-// ESMC_LogInfoFortran (the fortran version
-// of ESMC_LogPrint), ESMC_LogWrite (another way to write to the log file using
-// the fortran write statement) ESMC_LogErrClose (closes any log file which are
-// still open), and ESMC_LogErrOpen (initializes and opens the log file).
-// See below for a more detailed definition of these methods.
-//
-//-----------------------------------------------------------------------------
-//
 // insert any higher level, 3rd party or system includes here
 // #include <ESMC.h>
 #include <stdio.h>        
@@ -44,16 +34,18 @@ int numFileGlobal=0;
 int logErrFileFortran[10];
 int numFileFortGlobal=1;
 char listOfFileNames[20][32];
+char listOfFortFileNames[20][32];
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.1 2003/03/19 15:56:48 shep_smith Exp $";
-//-----------------------------------------------------------------------------
-
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.2 2003/03/28 21:34:16 shep_smith Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
+//
+//---------------------------------------------------------------------------------
+//
 //
 //BOP
 // !IROUTINE:  ESMC_LogOpenFile -  opens a Log object
@@ -85,6 +77,8 @@ void ESMC_Log::ESMC_LogOpenFile(
 //
 // The second argument is a string and is used to form the name of the
 // logfile.
+//
+// This routine is called from native C or C++ code. C I/O libraries are used.
 //
 //EOP
 // 
@@ -120,8 +114,44 @@ void ESMC_Log::ESMC_LogOpenFile(
      
  }   //end ESMC_LogErrOpenFile
 
+//-------------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LogOpenFile -  opens a Log object
+//
+// !INTERFACE:
 
-void ESMC_Log::ESMC_LogOpenFileForWrite(int numLogFile, char name[])
+void ESMC_Log::ESMC_LogOpenFileForWrite(
+//
+// !RETURN VALUE:
+//   none
+//
+// !ARGUMENTS:
+
+     int numLogFile, //number of log files written (input). Set
+		     // to either ESMF_SINGLE_LOG_FILE or
+		     // ESMF_MULT_LOG_FILE .
+
+     char name[]     //string to form name of log file (input)
+
+   )
+//
+// !DESCRIPTION
+// ESMC\_LogErrOpenFile takes two
+// arguments.  The first should be set to ESMF_SINGLE_LOG_FILE or
+// ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
+// ESMF\_LogConstants.h, set whether one file should be written for all 
+// processes (ESMF_SINGLE\_LOG\_FILE), or whether one file per process should
+// be written (ESMF\_MULT\_LOG\_FILE).
+//
+// The second argument is a string and is used to form the name of the
+// logfile.
+//
+// This routine is called from native Fortran code. Fortran I/O libraries are
+// used.
+//
+//EOP
+// 
+//
 {
     
    if (!ESMC_LogNameValid(name) ) {
@@ -154,7 +184,21 @@ void ESMC_Log::ESMC_LogOpenFileForWrite(int numLogFile, char name[])
   logErrFileFortran[numFileFort]=unitNumber;
 }
 
-bool ESMC_Log::ESMC_LogNameValid(char name[])
+//----------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogNameValid - checks to see if a name has been used before
+//
+// !INTERFACE:
+bool ESMC_Log::ESMC_LogNameValid(
+// !RETURN VALUE
+//    none
+// !ARGUMENTS
+      char name[]           // name of file
+      )
+// !DESCRIPTION
+//    Checks to see if a file of the name name has been opened by Log.
+//    If it has the function returns a false value.  Note: this function
+//    use a global array that all ESMC_Log objects have access to.
 {
   for(int i=0; i< numFileGlobal+numFileFortGlobal; i++)
     if (strcmp(name,listOfFileNames[i])  == 0) 
@@ -180,7 +224,11 @@ void ESMC_Log::ESMC_LogInit(
     )
 
 // !DESCRIPTION
-// ESMC_LogInit initializes the log object.
+// ESMC_LogInit initializes the log object.  The following items are set:
+//   verbosity (whether or not something is written out, flush (is output 
+//   flushed?), whether or not the code halts on errors and warnings.  By
+//   default, all output goes to standard out.  This can be changed by calling
+//   the open file methods.
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 //
@@ -218,9 +266,6 @@ void ESMC_Log::ESMC_LogInit(
       printf("haltOnWarning must be set to ESMF_LOG_FALSE or ESMF_LOG_TRUE.\n");
       ESMC_LogExit();
    }
-   numFilePtr=numFileGlobal;
-   numFilePtr=numFileGlobal;
-   numFilePtr=numFileGlobal;
    numFilePtr=numFileGlobal;
    numFileGlobal++;
    numFileFort=numFileFortGlobal;
@@ -275,7 +320,8 @@ void ESMC_Log::ESMC_LogInfo(
 
 {
 
- ESMC_LogPrintHeader();
+ int fortIO=ESMF_LOG_FALSE;
+ ESMC_LogPrintHeader(fortIO);
  char* chPtr;
  va_list argp;
 
@@ -345,16 +391,14 @@ void ESMC_Log::ESMC_LogInfoFortran(
     )
 //
 // !DESCRIPTION:
-// ESMC\_LogPrintFortran is the version of LogPrint used for the Fortran
-// interface.  Instead of printing the data from the stack as ESMC\_LogPrint  
-// does, ESMC\_LogPrintFortran prints the data stored in the "Data" arrays. 
+// ESMC\_LogInfoFortran is the version of LogInfo used for the Fortran
+// interface.  Instead of printing the data from the stack as ESMC\_LogInfo 
+// does, ESMC\_LogInfoFortran prints the data stored in the "Data" arrays. 
 // The routine is called from esmf\_logprint which is  defined in
-// ESMF\_LogWrapper.C.  esmf\_logprint is callable from the user's
-// from Fortran code and is the the one that takes the data
+// ESMF\_LogInterface.C.  esmf\_logprint is callable from the user's
+// from Fortran code.  It is this routine that takes the data
 // from the stack and stores it in the "Data" arrays.
 //
-// Any number of data items may be passed to ESMC\_LogPrintFortran.
-// 
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -363,7 +407,8 @@ void ESMC_Log::ESMC_LogInfoFortran(
 {
 
 
- ESMC_LogPrintHeader();
+ int fortIO=ESMF_LOG_TRUE;
+ ESMC_LogPrintHeader(fortIO);
  int numStr=0;
  char* chPtr;
  int* intPtr;
@@ -418,7 +463,7 @@ void ESMC_Log::ESMC_LogInfoFortran(
 //    none 
 //
 // !ARGUMENTS:
-//     none.
+     int fortIO       //if set to ESMF_LOG_TRUE, use fortran io libraries
 
    )
 //
@@ -442,11 +487,21 @@ void ESMC_Log::ESMC_LogInfoFortran(
   timeAsc=asctime(timePtr);
   int len1=strlen(timeAsc);
   int len2=0;
-  FTN(esmf_logprintstring)(&unitNumber,timeAsc,&len1,&flush,"",&len2);
+  if (fortIO == ESMF_LOG_TRUE) { 
+   FTN(esmf_logprintstring)(&unitNumber,timeAsc,&len1,&flush,"",&len2);
+  } else {
+    fprintf(logErrFilePtr[numFilePtr],"%s",timeAsc);
+    if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  } 
 #ifdef HAS_MPI
   rank=MPI::COMM_WORLD.Get_rank();
   len2=4;
-  FTN(esmf_logprintint)(&unitNumber,&rank,&flush,"PE: ",&len2);
+  if (fortIO == ESMF_LOG_TRUE) { 
+   FTN(esmf_logprintint)(&unitNumber,&rank,&flush,"PE: ",&len2);
+  } else {
+    fprintf(logErrFilePtr[numFilePtr],"PE: %d",rank);
+    if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  } 
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -467,7 +522,7 @@ int ESMC_Log::ESMC_LogWrite(
 //
 // !Description:
 // This is method is used in conjunction with esmf\_logwrite (defined in
-// ESMC\_LogFortranWrapper.C) to write data to the log file.  This routine
+// ESMC\_LogInterface.C) to write data to the log file.  This routine
 // is used with the standard Fortran write function, eg.
 // write(logwrite(aLog),*) 'Hi '. 
 // The routine writes header data, and
@@ -482,7 +537,8 @@ int ESMC_Log::ESMC_LogWrite(
   int rank;
 #endif
 
-  ESMC_LogPrintHeader();
+  int fortIO=ESMF_LOG_TRUE;
+  ESMC_LogPrintHeader(fortIO);
   return unitNumber;
 }
 
@@ -526,11 +582,40 @@ void ESMC_Log::ESMC_LogFormName(
 #endif
 }
 
-void ESMC_Log::ESMC_LogCloseFileForWrite()
+//-----------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogCloseFileForWrite - closes log file. 
+//
+// !INTERFACE:
+void ESMC_Log::ESMC_LogCloseFileForWrite(
+//
+// ! RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//   none
+
+   )
+//
+// ! DESCRIPTION:
+// This routine simply closes the log file(s).  It also removes
+// file from the global file array. The routine is called from native
+// Fortran code (File is closed with Fortran I/O libraries.)
+//EOP
 {
+  int i,j;
   if (standardOut == ESMF_LOG_FALSE) {
     if (fortIsOpen==ESMF_LOG_TRUE) {
       FTN(esmf_logclosefortran)(&unitNumber);
+      for( i=0; i<numFileFortGlobal; i++)
+        if (strcmp(nameLogErrFile,listOfFortFileNames[i])  == 0) {
+         for(j=i+1;j+numFileFortGlobal; j++)
+          strcpy(listOfFortFileNames[j-1],listOfFortFileNames[j]);
+         for(j=i+1;j+numFileFortGlobal; j++)
+	  logErrFileFortran[j-1]=logErrFileFortran[j]; 
+         numFileFortGlobal--;
+         break;
+        }
     }
   }
 }
@@ -550,15 +635,28 @@ void ESMC_Log::ESMC_LogCloseFile(
    )
 //
 // ! DESCRIPTION:
-// This routine simply closes the log file(s).
+// This routine simply closes the log file(s).  It also removes
+// file from the global file array. The routine is called from native
+// C/C++ code (File is closed with C I/O libraries.)
+//
 //EOP
 
 {
+  int i,j;
 
    if (standardOut == ESMF_LOG_FALSE) {
      if (logErrFilePtr[numFilePtr] != NULL) {
        fclose(logErrFilePtr[numFilePtr]);
      }
+    for( i=0; i< numFileGlobal; i++)
+      if (strcmp(nameLogErrFile,listOfFileNames[i])  == 0) {
+       for(j=i+1;j<numFileGlobal; j++)
+          strcpy(listOfFileNames[j-1],listOfFileNames[j]);
+       for(j=i+1;j<numFileGlobal; j++)
+	  logErrFilePtr[j-1]=logErrFilePtr[j];
+       numFileGlobal--;
+       break;
+      } 
    }
 }
 
@@ -568,7 +666,7 @@ void ESMC_Log::ESMC_LogCloseFile(
 //BOP
 // !IROUTINE: ESMC_Log - native C++ constructor for log class
 //
-// !Interface:
+// !INTERFACE:
 
 ESMC_Log::ESMC_Log(
 
@@ -598,7 +696,7 @@ ESMC_Log::ESMC_Log(
 
 //----------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC\_LogErr - write error message to log file
+// !IROUTINE: ESMC_LogErr - write error message to log file
 //
 // !INTERFACE:
 
@@ -621,7 +719,9 @@ void ESMC_Log::ESMC_LogErr(
 
 {
 
-   ESMC_LogPrint(errCode,line,file,dir);
+   int fortIO=ESMF_LOG_FALSE;
+   ESMC_LogPrintHeader(fortIO);
+   ESMC_LogPrint(fortIO,errCode,line,file,dir);
 
    if (haltOnErr==ESMF_LOG_TRUE) {
     ESMC_LogCloseFile();
@@ -633,7 +733,7 @@ void ESMC_Log::ESMC_LogErr(
 
 //----------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC\_LogErrMsg - write error message to log file
+// !IROUTINE: ESMC_LogErrMsg - write error message to log file
 //
 // !INTERFACE:
 
@@ -657,7 +757,9 @@ void ESMC_Log::ESMC_LogErrMsg(
 
 {
 
-   ESMC_LogPrint(errCode,line,file,dir,msg);
+   int fortIO=ESMF_LOG_FALSE;
+   ESMC_LogPrintHeader(fortIO);
+   ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
    if (haltOnErr==ESMF_LOG_TRUE) {
     ESMC_LogCloseFile();
@@ -684,13 +786,15 @@ void ESMC_Log::ESMC_LogErrMsg(
     )
 //
 // !DESCRIPTION:
-//  Same as ESMC_LogErr, except execution is not stopped after
+//  Same as ESMC\_LogErr, except execution is not stopped after
 //  printing message, except when haltOnWarn set to true
 //
 //EOP
 { 
 
- ESMC_LogPrint(errCode,line,file,dir);
+ int fortIO=ESMF_LOG_FALSE;
+ ESMC_LogPrintHeader(fortIO);
+ ESMC_LogPrint(fortIO,errCode,line,file,dir);
 
  if (haltOnWarn == ESMF_LOG_TRUE) {
     ESMC_LogCloseFile();
@@ -717,13 +821,15 @@ void ESMC_Log::ESMC_LogErrMsg(
     )
 //
 // !DESCRIPTION:
-//  Same as ESMC_LogErr, except execution is not stopped after
+//  Same as ESMC\_LogErr, except execution is not stopped after
 //  printing message, except when haltOnWarn set to true
 //
 //EOP
 { 
 
- ESMC_LogPrint(errCode,line,file,dir,msg);
+ int fortIO=ESMF_LOG_FALSE;
+ ESMC_LogPrintHeader(fortIO);
+ ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
  if (haltOnWarn == ESMF_LOG_TRUE) {
     ESMC_LogCloseFile();
@@ -784,16 +890,17 @@ void ESMC_Log::ESMC_LogErrFortran(
   )
 // !DESCRIPTION:
 //Similar to LogErr, except called by the fortran wrapper
-//esmf_logerr which is defined in
-//ESMC_Interface.C.  The major difference between this routine
+//esmf\_logerr which is defined in
+//ESMC\_Interface.C.  The major difference between this routine
 //and LogErr is that this
 //routine prints the printf style data from the Data arrays not the stack.
 //EOP
 
 {
 
-  ESMC_LogPrintHeader();
-  ESMC_LogPrint(errCode,line,file,dir,msg);
+  int fortIO=ESMF_LOG_TRUE;
+  ESMC_LogPrintHeader(fortIO);
+  ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
 
   if (haltOnErr == ESMF_LOG_TRUE) {
@@ -825,14 +932,15 @@ void ESMC_Log::ESMC_LogWarningFortran(
 
 )
 // !DESCRIPTION:
-// Similar to ESMC_LogWarning, except called by the fortran
-// wrapper esmf_logerr which is
-// defined in ESMC_Interface.C
+// Similar to ESMC\_LogWarning, except called by the fortran
+// wrapper esmf\_logerr which is
+// defined in ESMC\_Interface.C
 //EOP
 
 {
- ESMC_LogPrintHeader();
- ESMC_LogPrint(errCode,line,file,dir,msg);
+ int fortIO=ESMF_LOG_TRUE;
+ ESMC_LogPrintHeader(fortIO);
+ ESMC_LogPrint(fortIO,errCode,line,file,dir,msg);
 
  if (haltOnWarn == ESMF_LOG_TRUE) {
     ESMC_LogCloseFileForWrite();
@@ -844,14 +952,15 @@ void ESMC_Log::ESMC_LogWarningFortran(
 //------------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE ESMC_LogPrint - prints to the log file
+// !IROUTINE: ESMC_LogPrint - prints to the log file
 // 
-// !INTERFACE
+// !INTERFACE:
 
 void ESMC_Log:: ESMC_LogPrint(
 
 // !ARGUMENTS:
 
+   int fortIO,          //if set to ESMF_LOG_TRUE use Fortran IO libraries
    int errCode,
    int line,            // see LogErr for a definition
    char file[],         // of these variables
@@ -861,31 +970,52 @@ void ESMC_Log:: ESMC_LogPrint(
   )
 
 // !DESCRIPTION: This is a private routine, used by many methods of
-// ESMC_LogPrint to print data to the log file.
+// ESMC\_Log to print data to the log file. If used from Fortran, then
+// Fortran I/O libraries are used.  Otherwise C I/O libraries are used.
 //EOP
 {
  char errMsg[32];
  int len1,len2;
  ESMC_LogGetErrMsg(errCode,errMsg);
- len1=12;
- FTN(esmf_logprintint)(&unitNumber,&errCode,&flush,"Error Code: ",&len1);
- len1=0;
- len2=strlen(errMsg);
- FTN(esmf_logprintstring)(&unitNumber,errMsg,&len2,&flush,"",&len1);
- len1=11;
- len2=strlen(dir);
- FTN(esmf_logprintstring)(&unitNumber,dir,&len2,&flush,"Directory: ",&len1);
- len1=6;
- len2=strlen(file);
- FTN(esmf_logprintstring)(&unitNumber,file,&len2,&flush,"File: ",&len1);
- len1=7;
- FTN(esmf_logprintint)(&unitNumber,&line,&flush,"Line: ",&len1);
- len1=10;
- len2=strlen(msg);
- if (msg[0] != NULL) FTN(esmf_logprintstring)(&unitNumber,msg,
-  &len2,&flush,"Comments: ",&len1);
- FTN(esmf_logprintnewline)(&unitNumber,&flush);
- FTN(esmf_logprintnewline)(&unitNumber,&flush);
+ if (fortIO == ESMF_LOG_TRUE) {
+  len1=12;
+  FTN(esmf_logprintint)(&unitNumber,&errCode,&flush,"Error Code: ",&len1);
+  len1=0;
+  len2=strlen(errMsg);
+  FTN(esmf_logprintstring)(&unitNumber,errMsg,&len2,&flush,"",&len1);
+  len1=11;
+  len2=strlen(dir);
+  FTN(esmf_logprintstring)(&unitNumber,dir,&len2,&flush,"Directory: ",&len1);
+  len1=6;
+  len2=strlen(file);
+  FTN(esmf_logprintstring)(&unitNumber,file,&len2,&flush,"File: ",&len1);
+  len1=7;
+  FTN(esmf_logprintint)(&unitNumber,&line,&flush,"Line: ",&len1);
+  if (msg[0] != NULL) {
+     len1=10;
+     len2=strlen(msg);
+     FTN(esmf_logprintstring)(&unitNumber,msg, &len2,&flush,"Comments: ",&len1);
+  }
+  FTN(esmf_logprintnewline)(&unitNumber,&flush);
+  FTN(esmf_logprintnewline)(&unitNumber,&flush);
+ } else {
+  fprintf(logErrFilePtr[numFilePtr],"Error Code: %d",errCode);
+  if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  fprintf(logErrFilePtr[numFilePtr],"%s",errMsg);
+  if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  fprintf(logErrFilePtr[numFilePtr],"Directory: %s ",dir);
+  if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  fprintf(logErrFilePtr[numFilePtr],"File: %s",file);
+  if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  fprintf(logErrFilePtr[numFilePtr],"Line: %d",line);
+  if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  if (msg[0] != NULL) {
+    fprintf(logErrFilePtr[numFilePtr],"Comments: %s",msg);
+    if (flush==ESMF_LOG_TRUE) fflush(logErrFilePtr[numFilePtr]);
+  }
+  fprintf(logErrFilePtr[numFilePtr],"\n");
+  fprintf(logErrFilePtr[numFilePtr],"\n");
+ }
 }
 //-----------------------------------------------------------------------------
 //BOP
@@ -906,7 +1036,6 @@ void ESMC_Log:: ESMC_LogPrint(
 // GetErrMsg returns a string corresponding to the error code
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
 {
  switch (errCode)
  {
