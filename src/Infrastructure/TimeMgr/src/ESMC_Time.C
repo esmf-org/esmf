@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.9 2003/03/28 00:50:07 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.9 2003/03/28 00:50:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -416,7 +416,10 @@
       double *dayOfYear) const {    // out - time's day of year value
 //
 // !DESCRIPTION:
-//      Gets a {\tt Time}'s day of the year value
+//      Gets a {\tt Time}'s day of the year value as a floating point value.
+//      Whole number part is days; fractional part is fraction of a day, equal
+//      to seconds (whole + fractional) divided by 86400, the number of seconds
+//      in a day.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -524,60 +527,51 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseValidate - validate Time state
+// !IROUTINE:  ESMC_Read - restore Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_BaseValidate(
+      int ESMC_Time::ESMC_Read(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
+      ESMF_IKIND_I8 S,    // in - integer seconds
+      int Sn,             // in - fractional seconds, numerator
+      int Sd,             // in - fractional seconds, denominator
+      ESMC_Calendar *cal, // in - associated calendar
+      int timezone) {     // in - associated timezone
 //
 // !DESCRIPTION:
-//      validate {\tt Time} state for testing/debugging
+//      restore {\tt Time} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
-    return(ESMF_SUCCESS);
+    int rc;
 
- }  // end ESMC_TimeValidate
+    if (cal == 0) {
+      cout << "ESMC_Time::ESMC_Read(): null pointer passed in" << endl;
+      return(ESMF_FAILURE);
+    }
 
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BasePrint - print Time state
-//
-// !INTERFACE:
-      int ESMC_Time::ESMC_BasePrint(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const char *options) const {    // in - print options
-//
-// !DESCRIPTION:
-//      print {\tt Time} state for testing/debugging
-//
-//EOP
-// !REQUIREMENTS:  
+    // use base class Read() first
+    rc = ESMC_BaseTime::ESMC_Read(S, Sn, Sd);
 
-    ESMC_BaseTime::ESMC_BasePrint(options);
-    // TODO: print calendar and timezone
+    Calendar = cal;  // TODO?: this only restores calendar pointer; component
+                     // must be sure to restore corresponding calendar first
+    Timezone = timezone;
+  
+    return(rc);
 
-    return(ESMF_SUCCESS);
-
- }  // end ESMC_TimePrint
+ }  // end ESMC_Read
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BasePrint - return Time state
+// !IROUTINE:  ESMC_Write - return Time state
 //
 // !INTERFACE:
-      int ESMC_Time::ESMC_BasePrint(
+      int ESMC_Time::ESMC_Write(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -597,21 +591,73 @@
 
     int rc;
 
-    // use base class Print() first
-    rc = ESMC_BaseTime::ESMC_BasePrint(S, Sn, Sd);
-
-    cal = Calendar;
-
-    if (timezone != 0) {
-      *timezone = Timezone;
+    if (S == 0 || Sn == 0 || Sd == 0 || cal == 0 || timezone == 0) {
+      cout << "ESMC_Time::ESMC_Write(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
     }
-    else {
-      rc = ESMF_FAILURE;
-    }
+
+    // use base class Write() first
+    rc = ESMC_BaseTime::ESMC_Write(S, Sn, Sd);
+
+    cal = Calendar;  // TODO?: this only saves calendar pointer; component
+                     // must be sure to save corresponding calendar
+    *timezone = Timezone;
   
     return(rc);
 
- }  // end ESMC_TimePrint
+ }  // end ESMC_Write
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Validate - validate Time state
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_Validate(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - validate options
+//
+// !DESCRIPTION:
+//      validate {\tt Time} state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_Validate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Print - print Time state
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_Print(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - print options
+//
+// !DESCRIPTION:
+//      print {\tt Time} state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+    cout << "Time:" << endl;
+    ESMC_BaseTime::ESMC_Print(options);
+    if (Calendar != 0) Calendar->ESMC_Print(options);
+    cout << "Timezone = " << Timezone << endl;
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_Print
 
 //-------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.6 2003/03/28 00:50:07 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,7 +21,6 @@
 
  // higher level, 3rd party or system includes
  #include <iostream.h>
- #include <stdio.h>
 
  // associated class definition file
  #include <ESMC_Calendar.h>
@@ -29,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.6 2003/03/28 00:50:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -287,21 +286,64 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BasePrint - return Calendar state
+// !IROUTINE:  ESMC_Read - restore Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_BasePrint(
+      int ESMC_Calendar::ESMC_Read(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType_e *Type,  // out
-      int *DaysPerMonth,          // out
-      int *SecondsPerDay,         // out
-      int *DaysPerYear,           // out
-      int *DaysPerYearDn,         // out
-      int *DaysPerYearDd) const { // out
+      ESMC_CalendarType_e type,  // in
+      int *daysPerMonth,         // in
+      int secondsPerDay,         // in
+      int daysPerYear,           // in
+      int daysPerYearDn,         // in
+      int daysPerYearDd)       { // in
+// 
+// !DESCRIPTION:
+//      Restores {\tt Calendar} state for persistence/checkpointing
+// 
+//EOP
+// !REQUIREMENTS:
+
+    if (daysPerMonth == 0) {
+      cout << "ESMC_Calendar::ESMC_Read(): null pointer passed in" << endl;
+      return(ESMF_FAILURE);
+    }
+
+    Type = type;
+    for (int i=1; i<= MONTHSPERYEAR; i++)
+    {
+        DaysPerMonth[i] = daysPerMonth[i];    
+    }
+    SecondsPerDay  = secondsPerDay;
+    DaysPerYear.D  = daysPerYear;
+    DaysPerYear.Dn = daysPerYearDn;
+    DaysPerYear.Dd = daysPerYearDd;
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_Read
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Write - save Calendar state
+//
+// !INTERFACE:
+      int ESMC_Calendar::ESMC_Write(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_CalendarType_e *type,  // out
+      int *daysPerMonth,          // out
+      int *secondsPerDay,         // out
+      int *daysPerYear,           // out
+      int *daysPerYearDn,         // out
+      int *daysPerYearDd) const { // out
 // 
 // !DESCRIPTION:
 //      Returns {\tt Calendar} state for persistence/checkpointing
@@ -309,32 +351,57 @@
 //EOP
 // !REQUIREMENTS:
 
-    if (Type != NULL && DaysPerMonth != NULL &&
-        SecondsPerDay != NULL && DaysPerYear != NULL &&
-        DaysPerYearDn != NULL && DaysPerYearDd != NULL)
-    {
-        *Type = this->Type;
-        for (int i=1; i<= MONTHSPERYEAR; i++)
-        {
-            DaysPerMonth[i] = this->DaysPerMonth[i];    
-        }
-        *SecondsPerDay = this->SecondsPerDay;
-        *DaysPerYear   = this->DaysPerYear.D;
-        *DaysPerYearDn = this->DaysPerYear.Dn;
-        *DaysPerYearDd = this->DaysPerYear.Dd;
-
-        return(ESMF_SUCCESS);
+    if (type == 0 || daysPerMonth == 0 ||
+        secondsPerDay == 0 || daysPerYear == 0 ||
+        daysPerYearDn == 0 || daysPerYearDd == 0) {
+      cout << "ESMC_Calendar::ESMC_Write(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
     }
-    else return(ESMF_FAILURE);
 
-}  // end ESMC_BasePrint
+    *type = Type;
+    for (int i=1; i<= MONTHSPERYEAR; i++)
+    {
+        daysPerMonth[i] = DaysPerMonth[i];    
+    }
+    *secondsPerDay = SecondsPerDay;
+    *daysPerYear   = DaysPerYear.D;
+    *daysPerYearDn = DaysPerYear.Dn;
+    *daysPerYearDd = DaysPerYear.Dd;
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_Write
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BasePrint - print Calendar state
+// !IROUTINE:  ESMC_Validate - validate Calendar state
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_BasePrint(void) const {
+      int ESMC_Calendar::ESMC_Validate(const char *options) const {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      validate {\tt Calendar} state
+//
+//EOP
+// !REQUIREMENTS: 
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_Validate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Print - print Calendar state
+//
+// !INTERFACE:
+      int ESMC_Calendar::ESMC_Print(const char *options) const {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -348,18 +415,19 @@
 //EOP
 // !REQUIREMENTS: 
 
-    printf("Type = %d\n", Type);
-    printf("DaysPerMonth = ");
-    for (int i=1; i<= MONTHSPERYEAR; i++) printf("%d ", DaysPerMonth[i]);
-    printf("\n");
-    printf("SecondsPerDay = %d\n", SecondsPerDay);
-    printf("DaysPerYear = %d\n", DaysPerYear.D);
-    printf("DaysPerYearDn = %d\n", DaysPerYear.Dn);
-    printf("DaysPerYearDd = %d\n", DaysPerYear.Dd);
+    cout << "Calendar:" << endl;
+    cout << "Type = " << Type << endl;
+    cout << "DaysPerMonth = " << endl;
+    for (int i=1; i<= MONTHSPERYEAR; i++) cout << DaysPerMonth[i] << " ";
+    cout << endl;
+    cout << "SecondsPerDay = " << SecondsPerDay  << endl;
+    cout << "DaysPerYear = "   << DaysPerYear.D  << endl;
+    cout << "DaysPerYearDn = " << DaysPerYear.Dn << endl;
+    cout << "DaysPerYearDd = " << DaysPerYear.Dd << endl;
     
     return(ESMF_SUCCESS);
 
-}  // end ESMC_BasePrint
+}  // end ESMC_Print
 
 //-------------------------------------------------------------------------
 //BOP
@@ -381,7 +449,7 @@
 //EOP
 // !REQUIREMENTS: 
 
-    // default calendar type is none ??
+    // TODO default calendar type is none ??
     ESMC_CalendarInit(ESMC_CAL_NOCALENDAR);
 
 } // end ESMC_Calendar
@@ -435,7 +503,7 @@
 // !REQUIREMENTS: 
 
     ESMC_CalendarInitGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
-                        DaysPerYearDn, DaysPerYearDd);
+                             DaysPerYearDn, DaysPerYearDd);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------

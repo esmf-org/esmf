@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.6 2003/03/27 01:41:26 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.7 2003/03/29 01:41:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,14 +148,17 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // required methods inherited and overridden from the ESMC_Base class
 
-    // internal validation
-    int ESMC_BaseValidate(const char *options) const;
-
     // for persistence/checkpointing
-    int ESMC_BasePrint(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
+    int ESMC_Read(ESMF_IKIND_I8 S, int Sn, int Sd,
+                  ESMC_Calendar *cal);
+    int ESMC_Write(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                   ESMC_Calendar *cal) const;
+
+    // internal validation
+    int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_BasePrint(void) const;
+    int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.8 2003/03/28 00:49:09 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.9 2003/03/29 01:41:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.8 2003/03/28 00:49:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.9 2003/03/29 01:41:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -159,10 +159,112 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseValidate - internal consistency check for a Clock
+// !IROUTINE:  ESMC_Read - restore contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_BaseValidate(
+      int ESMC_Clock::ESMC_Read(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *timeStep,             // in
+      ESMC_Time         *startTime,            // in
+      ESMC_Time         *stopTime,             // in
+      ESMC_Time         *refTime,              // in
+      ESMC_Time         *currTime,             // in
+      ESMC_Time         *prevTime,             // in
+      ESMF_IKIND_I8      advanceCount,         // in
+      ESMC_Alarm        *alarmList[],          // in
+      int                numAlarms ) {         // in 
+//
+// !DESCRIPTION:
+//      Restore information about a {\tt Clock}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base}
+//      class method.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    if (timeStep == 0 || startTime == 0 || stopTime == 0 || refTime == 0 ||
+        currTime == 0 || prevTime == 0 || alarmList == 0) {
+      cout << "ESMC_Clock::ESMC_Read(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
+    }
+    
+    TimeStep     = *timeStep;
+    StartTime    = *startTime;
+    StopTime     = *stopTime;
+    RefTime      = *refTime;
+    CurrTime     = *currTime;
+    PrevTime     = *prevTime;
+    AdvanceCount = advanceCount;
+    NumAlarms    = numAlarms;
+    for (int i=0; i<NumAlarms; i++) AlarmList[i] = alarmList[i];
+                              // TODO: component must be sure Alarms are
+                              // restored first
+    
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_Read
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Write - save contents of a Clock
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_Write(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *timeStep,             // out
+      ESMC_Time         *startTime,            // out
+      ESMC_Time         *stopTime,             // out
+      ESMC_Time         *refTime,              // out
+      ESMC_Time         *currTime,             // out
+      ESMC_Time         *prevTime,             // out
+      ESMF_IKIND_I8     *advanceCount,         // out
+      ESMC_Alarm        *alarmList[],          // out
+      int               *numAlarms ) const {   // out 
+//
+// !DESCRIPTION:
+//      Save information about a {\tt Clock}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base}
+//      class method.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    if (timeStep == 0 || startTime == 0 || stopTime == 0 || refTime == 0 ||
+        currTime == 0 || prevTime == 0 || advanceCount == 0 || alarmList == 0 ||
+        numAlarms == 0) {
+      cout << "ESMC_Clock::ESMC_Write(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
+    }
+    
+    *timeStep     = TimeStep;
+    *startTime    = StartTime;
+    *stopTime     = StopTime;
+    *refTime      = RefTime;
+    *currTime     = CurrTime;
+    *prevTime     = PrevTime;
+    *advanceCount = AdvanceCount;
+    *numAlarms    = NumAlarms;
+    for (int i=0; i<NumAlarms; i++) alarmList[i] = AlarmList[i];
+                               // TODO: only saves pointers; component must be
+                               // sure Alarms are saved afterward
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_Write
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Validate - internal consistency check for a Clock
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_Validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -183,44 +285,44 @@
 //
     return(ESMF_SUCCESS);
 
- } // end ESMC_BaseValidate
-
+ } // end ESMC_Validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BasePrint - print contents of a Clock
+// !IROUTINE:  ESMC_Print - print contents of a Clock
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_BasePrint(
+      int ESMC_Clock::ESMC_Print(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *timeStep,             // out
-      ESMC_Time         *startTime,            // out
-      ESMC_Time         *stopTime,             // out
-      ESMC_Time         *refTime,              // out
-      ESMC_Time         *currTime,             // out
-      ESMC_Time         *prevTime,             // out
-      ESMF_IKIND_I8     *advanceCount,         // out
-      ESMC_Alarm        *alarmList[],          // out
-      int               *numAlarms ) const {   // out 
+      const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
-//      Print information about a {\tt Clock}.  The options control the
-//      type of information and level of detail.  {\tt ESMC\_Base}
-//      class method.
+//      Prints a {\tt Clock}'s contents for testing/debugging
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS:  XXXn.n, YYYn.n
 
-//
-//  code goes here
-//
+    cout << "Clock:" << endl;
+    cout << "TimeStep = "     << TimeStep.ESMC_Print(options)  << endl;
+    cout << "StartTime = "    << StartTime.ESMC_Print(options) << endl;
+    cout << "StopTime = "     << StopTime.ESMC_Print(options) << endl;
+    cout << "RefTime = "      << RefTime.ESMC_Print(options) << endl;
+    cout << "CurrTime = "     << CurrTime.ESMC_Print(options) << endl;
+    cout << "PrevTime = "     << PrevTime.ESMC_Print(options) << endl;
+    cout << "AdvanceCount = " << AdvanceCount << endl;
+    cout << "NumAlarms = "    << NumAlarms << endl;
+    cout << "AlarmList = " << endl;
+    for (int i=0; i<NumAlarms; i++) cout << AlarmList[i]->ESMC_Print(options);
+
+    // TODO print ClockMutex ?
+
     return(ESMF_SUCCESS);
 
- } // end ESMC_BasePrint
+ } // end ESMC_Print
 
 //-------------------------------------------------------------------------
 //BOP

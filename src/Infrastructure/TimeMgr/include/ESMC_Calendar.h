@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.4 2003/03/27 01:39:50 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.5 2003/03/29 01:41:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -72,6 +72,10 @@
 
 #define MONTHSPERYEAR 12
 
+// TODO: make function for Gregorian only?
+#define ESMC_IS_LEAP_YEAR(year)  ( (year%400 == 0) || ((year%4 == 0) && \
+                                                       (year%100 != 0)) )
+
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
 typedef enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                                 ESMC_CAL_JULIAN,
@@ -110,10 +114,10 @@ class ESMC_Calendar {
   public:
 
     // Calendar is a shallow class, so only Init methods are needed
-    int ESMC_CalendarInit(ESMC_CalendarType_e Type);
-    int ESMC_CalendarInitGeneric(int *DaysPerMonth, int SecondsPerDay,
-                            int DaysPerYear,   int DaysPerYearDn,
-                            int DaysPerYearDd);
+    int ESMC_CalendarInit(ESMC_CalendarType_e type);
+    int ESMC_CalendarInitGeneric(int *daysPerMonth, int secondsPerDay,
+                                 int daysPerYear,   int daysPerYearDn,
+                                 int daysPerYearDd);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -127,23 +131,27 @@ class ESMC_Calendar {
 
     // required methods inherited and overridden from the ESMC_Base class
 
-    // internal validation
-    int ESMC_BaseValidate(const char *options) const;
-
     // for persistence/checkpointing
-    int ESMC_BasePrint(ESMC_CalendarType_e *Type,
-                       int *DaysPerMonth,  int *SecondsPerDay,
-                       int *DaysPerYear,   int *DaysPerYearDn,
-                       int *DaysPerYearDd) const;
+    int ESMC_Read(ESMC_CalendarType_e type,
+                  int *daysPerMonth, int secondsPerDay,
+                  int daysPerYear,   int daysPerYearDn,
+                  int daysPerYearDd);
+    int ESMC_Write(ESMC_CalendarType_e *type,
+                   int *daysPerMonth,  int *secondsPerDay,
+                   int *daysPerYear,   int *daysPerYearDn,
+                   int *daysPerYearDd) const;
+
+    // internal validation
+    int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_BasePrint(void) const;
+    int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
     ESMC_Calendar(ESMC_CalendarType_e Type);
-    ESMC_Calendar(int *DaysPerMonth, int SecondsPerDay,
-                  int DaysPerYear,   int DaysPerYearDn, int DaysPerYearDd);
+    ESMC_Calendar(int *daysPerMonth, int secondsPerDay,
+                  int daysPerYear,   int daysPerYearDn, int daysPerYearDd);
     ~ESMC_Calendar(void);
 
  // < declare the rest of the public interface methods here >

@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.4 2003/03/28 00:45:51 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.5 2003/03/29 01:41:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,12 +49,24 @@ extern "C" {
            *status = (ptr)->ESMC_FractionSet(value);
        }
 
-       void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr, char *opts, int *status) {
-           *status = (ptr)->ESMC_FractionValidate(opts);
+       void FTN(c_esmc_fractionread)(ESMC_Fraction *ptr, int *arg1, int *arg2,
+                                     int *arg3, int *status) {
+           *status = (ptr)->ESMC_Read(*arg1, *arg2, *arg3);
        }
 
-       void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, char *opts, int *status) {
-           *status = (ptr)->ESMC_FractionPrint(opts);
+       void FTN(c_esmc_fractionwrite)(ESMC_Fraction *ptr, int *arg1, int *arg2,
+                                      int *arg3, int *status) {
+           *status = (ptr)->ESMC_Write(arg1, arg2, arg3);
+       }
+
+       void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr, const char *opts,
+                                         int *status) {
+           *status = (ptr)->ESMC_Validate(opts);
+       }
+
+       void FTN(c_esmc_fractionprint)(ESMC_Fraction *ptr, const char *opts,
+                                      int *status) {
+           *status = (ptr)->ESMC_Print(opts);
        }
 #endif
 };

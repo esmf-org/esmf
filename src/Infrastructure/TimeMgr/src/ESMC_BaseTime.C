@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.9 2003/03/28 00:50:06 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.9 2003/03/28 00:50:06 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.10 2003/03/29 01:41:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1160,10 +1160,73 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseValidate - validate BaseTime state
+// !IROUTINE:  ESMC_Read - restore BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_BaseValidate(
+      int ESMC_BaseTime::ESMC_Read(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_IKIND_I8 S,    // in - integer seconds
+      int Sn,             // in - fractional seconds, numerator
+      int Sd) {           // in - fractional seconds, denominator
+//
+// !DESCRIPTION:
+//      restore {\tt BaseTime} state for persistence/checkpointing
+//
+//EOP
+// !REQUIREMENTS:  
+
+    this->S  = S;
+    this->Sn = Sn;
+    this->Sd = Sd;
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_Read
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Write - save BaseTime state
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_Write(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_IKIND_I8 *S,    // out - integer seconds
+      int *Sn,             // out - fractional seconds, numerator
+      int *Sd) const {     // out - fractional seconds, denominator
+//
+// !DESCRIPTION:
+//      return {\tt BaseTime} state for persistence/checkpointing
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (S == 0 || Sn == 0 || Sd == 0) {
+      cout << "ESMC_BaseTime::ESMC_Write(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
+    }
+
+    *S = this->S;
+    *Sn = this->Sn;
+    *Sd = this->Sd;
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_Write
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Validate - validate BaseTime state
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_Validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1181,14 +1244,14 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_BaseValidate
+}  // end ESMC_Validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BasePrint - print BaseTime state
+// !IROUTINE:  ESMC_Print - print BaseTime state
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_BasePrint(
+      int ESMC_BaseTime::ESMC_Print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1202,48 +1265,14 @@
 //EOP
 // !REQUIREMENTS:  
 
+    cout << "BaseTime:" << endl;
     cout << "S = "  << S  << endl;
     cout << "Sn = " << Sn << endl;
     cout << "Sd = " << Sd << endl << endl;
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_BasePrint
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BasePrint - return BaseTime state
-//
-// !INTERFACE:
-      int ESMC_BaseTime::ESMC_BasePrint(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMF_IKIND_I8 *S,              // out - integer seconds
-      int *Sn,             // out - fractional seconds, numerator
-      int *Sd) const {     // out - fractional seconds, denominator
-//
-// !DESCRIPTION:
-//      return {\tt BaseTime} state for persistence/checkpointing
-//
-//EOP
-// !REQUIREMENTS:  
-
-// TODO: replace with checkpoint routine
-
-    if (S != NULL && Sn != NULL & Sd != NULL)
-    {
-        *S = this->S;
-        *Sn = this->Sn;
-        *Sd = this->Sd;
-
-        return(ESMF_SUCCESS);
-    }
-    else return(ESMF_FAILURE);
-
-}  // end ESMC_BasePrint
+}  // end ESMC_Print
 
 //-------------------------------------------------------------------------
 //BOP

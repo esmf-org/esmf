@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.7 2003/03/28 01:29:03 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.8 2003/03/29 01:41:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -89,8 +89,8 @@
  
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_BaseValidate
-      public ESMF_BasePrint
+      public ESMF_Validate
+      public ESMF_Print
 
 ! !PRIVATE MEMBER FUNCTIONS:
       private ESMF_AlarmEQ
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.7 2003/03/28 01:29:03 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.8 2003/03/29 01:41:20 eschwab Exp $'
 
 !==============================================================================
 !
@@ -673,14 +673,14 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BaseValidate - Validate an Alarm's properties
+! !IROUTINE:  ESMF_Validate - Validate an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(alarm, opt, rc)
+      subroutine ESMF_Validate(alarm, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
-      character (len=*), intent(in), optional :: opt
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -690,7 +690,7 @@
 !     \begin{description}
 !     \item[alarm]
 !          Alarm to validate
-!     \item[{[opt]}]
+!     \item[{[opts]}]
 !          Validate options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -700,20 +700,20 @@
 !     TMGn.n.n
 !EOP
       
-!      call c_ESMC_BaseValidate(alarm, opt, rc)
+      call c_ESMC_AlarmValidate(alarm, opts, rc)
     
-      end subroutine ESMF_BaseValidate
+      end subroutine ESMF_Validate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BasePrint - Print out an Alarm's properties
+! !IROUTINE:  ESMF_Print - Print out an Alarm's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(alarm, opt, rc)
+      subroutine ESMF_Print(alarm, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
-      character (len=*), intent(in), optional :: opt
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -724,7 +724,7 @@
 !     \begin{description}
 !     \item[alarm]
 !          Alarm to print out
-!     \item[{[opt]}]
+!     \item[{[opts]}]
 !          Print options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -734,9 +734,9 @@
 !     TMGn.n.n
 !EOP
       
-!      call c_ESMC_BasePrint(alarm, opt, rc)   
+      call c_ESMC_AlarmPrint(alarm, opts, rc)   
 
-      end subroutine ESMF_BasePrint
+      end subroutine ESMF_Print
 
 !------------------------------------------------------------------------------
 

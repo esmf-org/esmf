@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.6 2003/03/24 20:11:10 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.6 2003/03/24 20:11:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.7 2003/03/29 01:41:21 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -454,10 +454,100 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseValidate - internal consistency check for an Alarm
+// !IROUTINE:  ESMC_Read - restore contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_BaseValidate(
+      int ESMC_Alarm::ESMC_Read(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *ringInterval,
+      ESMC_Time         *ringTime,
+      ESMC_Time         *prevRingTime,
+      ESMC_Time         *stopTime,
+      bool              ringing,
+      bool              enabled,
+      int               id) {
+
+//
+// !DESCRIPTION:
+//      Restore information about an {\tt Alarm}. For persistence/checkpointing
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    if (ringInterval == 0 || ringTime == 0 || prevRingTime == 0 ||
+        stopTime == 0 ) {
+      // TODO: log error
+      cout << "ESMC_Alarm::ESMC_Read(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
+    }
+
+    RingInterval = *ringInterval;
+    RingTime     = *ringTime;
+    PrevRingTime = *prevRingTime;
+    StopTime     = *stopTime;
+    Ringing      = ringing;
+    Enabled      = enabled;
+    ID           = id;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_Read
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Write - save contents of an Alarm
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_Write(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_TimeInterval *ringInterval,
+      ESMC_Time         *ringTime,
+      ESMC_Time         *prevRingTime,
+      ESMC_Time         *stopTime,
+      bool              *ringing,
+      bool              *enabled,
+      int               *id) const {
+
+//
+// !DESCRIPTION:
+//      Save information about an {\tt Alarm}. For persistence/checkpointing
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    if (ringInterval == 0 || ringTime == 0 || prevRingTime == 0 ||
+        stopTime == 0 || ringing == 0 || enabled == 0 || id == 0) {
+      // TODO: log error
+      cout << "ESMC_Alarm::ESMC_Write(): null pointer(s) passed in" << endl;
+      return(ESMF_FAILURE);
+    }
+
+    *ringInterval = RingInterval;
+    *ringTime     = RingTime;
+    *prevRingTime = PrevRingTime;
+    *stopTime     = StopTime;
+    *ringing      = Ringing;
+    *enabled      = Enabled;
+    *id           = ID;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_Write
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Validate - internal consistency check for an Alarm
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_Validate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -478,14 +568,14 @@
 //
     return(ESMF_SUCCESS);
 
- } // end ESMC_BaseValidate
+ } // end ESMC_Validate
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BasePrint - print contents of an Alarm
+// !IROUTINE:  ESMC_Print - print contents of an Alarm
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_BasePrint(
+      int ESMC_Alarm::ESMC_Print(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -499,55 +589,20 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-// TODO: dereference class members
-#if 0
-    cout << "RingInterval = " << RingInterval << endl;
-    cout << "RingTime = " << RingTime << endl;
-    cout << "PrevRingTime = " << PrevRingTime << endl;
-    cout << "StopTime = " << StopTime << endl;
-    cout << "Ringing = " << Ringing << endl;
-    cout << "Enabled = " << Enabled << endl;
-    cout << "ID = " << ID << endl;
-#endif
+    cout << "Alarm:" << endl;
+    cout << "RingInterval = " << RingInterval.ESMC_Print(options)  << endl;
+    cout << "RingTime = "     << RingTime.ESMC_Print(options) << endl;
+    cout << "PrevRingTime = " << PrevRingTime.ESMC_Print(options) << endl;
+    cout << "StopTime = "     << StopTime.ESMC_Print(options) << endl;
+    cout << "Ringing = "      << Ringing << endl;
+    cout << "Enabled = "      << Enabled << endl;
+    cout << "ID = "           << ID << endl;
 
     // TODO print AlarmMutex ?
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_BasePrint
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BasePrint - print contents of an Alarm
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_BasePrint(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_TimeInterval *RingInterval,
-      ESMC_Time         *RingTime,
-      ESMC_Time         *PrevRingTime,
-      ESMC_Time         *StopTime,
-      bool              *Ringing,
-      bool              *Enabled,
-      int               *ID) const {
-
-//
-// !DESCRIPTION:
-//      Print information about an {\tt Alarm}. For persistence/checkpointing
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-//
-//  code goes here TODO: replace with checkpoint routine ?
-//
-    return(ESMF_SUCCESS);
-
- } // end ESMC_BasePrint
+ } // end ESMC_Print
 
 //-------------------------------------------------------------------------
 //BOP

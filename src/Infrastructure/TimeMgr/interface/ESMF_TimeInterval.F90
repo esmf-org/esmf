@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.6 2003/03/28 01:29:03 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.7 2003/03/29 01:41:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,8 +81,8 @@
 
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_BaseValidate
-      public ESMF_BasePrint
+      public ESMF_Validate
+      public ESMF_Print
 
 ! !PRIVATE MEMBER FUNCTIONS:
  
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.6 2003/03/28 01:29:03 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.7 2003/03/29 01:41:21 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1241,13 +1241,14 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BaseValidate - Validate a time interval's properties
+! !IROUTINE:  ESMF_Validate - Validate a time interval's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(timeinterval, rc)
+      subroutine ESMF_Validate(timeinterval, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1257,6 +1258,8 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          Time interval to validate
+!     \item[{[opts]}]
+!          Validate options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1265,19 +1268,20 @@
 !     TMGn.n.n
 !EOP
     
-!      call c_ESMC_BaseValidate(timeinterval, rc)
+      call c_ESMC_TimeIntervalValidate(timeinterval, opts, rc)
 
-      end subroutine ESMF_BaseValidate
+      end subroutine ESMF_Validate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BasePrint - Print out a time interval's properties
+! !IROUTINE:  ESMF_Print - Print out a time interval's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(timeinterval, rc)
+      subroutine ESMF_Print(timeinterval, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1288,6 +1292,8 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          Time interval to print out
+!     \item[{[opts]}]
+!          Print options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1296,9 +1302,9 @@
 !     TMGn.n.n
 !EOP
     
-!      call c_ESMC_BasePrint(timeinterval, rc)
+      call c_ESMC_TimeIntervalPrint(timeinterval, opts, rc)
 
-      end subroutine ESMF_BasePrint
+      end subroutine ESMF_Print
 
 !------------------------------------------------------------------------------
 

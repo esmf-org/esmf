@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.3 2003/03/28 00:45:51 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.4 2003/03/29 01:41:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,14 +49,36 @@ extern "C" {
                                          <value> *value, int *status} {
            *status = (ptr)->ESMC_CalendarSet(value);
        }
-
-       void FTN(c_esmc_calendarvalidate)(ESMC_Calendar *ptr, char *opts, int *status) {
-           *status = (ptr)->ESMC_CalendarValidate(opts);
-       }
-
-       void FTN(c_esmc_calendarprint)(ESMC_Calendar *ptr, char *opts, int *status) {
-           *status = (ptr)->ESMC_CalendarPrint(opts);
-       }
 #endif
+
+       void FTN(c_esmc_calendarread)(ESMC_Calendar *ptr,
+                                     ESMC_CalendarType_e *type,
+                                     int *daysPerMonth, int *secondsPerDay,
+                                     int *daysPerYear,  int *daysPerYearDn,
+                                     int *daysPerYearDd, int *status) {
+           *status = (ptr)->ESMC_Read(*type, daysPerMonth, *secondsPerDay,
+                                      *daysPerYear, *daysPerYearDn,
+                                      *daysPerYearDd);
+       }
+
+       void FTN(c_esmc_calendarwrite)(ESMC_Calendar *ptr,
+                                      ESMC_CalendarType_e *type,
+                                      int *daysPerMonth, int *secondsPerDay,
+                                      int *daysPerYear,  int *daysPerYearDn,
+                                      int *daysPerYearDd, int *status) {
+           *status = (ptr)->ESMC_Write(type, daysPerMonth, secondsPerDay,
+                                      daysPerYear, daysPerYearDn,
+                                      daysPerYearDd);
+       }
+
+       void FTN(c_esmc_calendarvalidate)(ESMC_Calendar *ptr, const char *opts,
+                                         int *status) {
+           *status = (ptr)->ESMC_Validate(opts);
+       }
+
+       void FTN(c_esmc_calendarprint)(ESMC_Calendar *ptr, const char *opts,
+                                      int *status) {
+           *status = (ptr)->ESMC_Print(opts);
+       }
 
 };

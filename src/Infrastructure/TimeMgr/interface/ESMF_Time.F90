@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.10 2003/03/28 01:29:03 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.11 2003/03/29 01:41:21 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -84,8 +84,10 @@
 
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_BaseValidate
-      public ESMF_BasePrint
+      public ESMF_Read
+      public ESMF_Write
+      public ESMF_Validate
+      public ESMF_Print
 
 ! !PRIVATE MEMBER FUNCTIONS:
 
@@ -105,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.10 2003/03/28 01:29:03 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.11 2003/03/29 01:41:21 eschwab Exp $'
 
 !==============================================================================
 
@@ -1155,19 +1157,109 @@
 
 !------------------------------------------------------------------------------
 !
-! This section defines the overridden Validate and Print methods inherited
-! from the ESMF_Base class
+! This section defines the overridden Read, Write, Validate and Print methods
+! inherited from the ESMF_Base class
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BaseValidate - Validate a time instant's properties
+! !IROUTINE:  ESMF_Read - Restore a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(time, opt, rc)
+      subroutine ESMF_Read(time, S, Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      character (len=*), intent(in), optional :: opt
+      integer(ESMF_IKIND_I8), intent(in) :: S
+      integer, intent(in) :: Sn
+      integer, intent(in) :: Sd
+      type(ESMF_Calendar), intent(in) :: cal
+      integer, intent(in) :: tz
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Perform a restore on a {\tt Time}'s properties
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          Time instant to restore
+!     \item[{[S]}]
+!          64-bit integer seconds
+!     \item[{[Sn]}]
+!          Integer fractional seconds - numerator
+!     \item[{[Sd]}]
+!          Integer fractional seconds - denominator
+!     \item[{[cal]}]
+!          Associated {\tt Calendar}
+!     \item[{[tz]}]
+!          Associated timezone (hours offset from GMT, e.g. EST = -5)
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+   
+      call c_ESMC_TimeRead(time, S, Sn, Sd, cal, tz, rc)
+
+      end subroutine ESMF_Read
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_Write - Save a time instant's properties
+
+! !INTERFACE:
+      subroutine ESMF_Write(time, S, Sn, Sd, cal, tz, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Time), intent(inout) :: time
+      integer(ESMF_IKIND_I8), intent(in) :: S
+      integer, intent(in) :: Sn
+      integer, intent(in) :: Sd
+      type(ESMF_Calendar), intent(in) :: cal
+      integer, intent(in) :: tz
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Perform a save on a {\tt Time}'s properties
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          Time instant to save
+!     \item[{[S]}]
+!          64-bit integer seconds
+!     \item[{[Sn]}]
+!          Integer fractional seconds - numerator
+!     \item[{[Sd]}]
+!          Integer fractional seconds - denominator
+!     \item[{[cal]}]
+!          Associated {\tt Calendar}
+!     \item[{[tz]}]
+!          Associated timezone (hours offset from GMT, e.g. EST = -5)
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMGn.n.n
+!EOP
+   
+      call c_ESMC_TimeWrite(time, S, Sn, Sd, cal, tz, rc)
+
+      end subroutine ESMF_Write
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_Validate - Validate a time instant's properties
+
+! !INTERFACE:
+      subroutine ESMF_Validate(time, opts, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Time), intent(inout) :: time
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1177,7 +1269,7 @@
 !     \begin{description}
 !     \item[time]
 !          Time instant to validate
-!     \item[{[opt]}]
+!     \item[{[opts]}]
 !          Validation options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1187,20 +1279,20 @@
 !     TMGn.n.n
 !EOP
    
-!      call c_ESMC_BaseValidate(time, opt, rc)
+      call c_ESMC_TimeValidate(time, opts, rc)
 
-      end subroutine ESMF_BaseValidate
+      end subroutine ESMF_Validate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BasePrint - Print out a time instant's properties
+! !IROUTINE:  ESMF_Print - Print out a time instant's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(time, opt, rc)
+      subroutine ESMF_Print(time, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      character (len=*), intent(in), optional :: opt
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1211,7 +1303,7 @@
 !     \begin{description}
 !     \item[time]
 !          Time instant to print out
-!     \item[{[opt]}]
+!     \item[{[opts]}]
 !          Print options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1221,9 +1313,9 @@
 !     TMGn.n.n
 !EOP
    
-!      call c_ESMC_BasePrint(time, opt, rc)
+      call c_ESMC_TimePrint(time, opts, rc)
 
-      end subroutine ESMF_BasePrint
+      end subroutine ESMF_Print
 
 !------------------------------------------------------------------------------
 

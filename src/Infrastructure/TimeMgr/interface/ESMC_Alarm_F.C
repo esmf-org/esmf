@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.4 2003/03/28 00:45:51 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.5 2003/03/29 01:41:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,13 +121,39 @@ extern "C" {
            *esmf_alarmEQ = (int) (*alarm1 == *alarm2);
        }
 
+       void FTN(c_esmc_alarmread)(ESMC_Alarm *ptr,
+                                  ESMC_TimeInterval *ringInterval,
+                                  ESMC_Time *ringTime,
+                                  ESMC_Time *prevRingTime,
+                                  ESMC_Time *stopTime,
+                                  bool *ringing,
+                                  bool *enabled,
+                                  int  *id,
+                                  int  *status) {
+           *status = (ptr)->ESMC_Read(ringInterval, ringTime, prevRingTime,
+                                      stopTime, *ringing, *enabled, *id);
+       }
+
+       void FTN(c_esmc_alarmwrite)(ESMC_Alarm *ptr,
+                                   ESMC_TimeInterval *ringInterval,
+                                   ESMC_Time *ringTime,
+                                   ESMC_Time *prevRingTime,
+                                   ESMC_Time *stopTime,
+                                   bool *ringing,
+                                   bool *enabled,
+                                   int  *id,
+                                   int  *status) {
+           *status = (ptr)->ESMC_Write(ringInterval, ringTime, prevRingTime,
+                                       stopTime, ringing, enabled, id);
+       }
+
        void FTN(c_esmc_alarmvalidate)(ESMC_Alarm *ptr, const char *opts,
-                                     int *status) {
-           *status = (ptr)->ESMC_BaseValidate(opts);
+                                      int *status) {
+           *status = (ptr)->ESMC_Validate(opts);
        }
 
        void FTN(c_esmc_alarmprint)(ESMC_Alarm *ptr, const char *opts,
-                                  int *status) {
-           *status = (ptr)->ESMC_BasePrint(opts);
+                                   int *status) {
+           *status = (ptr)->ESMC_Print(opts);
        }
 };

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.7 2003/03/28 00:46:46 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.8 2003/03/29 01:41:20 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -119,14 +119,14 @@
 
 ! Required inherited and overridden ESMF_Base class methods
 
-      public ESMF_BaseValidate
-      public ESMF_BasePrint
+      public ESMF_Validate
+      public ESMF_Print
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.7 2003/03/28 00:46:46 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.8 2003/03/29 01:41:20 eschwab Exp $'
 
 !==============================================================================
 
@@ -418,13 +418,14 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BaseValidate - Validate a calendar's properties
+! !IROUTINE:  ESMF_Validate - Validate a calendar's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BaseValidate(calendar, rc)
+      subroutine ESMF_Validate(calendar, opts, rc)
  
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout) :: calendar
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -434,6 +435,8 @@
 !     \begin{description}
 !     \item[calendar]
 !          Calendar to validate
+!     \item[{[opts]}]
+!          Validate options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -442,19 +445,20 @@
 !     TMGn.n.n
 !EOP
       
-!      call c_ESMC_BaseValidate(calendar, rc)
+      call c_ESMC_CalendarValidate(calendar, opts, rc)
 
-      end subroutine ESMF_BaseValidate
+      end subroutine ESMF_Validate
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BasePrint - Print out a calendar's properties
+! !IROUTINE:  ESMF_Print - Print out a calendar's properties
 
 ! !INTERFACE:
-      subroutine ESMF_BasePrint(calendar, rc)
+      subroutine ESMF_Print(calendar, opts, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(inout) :: calendar
+      character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -465,6 +469,8 @@
 !     \begin{description}
 !     \item[calendar]
 !          Calendar to print out
+!     \item[{[opts]}]
+!          Print options
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -473,9 +479,9 @@
 !     TMGn.n.n
 !EOP
   
-!      call c_ESMC_BasePrint(calendar, rc)
+      call c_ESMC_CalendarPrint(calendar, opts, rc)
 
-      end subroutine ESMF_BasePrint
+      end subroutine ESMF_Print
       
 !------------------------------------------------------------------------------
 

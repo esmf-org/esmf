@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.5 2003/03/28 01:29:47 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.6 2003/03/29 01:41:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -126,9 +126,9 @@
 
     int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *advanceCount);    // TMG3.5.1
 
-    int ESMC_ClockGetTimeInterval(ESMC_TimeInterval *timeInterval);
+    int ESMC_ClockGetTimeStep(ESMC_TimeInterval *timeStep);
                                                                    // TMG3.5.2
-    int ESMC_ClockSetTimeInterval(ESMC_TimeInterval *timeInterval);
+    int ESMC_ClockSetTimeStep(ESMC_TimeInterval *timeStep);
                                                                    // TMG3.4.2
 
     int ESMC_ClockGetCurrTime(ESMC_Time *currTime);    // TMG3.5.4
@@ -144,22 +144,32 @@
 
     // required methods inherited and overridden from the ESMC_Base class
 
-    // internal validation
-    int ESMC_BaseValidate(const char *options) const;
-
     // for persistence/checkpointing
-    int ESMC_BasePrint(ESMC_TimeInterval *timeStep,
-                       ESMC_Time         *startTime,
-                       ESMC_Time         *stopTime,
-                       ESMC_Time         *refTime,
-                       ESMC_Time         *currTime,
-                       ESMC_Time         *prevTime,
-                       ESMF_IKIND_I8     *advanceCount,
-                       ESMC_Alarm        *alarmList[],
-                       int               *numAlarms ) const;
+    int ESMC_Read(ESMC_TimeInterval *timeStep,
+                  ESMC_Time         *startTime,
+                  ESMC_Time         *stopTime,
+                  ESMC_Time         *refTime,
+                  ESMC_Time         *currTime,
+                  ESMC_Time         *prevTime,
+                  ESMF_IKIND_I8      advanceCount,
+                  ESMC_Alarm        *alarmList[],
+                  int                numAlarms );
+
+    int ESMC_Write(ESMC_TimeInterval *timeStep,
+                   ESMC_Time         *startTime,
+                   ESMC_Time         *stopTime,
+                   ESMC_Time         *refTime,
+                   ESMC_Time         *currTime,
+                   ESMC_Time         *prevTime,
+                   ESMF_IKIND_I8     *advanceCount,
+                   ESMC_Alarm        *alarmList[],
+                   int               *numAlarms ) const;
+
+    // internal validation
+    int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_BasePrint(void) const;
+    int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Clock(void);

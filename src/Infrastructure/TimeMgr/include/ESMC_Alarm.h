@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.6 2003/03/28 01:29:47 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.7 2003/03/29 01:41:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -156,20 +156,31 @@ class ESMC_Alarm {
 
     // required methods inherited and overridden from the ESMC_Base class
 
+    // for persistence/checkpointing
+
+    // restore state
+    int ESMC_Read(ESMC_TimeInterval *ringInterval,
+                  ESMC_Time         *ringTime,
+                  ESMC_Time         *prevRingTime,
+                  ESMC_Time         *stopTime,
+                  bool              ringing,
+                  bool              enabled,
+                  int               id);
+
+    // save state
+    int ESMC_Write(ESMC_TimeInterval *ringInterval,
+                   ESMC_Time         *ringTime,
+                   ESMC_Time         *prevRingTime,
+                   ESMC_Time         *stopTime,
+                   bool              *ringing,
+                   bool              *enabled,
+                   int               *id) const;
+
     // internal validation
-    int ESMC_BaseValidate(const char *options) const;
+    int ESMC_Validate(const char *options=0) const;
 
     // for testing/debugging
-    int ESMC_BasePrint(const char *options) const;
-
-    // for persistence/checkpointing
-    int ESMC_BasePrint(ESMC_TimeInterval *ringInterval,
-                       ESMC_Time         *ringTime,
-                       ESMC_Time         *prevRingTime,
-                       ESMC_Time         *stopTime,
-                       bool              *ringing,
-                       bool              *enabled,
-                       int               *id) const;
+    int ESMC_Print(const char *options=0) const;
 
     // native C++ constructors/destructors
     ESMC_Alarm(void);

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.5 2003/03/28 00:45:51 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.6 2003/03/29 01:41:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -54,14 +54,27 @@ extern "C" {
                                          <value> *value, int *status} {
            *status = (ptr)->ESMC_TimeIntervalSet(value);
        }
-
-       void FTN(c_esmc_timeintervalvalidate)(ESMC_TimeInterval *ptr, char *opts, int *status) {
-           *status = (ptr)->ESMC_TimeIntervalValidate(opts);
-       }
-
-       void FTN(c_esmc_timeintervalprint)(ESMC_TimeInterval *ptr, char *opts, int *status) {
-           *status = (ptr)->ESMC_TimeIntervalPrint(opts);
-       }
 #endif
 
+       void FTN(c_esmc_timeintervalread)(ESMC_TimeInterval *ptr,
+                                         ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                                         ESMC_Calendar *cal, int *status) {
+           *status = (ptr)->ESMC_Read(*S, *Sn, *Sd, cal);   
+       }
+
+       void FTN(c_esmc_timeintervalwrite)(ESMC_TimeInterval *ptr,
+                                          ESMF_IKIND_I8 *S, int *Sn, int *Sd,
+                                          ESMC_Calendar *cal, int *status) {
+           *status = (ptr)->ESMC_Write(S, Sn, Sd, cal);
+       }
+
+       void FTN(c_esmc_timeintervalvalidate)(ESMC_TimeInterval *ptr,
+                                             const char *opts, int *status) {
+           *status = (ptr)->ESMC_Validate(opts);
+       }
+
+       void FTN(c_esmc_timeintervalprint)(ESMC_TimeInterval *ptr,
+                                          const char *opts, int *status) {
+           *status = (ptr)->ESMC_Print(opts);
+       }
 };
