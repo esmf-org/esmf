@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.15 2003/09/23 16:28:11 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.16 2003/09/23 19:20:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.15 2003/09/23 16:28:11 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.16 2003/09/23 19:20:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -210,8 +210,10 @@
       logical :: rcpresent
       integer :: status
       integer, dimension(:), pointer :: src_ptr, dst_ptr
+      integer :: numlist
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgt_ptr
-      type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
+      type(ESMF_LocalArray) :: srcindex, dstindex, weights
+      type (ESMF_Array) :: &! temps for use when re-sizing arrays
          src_add_tmp, dst_add_tmp, weights_tmp
 
 !     Initialize return code
@@ -222,13 +224,15 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_LocalArrayGetData(tv%srcindex, src_ptr, ESMF_DATA_REF, rc)
-      call ESMF_LocalArrayGetData(tv%dstindex, dst_ptr, ESMF_DATA_REF, rc)
-      call ESMF_LocalArrayGetData(tv%weights, wgt_ptr, ESMF_DATA_REF, rc)
+      call ESMF_TransformValuesGet(tv, numlist=numlist, srcindex=srcindex, &
+                                   dstindex=dstindex, weights=weights, rc=rc)
+      call ESMF_LocalArrayGetData(srcindex, src_ptr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(dstindex, dst_ptr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(weights, wgt_ptr, ESMF_DATA_REF, rc)
       !
       ! increment number of links for this regrid
       !
-      tv%numlinks = tv%numlinks + 1
+      numlist = numlist + 1
       !
       !  if new number of links exceeds array sizes, re-size arrays
       !
@@ -236,9 +240,10 @@
       !
       ! Add addresses and weights to regrid arrays
       !
-      src_ptr(tv%numlinks) = src_add
-      dst_ptr(tv%numlinks) = dst_add
-      wgt_ptr(tv%numlinks) = weight
+      call ESMF_TransformValuesSet(tv, numlist=numlist, rc=rc);
+      !src_ptr(tv%numlist) = src_add
+      !dst_ptr(tv%numlist) = dst_add
+      !wgt_ptr(tv%numlist) = weight
 
       rc = ESMF_SUCCESS
 
