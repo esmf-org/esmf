@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.19 2003/07/18 20:36:28 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.20 2003/07/23 17:58:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,6 +55,8 @@
 
  enum ESMC_Op {ESMC_SUM=1, ESMC_MIN, ESMC_MAX};
 
+ #define ESMC_MAX_TYPES 30
+ #define ESMC_MAX_OPS 20
  #define ESMC_MAX_QUEUE 1000
 
 // !PRIVATE TYPES:
@@ -112,8 +114,8 @@
 
   public:
      // conversion map from ESMF to MPI types
-     static MPI_Datatype ESMC_DataKindToMPI[];
-     static MPI_Op       ESMC_OpToMPI[];
+     static MPI_Datatype ESMC_DataKindToMPI[ESMC_MAX_TYPES];
+     static MPI_Op       ESMC_OpToMPI[ESMC_MAX_OPS];
 
 
 // !PUBLIC MEMBER FUNCTIONS:
