@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.35 2004/04/14 20:43:17 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.36 2004/04/27 20:34:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.35 2004/04/14 20:43:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.36 2004/04/27 20:34:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -120,6 +120,7 @@ int ESMC_Alarm::count=0;
 
     if (ringTime != ESMC_NULL_POINTER) {
       alarm->ringTime = *ringTime;
+      alarm->prevRingTime = alarm->ringTime;
     }
     if (ringInterval != ESMC_NULL_POINTER) {
       alarm->ringInterval = *ringInterval;
@@ -137,6 +138,7 @@ int ESMC_Alarm::count=0;
       if (ringTime == ESMC_NULL_POINTER || ringTimeIsCurrTime) {
         // works for positive or negative ringInterval
         alarm->ringTime = clock->currTime + alarm->ringInterval;
+        alarm->prevRingTime = alarm->ringTime;
       }
     }
     if (stopTime != ESMC_NULL_POINTER) {
@@ -309,6 +311,7 @@ int ESMC_Alarm::count=0;
     }
     if (ringTime != ESMC_NULL_POINTER) {
       this->ringTime = *ringTime;
+      this->prevRingTime = this->ringTime;
     }
     if (ringInterval != ESMC_NULL_POINTER) {
       this->ringInterval = *ringInterval;
@@ -408,6 +411,9 @@ int ESMC_Alarm::count=0;
     }
     if (ringTime != ESMC_NULL_POINTER) {
       *ringTime = this->ringTime;
+    }
+    if (prevRingTime != ESMC_NULL_POINTER) {
+      *prevRingTime = this->prevRingTime;
     }
     if (ringInterval != ESMC_NULL_POINTER) {
       *ringInterval = this->ringInterval;
@@ -809,18 +815,21 @@ int ESMC_Alarm::count=0;
 
     *rc = ESMF_SUCCESS;
 
+    // carry previous flag forward
+    ringingOnPrevTimeStep = ringingOnCurrTimeStep;
+    
     // get clock's timestep direction: positive or negative
     bool positive = (clock->timeStep.ESMC_TimeIntervalAbsValue() ==
                      clock->timeStep) ? true : false;
 
     // check if time to turn on alarm
     if (!ringing && enabled) {
-      ringingOnPrevTimeStep = ringingOnCurrTimeStep;
       ringingOnCurrTimeStep = ringing = (positive) ?
                   clock->currTime >= ringTime && clock->prevTime < ringTime :
                   clock->currTime <= ringTime && clock->prevTime > ringTime;
       if (ringing) {
         // update next ringing time if ringInterval nonzero
+        prevRingTime = ringTime;
         ringTime += ringInterval;
       }
     }
