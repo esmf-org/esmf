@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.7 2004/06/18 10:44:16 nscollins Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.8 2004/06/18 15:49:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,8 +14,7 @@
     program ESMF_LogErrEx
 
 !------------------------------------------------------------------------------
-!	Writing messages to log with different methods.
-!	Add example string when put being built
+!EXAMPLE	Writing messages to log with different methods.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_LogErrEx - Log Error examples
@@ -38,6 +37,8 @@
     ! a log object that is not the default log
     type(ESMF_LOG):: alog
 !EOC
+    integer :: finalrc
+    finalrc = ESMF_SUCCESS
 !BOE
 !\subsubsection{Default Log}
 
@@ -47,14 +48,26 @@
 !BOC
     ! Initialize ESMF to initialize the default log
     call ESMF_Initialize(rc=rc1)
-
+!EOC
+    if (rc1.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOC
     ! LogWrite 
     ret= ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
+!EOC
+    if (rc2.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOC
     ! LogMsgFoundAllocError
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE,rcToReturn=rc2)
 !EOC
+    if (rc2.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
 !BOE
 !\subsubsection{User Created Log}
 
@@ -68,17 +81,54 @@
 #define ESMF_METHOD "ESMF_LogErrEx Method"
     ! Open a log named "Testlog.txt" associated with alog.
     call ESMF_LogOpen(alog, "TestLog.txt",rc=rc1)
+!EOC
+    if (rc1.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOE
     ! LogWrite
     ret= ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog)
+!EOC
+    if (.NOT.ret) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOE
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello", ESMF_CONTEXT, &
           rcToReturn=rc2,log=alog)
+!EOC
+    if (.NOT.ret) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOE
     ! LogMsgFoundAllocError
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE, ESMF_CONTEXT, rc2,alog)
+!EOC
+    if (.NOT.ret) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOE
     ! Close the log.
-    call ESMF_LogClose(alog)
+    call ESMF_LogClose(alog,rc2)
+!EOC
+    if (rc2.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+!BOC
 
     ! Finalize ESMF to close the default log
     call ESMF_Finalize(rc=rc1)
+!EOC
+    if (rc1.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
+
+    if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_LogErrEx.F90"
+    else
+        print *, "FAIL: ESMF_LogErrEx.F90"
+    end if
+!BOC
+
 end program
 !EOC
