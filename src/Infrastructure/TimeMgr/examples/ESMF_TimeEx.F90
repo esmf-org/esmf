@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.15 2003/10/22 02:33:09 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.16 2003/12/03 16:42:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.15 2003/10/22 02:33:09 eschwab Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.16 2003/12/03 16:42:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -51,38 +51,73 @@
       integer :: dayOfYear, dayOfWeek, dayOfMonth
 
       ! result code
-      integer :: rc
+      integer :: rc, finalrc
+      finalrc = ESMF_SUCCESS
 
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       ! initialize time1 to 2/28/2000 2:24:45
       call ESMF_TimeSet(time1, yr=2000, &
                         mm=2, dd=28, h=2, m=24, s=45, &
                         calendar=gregorianCalendar, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! initialize time2 to 3/1/2000 3:26:01
       call ESMF_TimeSet(time2, yr=2000, &
                         mm=3, dd=1, h=3, m=26, s=1, &
                         calendar=gregorianCalendar, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! initialize time interval1 to 2 days, 1800 seconds (0.5 hour)
       call ESMF_TimeIntervalSet(timeInterval1, d=2, &
                                 s=1800, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Time1 = "
       call ESMF_TimePrint(time1, "string", rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       print *, "Time2 = "
       call ESMF_TimePrint(time2, "string", rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       call ESMF_TimeIntervalGet(timeInterval1, d=D, s=S, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Time Interval1 = ", D, " days, ", S, " seconds."
       print *
 
       ! calculate difference between time2 and time1
       timeInterval2 = time2 - time1
       call ESMF_TimeIntervalGet(timeInterval2, d=D, h=H, m=M, s=S, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Difference between time2 and time1 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
 
@@ -91,10 +126,18 @@
       print *, "Time1 plus TimeInterval1 = "
       call ESMF_TimePrint(time3, "string", rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       ! subtract time interval1 from time2
       time3 = time2 - timeInterval1
       print *, "Time2 minus TimeInterval1 = "
       call ESMF_TimePrint(time3, "string", rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
       ! compare time1 and time2
       if (time1 .lt. time2) then
@@ -102,27 +145,78 @@
       end if
 
       call ESMF_TimeGet(time1, calendar=cal, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "time1 calendar = "
       call ESMF_CalendarPrint(cal, rc=rc)
 
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       call ESMF_TimeGet(time1, dayOfYear=dayOfYear, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "time1 day of the year = ", dayOfYear
 
       call ESMF_TimeGet(time1, dayOfMonth=dayOfMonth, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "time1 day of the month = ", dayOfMonth
 
       call ESMF_TimeGet(time1, dayOfWeek=dayOfWeek, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "time1 day of the week = ", dayOfWeek
 
       call ESMF_TimeGet(time1, midMonth=midMonth, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *
       print *, "time1 middle of the month = "
       call ESMF_TimePrint(midMonth, "string", rc)
 
       ! get wall clock time
       call ESMF_TimeSet(wallClock, calendar=gregorianCalendar, rc=rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       call ESMF_TimeSyncToRealTime(wallClock, rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
       print *, "Wall Clock Time = "
       call ESMF_TimePrint(wallClock, "string", rc)
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+
+     if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_TimeEx.F90"
+     else
+        print *, "FAIL: ESMF_TimeEx.F90"
+     end if
+
 
       end program ESMF_TimeEx
