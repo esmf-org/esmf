@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.8 2003/03/24 21:09:23 eschwab Exp $
+// $Id: ESMC_Base.h,v 1.9 2003/03/25 20:08:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,7 +22,7 @@
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
 
-#include <ESMF_Macros.inc>
+#include <ESMC.h>
 
 //-----------------------------------------------------------------------------
 //BOP
