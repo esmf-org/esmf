@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.101 2004/07/22 15:04:37 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.102 2004/07/26 17:55:24 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -123,6 +123,7 @@
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
          type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
+         type(ESMF_CWrap), pointer  :: compw      ! to satisfy the C interface
          type(ESMF_VM)      :: vm                 ! component VM
          type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
          integer            :: npetlist           ! number of PETs in petlist
@@ -218,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.101 2004/07/22 15:04:37 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.102 2004/07/26 17:55:24 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -466,6 +467,9 @@ end function
         ! instantiate a default VMPlan
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
                                   compp%npetlist, compp%petlist)
+                                  
+        ! allocate memory for the CWrap member
+        allocate(compp%compw)
 
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
@@ -538,6 +542,9 @@ end function
         ! destruct the VMPlan
         call ESMF_VMPlanDestruct(compp%vmplan)
 
+        ! Deallocate memory held for CWrap member
+        deallocate(compp%compw)
+
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -600,7 +607,6 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
@@ -652,11 +658,11 @@ end function
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
-        compw%compp => compp
+        compp%compw%compp => compp
 
         ! Set up the arguments, then make the call
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETINIT, phase, &
-                                       compw, is, es, clock, status)
+                                       compp%compw, is, es, clock, status)
           
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETINIT, phase, &
@@ -733,7 +739,6 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_CWrap) :: compw
         type (ESMF_BlockingFlag) :: blocking
 
         ! WriteRestart return code; assume failure until success is certain
@@ -756,11 +761,11 @@ end function
         ! TODO: add rest of default handling here.
 
         ! Wrap comp so it's passed to C++ correctly.
-        compw%compp => compp
+        compp%compw%compp => compp
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETWRITERESTART, phase, &
-                                                compw, iospec, clock, status)
+                                    compp%compw, iospec, clock, status)
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
@@ -824,7 +829,6 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_CWrap) :: compw
         type (ESMF_BlockingFlag) :: blocking
 
         ! ReadRestart return code; assume failure until success is certain
@@ -847,11 +851,11 @@ end function
         ! TODO: put in rest of default argument handling here
 
         ! Wrap comp so it's passed to C++ correctly.
-        compw%compp => compp
+        compp%compw%compp => compp
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETREADRESTART, phase, &
-                                                compw, iospec, clock, status)
+                                    compp%compw, iospec, clock, status)
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
@@ -921,7 +925,6 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
@@ -973,11 +976,11 @@ end function
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
-        compw%compp => compp
+        compp%compw%compp => compp
 
         ! Set up the arguments before the call     
         call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETFINAL, phase, &
-                                compw, importState, exportState, clock, status)
+                       compp%compw, importState, exportState, clock, status)
         
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETFINAL, phase, &
@@ -1060,7 +1063,6 @@ end function
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
         character(ESMF_MAXSTR) :: cname
-        type(ESMF_CWrap) :: compw
         type(ESMF_State) :: is, es
         logical :: isdel, esdel
         integer :: dummy
@@ -1112,11 +1114,11 @@ end function
         call ESMF_GetName(compp%base, cname, status)
 
         ! Wrap comp so it's passed to C++ correctly.
-        compw%compp => compp
+        compp%compw%compp => compp
 
         ! Set up the arguments before the call     
-        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, compw, &
-                                       importState, exportState, clock, status)
+        call c_ESMC_FTableSetStateArgs(compp%this, ESMF_SETRUN, phase, &
+                       compp%compw, importState, exportState, clock, status)
         
         call c_ESMC_FTableCallEntryPointVM(compp%vm_parent, compp%vmplan, &
           compp%vm_info, compp%vm_cargo, compp%this, ESMF_SETRUN, phase, status)
@@ -1741,9 +1743,9 @@ end function
                          compp%vm_cargo, callrc, status)
     ! TODO: what is the relationship between callrc and status and rc
     ! if (ESMF_LogPassFoundError(status, rc)) return
-      if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+    !  if (ESMF_LogMsgFoundError(status, &
+    !                              ESMF_ERR_PASSTHRU, &
+    !                              ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (rcpresent) rc = callrc
