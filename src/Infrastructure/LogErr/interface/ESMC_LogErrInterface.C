@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.13 2003/07/25 23:16:46 jwolfe Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.14 2003/10/09 17:10:51 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,12 +30,24 @@ extern int numFortFiles;
 extern char listOfCFileNames[20][32];
 extern char listOfFortFileNames[20][32];
 
+//-----------------------------------------------------------------------------------
+//BOP
+// These wrapper function are called by the FORTRAN routines defined in the file 
+// ESMF\_LogErr.F90.  The structure is:
+//  
+//    ESMF\_LogFoo(aLog) --->  C\_ESMF\_LogFoo(aLog)  ----> aLog.ESMC\_LogFoo()
+// In other words, these routines actually call the C++ methods.  You can't call
+// the C++ methods directly from FORTRAN.  You must go thru this intermediate step.
+//
+//EOP
+//-------------------------------------------------------------------------------------------
+
 extern "C" {
 //------------------------------------------------------------------------
 //BOP
 // !IROUTINE: C_ESMF_LogCloseFile - closes a file from Fortran code
 //
-// !INTERFACE 
+// !INTERFACE: 
 
 void FTN(c_esmf_logclosefile)(
 //
@@ -66,13 +78,13 @@ void FTN(c_esmf_logclosefile)(
 // !RETURN VALUE:
 //   none
 //
-// !ARGUMENTS
+// !ARGUMENTS:
         ESMC_Log *aLog, 
         int *numFiles, 
         char name[], 
         int namelen)
 //
-// !DESCRIPTION
+// !DESCRIPTION:
 // This routine finds the first space in the array name and inserts a
 // a null character. It then calls {\tt ESMC\_LogOpenFileForWrite} 
 // an {\tt ESMC\_Log} method for opening files.
@@ -101,14 +113,14 @@ void FTN(c_esmf_logclosefile)(
 //
    void FTN(esmf_loginfo)(
 //
-// !RETURN VALUE
+// !RETURN VALUE:
 //   none
 //
-// !ARGUMENTS
+// !ARGUMENTS:
       ESMC_Log* aLog,
       char* fmt,...)
 //
-// !DESCRIPTION
+// !DESCRIPTION:
 //  This routine allows the user to write miscellaneous information the
 //  {\tt ESMC\_Log} file. It uses a printf style character descriptor, e.g. 
 //  {\tt ESMC\_LogInfo}(aLog,"Hi there, %s ", shep), where shep here would be
@@ -221,15 +233,15 @@ void FTN(c_esmf_logclosefile)(
           
 //---------------------------------------------------------------------------------
 //BOP
-// !IROUTINE C_ESMF_LogWarnMsg- writes warning messages
+// !IROUTINE: C_ESMF_LogWarnMsg- writes warning messages
 //
-// !INTERFACE
+// !INTERFACE:
      void FTN(c_esmf_logwarnmsg)(
 //
-// !RETURN VALUE
+// !RETURN VALUE:
 // none
 //
-// !ARGUMENTS
+// !ARGUMENTS:
       ESMC_Log *aLog,
       int *errCode,
       int *line,
@@ -239,10 +251,10 @@ void FTN(c_esmf_logclosefile)(
       int filelen,
       int dirlen,
       int msglen)
-// !DESCRIPTION
-//    This routine is called by {\tt ESMC\_LogWarnMsg} (defined in ESMF_LogErr.F90).  
-//    {\tt ESMC\_LogWarnMsg_Ln} calls
-// the C++ method that actually writes the warning.
+//
+// !DESCRIPTION:
+//    This routine is called by {\tt ESMF\_LogWarnMsg} (defined in ESMF\_LogErr.F90).  
+//    {\tt C\_ESMF\_LogWarnMsg} calls the C++ method that actually writes the warning.
 //
 //EOP
 //-------------------------------------------------------------------------
@@ -284,15 +296,15 @@ void FTN(c_esmf_logclosefile)(
 
 //------------------------------------------------------------------------------
 //BOP
-// !IROUTINE C_ESMF_LogWarn - writes warning messages
+// !IROUTINE: C_ESMF_LogWarn - writes warning messages
 //
-// !INTERFACE
+// !INTERFACE:
 //
       void FTN(c_esmf_logwarn)(
-// !RETURN VALUES
+// !RETURN VALUES:
 // none
 //
-// !ARGUMENTS
+// !ARGUMENTS:
 //
        ESMC_Log *aLog,
        int *errCode,
@@ -302,9 +314,9 @@ void FTN(c_esmf_logclosefile)(
        int filelen,
        int dirlen)
 //
-// !DESCRIPTION
-//    This routine is called by {\tt ESMC\_LogWarn} (defined in ESMF_LogErr.F90).  
-//    {\tt ESMC\_LogWarn_Ln} calls the C++ method that actually writes the warning.
+// !DESCRIPTION:
+//    This routine is called by {\tt ESMC\_LogWarn} (defined in ESMF\_LogErr.F90).  
+//    {\tt C\_ESMC\_LogWarn} calls the C++ method that actually writes the warning.
 //
 //EOP
 //-------------------------------------------------------------------------
@@ -339,13 +351,15 @@ void FTN(c_esmf_logclosefile)(
 //BOP
 // !IROUTINE: C_ESMF_LogSetFlush - flushes output
 //
-// !INTERFACE
+// !INTERFACE:
        void FTN(c_esmf_logsetflush)(
-// !RETURN VALUES
+// !RETURN VALUE:
 //     none
-// !ARGUMENTS
+// !ARGUMENTS:
 //  
       ESMC_Log* aLog)
+// !DESCRIPTION:
+//  This routine calls the {\tt ESMC\_Log} method that flushes output.
 //
 //EOP
 //--------------------------------------------------------------------------
@@ -359,10 +373,11 @@ void FTN(c_esmf_logclosefile)(
 //
 // !INTERFACE:
      void FTN(c_esmf_logsetnotflush)(
-// !RETURN VALUE
+// !RETURN VALUE:
 //   none
-// !ARGUMENTS
+// !ARGUMENTS:
       ESMC_Log* aLog)
+
 //
 // !DESCRIPTION:
 //    This routine calls the Log method {\tt ESMC\_LogNotFlush()} which sets a flag
@@ -378,11 +393,11 @@ void FTN(c_esmf_logclosefile)(
 //BOP
 // !IROUTINE: C_ESMF_LogSetVerbose -  causes output to be written to the Log
 //
-// !INTERFACE
+// !INTERFACE:
     void FTN(c_esmf_logsetverbose)(
-// !RETURN VALUE
+// !RETURN VALUE:
 //   none
-// !ARGUMENTS
+// !ARGUMENTS:
      ESMC_Log* aLog)
 //
 // !DESCRIPTION:
@@ -396,13 +411,13 @@ void FTN(c_esmf_logclosefile)(
 
 //---------------------------------------------------------------------------
 //BOP                    
-// !IROUTINE: ESMF_LogNotVerbose -  causes output not to be written to the Log
+// !IROUTINE: C_ESMF_LogNotVerbose -  causes output not to be written to the Log
 //                       
-// !INTERFACE
+// !INTERFACE:
      void FTN(c_esmf_logsetnotverbose)(
-// !RETURN VALUE
+// !RETURN VALUE:
 //    NONE
-//!ARGUMENTS
+//!ARGUMENTS:
 //
     ESMC_Log* aLog) 
 //
@@ -423,7 +438,7 @@ void FTN(c_esmf_logclosefile)(
 //
 // !INTERFACE:
      int  FTN(c_esmf_loggetunit)(
-//  !RETURN VALUE
+//  !RETURN VALUE:
 //    A Fortran Unit Number
 //
 // !ARGUMENTS:
@@ -445,15 +460,15 @@ void FTN(c_esmf_logclosefile)(
 
 //----------------------------------------------------------------------------------
 //BOP
-// !IROUTINE ESMF_LogErrMsg - writes warning messages
+// !IROUTINE: C_ESMF_LogErrMsg - writes warning messages
 //
-// !INTERFACE
+// !INTERFACE:
     void FTN(c_esmf_logerrmsg)(
 //
-// !RETURN VALUE
+// !RETURN VALUE:
 //    none
 //
-// !ARGUMENTS
+// !ARGUMENTS:
 //
 //
     ESMC_Log *aLog,
@@ -466,10 +481,9 @@ void FTN(c_esmf_logclosefile)(
     int dirlen,
     int msglen)
 //
-// !DESCRIPTION
-//    This routine is called by {\tt ESMC\_LogErrMsg} (defined in
-//    ESMF_LogErr.F90).  
-//    {\tt ESMC\_LogErrMsg_Ln} calls the C++ method that actually writes
+// !DESCRIPTION:
+//    This routine is called by {\tt ESMF\_LogErrMsg} (defined in ESMF\_LogErr.F90).  
+//    {\tt C\_ESMF\_LogErrMsg} calls the C++ method that actually writes
 //    the warning.
 //
 //EOP
@@ -512,13 +526,13 @@ void FTN(c_esmf_logclosefile)(
 
 //-------------------------------------------------------------------------------------------
 //BOP
-// !IROUTINE C_ESMF_LogErr - writes warning messages
+// !IROUTINE: C_ESMF_LogErr - writes warning messages
 //
-// !INTERFACE
+// !INTERFACE:
      void FTN(c_esmf_logerr)(
-// !Return Value
+// !RETURN VALUE:
 //  none
-// !ARGUMENTS
+// !ARGUMENTS:
 //
      ESMC_Log *aLog,
      int *errCode,
@@ -528,8 +542,9 @@ void FTN(c_esmf_logclosefile)(
      int filelen,
      int dirlen)
 //
-// !DESCRIPTION
-//    This routine is called by {\tt ESMC\_LogErr} (defined in ESMF_LogErr.F90). //    {\tt ESMC\_LogErr_Ln} calls the C++ method that actually writes the warning.
+// !DESCRIPTION:
+//    This routine is called by {\tt ESMF\_LogErr} (defined in ESMF\_LogErr.F90). 
+//    {\tt C\_ESMC\_LogErr} calls the C++ method that actually writes the warning.
 //
 //EOP
 //----------------------------------------------------------------------------------------------
@@ -566,11 +581,11 @@ void FTN(c_esmf_logclosefile)(
 //
 // !IROUTINE: C_ESMF_LogSetHaltOnErr - program halts on encountering an error
 //
-// !INTERFACE
-    void FTN(c_esmf_logsethaltonerr)(
-// !RETURN VALUE
+// !INTERFACE:
+    void FTN(esmf_logsethaltonerr)(
+// !RETURN VALUE:
 //  none
-// !ARGUMENTS
+// !ARGUMENTS:
     ESMC_Log* aLog)
 // !DESCRIPTION:
 //    This routine calls a {\tt ESMC\_Log} method that sets
@@ -586,13 +601,13 @@ void FTN(c_esmf_logclosefile)(
 //---------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: C_ESMF_LogSetNotHaltOnErr - program does not halt on encountering an error
+// !IROUTINE: C_ESMF_LogSetNotHaltOnErr - program does not halt on an error
 //
-// !INTERFACE
+// !INTERFACE:
    void FTN(c_esmf_logsetnothaltonerr)(
-// !RETURN VALUE
+// !RETURN VALUE:
 //   none
-// !ARGUMENTS
+// !ARGUMENTS:
     ESMC_Log* aLog)
 //
 // !DESCRIPTION:
@@ -608,19 +623,20 @@ void FTN(c_esmf_logclosefile)(
 //---------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMF_LogSetHaltOnWarn - program halts on encountering a warning
+// !IROUTINE: C_ESMF_LogSetHaltOnWarn - program halts on encountering a warning
 //
 // !INTERFACE:
-//    subroutine ESMF_LogSetHaltOnWarn(aLog)
+void FTN(c_esmf_logsethaltonwarn)(
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS:
-//    typdef(ESMF_Log) :: aLog
+    ESMC_Log* aLog)
 //
 // !DESCRIPTION:
 //    This routine calls a {\tt ESMC\_Log} method that sets a flag to stop execution on
 //    reaching a warning.
 //EOP
 //--------------------------------------------------------------------------
-void FTN(c_esmf_logsethaltonwarn)(ESMC_Log* aLog)
 {
    aLog->ESMC_LogSetHaltOnWarn();
 }
@@ -629,14 +645,13 @@ void FTN(c_esmf_logsethaltonwarn)(ESMC_Log* aLog)
 //---------------------------------------------------------------------------
 //BOP
 //
-//!IROUTINE: C_ESMF_LogSetNotHaltOnWarn - program does not halt on
-//encountering a warning
+// !IROUTINE: C_ESMF_LogSetNotHaltOnWarn - program does not halt on warning
 //
-// !INTERFACE
+// !INTERFACE:
     void FTN(c_esmf_logsetnothaltonwarn)( 
-// !RETURN VALUES
+// !RETURN VALUE:
 //   none
-// !ARGUMENTS
+// !ARGUMENTS:
       ESMC_Log* aLog)
 //                      
 // !DESCRIPTION:                              
@@ -649,14 +664,43 @@ void FTN(c_esmf_logsethaltonwarn)(ESMC_Log* aLog)
   aLog->ESMC_LogSetNotHaltOnWarn();
 }
 
-void FTN(c_esmf_loggetverbose)(ESMC_Log* aLog, ESMC_Logical* verbose)
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: C_ESMF_GetVerbose - gets verbose flag
+//
+// !INTERFACE:
+void FTN(c_esmf_loggetverbose)(
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+    ESMC_Log* aLog, ESMC_Logical* verbose)
+// !DESCRIPTION:
+//  This routine calls a {\tt ESMC\_Log} method that gets the verbose flag
+//
+//EOP
+//-----------------------------------------------------------------------------
 {
   ESMC_Logical temp;
   temp=aLog->ESMC_LogGetVerbose();
   verbose =&(temp);
 }
 
-void FTN(c_esmf_loggetflush)(ESMC_Log* aLog, ESMC_Logical* flush)
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: C_ESMF_LogGetFlush - gets flush flag
+//
+// !INTERFACE:
+void FTN(c_esmf_loggetflush)(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+    ESMC_Log* aLog, ESMC_Logical* flush)
+// !DESCRIPTION:
+// This routine calls a {\tt ESMC\_Log} method that gets the flush flag
+//
+//EOP
+//--------------------------------------------------------------------------
 {
   ESMC_Logical temp;
   temp=aLog->ESMC_LogGetFlush();
@@ -664,14 +708,42 @@ void FTN(c_esmf_loggetflush)(ESMC_Log* aLog, ESMC_Logical* flush)
 
 }
 
-void FTN(c_esmf_loggethaltonerr)(ESMC_Log* aLog,ESMC_Logical* haltOnErr)
+//----------------------------------------------------------------------
+//BOP
+// !IROUTINE: C_ESMF_LogGetHaltOnErr - gets HaltOnErr flag 
+//
+// !INTERFACE:
+void FTN(c_esmf_loggethaltonerr)(
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+    ESMC_Log* aLog,ESMC_Logical* haltOnErr)
+// !DESCRIPTION:
+// This routine gets the HaltOnErr flag
+//
+//EOP
+// ---------------------------------------------------------------------
 {
   ESMC_Logical temp;
   temp=aLog->ESMC_LogGetHaltOnErr();
   haltOnErr=&(temp);
 }
 
-void FTN(c_esmf_loggethaltonwarn)(ESMC_Log* aLog,ESMC_Logical* haltOnWarn)
+//----------------------------------------------------------------------
+//BOP
+// !IROUTINE: C_ESMF_LogGetHaltOnWarn - gets HaltOnErr flag
+//
+// !INTERFACE:
+void FTN(c_esmf_loggethaltonwarn)(
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+    ESMC_Log* aLog,ESMC_Logical* haltOnWarn)
+// !DESCRIPTION:
+//  This routine calls a {\tt ESMC\_Log} method that gets the HaltOnWarn flag.
+//
+//EOP
+//-----------------------------------------------------------------------------------
 {
   ESMC_Logical temp;
   temp=aLog->ESMC_LogGetHaltOnWarn();
