@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.144 2004/05/10 15:43:46 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.145 2004/05/14 18:30:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.144 2004/05/10 15:43:46 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.145 2004/05/14 18:30:00 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -363,6 +363,10 @@
       contains
 !
 !==============================================================================
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddIntAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set an integer Attribute
 !
@@ -419,6 +423,10 @@
       end subroutine ESMF_FieldAddIntAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddIntListAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list Attribute
 !
@@ -485,6 +493,10 @@
       end subroutine ESMF_FieldAddIntListAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddRealAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a real Attribute
 !
@@ -541,6 +553,10 @@
       end subroutine ESMF_FieldAddRealAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddRealListAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a real list Attribute
 !
@@ -607,6 +623,10 @@
       end subroutine ESMF_FieldAddRealListAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddLogicalAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a logical Attribute
 !
@@ -663,6 +683,10 @@
       end subroutine ESMF_FieldAddLogicalAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddLogicalListAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list Attribute
 !
@@ -729,6 +753,10 @@
       end subroutine ESMF_FieldAddLogicalListAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldAddCharAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldAddAttribute - Set a character Attribute
 !
@@ -784,6 +812,10 @@
       end subroutine ESMF_FieldAddCharAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoDataPtr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
@@ -878,6 +910,10 @@
       end function ESMF_FieldCreateNoDataPtr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoArray()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
@@ -968,6 +1004,10 @@
       end function ESMF_FieldCreateNoArray
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoGridArray()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no Grid or Array
 
@@ -1041,6 +1081,10 @@
       end function ESMF_FieldCreateNoGridArray
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDestroy()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldDestroy - Free all resources associated with a Field
 
@@ -1106,6 +1150,10 @@
       end subroutine ESMF_FieldDestroy
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGet()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
 !
@@ -1238,6 +1286,10 @@
         end subroutine ESMF_FieldGet
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetArray()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
 !
@@ -1310,6 +1362,10 @@
       end subroutine ESMF_FieldGetArray
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetIntAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer Attribute
 !
@@ -1366,6 +1422,10 @@
       end subroutine ESMF_FieldGetIntAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetIntListAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer list Attribute
 !
@@ -1433,6 +1493,10 @@
       end subroutine ESMF_FieldGetIntListAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetRealAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real Attribute
 !
@@ -1489,6 +1553,10 @@
       end subroutine ESMF_FieldGetRealAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetRealListAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real list Attribute
 !
@@ -1555,6 +1623,10 @@
       end subroutine ESMF_FieldGetRealListAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLogicalAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical Attribute
 !
@@ -1611,6 +1683,10 @@
       end subroutine ESMF_FieldGetLogicalAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLogicalListAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list Attribute
 !
@@ -1677,6 +1753,10 @@
       end subroutine ESMF_FieldGetLogicalListAttr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetCharAttr()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character Attribute
 !
@@ -1734,6 +1814,10 @@
 
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetAttributeCount()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of Attributes
 !
@@ -1785,6 +1869,10 @@
       end subroutine ESMF_FieldGetAttributeCount
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetAttrInfoByName()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by name
 !
@@ -1850,6 +1938,10 @@
       end subroutine ESMF_FieldGetAttrInfoByName
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by number
 !
@@ -1920,6 +2012,10 @@
       end subroutine ESMF_FieldGetAttrInfoByNum
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetGlobalGridInfo()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalGridInfo - Get information about the Global Grid
 !
@@ -1970,6 +2066,10 @@
         end subroutine ESMF_FieldGetGlobalGridInfo
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLocalGridInfo()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalGridInfo - Get information about the Local Grid
 !
@@ -2015,6 +2115,10 @@
         end subroutine ESMF_FieldGetLocalGridInfo
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetGlobalDataInfo()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalDataInfo - Get information about Field Data
 !
@@ -2060,6 +2164,10 @@
         end subroutine ESMF_FieldGetGlobalDataInfo
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldGetLocalDataInfo()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldGetLocalDataInfo - Get information about Field Data
 !
@@ -2106,6 +2214,10 @@
         end subroutine ESMF_FieldGetLocalDataInfo
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldPrint()"
+
 !BOP
 ! !IROUTINE:  ESMF_FieldPrint - Print the contents of a Field
 
@@ -2197,6 +2309,10 @@
         end subroutine ESMF_FieldPrint
 !
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldRead()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldRead - Read in a Field from external storage
 !
@@ -2250,6 +2366,10 @@
         end function ESMF_FieldRead
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldReadRestart()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldReadRestart - Read back in a saved Field
 !
@@ -2298,6 +2418,10 @@
 
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetArray()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldSetArray - Set data Array associated with the Field
 !
@@ -2374,6 +2498,9 @@
 
 !------------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetGrid()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldSetGrid - Set Grid associated with the Field
 !
@@ -2440,6 +2567,10 @@
         end subroutine ESMF_FieldSetGrid
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetDataMap()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldSetDataMap - Set DataMap assocated with a Field
 !
@@ -2506,6 +2637,10 @@
         end subroutine ESMF_FieldSetDataMap
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldSetDataValues()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldSetDataValues - Set contents of Data array
 !
@@ -2547,6 +2682,10 @@
         end subroutine ESMF_FieldSetDataValues
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldValidate()"
+
 !BOP
 ! !IROUTINE:  ESMF_FieldValidate - Check the internal consistency of a Field
 
@@ -2602,6 +2741,10 @@
       end subroutine ESMF_FieldValidate
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWrite()"
+
 !BOP
 ! !IROUTINE: ESMF_FieldWrite - Write a Field to external storage
 !
@@ -2686,6 +2829,10 @@
 
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldWriteRestart()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldWriteRestart - Save Field in the quickest manner possible
 !
@@ -2731,6 +2878,10 @@
 ! This section includes all the Field internal methods.
 !
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNew()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNew - Construct the internals of a Field
 
@@ -2883,6 +3034,10 @@
       end subroutine ESMF_FieldConstructNew
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNewArray()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNewArray - Construct the internals of a Field
 
@@ -2969,6 +3124,10 @@
       end subroutine ESMF_FieldConstructNewArray
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNoDataPtr()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoDataPtr - Construct a Field with no associated buffer
 
@@ -3100,6 +3259,10 @@
       end subroutine ESMF_FieldConstructNoDataPtr
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNoArray()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoArray - Construct a Field with no associated Array
 
@@ -3215,6 +3378,10 @@
       end subroutine ESMF_FieldConstructNoArray
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldConstructNoGridArray()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldConstructNoGridArray - Construct a Field with no Grid or Array
 !
@@ -3289,6 +3456,10 @@
       end subroutine ESMF_FieldConstructNoGridArray
 
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldDestruct()"
+
 !BOPI
 ! !IROUTINE:   ESMF_FieldDestruct - Free any Field memory allocated internally
 !
@@ -3343,6 +3514,10 @@
       end subroutine ESMF_FieldDestruct
 !
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBoxIntersect()"
+
 !BOPI
 ! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
 !
@@ -3500,5 +3675,9 @@
 
       end subroutine ESMF_FieldBoxIntersect
 
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "No ESMF method defined"
 
       end module ESMF_FieldMod
