@@ -1,4 +1,4 @@
-% $Id: comp_usage.tex,v 1.1 2003/05/07 04:34:31 cdeluca Exp $
+% $Id: comp_usage.tex,v 1.2 2003/11/11 01:59:23 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,11 +17,11 @@ to be exchanged between separate Components.  It uses the Time class
 to describe the current model time, timesteps, and time intervals.
 
 
-There are three subtypes of the Component class.  An Application
-Component contains other Component subobjects, and will either be
-the main program or be a Component nested in a higher level
-Application.  A Gridded Component is a computational entity which
+There are two subtypes of the Component class.  
+A Gridded Component is a computational entity which
 consumes and produces data.  A Coupler Component manages the
 transformation of data between Components.
+Either type of Component can create subcomponents of any
+type and manage their execution.
 
 
