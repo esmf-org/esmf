@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.8 2003/07/28 17:37:05 jwolfe Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.9 2003/07/29 16:31:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.8 2003/07/28 17:37:05 jwolfe Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.9 2003/07/29 16:31:49 jwolfe Exp $'
 !
 !==============================================================================
 
@@ -105,7 +105,7 @@
 !
 ! !INTERFACE:
       subroutine ESMF_ArraySetAxisIndex(array, totalindex, compindex, &
-                                                                 exclindex, rc)
+                                        exclindex, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array 
@@ -286,12 +286,15 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayRedist(array, layout, rank_trans, olddecompids, &
+      subroutine ESMF_ArrayRedist(array, layout, global_start, &
+                                  global_dimlengths, rank_trans, olddecompids, &
                                   decompids, redistarray, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
       type(ESMF_DELayout) :: layout
+      integer, dimension(:), intent(in) :: global_start
+      integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: rank_trans
       integer, dimension(:), intent(in) :: olddecompids
       integer, dimension(:), intent(in) :: decompids
@@ -308,7 +311,8 @@
         logical :: rcpresent      ! did user specify rc?
         integer :: size_rank_trans
         integer :: size_decomp
-
+! TODO: create a subroutine that takes a grid as an argument instead of some of
+!       these
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -320,9 +324,9 @@
 ! call c routine to query index
         size_rank_trans = size(rank_trans)
         size_decomp = size(decompids)
-        call c_ESMC_ArrayRedist(array, layout, rank_trans, size_rank_trans, &
-                                olddecompids, decompids, size_decomp, &
-                                redistarray, status)
+        call c_ESMC_ArrayRedist(array, layout, global_start, global_dimlengths, &
+                                rank_trans, size_rank_trans, olddecompids, &
+                                decompids, size_decomp, redistarray, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayRedist returned error"
           return
