@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.2 2003/03/28 23:06:13 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.3 2003/03/31 18:23:30 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,9 @@
 // inlined are defined in the companion file ESMC\_LogErr.C
 //
 // !USES:
-#include "ESMC.h"
+#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMC.h"
+// commenting out the above and including the one below makes the code compile
+// #include "ftn.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -45,8 +47,9 @@ class ESMC_Log {
   private:
 // !PRIVATE MEMBER FUNCIONS
     void ESMC_LogFormName();
-    void ESMC_LogPrintHeader();
-    void ESMC_LogPrint(int errCode, int line, char file[], char dir[], char msg[]=NULL);
+    void ESMC_LogPrintHeader(int fortIO);
+    void ESMC_LogPrint(int fortIO, int errCode, int line, char file[],
+                       char dir[], char msg[]=NULL);
     void ESMC_LogGetErrMsg(int errCode, char msg[]) const;
     bool ESMC_LogNameValid(char name[]);
 // !PRIVATE TYPES:
