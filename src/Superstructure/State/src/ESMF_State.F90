@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.28 2004/03/10 23:40:53 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.29 2004/03/12 23:50:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,6 +180,7 @@
         type(ESMF_StateDataNeeded) :: needed
         type(ESMF_StateDataReady) :: ready
         type(ESMF_StateDataValid) :: valid
+        type(ESMF_StateDataReqRestart) :: reqrestart
       end type
 
 !------------------------------------------------------------------------------
@@ -193,10 +194,13 @@
 #endif
       private
         type(ESMF_Base) :: base
+        type(ESMF_Status) :: statestatus
         type(ESMF_StateImpExpType) :: st
         character (len=ESMF_MAXSTR) :: compname
-        type(ESMF_StateDataValid) :: stvalid
-        type(ESMF_StateDataReqRestart) :: reqrestart
+        type(ESMF_StateDataNeeded) :: needed_default
+        type(ESMF_StateDataReady) :: ready_default
+        type(ESMF_StateDataValid) :: stvalid_default
+        type(ESMF_StateDataReqRestart) :: reqrestart_default
         integer :: alloccount
         integer :: datacount
         type(ESMF_StateData), dimension(:), pointer :: datalist
@@ -284,7 +288,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.28 2004/03/10 23:40:53 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.29 2004/03/12 23:50:05 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -995,7 +999,8 @@ end function
 
 ! !INTERFACE:
       function ESMF_StateCreate(statename, statetype, compname, &
-                   bundles, fields, arrays, nestedstates, names, itemcount, rc)
+                   bundles, fields, arrays, nestedstates, names, itemcount, &
+                   dataneeded, dataready, datavalid, datareqrestart, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateCreate
@@ -1010,6 +1015,10 @@ end function
       type(ESMF_State), dimension(:), intent(in), optional :: nestedstates
       character(len=*), dimension(:), intent(in), optional :: names
       integer, intent(in), optional :: itemcount
+      type(ESMF_StateDataNeeded), optional :: dataneeded
+      type(ESMF_StateDataReady), optional :: dataready
+      type(ESMF_StateDataValid), optional :: datavalid
+      type(ESMF_StateDataReqRestart), optional :: datareqrestart
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1044,6 +1053,28 @@ end function
 !    actual number of items added to the State.  If the count is specified
 !    it will do an error check to verify the total number of items found
 !    in the argument lists matches this count of the expected number of items.
+!   \item[{[dataneeded]}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAISNEEDED} or 
+!    {\tt ESMF\_STATEDATANOTNEEDED}.  If not specified, the default value is
+!    set to {\tt ESMF\_STATEDATAISNEEDED}.
+!   \item[{[dataready]}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAREADYTOWRITE},
+!    {\tt ESMF\_STATEDATAREADYTOREAD}, or {\tt ESMF\_STATEDATANOTREADY}.
+!    If not specified, the default value is set to 
+!    {\tt ESMF\_STATEDATAREADYTOREAD}.
+!   \item[{[datavalid]}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAISVALID},
+!    {\tt ESMF\_STATEDATAINVALID}, or {\tt ESMF\_STATEDATAVALIDITYUNKNOWN}.
+!    If not specified, the default value is set to 
+!    {\tt ESMF\_STATEDATAISVALID}.
+!   \item[{[datareqrestart}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAISRESTART} or
+!    {\tt ESMF\_STATEDATANORESTART}. If not specified, the default 
+!    value is set to {\tt ESMF\_STATEDATAISRESTART}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1077,7 +1108,8 @@ end function
         endif
       
         call ESMF_StateConstruct(stypep, statename, statetype, compname, &
-               bundles, fields, arrays, nestedstates, names, itemcount, status)
+                   bundles, fields, arrays, nestedstates, names, itemcount, &
+                   dataneeded, dataready, datavalid, datareqrestart, rc)
         if (status .ne. ESMF_SUCCESS) then
           print *, "State construction error"
           return
@@ -2135,7 +2167,7 @@ end function
         return
       endif
       stypep => state%statep
-      if (stypep%stvalid .eq. ESMF_STATEDATAINVALID) then
+      if (stypep%statestatus .ne. ESMF_STATE_READY) then
         print *, "Error: uninitialized or invalid State"
         if (present(rc)) rc=ESMF_FAILURE
         return
@@ -3345,7 +3377,8 @@ end function
 
 ! !INTERFACE:
       subroutine ESMF_StateConstruct(stypep, statename, statetype, compname, & 
-                         bundles, fields, arrays, states, names, itemcount, rc)
+                         bundles, fields, arrays, states, names, itemcount, &
+                         dataneeded, dataready, datavalid, datareqrestart, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_StateType), pointer :: stypep
@@ -3358,41 +3391,67 @@ end function
       type(ESMF_State), dimension(:), intent(in), optional :: states
       character(len=*), dimension(:), intent(in), optional :: names
       integer, intent(in), optional :: itemcount
+      type(ESMF_StateDataNeeded), optional :: dataneeded
+      type(ESMF_StateDataReady), optional :: dataready
+      type(ESMF_StateDataValid), optional :: datavalid
+      type(ESMF_StateDataReqRestart), optional :: datareqrestart
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Construct a new State and set the decomposition characteristics.
-!      The return value is a new State.
-!    
-!      The arguments are:
-!      \begin{description}
-!       \item[stypep]
-!        Internal StateType pointer.  Required.
-!       \item[{[statename]}]
-!        Name of this {\tt ESMF\_State} object. 
-!       \item[{[statetype]}]
-!        Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATEIMPORT},
-!        {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.   
-!        {\tt ESMF\_STATELIST} is the default if not specified.
-!       \item[{[compname]}]
-!        Name of the {\tt Component} this {\tt ESMF\_State} is associated with.
-!       \item[{[bundles]}]
-!        An array of {\tt Bundles}.
-!       \item[{[fields]}]
-!        An array of {\tt Fields}.
-!       \item[{[arrays]}]
-!        An array of {\tt Arrays}.
-!       \item[{[states]}]
-!        An array of nested {\tt ESMF\_States}.
-!       \item[{[names]}]
-!        An array of name placeholders.
-!       \item[{[itemcount]}]
-!        The total number of Bundles, Fields, Arrays, States, and Names specified.
-!        This argument is optional, and if specified is used as an error check
-!        to verify that the actual total number of items found matches this count.
-!       \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!  Construct a new State and set the decomposition characteristics.
+!  The return value is a new State.
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[stypep]
+!    Internal StateType pointer.  Required.
+!   \item[{[statename]}]
+!    Name of this {\tt ESMF\_State} object. 
+!   \item[{[statetype]}]
+!    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATEIMPORT},
+!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.   
+!    {\tt ESMF\_STATELIST} is the default if not specified.
+!   \item[{[compname]}]
+!    Name of the {\tt Component} this {\tt ESMF\_State} is associated with.
+!   \item[{[bundles]}]
+!    An array of {\tt Bundles}.
+!   \item[{[fields]}]
+!    An array of {\tt Fields}.
+!   \item[{[arrays]}]
+!    An array of {\tt Arrays}.
+!   \item[{[states]}]
+!    An array of nested {\tt ESMF\_States}.
+!   \item[{[names]}]
+!    An array of name placeholders.
+!   \item[{[itemcount]}]
+!    The total number of Bundles, Fields, Arrays, States, and Names specified.
+!    This argument is optional, and if specified is used as an error check
+!    to verify that the actual total number of items found matches this count.
+!   \item[{[dataneeded]}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAISNEEDED} or 
+!    {\tt ESMF\_STATEDATANOTNEEDED}.  If not specified, the default value is
+!    set to {\tt ESMF\_STATEDATAISNEEDED}.
+!   \item[{[dataready]}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAREADYTOWRITE},
+!    {\tt ESMF\_STATEDATAREADYTOREAD}, or {\tt ESMF\_STATEDATANOTREADY}.
+!    If not specified, the default value is set to 
+!    {\tt ESMF\_STATEDATAREADYTOREAD}.
+!   \item[{[datavalid]}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAISVALID},
+!    {\tt ESMF\_STATEDATAINVALID}, or {\tt ESMF\_STATEDATAVALIDITYUNKNOWN}.
+!    If not specified, the default value is set to 
+!    {\tt ESMF\_STATEDATAISVALID}.
+!   \item[{[datareqrestart}]
+!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Valid values are {\tt ESMF\_STATEDATAISRESTART} or
+!    {\tt ESMF\_STATEDATANORESTART}. If not specified, the default 
+!    value is set to {\tt ESMF\_STATEDATAISRESTART}.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 ! !REQUIREMENTS:
@@ -3435,6 +3494,31 @@ end function
         if (status .ne. ESMF_SUCCESS) then
           print *, "State construction error"
           return
+        endif
+
+        ! Set the defaults for objects added to this state
+        if (present(dataneeded)) then
+            stypep%needed_default = dataneeded
+        else
+            stypep%needed_default = ESMF_STATEDATAISNEEDED
+        endif
+
+        if (present(dataready)) then
+            stypep%ready_default = dataready
+        else
+            stypep%ready_default = ESMF_STATEDATAREADYTOREAD
+        endif
+
+        if (present(datavalid)) then
+            stypep%stvalid_default = datavalid
+        else
+            stypep%stvalid_default = ESMF_STATEDATAISVALID
+        endif
+
+        if (present(datareqrestart)) then
+            stypep%reqrestart_default = datareqrestart
+        else
+            stypep%reqrestart_default = ESMF_STATEDATAISRESTART
         endif
 
         ! Set the initial size of the datalist
@@ -3578,7 +3662,7 @@ end function
         else
           stypep%compname = "no component name specified"
         endif
-        stypep%stvalid = ESMF_STATEDATAISVALID
+        stypep%statestatus = ESMF_STATE_READY
         stypep%alloccount = 0
         stypep%datacount = 0
         nullify(stypep%datalist)
@@ -3631,7 +3715,7 @@ end function
         ! TODO: add code here
         stypep%st = ESMF_STATEINVALID
         stypep%compname = ""
-        stypep%stvalid = ESMF_STATEDATAINVALID
+        stypep%statestatus = ESMF_STATE_INVALID
         if (stypep%datacount .gt. 0) then
           do i = 1, stypep%datacount
             ! free anything allocated here
@@ -3847,9 +3931,10 @@ end function
             endif
             nextitem%datap%ap = arrays(i)
  
-            nextitem%needed = ESMF_STATEDATAISNEEDED
-            nextitem%ready = ESMF_STATEDATAREADYTOREAD
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
  
         endif
 
@@ -4047,9 +4132,10 @@ end function
             endif
             nextitem%datap%fp = fields(i)
  
-            nextitem%needed = ESMF_STATEDATAISNEEDED
-            nextitem%ready = ESMF_STATEDATAREADYTOREAD
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
  
         endif
 
@@ -4285,9 +4371,10 @@ end function
                     dataitem%indirect_index = bindex
                 endif
             
-                dataitem%needed = ESMF_STATEDATAISNEEDED
-                dataitem%ready = ESMF_STATEDATAREADYTOREAD
-                dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+                dataitem%needed = stypep%needed_default
+                dataitem%ready = stypep%ready_default
+                dataitem%valid = stypep%stvalid_default
+                dataitem%reqrestart = stypep%reqrestart_default
             endif
 
             ! This is a total running count of all fields in all bundles.
@@ -4335,9 +4422,10 @@ end function
             endif
             nextitem%datap%bp = bundles(i)
  
-            nextitem%needed = ESMF_STATEDATAISNEEDED
-            nextitem%ready = ESMF_STATEDATAREADYTOREAD
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
  
             ! save the current datalist index for the fields code below
             bindex = stypep%datacount
@@ -4386,9 +4474,10 @@ end function
                 nextitem%indirect_index = bindex
             endif
 
-            nextitem%needed = ESMF_STATEDATAISNEEDED
-            nextitem%ready = ESMF_STATEDATAREADYTOREAD
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
 
           ! If the field entry already existed but needs bundle index updated,
           !  we do have to do a lookup on the field to see where it was
@@ -4593,9 +4682,10 @@ end function
             endif
             nextitem%datap%spp => states(i)%statep
  
-            nextitem%needed = ESMF_STATEDATAISNEEDED
-            nextitem%ready = ESMF_STATEDATAREADYTOREAD
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
  
         endif
 
@@ -4686,7 +4776,7 @@ end function
         print *, "Error: invalid or uninitialized state object"
         return
       endif
-      if (stypep%stvalid .eq. ESMF_STATEDATAINVALID) then
+      if (stypep%statestatus .ne. ESMF_STATE_READY) then
         print *, "Error: invalid or uninitialized state object"
         return
       endif
@@ -4835,9 +4925,11 @@ end function
 
             nullify(nextitem%datap)
             nextitem%indirect_index = -1
-            nextitem%needed = ESMF_STATEDATANOTNEEDED
-            nextitem%ready = ESMF_STATEDATANOTREADY
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
         endif
       enddo
 
@@ -4870,9 +4962,10 @@ end function
 
             nullify(nextitem%datap)
  
-            nextitem%needed = ESMF_STATEDATANOTNEEDED
-            nextitem%ready = ESMF_STATEDATANOTREADY
-            nextitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
+            nextitem%needed = stypep%needed_default
+            nextitem%ready = stypep%ready_default
+            nextitem%valid = stypep%stvalid_default
+            nextitem%reqrestart = stypep%reqrestart_default
  
         endif
 
@@ -4990,30 +5083,5 @@ end function
 
 
 
-
-
-       end module ESMF_StateMod
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      end module ESMF_StateMod
 
