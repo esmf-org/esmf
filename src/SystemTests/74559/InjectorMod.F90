@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.4 2003/04/29 21:41:37 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.5 2003/04/29 22:48:48 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -249,10 +249,10 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         call ESMF_StateGetData(importstate, "RHO", field_rho, rc=rc)
         call ESMF_StateGetData(importstate, "FLAG", field_flag, rc=rc)
       
-        call ESMF_FieldHalo(field_sie, rc)
-        call ESMF_FieldHalo(field_u, rc)
-        call ESMF_FieldHalo(field_v, rc)
-        call ESMF_FieldHalo(field_rho, rc)
+        !call ESMF_FieldHalo(field_sie, rc)
+        !call ESMF_FieldHalo(field_u, rc)
+        !call ESMF_FieldHalo(field_v, rc)
+        !call ESMF_FieldHalo(field_rho, rc)
         
         ! Check time to see if we are still injecting
         call ESMF_ClockGetCurrTime(clock, currtime, rc)

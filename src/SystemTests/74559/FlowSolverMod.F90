@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.3 2003/04/29 21:41:37 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.4 2003/04/29 22:48:48 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -489,10 +489,10 @@
       endif
       dt = s_
  
-      call ESMF_FieldHalo(field_sie, status)
-      call ESMF_FieldHalo(field_u, status)
-      call ESMF_FieldHalo(field_v, status)
-      call ESMF_FieldHalo(field_rho, status)
+      !call ESMF_FieldHalo(field_sie, status)
+      !call ESMF_FieldHalo(field_u, status)
+      !call ESMF_FieldHalo(field_v, status)
+      !call ESMF_FieldHalo(field_rho, status)
 
       !
       ! calculate RHOU's and RHOV's
@@ -1144,21 +1144,21 @@
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      call ESMF_ArrayDestroy(outarray, status)
+      !call ESMF_ArrayDestroy(outarray, status)
 
       call ESMF_FieldAllGather(field_v, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      call ESMF_ArrayDestroy(outarray, status)
+      !call ESMF_ArrayDestroy(outarray, status)
 
       call ESMF_FieldAllGather(field_sie, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      call ESMF_ArrayDestroy(outarray, status)
+      !call ESMF_ArrayDestroy(outarray, status)
 
       if(file_no .eq. 1) then
         call ESMF_FieldAllGather(field_flag, outarray, status)
@@ -1166,7 +1166,7 @@
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         endif
-        call ESMF_ArrayDestroy(outarray, status)
+        !call ESMF_ArrayDestroy(outarray, status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS

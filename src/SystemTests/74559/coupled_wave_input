@@ -9,7 +9,7 @@
      u0 = 00.5,           v0 = 0.0,
      sie0 = 2.0e+02,      rho0 = 6.0,
      sieobs = 4.0e+02,
-     printout = 2,
+     printout = 1,
 
      iflo_min = 30,       iflo_max = 32,
      nobsdesc = 24,
