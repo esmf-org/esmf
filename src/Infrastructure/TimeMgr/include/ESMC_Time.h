@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.19 2003/04/28 23:08:53 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.20 2003/04/30 07:39:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,6 +62,7 @@
  #include <ESMC_Base.h>           // inherited Base class
  #include <ESMC_BaseTime.h>       // inherited Time class
  #include <ESMC_Calendar.h>       // associated Calendar class
+ #include <ESMC_TimeInterval.h> 
 
 // !PUBLIC TYPES:
  class ESMC_Time;
@@ -134,6 +135,9 @@
     int ESMC_TimeGetString(char *timeString) const;
 
     int ESMC_TimeGetDayOfYear(double *dayOfYear) const; // (TMG 2.5.2)
+    int ESMC_TimeGetDayOfYear(int *dayOfYear) const;
+    int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
+
     int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
     int ESMC_TimeGetDayOfMonth(int *dayOfMonth) const;  // (TMG 2.5.4)
     int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
