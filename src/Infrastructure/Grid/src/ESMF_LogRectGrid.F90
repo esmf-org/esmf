@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.36 2004/03/16 21:54:53 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.37 2004/03/17 23:41:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.36 2004/03/16 21:54:53 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.37 2004/03/17 23:41:24 svasquez Exp $'
 
 !==============================================================================
 !
@@ -330,8 +330,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -512,8 +512,8 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOP
+! !REQUIREMENTS:  TODO
 
       type(ESMF_GridType), pointer :: grid    ! Pointer to new grid
       integer :: status                       ! Error status
