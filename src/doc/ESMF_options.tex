@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.4 2004/06/08 18:39:16 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.5 2004/06/08 21:42:19 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
@@ -43,7 +43,6 @@ Valid values are:
 %////////////////////////////////////////////////////////////
 \mbox{}\hrulefill\
 
-
 \subsubsection{ESMF\_CopyFlag}
 
 {\sf DESCRIPTION:\\}
@@ -76,8 +75,55 @@ Valid values are:
 %////////////////////////////////////////////////////////////
 \mbox{}\hrulefill\
 
+\subsection{Parameters}
 
+\subsubsection{ESMF\_DataKind}
 
+{\sf DESCRIPTION:\\}
+Supported ESMF data kinds.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_I1]
+      1 byte integer.
+\item [ESMF\_I2]
+      2 byte integer.
+\item [ESMF\_I4]
+      4 byte integer.
+\item [ESMF\_I8]
+      8 byte integer.
+\item [ESMF\_R4]
+      4 byte real.
+\item [ESMF\_R8]
+      8 byte real.
+\item [ESMF\_C8]
+      8 byte character.
+\item [ESMF\_C16]
+      16 byte character.
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
+
+\subsubsection{ESMF\_DataType}
+
+{\sf DESCRIPTION:\\}
+Supported ESMF data types.
+
+Valid values are:
+\begin{description}
+\item [ESMF\_DATA\_INTEGER]
+      Integer type.
+\item [ESMF\_DATA\_REAL]
+      Real type.
+\item [ESMF\_DATA\_LOGICAL]
+      Logical type.
+\item [ESMF\_DATA\_CHARACTER]
+      Character type.
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
 
 
 

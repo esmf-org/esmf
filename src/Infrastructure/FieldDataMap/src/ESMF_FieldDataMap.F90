@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.13 2004/06/08 14:51:53 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.14 2004/06/08 21:42:19 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.13 2004/06/08 14:51:53 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.14 2004/06/08 21:42:19 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -160,14 +160,14 @@
 ! !IROUTINE: ESMF_FieldDataMapGet - Get values from a FieldDataMap 
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapGet(datamap, dataRank, dataIndices, counts, &
+      subroutine ESMF_FieldDataMapGet(datamap, dataRank, dataIndexList, countList, &
                                       horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap), intent(in) :: datamap  
       integer, intent(out), optional :: dataRank    
-      integer, dimension(:), intent(out), optional :: dataIndices
-      integer, dimension(:), intent(out), optional :: counts 
+      integer, dimension(:), intent(out), optional :: dataIndexList
+      integer, dimension(:), intent(out), optional :: countList 
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
@@ -181,13 +181,13 @@
 !     An {\tt ESMF\_FieldDataMap}.
 !  \item [{[datarank]}]
 !     The number of dimensions in the data {\tt ESMF\_Array}.
-!  \item [{[dataIndices]}]
+!  \item [{[dataIndexList]}]
 !      An integer array, {\tt datarank} long, which specifies
 !      the mapping between rank numbers in the {\tt ESMF\_Grid}
 !      and the {\tt ESMF\_Array}.  If there is no correspondance
 !      (because the {\tt ESMF\_Array} has a higher rank than the
 !      {\tt ESMF\_Grid}) the index value will be 0.
-!  \item [{[counts]}]
+!  \item [{[countList]}]
 !      An integer array, with length ({\tt datarank} minus the grid rank).
 !      Each entry is the default item count which would be used
 !      for those ranks which do not correspond to grid ranks when
@@ -219,8 +219,8 @@
 
 
         ! get any values from the internal array datamap
-        call ESMF_ArrayDataMapGet(datamap%adm, dataRank, dataIndices, &
-                                  counts, status)
+        call ESMF_ArrayDataMapGet(datamap%adm, dataRank, dataIndexList, &
+                                  countList, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! TODO: need to add rankLength and vector information here
@@ -300,14 +300,14 @@
 ! !IROUTINE: ESMF_FieldDataMapSet - Set values in a FieldDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapSet(datamap, dataRank, dataIndices, counts, &
+      subroutine ESMF_FieldDataMapSet(datamap, dataRank, dataIndexList, countList, &
                                       horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap), intent(inout) :: datamap  
       integer, intent(in), optional :: dataRank    
-      integer, dimension(:), intent(in), optional :: dataIndices
-      integer, dimension(:), intent(in), optional :: counts 
+      integer, dimension(:), intent(in), optional :: dataIndexList
+      integer, dimension(:), intent(in), optional :: countList 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
@@ -321,13 +321,13 @@
 !        An {\tt ESMF\_FieldDataMap}.
 !     \item [{[datarank]}]
 !           The number of dimensions in the data {\tt ESMF\_Array}.
-!     \item [{[dataIndices]}] 
+!     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
 !           the mapping between rank numbers in the {\tt ESMF\_Grid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
 !           {\tt ESMF\_Grid}) the index value must be 0.
-!     \item [{[counts]}]
+!     \item [{[countList]}]
 !           An integer array, with length ({\tt datarank} minus the grid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
 !           {\tt ESMF\_Grid}, the additional dimensions may
@@ -364,8 +364,8 @@
 
 
         ! set the internal array map
-        call ESMF_ArrayDataMapSet(datamap%adm, dataRank, dataIndices, &
-                                   counts, status)
+        call ESMF_ArrayDataMapSet(datamap%adm, dataRank, dataIndexList, &
+                                   countList, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! TODO: add the vector information here
@@ -386,14 +386,14 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FieldDataMapSetDefExplicit(datamap, dataRank, &
-                                                 dataIndices, counts, &
+                                                 dataIndexList, countList, &
                                                  horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap) :: datamap
       integer, intent(in) :: dataRank
-      integer, dimension(:), intent(in), optional :: dataIndices
-      integer, dimension(:), intent(in), optional :: counts
+      integer, dimension(:), intent(in), optional :: dataIndexList
+      integer, dimension(:), intent(in), optional :: countList
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc  
@@ -408,14 +408,14 @@
 !       An {\tt ESMF\_FieldDataMap}.
 !     \item [datarank]
 !           The number of dimensions in the data {\tt ESMF\_Array}.
-!     \item [{[dataIndices]}] 
+!     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
 !           the mapping between rank numbers in the {\tt ESMF\_Grid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
 !           (because the {\tt ESMF\_Array} has a higher rank than the
 !           {\tt ESMF\_Grid}) the index value must be 0.  The default is
 !           a 1-to-1 mapping with the {\tt ESMF\_Grid}.
-!     \item [{[counts]}]
+!     \item [{[countList]}]
 !           An integer array, with length ({\tt datarank} minus the grid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
 !           {\tt ESMF\_Grid}, the additional dimensions may
@@ -453,8 +453,8 @@
         endif
 
         ! initialize the contents of the internal array datamap
-        call ESMF_ArrayDataMapSetDefault(datamap%adm, dataRank, dataIndices, &
-                                         counts, status)
+        call ESMF_ArrayDataMapSetDefault(datamap%adm, dataRank, dataIndexList, &
+                                         countList, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
@@ -483,13 +483,13 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldDataMapSetDefault()
-      subroutine ESMF_FieldDataMapSetDefIndex(datamap, dataIndexOrder, counts, &
+      subroutine ESMF_FieldDataMapSetDefIndex(datamap, dataIndexOrder, countList, &
                                               horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap) :: datamap
       type(ESMF_IndexOrder), intent(in) :: dataIndexOrder
-      integer, dimension(:), intent(in), optional :: counts 
+      integer, dimension(:), intent(in), optional :: countList 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc  
@@ -508,7 +508,7 @@
 !           This is simply a convenience for the common cases; there is
 !           a more general form of this call which allows the mapping to
 !           be specified as an integer array of index numbers directly.
-!     \item [{[counts]}]
+!     \item [{[countList]}]
 !           An integer array, with length ({\tt datarank} minus the grid rank).
 !           If the {\tt ESMF\_Array} is a higher rank than the
 !           {\tt ESMF\_Grid}, the additional dimensions may
@@ -545,7 +545,7 @@
 
         ! initialize the contents of the internal array datamap
         call ESMF_ArrayDataMapSetDefault(datamap%adm, dataIndexOrder, &
-                                         counts, status)
+                                         countList, status)
         if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
