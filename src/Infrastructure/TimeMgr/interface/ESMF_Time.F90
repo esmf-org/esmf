@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.76 2004/10/27 18:52:25 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.77 2004/11/24 00:38:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.76 2004/10/27 18:52:25 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.77 2004/11/24 00:38:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -465,7 +465,8 @@
                                     ms_r8, us_r8, ns_r8, &
                                     sN, sD, &
                                     calendar, calendarType, timeZone, &
-                                    timeString, dayOfWeek, midMonth, &
+                                    timeString, timeStringISOFrac, &
+                                    dayOfWeek, midMonth, &
                                     dayOfYear,  dayOfYear_r8, &
                                     dayOfYear_intvl, rc)
 
@@ -497,6 +498,7 @@
       type(ESMF_CalendarType), intent(out), optional :: calendarType
       integer,                 intent(out), optional :: timeZone
       character (len=*),       intent(out), optional :: timeString
+      character (len=*),       intent(out), optional :: timeStringISOFrac
       integer,                 intent(out), optional :: dayOfWeek
       type(ESMF_Time),         intent(out), optional :: midMonth
       integer(ESMF_KIND_I4),   intent(out), optional :: dayOfYear
@@ -523,13 +525,17 @@
 !     whereas {\tt ESMF\_TimeGet(s=seconds)} would return
 !       {\tt seconds = 7200}.
 !
-!     For {\tt timeString}, {\tt dayOfWeek}, {\tt midMonth}, 
-!     {\tt dayOfYear}, {\tt dayOfYear\_r8}, and {\tt dayOfYear\_intvl}
-!     described below, valid calendars are Gregorian, Julian Date, No Leap,
-!     360 Day and Custom calendars.  Not valid for Julian day or no calendar. \\
+!     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
+!     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_r8}, and
+!     {\tt dayOfYear\_intvl} described below, valid calendars are Gregorian,
+!     Julian Date, No Leap, 360 Day and Custom calendars.  Not valid for
+!     Julian day or no calendar. \\
 !
-!     For timeString, convert {\tt ESMF\_Time}'s value into ISO 8601
-!     format YYYY-MM-DDThh:mm:ss.  See ~\cite{ISO}.
+!     For timeString, convert {\tt ESMF\_Time}'s value into partial ISO 8601
+!     format YYYY-MM-DDThh:mm:ss[:n/d].  See ~\cite{ISO}.
+!     
+!     For timeStringISOFrac, convert {\tt ESMF\_Time}'s value into full ISO 8601
+!     format YYYY-MM-DDThh:mm:ss[.f].  See ~\cite{ISO}.
 !     
 !     For dayOfWeek, gets the day of the week the given {\tt ESMF\_Time}
 !     instant falls on.  ISO 8601 standard:  Monday = 1 through Sunday = 7.
@@ -606,8 +612,13 @@
 !          Associated timezone (hours offset from UCT, e.g. EST = -5).
 !          (Not implemented yet).
 !     \item[{[timeString]}]
-!          Convert time value to ISO 8601 format string YYYY-MM-DDThh:mm:ss.
-!          See ~\cite{ISO}.
+!          Convert time value to format string YYYY-MM-DDThh:mm:ss[:n/d],
+!          where n/d is numerator/denominator of any fractional seconds and
+!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
+!     \item[{[timeStringISOFrac]}]
+!          Convert time value to strict ISO 8601 format string
+!          YYYY-MM-DDThh:mm:ss[.f], where f is decimal form of any fractional
+!          seconds.  See ~\cite{ISO}.
 !     \item[{[dayOfWeek]}]
 !          The time instant's day of the week [1-7].
 !     \item[{[MidMonth]}]
@@ -634,17 +645,22 @@
 !     TMG2.1, TMG2.5.1, TMG2.5.6
 
       ! temp time string for C++ to fill
-      character (len=ESMF_MAXSTR) :: tempTimeString
+      character (len=ESMF_MAXSTR) :: tempTimeString, tempTimeStringISOFrac
 
       ! initialize time string lengths to zero for non-existent time string
-      integer :: timeStringLen
-      integer :: tempTimeStringLen
+      integer :: timeStringLen, timeStringLenISOFrac
+      integer :: tempTimeStringLen, tempTimeStringLenISOFrac
       timeStringLen = 0     
+      timeStringLenISOFrac = 0     
       tempTimeStringLen = 0
+      tempTimeStringLenISOFrac = 0
 
       ! if used, get length of given timeString for C++ validation
       if (present(timeString)) then
         timeStringLen = len(timeString)
+      end if
+      if (present(timeStringISOFrac)) then
+        timeStringLenISOFrac = len(timeStringISOFrac)
       end if
 
       ! use optional args for any subset
@@ -653,6 +669,8 @@
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
                           sN, sD, calendar, calendarType, timeZone, &
                           timeStringLen, tempTimeStringLen, tempTimeString, &
+                          timeStringLenISOFrac, tempTimeStringLenISOFrac, &
+                          tempTimeStringISOFrac, &
                           dayOfWeek, MidMonth, dayOfYear, dayOfYear_r8, &
                           dayOfYear_intvl, rc)
 
@@ -660,6 +678,9 @@
       !   native Fortran storage style
       if (present(timeString)) then
         timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+      if (present(timeStringISOFrac)) then
+        timeStringISOFrac = tempTimeStringISOFrac(1:tempTimeStringLenISOFrac)
       endif
 
       end subroutine ESMF_TimeGet
@@ -724,8 +745,17 @@
 !          The {\tt ESMF\_Time} to be printed out.
 !     \item[{[options]}]
 !          Print options. If none specified, prints all Time property values. \\
-!          "string" - prints Time's value in ISO 8601 format
-!                     YYYY-MM-DDThh:mm:ss.  See ~\cite{ISO}. \\
+!          "string" - prints {\tt time}'s value in ISO 8601 format for all units
+!                     through seconds.  For any non-zero fractional seconds,
+!                     prints in integer rational fraction form n/d.  Format is
+!                     YYYY-MM-DDThh:mm:ss[:n/d], where [:n/d] is the 
+!                     integer numerator and denominator of the fractional
+!                     seconds value, if present.  See ~\cite{ISO}. \\
+!          "string isofrac" - prints {\tt time}'s value in strict ISO 8601
+!                     format for all units, including any fractional seconds
+!                     part.  Format is YYYY-MM-DDThh:mm:ss[.f] where [.f]
+!                     represents fractional seconds in decimal form, if present.
+!                     See ~\cite{ISO}. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
