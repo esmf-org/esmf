@@ -508,7 +508,7 @@
 
       end do
       
-      iret = -98 ! good chance ESMF_Config_now%buffer is not big enough 
+      iret = -98 ! good chance cf%buffer is not big enough 
       if ( present (rc )) rc = iret
       return
       
@@ -516,7 +516,7 @@
 
 !     All done
 !     --------
-!      close(lu)
+! Close lu
       call clstext(lu,ios)
       if(ios /= 0) then
          iret = -99
@@ -551,10 +551,12 @@
       integer, intent(out), optional  :: rc      ! Error code
                                                  !   0  no error
                                                  !  -1  buffer not loaded
-                                                 !  -2  could not find label   
+                                                 !  -2  could not find label
+                                                 !  -3  invalid operation
+                                                 !      with index_
+      
 
-! !DESCRIPTION: Finds the label (key) in the resource file. If "unique"
-!               is present, uniqueness of the label is verified.
+! !DESCRIPTION: Finds the label (key) in the resource file. 
 !
 !               Since the search is done by looking for a word in the 
 !               whole resource file, it is important to use special 
@@ -565,7 +567,7 @@
 !
 ! !REVISION HISTORY:
 !    7anp2003  Zaslavsky  initial interface/prolog
-!   21apr2003  Zaslavsky  Coded using DAO code written by da Silva   
+!   11apr2003  Zaslavsky  Coded using DAO code written by da Silva   
 !EOP -------------------------------------------------------------------
 	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
 
@@ -575,22 +577,19 @@
 
 !     Determine whether label exists
 !     ------------------------------    
-!      print *,'buffer= ',cf%buffer(1:cf%nbuf)
-!      print *,'label= ',EOL//label 
 
-      i = index_ ( cf%buffer(1:cf%nbuf), &
-                   EOL//label ) + 1
+      i = index_ ( cf%buffer(1:cf%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
-           cf%this_line = BLK // EOL
-           iret = -2
-           if ( present (rc )) rc = iret
-           return
-        elseif(i.le.0) then
-! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
-           print *, myname_,'invalid index_() return',i
-       iret = 1000                                      ! Error code here ?
-       if ( present (rc )) rc = iret
-       return
+         cf%this_line = BLK // EOL
+         iret = -2
+         if ( present (rc )) rc = iret
+         return
+      elseif(i.le.0) then
+         ! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
+         print *, myname_,'invalid index_() return',i
+         iret = -3
+         if ( present (rc )) rc = iret
+         return
       end if
 
 !     Extract the line associated with this label
@@ -598,12 +597,12 @@
       i = i + len ( label )
       j = i + index_(cf%buffer(i:cf%nbuf),EOL) - 2
       cf%this_line = cf%buffer(i:j) // BLK // EOL
-
+      
       cf%next_line = j + 2
-
+      
       iret = 0
       if ( present (rc )) rc = iret
-
+      
       return
     end subroutine ESMF_ConfigFindLabel
 
@@ -631,7 +630,7 @@
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      11apr2003  Zaslavsky  Coded using DAO code written by da Silva 
 !EOP -------------------------------------------------------------------
       integer :: i, j, iret
 
@@ -694,13 +693,21 @@
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      11apr2003  Zaslavsky  Coded using DAO code written by da Silva   
 !EOP -------------------------------------------------------------------
       character*1   ch
       integer       ib, ie, iret
       
       iret = 0
       
+      if(present( label )) then
+         call ESMF_ConfigFindLabel( cf, label, iret )
+         if ( iret /= 0 ) then
+            if ( present (rc )) rc = iret
+            return
+         endif
+      endif
+
       call ESMF_Config_trim ( cf%this_line )
       
       ch = cf%this_line(1:1)
@@ -717,6 +724,7 @@
          token = BLK
          if ( present ( default )) token = default
          iret = -1
+         if ( present (rc )) rc = iret
          return
       else
          ! Get the token, and shift the rest of %this_line to
@@ -726,12 +734,7 @@
          cf%this_line = cf%this_line(ie+2:)
          iret = 0
       end if
-      
-      if ( iret /= 0 ) then
- 
-      else
 
-      endif
       if ( present (rc )) rc = iret
       return
       
@@ -745,8 +748,6 @@
 !BOP -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetFloat - gets a floating point number/numbers
-!
-! !DESCRIPTION: Gets a floating point number/numbers
 
 !
 ! !INTERFACE:
@@ -763,9 +764,11 @@
 
       integer, intent(out), optional         :: rc       ! Error code
 !
+! !DESCRIPTION: Gets a floating point number/numbers
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
 !
       integer:: iret
@@ -804,8 +807,6 @@
 !BOP -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetInt - gets an integer number/numbers
-!
-! !DESCRIPTION: Gets a integer point number/numbers
 
 !
 ! !INTERFACE:
@@ -821,10 +822,13 @@
       integer, intent(in), optional          :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
+
+!
+! !DESCRIPTION: Gets a integer point number/numbers
 !
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character*256 token
       real*8        x
@@ -865,10 +869,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetChar - gets a characher
-!
-! !DESCRIPTION: Gets a character
-
+! !IROUTINE: ESMF_ConfigGetChar - gets a characer
 !
 ! !INTERFACE:
 
@@ -883,9 +884,12 @@
       character, intent(in), optional        :: default  ! default value
       integer, intent(out), optional         :: rc       ! Error code
 !
+! !DESCRIPTION: Gets a character
+!
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character ch
       character*256 token
@@ -905,7 +909,7 @@
          ch = token(1:1)
       end if
 
-      rc = iret
+      if (present( rc )) rc = iret
       ESMF_ConfigGetChar = ch
 
       return
@@ -920,9 +924,6 @@
 !
 ! !IROUTINE: ESMF_ConfigGetString - gets a string 
 !
-! !DESCRIPTION: Gets a sequence of characters (word). It will be 
-!               terminated by the first white space.
-
 !
 ! !INTERFACE:
 
@@ -939,8 +940,13 @@
 
       integer, intent(out), optional         :: rc       ! Error code
 !
+! !DESCRIPTION: Gets a sequence of characters (word). It will be 
+!               terminated by the first white space.
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
+!      21apr2003  Zaslavsky  Coding
+
 !
 !EOP -------------------------------------------------------------------
       integer iret
@@ -951,9 +957,7 @@
          call ESMF_ConfigGetToken( cf, string, rc = iret )
       endif
 
-
-
-      rc = iret
+      if (present( rc )) rc = iret
 
       return
     end subroutine ESMF_ConfigGetString
@@ -963,9 +967,6 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 ! !IROUTINE: ESMF_ConfigGetLen - gets the length of the line in words
-!
-! !DESCRIPTION: Gets the length of the line in words by counting words
-!               disregarding types
 !
 ! !INTERFACE:
 
@@ -981,9 +982,12 @@
 
       integer, intent(out), optional :: rc            ! Error code
 !
+! !DESCRIPTION: Gets the length of the line in words by counting words
+!               disregarding types
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      22apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character*256 token
       integer iret
@@ -991,27 +995,28 @@
 
       iret = 0
       count = 0
+      
+      if( present( label )) then
+         call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
+         if( iret /= 0) then
+            if (present( rc )) rc = iret
+            return
+         endif
+      endif
 
-      call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
-      if ( iret == 0 ) then
-         do
-      if (present (label ) ) then
-         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
-      else
+      do
          call ESMF_ConfigGetToken( cf, token, rc = iret )
-      endif
-            if ( iret == 0 ) then
-               count = count + 1
-            else
-               iret = 0
-               exit
-            endif
-         enddo
-      else
-         rc = iret  ! case when label is not found
-      endif
+         if ( iret == 0 ) then
+            count = count + 1
+         else
+            if (iret ==-1) iret  = 0  ! end of the line
+            exit
+         endif
+      enddo
+ 
 
       ESMF_ConfigGetLen = count
+
       if( present ( rc )) rc = iret
       return
     end function ESMF_ConfigGetLen
@@ -1022,9 +1027,6 @@
 !BOP -------------------------------------------------------------------
 !
 ! !IROUTINE: ESMF_ConfigGetDim - gets table sizes
-!
-! !DESCRIPTION: Gets number of lines in the table and max number of 
-!               words in a table line
 !
 ! !INTERFACE:
 
@@ -1043,9 +1045,12 @@
 
       integer, intent(out), optional        :: rc     ! Error code
 !
+! !DESCRIPTION: Gets number of lines in the table and max number of 
+!               words in a table line
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
-!
+!      23apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       integer n, iret
       logical end
@@ -1075,7 +1080,7 @@
             if ( iret /= 0 ) then
                lines = 0
                columns = 0
-               rc = iret
+               if ( present( rc )) rc = iret
                return
             else
                columns = max(columns, n)
