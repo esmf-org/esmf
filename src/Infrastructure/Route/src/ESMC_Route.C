@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.14 2003/03/13 22:57:05 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.15 2003/03/14 22:55:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.14 2003/03/13 22:57:05 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.15 2003/03/14 22:55:36 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -135,15 +135,11 @@
 // !REQUIREMENTS:  
 
     static int rseqnum = 1;
-    int nx, ny;
     int myde, rc;
-    int decount;         // total number of PEs in src + dst layouts
+    int decount;         // total number of DE/PEs in src + dst layouts
 
-    // TODO: make this rank independent
-    rc = layout->ESMC_DELayoutGetSize(&nx, &ny);
-    decount = nx * ny;
+    rc = layout->ESMC_DELayoutGetNumDEs(&decount);
     rc = layout->ESMC_DELayoutGetDEid(&myde);
-
     
     routeid = rseqnum++;
     sendRT = ESMC_RTableCreate(myde, decount, &rc);
@@ -348,12 +344,72 @@
 // !REQUIREMENTS:  
     
     int rc = ESMF_FAILURE;
+    int i, j, k, l;
+    int ccount, xscount, xrcount;
+    int mydeid, theirdeid;
+    int needed;
+    ESMC_XPacket *sendxp, *recvxp;
+    int srank, rrank;
+    int srcbytes, rcvbytes;
+    int sleft, rleft;
+    int sright, rright;
+    int *sstrides, *rstrides;
+    int *snums, *rnums;
 
-    // for each destination de in the comm table
-    //    look up the corresponding send/recv xpackets in the rtables
-    //    prep the arguments for the comm routines
-    //    and call the comm routines - possibly multiple times, one for
-    //    each disjoint piece?
+    //rc = layout->ESMC_DELayout
+    //rc = sendRT->ESMC_RTable
+    //rc = recvRT->ESMC_RTable
+    //rc = ct->ESMC_CommTable
+    
+    rc = layout->ESMC_DELayoutGetDEid(&mydeid);
+    rc = ct->ESMC_CommTableGetCount(&ccount);
+
+    // for each destination in the comm table
+    for (i=0; i<ccount; i++) {
+
+        // find out who the next id is 
+        rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
+        if (!needed)
+	    continue;
+
+        // look up the corresponding send/recv xpackets in the rtables
+        rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
+        if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
+        rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, &sstrides, &snums);
+
+        rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
+        if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
+        rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, &rstrides, &rnums);
+        
+        // ready to call the comm routines - possibly multiple times, one for
+        //  each disjoint memory piece?
+     
+        // TODO: this section isn't finished by a long shot.  we need to
+        //  call mpi with at least a source base addr and bytecount, 
+        // receive base addr & bytecount, receiving proc id - not sure 
+        // what else.  and can this be a V version of the call - which
+        // does arrays of addresses & counts?  because the chunks may be
+        // strided, which either means multiple single calls or a call
+        // which does multiples at one time.
+        // 
+        // how is this loop to be structured?  we've got to set up both
+        // a send and receive each time.  ranks must match?
+        for (j=0, srcbytes = sleft, rcvbytes = rleft; j<srank; j++) {
+            for (l=0; l<snums[j] && l<rnums[j]; l++, 
+                            srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
+                //rc = layout->ESMC_DELayoutSendRecv(mydeid, 
+                //             (void *)((char *)srcaddr+srcbytes), 
+                //             sleft-sright,
+                //             theirdeid, 
+                //             (void *)((char *)dstaddr+rcvbytes), 
+                //             rleft-rright);
+                //
+                // and what do we call when we run out of sends but there's
+                // still stuff to receive?  can we use the same call?
+            }
+        }
+
+    }
 
     return rc;
 
@@ -400,7 +456,7 @@
     ESMC_AxisIndex *my_AI, *their_AI;
     ESMC_XPacket *my_XP, *their_XP, *intersect_XP;
     int i, j, k;
-    int their_de, their_de_parent;
+    int their_de, their_de_parent, their_decount;
     int nx, ny;
 
     // Calculate the sending table.  If this DE is not part of the sending
@@ -416,10 +472,9 @@
       my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
 
       // loop over DE's from receiving layout to calculate send table
-      layout_rcv->ESMC_DELayoutGetSize(&nx, &ny);
-      for (j=0; j<ny; j++) {
-        for (i=0; i<nx; i++) {
-          their_de = j*nx + i;
+      layout_rcv->ESMC_DELayoutGetNumDEs(&their_decount);
+      for (i=0; i<their_decount; i++) {
+          their_de = i;
 
           // get the parent DE identifier for this DE in the rcv layout
           // layout_rcv->ESMC_DELayoutGetParentID(their_de, their_de_parent);
@@ -439,9 +494,8 @@
           // TODO: translate from global to local
 
           // load the intersecting XPacket into the sending RTable
-          // sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
         }
-      }
     }
 
 
@@ -458,10 +512,8 @@
       my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
 
       // loop over DE's from sending layout to calculate receive table
-      layout_snd->ESMC_DELayoutGetSize(&nx, &ny);
-      for (j=0; j<ny; j++) {
-        for (i=0; i<nx; i++) {
-          their_de = j*nx + i;
+      for (i=0; i<their_decount; i++) {
+          their_de = i;
 
           // get the parent DE identifier for this DE in the snd layout
           // layout_snd->ESMC_DELayoutGetParentID(their_de, their_de_parent);
@@ -481,9 +533,8 @@
           // TODO: translate from global to local
 
           // load the intersecting XPacket into the receiving RTable
-          // recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
         }
-      }
     }
 
     return ESMF_SUCCESS;

@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.7 2003/03/13 22:01:51 nscollins Exp $
+// $Id: ESMC_RTable.h,v 1.8 2003/03/14 22:55:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,6 +78,7 @@
     //int ESMC_RTableGet<Value>(<value type> *value) const;
     //int ESMC_RTableSet<Value>(<value type>  value);
     int ESMC_RTableSetEntry(int deid, ESMC_XPacket *xp); 
+    int ESMC_RTableGetEntry(int deid, int *xpcount, ESMC_XPacket **xp); 
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RTableValidate(const char *options) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.8 2003/03/14 15:26:05 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.9 2003/03/14 22:55:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.8 2003/03/14 15:26:05 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.9 2003/03/14 22:55:35 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -210,6 +210,40 @@
 // !REQUIREMENTS:  
 
     *count = commcount;
+    
+    return ESMF_SUCCESS;
+
+ } // end ESMC_CommTableGetCount
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CommTableGetPartner - get partner list count
+//
+// !INTERFACE:
+     int ESMC_CommTable::ESMC_CommTableGetPartner(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+     int entry,               // in - integer entry count
+     int *partner,            // out - integer partner number
+     int *needed) const {     // out - integer flag 0=no, 1=yes
+//
+// !DESCRIPTION:
+//     Returns the nth communication partner, and flag saying if
+//     communication is needed.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (entry < 0 || entry >= commcount) {
+        *partner = -1;
+        *needed = 0;
+        return ESMF_FAILURE;
+    }
+    *partner = commpartner[entry];
+    *needed = commneeded[entry];
     
     return ESMF_SUCCESS;
 

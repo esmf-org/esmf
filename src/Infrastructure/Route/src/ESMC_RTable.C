@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.9 2003/03/13 22:57:05 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.10 2003/03/14 22:55:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.9 2003/03/13 22:57:05 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.10 2003/03/14 22:55:36 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -242,6 +242,40 @@
     return ESMF_SUCCESS;
 
  } // end ESMC_RTableSetEntry
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RTableGetEntry - Get entry from an RTable
+//
+// !INTERFACE:
+      int ESMC_RTable::ESMC_RTableGetEntry(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+       int ndeid,             // in  -
+       int *xpcount,          // out
+       ESMC_XPacket **xp) {   // out
+//
+// !DESCRIPTION:
+//     Gets an RTable entry with the given value.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (ndeid < 0 || ndeid > entrycount) {
+        printf("ndeid out of range, %d must be between 0 and %n\n", 
+		                                	ndeid, entrycount);
+        return ESMF_FAILURE;
+    }
+
+    *xpcount = entry[ndeid].xpcount;
+    *xp = entry[ndeid].xp;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RTableGetEntry
 
 //-----------------------------------------------------------------------------
 //BOP

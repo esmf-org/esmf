@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.h,v 1.7 2003/03/14 15:26:35 nscollins Exp $
+// $Id: ESMC_CommTable.h,v 1.8 2003/03/14 22:55:35 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,6 +71,7 @@
 
  // accessor methods for class members
     int ESMC_CommTableGetCount(int *count) const;
+    int ESMC_CommTableGetPartner(int entrynum, int *partner, int *needed) const;
     int ESMC_CommTableSetPartner(int partner);
 
     //int ESMC_CommTableGet<Value>(<value type> *value) const;
