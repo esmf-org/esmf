@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2004/08/23 16:23:44 nscollins Exp $
+! $Id: user_model1.F90,v 1.2 2004/09/23 21:45:26 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -227,10 +227,12 @@
         call ESMF_FieldGet(humidity, grid=grid, horzRelLoc=relloc, rc=status)
         call ESMF_GridGetDELocalInfo(grid, localCellCountPerDim=counts, &
                                      horzRelLoc=relloc, rc=status)
-        call ESMF_GridGetCoord(grid, horzRelLoc=relloc, &
-                               centerCoord=coordArray, rc=status)
-        call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
-        call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+        if (counts(1)*counts(2).ne.0) then
+          call ESMF_GridGetCoord(grid, horzRelLoc=relloc, &
+                                 centerCoord=coordArray, rc=status)
+          call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+          call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+        endif
 
         ! update field values here
         ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
@@ -240,12 +242,14 @@
 
         ! increment data values in place
     !    idata = idata + 10.0
-        do j   = 1,counts(2)
-          do i = 1,counts(1)
-            idata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                              + 2.0*sin(coordY(i,j)/50.0*pi)
+        if (counts(1)*counts(2).ne.0) then
+          do j   = 1,counts(2)
+            do i = 1,counts(1)
+              idata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                                + 2.0*sin(coordY(i,j)/50.0*pi)
+            enddo
           enddo
-        enddo
+        endif
 
      !   call ESMF_StatePrint(exportState, rc=status)
      !   call ESMF_FieldPrint(humidity, rc=status)
