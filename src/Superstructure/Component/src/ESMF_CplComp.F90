@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.17 2004/03/02 16:52:48 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.18 2004/03/08 22:50:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.17 2004/03/02 16:52:48 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.18 2004/03/08 22:50:24 svasquez Exp $'
 
 !==============================================================================
 !
@@ -172,22 +172,16 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[name]
 !    Component name.
-!
 !   \item[layout]
 !    Component layout.
-!
 !   \item[config]
 !    Component-specific configuration object.  
-!  
 !   \item[clock]
 !    Component-specific clock object.  
-!  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -259,26 +253,19 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
-!  
 !   \item[{[configfile]}]
 !    Component-specific configuration filename. 
-!  
 !   \item[{[clock]}]
 !    Component-specific clock.
-!  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -339,13 +326,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[component]
 !       Destroy contents of this {\tt Component}.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
@@ -412,24 +396,17 @@
 !    
 !  The arguments are: 
 !  \begin{description} 
-!  
 !   \item[component]
 !    Component to call Finalize routine for.
-!
 !   \item[{[importstate]}]
 !       ESMF\_State containing import data for coupling.
-!
 !   \item[{[exportstate]}]
 !       ESMF\_State containing export data for coupling.
-!
 !   \item[{[clock]}]  External clock for passing in time information.
-!
 !   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -467,29 +444,21 @@
 !
 !  The arguments are:
 !  \begin{description}
-!  
 !   \item[component]
 !    Component to query.
-!
 !   \item[{[name]}]
 !    Component name.
-!    
 !   \item[{[layout]}]
 !    Component layout.
-!    
 !   \item[{[clock]}]
 !    Component-specific clock.
-!
 !   \item[{[configfile]}]
 !    Component-specific configuration filename.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
-!    
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -523,24 +492,17 @@
 !    
 !  The arguments are: 
 !  \begin{description} 
-!  
 !   \item[component]
 !    Component to call Initialization routine for.
-!
 !   \item[{[importstate]}]  
 !       ESMF\_State containing source data for coupling.
-!
 !   \item[{[exportstate]}]  
 !       ESMF\_State containing destination data for coupling.
-!
 !   \item[{[clock]}]  External clock for passing in time information.
-!
 !   \item[{[phase]}]  If multiple-phase init, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -571,16 +533,12 @@
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to print.
-!
 !   \item[{[options]}]
 !    Options on print.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -611,21 +569,17 @@
 !    
 !  The arguments are: 
 !  \begin{description} 
-!  
 !   \item[component]
 !    Component to call ReadRestart routine for.
-!
 !   \item[{[iospec]}]
-!       {\tt IOSpec} object which describes I/O options.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase restore, which phase number this is.
+!    {\tt IOSpec} object which describes I/O options.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!      If multiple-phase restore, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -658,24 +612,19 @@
 !    
 !  The arguments are: 
 !  \begin{description} 
-!  
 !   \item[component]
 !    Component to call Run routine for.
-!
 !   \item[{[importstate]}]
-!       ESMF\_State containing import data for coupling.
-!
+!     ESMF\_State containing import data for coupling.
 !   \item[{[exportstate]}]
-!       ESMF\_State containing export data for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!     ESMF\_State containing export data for coupling.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!      If multiple-phase run, which phase number this is.
 !      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -714,29 +663,21 @@
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to set information for. 
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[clock]}]
 !    Component-specific clock.
-!
 !   \item[{[configfile]}]
 !    Component-specific configuration filename.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -762,19 +703,14 @@
 ! !DESCRIPTION:
 !      Routine to ensure a Component is valid.
 !
-!
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to validate.
-!
 !   \item[{[options]}]
 !    Object to be validated.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -807,18 +743,15 @@
 !  
 !   \item[component]
 !    Component to call WriteRestart routine for.
-!
 !   \item[{[iospec]}]
-!       {\tt IOSpec} object which describes I/O options.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase checkpoint, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!    {\tt IOSpec} object which describes I/O options.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase checkpoint, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP

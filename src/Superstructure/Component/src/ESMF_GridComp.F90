@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.21 2004/03/01 19:27:08 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.22 2004/03/08 22:50:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.21 2004/03/01 19:27:08 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.22 2004/03/08 22:50:24 svasquez Exp $'
 
 !==============================================================================
 !
@@ -185,29 +185,21 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[name]
 !    Component name.
-!
 !   \item[layout]
 !    Component layout.
-!
 !   \item[mtype]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
-!
 !   \item[grid]
 !    Default grid associated with this component.
-!
 !   \item[config]
 !    Component-specific configuration object.  
-!  
 !   \item[clock]
 !    Component-specific clock object.  
-!  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -282,33 +274,24 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[mtype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
-!
 !   \item[{[grid]}]
 !    Default grid associated with this component.
-!
 !   \item[{[clock]}]
 !    Private clock associated with this component.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object.   If specified, takes
 !    priority over filename.
-!  
 !   \item[{[configfile]}]
 !    Component-specific configuration filename. 
-!  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -388,36 +371,26 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[name]
 !    Component name.
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[mtype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
-!
 !   \item[{[grid]}]
 !    Default grid associated with this component.
-!
 !   \item[{[clock]}]
 !    Private clock associated with this component.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object.   If specified, takes
 !    priority over filename.
-!  
 !   \item[{[configfile]}]
 !    Component-specific configuration filename. 
-!  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOPI
@@ -480,13 +453,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[component]
-!       Destroy contents of this {\tt Component}.
-!
+!      Destroy contents of this {\tt Component}.
 !     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -556,19 +526,17 @@
 !
 !   \item[component]
 !    Component to call Finalize routine for.
-!
-!   \item[{[importstate]}]  Import data for finalize.
-!
-!   \item[{[exportstate]}]  Export data for finalize.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[importstate]}]  
+!    Import data for finalize.
+!   \item[{[exportstate]}]  
+!     Export data for finalize.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase finalize, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -608,36 +576,26 @@
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[name]
 !    Component to query.
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[mtype]}]
 !    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
-!
 !   \item[{[grid]}]
 !    Default grid associated with this component.
-!
 !   \item[{[clock]}]
 !    Component-specific clock object.
-!
 !   \item[{[configfile]}]
 !    Component-specific configuration object.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object. If specified, takes
 !    priority over filename.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 
@@ -674,22 +632,19 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to call Initialization routine for.
-!
-!   \item[{[importstate]}]  Import data for initialization.
-!
-!   \item[{[exportstate]}]  Export data for initialization.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[importstate]}]  
+!    Import data for initialization.
+!   \item[{[exportstate]}]  
+!    Export data for initialization.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase init, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -719,16 +674,12 @@
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to print.
-!
 !   \item[{[options]}]
 !    Print options.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -760,20 +711,17 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to call ReadRestart routine for.
-!
-!   \item[{[iospec]}]  I/O options.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[iospec]}]  
+!    I/O options.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase finalize, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -806,22 +754,19 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to call Run routine for.
-!
-!   \item[{[importstate]}]  Import data for run.
-!
-!   \item[{[exportstate]}]  Export data for run.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[importstate]}]  
+!    Import data for run.
+!   \item[{[exportstate]}]  
+!     Export data for run.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase run, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -861,36 +806,26 @@
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to set value for.
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[mtype]}]
 !    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.
-!
 !   \item[{[grid]}]
 !    Default grid associated with this component.
-!
 !   \item[{[clock]}]
 !    Private clock associated with this component.
-!
 !   \item[{[config]}]
 !    Already created {\tt Config} object.   If specified, takes
 !    priority over filename.
-!
 !   \item[{[configfile]}]
 !    Component-specific configuration filename.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -919,16 +854,12 @@
 !
 !  The arguments are:
 !  \begin{description}
-!      
 !   \item[component]
 !    Component to validate.
-!
 !   \item[{[options]}]  
 !    Object to be validated.
-!
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     
 !   \end{description}
 !
 !EOP
@@ -962,20 +893,17 @@
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[component]
 !    Component to call WriteRestart routine for.
-!
-!   \item[{[iospec]}]  I/O options.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[iospec]}]  
+!    I/O options.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase finalize, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOP
@@ -1010,22 +938,17 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[component] 
-!          gridded component object
-!
+!      gridded component object
 !     \item[{[max]}] 
-!          Maximum threading level
-!
+!      Maximum threading level
 !     \item[{[pref\_intra\_process]}] 
-!          Intra process communication preference
-!
+!      Intra process communication preference
 !     \item[{[pref\_intra\_ssi]}] 
-!          Intra SSI communication preference
-!
+!      Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
-!          Inter process communication preference
-!
+!      Inter process communication preference
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
@@ -1078,23 +1001,17 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[component] 
-!          gridded component object
-!
+!      gridded component object
 !     \item[{[max]}] 
-!          Maximum threading level
-!
+!      Maximum threading level
 !     \item[{[pref\_intra\_process]}] 
-!          Intra process communication preference
-!
+!      Intra process communication preference
 !     \item[{[pref\_intra\_ssi]}] 
-!          Intra SSI communication preference
-!
+!      Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
-!          Inter process communication preference
-!
+!      Inter process communication preference
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
@@ -1147,23 +1064,17 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[component] 
-!          gridded component object
-!
+!      gridded component object
 !     \item[{[max]}] 
-!          Maximum threading level
-!
+!      Maximum threading level
 !     \item[{[pref\_intra\_process]}] 
-!          Intra process communication preference
-!
+!      Intra process communication preference
 !     \item[{[pref\_intra\_ssi]}] 
-!          Intra SSI communication preference
-!
+!      Intra SSI communication preference
 !     \item[{[pref\_inter\_ssi]}] 
-!          Inter process communication preference
-!
+!      Inter process communication preference
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
@@ -1211,13 +1122,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[component] 
-!          gridded component object
-!
+!      gridded component object
 !     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI

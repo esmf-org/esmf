@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.70 2004/03/05 17:51:52 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.71 2004/03/08 22:50:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.70 2004/03/05 17:51:52 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.71 2004/03/08 22:50:24 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1470,14 +1470,11 @@ end function
 !     Initialize the ESMF framework.
 !
 !     \begin{description}
-!
 !     \item [lang]
 !           Flag to say whether main program is F90 or C++.  Affects things
 !           related to initialization, such as starting MPI.
-!
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1544,7 +1541,6 @@ end function
 !     \begin{description}
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOP
