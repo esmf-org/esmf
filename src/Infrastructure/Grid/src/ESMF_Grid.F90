@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.24 2003/01/10 22:03:59 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.25 2003/01/14 20:41:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_IOMod          ! ESMF I/O class
-!     use ESMF_LayoutMod      ! ESMF layout class
+      use ESMF_LayoutMod      ! ESMF layout class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       implicit none
 
@@ -68,23 +68,22 @@
       sequence
       private
 
-        type (ESMF_Base) :: base                     ! base class object
-        type (ESMF_Status) :: gridstatus             ! uninitialized, init ok,
-                                                     ! etc
-        integer :: horz_gridtype                     ! enum for type of horizontal grid
-        integer :: vert_gridtype                     ! enum for type of vertical grid
-        integer :: horz_stagger                      ! enum for horizontal grid staggering
-        integer :: vert_stagger                      ! enum for vertical grid staggering
-        integer :: horz_coord_system                 ! enum for horizontal physical
-                                                     ! coordinate system
-        integer :: vert_coord_system                 ! enum for vertical physical
-                                                     ! coordinate system
-        integer :: coord_order                       ! enum for mapping of xyz 
-                                                     ! to ijk
-        integer :: num_physgrids                     ! number of grid descriptors
-                                                     ! necessary to support
-                                                     ! staggering, vertical
-                                                     ! grids, background grids
+        type (ESMF_Base) :: base            ! base class object
+        type (ESMF_Status) :: gridstatus    ! uninitialized, init ok, etc
+        integer :: horz_gridtype            ! enum for type of horizontal grid
+        integer :: vert_gridtype            ! enum for type of vertical grid
+        integer :: horz_stagger             ! enum for horizontal grid staggering
+        integer :: vert_stagger             ! enum for vertical grid staggering
+        integer :: horz_coord_system        ! enum for horizontal physical
+                                            ! coordinate system
+        integer :: vert_coord_system        ! enum for vertical physical
+                                            ! coordinate system
+        integer :: coord_order              ! enum for mapping of xyz 
+                                            ! to ijk
+        integer :: num_physgrids            ! number of grid descriptors
+                                            ! necessary to support
+                                            ! staggering, vertical
+                                            ! grids, background grids
         type (ESMF_PhysGridType), dimension(:), pointer :: &
            physgrids         ! grid info for all grid descriptions necessary
                              ! to define horizontal, staggered and vertical grids
@@ -196,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.24 2003/01/10 22:03:59 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.25 2003/01/14 20:41:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -408,6 +407,7 @@
 
 ! !INTERFACE:
       function ESMF_GridCreateInternal(i_max, j_max, &
+                                       nDE_i, nDE_j, layout, &
                                        horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
@@ -419,6 +419,9 @@
 ! !ARGUMENTS:
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      integer, intent(in), optional :: nDE_i
+      integer, intent(in), optional :: nDE_j
+      type (ESMF_Layout), intent(in), optional :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -443,6 +446,12 @@
 !          Number of grid increments in the i-direction.
 !     \item[[j\_max]]
 !          Number of grid increments in the j-direction.
+!     \item[[nDE\_i]]
+!          Number of DE's in 1st dir.
+!     \item[[nDE\_j]]
+!          Number of DE's in 2nd dir.
+!     \item[[layout]]
+!         Layout of DE's.
 !     \item[[horz\_gridtype]]
 !          Integer specifier to denote horizontal gridtype:
 !             horz\_gridtype=1   equally-spaced lat/lon grid
@@ -514,6 +523,7 @@
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_GridConstruct(grid, i_max, j_max, &
+                              nDE_i, nDE_j, layout, &
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
@@ -942,6 +952,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridConstructInternal(grid, i_max, j_max, &
+                                            nDE_i, nDE_j, layout, &
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
@@ -951,6 +962,9 @@
       type(ESMF_GridType) :: grid
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      integer, intent(in), optional :: nDE_i
+      integer, intent(in), optional :: nDE_j
+      type (ESMF_Layout), intent(in), optional :: layout
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -980,36 +994,24 @@
 !          Number of grid increments in the i-direction.
 !     \item[[j\_max]]
 !          Number of grid increments in the j-direction.
+!     \item[[nDE\_i]]
+!          Number of DE's in 1st dir.
+!     \item[[nDE\_j]]
+!          Number of DE's in 2nd dir.
+!     \item[[layout]]
+!         Layout of DE's.
 !     \item[[horz\_gridtype]]
-!          Integer specifier to denote horizontal gridtype:
-!             horz\_gridtype=1   equally-spaced lat/lon grid
-!             TODO:  fill out
+!          Integer specifier to denote horizontal gridtype.
 !     \item[[vert\_gridtype]]
-!          Integer specifier to denote vertical gridtype:
-!             vert\_gridtype=0   no vertical grid
-!             TODO:  fill out
+!          Integer specifier to denote vertical gridtype.
 !     \item[[horz\_stagger]]
-!          Integer specifier to denote horizontal grid stagger:
-!             horz\_stagger=1   Arakawa A (centered velocity)
-!             horz\_stagger=2   Arakawa B (velocities at grid corners)
-!             horz\_stagger=3   Arakawa C (velocities at cell faces)
-!             TODO:  fill out
+!          Integer specifier to denote horizontal grid stagger.
 !     \item[[vert\_stagger]]
-!          Integer specifier to denote vertical grid stagger:
-!             vert\_stagger=1   Arakawa A (centered velocity)
-!             vert\_stagger=2   Arakawa B (velocities at grid corners)
-!             vert\_stagger=3   Arakawa C (velocities at cell faces)
-!             TODO:  fill out
+!          Integer specifier to denote vertical grid stagger.
 !     \item[[horz\_coord\_system]]
-!          Integer specifier to denote horizontal coordinate system:
-!             horz\_coord\_system=1   spherical
-!             horz\_coord\_system=2   Cartesian
-!             horz\_coord\_system=3   cylindrical
+!          Integer specifier to denote horizontal coordinate system.
 !     \item[[vert\_coord\_system]]
-!          Integer specifier to denote vertical coordinate system:
-!             vert\_coord\_system=1   spherical
-!             vert\_coord\_system=2   Cartesian
-!             vert\_coord\_system=3   cylindrical
+!          Integer specifier to denote vertical coordinate system.
 !     \item[[x\_min]]
 !          Minimum physical coordinate in the x-direction.
 !     \item[[x\_max]]
@@ -1027,8 +1029,6 @@
 
       character(len=4) :: physgrid_name       !
       integer :: physgrid_id                  ! integer identifier for physgrid
-      integer :: nDE_i                        ! Number of DE's in 1st dir
-      integer :: nDE_j                        ! Number of DE's in 2nd dir
       integer :: status=ESMF_SUCCESS          ! Error status
       logical :: rcpresent=.FALSE.            ! Return code present
 
@@ -1055,8 +1055,8 @@
       endif
 
 !     Create the DistGrid
-!     For time being, just set the number of DE
-      grid%distgrid = ESMF_DistGridCreate(nDE_i=2, nDE_j=1, &
+      grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
+                                          layout=layout, &
                                           i_max=i_max, j_max=j_max, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
@@ -1696,7 +1696,6 @@
         print *, "ERROR in ESMF_GridSetCoordCompute: Distgrid get info"
         return
       endif
-      DE_id = 1     ! TODO:  interface with layout to get DE identifier
       DE_id = grid%distgrid%ptr%MyDE%MyDE
       call ESMF_DistGridGetCounts(grid%distgrid%ptr, DE_id, &
                                   global_start_dir1=global_nmin1, &

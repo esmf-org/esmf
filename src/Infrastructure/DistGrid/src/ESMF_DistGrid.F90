@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.20 2003/01/13 17:50:41 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.21 2003/01/14 20:41:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,8 +144,6 @@
         integer, dimension(:), pointer :: end2
         integer, dimension(:), pointer :: size2
         integer, dimension(:), pointer :: gstart
-!       type (ESMF_DecompAxis), dimension(2) :: global_dir1
-!       type (ESMF_DecompAxis), dimension(2) :: global_dir2
         integer :: maxsize_dir1            ! maximum DE cell count in 1st dir
         integer :: maxsize_dir2            ! maximum DE cell count in 2nd dir
         logical :: covers_domain_dir1      ! identifiers if distgrid covers
@@ -189,6 +187,8 @@
     public ESMF_DistGridSetDecomp
     public ESMF_DistGridGetValue
     public ESMF_DistGridSetValue
+    public ESMF_DistGridLocalToGlobalIndex
+    public ESMF_DistGridGlobalToLocalIndex
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
  
@@ -197,7 +197,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.20 2003/01/13 17:50:41 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.21 2003/01/14 20:41:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -362,7 +362,7 @@
 
 ! !INTERFACE:
       function ESMF_DistGridCreateInternal(nDE_i, nDE_j, i_max, j_max, &
-                                           name, rc)
+                                           layout, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
@@ -372,6 +372,7 @@
       integer, intent(in) :: nDE_j
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      type (ESMF_Layout), intent(in), optional :: layout
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
@@ -390,6 +391,8 @@
 !          Global number of computation cells in the 1st direction.
 !     \item[[j\_max]] 
 !          Global number of computation cells in the 2nd direction.
+!     \item[[layout]]
+!          Layout of DE's.
 !     \item[[name]] 
 !          {\tt DistGrid} name.
 !     \item[[rc]] 
@@ -423,7 +426,7 @@
 
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, i_max, &
-                                          j_max, name, rc)
+                                          j_max, layout, name, rc)
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => distgrid
@@ -584,7 +587,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, &
-                                                i_max, j_max, name, rc)
+                                                i_max, j_max, layout, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid 
@@ -592,6 +595,7 @@
       integer, intent(in) :: nDE_j
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      type (ESMF_Layout), intent(in), optional :: layout
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
@@ -632,7 +636,7 @@
       integer, dimension(:), allocatable :: PEList
       logical :: cover_domain_dir1
       logical :: cover_domain_dir2
-      integer :: i
+      integer :: i, lDE_i, lDE_j
 
 !     Initialize return code
       if(present(rc)) then
@@ -659,46 +663,62 @@
         return
       endif
 
-!     Create layout with specified decomposition
-      allocate(PEList(nDE_i*nDE_j))
-      do i = 1,nDE_i*nDE_j
-        PEList(i) = i - 1  ! TODO:  short-term fix to go to C++
-      enddo
-      distgrid%layout = ESMF_LayoutCreate(nDE_i, nDE_j, PEList, &
-                                          ESMF_XFAST, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
-        return
+!     If a layout is passed in, set the distgrid layout to it.
+!     Otherwise create layout with specified decomposition.
+      if(present(layout)) then
+        call ESMF_LayoutGetSize(layout, lDE_i, lDE_j, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_DistGridConstructInternal: Layout get size"
+          return
+        endif
+        distgrid%layout = layout
+      else
+        if(nDE_i.eq.0 .or. nDE_j.eq.0) then
+          print *, "ERROR in ESMF_DistGridConstructInternal: nDE_i or nDE_j"
+          return
+        endif
+        allocate(PEList(nDE_i*nDE_j))
+        do i = 1,nDE_i*nDE_j
+          PEList(i) = i - 1  ! TODO:  short-term fix to go to C++
+        enddo
+        distgrid%layout = ESMF_LayoutCreate(nDE_i, nDE_j, PEList, &
+                                            ESMF_XFAST, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_DistGridConstructInternal: Layout create"
+          return
+        endif
+        lDE_i = nDE_i
+        lDE_j = nDE_j
       endif
 
 !     Allocate resources based on number of DE's
-      allocate(distgrid%start1(nDE_i*nDE_j), stat=status)
-      allocate(distgrid%end1(nDE_i*nDE_j), stat=status)
-      allocate(distgrid%size1(nDE_i*nDE_j), stat=status)
-      allocate(distgrid%start2(nDE_i*nDE_j), stat=status)
-      allocate(distgrid%end2(nDE_i*nDE_j), stat=status)
-      allocate(distgrid%size2(nDE_i*nDE_j), stat=status)
-      allocate(distgrid%gstart(nDE_i*nDE_j), stat=status)
-!     allocate(distgrid%global_dir1(nDE_i*nDE_j), stat=status)
-!     allocate(distgrid%global_dir2(nDE_i*nDE_j), stat=status)
+      allocate(distgrid%start1(lDE_i*lDE_j), stat=status)
+      allocate(distgrid%end1(lDE_i*lDE_j), stat=status)
+      allocate(distgrid%size1(lDE_i*lDE_j), stat=status)
+      allocate(distgrid%start2(lDE_i*lDE_j), stat=status)
+      allocate(distgrid%end2(lDE_i*lDE_j), stat=status)
+      allocate(distgrid%size2(lDE_i*lDE_j), stat=status)
+      allocate(distgrid%gstart(lDE_i*lDE_j), stat=status)
+!     allocate(distgrid%global_dir1(lDE_i*lDE_j), stat=status)
+!     allocate(distgrid%global_dir2(lDE_i*lDE_j), stat=status)
 
-!jw   allocate(distgrid%DEids(nDE_i*nDE_j), stat=status)  TODO: use ESMF_ArrayCreate
-!jw   allocate(distgrid%DEx(nDE_i*nDE_j), stat=status)
-!jw   allocate(distgrid%DEy(nDE_i*nDE_j), stat=status)
+!jw   allocate(distgrid%DEids(lDE_i*lDE_j), stat=status)  TODO: use ESMF_ArrayCreate
+!jw   allocate(distgrid%DEx(lDE_i*lDE_j), stat=status)
+!jw   allocate(distgrid%DEy(lDE_i*lDE_j), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
 
 !     Set decomposition based on input numbers of processors
-      call ESMF_DistGridSetDecomp(distgrid, nDE_i, nDE_j, status)
+      call ESMF_DistGridSetDecomp(distgrid, lDE_i, lDE_j, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set decomp"
         return
       endif
 
 !     Parse problem size
-      call ESMF_DistGridSetCounts(distgrid, nDE_i, nDE_j, i_max, j_max, &
+      call ESMF_DistGridSetCounts(distgrid, lDE_i, lDE_j, i_max, j_max, &
                                   status)
         
 !     Fill in DE derived type
@@ -1220,7 +1240,6 @@
           de = (j-1)*nDE_j + i
           distgrid%gstart(de) = global_s
           global_s = global_s + distgrid%size1(de)*distgrid%size2(de)
-          write(*,*) 'de, distgrid%gstart', de, distgrid%gstart(de)
         enddo
       enddo
 
@@ -1493,6 +1512,100 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSetDecompInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridGlobalToLocalIndex - translate global indexing to local
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global, local, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid), intent(in) :: distgrid
+      type(ESMF_Array), intent(in) :: global
+      type(ESMF_Array), intent(out) :: local
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Translates global indexing to local indexing for a DistGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be used.
+!     \item[[global]]
+!          Array of global identifiers to be translated.
+!     \item[[local]]
+!          Array of local identifiers corresponding to global identifiers.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!  code goes here
+!
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGlobalToLocalIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridLocalToGlobalIndex - translate local indexing to global
+
+! !INTERFACE:
+      subroutine ESMF_DistGridLocalToGlobalIndex(distgrid, local, global, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid), intent(in) :: distgrid
+      type(ESMF_Array), intent(in) :: local
+      type(ESMF_Array), intent(out) :: global
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Translates local indexing to global indexing for a DistGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be used.
+!     \item[[local]]
+!          Array of local identifiers to be translated.
+!     \item[[global]]
+!          Array of global identifiers corresponding to local identifiers.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+!  code goes here
+!
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridLocalToGlobalIndex
 
 !------------------------------------------------------------------------------
 !BOP
