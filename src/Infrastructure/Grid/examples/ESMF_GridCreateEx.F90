@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.28 2005/01/29 00:11:19 jwolfe Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.29 2005/02/09 20:47:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -200,7 +200,7 @@
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOE
-!\subsubsection{3D Grid Creation}
+!\subsubsection{3D Grid Creation with Arbitrary Distribution}
 
 ! This example shows how to create the same non-uniform 3D {\tt ESMF\_Grid} as
 ! from the previous example but distributed in an arbitrary fashion as one might
