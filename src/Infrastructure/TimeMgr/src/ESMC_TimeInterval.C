@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.58 2004/04/26 20:31:34 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.59 2004/04/27 23:01:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.58 2004/04/26 20:31:34 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.59 2004/04/27 23:01:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -352,7 +352,7 @@
     //   of units possible
     //---------------------------------------------------------------------
 
-    tiToConvert.calendar->ESMC_CalendarIntervalMagnitude(tiToConvert);
+    tiToConvert.ESMC_TimeIntervalReduce();
 
     //---------------------------------------------------------------------
     // convert from reduced units to user-requested units, keeping them
@@ -858,7 +858,7 @@
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    absValue.calendar->ESMC_CalendarIntervalMagnitude(absValue);
+    absValue.ESMC_TimeIntervalReduce();
 
     // if absolute, simply perform absolute value on baseTime seconds and return
     if (absValue.yy == 0 && absValue.mm == 0 && absValue.d == 0) {
@@ -876,7 +876,7 @@
       case ESMC_CAL_GREGORIAN:
       case ESMC_CAL_NOLEAP:
         if (absValue.yy != 0 || absValue.d != 0) {
-          // shouldn't be here - yy and d already reduced in Magnitude call
+          // shouldn't be here - yy and d already reduced in Reduce() call
           // above TODO: write LogErr message (internal error)
           return(errorResult);
 
@@ -918,7 +918,7 @@
 
         break;
       case ESMC_CAL_360DAY:
-        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // shouldn't be here - yy, mm, d already reduced in Reduce() call above
         // TODO: write LogErr message (internal error)
         return(errorResult);
         break;
@@ -928,7 +928,7 @@
           return(errorResult);
         }
         if (absValue.d != 0) {
-          // shouldn't be here - days already reduced in Magnitude call above
+          // shouldn't be here - days already reduced in Reduce() call above
           // TODO: write LogErr message (internal error)
           return(errorResult);
         }
@@ -1014,8 +1014,8 @@
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    ti1.calendar->ESMC_CalendarIntervalMagnitude(ti1);
-    ti2.calendar->ESMC_CalendarIntervalMagnitude(ti2);
+    ti1.ESMC_TimeIntervalReduce();
+    ti2.ESMC_TimeIntervalReduce();
 
     // if both absolute, simply divide baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
@@ -1044,7 +1044,7 @@
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.d  != 0 || ti2.d  != 0) {
-          // shouldn't be here - yy and d already reduced in Magnitude call
+          // shouldn't be here - yy and d already reduced in Reduce() call
           // above TODO: write LogErr message (internal error)
           return(0.0);
 
@@ -1075,7 +1075,7 @@
         }
         break;
       case ESMC_CAL_360DAY:
-        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // shouldn't be here - yy, mm, d already reduced in Reduce() call above
         // TODO: write LogErr message (internal error)
         return(0.0);
         break;
@@ -1086,7 +1086,7 @@
           return(0.0);
         }
         if (ti1.d != 0 || ti2.d != 0) {
-          // shouldn't be here - days already reduced in Magnitude call above
+          // shouldn't be here - days already reduced in Reduce() call above
           // TODO: write LogErr message (internal error)
           return(0.0);
         }
@@ -1167,14 +1167,31 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval quotient;
+    // copy calendar, startTime, endTime from this time interval
+    ESMC_TimeInterval quotient = *this;
 
-    // TODO: fractional & calendar interval parts
+    // reduce to smallest and least number of units
+    quotient.ESMC_TimeIntervalReduce();
 
+    // TODO: fractional interval parts
+
+    // divide relative yy, mm, d parts
     if (divisor != 0) {
-      quotient.s = this->s / divisor;
+      quotient.yy /= divisor;
+      quotient.mm /= divisor;
+      quotient.d  /= divisor;
+
+      // divide absolute s part  // TODO: fractions
+      quotient.s /= divisor;
+
+    } else {
+      // TODO: write LogErr message (divide-by-zero)
+      ESMC_TimeInterval zeroInterval;
+      return(zeroInterval);
     }
-    // TODO:  else throw exception ?
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(quotient);
 
@@ -1199,14 +1216,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional & calendar interval parts
-
-    if (divisor != 0) {
-      this->s /= divisor;
-    }
-    // TODO:  else throw exception ?
-
-    return(*this);
+    return(*this = *this / divisor);
 
 }  // end ESMC_TimeInterval::operator/=
 
@@ -1230,14 +1240,31 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval quotient;
+    // copy calendar, startTime, endTime from this time interval
+    ESMC_TimeInterval quotient = *this;
 
-    // TODO: fractional & calendar interval parts
+    // reduce to smallest and least number of units
+    quotient.ESMC_TimeIntervalReduce();
 
+    // TODO: fractional interval parts
+
+    // divide relative yy, mm, d parts
     if (fabs(divisor) > FLT_EPSILON) {
-      quotient.s = (ESMF_KIND_I8) ((ESMF_KIND_R8) this->s / divisor);
+      quotient.yy = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.yy / divisor);
+      quotient.mm = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.mm / divisor);
+      quotient.d  = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.d  / divisor);
+
+      // divide absolute s part  // TODO: fractions
+      quotient.s  = (ESMF_KIND_I8) ((ESMF_KIND_R8) quotient.s  / divisor);
+
+    } else {
+      // TODO: write LogErr message (divide-by-zero)
+      ESMC_TimeInterval zeroInterval;
+      return(zeroInterval);
     }
-    // TODO:  else throw exception ?
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(quotient);
 
@@ -1262,14 +1289,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional & calendar interval parts
-
-    if (fabs(divisor) > FLT_EPSILON) {
-      this->s = (ESMF_KIND_I8) ((ESMF_KIND_R8) this->s / divisor);
-    }
-    // TODO:  else throw exception ?
-
-    return(*this);
+    return(*this = *this / divisor);
 
 }  // end ESMC_TimeInterval::operator/=
 
@@ -1349,8 +1369,8 @@
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    ti1.calendar->ESMC_CalendarIntervalMagnitude(ti1);
-    ti2.calendar->ESMC_CalendarIntervalMagnitude(ti2);
+    ti1.ESMC_TimeIntervalReduce();
+    ti2.ESMC_TimeIntervalReduce();
 
     // if both absolute, simply modulus baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
@@ -1380,7 +1400,7 @@
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.d  != 0 || ti2.d  != 0) {
-          // shouldn't be here - yy and d already reduced in Magnitude call
+          // shouldn't be here - yy and d already reduced in Reduce() call
           // above TODO: write LogErr message (internal error)
           return(remainder);
 
@@ -1412,7 +1432,7 @@
         }
         break;
       case ESMC_CAL_360DAY:
-        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // shouldn't be here - yy, mm, d already reduced in Reduce() call above
         // TODO: write LogErr message (internal error)
         return(remainder);
         break;
@@ -1423,7 +1443,7 @@
           return(remainder);
         }
         if (ti1.d != 0 || ti2.d != 0) {
-          // shouldn't be here - days already reduced in Magnitude call above
+          // shouldn't be here - days already reduced in Reduce() call above
           // TODO: write LogErr message (internal error)
           return(remainder);
         }
@@ -1650,11 +1670,8 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval product;
-
-    // TODO: whole, fractional & calendar interval parts
-
-    return(product);
+    // use commutative complement
+    return(ti * multiplier);
 
 }  // end operator*
 
@@ -1677,9 +1694,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: whole, fractional & calendar interval parts
-
-    return(*this);
+    return(*this = *this * multiplier);
 
 }  // end ESMC_TimeInterval::operator*=
 
@@ -1704,11 +1719,25 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval product;
+    // copy calendar, startTime, endTime from this time interval
+    ESMC_TimeInterval product = *this;
 
-    // TODO: fractional & calendar interval parts
+    // reduce to smallest and least number of units
+    product.ESMC_TimeIntervalReduce();
 
-    product.s = (ESMF_KIND_I8) ((ESMF_KIND_R8) this->s * multiplier);
+    // TODO: fractional interval parts
+    // TODO: check for overflow/underflow, return 0 with LogErr message
+
+    // multiply relative yy, mm, d parts
+    product.yy = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.yy * multiplier);
+    product.mm = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.mm * multiplier);
+    product.d  = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.d  * multiplier);
+
+    // multiply absolute s part  // TODO: fractions
+    product.s  = (ESMF_KIND_I8) ((ESMF_KIND_R8) product.s  * multiplier);
+
+    // note: result not normalized here -- it is done during a Get() or use
+    // in an arithmetic or comparison operation.
 
     return(product);
 
@@ -1736,13 +1765,8 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval product;
-
-    // TODO: fractional & calendar interval parts
-
-    product.s = (ESMF_KIND_I8) (multiplier * (ESMF_KIND_R8) ti.s);
-
-    return(product);
+    // use commutative complement
+    return(ti * multiplier);
 
 }  // end operator*
 
@@ -1765,11 +1789,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional & calendar interval parts
-
-    this->s = (ESMF_KIND_I8) ((ESMF_KIND_R8) this->s * multiplier);
-
-    return(*this);
+    return(*this = *this * multiplier);
 
 }  // end ESMC_TimeInterval::operator*=
 
@@ -2058,8 +2078,8 @@
 
     // Reduce both time interval's units to the smallest and least number
     // of units possible
-    ti1.calendar->ESMC_CalendarIntervalMagnitude(ti1);
-    ti2.calendar->ESMC_CalendarIntervalMagnitude(ti2);
+    ti1.ESMC_TimeIntervalReduce();
+    ti2.ESMC_TimeIntervalReduce();
 
     // if both absolute, simply compare baseTime seconds and return
     if (ti1.yy == 0 && ti2.yy == 0 &&
@@ -2097,7 +2117,7 @@
       case ESMC_CAL_NOLEAP:
         if (ti1.yy != 0 || ti2.yy != 0 ||
             ti1.d  != 0 || ti2.d  != 0) {
-          // shouldn't be here - yy and d already reduced in Magnitude call
+          // shouldn't be here - yy and d already reduced in Reduce() call
           // above TODO: write LogErr message (internal error)
           return(false);
 
@@ -2148,7 +2168,7 @@
         }
         break;
       case ESMC_CAL_360DAY:
-        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // shouldn't be here - yy, mm, d already reduced in Reduce() call above
         // TODO: write LogErr message (internal error)
         return(false);
         break;
@@ -2159,7 +2179,7 @@
           return(false);
         }
         if (ti1.d != 0 || ti2.d != 0) {
-          // shouldn't be here - days already reduced in Magnitude call above
+          // shouldn't be here - days already reduced in Reduce() call above
           // TODO: write LogErr message (internal error)
           return(false);
         }
@@ -2536,7 +2556,7 @@
 }  // end ~ESMC_TimeInterval
 
 //-------------------------------------------------------------------------
-//  Private methods to support ESMC_TimeIntervalGet() API
+//  Private methods
 //-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
@@ -2581,3 +2601,119 @@
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeIntervalGetString
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalReduce - reduce a Time Interval to the smallest and least number of units
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalReduce(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//     Determines the magnitude of a given {\tt ESMC\_TimeInterval} by reducing
+//     to the smallest and least number of units possible, ideally only seconds.//     Takes into account the time interval's calendar and its start time
+//     and/or end time, if set.
+//
+//EOP
+// !REQUIREMENTS:
+
+    // Note:  Don't return ESMF_FAILURE; just reduce what we can.  Failure is
+    //        determined by the method which tries to satisfy the user's
+    //        request.
+
+    // reduce any yy,mm,d to base time units (seconds) if possible,
+    //   or at least to months and/or days if not
+    switch (calendar->calendarType)
+    {
+      case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_NOLEAP:
+        // use startTime to reduce yy,mm,d to seconds
+        if (startTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+          endTime = startTime + *this;
+          ESMC_TimeInterval ti = endTime - startTime;
+          s = ti.s;
+          //TODO: *this = endTime - startTime;
+          //      should just copy base class part wholesale, rather than
+          //      individual properties (including fraction sN/sD); breaks
+          //      encapsulation principle.
+          yy = mm = d = 0;  // yy, mm, d all reduced to base seconds
+
+        // use endTime to reduce yy,mm,d to seconds
+        } else if (endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+          startTime = endTime - *this;
+          ESMC_TimeInterval ti = endTime - startTime;
+          s = ti.s;
+          //TODO: *this = endTime - startTime;
+          //      should just copy base class part wholesale, rather than
+          //      individual properties (including fraction sN/sD); breaks
+          //      encapsulation principle.
+          yy = mm = d = 0; // yy, mm, d all reduced to base seconds
+
+        } else { // no startTime or endTime available, reduce what we can
+                 //   to (mm, s)
+          if (calendar->calendarType == ESMC_CAL_GREGORIAN) {
+            // cannot reduce yy or mm to seconds, but can reduce yy to mm
+            if (yy != 0) {
+              mm += yy * calendar->monthsPerYear;
+              yy = 0;
+            }
+          } else { // ESMC_CAL_NOLEAP
+            // reduce yy to seconds
+            if (yy != 0) {
+              s += yy * calendar->secondsPerYear;
+              yy = 0;
+            }
+            // cannot reduce mm to seconds
+          }
+          // reduce d to seconds
+          if (d != 0) {
+            s += d * calendar->secondsPerDay;
+            d = 0;
+          }
+          // we now have (mm, s); yy and d have been reduced
+        }
+        break;
+      case ESMC_CAL_360DAY:
+        if (yy != 0) {
+          s += yy * calendar->secondsPerYear;
+          yy = 0;
+        }
+        if (mm != 0) {
+          s += mm * 30 * calendar->secondsPerDay;
+          mm = 0;
+        }
+        if (d != 0) {
+          s += d * calendar->secondsPerDay;
+          d = 0;
+        }
+        // yy, mm, d all reduced to base seconds
+        break;
+      case ESMC_CAL_JULIANDAY:
+        // ignore years and months
+
+        // reduce days to seconds
+        if (d != 0) {
+          s += d * calendar->secondsPerDay;
+          d = 0;
+        }
+        break;
+      case ESMC_CAL_NOCALENDAR:
+        // ignore years, months and days
+        break;
+      case ESMC_CAL_CUSTOM:
+        // TODO:
+        break;
+      default:
+        // unknown calendar type
+        break;
+    };
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_TimeIntervalReduce
