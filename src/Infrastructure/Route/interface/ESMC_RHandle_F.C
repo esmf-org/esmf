@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle_F.C,v 1.10 2003/11/06 23:56:13 jwolfe Exp $
+// $Id: ESMC_RHandle_F.C,v 1.11 2004/03/04 18:13:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,8 @@ extern "C" {
                                        ESMC_LocalArray **dst, 
                                        ESMC_LocalArray **w, 
                                        int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              printf("transformvalueget: bad object\n");
               *status = ESMF_FAILURE;
               return;
            }
@@ -69,7 +70,8 @@ extern "C" {
                                        struct c_F90ptr *dst, 
                                        struct c_F90ptr *w, 
                                        int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              printf("transformvaluegetf90ptr: bad object\n");
               *status = ESMF_FAILURE;
               return;
            }
@@ -82,7 +84,8 @@ extern "C" {
                                        ESMC_LocalArray **dst, 
                                        ESMC_LocalArray **w, 
                                        int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              printf("transformvaluesset: bad object\n");
               *status = ESMF_FAILURE;
               return;
            }
@@ -91,7 +94,8 @@ extern "C" {
 
        void FTN(c_esmc_transformvaluesvalidate)(ESMC_TransformValues **ptr, 
                                                 char *opts, int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              printf("transformvaluesvalidate: bad object\n");
               *status = ESMF_FAILURE;
               return;
            }
@@ -101,7 +105,8 @@ extern "C" {
 
        void FTN(c_esmc_transformvaluesprint)(ESMC_TransformValues **ptr, 
                                              char *opts, int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
+              printf("transformvaluesprint: bad object\n");
               *status = ESMF_FAILURE;
               return;
            }
@@ -127,7 +132,7 @@ extern "C" {
                                        ESMC_TransformValues **tv,
                                        // char **label,   not null terminated
                                        int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
@@ -140,7 +145,7 @@ extern "C" {
                                        ESMC_TransformValues **tv,
                                        // char **label,   not null terminated
                                        int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
@@ -149,7 +154,7 @@ extern "C" {
 
        void FTN(c_esmc_routehandlevalidate)(ESMC_RouteHandle **ptr, char *opts,
                                             int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
@@ -159,7 +164,7 @@ extern "C" {
 
        void FTN(c_esmc_routehandleprint)(ESMC_RouteHandle **ptr, char *opts, 
                                          int *status) {
-           if ((ptr == NULL) || (ptr == NULL)) {
+           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
            }
