@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.18 2003/04/04 21:08:06 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.19 2003/04/04 23:21:40 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.18 2003/04/04 21:08:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.19 2003/04/04 23:21:40 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1504,6 +1504,184 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return rc;
 
  } // end ESMC_DELayoutGatherArray
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGatherArrayF - gather a distributed float array
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGatherArrayF(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      float *DistArray,          // in  - distributed array
+      int decompids[],           // in  - decomposition identifier for each
+                                 //       axis for the array
+      int size_decomp,           // in  - size of decomp arrays
+      ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
+                                 //       structures for exclusive data
+      ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
+                                 //       structures for total data
+      float *GlobalArray) {      // out - global array
+//
+// !DESCRIPTION:
+//    returns an array of AxisIndex types representing the decomposition of
+//    an arbitrary number of axis by a layout
+//
+//EOP
+// !REQUIREMENTS:
+// TODO:  this might be a good place to use templates
+
+  int rc = ESMF_FAILURE;
+  int i, j, k, l, m;     // general counter vars
+  int mpidatatype;
+
+  // get layout size
+  int nx, ny;
+  this->ESMC_DELayoutGetSize(&nx, &ny);
+  int nde = nx*ny;
+  int rankx, ranky;
+
+  // switch based on array rank
+  switch (size_decomp) {
+    case 1:
+      cout << "no code to handle array rank " << size_decomp << " yet\n";
+    break;
+    case 2:
+      {
+        // figure out which ranks are decomposed and figure out the
+        // number of separate data chunks per rank and size of data
+        // chunks
+        int rmax[2];
+        int rsize[2];
+        int rsize_tot[2];
+        int rskip[2];
+        int rbreak[1];
+        int rbcount = 0;
+        for (i=0; i<size_decomp; i++) {
+          rmax[i] = AIPtr[i].max;
+          rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
+          rsize_tot[i] = AIPtr2[i].r - AIPtr2[i].l + 1;
+          if (decompids[i] == 0) {
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+          if (decompids[i] == 1) {
+            rankx = i;
+          }
+          if (decompids[i] == 2) {
+            ranky = i;
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+        }
+        rskip[0] = 1;
+        for (i=1; i<size_decomp; i++) {
+          rskip[i] = rskip[i-1]*rmax[i-1];
+        }
+        // loop over ranks, skipping the first decomposed one, loading
+        // up chunks of data to gather
+        int k, j_tot;
+        float *sendbuf, *recvbuf;
+        int sendcount;
+        int* recvcounts = new int[nde];
+        int* displs = new int[nde];
+        for (int j=0; j<rsize[rbreak[0]]; j++) {
+          j_tot = j + AIPtr[ranky].l;
+          sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].l];
+          sendcount = rsize[rankx];
+          recvbuf = &GlobalArray[j*rmax[rankx]];
+          for (int kx=0; kx<nx; kx++) {
+            for (int ky=0; ky<ny; ky++) {
+              k = ky*nx + kx;
+              recvcounts[k] = rsize[rankx]; // TODO: fix so variable
+              displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+            }
+          }
+          // call layout gather routine
+          comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
+                                   displs, ESMC_FLOAT);
+        }
+        delete [] recvcounts;
+        delete [] displs;
+      }
+    break;
+    case 3:
+      {
+        // figure out which ranks are decomposed and figure out the
+        // number of separate data chunks per rank and size of data
+        // chunks
+        int rmax[3];
+        int rsize[3];
+        int rskip[3];
+        int rbreak[2];
+        int rbcount = 0;
+        for (i=0; i<size_decomp; i++) {
+          rmax[i] = AIPtr[i].max;
+          rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
+          if (decompids[i] == 0) {
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+          if (decompids[i] == 1) {
+            rankx = i;
+          }
+          if (decompids[i] == 2) {
+            ranky = i;
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+        }
+        rskip[0] = 1;
+        for (i=1; i<size_decomp; i++) {
+          rskip[i] = rskip[i-1]*rmax[i-1];
+        }
+        // loop over ranks, skipping the first decomposed one, loading
+        // up chunks of data to gather
+        int k;
+        float *sendbuf, *recvbuf;
+        int sendcount;
+        int* recvcounts = new int[nde];
+        int* displs = new int[nde];
+        for (i=0; i<rsize[rbreak[1]]; i++) {
+          for (int j=0; j<rsize[rbreak[0]]; j++) {
+            sendbuf = &DistArray[j*rsize[rankx]
+                    + i*rsize[rankx]*rsize[rbreak[0]]];
+            sendcount = rsize[rankx];
+            recvbuf = &GlobalArray[j*rmax[rankx]
+                    + i*rmax[rankx]*rmax[rbreak[0]]];
+            for (int kx=0; kx<nx; kx++) {
+              for (int ky=0; ky<ny; ky++) {
+                k = ky*nx + kx;
+                recvcounts[k] = rsize[rankx]; // TODO: fix so variable
+                displs[k] = kx*rsize[rankx] + ky*rskip[ranky]*rsize[ranky];
+              }
+            }
+          // call layout gather routine
+          comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
+                                   displs, ESMC_FLOAT);
+          }
+        }
+        delete [] recvcounts;
+        delete [] displs;
+      }
+    break;
+    case 4:
+    break;
+    case 5:
+      cout << "no code to handle array rank " << size_decomp << " yet\n";
+    break;
+    default:
+      cout << "no code to handle array rank " << size_decomp << " yet\n";
+    break;
+  }
+
+  rc = ESMF_SUCCESS;
+  return rc;
+
+ } // end ESMC_DELayoutGatherArrayF
 
 //-----------------------------------------------------------------------------
 //BOP
