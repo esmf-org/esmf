@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.12 2003/04/02 20:15:18 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.13 2003/04/07 16:11:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.12 2003/04/02 20:15:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.13 2003/04/07 16:11:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -121,7 +121,7 @@
 // !REQUIREMENTS:  
 
     if (D != ESMC_NULL_POINTER) {
-      *D = S / 86400;
+      *D = S / SECONDS_PER_DAY;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
 
@@ -146,7 +146,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    S = D * 86400;
+    S = D * SECONDS_PER_DAY;
 
     return(ESMF_SUCCESS);
 
@@ -172,7 +172,7 @@
 // !REQUIREMENTS:  
 
     if (H != ESMC_NULL_POINTER) {
-      *H = S / 3600;
+      *H = S / SECONDS_PER_HOUR;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
 
@@ -197,7 +197,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     S = H * 3600;
+     S = H * SECONDS_PER_HOUR;
 
      return(ESMF_SUCCESS);
 
@@ -223,7 +223,7 @@
 // !REQUIREMENTS:  
 
      if (M != ESMC_NULL_POINTER) {
-       *M = S / 60;
+       *M = S / SECONDS_PER_MINUTE;
        return(ESMF_SUCCESS);
      } else return(ESMF_FAILURE);
 
@@ -248,7 +248,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     S = M * 60;
+     S = M * SECONDS_PER_MINUTE;
 
      return(ESMF_SUCCESS);
 
@@ -495,7 +495,7 @@
 // !REQUIREMENTS:  
 
     if (d != ESMC_NULL_POINTER) {
-      *d = (double) S / 86400.0;
+      *d = (double) S / (double) SECONDS_PER_DAY;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
 
@@ -520,7 +520,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    S = (ESMF_IKIND_I8) (d * 86400);
+    S = (ESMF_IKIND_I8) (d * SECONDS_PER_DAY);
     // TODO convert remainder to Sn/Sd
 
     return(ESMF_SUCCESS);
@@ -547,7 +547,7 @@
 // !REQUIREMENTS:  
 
     if (h != ESMC_NULL_POINTER) {
-      *h = (double) S / 3600.0;
+      *h = (double) S / (double) SECONDS_PER_HOUR;
       return(ESMF_SUCCESS);
     } else return(ESMF_FAILURE);
 
@@ -572,7 +572,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     S = (ESMF_IKIND_I8) (h * 3600);
+     S = (ESMF_IKIND_I8) (h * SECONDS_PER_HOUR);
     // TODO convert remainder to Sn/Sd
 
      return(ESMF_SUCCESS);
@@ -599,7 +599,7 @@
 // !REQUIREMENTS:  
 
      if (m != ESMC_NULL_POINTER) {
-       *m = (double) S / 60.0;
+       *m = (double) S / (double) SECONDS_PER_MINUTE;
        return(ESMF_SUCCESS);
      } else return(ESMF_FAILURE);
 
@@ -624,7 +624,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     S = (ESMF_IKIND_I8) (m * 60);
+     S = (ESMF_IKIND_I8) (m * SECONDS_PER_MINUTE);
     // TODO convert remainder to Sn/Sd
 
      return(ESMF_SUCCESS);
