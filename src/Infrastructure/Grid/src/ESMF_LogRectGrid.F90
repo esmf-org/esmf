@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.85 2004/06/21 22:17:30 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.86 2004/06/21 23:32:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.85 2004/06/21 22:17:30 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.86 2004/06/21 23:32:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1951,6 +1951,9 @@
 
       call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
                             logRectFlag=lrFlag, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Check layout attributes
       if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
