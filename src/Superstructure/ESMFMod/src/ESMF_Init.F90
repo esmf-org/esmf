@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.2 2004/04/20 21:41:14 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.3 2004/04/23 14:30:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,10 +89,11 @@
 ! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
 !
 ! !INTERFACE:
-      subroutine ESMF_Initialize(defaultCalendar, rc)
+      subroutine ESMF_Initialize(defaultCalendar, vm, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
+      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar  
+      type(ESMF_VM),           intent(out), optional :: vm   
       integer,                 intent(out), optional :: rc     
 
 !
@@ -104,6 +105,8 @@
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
+!     \item [{[vm]}]
+!           Returns the global vm that was created during initialization.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -112,6 +115,9 @@
 !EOP
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultCalendar, rc)
+      if (present(vm)) then
+        call ESMF_VMGetGlobal(vm, rc)
+      endif
 
       end subroutine ESMF_Initialize
 
