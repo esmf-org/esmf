@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.5 2002/10/11 01:49:06 eschwab Exp $
+// $Id: ESMC_class.h,v 1.6 2002/10/11 17:11:45 eschwab Exp $
 //
 // ESMF <Class> C++ definition include file
 //
@@ -18,16 +18,14 @@
 
 //-------------------------------------------------------------------------
 
-// put any constants or macros which apply to the whole component in this file.
-// anything public or esmf-wide should be up higher at the top level
+// Put any constants or macros which apply to the whole component in this file.
+// Anything public or esmf-wide should be up higher at the top level
 // include files.
 #include <ESMC_<Comp>.h> 
 
 //-------------------------------------------------------------------------
 //BOP
 // !CLASS:  ESMC_<Class> - one line general statement about this class
-
-//-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
 //
@@ -37,6 +35,7 @@
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
+//-------------------------------------------------------------------------
 // 
 // !USES:
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
@@ -57,8 +56,6 @@ class ESMC_<Class>Config {
 
 // class definition type
 class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
-
-// < insert any C++ class declaratives here, e.g. friends >
 
   private:
 //  < insert class members here >  corresponds to type ESMF_<Class> members

@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.6 2002/10/10 21:40:11 eschwab Exp $
+! $Id: ESMF_class.F90,v 1.7 2002/10/11 17:11:45 eschwab Exp $
 !
 ! ESMF <Class> Module
 !
@@ -96,7 +96,7 @@
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.6 2002/10/10 21:40:11 eschwab Exp $
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.7 2002/10/11 17:11:45 eschwab Exp $
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
@@ -239,7 +239,7 @@
 
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_<Class>Destruct - release resources associated w/ a <Class>
+! !IROUTINE: ESMF_<Class>Destruct - release resources associated w/a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Destruct(<class>, rc)
@@ -296,30 +296,6 @@
 
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_<Class>SetConfig - set configuration information for a <Class>
-
-! !INTERFACE:
-      subroutine ESMF_<Class>SetConfig(<class>, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>
-      type(ESMF_<Class>Config), intent(in) :: config    ! resources
-      integer, intent(out), optional :: rc              ! return code
-
-!
-! !DESCRIPTION:
-!     Configures the <Class> object with set of resources given.
-!
-!EOP
-! !REQUIREMENTS: developer's guide for classes
-
-!
-!  code goes here
-!
-      end subroutine ESMF_<Class>GetConfig
-
-!-------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_<Class>GetConfig - get configuration information from a <Class>
 
 ! !INTERFACE:
@@ -344,20 +320,19 @@
 
 !-------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_<Class>Set<Value> - set <Value> for a <Class>
+! !IROUTINE: ESMF_<Class>SetConfig - set configuration information for a <Class>
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Set<Value>(<class>, value, rc)
+      subroutine ESMF_<Class>SetConfig(<class>, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>
-      <value type>, intent(in) :: value
+      type(ESMF_<Class>Config), intent(in) :: config    ! resources
       integer, intent(out), optional :: rc              ! return code
 
 !
 ! !DESCRIPTION:
-!     Sets the <Class> member <Value> with the given value.
-!     Can be multiple routines, one per value
+!     Configures the <Class> object with set of resources given.
 !
 !EOP
 ! !REQUIREMENTS: developer's guide for classes
@@ -365,7 +340,7 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_<Class>Set<Value>
+      end subroutine ESMF_<Class>SetConfig
 
 !-------------------------------------------------------------------------
 !BOP
@@ -391,6 +366,31 @@
 !  code goes here
 !
       end subroutine ESMF_<Class>Get<Value>
+
+!-------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_<Class>Set<Value> - set <Value> for a <Class>
+
+! !INTERFACE:
+      subroutine ESMF_<Class>Set<Value>(<class>, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_<Class>), intent(in) :: <class>
+      <value type>, intent(in) :: value
+      integer, intent(out), optional :: rc              ! return code
+
+!
+! !DESCRIPTION:
+!     Sets the <Class> member <Value> with the given value.
+!     Can be multiple routines, one per value
+!
+!EOP
+! !REQUIREMENTS: developer's guide for classes
+
+!
+!  code goes here
+!
+      end subroutine ESMF_<Class>Set<Value>
 
 !-------------------------------------------------------------------------
 !BOP
@@ -446,4 +446,3 @@
 !-------------------------------------------------------------------------
 
       end module ESMF_<Class>Mod
-

@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 eschwab Exp $
+// $Id: ESMC_class.C,v 1.6 2002/10/11 17:11:41 eschwab Exp $
 //
 // ESMC <Class> method code (body) file
 //
@@ -9,7 +9,7 @@
 
 //-------------------------------------------------------------------------
 //
-// !PURPOSE:
+// !DESCRIPTION:
 //
 // The code in this file implements the C++ <Class> methods defined
 // in the companion file ESMC_<Class>.h
@@ -18,7 +18,7 @@
 //
 //-------------------------------------------------------------------------
 //
-// insert any higher level or system includes here
+// insert any higher level, 3rd party or system includes here
 #include <ESMC_Util.h>
 
 // associated class definition file
@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 eschwab Exp $";
+static const char *const version = "$Id: ESMC_class.C,v 1.6 2002/10/11 17:11:41 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -58,7 +58,7 @@ static const char *const version = "$Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 
 //      object and uses the internal routine ESMC_<Class>Contruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC_<Class>Init.
-//      Can be multiple overloaded methods with the same name, but
+//      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
 //EOP
@@ -117,7 +117,7 @@ static const char *const version = "$Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 
 //      ESMC_<Class>Construct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
+// !REQUIREMENTS:  developer's guide for classes
 
 //
 //  code goes here
@@ -289,11 +289,11 @@ static const char *const version = "$Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 
 // !RETURN VALUE:  int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {    // in
+      const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
 //      Validates that a <Class> is internally consistent.
-//      Returns error code if problems are found.
+//      Returns error code if problems are found.  ESMC_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -315,11 +315,11 @@ static const char *const version = "$Id: ESMC_class.C,v 1.5 2002/10/11 01:49:06 
 // !RETURN VALUE:  int error return code
 //
 // !ARGUMENTS:
-      const char *options) const {     //  in
+      const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
 //      Print information about a <Class>.  The options control the
-//      type of information and level of detail.
+//      type of information and level of detail.  ESMC_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
