@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.65 2003/07/18 20:40:23 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.66 2003/07/22 15:37:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,7 +74,8 @@
                                             ! necessary to support
                                             ! staggering, vertical
                                             ! grids, background grids
-        logical, dimension(3) :: periodic   ! logical identifier to indicate
+        logical, dimension(ESMF_MAXGRIDDIM) :: periodic
+                                            ! logical identifier to indicate
                                             ! periodic boundary conditions in
                                             ! each direction
         type (ESMF_PhysGrid), dimension(:), pointer :: &
@@ -204,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.65 2003/07/18 20:40:23 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.66 2003/07/22 15:37:13 jwolfe Exp $'
 
 !==============================================================================
 !
