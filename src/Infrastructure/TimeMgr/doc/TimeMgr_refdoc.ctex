@@ -133,10 +133,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Time_usage}
-\input{Time_fex}
+\input{ESMF_TimeEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Time_usage}
-\input{../Infrastructure/TimeMgr/doc/Time_fex}
+\input{../Infrastructure/TimeMgr/doc/ESMF_TimeEx_fapi}
 #endif
 
 \subsection{Restrictions}
