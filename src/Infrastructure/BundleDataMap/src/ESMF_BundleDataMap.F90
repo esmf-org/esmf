@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.6 2004/05/26 18:27:50 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.7 2004/06/01 20:18:26 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.6 2004/05/26 18:27:50 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.7 2004/06/01 20:18:26 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -181,14 +181,160 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleDataMapGet - Get object from a BundleDataMap type.
 !
-! This section includes the BundleDataMap SetDefault and Invalidate routines
+! !INTERFACE:
+      subroutine ESMF_BundleDataMapGet(bundledatamap, bundleInterleave, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
+      type(ESMF_BundleInterleave), intent(out), optional :: bundleInterleave
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!   Return info about the {\tt ESMF\_BundleDataMap} described by this object.
+!
+!   The arguments are:
+!     \begin{description}
+!     \item [bundledatamap]
+!           An {\tt ESMF\_BundleDataMap} object.
+!     \item [{[bundleInterleave]}]
+!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
+!           a single array.  Possible values are {\tt ESMF\_BIL\_BYITEM} and
+!           {\tt ESMF\_BIL\_BYFIELD}. 
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
 !
 !
+!EOP
+! !REQUIREMENTS: 
+ 
+        ! local vars
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+
+        ! initialize return code
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! if specified, return value
+        if (present(bundleInterleave)) bundleInterleave = bundledatamap%bil
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_BundleDataMapGet
+
+
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_BundleDataMapSetDefault - initialize the contents of a BundleDataMap
+! !IROUTINE: ESMF_BundleDataMapPrint - Print a BundleDataMap type
+!
+!
+! !INTERFACE:
+      subroutine ESMF_BundleDataMapPrint(bundledatamap, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_BundleDataMap), intent(in) :: bundledatamap
+      character (len = *), intent(in) :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a {\tt ESMF\_BundleDataMap}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundledatamap]
+!           {\tt ESMF\_BundleDataMap} object to print.
+!     \item [{[options]}]
+!           Print options.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        character (len = ESMF_MAXSTR) :: str
+
+        print *, "BundleDataMap print:"
+        if (bundledatamap%status .ne. ESMF_STATE_READY) then
+          print *, "Uninitialized or Invalid object"
+          if (present(rc)) rc = ESMF_FAILURE
+          return
+        endif
+
+        ! TODO: add print code here
+        call ESMF_BundleInterleaveString(bundledatamap%bil, str, rc)
+        print *, " Data: ", str
+  
+        if (present(rc)) rc = ESMF_SUCCESS
+      
+        end subroutine ESMF_BundleDataMapPrint
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleDataMapSet - Set a BundleDataMap type object.
+!
+! !INTERFACE:
+      subroutine ESMF_BundleDataMapSet(bundledatamap, bundleInterleave, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!   Set info about the given {\tt ESMF\_BundleDataMap}.
+!
+!   The arguments are:
+!     \begin{description}
+!     \item [bundledatamap]
+!           An {\tt ESMF\_BundleDataMap} object.
+!     \item [{[bundleInterleave]}]
+!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
+!           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
+!           {\tt ESMF\_BIL\_BYFIELD}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: 
+ 
+        ! local vars
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+
+        ! initialize return code
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+
+        ! if specified, set value
+        if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_BundleDataMapSet
+
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_BundleDataMapSetDefault - Set BundleDataMap default values
 
 ! !INTERFACE:
       subroutine ESMF_BundleDataMapSetDefault(bundledatamap, bundleInterleave, rc)
@@ -199,7 +345,7 @@ end function
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!     Initialize the contents of a {\tt ESMF\_BundleDataMap} type.
+!     Set default values of a {\tt ESMF\_BundleDataMap} type.
 !
 !     The arguments are:
 !     \begin{description} 
@@ -281,92 +427,33 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section contains the Get and Set routines
-!
-!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleDataMapGet - Get object from a BundleDataMap type.
+! !IROUTINE: ESMF_BundleDataMapValidate - Validate internal state of a BundleDataMap type
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapGet(bundledatamap, bundleInterleave, rc)
+      subroutine ESMF_BundleDataMapValidate(bundledatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(out), optional :: bundleInterleave
-      integer, intent(out), optional :: rc  
+      type(ESMF_BundleDataMap), intent(in) :: bundledatamap
+      character (len = *), intent(in) :: options
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Return info about the {\tt ESMF\_BundleDataMap} described by this object.
+!      Routine to validate the internal state of a {\tt ESMF\_BundleDataMap}.
 !
-!   The arguments are:
+!      The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
-!           An {\tt ESMF\_BundleDataMap} object.
-!     \item [{[bundleInterleave]}]
-!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
-!           a single array.  Possible values are {\tt ESMF\_BIL\_BYITEM} and
-!           {\tt ESMF\_BIL\_BYFIELD}. 
+!           {\tt ESMF\_BundleDataMap} object to validate.
+!     \item [{[options]}]
+!           Validation options.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: 
- 
-        ! local vars
-        integer :: status                     ! local error status
-        logical :: rcpresent                  ! did user specify rc?
-
-        ! initialize return code
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! if specified, return value
-        if (present(bundleInterleave)) bundleInterleave = bundledatamap%bil
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_BundleDataMapGet
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleDataMapSet - Set a BundleDataMap type object.
-!
-! !INTERFACE:
-      subroutine ESMF_BundleDataMapSet(bundledatamap, bundleInterleave, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
-      integer, intent(out), optional :: rc  
-!
-! !DESCRIPTION:
-!   Set info about the given {\tt ESMF\_BundleDataMap}.
-!
-!   The arguments are:
-!     \begin{description}
-!     \item [bundledatamap]
-!           An {\tt ESMF\_BundleDataMap} object.
-!     \item [{[bundleInterleave]}]
-!           Type of interleave for {\tt ESMF\_Bundle} data if packed into
-!           a single array.  Options are {\tt ESMF\_BIL\_BYITEM} and
-!           {\tt ESMF\_BIL\_BYFIELD}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
+!       \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
- 
+! !REQUIREMENTS:  FLD4.1
+        
         ! local vars
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
@@ -380,21 +467,50 @@ end function
         endif
 
 
-        ! if specified, set value
-        if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
-
+        if (bundledatamap%status .ne. ESMF_STATE_READY) return
+            
+        ! TODO: add more validation here - for index numbers, etc
+ 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_BundleDataMapSet
-
-
+        end subroutine ESMF_BundleDataMapValidate
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_BundleInterleaveString - Return an interleave as a string
 !
-! This section is I/O for BundleDataMaps
+! !INTERFACE:
+      subroutine ESMF_BundleInterleaveString(interleave, string, rc)
 !
 !
+! !ARGUMENTS:
+      type(ESMF_BundleInterleave), intent(in) :: interleave
+      character (len = *), intent(out) :: string
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Routine to turn an interleave into a string.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [interleave]
+!           The {\tt ESMF\_BundleInterleave} object to be turned into a string.
+!     \item [string]
+!          Return string.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!
+!EOPI
+! !REQUIREMENTS:
+
+        if (interleave .eq. ESMF_BIL_BYFIELD) string = "Interleave by Field"
+        if (interleave .eq. ESMF_BIL_BYITEM) string = "Interleave by Item"
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_BundleInterleaveString
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -563,141 +679,6 @@ end function
         end function ESMF_BundleDataMapRead
 
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleDataMapValidate - Validate internal state of a BundleDataMap type
-!
-! !INTERFACE:
-      subroutine ESMF_BundleDataMapValidate(bundledatamap, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleDataMap), intent(in) :: bundledatamap
-      character (len = *), intent(in) :: options
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Routine to validate the internal state of a {\tt ESMF\_BundleDataMap}.
-!
-!      The arguments are:
-!     \begin{description}
-!     \item [bundledatamap]
-!           {\tt ESMF\_BundleDataMap} object to validate.
-!     \item [{[options]}]
-!           Validation options.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOP
-! !REQUIREMENTS:  FLD4.1
-        
-        ! local vars
-        integer :: status                     ! local error status
-        logical :: rcpresent                  ! did user specify rc?
-
-        ! initialize return code
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-
-        if (bundledatamap%status .ne. ESMF_STATE_READY) return
-            
-        ! TODO: add more validation here - for index numbers, etc
- 
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_BundleDataMapValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleDataMapPrint - Print a BundleDataMap type
-!
-!
-! !INTERFACE:
-      subroutine ESMF_BundleDataMapPrint(bundledatamap, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_BundleDataMap), intent(in) :: bundledatamap
-      character (len = *), intent(in) :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about a {\tt ESMF\_BundleDataMap}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundledatamap]
-!           {\tt ESMF\_BundleDataMap} object to print.
-!     \item [{[options]}]
-!           Print options.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        character (len = ESMF_MAXSTR) :: str
-
-        print *, "BundleDataMap print:"
-        if (bundledatamap%status .ne. ESMF_STATE_READY) then
-          print *, "Uninitialized or Invalid object"
-          if (present(rc)) rc = ESMF_FAILURE
-          return
-        endif
-
-        ! TODO: add print code here
-        call ESMF_BundleInterleaveString(bundledatamap%bil, str, rc)
-        print *, " Data: ", str
-  
-        if (present(rc)) rc = ESMF_SUCCESS
-      
-        end subroutine ESMF_BundleDataMapPrint
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_BundleInterleaveString - Return a interleave as a string
-!
-! !INTERFACE:
-      subroutine ESMF_BundleInterleaveString(interleave, string, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_BundleInterleave), intent(in) :: interleave
-      character (len = *), intent(out) :: string
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Routine to turn an interleave into a string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [interleave]
-!           The {\tt ESMF\_BundleInterleave} object to be turned into a string.
-!     \item [string]
-!          Return string.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-
-        if (interleave .eq. ESMF_BIL_BYFIELD) string = "Interleave by Field"
-        if (interleave .eq. ESMF_BIL_BYITEM) string = "Interleave by Item"
-
-        if (present(rc)) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_BundleInterleaveString
-
-!------------------------------------------------------------------------------
 
 
         end module ESMF_BundleDataMapMod
