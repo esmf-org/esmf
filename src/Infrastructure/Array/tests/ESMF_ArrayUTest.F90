@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.9 2004/10/05 15:20:11 svasquez Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.10 2004/10/20 17:05:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.9 2004/10/05 15:20:11 svasquez Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.10 2004/10/20 17:05:38 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -57,7 +57,7 @@
     
      call ESMF_Initialize(vm=vm, rc=rc)
      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-     print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+     call ESMF_TestStart(npets, ESMF_SRCLINE)
 
 
 
@@ -127,7 +127,8 @@
 !   !  Create an Array with a halo width
  
     !EX_UTest
-    allocate(f90ptr1(10,20))
+    allocate(f90ptr1(-5:5,20:40))
+    f90ptr1(:,:) = 1.0
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Create Array with HaloWidth Test"
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, haloWidth=2, rc=rc)
@@ -147,6 +148,15 @@
     write(failMsg, *) "Halo Width not 2" 
     call ESMF_Test((width.eq.2), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 get halowidth returned"
+
+!-------------------------------------------------------------------------------
+!
+   !  Print an Array
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Print an Array Test"
+    call ESMF_ArrayPrint(array1, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------------
 !
@@ -350,7 +360,7 @@
 
 #endif
 
-
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
     call ESMF_Finalize()
 
 
