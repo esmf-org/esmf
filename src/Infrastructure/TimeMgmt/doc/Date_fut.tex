@@ -1,0 +1,14 @@
+% $Id: Date_fut.tex,v 1.1 2002/11/14 23:48:30 jwolfe Exp $
+
+The current range restrictions for the date object are primarily an artifact of
+the {\tt yearmmdd} interface.  The underlying objects are capable of greater ranges.
+The upper range of the Gregorian calendar can be extended to October 17, 1465002, 
+at which date the julian day calculation overflows.  The current Gregorian lower limit 
+can not be changed.
+
+The No-Leap limits can be extended to the years \( 2^{31} \) (A.D) and \( 2^{31} - 1 \) (B.C.).  
+They do not suffer the limits placed on the Gregorian calendar by the julian day 
+calculation.  They are limited by a 4 byte integer holding the year.
+
+If the ranges imposed by the {\tt yearmmdd} interface are too narrow, the library interface
+can change to accomodate a separate integer for each of year, month and day.

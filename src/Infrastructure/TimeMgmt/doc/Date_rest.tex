@@ -1,0 +1,17 @@
+% $Id: Date_rest.tex,v 1.1 2002/11/14 23:48:55 jwolfe Exp $
+
+The Gregorian date object is limited to the range
+November 25, -4713 to December 31, +214748 (both in the Gregorian calendar).  The lower limit
+is due to the algorithm used in the Gregorian calendar, which relies on
+calculating the julian day.  This calculation is valid only for a positive
+julian day, and the lower limit corresponds to the julian day of one.  The
+upper limit is imposed because January 1, 214749 is expressed in the {\tt yearmmdd}
+format as 2147490101, which is larger than \( 2^{31} \).
+
+The No Leap date object is limited to the range January 1, -214748 to
+December 31, +21478 .  Both of these limitations derive from the {\tt yearmmdd}
+interface and the fact that the year 21479 (B.C. or A.D.) can not be represented
+in this format and a 4-byte integer.
+
+
+
