@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.6 2003/01/09 21:22:04 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.7 2003/01/23 20:22:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,6 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF.h>
-#include <ESMF_Data.h>
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_AllocMod - One line general statement about this class
@@ -73,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.6 2003/01/09 21:22:04 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.7 2003/01/23 20:22:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -251,7 +250,7 @@
       endif
 
 !     make sure the pointer is associated w/ something
-      if (associated(f90ptr) .eqv. .TRUE.) then
+      if (associated(f90ptr)) then
           print *, "ERROR in ESMF_Deallocate: pointer not associated"
           return
       endif
