@@ -1,44 +1,47 @@
-! $Id: ESMF_Base.F90,v 1.4 2002/10/22 19:27:06 nscollins Exp $
-!-------------------------------------------------------------------------
+! $Id: ESMF_Base.F90,v 1.5 2002/10/23 20:01:31 eschwab Exp $
 !
-! ESMF Base module
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
 !
-! This code covered by the GNU public license.  See licence file for details.
-! NCAR, 2002.
-!
-
-!-------------------------------------------------------------------------
-!
-! !PURPOSE:
-!
-! The code in this file implements the Base defined type
-!  and functions which operate on all types.  This is an
-!  interface to the actual base class object in the ../src dir.
-!
-! See the ESMF Developers Guide document for more details.
+! ESMF Base Module
 !
 ! (all lines between the !BOP and !EOP markers will be included in the
 ! automated document processing.)
-!
-!
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
+#include <ESMF_Macros.inc>
+
+!------------------------------------------------------------------------------
+!
+!
+!------------------------------------------------------------------------------
 ! module definition
 
       module ESMF_BaseMod
-
-!
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+ 
 !BOP
-! !MODULE: ESMF_Basemod
+! !MODULE: ESMF_BaseMod - Base class for all ESMF classes
 !
+! !DESCRIPTION:
+!
+! The code in this file implements the Base defined type
+!  and functions which operate on all types.  This is an
+!  interface to the actual C++ base class implementation in the ../src dir.
+!
+! See the ESMF Developers Guide document for more details.
+!
+!------------------------------------------------------------------------------
 
-! !PUBLIC TYPES:
+! !USES:
       implicit none
-
-      integer, parameter :: ESMF_MaxDim = 8
-      integer, parameter :: ESMF_MaxStr = 128 
+!
+! !PRIVATE TYPES:
+      private
 
       type ESMF_Status
       sequence
@@ -47,10 +50,10 @@
       end type
 
       type(ESMF_Status), parameter :: ESMF_STATE_UNINIT = ESMF_Status(1), &
-                                     ESMF_STATE_ALLOCATED = ESMF_Status(2), &
-                                     ESMF_STATE_BUSY = ESMF_Status(3), &
-                                     ESMF_STATE_INVALID = ESMF_Status(4)
-
+                                      ESMF_STATE_ALLOCATED = ESMF_Status(2), &
+                                      ESMF_STATE_BUSY = ESMF_Status(3), &
+                                      ESMF_STATE_INVALID = ESMF_Status(4)
+ 
       type ESMF_DataType
       sequence
       private
@@ -61,17 +64,6 @@
                                         ESMF_DATA_REAL = ESMF_DataType(2), &
                                         ESMF_DATA_LOGICAL = ESMF_DataType(3), &
                                         ESMF_DATA_CHARACTER = ESMF_DataType(4)
-
-      type ESMF_DataKind
-      sequence
-      private
-          integer :: dkind
-      end type
-
-!     i'll need some help with kinds...
-      type(ESMF_DataKind), parameter :: ESMF_KIND_WHAT = ESMF_DataKind(1)
-
-
       type ESMF_DataValue
       sequence
       private
@@ -84,87 +76,106 @@
           real :: vr
           real, dimension (:), pointer :: vrp
           logical :: vl
-!        !character (len=ESMF_MaxStr) :: vc
+          logical, pointer :: vlp
+          character (len=ESMF_MAXSTR) :: vc
           character, pointer :: vcp
       end type
-
-      type ESMF_Flag
-      sequence
-      private
-          logical :: truefalse
-      end type
-
-      type(ESMF_Flag), parameter :: ESMF_TRUE = ESMF_Flag(.true.), &
-                                    ESMF_FALSE = ESMF_Flag(.false.)
 
       type ESMF_Attribute
       sequence
       private
-          character (len=ESMF_MaxStr) :: attr_name
+          character (len=ESMF_MAXSTR) :: attr_name
           type (ESMF_DataType) :: attr_type
           type (ESMF_DataValue) :: attr_value
       end type
 
-      type ESMF_Pointer
+      type ESMF_BasePointer
       sequence
       private
-          integer*8 :: base
+          integer*8 :: base_ptr
       end type
 
       type ESMF_Base
       sequence
       private
-     
-          type (ESMF_Status) :: basestatus
-
-          integer :: attribute_count
-          type (ESMF_Attribute), pointer :: attr_list
-
-!        !integer :: ref_count
+         integer :: inst_count
+         integer :: ID
+         integer :: ref_count
+         type (ESMF_Status) :: base_status
      end type
 
+! !PUBLIC TYPES:
+
+      public ESMF_STATE_UNINIT, ESMF_STATE_ALLOCATED, &
+             ESMF_STATE_BUSY, ESMF_STATE_INVALID
+
+      public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
+             ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER
+
+      public ESMF_Status, ESMF_DataType, ESMF_DataValue 
+      public ESMF_Attribute, ESMF_BasePointer, ESMF_Base
+
+! !PUBLIC MEMBER FUNCTIONS:
+!
 ! !DESCRIPTION:
 !     The following routines apply to any type in the system.  
 !     The attribute routines can be inherited as-is.  The other
 !     routines need to be specialized by the higher level objects.
-
-! !PUBLIC MEMBER FUNCTIONS:
 !
-!     subroutine ESMF_AttributeSet(anytype, name, value, rc)
-!     subroutine ESMF_AttributeGet(anytype, name, type, value, rc)
-!     subroutine ESMF_AttributeGetCount(anytype, count, rc)
-!     subroutine ESMF_AttributeGetbyNumber(anytype, number, name, type, value, rc)
-!     subroutine ESMF_AttributeGetNameList(count, namelist, rc)
-!     subroutine ESMF_AttributeSetList(anytype, namelist, valuelist, rc)
-!     subroutine ESMF_AttributeGetList(anytype, namelist, typelist, valuelist, rc)
-!     subroutine ESMF_AttributeSetObjectList(anytypelist, name, value, rc)
-!     subroutine ESMF_AttributeGetObjectList(anytypelist, namelist, typelist, valuelist, rc)
-!     subroutine ESMF_AttributeCopy(name, source, destination, rc)
-!     subroutine ESMF_AttributeCopyAll(source, destination, rc)
-!
-! one of these:
-!     subroutine ESMF_BaseInit() 
-!     subroutine ESMF_BaseCreate() and ESMF_BaseDestroy()
-!     subroutine ESMF_BaseConstruct() and ESMF_BaseDestruct()
+!   Virtual methods to be defined by derived classes
+!      public ESMF_Init
+!      public ESMF_Create
 !     no need for create, is there?  maybe for attribs if not inline?
-!
-!     are we going to leave room for ref counts?
-!     sequence numbers for debugging?
-!
-! plus:
-!     skeleton Print(), Validate() routines
-!
+!      public ESMF_Destroy
+!      public ESMF_Construct 
+!      public ESMF_Destruct
+!      public ESMF_GetConfig
+!      public ESMF_SetConfig
+!      public ESMF_Read
+!      public ESMF_Write
+!      public ESMF_Validate
+!      public ESMF_Print
 
+!   Base class methods
+!      public ESMF_BaseGetInstCount
+!      public ESMF_BaseSetInstCount
+
+!      public ESMF_BaseGetID
+!      public ESMF_BaseSetID
+
+!      public ESMF_BaseGetRefCount
+!      public ESMF_BaseSetRefCount
+
+!      public ESMF_BaseGetStatus
+!      public ESMF_BaseSetStatus
+
+!  Attribute methods
+      public ESMF_AttributeSet
+      public ESMF_AttributeGet
+      public ESMF_AttributeGetCount
+      public ESMF_AttributeGetbyNumber
+      public ESMF_AttributeGetNameList
+      public ESMF_AttributeSetList
+      public ESMF_AttributeGetList
+      public ESMF_AttributeSetObjectList
+      public ESMF_AttributeGetObjectList
+      public ESMF_AttributeCopy
+      public ESMF_AttributeCopyAll
+!
+!
 !EOP
+
+!------------------------------------------------------------------------------
+! leave the following line as-is; it will insert the cvs ident string
+! into the object file for tracking purposes.
+      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.5 2002/10/23 20:01:31 eschwab Exp $'
+!------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
 
       contains
 
-!-------------------------------------------------------------------------
 !BOP
-!
-!
 ! !INTERFACE:
       subroutine ESMF_AttributeSet(anytype, name, value, rc)
 !
@@ -433,8 +444,9 @@
 !EOP
 
       end subroutine ESMF_AttributeCopyAll
-
-
+!-------------------------------------------------------------------------
+!BOP
+!
 !-------------------------------------------------------------------------
 ! put Print and Validate skeletons here - but they should be
 !  overridden by higher level more specialized functions.
