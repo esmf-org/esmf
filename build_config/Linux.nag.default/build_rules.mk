@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.20 2005/02/14 16:30:14 nscollins Exp $
+#  $Id: build_rules.mk,v 1.21 2005/03/07 23:17:49 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -149,6 +149,7 @@ F_FIXNOCPP      = -fixed
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
+
 # by default append each directory which is in LD_LIBRARY_PATH to
 # the -L flag and also to the run-time load flag.  (on systems which
 # support the 'module' command, that is how it works - by adding dirs
@@ -167,10 +168,16 @@ CXXLIB_PATHS   = -L/soft/com/packages/intel-8.1/lib
 F90LIB_PATHS   = -L/soft/com/packages/nag-f95-5.0/lib
 endif
 
+# include the lib which defines a fast intel memcpy if compiling optimized.
+ifeq ($(ESMF_BOPT),O)
+EXTRALIBS         += -lifcoremt
+endif
+
 C_F90CXXLIBS       = ${MPI_LIB} ${LIB_PATHS} \
                      ${F90LIB_PATHS} -lrt -lf96 \
                      ${CXXLIB_PATHS} -lcxa -lunwind -lstdc++ ${EXTRALIBS}
 C_CXXF90LIBS       = ${LIB_PATHS} ${F90LIB_PATHS} ${MPI_LIB} -lrt -lf96 ${EXTRALIBS}
+
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
