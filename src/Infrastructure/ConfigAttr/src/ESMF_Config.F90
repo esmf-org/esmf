@@ -264,8 +264,6 @@
      character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
      character, parameter :: NULL= achar(00)   ! what it says
 
-     logical :: DELayout_provided
-
      character(len=*), parameter :: myname='ESMF_ConfigMod'
 !-----------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -288,19 +286,19 @@
 !
 ! !IROUTINE: ESMF_ConfigCreate - Create Configuration
 !
-! !DESCRIPTION: Create ESMF configuration for a given layout.
-!
 ! !INTERFACE:
 
-    type(ESMF_Config) function ESMF_ConfigCreate( layout, rc )
+    type(ESMF_Config) function ESMF_ConfigCreate( rc )
 
       implicit none
 
-      type(ESMF_DELayout), intent(in), optional  :: layout   ! ESMF layout
       integer,intent(out), optional              :: rc       ! error code
-      !
+!
+! !DESCRIPTION: Create ESMF configuration for a given layout.
+!
 ! !REVISION HISTORY:
 ! 	7apr2003  Zaslavsky  initial interface/prolog
+!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigCreate'
       integer iret
@@ -308,25 +306,18 @@
 
       iret = 0
  
-      if ( present ( layout ) ) then 
-         DELayout_provided = .true.     
-      else
-         DELayout_provided = .false.
-      endif
-
 ! Initialization
 
       allocate(cf_local%buffer, cf_local%this_line, stat = iret)
       if(iret /= 0) then
-         ! SUBSITUTE:   call perr(myname,'allocate(new%..)', iret)
-         print *, myname,'allocate(new%..)', iret
+         ! SUBSITUTE:   call perr(myname,'allocate(...%..)', iret)
+         print *, myname,'allocate(...%..)', iret
       endif
 
       ESMF_ConfigCreate = cf_local
       if (present( rc )) rc = iret
 
       return
-
     end function ESMF_ConfigCreate
     
 
@@ -336,8 +327,6 @@
 !
 ! !IROUTINE: ESMF_ConfigDestroy - destroys configuration
 !
-! !DESCRIPTION: Destroys an ESMF configuration.
-!
 ! !INTERFACE:
 
     subroutine ESMF_ConfigDestroy( cf, rc )
@@ -346,8 +335,11 @@
       type(ESMF_Config), intent(inout) :: cf       ! ESMF Configuration
       integer,intent(out), optional    :: rc       ! error code
 !
+! !DESCRIPTION: Destroys an ESMF configuration.
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
+!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigDestroy'
       integer :: ier, iret
@@ -356,8 +348,8 @@
 
       deallocate(cf%buffer, cf%this_line, stat = iret)
       if(rc /= 0) then
-! SUBSTITUTE:  call perr(myname_,'deallocate(new%..)', iret)
-         print *, myname_,'deallocate(new%..)', iret
+! SUBSTITUTE:  call perr(myname_,'deallocate(...%..)', iret)
+         print *, myname_,'deallocate(...%..)', iret
       endif
 
       if (present( rc )) rc = iret
@@ -372,17 +364,16 @@
 !
 ! !IROUTINE: ESMF_ConfigLoadFile - load resource file into memory
 !
-! !DESCRIPTION: Resource file fname is loaded is loaded into memory
-!
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigLoadFile( cf, fname, unique, rc )
+    subroutine ESMF_ConfigLoadFile( cf, fname, layout, unique, rc )
 
 
       implicit none
 
       type(ESMF_Config), intent(inout) :: cf        ! ESMF Configuration
       character(len=*), intent(in)     :: fname     ! file name
+      type(ESMF_DELayout), intent(in), optional  :: layout   ! ESMF layout
       logical, intent(in), optional    :: unique    ! if unique is present, 
                                                     ! uniqueness of labels
                                                     ! is checked and error
@@ -390,8 +381,11 @@
                                                     ! 
       integer, intent(out), optional :: rc          ! Error code
 !
+! !DESCRIPTION: Resource file fname is loaded is loaded into memory
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
+!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
 
       character(len=*),parameter :: myname_='ESMF_ConfigLoadFile'
@@ -399,16 +393,19 @@
 
       iret = 0
 
-
-      call ESMF_ConfigLoadFile_1proc_( cf, fname, unique, iret )
+      if( present ( unique )) then
+         call ESMF_ConfigLoadFile_1proc_( cf, fname, unique, iret )
+      else
+         call ESMF_ConfigLoadFile_1proc_( cf, fname, iret )
+      endif
       if(iret /= 0) then
 ! SUBSITUTE call perr(myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret)
          print *, myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret
          return
       endif
 
-      if ( DELayout_provided ) then
-         print *, myname, ' DELayout is not used yet '
+      if ( present (layout) ) then
+         print *, myname, ' DE layout is not used yet '
       endif
 
       if (present( rc )) rc = iret
@@ -422,10 +419,9 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigLoadFile - load resource file into memory
+! !IROUTINE: ESMF_ConfigLoadFile_1proc - load resource file into memory
 !
-! !DESCRIPTION: Resource file fname is loaded is loaded into memory
-!
+
 ! !INTERFACE:
 
     subroutine ESMF_ConfigLoadFile_1proc( cf, fname, unique, rc )
@@ -448,14 +444,18 @@
                                                  !     NBUF_MAX in 'i90.h'
                                                  !     other iostat from open 
                                                  !     statement.
-                                                 !
+!
+! !DESCRIPTION: Resource file fname is loaded is loaded into memory
+!
 ! !REVISION HISTORY:
 ! 	7anp2003  Zaslavsky  initial interface/prolog
+!      10apr2003  Zaslavsky  coding
 !EOP -------------------------------------------------------------------
       integer         lu, ios, loop, ls, ptr, iret
       character*256   line
       character(len=*), parameter :: myname = 'ESMF_ConfigLoadFile_1proc'
 
+      iret = 0
 
       if ( unique ) then
          print *, myname, ' Uniqueness of labels is not checked yet '
@@ -463,11 +463,10 @@
 
 !     Open file
 !     ---------     
-!      lu = ESMF_Config_lua()
-
       lu = luavail()	! a more portable version
       if ( lu .lt. 0 ) then
          iret = -97
+        if ( present (rc )) rc = iret
          return
       end if
 
