@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.73 2004/01/28 00:34:44 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.74 2004/01/28 20:24:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -378,7 +378,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.73 2004/01/28 00:34:44 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.74 2004/01/28 20:24:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -710,12 +710,21 @@ end function
       logical :: rcpresent                          ! Return code present   
       integer :: status
 
-!     ! Initialize return code
+      ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
+
+      ! TODO: remove this once everyone is initializing their Base objects.
+      ! cheat for old code for now.
+      if (base%this .eq. ESMF_NULL_POINTER) then
+          call ESMF_BaseCreate(base, namespace, name, 0, status)
+          if (rcpresent) rc = status
+          return
+      endif
+      ! end cheat
 
       if (present(namespace)) then
           call c_ESMC_SetF90ClassName(base, namespace, status)
