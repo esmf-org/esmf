@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.1 2003/03/14 06:25:41 eschwab Exp $
+// $Id: ESMC_ClockUTest.C,v 1.2 2003/03/18 04:38:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.1 2003/03/14 06:25:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.2 2003/03/18 04:38:57 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -60,7 +60,7 @@
    //  tests default constructor; add args to test other constructors
    ESMC_Clock clock;
 
-#ifdef EXHAUSTIVE
+#ifdef ESMF_EXHAUSTIVE
 
    // perform exhaustive tests here;
    //   see #else below for non-exhaustive tests
