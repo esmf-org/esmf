@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.7 2003/03/12 18:45:00 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.8 2003/03/12 18:53:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.7 2003/03/12 18:45:00 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.8 2003/03/12 18:53:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -82,31 +82,39 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_XPacketGet<Value> - get <Value> for a XPacket
+// !IROUTINE:  ESMC_XPacketGet - Get values back out of an exchange packet
 //
 // !INTERFACE:
-      //int ESMC_XPacket::ESMC_XPacketGet(
+      int ESMC_XPacket::ESMC_XPacketGet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      //<value type> *value) const {     // out - value
+      int *nrank,     // out, single ints
+      int *nleft,     // out, single ints
+      int *nright,    // out, single ints
+      int *nstrides,  // out, array of rank ints
+      int *nnum) {    // out, array of rank ints
 //
 // !DESCRIPTION:
-//     Returns the value of XPacket member <Value>.
-//     Can be multiple routines, one per value
+//     Returns the contents of XPacket member.
 //
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
 
-    //return ESMF_FAILURE;
+    *nrank = rank;
+    *nleft = left;
+    *nright = right;
+    for (int i=0; i<rank; i++) {
+      nstrides[i] = strides[i];
+      nnum[i] = num[i];
+    }
 
- //} // end ESMC_XPacketGet
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketGet
 
 //-----------------------------------------------------------------------------
 //BOP
