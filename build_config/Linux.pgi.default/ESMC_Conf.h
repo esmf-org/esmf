@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.2 2004/02/25 02:58:31 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.3 2004/02/25 20:21:09 eschwab Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -61,7 +61,7 @@ Licensed under the GPL.
 
 #if 0
 PGI method for marking F90 "not present" optional arguments uses
-address of compiler-generated global array element pghpf_0_[8].
+the address of compiler-generated global array element pghpf_0_[8].
 However, PGI says check against entire array to be safe.
 #endif
 extern char pghpf_0_[];
