@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.21 2004/03/15 20:52:20 nscollins Exp $
+% $Id: Component_refdoc.ctex,v 1.22 2004/03/16 20:17:22 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,6 +120,7 @@
 \input{ESMF_CplComp_fapi}
 \input{ESMF_CplSetServ_fapi}
 #elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMF_CplComp_fapi}
 \input{../Superstructure/Component/doc/ESMF_CplSetServ_fapi}
 #endif
 
