@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.33 2003/10/14 23:20:56 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.34 2003/10/15 23:17:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.33 2003/10/14 23:20:56 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.34 2003/10/15 23:17:07 jwolfe Exp $'
 
 !==============================================================================
 
@@ -152,6 +152,7 @@
       type(ESMF_Array), dimension(:), pointer :: dstLocalCoordArray
       type(ESMF_Array), dimension(:), pointer :: srcLocalCoordArray
       type(ESMF_DomainList) :: sendDomainList, recvDomainList
+      type(ESMF_DomainList) :: sendDomainListTot, recvDomainListTot
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
@@ -287,9 +288,9 @@
    !              information locally to calculate the regrid weights
 
       ! From each grid get the bounding box information on this DE
-      call ESMF_GridGetPhysGrid(srcGrid, srcRelLoc, localMin=srcMin, &   
+      call ESMF_GridGetPhysGrid(srcGrid, relloc=srcRelLoc, localMin=srcMin, &   
                                 localMax=srcMax, rc=status)
-      call ESMF_GridGetPhysGrid(dstGrid, dstRelLoc, localMin=dstMin, &
+      call ESMF_GridGetPhysGrid(dstGrid, relloc=dstRelLoc, localMin=dstMin, &
                                 localMax=dstMax, rc=status)
 
    ! STORED ROUTE FOR MOVING DATA FOR REGRID RUN:
@@ -328,14 +329,14 @@
    ! TEMPORARY INTERNAL ROUTE:
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                     myTotalAI, sendDomainList, status)
+                                     myTotalAI, sendDomainListTot, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridBoxIntersectSend ", &
                  "returned failure"
         return
       endif
       call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainList, .true., status)
+                                     recvDomainListTot, .true., status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridBoxIntersectRecv ", &
                  "returned failure"
@@ -346,15 +347,15 @@
       ! TODO: this must be either a parent layout, or the src and dst layouts
       !  must be identical.
       tempRoute = ESMF_RouteCreate(srcDELayout, status)
-      call ESMF_RoutePrecomputeDomList(tempRoute, 2, my_DE, sendDomainList, &
-                                       recvDomainList, status)
+      call ESMF_RoutePrecomputeDomList(tempRoute, 2, my_DE, sendDomainListTot, &
+                                       recvDomainListTot, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: ", &
                  "RoutePrecomputeDomList returned failure"
         return
       endif
       ! set size of recv items in Route
-      call ESMF_RouteSetRecvItems(tempRoute, recvDomainList%total_points, status)
+      call ESMF_RouteSetRecvItems(tempRoute, recvDomainListTot%total_points, status)
 
   ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
@@ -419,22 +420,22 @@
       if(present(srcMask)) then
   !      srcUserMask = srcMask
       else
-        size = recvDomainList%total_points
+        size = recvDomainListTot%total_points
         allocate(srcUserMask(size))
         srcUserMask = .TRUE.
       endif
      
       ! Loop through domains for the search routine
       call ESMF_GridGet(srcGrid, horz_coord_system=coordSystem, rc=status)
-      num_domains = recvDomainList%num_domains
+      num_domains = recvDomainListTot%num_domains
       start = 1
       do i = 1,num_domains
-        srcSizeX = recvDomainList%domains(i)%ai(1)%max &
-                 - recvDomainList%domains(i)%ai(1)%min + 1
-        srcSizeY = recvDomainList%domains(i)%ai(2)%max &
-                 - recvDomainList%domains(i)%ai(2)%min + 1
+        srcSizeX = recvDomainListTot%domains(i)%ai(1)%max &
+                 - recvDomainListTot%domains(i)%ai(1)%min + 1
+        srcSizeY = recvDomainListTot%domains(i)%ai(2)%max &
+                 - recvDomainListTot%domains(i)%ai(2)%min + 1
         stop  = start + srcSizeX*srcSizeY - 1
-        call ESMF_RegridBilinearSearch(tv, recvDomainList%domains(i), &
+        call ESMF_RegridBilinearSearch(tv, recvDomainListTot%domains(i), &
                                        coordSystem, &
                                        srcSizeX, srcSizeY, start-1, &
                                        dstCounts(1), dstCounts(2), &
@@ -594,9 +595,9 @@
       jbDst = 1
       jeDst = dstSizeY
       ibSrc = domain%ai(1)%min
-      ieSrc = domain%ai(1)%max
+      ieSrc = domain%ai(1)%max - 1
       jbSrc = domain%ai(2)%min
-      jeSrc = domain%ai(2)%max
+      jeSrc = domain%ai(2)%max - 1
 
       dstICount = ieDst - ibDst + 1
       srcICount = ieSrc - ibSrc + 1

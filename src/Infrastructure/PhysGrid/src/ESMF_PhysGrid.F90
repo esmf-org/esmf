@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.50 2003/10/14 20:26:01 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.51 2003/10/15 23:16:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
       sequence
         type (ESMF_Base)         :: base       ! name especially
         type (ESMF_GridMaskKind) :: mask_type  ! type of mask
-        type (ESMF_Array), pointer :: data     ! mask data at each grid point
+        type (ESMF_Array)        :: data       ! mask data at each grid point
       end type
 
 !------------------------------------------------------------------------------
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.50 2003/10/14 20:26:01 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.51 2003/10/15 23:16:32 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -595,15 +595,15 @@
 ! !IROUTINE: ESMF_PhysGridGet - Retrieves selected internal PhysGrid quantities.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridGet(physgrid, relloc, name,        &
-                                  num_dims, coord_system, rc)
+      subroutine ESMF_PhysGridGet(physgrid, relloc, name, num_dims, &
+                                  coord_system, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_PhysGrid), intent(in) :: physgrid
       type (ESMF_RelLoc), intent(out), optional :: relloc
-      type (ESMF_CoordSystem), intent(out), optional :: coord_system
-      integer, intent(out), optional :: num_dims
       character (len = *), intent(out), optional :: name  
+      integer, intent(out), optional :: num_dims
+      type (ESMF_CoordSystem), intent(out), optional :: coord_system
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -786,12 +786,12 @@
 !
 !     if dimension supplied, just grab the coordinate
 !
-      if (present(dim_order)) &
+      if (present(dim_order)) then
          phys_coord = physgrid%ptr%coords(dim_order)
 !
 !     if a name supplied, search for a coord with given name
 !
-      if (present(name)) then
+      elseif (present(name)) then
          found = .false.
          name_srch: do n=1,physgrid%ptr%num_dims
             if (name == trim(ESMF_PhysCoordGetName(physgrid%ptr%coords(n)))) then
@@ -1295,8 +1295,8 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_Array), pointer :: &
-         mask_array         ! array containing mask value for each cell
+      type(ESMF_Array), intent(in) :: mask_array
+                            ! array containing mask value for each cell
 
       type(ESMF_GridMaskKind), intent(in) :: &
          mask_type          ! type of mask (logical, mult, regionID)
@@ -1415,7 +1415,7 @@
       endif
 
       physgrid%ptr%masks(nmask_new)%mask_type = mask_type
-      physgrid%ptr%masks(nmask_new)%data => mask_array
+      physgrid%ptr%masks(nmask_new)%data = mask_array
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1493,7 +1493,6 @@
 
          ! get mask associated with id
          mask_array = physgrid%ptr%masks(id)%data
-
 !
 !     if name supplied, check for valid id and return appropriate mask
 !
@@ -1520,7 +1519,6 @@
             print *, "Requested name:",trim(name)
             return
          endif
-
 !
 !     if we enter this else branch, neither id nor mask has been 
 !     supplied so return error
