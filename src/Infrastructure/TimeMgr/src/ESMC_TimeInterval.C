@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.24 2003/05/07 20:12:49 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.25 2003/05/07 20:19:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.24 2003/05/07 20:12:49 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.25 2003/05/07 20:19:32 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -395,7 +395,7 @@
     //ESMC_TimeIntervalGet(&YY, &MM, &D, &H, &M, &S); // TODO: when calendar
                                                       //  intervals implemented
 
-    // TODO: ISO 8601 format ?
+    // ISO 8601 format PyYmMdDThHmMsS
     sprintf(timeString, "P%lldDT%dH%dM%lldS\0", D, H, M, S);
     //sprintf(timeString, "P%lldY%dM%lldDT%dH%dM%lldS\0", // TODO: when calendar
     //        YY, MO, D, H, M, S);                    //  intervals implemented
