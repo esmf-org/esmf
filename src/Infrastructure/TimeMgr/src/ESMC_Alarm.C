@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.49 2004/08/06 22:31:34 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.50 2004/08/09 22:29:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.49 2004/08/06 22:31:34 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.50 2004/08/09 22:29:01 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -1020,8 +1020,9 @@ int ESMC_Alarm::count=0;
         // and update next ringing time
         bool updateNextRingingTime = true;
         if (stopTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
-          updateNextRingingTime = (positive) ? clock->currTime < stopTime :
-                                               clock->currTime > stopTime ;
+          updateNextRingingTime = (positive) ?
+                                   clock->currTime < (stopTime - ringInterval):
+                                   clock->currTime > (stopTime - ringInterval);
         }
         if (updateNextRingingTime) {
           prevRingTime = ringTime;
@@ -1045,8 +1046,9 @@ int ESMC_Alarm::count=0;
         // and update next ringing time
         bool updateNextRingingTime = true;
         if (stopTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
-          updateNextRingingTime = (positive) ? clock->currTime < stopTime :
-                                               clock->currTime > stopTime ;
+          updateNextRingingTime = (positive) ?
+                                   clock->currTime < (stopTime - ringInterval):
+                                   clock->currTime > (stopTime - ringInterval);
         }
         if (updateNextRingingTime) {
           prevRingTime = ringTime;
@@ -1055,7 +1057,7 @@ int ESMC_Alarm::count=0;
 
       } else { // check if time to turn off alarm
         if (ringTimeStepCount > 0) {
-          if (timeStepRingingCount+1 >= ringTimeStepCount) {
+          if (timeStepRingingCount >= ringTimeStepCount) {
             ringingOnCurrTimeStep = ringing = false;
             timeStepRingingCount = 0;
           }
