@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.57 2004/07/27 15:49:47 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.58 2004/08/14 22:38:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.57 2004/07/27 15:49:47 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.58 2004/08/14 22:38:32 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -536,8 +536,8 @@
 !TODO: Leave here or move to Route?
 
       integer :: localrc
-      integer :: myDE, gridrank, nDEs, theirDE, i, j
-      integer, dimension(:), allocatable :: dimOrder
+      integer :: myDE, gridrank, nDEs, theirDE, i, j, haloWidth
+      integer, dimension(:), allocatable :: dimOrder, lbounds
       logical :: totalUse
       real(ESMF_KIND_R8) :: count
       real(ESMF_KIND_R8), dimension(:), allocatable :: dstMin, dstMax
@@ -617,12 +617,13 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! Modify DomainLists for Array dimensions larger than Grid dimensions
+      ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
       ! TODO: move this to its own subroutine?
-      if ((dimCount.gt.gridrank) .and. (present(srcArray))) then ! TODO: fill in
+      if (present(srcArray)) then ! TODO: fill in
       ! sendDomainList first
         allocate(     myArrayAI(dimCount), &
                  myArrayLocalAI(dimCount), &
+                        lbounds(dimCount), &
                        dimOrder(dimCount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
                                        ESMF_CONTEXT, rc)) return
@@ -632,16 +633,26 @@
         else
           call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=localrc)
         endif
+        call ESMF_ArrayGet(srcArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
         call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=dimOrder, rc=localrc)
         do i = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
             myAI(j) = sendDomainList%domains(i)%ai(j)
           enddo
           sendDomainList%domains(i)%rank = dimCount
+
+          ! modify myAI to include Array haloWidth and possibly different lbounds
+          ! and load into appropriate spot of domainList
           do j = 1,dimCount
             if (dimOrder(j).eq.1) then
+              myAI(1)%min    = myAI(1)%min    +   haloWidth + lbounds(j) - 1
+              myAI(1)%max    = myAI(1)%max    +   haloWidth + lbounds(j) - 1
+              myAI(1)%stride = myAI(1)%stride + 2*haloWidth
               sendDomainList%domains(i)%ai(j) = myAI(1)
             elseif (dimOrder(j).eq.2) then
+              myAI(2)%min    = myAI(2)%min    +   haloWidth + lbounds(j) - 1
+              myAI(2)%max    = myAI(2)%max    +   haloWidth + lbounds(j) - 1
+              myAI(2)%stride = myAI(2)%stride + 2*haloWidth
               sendDomainList%domains(i)%ai(j) = myAI(2)
             elseif (dimOrder(j).eq.0) then
               sendDomainList%domains(i)%ai(j) = myArrayAI(j)
@@ -697,6 +708,7 @@
         enddo
 
         deallocate(      dimOrder, &
+                          lbounds, &
                         myArrayAI, &
                    myArrayLocalAI, &
                             allAI, &
