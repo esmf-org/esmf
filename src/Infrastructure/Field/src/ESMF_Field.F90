@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.17 2003/04/23 21:39:29 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.18 2003/04/24 16:39:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -210,7 +210,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.17 2003/04/23 21:39:29 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.18 2003/04/24 16:39:36 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2039,7 +2039,7 @@
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
-                                               lengths=dimlengths, rc=status)
+                                               counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: ArrayGet returned failure"
         return
@@ -2139,7 +2139,7 @@
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
-                                               lengths=dimlengths, rc=status)
+                                               counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHalo: ArrayGet returned failure"
         return
@@ -2241,7 +2241,7 @@
 
       ! And get the Array sizes
       call ESMF_ArrayGet(fp%localfield%localdata, rank=datarank, &
-                                               lengths=dimlengths, rc=status)
+                                               counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: ArrayGet returned failure"
         return
@@ -2381,7 +2381,7 @@
 
           ! And get the Array sizes
           call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
-                                               lengths=dimlengths, rc=status)
+                                               counts=dimlengths, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
              print *, "ERROR in FieldRoute: ArrayGet returned failure"
              return
@@ -2401,7 +2401,7 @@
 
           ! And get the Array sizes
           call ESMF_ArrayGet(dtypep%localfield%localdata, rank=datarank, &
-                                               lengths=dimlengths, rc=status)
+                                               counts=dimlengths, rc=status)
           if(status .NE. ESMF_SUCCESS) then 
              print *, "ERROR in FieldRoute: ArrayGet returned failure"
              return
