@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.46 2004/12/28 06:10:26 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.47 2004/12/28 07:05:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.46 2004/12/28 06:10:26 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.47 2004/12/28 07:05:45 theurich Exp $'
 
 !==============================================================================
 
@@ -4034,3 +4034,17 @@ subroutine f_ESMF_VMGlobalGet(localPet, petCount)
   call ESMF_VMGet(GlobalVM, localPet=localPet, petCount=petCount)
   
 end subroutine f_ESMF_VMGlobalGet
+
+
+! The following modules are here only for backwards compatability until 
+! after the ESMF_2_1_0r release
+
+module ESMF_VMTypesMod
+use ESMF_VMMod
+end module
+
+module ESMF_VMBaseMod
+end module
+
+module ESMF_VMCommMod
+end module
