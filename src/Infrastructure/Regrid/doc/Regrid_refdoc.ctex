@@ -68,7 +68,7 @@
 %\input{../Infrastructure/Regrid/doc/Regrid_param}
 %#endif
 
-\section{Regrid Class}
+\section{Regrid Method}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -77,12 +77,19 @@
 \input{../Infrastructure/Regrid/doc/Regrid_desc}
 #endif
 
-%\subsection{Design}
-%#ifdef STANDALONE
-%\input{Regrid_design}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_design}
-%#endif
+\subsection{Regrid Options}
+#ifdef STANDALONE
+\input{Regrid_options}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Regrid/doc/Regrid_options}
+#endif
+
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{Regrid_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Regrid/doc/Regrid_implnotes}
+#endif
 
 %\subsubsection{Class Definition}
 %#ifdef STANDALONE
@@ -112,12 +119,12 @@
 %\input{../Infrastructure/Regrid/doc/Regrid_fparam}
 %#endif
 
-\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_Regrid_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Regrid/doc/ESMF_Regrid_fapi}
-#endif
+%\subsection{Class API}
+%#ifdef STANDALONE
+%\input{ESMF_Regrid_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Regrid/doc/ESMF_Regrid_fapi}
+%#endif
 
 #ifdef STANDALONE
 \section{Review Status}
