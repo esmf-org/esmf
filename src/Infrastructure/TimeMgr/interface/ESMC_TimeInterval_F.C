@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.36 2004/08/21 00:01:25 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.37 2004/11/24 00:36:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -231,7 +231,10 @@ extern "C" {
                                  ESMC_Calendar **calendar,
                                  ESMC_CalendarType *calendarType,
                                  int *timeStringLen, int *tempTimeStringLen,
-                                 char *tempTimeString, int *status) {
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -266,7 +269,10 @@ extern "C" {
                                           // always present internal arguments
                                               *timeStringLen,
 	                                       tempTimeStringLen,
-                                               tempTimeString);
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -288,7 +294,10 @@ extern "C" {
                                  ESMC_CalendarType *calendarType, 
                                  ESMC_Time *startTimeIn,
                                  int *timeStringLen, int *tempTimeStringLen,
-                                 char *tempTimeString, int *status) {
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -323,7 +332,10 @@ extern "C" {
                                           // always present internal arguments
                                               *timeStringLen,
 	                                       tempTimeStringLen,
-                                               tempTimeString);
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -345,7 +357,10 @@ extern "C" {
                                  ESMC_CalendarType *calendarType, 
                                  ESMC_Calendar **calendarIn, 
                                  int *timeStringLen, int *tempTimeStringLen,
-                                 char *tempTimeString, int *status) {
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -380,7 +395,10 @@ extern "C" {
                                           // always present internal arguments
                                               *timeStringLen,
 	                                       tempTimeStringLen,
-                                               tempTimeString);
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
@@ -402,7 +420,10 @@ extern "C" {
                                  ESMC_CalendarType *calendarType, 
                                  ESMC_CalendarType *calendarTypeIn, 
                                  int *timeStringLen, int *tempTimeStringLen,
-                                 char *tempTimeString, int *status) {
+                                 char *tempTimeString,
+                                 int *timeStringLenISOFrac,
+                                 int *tempTimeStringLenISOFrac,
+                                 char *tempTimeStringISOFrac, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(
                        ESMC_NOT_PRESENT_FILTER(yy),
                        ESMC_NOT_PRESENT_FILTER(yy_i8),
@@ -437,7 +458,10 @@ extern "C" {
                                           // always present internal arguments
                                               *timeStringLen,
 	                                       tempTimeStringLen,
-                                               tempTimeString);
+                                               tempTimeString,
+                                              *timeStringLenISOFrac,
+	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
