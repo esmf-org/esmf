@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.5 2003/02/04 20:19:58 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.6 2003/02/13 15:11:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.5 2003/02/04 20:19:58 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.6 2003/02/13 15:11:09 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -134,10 +134,12 @@
 
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
 !       Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -305,15 +307,19 @@
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
-       logical :: rcpresent=.FALSE.
+       character (len=6) :: defaultopts
+       integer :: status                   ! local error status
+       logical :: rcpresent                ! did user specify rc?
 
 !      Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
+       defaultopts = "brief"
 
 !      ! TODO: Add Print code  here
        if(present(options)) then

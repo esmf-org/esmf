@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.29 2003/02/12 17:44:41 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.30 2003/02/13 15:10:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.29 2003/02/12 17:44:41 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.30 2003/02/13 15:10:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -464,10 +464,12 @@ end function
 
 ! local vars
         type (ESMF_Array) :: array ! new C++ Array
-        integer :: status=ESMF_FAILURE ! local error status
-        logical :: rcpresent=.FALSE. ! did user specify rc?
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
 
 ! TODO: need a null pointer to assign to initialize ptr
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
 ! Initialize return code; assume failure until success is certain
@@ -537,10 +539,12 @@ end function
 
 ! local vars
         type (ESMF_Array), pointer :: a ! pointer to new Array
-        integer :: status=ESMF_FAILURE ! local error status
-        logical :: rcpresent=.FALSE. ! did user specify rc?
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
 
 ! initialize pointer
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
 ! nullify(a)
 
 ! initialize return code; assume failure until success is certain
@@ -611,25 +615,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI41D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 1 
@@ -728,25 +734,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI81D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 1 
@@ -845,25 +853,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI42D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 2 
@@ -962,25 +972,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapI82D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 2 
@@ -1079,25 +1091,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR41D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  real (ESMF_IKIND_R4), dimension(:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 1 
@@ -1196,25 +1210,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR81D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  real (ESMF_IKIND_R8), dimension(:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 1 
@@ -1313,25 +1329,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR42D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 2 
@@ -1430,25 +1448,27 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
-! local vars 
+ ! local variables 
  type (ESMF_Array) :: array ! what C++ is going to return 
  integer :: i ! local variable 
- integer :: status=ESMF_FAILURE ! local error status 
- logical :: rcpresent=.FALSE. ! did user specify rc? 
- logical :: copyreq=.FALSE. ! did user specify copy? 
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
  
  type (ESMF_ArrWrapR82D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: localp ! local copy 
  
-! !TODO: need a null pointer to assign to initialize ptr 
- array%this = ESMF_NULL_POINTER 
- 
-! ! initialize return code; assume failure until success is certain 
+ ! Initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
 ! ! call create routine 
  do i=1, 2 
@@ -1529,18 +1549,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapI41D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -1600,18 +1626,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapI81D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -1671,18 +1703,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapI42D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -1742,18 +1780,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapI82D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -1813,18 +1857,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapR41D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  real (ESMF_IKIND_R4), dimension(:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -1884,18 +1934,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapR81D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
  real (ESMF_IKIND_R8), dimension(:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -1955,18 +2011,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapR42D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -2026,18 +2088,24 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
+ integer :: status ! local error status 
+ logical :: rcpresent ! did user specify rc? 
+ logical :: copyreq ! did user specify copy? 
+ 
  type (ESMF_ArrWrapR82D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: localp ! local copy 
- logical :: copyreq=.FALSE. ! are we making a copy? 
- integer :: status=ESMF_FAILURE 
- logical :: rcpresent=.FALSE. 
  
-! ! initialize return code; assume failure until success is certain 
+ ! initialize return code; assume failure until success is certain 
+ status = ESMF_FAILURE 
+ rcpresent = .FALSE. 
  if (present(rc)) then 
  rcpresent = .TRUE. 
  rc = ESMF_FAILURE 
  endif 
+ 
+ copyreq = .FALSE. 
+ array%this = ESMF_NULL_POINTER 
  
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
@@ -2102,7 +2170,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I41Dptr) 
@@ -2134,7 +2204,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I81Dptr) 
@@ -2166,7 +2238,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I42Dptr) 
@@ -2198,7 +2272,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I82Dptr) 
@@ -2230,7 +2306,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R41Dptr) 
@@ -2262,7 +2340,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R81Dptr) 
@@ -2294,7 +2374,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R42Dptr) 
@@ -2326,7 +2408,9 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- integer :: status=ESMF_FAILURE ! local error status 
+ integer :: status ! local error status 
+ 
+ status = ESMF_FAILURE 
  
  call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R82Dptr) 
@@ -2390,10 +2474,12 @@ end function
 
 ! local vars
         type (ESMF_Array) :: array ! what C++ is going to return
-        integer :: status=ESMF_FAILURE ! local error status
-        logical :: rcpresent=.FALSE. ! did user specify rc?
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
 
 ! TODO: need a null pointer to assign to initialize ptr
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
 ! initialize return code; assume failure until success is certain
@@ -2495,15 +2581,19 @@ end function
 ! !REQUIREMENTS:
 
 ! local vars
-        integer :: status=ESMF_FAILURE ! local error status
-        logical :: rcpresent=.FALSE. ! did user specify rc?
-        logical :: needsdealloc=.FALSE. ! do we need to free space?
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
+        logical :: needsdealloc ! do we need to free space?
 
 ! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        needsdealloc = .FALSE.
 
 ! ! TODO: document the current rule - if we did the allocate in
 ! ! the case of ESMF_DO_COPY at create time, then we delete the
@@ -2719,10 +2809,12 @@ end function
 
 ! local vars
         type (ESMF_ArraySpec), pointer :: as ! pointer to new Array
-        integer :: status=ESMF_FAILURE ! local error status
-        logical :: rcpresent=.FALSE. ! did user specify rc?
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
 
 ! initialize pointer
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         nullify(as)
 
 ! initialize return code; assume failure until success is certain
@@ -2821,10 +2913,12 @@ end function
 
 ! local vars
         integer :: i
-        integer :: status=ESMF_FAILURE ! local error status
-        logical :: rcpresent=.FALSE. ! did user specify rc?
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
 
 ! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -2907,18 +3001,20 @@ end function
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status=ESMF_FAILURE ! Error status
-      logical :: rcpresent=.FALSE. ! Return code present
+      integer :: status ! Error status
+      logical :: rcpresent ! Return code present
 
 ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
 
-      ! TODO: add an interface to the C stuff here
+      ! TODO: add an interface to the C code here
       !call c_ESMC_ArrayGetName(array, name, status)
-      !if(status .NE. 0) then
+      !if(status .NE. ESMF_FAILURE) then
       ! print *, "ERROR in ESMF_ArrayGetName"
       ! return
       !endif
@@ -3082,15 +3178,19 @@ end function
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE ! local error status
-       logical :: rcpresent=.FALSE.
+       character (len=6) :: defaultopts ! default print options
+       integer :: status ! local error status
+       logical :: rcpresent
 
-! Initialize return code; assume failure until success is certain
+       ! Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
+       defaultopts = "brief"
 
        if(present(options)) then
            call c_ESMC_ArrayPrint(array, options, status)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.7 2003/01/23 20:22:38 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.8 2003/02/13 15:10:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.7 2003/01/23 20:22:38 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.8 2003/02/13 15:10:36 nscollins Exp $'
 
 !==============================================================================
 !
@@ -183,10 +183,12 @@
 !EOP
 ! !REQUIREMENTS:  AAAn.n.n
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     initialize the return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -240,10 +242,12 @@
 !EOP
 ! !REQUIREMENTS:  AAAn.n.n
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     initialize the return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE

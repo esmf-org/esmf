@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.4 2003/02/10 22:11:19 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.5 2003/02/13 15:10:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,25 +85,27 @@
 !EOP @\
 ! !REQUIREMENTS: @\
  @\
-!       local vars @\
+        ! local variables @\
         type (ESMF_Array) :: array          ! what C++ is going to return @\
         integer :: i                        ! local variable @\
-        integer :: status=ESMF_FAILURE      ! local error status @\
-        logical :: rcpresent=.FALSE.        ! did user specify rc? @\
-        logical :: copyreq=.FALSE.          ! did user specify copy? @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+        logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
         integer :: rank, lengths(mrank)         ! size info for the array @\
         mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
-!       !TODO: need a null pointer to assign to initialize ptr @\
-        array%this = ESMF_NULL_POINTER @\
- @\
-!       ! initialize return code; assume failure until success is certain @\
+        ! Initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        copyreq = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
  @\
 !       ! call create routine @\
         do i=1, mrank @\
@@ -180,18 +182,24 @@
 !EOP @\
 ! !REQUIREMENTS: @\
  @\
+        integer :: status                   ! local error status @\
+        logical :: rcpresent                ! did user specify rc? @\
+        logical :: copyreq                  ! did user specify copy? @\
+ @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
         integer :: rank, lengths(mrank)         ! size info for the array @\
         mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
-        logical :: copyreq=.FALSE.      ! are we making a copy? @\
-	integer :: status=ESMF_FAILURE @\
-        logical :: rcpresent=.FALSE. @\
  @\
-!       ! initialize return code; assume failure until success is certain @\
+        ! initialize return code; assume failure until success is certain @\
+        status = ESMF_FAILURE @\
+        rcpresent = .FALSE. @\
         if (present(rc)) then @\
           rcpresent = .TRUE. @\
           rc = ESMF_FAILURE @\
         endif @\
+ @\
+        copyreq = .FALSE. @\
+        array%this = ESMF_NULL_POINTER @\
  @\
         ! check copyflag to see if we are making a reference @\
         ! or making a new array and a copy @\
@@ -252,7 +260,9 @@
 !EOP @\
 ! !REQUIREMENTS: @\
  @\
-        integer :: status=ESMF_FAILURE      ! local error status @\
+        integer :: status                               ! local error status @\
+ @\
+        status = ESMF_FAILURE  @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
         deallocate(wrap%##mtypekind##mrank##Dptr) @\

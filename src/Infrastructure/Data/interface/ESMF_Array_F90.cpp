@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.4 2003/02/12 17:44:41 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.5 2003/02/13 15:10:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -154,7 +154,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.4 2003/02/12 17:44:41 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.5 2003/02/13 15:10:37 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -404,10 +404,12 @@ end function
 
 !       local vars
         type (ESMF_Array) :: array          ! new C++ Array
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
 !       TODO: need a null pointer to assign to initialize ptr
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
 !       Initialize return code; assume failure until success is certain
@@ -477,10 +479,12 @@ end function
 
 !       local vars
         type (ESMF_Array), pointer :: a     ! pointer to new Array
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
 !       initialize pointer
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
 !        nullify(a)
 
 !       initialize return code; assume failure until success is certain
@@ -618,10 +622,12 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 
 !       local vars
         type (ESMF_Array) :: array          ! what C++ is going to return
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
 !       TODO: need a null pointer to assign to initialize ptr
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
 
 !       initialize return code; assume failure until success is certain
@@ -723,15 +729,19 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 ! !REQUIREMENTS:
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-        logical :: needsdealloc=.FALSE.     ! do we need to free space?
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+        logical :: needsdealloc             ! do we need to free space?
 
 !       initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        needsdealloc = .FALSE.
 
 !       ! TODO: document the current rule - if we did the allocate in
 !       !   the case of ESMF_DO_COPY at create time, then we delete the
@@ -947,10 +957,12 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 
 !       local vars
         type (ESMF_ArraySpec), pointer :: as     ! pointer to new Array
-        integer :: status=ESMF_FAILURE           ! local error status
-        logical :: rcpresent=.FALSE.             ! did user specify rc?
+        integer :: status                        ! local error status
+        logical :: rcpresent                     ! did user specify rc?
 
 !       initialize pointer
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         nullify(as)
 
 !       initialize return code; assume failure until success is certain
@@ -1049,10 +1061,12 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 
 !       local vars
         integer :: i
-        integer :: status=ESMF_FAILURE           ! local error status
-        logical :: rcpresent=.FALSE.             ! did user specify rc?
+        integer :: status                        ! local error status
+        logical :: rcpresent                     ! did user specify rc?
 
 !       initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -1135,18 +1149,20 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
 
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
 
-      ! TODO: add an interface to the C stuff here
+      ! TODO: add an interface to the C code here
       !call c_ESMC_ArrayGetName(array, name, status)
-      !if(status .NE. 0) then
+      !if(status .NE. ESMF_FAILURE) then
       !  print *, "ERROR in ESMF_ArrayGetName"
       !  return
       !endif
@@ -1310,15 +1326,19 @@ ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
-       logical :: rcpresent=.FALSE.
+       character (len=6) :: defaultopts      ! default print options 
+       integer :: status                     ! local error status
+       logical :: rcpresent        
 
-!      Initialize return code; assume failure until success is certain
+       ! Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
+       defaultopts = "brief"
 
        if(present(options)) then
            call c_ESMC_ArrayPrint(array, options, status) 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.23 2003/02/06 18:54:02 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.24 2003/02/13 15:10:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -254,7 +254,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.23 2003/02/06 18:54:02 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.24 2003/02/13 15:10:20 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -392,10 +392,11 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:  FLD1.5, FLD1.5.3
-      logical :: rcpresent=.FALSE.                ! Return code present   
+      logical :: rcpresent                          ! Return code present   
       character (len = ESMF_MAXSTR) :: defaultname  ! Name if not given
 
 !     !Initialize return code
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -774,7 +775,7 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
-      integer*8 :: nullp = 0
+      integer*8, parameter :: nullp = 0
 
       ptype%ptr = nullp
       if (present(rc)) rc = ESMF_SUCCESS

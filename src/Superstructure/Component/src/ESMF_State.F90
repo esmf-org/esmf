@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.24 2003/02/12 23:38:48 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.25 2003/02/13 15:11:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,7 +243,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.24 2003/02/12 23:38:48 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.25 2003/02/13 15:11:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1095,6 +1095,7 @@ end function
       status = ESMF_FAILURE 
       rcpresent = .FALSE.
       fneedsdealloc = .FALSE.
+      fname = ""
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
@@ -1145,10 +1146,18 @@ end function
       ! For each bundle...
       do i=1, bcount
 
-        call ESMF_BundleGetName(bundles(i), bname)
+        call ESMF_BundleGetName(bundles(i), bname, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+          return
+        endif
     
         ! See if this name is already in the state
         exists = ESMF_StateTypeFindData(stypep, bname, dataitem, bindex, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+          return
+        endif
    
         ! If not, in the second pass we will need to add it.
         if (.not. exists) then
@@ -1176,10 +1185,43 @@ end function
 
         ! and now the same for each field in the bundle
         call ESMF_BundleGetFieldCount(bundles(i), fcount, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+          return
+        endif
+    
 
+        print *, "fcount = ", fcount
         do j=1, fcount
-            exists = ESMF_StateTypeFindData(stypep, bname, dataitem, &
+            ! get next field and query name
+            call ESMF_BundleGetFields(bundles(i), j, field, status)
+            print *, "--After GetFields, status = ", status, "j = ", j
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+              return
+            endif
+
+            print *, "Before field print, j = ", j
+            call ESMF_FieldPrint(field, "", status)
+            print *, "After field print, before get name, name = ", trim(fname)
+
+            print *, "Before get name, j = ", j
+            call ESMF_FieldGetName(field, fname, status)
+            print *, "After field get name, name = ", trim(fname), status
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_StateTypeAddBundleList: get name from field"
+              return
+            endif
+    
+            print *, "Before find data name, j = ", j
+            exists = ESMF_StateTypeFindData(stypep, fname, dataitem, &
                                                               findex, status)
+            print *, "After find data name, exists = ", exists
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_StateTypeAddBundleList: get field from bundle"
+              return
+            endif
+
             ! If the field is going to have to be added later,
             !  keep track of whether it belongs to a bundle which has to
             !  be added new, or exists.  If it exists, note the index number
@@ -1256,7 +1298,11 @@ end function
               return
             endif
 
-            call ESMF_BundleGetName(bundles(i), nextitem%namep)
+            call ESMF_BundleGetName(bundles(i), nextitem%namep, status)
+            if (status .ne. ESMF_SUCCESS) then
+              print *, "ERROR in ESMF_StateTypeAddBundleList: get bundle name"
+              return
+            endif
 
             allocate(nextitem%datap, stat=status)
             if (status .ne. 0) then    ! F90 return code
@@ -1278,6 +1324,10 @@ end function
         !  have to go through each field and see if any of them need to
         !  be added or updated.
         call ESMF_BundleGetFieldCount(bundles(i), fcount, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_StateTypeAddBundleList: get field count from bundle"
+          return
+        endif
 
         ! Skip empty bundles
         if (fcount .le. 0) cycle
@@ -1771,8 +1821,8 @@ end function
       integer :: i
       integer :: allocsize 
       integer :: newsize
-      integer, parameter :: chunksize = 16         ! extend list by this
       integer :: status                            ! local error status
+      integer, parameter :: chunksize = 16         ! extend list by this
  
       ! Assume failure until success assured.
       status = ESMF_FAILURE
@@ -1781,6 +1831,9 @@ end function
       ! An initially empty list. Simply allocate, no data copy needed.
       if (stypep%alloccount .eq. 0) then
 
+          print *, 1, itemcount, chunksize
+          print *, 2, chunksize
+          print *, 3, mod(itemcount, chunksize)
           allocsize = itemcount + chunksize - mod(itemcount,chunksize)
           allocate(stypep%datalist(allocsize), stat=status)
           if(status .NE. 0) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.11 2003/02/11 23:09:29 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.12 2003/02/13 15:11:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_LayoutMod
-      use ESMF_TimeMod
+      !use ESMF_TimeMod
       use ESMF_ClockMod
       use ESMF_StateMod
       implicit none
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.11 2003/02/11 23:09:29 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.12 2003/02/13 15:11:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -248,13 +248,15 @@ end interface
 
 !       local vars
         type (ESMF_CompClass) :: comptype       ! the new Component
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
 !       Initialize the pointer to null.
         nullify(ESMF_CompCreateNew%compp)
 
 !       Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -305,13 +307,15 @@ end interface
 
 !       ! Local variables
         type (ESMF_CompClass) :: comptype       ! the new Component
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
 !       ! Initialize pointer
         nullify(ESMF_CompCreateNoData%compp)
 
 !       ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -360,10 +364,12 @@ end interface
 ! !REQUIREMENTS:
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
 !       initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -420,10 +426,12 @@ end interface
 
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
 !       Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -478,10 +486,12 @@ end interface
 
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
-!       Runialize return code; assume failure until success is certain
+!       Initalize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -532,10 +542,12 @@ end interface
 
 
 !       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+        integer :: status                       ! local error status
+        logical :: rcpresent                    ! did user specify rc?
 
-!       Finalize return code; assume failure until success is certain
+!       Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
@@ -760,15 +772,19 @@ end interface
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
-       logical :: rcpresent=.FALSE.
+       character (len=6) :: defaultopts
+       integer :: status                       ! local error status
+       logical :: rcpresent                    ! did user specify rc?
 
 !      Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
+       defaultopts = "brief"
 
 !      ! Interface to call the C++ validate code
        if(present(options)) then
@@ -809,15 +825,19 @@ end interface
 !
 ! TODO: code goes here
 !
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
-       logical :: rcpresent=.FALSE.
+       character (len=6) :: defaultopts
+       integer :: status                       ! local error status
+       logical :: rcpresent                    ! did user specify rc?
 
 !      Initialize return code; assume failure until success is certain
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
        if (present(rc)) then
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
+       defaultopts = "brief"
 
 !      ! Interface to call the C++ print code
        if(present(options)) then
