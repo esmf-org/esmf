@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.15 2005/02/11 21:01:46 nscollins Exp $
+#  $Id: build_rules.mk,v 1.16 2005/02/14 16:27:52 nscollins Exp $
 #
 #  Linux.absoft.default makefile fragment
 #
@@ -152,11 +152,29 @@ CXX_FLINKER	   = ${CXX_CC}
 CXX_CCV		   = ${CXX_CC} --version
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 C_F90CXXLD         = ${CXX_FC}
-CXXLIBBASE         = /usr/lib/gcc-lib/i386-redhat-linux/2.96
-C_F90CXXLIBS       = ${MPI_LIB} -L${CXXLIBBASE} -lf90math -lfio -lf77math -lrt -lstdc++
 C_CXXF90LD         = ${CXX_CC} 
-F90LIBBASE         = /soft/com/packages/absoft-8.0/opt/absoft/lib
-C_CXXF90LIBS       = ${MPI_LIB} -lstdc++ -L${F90LIBBASE} -lf90math -lrt -lfio -lf77math
+# by default append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if it is not set, default to where the absoft
+# compilers try to install themselves.  if your compiler is someplace else
+# either set LD_LIBRARY_PATH first, or make a site specific file and
+# edit the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+LIB_PATHS      = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+CXXLIB_PATHS   = 
+F90LIB_PATHS   = 
+LD_PATHS   = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+else
+CXXLIB_PATHS   = -L/usr/lib
+F90LIB_PATHS   = -L/soft/com/packages/absoft-9.0/opt/absoft/lib
+LIB_PATHS      = ${CXXLIB_PATHS} ${F90LIB_PATHS}
+endif
+
+C_F90CXXLIBS       = ${MPI_LIB} ${LIB_PATHS} -lf90math -lfio -lf77math \
+                      -lrt -lstdc++ 
+C_CXXF90LIBS       = ${MPI_LIB} ${LIB_PATHS} -lstdc++ -lf90math -lrt \
+                      -lfio -lf77math
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
