@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2004/05/14 22:34:27 slswift Exp $ 
+# $Id: makefile,v 1.18 2004/07/07 17:38:23 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -15,28 +15,32 @@ LIBBASE	  =
 LOCDIR	  = src/Superstructure/Component/tests
 
 TESTS_BUILD   =	$(ESMC_TESTDIR)/ESMF_CompCreate \
-		$(ESMC_TESTDIR)/ESMF_CompCreateUTest \
+		$(ESMC_TESTDIR)/ESMF_GridCompCreateUTest \
 		$(ESMC_TESTDIR)/ESMC_CompCreate \
 		$(ESMC_TESTDIR)/ESMF_CompRun \
-		$(ESMC_TESTDIR)/ESMC_CompRun 
+		$(ESMC_TESTDIR)/ESMC_CompRun \
+		$(ESMC_TESTDIR)/ESMF_CplCompCreateUTest
 
 TESTS_RUN     =	RUN_ESMF_CompCreate \
-		RUN_ESMF_CompCreateUTest \
+		RUN_ESMF_GridCompCreateUTest \
+		ESMF_CplCompCreateUTest \
 		RUN_ESMC_CompCreate \
 		RUN_ESMF_CompRun \
-		RUN_ESMC_CompRun 
+		RUN_ESMC_CompRun
 
 TESTS_RUN_UNI =	RUN_ESMF_CompCreateUNI \
-		RUN_ESMF_CompCreateUTestUNI \
+		RUN_ESMF_GridCompCreateUTestUNI \
+		RUN_ESMF_CplCompCreateUTestUNI \
 		RUN_ESMC_CompCreateUNI \
 		RUN_ESMF_CompRunUNI \
-		RUN_ESMC_CompRunUNI 
+		RUN_ESMC_CompRunUN 
 
 TESTS_RM      =	ESMF_CompCreate.rm \
-		ESMF_CompCreateUTest.rm \
+		ESMF_GridCompCreateUTest.rm \
+		ESMF_CplCompCreateUTest.rm \
 		ESMC_CompCreate.rm \
 		ESMF_CompRun.rm \
-		ESMC_CompRun.rm 
+		ESMC_CompRun.rm
 
 include $(ESMF_DIR)/makefile
 
@@ -68,16 +72,16 @@ $(ESMC_TESTDIR)/ESMF_CompCreateUTest: ESMF_CompCreateUTest.o
 	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreateUTest ESMF_CompCreateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
 	${RM} -f ESMF_CompCreateUTest.o
 
-RUN_ESMF_CompCreateUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreateUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreateUTest > $(ESMC_TESTDIR)/ESMF_CompCreateUTest.stdout
+RUN_ESMF_GridCompCreateUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_GridCompCreateUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
 
-RUN_ESMF_CompCreateUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_CompCreateUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreateUTest > $(ESMC_TESTDIR)/ESMF_CompCreateUTest.stdout
+RUN_ESMF_GridCompCreateUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_GridCompCreateUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest > $(ESMC_TESTDIR)/ESMF_GridCompCreateUTest.stdout
 
-ESMF_CompCreateUTest.rm:
-	echo "ESMF_CompCreate.rm target called here."
+ESMF_GridCompCreateUTest.rm:
+	echo "ESMF_GridCompCreate.rm target called here."
 
 
 
@@ -141,4 +145,21 @@ RUN_ESMC_CompRunUNI:
 
 ESMC_CompRun.rm:
 	echo "ESMC_CompRun.rm target called here."
+
+
+$(ESMC_TESTDIR)/ESMF_CplCompCreateUTest: ESMF_CplCompCreateUTest.o
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest ESMF_CplCompCreateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
+	${RM} -f ESMF_CplCompCreateUTest.o
+
+RUN_ESMF_CplCompCreateUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CplCompCreateUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
+
+RUN_ESMF_CplCompCreateUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_CplCompCreateUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest > $(ESMC_TESTDIR)/ESMF_CplCompCreateUTest.stdout
+
+ESMF_CplCompCreateUTest.rm:
+	echo "ESMF_CplCompCreate.rm target called here."
+
 
