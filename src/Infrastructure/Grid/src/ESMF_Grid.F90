@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.70 2003/07/31 15:50:39 atrayanov Exp $
+! $Id: ESMF_Grid.F90,v 1.71 2003/07/31 23:01:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.70 2003/07/31 15:50:39 atrayanov Exp $'
+      '$Id: ESMF_Grid.F90,v 1.71 2003/07/31 23:01:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -219,6 +219,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridCreateEmpty
          module procedure ESMF_GridCreateInternal
+         module procedure ESMF_GridCreateInternalSpecd
          module procedure ESMF_GridCreateRead
          module procedure ESMF_GridCreateCopy
          module procedure ESMF_GridCreateCutout
@@ -240,6 +241,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridConstructNew
          module procedure ESMF_GridConstructInternal
+         module procedure ESMF_GridConstructInternalSpecd
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct a
@@ -352,6 +354,22 @@
 !!
 !!EOP
 !      end interface
+!!
+!------------------------------------------------------------------------------
+!!BOP
+!! !INTERFACE:
+       interface ESMF_GridAddPhysGrid
+!
+!! !PRIVATE MEMBER FUNCTIONS:
+          module procedure ESMF_GridAddPhysGrid
+          module procedure ESMF_GridAddPhysGridSpecd
+!
+!! !DESCRIPTION:
+!!     This interface provides a single entry point for methods that
+!!     search a {\tt ESMF\_Grid} for point(s).
+!!
+!!EOP
+       end interface
 !!
 !------------------------------------------------------------------------------
 
@@ -545,6 +563,120 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_GridCreateInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCreateInternalSpecd - Create a new Grid internally
+
+! !INTERFACE:
+      function ESMF_GridCreateInternalSpecd(countsPerDE1, countsPerDE2, &
+                                            xMin, dx, yMin, dy, layout, &
+                                            horz_gridtype, vert_gridtype, &
+                                            horz_stagger, vert_stagger, &
+                                            horz_coord_system, vert_coord_system, &
+                                            name, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateInternalSpecd
+!
+! !ARGUMENTS:
+      integer, dimension(:), intent(in) :: countsPerDE1
+      integer, dimension(:), intent(in) :: countsPerDE2
+      real, intent(in) :: xMin
+      real, dimension(:), intent(in) :: dx
+      real, intent(in) :: yMin
+      real, dimension(:), intent(in) :: dy
+      type (ESMF_DELayout), intent(in) :: layout
+      integer, intent(in), optional :: horz_gridtype
+      integer, intent(in), optional :: vert_gridtype
+      integer, intent(in), optional :: horz_stagger
+      integer, intent(in), optional :: vert_stagger
+      integer, intent(in), optional :: horz_coord_system
+      integer, intent(in), optional :: vert_coord_system
+      character (len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer to
+!     the new {\tt ESMF\_Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[countsPerDE1]}]
+!          Array of number of grid increments per DE in the x-direction.
+!     \item[{[countsPerDE2]}]
+!          Array of number of grid increments per DE in the y-direction.
+!     \item[{[xMin]}]
+!          Minimum physical coordinate in the x-direction.
+!     \item[{[dx]}]
+!          Array of physical increments between nodes in the x-direction.
+!     \item[{[yMin]}]
+!          Minimum physical coordinate in the y-direction.
+!     \item[{[dy]}]
+!          Array of physical increments between nodes in the y-direction.
+!     \item[{[layout]}]
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[horz\_gridtype]}]
+!          Integer specifier to denote horizontal gridtype.
+!     \item[{[vert\_gridtype]}]
+!          Integer specifier to denote vertical gridtype.
+!     \item[{[horz\_stagger]}]
+!          Integer specifier to denote horizontal grid stagger.
+!     \item[{[vert\_stagger]}]
+!          Integer specifier to denote vertical grid stagger.
+!     \item[{[horz\_coord\_system]}]
+!          Integer specifier to denote horizontal coordinate system.
+!     \item[{[vert\_coord\_system]}]
+!          Integer specifier to denote vertical coordinate system.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_GridType), pointer :: grid    ! Pointer to new grid
+      integer :: status=ESMF_FAILURE          ! Error status
+      logical :: rcpresent=.FALSE.            ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateInternalSpecd%ptr)
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstruct(grid, countsPerDE1, countsPerDE2, &
+                              xMin, dx, yMin, dy, layout, &
+                              horz_gridtype, vert_gridtype, &
+                              horz_stagger, vert_stagger, &
+                              horz_coord_system, vert_coord_system, &
+                              name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateInternalSpecd%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateInternalSpecd
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1120,6 +1252,151 @@
 
 !------------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: ESMF_GridConstructInternalSpecd - Construct the internals of an allocated Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridConstructInternalSpecd(grid, countsPerDE1, &
+                                                 countsPerDE2, xMin, dx, &
+                                                 yMin, dy, layout, &
+                                                 horz_gridtype, vert_gridtype, &
+                                                 horz_stagger, vert_stagger, &
+                                                 horz_coord_system, &
+                                                 vert_coord_system, &
+                                                 name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      integer, dimension(:), intent(in) :: countsPerDE1
+      integer, dimension(:), intent(in) :: countsPerDE2
+      real, intent(in) :: xMin
+      real, dimension(:), intent(in) :: dx
+      real, intent(in) :: yMin
+      real, dimension(:), intent(in) :: dy
+      type (ESMF_DELayout), intent(in) :: layout
+      integer, intent(in), optional :: horz_gridtype
+      integer, intent(in), optional :: vert_gridtype
+      integer, intent(in), optional :: horz_stagger
+      integer, intent(in), optional :: vert_stagger
+      integer, intent(in), optional :: horz_coord_system
+      integer, intent(in), optional :: vert_coord_system
+      character (len = *), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt ESMF\_Grid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_GridDestruct}
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
+!     {\tt ESMF\_GridConstruct}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt ESMF\_Grid}
+!     \item[{[countsPerDE1]}]
+!          Array of number of grid increments per DE in the x-direction.
+!     \item[{[countsPerDE2]}]
+!          Array of number of grid increments per DE in the y-direction.
+!     \item[{[xMin]}]
+!          Minimum physical coordinate in the x-direction.
+!     \item[{[dx]}]
+!          Array of physical increments between nodes in the x-direction.
+!     \item[{[yMin]}]
+!          Minimum physical coordinate in the y-direction.
+!     \item[{[dy]}]
+!          Array of physical increments between nodes in the y-direction.
+!     \item[{[layout]}]
+!         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[horz\_gridtype]}]
+!          Integer specifier to denote horizontal gridtype.
+!     \item[{[vert\_gridtype]}]
+!          Integer specifier to denote vertical gridtype.
+!     \item[{[horz\_stagger]}]
+!          Integer specifier to denote horizontal grid stagger.
+!     \item[{[vert\_stagger]}]
+!          Integer specifier to denote vertical grid stagger.
+!     \item[{[horz\_coord\_system]}]
+!          Integer specifier to denote horizontal coordinate system.
+!     \item[{[vert\_coord\_system]}]
+!          Integer specifier to denote vertical coordinate system.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS: TODO
+!EOPI
+
+      character(len=4) :: physgrid_name       !
+      integer :: physgrid_id                  ! integer identifier for physgrid
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
+
+!     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Initialize the derived type contents
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternalSpecd: Grid construct"
+        return
+      endif
+
+!     Fill in grid derived type with subroutine arguments
+      call ESMF_GridSet(grid, horz_gridtype, vert_gridtype, &
+                        horz_stagger, vert_stagger, &
+                        horz_coord_system, vert_coord_system, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternalSpecd: Grid set"
+        return
+      endif
+
+!     Create the DistGrid
+      grid%distgrid = ESMF_DistGridCreate(countsPerDE1=countsPerDE1, &
+                                          countsPerDE2=countsPerDE2, &
+                                          layout=layout, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternalSpecd: Distgrid create"
+        return
+      endif
+
+!     Create main physgrid
+      physgrid_name = 'base'
+      call ESMF_GridAddPhysGrid(grid, physgrid_id, xMin, dx, yMin, dy, &
+                                countsPerDE1, countsPerDE2, physgrid_name, &
+                                status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
+        return
+      endif
+
+!     Call SetCoord to create physical coordinates of subgrid
+      call ESMF_GridSetCoord(grid, physgrid_id, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternalSpecd: Grid set coord compute"
+        return
+      endif
+
+!     Create any necessary physgrids to support staggering  TODO
+
+!     Create vertical physgrid if requested
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructInternalSpecd: Grid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridConstructInternalSpecd
+
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_GridConstructNew - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
@@ -1366,6 +1643,127 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAddPhysGrid
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridAddPhysGridSpecd - Add a PhysGrid to a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridAddPhysGridSpecd(grid, physgrid_id, &
+                                           xMin, dx, yMin, dy, &
+                                           countsPerDE1, countsPerDE2, &
+                                           physgrid_name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      integer, intent(out) :: physgrid_id
+      real, intent(in), optional :: xMin
+      real, dimension(:), intent(in) :: dx
+      real, intent(in), optional :: yMin
+      real, dimension(:), intent(in) :: dy
+      integer, dimension(:), intent(in) :: countsPerDE1
+      integer, dimension(:), intent(in) :: countsPerDE2
+      character (len=*), intent(in), optional :: physgrid_name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Adds a {\tt ESMF\_PhysGrid} to a {\tt ESMF\_Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[{[counts]}]
+!          Array of number of grid increments in each direction.
+!     \item [{[physgrid\_id]}]
+!          Integer identifier for {\tt ESMF\_PhysGrid}.
+!     \item[{[x\_min]}]
+!          Minimum physical coordinate in the x-direction.
+!     \item[{[x\_max]}]
+!          Maximum physical coordinate in the x-direction.
+!     \item[{[y\_min]}]
+!          Minimum physical coordinate in the y-direction.
+!     \item[{[y\_max]}]
+!          Maximum physical coordinate in the y-direction.
+!     \item [{[physgrid\_name]}]
+!          {\tt ESMF\_PhysGrid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_SUCCESS          ! Error status
+      logical :: rcpresent=.FALSE.            ! Return code present
+      integer :: i, myDE(2)
+      real :: global_min(2)
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: gridp
+      type(ESMF_PhysGrid), dimension(:), allocatable, target :: temp_pgrids
+                                             ! temporary array of physgrids
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Increment the number of physgrids in the grid and allocate memory
+      grid%num_physgrids = grid%num_physgrids + 1
+      if(grid%num_physgrids .eq. 1) then
+!       allocate(grid%physgrids(1), stat=status)
+!       if(status .NE. ESMF_SUCCESS) then
+!         print *, "ERROR in ESMF_GridAddPhysGridSpecd: physgrids allocate"
+!         return
+!       endif
+        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
+          return
+        endif
+      else
+        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGridSpecd: temp_pgrids allocate"
+          return
+        endif
+        do i = 1, grid%num_physgrids - 1
+          temp_pgrids(i) = grid%physgrids(i)
+        enddo
+        deallocate(grid%physgrids, stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGridSpecd: physgrids deallocate"
+          return
+        endif
+      endif
+      physgrid_id = grid%num_physgrids 
+
+      global_min(1)=xMin
+      global_min(2)=yMin
+
+      gridp%ptr = grid
+      call ESMF_GridGetDELayout(gridp, layout, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGridSpecd: get delayout"
+        return
+      endif
+      call ESMF_DELayoutGetDEPosition(layout, myDE(1), myDE(2), status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGridSpecd: delayout get position"
+        return
+      endif
+
+      temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, myDE=myDE, &
+                                 dx=dx, dy=dy, global_min=global_min, &
+                                 countsPerDE1=countsPerDE1, &
+                                 countsPerDE2=countsPerDE2, &
+                                 name=physgrid_name, rc=status)
+      grid%physgrids => temp_pgrids
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAddPhysGridSpecd
 
 !------------------------------------------------------------------------------
 !BOP
