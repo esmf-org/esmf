@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.12 2005/02/28 16:28:46 nscollins Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.13 2005/02/28 21:26:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,14 +35,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.12 2005/02/28 16:28:46 nscollins Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.13 2005/02/28 21:26:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
     type(ESMF_Array) :: array1
     !character(ESMF_MAXSTR) :: filename
     real, dimension(:,:), pointer :: f90ptr1
-    integer :: width, attribute, attribute1
+    integer :: width, attribute
     real :: attribute4
     type(ESMF_DataType) :: att_datatype
     type(ESMF_DataKind) :: att_datakind
