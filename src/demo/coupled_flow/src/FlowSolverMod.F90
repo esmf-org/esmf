@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.16 2004/06/15 13:34:41 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.17 2004/06/16 05:29:39 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -581,7 +581,7 @@
           global(1,2) = j
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
-            call ESMF_GridGlobalToLocalIndex(grid, horzRelloc=ESMF_CELL_CENTER,&
+            call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER,&
                                       global2d=global, local2d=local, rc=status)
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
@@ -600,7 +600,7 @@
         do j = 1, 2 
           global(1,1) = i
           global(1,2) = j
-          call ESMF_GridGlobalToLocalIndex(grid, horzRelloc=ESMF_CELL_CENTER, &
+          call ESMF_GridGlobalToDELocalIndex(grid, horzRelloc=ESMF_CELL_CENTER, &
                                       global2d=global, local2d=local, rc=status)
           if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
           if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
