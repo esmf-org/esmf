@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/09/26 20:56:49 nscollins Exp $
+# $Id: makefile,v 1.5 2003/09/26 22:18:35 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -36,9 +36,6 @@ include $(ESMF_DIR)/makefile
 # on the mac, you have to give this additional flag so the file uses > 16 bit
 # offsets internally in the file.
 ifeq ($(ESMF_COMPILER),absoft)
-FFLAGS += -N11
-endif
-ifeq ($(ESMF_COMPILER),default)
 FFLAGS += -N11
 endif
 
