@@ -14,4 +14,5 @@ program test_log_2
     call ESMF_LogInitialize("aLog1.txt",rc=rc)
     call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
     ret = ESMF_LogFoundError(ESMF_FAILURE,"Log Found Error 2",ESMF_LOG_INFO)
+    ret = ESMF_LogFoundAllocError(ESMF_FAILURE,"Some object")
 end program

@@ -98,7 +98,7 @@ end type ESMF_Log
 
    public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite,&
    ESMF_LogInitialize, ESMF_LogFinalize,ESMF_LogFoundError,& 
-   ESMF_LogSet, ESMF_LogGet
+   ESMF_LogFoundAllocError,ESMF_LogSet, ESMF_LogGet
 
    type(ESMF_Log),SAVE::ESMF_LogDefault	
 !----------------------------------------------------------------------------
@@ -351,6 +351,49 @@ end function ESMF_LogWrite
 	endif	
        
 end function ESMF_LogFoundError
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogFoundAllocError - Returns logical associated with finding an error
+
+! !INTERFACE: 
+	function ESMF_LogFoundAllocError(rc,msg,line,file,method)
+!
+! !RETURN VALUE:
+	logical							::ESMF_LogFoundAllocError
+! !ARGUMENTS:
+!	
+	integer, intent(in)					:: rc
+	character(len=*), intent(in)				:: msg
+	integer, intent(in), optional          			:: line
+	character(len=*), intent(in), optional          	:: file
+	character(len=*), intent(in), optional			:: method
+	
+
+! !DESCRIPTION:
+!      This function returns a logical true for return codes that indicate an error
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [rc]
+!            Return code to check.
+!      \item [string]
+!            User-provided context string.
+!      \item [method]
+!            User-provided method string.
+!      
+!      \end{description}
+! 
+!EOP
+	
+	ESMF_LogFoundAllocError=ESMF_FALSE
+	if (rc .NE. 0) then
+		call ESMF_LogWrite("Alloc error:"//msg,ESMF_LOG_ERROR,line,file,method)
+		ESMF_LogFoundAllocError=ESMF_TRUE
+	endif	
+       
+end function ESMF_LogFoundAllocError
 
 !--------------------------------------------------------------------------
 !BOP

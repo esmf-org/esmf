@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.46 2004/05/13 22:48:24 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.47 2004/05/14 08:14:47 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.46 2004/05/13 22:48:24 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.47 2004/05/14 08:14:47 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -430,6 +430,59 @@ int ESMC_Log::ESMC_LogFoundError(
 		ESMC_LogWrite(msg,logtype);
 		result=ESMF_TRUE;
 	}
+	return result;
+
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+
+int ESMC_Log::ESMC_LogAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int LINE,
+    char FILE[],
+    char method[]      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	int result=ESMF_FALSE;
+	ESMC_LogWrite("Memory allocation error",ESMC_LOG_ERROR,LINE,FILE,method);
+	result=ESMF_TRUE;
+	return result;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+int ESMC_Log::ESMC_LogAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+  
+      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	int result=ESMF_FALSE;
+	ESMC_LogWrite("Memory allocation error",ESMC_LOG_ERROR);
+	result=ESMF_TRUE;
 	return result;
 
 }
