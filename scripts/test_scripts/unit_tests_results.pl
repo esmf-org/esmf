@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: unit_tests_results.pl,v 1.1 2005/03/18 16:11:24 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.2 2005/04/05 16:37:19 svasquez Exp $
 # This script runs at the end of the "run_tests", "run_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -188,6 +188,12 @@ use File::Find
 					}
                         		$pass_count=grep( /PASS/, @file_lines);
 					$pass_count = int $pass_count/$pet_count;
+					# HALT_FAILED must be handled differently
+					# if it occurs we must subtract the pass count by one.
+                        		$fail_count=grep( /HALT_FAILED/, @file_lines);
+					if ($fail_count !=0 ) {
+						$pass_count = $pass_count - 1;
+					}
 					if ($pass_count == $test_count){
 						push(pass_list, $file);
 					}
