@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.21 2004/11/01 23:39:13 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.22 2004/12/20 18:46:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_RTable.C,v 1.21 2004/11/01 23:39:13 nscollins Exp $";
+            "$Id: ESMC_RTable.C,v 1.22 2004/12/20 18:46:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -354,6 +354,46 @@
     return ESMF_SUCCESS;
 
  } // end ESMC_RTableGetCount
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RTableGetCount"
+//BOP
+// !IROUTINE:  ESMC_RTableGetTotalCount - Get number of all XPackets from RTable
+//
+// !INTERFACE:
+      int ESMC_RTable::ESMC_RTableGetTotalCount(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+       int *xpcount) {        // out
+//
+// !DESCRIPTION:
+//     Gets the count of all xpackets in the entire RTable
+//
+//EOP
+
+    int i, rc;
+    int count;
+    char msgbuf[ESMF_MAXSTR];
+
+    if (xpcount == NULL) {
+        sprintf(msgbuf, "bad xpcount argument\n");
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+
+        return(rc);
+    }
+
+    count = 0;
+    for (i=0; i<entrycount; i++)
+       count += entry[i].xpcount;
+
+    *xpcount = count;
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RTableGetTotalCount
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

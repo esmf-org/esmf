@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.117 2004/12/19 14:50:30 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.118 2004/12/20 18:46:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.117 2004/12/19 14:50:30 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.118 2004/12/20 18:46:15 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -713,23 +713,44 @@ static int maxroutes = 10;
     int srctcount, rcvtcount;
     char *srcbuf, *rcvbuf;
     char *srcptr, *rcvptr;
-    int nbytes;
+    int nbytes, xpcount, xpscount, xprcount;
+#define STACKLIMIT 64
+    vmk_commhandle *s_handle[STACKLIMIT];
+    char *s_srcbufstart[STACKLIMIT];
+    char *s_rcvbufstart[STACKLIMIT];
 
     char **srcbufstart, **rcvbufstart;
     vmk_commhandle **handle;
 
-    // TODO: don't hardcode sizes
-    handle = new vmk_commhandle*[5000];
-    srcbufstart = new char*[5000];
-    rcvbufstart = new char*[5000];
+    // compute total number of xpackets to be sent.
+    sendRT->ESMC_RTableGetTotalCount(&xpscount);
+    recvRT->ESMC_RTableGetTotalCount(&xprcount);
+    xpcount = xpscount + xprcount;
+    if ((xpcount < 0) || (xpcount > (1<<24))) {
+        sprintf(msgbuf, "computed bad xp counts: %d\n", xpcount);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+        return (rc);
+    }
+
+    // if the total number of possible outstanding communications requests
+    // is less than the limit, use local stack buffers.  if it is larger,
+    // allocate off the heap to avoid stack size problems.
+    if (xpcount <= STACKLIMIT) {
+        handle = s_handle;
+        srcbufstart = s_srcbufstart;
+        rcvbufstart = s_rcvbufstart;
+    } else {
+        handle = new vmk_commhandle*[xpcount];
+        srcbufstart = new char*[xpcount];
+        rcvbufstart = new char*[xpcount];
+    }
     
     mypet = vm->vmk_mypet();
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
     //printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
 
-    //printf("Ready to run Route on DE %d, commtable count = %d:\n",
-    //           mydeid, ccount);
+    //printf("Ready to run Route on PET %d, commtable count = %d:\n", mypet, ccount);
     //ESMC_RoutePrint("");
     
     
@@ -737,6 +758,15 @@ static int maxroutes = 10;
 
     // for each destination in the comm table
     for (i=0; i<ccount; i++) {
+
+        // some sanity checking to be sure we have enough async buffers
+        if (req > xpcount) {
+            sprintf(msgbuf, "not enough async bufs; have %d and index now %d (must be < %d)\n", 
+                             xpcount, req, xpcount);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                                       msgbuf, &rc);
+            return (rc);
+        }
 
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirpet, &needed);
@@ -879,7 +909,8 @@ static int maxroutes = 10;
 	   else {
               //delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
               //  (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
-              //   mydeid, theirdeid, ESMF_TRUE);
+              //   mypet, theirdeid, ESMF_TRUE);
+ //printf("dispatching sendrecv request %d, PET = %d\n", req, mypet);
               vm->vmk_sendrecv(srcbufstart[req], srctcount*nbytes, theirpet,
                 rcvbufstart[req], rcvtcount*nbytes, theirpet, &handle[req]);
 //              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirpet,
@@ -982,6 +1013,7 @@ static int maxroutes = 10;
            else
 	      rcvbuf = rcvbufstart[req];
     
+ //printf("waiting for sendrecv request %d, PET = %d\n", req, mypet);
            vm->vmk_wait(&handle[req]);
            
            // copy out of the recv buffer
@@ -1024,12 +1056,14 @@ static int maxroutes = 10;
 
     }
 
-    
-    // printf("End of Route run on DE %d\n", mydeid);
-    delete [] handle; 
-    delete [] srcbufstart;
-    delete [] rcvbufstart;
+    // if we are not using the local stack buffers, free these. 
+    if (xpcount > STACKLIMIT) {
+        delete [] handle; 
+        delete [] srcbufstart;
+        delete [] rcvbufstart;
+    }
 
+    //printf("End of Route run on PET %d\n", mypet);
     return rc;
 
  } // end ESMC_RouteRun
