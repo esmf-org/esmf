@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.6 2003/09/23 15:16:25 nscollins Exp $
+// $Id: ESMC_FTable.h,v 1.7 2004/02/24 14:36:44 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,10 @@
 //  This function does NOT inherit from the base class; it is embedded
 //  in other classes which inherit from base.
 
+#ifdef ESMF_ENABLE_VM
+#include "ESMC_VM.h"
+#endif
+
 // !PUBLIC TYPES:
  class ESMC_FTable;
 
@@ -66,6 +70,18 @@ typedef void (*VoidPtrIntPtrFunc)(void *, int *);
 typedef void (*C1SFunc)(void *, void *, void *, int *);
 typedef void (*C2SFunc)(void *, void *, void *, void *, int *);
 typedef void (*CSLFunc)(void *, void *, void *, int *);
+
+#ifdef ESMF_ENABLE_VM
+typedef void (*VoidFuncVM)(void *);
+typedef void (*IntFuncVM)(int, void *);
+typedef void (*Int2FuncVM)(int, int, void *);
+typedef void (*IntPtrFuncVM)(int *, void *);
+typedef void (*VoidPtrFuncVM)(void *, void *);
+typedef void (*VoidPtrIntPtrFuncVM)(void *, int *, void *);
+typedef void (*C1SFuncVM)(void *, void *, void *, int *, void *);
+typedef void (*C2SFuncVM)(void *, void *, void *, void *, int *, void *);
+typedef void (*CSLFuncVM)(void *, void *, void *, int *, void *);
+#endif
 
 struct funcinfo {
    char *funcname;
@@ -107,7 +123,10 @@ class ESMC_FTable {
 
     int ESMC_FTableExtend(int nfuncp, int ndatap);
     int ESMC_FTableCallVFuncPtr(char *name, int *funcrc);
-
+#ifdef ESMF_ENABLE_VM
+    int ESMC_FTableCallVFuncPtr(char *name, ESMC_VM **vm, int *funcrc);
+#endif
+    
     int ESMC_FTableValidate(const char*) const;
     int ESMC_FTablePrint(const char*) const;
 
@@ -129,5 +148,11 @@ class ESMC_FTable {
 
  };   // end class ESMC_FTable
 
+#ifdef ESMF_ENABLE_VM
+typedef struct{
+  char name[160];         // trimmed type string
+  ESMC_FTable *ftable;    // pointer to function table
+}cargotype;
+#endif
 
  #endif  // ESMC_FTable_H

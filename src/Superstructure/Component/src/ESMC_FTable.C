@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.4 2003/09/23 15:20:56 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.5 2004/02/24 14:40:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.4 2003/09/23 15:20:56 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.5 2004/02/24 14:40:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -471,36 +471,42 @@
         switch (funcs[i].ftype) {
           case FT_VOID: {
             VoidFunc vf;
+//printf("calling out of case FT_VOID\n");
             vf = (VoidFunc)funcs[i].funcptr;
             (*vf)();
             break;
           }
           case FT_INT: {
             IntFunc vf;
+//printf("calling out of case FT_INT\n");
             vf = (IntFunc)funcs[i].funcptr;
             (*vf)(*(int *)funcs[i].funcarg[0]);
             break;
           }
           case FT_2INT: {
             Int2Func vf;
+//printf("calling out of case FT_2INT\n");
             vf = (Int2Func)funcs[i].funcptr;
             (*vf)(*(int *)funcs[i].funcarg[0], *(int *)funcs[i].funcarg[1]);
             break;
           }
           case FT_INTP: {
             IntPtrFunc vf;
+//printf("calling out of case FT_INTP\n");
             vf = (IntPtrFunc)funcs[i].funcptr;
             (*vf)((int *)funcs[i].funcarg[0]);
             break;
           }
           case FT_VOIDP: {
             VoidPtrFunc vf;
+//printf("calling out of case FT_VOIDP\n");
             vf = (VoidPtrFunc)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0]);
             break;
           }
           case FT_VOIDPINTP: {
             VoidPtrIntPtrFunc vf;
+//printf("calling out of case FT_VOIDPINTP\n");
             vf = (VoidPtrIntPtrFunc)funcs[i].funcptr;
             (*vf)((void *)funcs[i].funcarg[0], (int *)funcs[i].funcarg[1]);
             *rc = *(int *)(funcs[i].funcarg[1]);
@@ -508,6 +514,7 @@
           }
           case FT_COMP1STAT: {
             C1SFunc vf;
+//printf("calling out of case FT_COMP1STAT\n");
             vf = (C1SFunc)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
@@ -516,6 +523,7 @@
           }
           case FT_COMP2STAT: {
             C2SFunc vf;
+//printf("calling out of case FT_COMP2STAT\n");
             vf = (C2SFunc)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
                   funcs[i].funcarg[2], funcs[i].funcarg[3],
@@ -525,6 +533,7 @@
           }
           case FT_COMPSLIST: {
             CSLFunc vf;
+//printf("calling out of case FT_COMPSLIST\n");
             vf = (CSLFunc)funcs[i].funcptr;
             (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
                   funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
@@ -543,6 +552,121 @@
 
  } // end ESMC_FTableCallVFuncPtr
 
+ 
+#ifdef ESMF_ENABLE_VM 
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
+//
+// !INTERFACE:
+      int ESMC_FTable::ESMC_FTableCallVFuncPtr(
+//
+// !RETURN VALUE:
+//    integer return code
+//
+// !ARGUMENTS:
+      char *name,         // in, function name
+      ESMC_VM **vm,       // in, p3 to this PET's VM instance
+      int *rc) {          // out, function return
+//
+// !DESCRIPTION:
+//    Calls the named function pointer
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i;
+
+    *rc = ESMF_FAILURE;
+    for (i=0; i<funccount; i++) {
+        if (strcmp(name, funcs[i].funcname))
+	   continue;
+   
+        switch (funcs[i].ftype) {
+          case FT_VOID: {
+            VoidFuncVM vf;
+//printf("calling out of case FT_VOID VM\n");
+            vf = (VoidFuncVM)funcs[i].funcptr;
+            (*vf)(vm);
+            break;
+          }
+          case FT_INT: {
+            IntFuncVM vf;
+//printf("calling out of case FT_INT VM\n");
+            vf = (IntFuncVM)funcs[i].funcptr;
+            (*vf)(*(int *)funcs[i].funcarg[0], vm);
+            break;
+          }
+          case FT_2INT: {
+            Int2FuncVM vf;
+//printf("calling out of case FT_2INT VM\n");
+            vf = (Int2FuncVM)funcs[i].funcptr;
+            (*vf)(*(int *)funcs[i].funcarg[0], *(int *)funcs[i].funcarg[1], vm);
+            break;
+          }
+          case FT_INTP: {
+            IntPtrFuncVM vf;
+//printf("calling out of case FT_INTP VM\n");
+            vf = (IntPtrFuncVM)funcs[i].funcptr;
+            (*vf)((int *)funcs[i].funcarg[0], vm);
+            break;
+          }
+          case FT_VOIDP: {
+            VoidPtrFuncVM vf;
+//printf("calling out of case FT_VOIDP VM\n");
+            vf = (VoidPtrFuncVM)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], vm);
+            break;
+          }
+          case FT_VOIDPINTP: {
+            VoidPtrIntPtrFuncVM vf;
+//printf("calling out of case FT_VOIDPINTP VM\n");
+            vf = (VoidPtrIntPtrFuncVM)funcs[i].funcptr;
+            (*vf)((void *)funcs[i].funcarg[0], (int *)funcs[i].funcarg[1], vm);
+            *rc = *(int *)(funcs[i].funcarg[1]);
+            break;
+          }
+          case FT_COMP1STAT: {
+            C1SFuncVM vf;
+//printf("calling out of case FT_COMP1STAT VM\n");
+            vf = (C1SFuncVM)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
+            *rc = *(int *)(funcs[i].funcarg[3]);
+            break;
+          }
+          case FT_COMP2STAT: {
+            C2SFuncVM vf;
+//printf("calling out of case FT_COMP2STAT VM\n");
+            vf = (C2SFuncVM)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], funcs[i].funcarg[3],
+                 (int *)funcs[i].funcarg[4], vm);
+            *rc = *(int *)(funcs[i].funcarg[4]);
+            break;
+          }
+          case FT_COMPSLIST: {
+            CSLFuncVM vf;
+//printf("calling out of case FT_COMPSLIST VM\n");
+            vf = (CSLFuncVM)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
+            *rc = *(int *)(funcs[i].funcarg[3]);
+            break;
+          }
+          default:
+            fprintf(stderr, "unknown function type\n");
+            return ESMF_FAILURE;
+        }
+
+        return ESMF_SUCCESS;
+    }
+
+    return ESMF_FAILURE;
+
+ } // end ESMC_FTableCallVFuncPtr
+#endif
+ 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_FTableValidate - internal consistency check for a Component
