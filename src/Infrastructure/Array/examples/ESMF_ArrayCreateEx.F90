@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.12 2004/06/16 13:04:09 nscollins Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.13 2004/06/16 14:42:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 
 !  Create an {\tt ESMF\_Array} based on an existing, allocated Fortran 
 !  pointer.  The data is type Integer, one dimensional.
-!  The {\tt ESMF\_DATA_REF} flag means the framework will not make
+!  The {\tt ESMF\_DATA\_REF} flag means the framework will not make
 !  a copy of the data area but will use this memory directly.
 !  When the {\tt ESMF\_Array} is deleted the data area will remain
 !  and must be deallocated by the user when the space is not needed.
@@ -105,7 +105,7 @@
 
 !  Create an {\tt ESMF\_Array} based on an existing, allocated Fortran
 !  pointer.  The data is type Integer, one dimensional.
-!  The {\tt ESMF\_DATA_COPY} flag means the framework will make
+!  The {\tt ESMF\_DATA\_COPY} flag means the framework will make
 !  a copy of the data area and will be independent of the original
 !  data array.
 !  When the {\tt ESMF\_Array} is deleted this data area will be 
