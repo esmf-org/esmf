@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.16 2003/04/28 16:05:07 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.17 2003/04/28 19:24:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.16 2003/04/28 16:05:07 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.17 2003/04/28 19:24:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -184,7 +184,7 @@
                               {  7, 8, 5, 0, 6,11, 9,10, 1, 2, 3, 4 },
                               {  9,11, 4,10, 0, 2, 3, 1, 8, 7, 6, 5 }, 
                               { 10, 9, 2,11, 4, 0, 1, 3, 7, 8, 5, 6 },
-                              {  4, 3,10, 2, 9, 1, 0,11, 6, 5, 6, 7 },
+                              {  4, 3,10, 2, 9, 1, 0,11, 6, 5, 8, 7 },
                               {  2, 4, 9, 3, 1,10,11, 0, 5, 6, 7, 8 },
                               {  5, 6, 8, 1, 7, 3, 4, 2, 0,11,10, 9 },
                               {  6, 1, 7, 5, 3, 8, 2, 4,11, 0, 9,10 },
