@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.12 2004/02/03 21:23:09 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.13 2004/03/04 23:53:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -412,7 +412,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.12 2004/02/03 21:23:09 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.13 2004/03/04 23:53:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -537,6 +537,7 @@
       grid%numPhysGrids = 0
       grid%numPhysGridsAlloc = 0
       nullify(grid%physGrids)
+      nullify(grid%distGridIndex)
       ! nullify(grid%gridSpecific)
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1190,6 +1191,7 @@
       ! this routine. it's going to be pointed to by the PhysGrids pointer
       ! in the grid structure, but that might not be obvious to the compiler.
       type(ESMF_PhysGrid), dimension(:), pointer, save :: temp_pgrids
+      integer, dimension(:), pointer, save :: temp_dgIndex
       integer :: i, oldcount, alloccount, allocrc
 
       ! number of currently used and available entries
@@ -1214,6 +1216,13 @@
           rc = ESMF_FAILURE
           return
         endif
+        allocate(gridp%distGridIndex(CHUNK), stat=allocrc)
+        if(allocrc .ne. 0) then
+          print *, "cannot allocate distGridIndex, first try"
+          print *, "ERROR in ESMF_GridAddPhysGrid: distGridIndex allocate"
+          rc = ESMF_FAILURE
+          return
+        endif
         gridp%numPhysGridsAlloc = CHUNK
         rc = ESMF_SUCCESS
         return
@@ -1234,21 +1243,34 @@
        print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
        return
      endif
+     allocate(temp_dgIndex(alloccount), stat=allocrc)
+     if(allocrc .ne. 0) then
+       print *, "cannot allocate temp_dgIndex, alloc=", alloccount
+       print *, "ERROR in ESMF_GridAddPhysGrid: temp_dgIndex allocate"
+       return
+     endif
 
      ! copy old contents over (note use of = and not => )
      do i = 1, oldcount
-       temp_pgrids(i) = gridp%physGrids(i)
+       temp_pgrids(i)  = gridp%physGrids(i)
+       temp_dgIndex(i) = gridp%distGridIndex(i)
      enddo
 
-     ! deallocate old array
+     ! deallocate old arrays
      deallocate(gridp%physGrids, stat=allocrc)
      if(allocrc .ne. 0) then
        print *, "ERROR in ESMF_GridAddPhysGrid: PhysGrids deallocate"
        return
      endif
+     deallocate(gridp%distGridIndex, stat=allocrc)
+     if(allocrc .ne. 0) then
+       print *, "ERROR in ESMF_GridAddPhysGrid: distGridIndex deallocate"
+       return
+     endif
 
-     ! and set original pointer to the new space
+     ! and set original pointers to the new space
      gridp%physGrids => temp_pgrids
+     gridp%distGridIndex => temp_dgIndex
 
      ! update count of how many items are currently allocated
      gridp%numPhysGridsAlloc = alloccount
