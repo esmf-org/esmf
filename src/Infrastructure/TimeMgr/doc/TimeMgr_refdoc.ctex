@@ -75,7 +75,7 @@
 
 %\subsection{Usage Notes}
 #ifdef STANDALONE
-\input{TimeMgr_usaggenotes}
+\input{TimeMgr_usagenotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_usagenotes}
 #endif

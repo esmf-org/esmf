@@ -1,20 +1,21 @@
-% $Id: TimeMgr_implnotes.tex,v 1.1 2003/08/12 02:47:48 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.2 2003/08/12 14:02:07 cdeluca Exp $
 
 \subsection{Implementation Notes}
+\begin{enumerate}
 
-{\bf Base {\tt TimeIntervals} and {\tt Times} on the same internal representation.} 
-It is useful to allow both {\tt TimeIntervals} and {\tt Times} to 
-inherit from a single class, {\tt BaseTime}.  In C++, this can be
+\item {\bf Base TimeIntervals and Times on the same internal representation.} 
+It is useful to allow both TimeIntervals and Times to 
+inherit from a single class, BaseTime.  In C++, this can be
 implemented by using inheritance.  In F90, it can be implemented
-by having the derived types {\tt TimeIntervals} and {\tt Times}
-contain a derived type {\tt BaseTime}.  In both cases, the 
+by having the derived types TimeIntervals and Times
+contain a derived type BaseTime.  In both cases, the 
 {\tt BaseTime} class can be made private and invisible to the user.
 
-The result of this strategy is that {\tt Time Intervals} and 
-{\tt Times} gain a core representation of time as well a set
+The result of this strategy is that Time Intervals and 
+Times gain a consistent core representation of time as well a set
 of basic methods.
 
-The {\tt BaseTime} class can be designed with a minimum number of elements
+The BaseTime class can be designed with a minimum number of elements
 to represent any required time.  The design is based on the idea used
 in the real-time POSIX 1003.1b-1993 standard.  That is, to represent
 time simply as a pair of integers: one for seconds (whole) and one for
@@ -35,20 +36,14 @@ seconds element (numerator) is \htmlref{normalized}{glos:Normalized}
 numerator becomes greater than or equal to the denominator, the whole
 seconds is incremented or decremented accordingly and the numerator is
 reset to the remainder.  Conversions are performed upon demand by
-interface methods within the {\tt TimeInterval} and
-{\tt Time}.  This is done because different applications require different
+interface methods within the TimeInterval and
+Time.  This is done because different applications require different
 representations of time intervals and time instances.
 
-The {\tt BaseTime} class defines increment and decrement methods for basic
+The BaseTime class defines increment and decrement methods for basic
 time interval calculations between time instants.  It is done here rather
-than in the {\tt Calendar} class because it can be done with simple 
-day-based arithmetic that is {\tt Calendar} independent.  
-
-The {\tt TimeInterval} and {\tt Time} classes that are derived from 
-{\tt BaseTime} contain an internal {\tt Calendar} class.  Upon demand by 
-a user, the results of an increment or decrement operation are 
-converted to user units, which may be calendar-dependent, via methods 
-obtained from their internal {\tt Calendar}.
+than in the Calendar class because it can be done with simple 
+day-based arithmetic that is Calendar independent.  
 
 Comparison methods can also be defined in the {\tt BaseTime} class.  These
 perform equality/inequality, less than, and greater than comparisons
@@ -56,12 +51,15 @@ between any two {\tt TimeIntervals} or {\tt Times}.  These methods capture
 the common comparison logic between {\tt TimeIntervals} and {\tt Times} and
 hence are defined here for sharing.
 
-Methods or possibly a separate class can be included to handle fractional
-arithmetic. 
+\item {\bf Time and TimeInterval dependence on the calendar.} The TimeInterval 
+and Time classes contain an internal Calendar class.  
+Upon demand by a user, the results of an increment or decrement operation are 
+converted to user units, which may be calendar-dependent, via methods 
+obtained from their internal {\tt Calendar}.
 
 For ease in calendar conversions, a time value of zero (both whole and
 numerator) can correspond to the Julian date of zero. 
-
+\end{enumerate}
 
 
 
