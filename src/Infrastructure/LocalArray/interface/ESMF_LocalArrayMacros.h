@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.13 2004/03/16 21:01:09 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.14 2004/03/17 17:50:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
       end type ESMF_ArrWrap##mrank##D##mtypekind @\
 
 #define ArrayLocalVarMacro(mname, mtypekind, mrank, mdim) \
-        type(ESMF_ArrWrap##mrank##D##mtypekind) :: local##mrank##D##mtypekind
+        type(ESMF_ArrWrap##mrank##D##mtypekind) :: l##mrank##D##mtypekind
 
 
 #if 0
@@ -401,7 +401,7 @@
             if (present(ubounds)) then @\
                 ub(1:size(ubounds)) = ubounds @\
             endif @\
-            allocate(newp ( mrng ), stat=status) @\
+            allocate(newp(mrng), stat=status) @\
             if (status .ne. 0) then     ! f90 status, not ESMF @\
               print *, "LocalArray space allocate error" @\
               return @\
@@ -418,7 +418,7 @@
         ! Until we need offsets, use 0. @\
         offsets = 0 @\
  @\
-        wrap % ptr##mrank##D##mtypekind => newp @\
+        wrap%ptr##mrank##D##mtypekind => newp @\
         call c_ESMC_LocalArraySetInternal(array, wrap, & @\
                                  ESMF_DATA_ADDRESS(newp(mloc)), counts, & @\
                                  lb, ub, offsets, & @\
@@ -493,7 +493,7 @@
  @\
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
         integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
-        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -529,16 +529,16 @@
             print *, "Array - cannot retrieve array dim sizes" @\
             return @\
           endif @\
-          allocate(localp( mrng ), stat=status) @\
+          allocate(lp(mrng), stat=status) @\
           if (status .ne. 0) then     ! f90 status, not ESMF @\
             print *, "LocalArray do_copy allocate error" @\
             return @\
           endif @\
           ! this must do a contents assignment @\
-          localp = wrap % ptr##mrank##D##mtypekind @\
-          fptr => localp  @\
+          lp = wrap%ptr##mrank##D##mtypekind @\
+          fptr => lp  @\
         else @\
-          fptr => wrap % ptr##mrank##D##mtypekind @\
+          fptr => wrap%ptr##mrank##D##mtypekind @\
         endif @\
  @\
         if (rcpresent) rc = ESMF_SUCCESS @\
@@ -599,7 +599,7 @@
         status = ESMF_FAILURE  @\
  @\
         call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
-        deallocate(wrap % ptr##mrank##D##mtypekind) @\
+        deallocate(wrap%ptr##mrank##D##mtypekind) @\
  @\
         if (present(rc)) rc = status @\
  @\

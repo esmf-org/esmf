@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalAllocMacros.h,v 1.7 2004/03/11 16:25:26 nscollins Exp $
+! $Id: ESMF_LocalAllocMacros.h,v 1.8 2004/03/17 17:50:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 #endif
 #define AllocAllocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        allocate(local##mrank##D##mtypekind % ptr##mrank##D##mtypekind( mrng ), stat=status) @\
+        allocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind(mrng), stat=status) @\
         if (status .ne. 0) then @\
           print *, "ESMC_LocalArrayCreate: Allocation error" @\
           return @\
@@ -37,8 +37,8 @@
         ! Set offsets for now to 0, since this is apparently unused. @\
         offsets = 0 @\
  @\
-        call c_ESMC_LocalArraySetInternal(array, local##mrank##D##mtypekind, & @\
-                        ESMF_DATA_ADDRESS(local##mrank##D##mtypekind % ptr##mrank##D##mtypekind ( mloc )), & @\
+        call c_ESMC_LocalArraySetInternal(array, l##mrank##D##mtypekind, & @\
+                        ESMF_DATA_ADDRESS(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind ( mloc )), & @\
                         counts, lbounds, ubounds, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, status) @\
  @\
@@ -55,8 +55,8 @@
 #endif
 #define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        call c_ESMC_LocalArrayGetF90Ptr(array, local##mrank##D##mtypekind, status) @\
-        deallocate(local##mrank##D##mtypekind % ptr##mrank##D##mtypekind, stat=status)  @\
-        nullify(local##mrank##D##mtypekind % ptr##mrank##D##mtypekind) @\
+        call c_ESMC_LocalArrayGetF90Ptr(array, l##mrank##D##mtypekind, status) @\
+        deallocate(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind, stat=status)  @\
+        nullify(l##mrank##D##mtypekind%ptr##mrank##D##mtypekind) @\
 ! < End macro - do not edit directly >  @\
 
