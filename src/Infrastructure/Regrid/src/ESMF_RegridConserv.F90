@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.28 2004/05/14 20:04:10 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.29 2004/05/17 22:33:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.28 2004/05/14 20:04:10 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.29 2004/05/17 22:33:58 jwolfe Exp $'
 
 !==============================================================================
 
@@ -145,7 +145,7 @@
 !          regridding.  Default is that all destination points participate. 
 !     \item[{[normOpt]}]
 !          Optional normalization option.  
-!          Default is {\tt ESMF\_RegridNormOptFracArea}.
+!          Default is {\tt ESMF\_RegridNormOpt\_FracArea}.
 !     \item[{[order]}]
 !          Optional integer to set conservation order.  The default is 1,
 !          for first-order.
@@ -248,7 +248,7 @@
       ! Set optional parameters if present - otherwise set defaults
       orderUse    = 1
       if (present(order)) orderUse = order
-      normOptUse  = ESMF_RegridNormOptFracArea
+      normOptUse  = ESMF_RegridNormOpt_FracArea
       if (present(normOpt)) normOptUse = normOpt
 
       ! Set regrid method and array pointers       TODO: add name
@@ -1234,13 +1234,13 @@
         weights(1) = weightsData(n)            ! TODO: fix this for second order
 
         select case (normOpt)
-        case (ESMF_RegridNormOptNone)
+        case (ESMF_RegridNormOpt_None)
           normFactor = 1.0d0
 
-        case (ESMF_RegridNormOptDstArea)
+        case (ESMF_RegridNormOpt_DstArea)
           normFactor = 1.0d0/dstArea(iDst,jDst)
 
-        case (ESMF_RegridNormOptFracArea)
+        case (ESMF_RegridNormOpt_FracArea)
           normFactor = 1.0d0/dstFracArea(iDst,jDst)
 
         case default
@@ -1290,7 +1290,7 @@
         if (weightsData(n) < -.05) then
           print *,'Regrid weight < 0 ', srcAdd, iDst, jDst, weights(1)
         endif
-        if (normOpt /= ESMF_RegridNormOptNone .AND. weights(1) > 1.05d0) then
+        if (normOpt /= ESMF_RegridNormOpt_None .AND. weights(1) > 1.05d0) then
           print *,'Regrid weight > 1 ', srcAdd, iDst, jDst, weights(1)
         endif
         ! sum the weight for each dest grid point
@@ -1302,11 +1302,11 @@
         do iDst = 1,dstSizeX
 
           select case(normOpt)
-          case (ESMF_RegridNormOptDstArea)
+          case (ESMF_RegridNormOpt_DstArea)
             normFactor = dstFracArea(iDst,jDst)
-          case (ESMF_RegridNormOptFracArea)
+          case (ESMF_RegridNormOpt_FracArea)
             normFactor = 1.0d0
-          case (ESMF_RegridNormOptNone)
+          case (ESMF_RegridNormOpt_None)
             normFactor = dstFracArea(iDst,jDst)*dstArea(iDst,jDst)
           end select
 
