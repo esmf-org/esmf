@@ -1,20 +1,17 @@
-! $Id: FlowArraysMod.F90,v 1.1 2003/05/02 19:26:02 nscollins Exp $
+! $Id: FlowArraysMod.F90,v 1.2 2003/05/10 18:29:09 nscollins Exp $
+!
 !-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-
 !BOP
 !
+! !MODULE: FlowArraysMod.F90 - Source file for Data for Flow Solver
+!
 ! !DESCRIPTION:
-!  Global storage of arrays and scalars
+!  Allocate and Deallocate ESMF Framework objects which handle data arrays
+!  including ESMF\_Fields, ESMF\_Grids,  and ESMF\_Arrays.
 !
+!EOP
 !
-!\begin{verbatim}
-
       module FlowArraysMod
-!
-! Some common definitions.  This requires the C preprocessor.
-!
-#include "ESMF.h"
 !
 ! ESMF modules
 !
@@ -25,21 +22,24 @@
 !
 ! arrays
 !
-      public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+      public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag, de
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v
+      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
+      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: p, q, flag, de
       integer, dimension(4) :: nbc
       integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
 !
 ! Fields
 !
       public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-                field_rhov, field_p, field_q, field_flag
+                field_rhov, field_p, field_q, field_flag, field_de
 
       type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                          field_rhou, field_rhov, field_p, field_q, field_flag
+                          field_rhou, field_rhov, field_p, field_q, field_flag, &
+                          field_de
 !
 ! scalars here
 !
@@ -99,13 +99,39 @@
 !
 ! create fields and get pointers to data
 !
+!BOP
+!
+! !DESCRIPTION:
+! \subsubsection{Example of Field Creation and Array Usage:}
+!
+!     The following piece of code provides an example of Field creation used in
+!     the Demo.  In this example, we create a Field from an ArraySpec, which
+!     designates the rank, type, and kind of the data.  First initialize the
+!     ArraySpec with rank 2 for a two-dimensional array, type ESMF\_DATA\_REAL,
+!     and kind ESMF\_KIND\_R4:
+!\begin{verbatim}
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                               kind=ESMF_KIND_R4)
-
+!\end{verbatim}
+!     Next, create a Field named "SIE" using the ArraySpec with a relative
+!     location (relloc) at the cell centers:
+!\begin{verbatim}
       field_sie  = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="SIE", rc=status)
+!\end{verbatim}
+!     Once the Field has been created, we have to get a pointer to the Array
+!     inside it.  In this example, we are not interested in the Array itself
+!     so we use a temporary array:
+!\begin{verbatim}
       call ESMF_FieldGetData(field_sie, array_temp, rc=status)
+!\end{verbatim}
+!     Here we are getting a pointer to the data inside the Array and calling it
+!     "sie."  Inside the Component "sie" can be used like an array made by an
+!     F90 allocation but will reference the data inside "field\_sie."
+!\begin{verbatim}
       call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
+!\end{verbatim}
+!EOP
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EAST, &
                    name="U", rc=status)
@@ -151,6 +177,11 @@
                    name="FLAG", rc=status)
       call ESMF_FieldGetData(field_flag, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)
+
+      field_de   = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                   name="DE", rc=status)
+      call ESMF_FieldGetData(field_de, array_temp, rc=status)
+      call ESMF_ArrayGetData(array_temp, de, ESMF_DATA_REF, status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysAlloc"
@@ -209,6 +240,7 @@
       call ESMF_FieldDestroy(field_p   , rc=status)
       call ESMF_FieldDestroy(field_q   , rc=status)
       call ESMF_FieldDestroy(field_flag, rc=status)
+      call ESMF_FieldDestroy(field_de  , rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysDealloc"
@@ -221,5 +253,4 @@
 
 !----------------------------------------------------------------------------------
     end module FlowArraysMod
-!\end{verbatim}
     
