@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.12 2003/04/11 22:02:39 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.13 2003/04/17 17:08:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.12 2003/04/11 22:02:39 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.13 2003/04/17 17:08:10 eschwab Exp $'
 
 !==============================================================================
 !
@@ -315,7 +315,7 @@
       integer, intent(in), optional :: D
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
-      integer(ESMF_IKIND_I8), intent(in), optional :: S
+      integer, intent(in), optional :: S
       integer, intent(in), optional :: MS
       integer, intent(in), optional :: US
       integer, intent(in), optional :: NS
@@ -350,7 +350,7 @@
 !     \item[{[M]}]
 !          Integer minutes
 !     \item[{[S]}]
-!          64-bit integer seconds
+!          Integer seconds
 !     \item[{[MS]}]
 !          Integer milliseconds
 !     \item[{[US]}]
@@ -417,7 +417,7 @@
       integer, intent(out), optional :: D
       integer, intent(out), optional :: H
       integer, intent(out), optional :: M
-      integer(ESMF_IKIND_I8), intent(out), optional :: S
+      integer, intent(out), optional :: S
       integer, intent(out), optional :: MS
       integer, intent(out), optional :: US
       integer, intent(out), optional :: NS
@@ -451,7 +451,7 @@
 !     \item[{[M]}]
 !          Integer minutes
 !     \item[{[S]}]
-!          64-bit integer seconds
+!          Integer seconds
 !     \item[{[MS]}]
 !          Integer milliseconds
 !     \item[{[US]}]
@@ -507,7 +507,7 @@
       integer, intent(in), optional :: D
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
-      integer(ESMF_IKIND_I8), intent(in), optional :: S
+      integer, intent(in), optional :: S
       integer, intent(in), optional :: MS
       integer, intent(in), optional :: US
       integer, intent(in), optional :: NS
@@ -541,7 +541,7 @@
 !     \item[{M]}]
 !          Integer minutes
 !     \item[{S]}]
-!          64-bit integer seconds
+!          Integer seconds
 !     \item[{MS]}]
 !          Integer milliseconds
 !     \item[{US]}]

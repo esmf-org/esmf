@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.14 2003/04/16 21:12:55 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.15 2003/04/17 17:08:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.14 2003/04/16 21:12:55 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.15 2003/04/17 17:08:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -90,7 +90,7 @@
       int *D,                   // in - integer number of interval days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
-      ESMF_IKIND_I8 *S,         // in - long integer seconds 
+      int *S,                   // in - integer seconds 
       int *MS,                  // in - integer milliseconds
       int *US,                  // in - integer microseconds
       int *NS,                  // in - integer nanoseconds
@@ -239,7 +239,7 @@
       int *D,                   // out - integer number of interval days
       int *H,                   // out - integer hours
       int *M,                   // out - integer minutes
-      ESMF_IKIND_I8 *S,         // out - long integer seconds 
+      int *S,                   // out - integer seconds 
       int *MS,                  // out - integer milliseconds
       int *US,                  // out - integer microseconds
       int *NS,                  // out - integer nanoseconds
@@ -328,7 +328,7 @@
       int *D,                   // in - integer number of interval days
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
-      ESMF_IKIND_I8 *S,         // in - long integer seconds 
+      int *S,                   // in - integer seconds 
       int *MS,                  // in - integer milliseconds
       int *US,                  // in - integer microseconds
       int *NS,                  // in - integer nanoseconds

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.9 2003/04/15 16:47:40 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.10 2003/04/17 17:08:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalinit)(ESMC_TimeInterval *ptr,
                                  int *YY, int *MO, int *D, int *H, int *M,
-                                 ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                                 int *S, int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,
@@ -46,7 +46,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
                                  int *YY, int *MO, int *D, int *H, int *M,
-                                 ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                                 int *S, int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,
@@ -58,7 +58,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalset)(ESMC_TimeInterval *ptr,
                                  int *YY, int *MO, int *D, int *H, int *M,
-                                 ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                                 int *S, int *MS, int *US, int *NS,
                                  double *d_, double *h_, double *m_,
                                  double *s_, double *ms_, double *us_,
                                  double *ns_, int *Sn, int *Sd,

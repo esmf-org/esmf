@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.15 2003/04/16 21:12:13 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.16 2003/04/17 17:08:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,7 +85,7 @@
 
     // Init method to support the F90 optional arguments interface
     int ESMC_TimeInit(int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                      ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                      int *S, int *MS, int *US, int *NS,
                       double *d_, double *h_, double *m_, double *s_,
                       double *ms_, double *us_, double *ns_,
                       int *Sn, int *Sd, ESMC_Calendar *cal, int *tz);
@@ -107,13 +107,13 @@
 
     // Get/Set methods to support the F90 optional arguments interface
     int ESMC_TimeGet(int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                     ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                     int *S, int *MS, int *US, int *NS,
                      double *d_, double *h_, double *m_, double *s_,
                      double *ms_, double *us_, double *ns_,
                      int *Sn, int *Sd) const;
 
     int ESMC_TimeSet(int *YY, int *MM, int *DD, int *D, int *H, int *M,
-                     ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
+                     int *S, int *MS, int *US, int *NS,
                      double *d_, double *h_, double *m_, double *s_,
                      double *ms_, double *us_, double *ns_,
                      int *Sn, int *Sd);
