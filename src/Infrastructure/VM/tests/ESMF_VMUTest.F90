@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.2 2004/08/24 23:14:19 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.3 2004/08/25 21:35:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.2 2004/08/24 23:14:19 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.3 2004/08/25 21:35:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,10 +51,11 @@
 
 !     !LOCAL VARIABLES:
       type(ESMF_VM):: vm
-      integer:: localPet
+      integer:: localPet, npets
       integer, allocatable:: array1(:)
+      integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
-      integer:: nsize, i
+      integer:: nsize, i, j
 
 
 !-------------------------------------------------------------------------------
@@ -93,7 +94,7 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, localPet, rc=rc)
+      call ESMF_VMGet(vm, localPet, petCount=npets, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -116,15 +117,23 @@
       reduceflag=ESMF_SUM, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      ! Populate array2
+      allocate(array2(nsize,npets))
+      do j=1, npets 
+      	do i=1, nsize
+        	array2(i,j) = (j-1) * 100 + i
+      	enddo
+      enddo
+
       ! print the scatter result
-      myresults = array1(1) + array1(2) + array1(3)
+      myresults = SUM(array2)
       print *, 'Global sum:'
       print *, localPet,' func_results: ', func_results, ' myresults:', myresults
 
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify Reduce Results Test"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test"
       call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -138,7 +147,7 @@
 
       !------------------------------------------------------------------------
       
-      !myresults = MIN(array1(1), array1(2), array1(3))
+      !myresults = MINVAL(array1)
       !write(failMsg, *) "Returned wrong results"
       !write(name, *) "Verify Reduce Results Test"
       !call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
