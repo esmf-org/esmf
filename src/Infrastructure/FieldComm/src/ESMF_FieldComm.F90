@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.61 2004/11/05 08:14:49 theurich Exp $
+! $Id: ESMF_FieldComm.F90,v 1.62 2004/11/18 17:00:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.61 2004/11/05 08:14:49 theurich Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.62 2004/11/18 17:00:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -379,7 +379,7 @@
       logical :: rcpresent                        ! Return code present
       integer :: htype
       logical :: allInOne
-      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -390,7 +390,7 @@
       endif     
 
       ! Initialize other variables
-      ftypep = field%ftypep
+      ftypep => field%ftypep
       allInOne = .false.
 
       ! if the routehandle has not been precomputed, do so now
@@ -1451,8 +1451,8 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_FieldType) :: ftypep              ! field type info
-      type(ESMF_DELayout) :: delayout          ! layout
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
+      type(ESMF_DELayout) :: delayout             ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
       integer :: i, datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
@@ -1467,7 +1467,7 @@
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = field%ftypep
+      ftypep => field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
@@ -1569,7 +1569,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
       integer :: datarank, numDims
@@ -1598,7 +1598,7 @@
       endif     
 
       ! Get the Layout from the Field's Grid
-      ftypep = field%ftypep
+      ftypep => field%ftypep
       call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
       
       ! Get the associated VM
