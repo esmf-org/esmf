@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_TimeEx.F90,v 1.13 2003/09/10 03:31:29 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.13 2003/09/10 03:31:29 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -86,7 +86,7 @@
       ! calculate difference between time2 and time1
       timeInterval2 = time2 - time1
       call ESMF_TimeIntervalGet(timeInterval2, d=D, h=H, m=M, s=S, rc=rc)
-      print *, "Difference between time2 ane time1 = ", D, " days, ", H, &
+      print *, "Difference between time2 and time1 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
 
       ! add time interval1 to time1
