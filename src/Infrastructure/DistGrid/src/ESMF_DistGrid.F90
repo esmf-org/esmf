@@ -1,4 +1,4 @@
-
+! $Id: ESMF_DistGrid.F90,v 1.126 2004/10/14 18:57:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,6 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-!!#include "ESMF_DistGrid.h"   !! this seems unneeded
 #include "ESMF.h"
 !==============================================================================
 !BOPI
@@ -216,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.125 2004/10/05 22:46:25 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.126 2004/10/14 18:57:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -560,14 +559,13 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      !logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
 !      ! If already destroyed or never created, return ok
 !      if (.not. associated(distgrid%ptr)) then
-!        dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+!        call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
 !                              "DistGrid uninitialized or already destroyed", &
 !                               ESMF_CONTEXT, rc)
 !        return
@@ -759,8 +757,6 @@
       integer :: ndim
       integer, dimension(ESMF_MAXDECOMPDIM) :: globalCellCountPerDim, &
                                                nDEsUse
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       type(ESMF_DistGridLocal),  pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
       type(ESMF_Logical):: otoFlag, lrFlag
@@ -789,21 +785,19 @@
 
       ! Check DELayout attributes
       if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layoutu
-        print logMsg, "not a 1-to-1 layout"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, "not a 1-to-1 layout", &
                                     ESMF_CONTEXT, rc)
         return
       endif
       ! if (ndim .ne. 2) then               ! ensure this is 2D Layout
-      !   print logMsg, "not a 2D layout"
-      !   dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
+      !   call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, "not a 2D layout", &
       !                               ESMF_CONTEXT, rc)
       !   return
       ! endif
       ! if (lrFlag .ne. ESMF_TRUE) then     ! ensure this is logical rect layout
-      !   print logMsg, "not a logically rectangular layout"
-      !   dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
-      !                               ESMF_CONTEXT, rc)
+      !   call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+      !                              "not a logically rectangular layout", &
+      !                              ESMF_CONTEXT, rc)
       !   return
       ! endif
       call ESMF_DELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=localrc)
@@ -813,9 +807,9 @@
       nDEs(0) = 1
       nDE = nDEs(1) * nDEs(2)
       if (nDE .le. 0) then
-        print logMsg, "number of DEs less than or equal to zero"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
-                                    ESMF_CONTEXT, rc)
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                   "number of DEs less than or equal to zero", &
+                                   ESMF_CONTEXT, rc)
         return
       endif
       call ESMF_DistGridAllocate(dgtype, nDE, dimCount, localrc)
@@ -847,8 +841,8 @@
             globalCellCount = globalCellCount * globalCellCountPerDim(i)
       enddo
       if (globalCellCount.le.0) then
-        print logMsg, "globalCellCount le 0"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                   "globalCellCount le 0", &
                                     ESMF_CONTEXT, rc)
         return
       endif
@@ -889,8 +883,8 @@
             globalCellCount = globalCellCount * globalCellCountPerDim(i)
       enddo
       if (globalCellCount.le.0) then
-        print logMsg, "globalCellCount le 0"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                   "globalCellCount le 0", &
                                     ESMF_CONTEXT, rc)
         return
       endif
@@ -970,8 +964,6 @@
 
       integer :: localrc                          ! Error status
       integer :: i, ndim
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       type(ESMF_Logical):: otoFlag, lrFlag
 
       ! Initialize return code; assume failure until success is certain
@@ -998,9 +990,9 @@
 
       ! Check DELayout attributes
       if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layoutu
-        print logMsg, "not a 1-to-1 layout"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
-                                    ESMF_CONTEXT, rc)
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                   "not a 1-to-1 layout", &
+                                   ESMF_CONTEXT, rc)
         return
       endif
 
@@ -1591,8 +1583,6 @@
       !integer :: localrc                          ! Error status
       integer :: i, j, de, bnd, localCount
       integer :: globalStart, globalEnd           ! global counters
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       type(ESMF_DistGridGlobal), pointer :: glob
 
       ! Initialize return code; assume failure until success is certain
@@ -1681,9 +1671,9 @@
 
       !-------------
       case default
-        print logMsg, "Invalid decompIds(1)"
-        dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
-                                    ESMF_CONTEXT, rc)
+        call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                  "Invalid decompIds(1)", &
+                                   ESMF_CONTEXT, rc)
         return
       end select
 
@@ -1767,9 +1757,9 @@
 
         !-------------
         case default
-          print logMsg, "Invalid decompIds(2)"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_NOT_FOUND, &
+                                     "Invalid decompIds(2)", &
+                                     ESMF_CONTEXT, rc)
           return
         end select
 
@@ -1829,7 +1819,6 @@
 
       !integer :: localrc                          ! Error status
       integer :: i, i2
-      character(len=ESMF_MAXSTR) :: logMsg
       type(ESMF_DistGridLocal), pointer :: me
 
       ! Initialize return code; assume failure until success is certain
@@ -1850,8 +1839,7 @@
         i2 = size(localCellCountPerDim)
         if (size(localCellCountPerDim).gt.dgtype%dimCount) then
           i2 = dgtype%dimCount
-          print logMsg, "size of array gt dimCount"
-          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite("size of array gt dimCount", ESMF_LOG_WARNING)
         endif
         do i = 1,i2
           localCellCountPerDim(i) = me%localCellCountPerDim(i)
@@ -1862,8 +1850,7 @@
         i2 = size(globalStartPerDim)
         if (size(globalStartPerDim).gt.dgtype%dimCount) then
           i2 = dgtype%dimCount
-          print logMsg, "size of array gt dimCount"
-          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite("size of array gt dimCount", ESMF_LOG_WARNING)
         endif
         do i = 1,i2
           globalStartPerDim(i) = me%globalStartPerDim(i)
@@ -1874,8 +1861,7 @@
         i2 = size(globalAIPerDim)
         if (size(globalAIPerDim).gt.dgtype%dimCount) then
           i2 = dgtype%dimCount
-          print logMsg, "size of array gt dimCount"
-          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite("size of array gt dimCount", ESMF_LOG_WARNING)
         endif
         do i = 1,i2
           globalAIPerDim(i) = me%globalAIPerDim(i)
@@ -2293,8 +2279,6 @@
       integer :: localrc                          ! Error status
       integer :: i, j, base, l1, r1, l2, r2
       integer, dimension(:), allocatable :: dimOrderUse
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       type(ESMF_DistGridLocal), pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
 
@@ -2317,16 +2301,16 @@
 
       !make sure local array is present as well
         if (.not. present(local1D)) then
-          print logMsg, "local array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "local array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
       !make sure array lengths are the same
         if (size(global1D) .NE. size(local1D)) then
-          print logMsg, "array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
 
@@ -2353,16 +2337,16 @@
 
       !make sure local array is present as well
         if (.not. present(local2D)) then
-          print logMsg, "global array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "global array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
       !make sure array lengths are the same
         if (size(global2D) .NE. size(local2D)) then
-          print logMsg, "array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
 
@@ -2387,16 +2371,16 @@
       if (present(globalAI1D)) then
         !make sure local AI array is present as well
         if (.not. present(localAI1D)) then
-          print logMsg, "local array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "local array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         !make sure array lengths are the same
         if (size(globalAI1D) .NE. size(localAI1D)) then
-          print logMsg, "array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         ! calculate default if dimOrder is not present
@@ -2434,16 +2418,16 @@
       if (present(globalAI2D)) then
         !make sure local ai array is present as well
         if (.not. present(localAI2D)) then
-          print logMsg, "local array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "local array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         !make sure array lengths are the same
         if (size(globalAI2D) .NE. size(localAI2D)) then
-          print logMsg, "array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
 
@@ -2554,8 +2538,6 @@
 
       !integer :: localrc                          ! Error status
       integer :: i, j, l1, l2, base, localCount
-      character(len=ESMF_MAXSTR) :: logMsg
-      logical :: dummy
       type(ESMF_DistGridLocal), pointer :: me
       type(ESMF_DistGridGlobal), pointer :: glob
 
@@ -2577,16 +2559,16 @@
       if (present(local1D)) then
         ! make sure global array is present as well
         if (.not. present(global1D)) then
-          print logMsg, "1D global array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "1D global array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         ! make sure array lengths are the same
         if (size(global1D) .NE. size(local1D)) then
-          print logMsg, "1D array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "1D array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         ! the following code works only for grid where the global data is
@@ -2608,16 +2590,16 @@
       if (present(local2D)) then
         ! make sure global array is present as well
         if (.not. present(global2D)) then
-          print logMsg, "2D global array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "2D global array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         ! make sure array lengths are the same
         if (size(global2D) .NE. size(local2D)) then
-          print logMsg, "2D array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "2D array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
 
@@ -2633,16 +2615,16 @@
       if (present(localAI1D)) then
         ! make sure global AI array is present as well
         if (.not. present(globalAI1D)) then
-          print logMsg, "1D AI global array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "1D AI global array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         ! make sure array lengths are the same
         if (size(globalAI1D) .NE. size(localAI1D)) then
-          print logMsg, "1D AI array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "1D AI array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         localCount = me%globalAIPerDim(1)%max &
@@ -2659,16 +2641,16 @@
       if (present(localAI2D)) then
         ! make sure global ai array is present as well
         if (.not. present(globalAI2D)) then
-          print logMsg, "2D AI global array not present"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "2D AI global array not present", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         ! make sure array lengths are the same
         if (size(globalAI2D) .NE. size(localAI2D)) then
-          print logMsg, "2D AI array lengths not equal"
-          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
-                                      ESMF_CONTEXT, rc)
+          call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, &
+                                     "2D AI array lengths not equal", &
+                                     ESMF_CONTEXT, rc)
           return
         endif
         do j = 1, size(localAI2D,2)
