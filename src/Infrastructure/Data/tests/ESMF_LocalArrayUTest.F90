@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.5 2003/08/19 17:07:27 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.6 2003/08/28 20:05:25 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -27,9 +27,11 @@
     implicit none
 
 !   ! Local variables
-    integer :: nx, ny, arank, rc 
+    integer :: nx, ny, arank, brank, rc 
     integer :: i, j, k, l, m, ni, nj, nk, nl, nm
-    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_ArraySpec) :: arrayspec, spec
+    type(ESMF_DataType) :: atype
+    type(ESMF_DataKind) :: akind
     integer :: counts(ESMF_MAXDIM)
     type(ESMF_LocalArray) :: array1, array2, array3, array4
     real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
@@ -616,6 +618,60 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
+    !NEX_UTest
+    write(failMsg, *) "rank not correct" 
+    write(name, *) "Get Spec rank and verify Test"
+    call ESMF_LocalArraySpecGet(arrayspec, rank=brank, rc=rc)
+    call ESMF_Test((arank.eq.brank), name, failMsg, result, ESMF_SRCLINE)
+
+
+    !NEX_UTest
+    write(failMsg, *) "type not correct" 
+    write(name, *) "Get Spec type and verify Test"
+    call ESMF_LocalArraySpecGet(arrayspec, type=atype, rc=rc)
+    call ESMF_Test((atype.eq.ESMF_DATA_REAL), name, failMsg, result, ESMF_SRCLINE)
+
+    !NEX_UTest
+    write(failMsg, *) "kind not correct" 
+    write(name, *) "Get Spec kind and verify Test"
+    call ESMF_LocalArraySpecGet(arrayspec, kind=akind, rc=rc)
+    call ESMF_Test((akind.eq.ESMF_KIND_R4), name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+
+    !EX_UTest
+    arank = 10
+    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(name, *) "Initializing an Array Spec of rank 10 Test"
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+    !EX_UTest
+    write(failMsg, *) "Did not return ESMF_FAILURE"
+    write(name, *) "Creating an Array from a Spec with rank of 10 Test"
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
+    call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
+    !NEX_UTest
+    arank = 5
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Initializing an Array Spec of rank 5 Test"
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating an Array from a Spec with rank of 5 Test"
+    array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
 !-------------------------------------------------------------------------------
 !   ! Test 8:
 !   !  Create based on an existing, allocated F90 pointer. 
@@ -633,7 +689,11 @@
       enddo
     enddo
 
+    !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Initializing an Array with data type integer Test"
     array1 = ESMF_LocalArrayCreate(int2Dptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 create returned"
 
     call ESMF_LocalArrayWrite(array1, filename="./foo", rc=rc)
