@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.37 2004/05/25 11:54:55 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.38 2004/05/26 06:14:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,12 +26,12 @@
 #include "ESMF.h"
 !------------------------------------------------------------------------------
 !BOPI
-! !MODULE: ESMF_CplCompMod - Coupler Cplcomp class.
+! !MODULE: ESMF_CplCompMod - Coupler Component class.
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the Fortran interfaces to the
-! {\tt Coupler Cplcomp} class and associated functions and subroutines.  
+! {\tt ESMF\_CplComp} class and associated functions and subroutines.  
 !
 !
 ! !USES:
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.37 2004/05/25 11:54:55 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.38 2004/05/26 06:14:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -159,14 +159,14 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp}, specifying all arguments.
 !
 !  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[name]
-!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
 !    from within the {\tt ESMF\_CplComp} code once the initialization routine
 !    is called.
 !   \item[config]
@@ -236,19 +236,20 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp}, specifying optional configuration
+!  file information.
 !
 !  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
 !   \item[{[name]}]
-!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
 !    from within the {\tt ESMF\_CplComp} code once the initialization routine
 !    is called.
 !   \item[{[config]}]
 !    An already-created {\tt ESMF\_Config} configuration object 
-!    from which the new component
+!    from which the new {\tt ESMF\_CplComp}
 !    can read in namelist-type information to set parameters for this run.
 !    If both are specified, this object takes priority over {\tt configFile}.
 !   \item[{[configFile]}]
@@ -311,8 +312,8 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateVM(vm, &
-                                  name, config, configFile, clock, petList, rc)
+      function ESMF_CplCompCreateVM(vm, name, config, configFile, &
+                                    clock, petList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateVM
@@ -327,7 +328,7 @@
       integer,           intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp}, setting the resources explicitly.
 !
 !  The return value is the new {\tt ESMF\_CplComp}.
 !    
@@ -339,7 +340,7 @@
 !    This will become the parent {\tt ESMF\_VM} 
 !    of the newly created {\tt ESMF\_CplComp}.
 !   \item[{[name]}]
-!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
 !    from within the {\tt ESMF\_CplComp} code once the initialization routine
 !    is called.
 !   \item[{[config]}]
@@ -427,17 +428,19 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp}, specifying the resources of the parent
+!  component as a default, with the option to select specific subsets of
+!  those resources to give to the child component.
 !
 !  The return value is the new {\tt ESMF\_CplComp}.
 !    
 !  The arguments are:
 !  \begin{description}
-!   \item[{[parent]}]
+!   \item[parent]
 !    The parent component object.  The child {\tt ESMF_CplComp} 
 !    will inherit all the {\tt PET}s from the parent.
 !   \item[{[name]}]
-!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
 !    from within the {\tt ESMF\_CplComp} code once the initialization routine
 !    is called.
 !   \item[{[config]}]
@@ -529,7 +532,9 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!  Create a new {\tt ESMF\_CplComp}, specifying the resources of the parent
+!  component as a default, with the option to select specific subsets of
+!  those resources to give to the child component.
 !
 !  The return value is the new {\tt ESMF\_CplComp}.
 !    
@@ -539,7 +544,7 @@
 !    The parent component object.  The child {\tt ESFM\_CplComp} 
 !    will inherit all the {\tt PET}s from the parent.
 !   \item[{[name]}]
-!    Name of the newly-created {\tt ESMF\_CplComp].  This name can be altered 
+!    Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
 !    from within the {\tt ESMF\_CplComp} code once the initialization routine
 !    is called.
 !   \item[{[config]}]
@@ -672,7 +677,7 @@
 !
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
-                                              exportState, clock, phase, rc)
+                                  exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -681,6 +686,7 @@
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -690,7 +696,7 @@
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
-!    {\tt ESMF\_CplComp} object to call finalize routine for.
+!    The {\tt ESMF\_CplComp} to call finalize routine for.
 !   \item[{[importState]}]
 !    {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
@@ -713,6 +719,8 @@
 !      if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !      For multiple-phase child components, this is the integer phase 
 !      number to be invoked.
+!   \item[{[blockingFlag]}]
+!    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -720,7 +728,8 @@
 !EOP
 
         call ESMF_CompFinalize(cplcomp%compp, importState=importState, &
-                      exportState=exportState, clock=clock, phase=phase, rc=rc)
+                 exportState=exportState, clock=clock, phase=phase, &
+                 blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_CplCompFinalize
 
@@ -732,15 +741,15 @@
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompGet(cplcomp, name, clock, &
-                                                   configFile, config, vm, rc)
+      subroutine ESMF_CplCompGet(cplcomp, name, config, &
+                                                   configFile, clock, vm, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: cplcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_Clock), intent(out), optional :: clock
-      character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
+      character(len=*), intent(out), optional :: configFile
+      type(ESMF_Clock), intent(out), optional :: clock
       type(ESMF_VM), intent(out), optional :: vm
       integer, intent(out), optional :: rc             
 
@@ -758,12 +767,14 @@
 !    {\tt ESMF\_CplComp} object to query.
 !   \item[{[name]}]
 !    Return the name of the {\tt ESMF\_CplComp}.
-!   \item[{[clock]}]
-!    Return the private clock for this {\tt ESMF\_CplComp}.
-!   \item[{[configFile]}]
-!    Return the configuration filename for this {\tt ESMF\_CplComp}.
 !   \item[{[config]}]
 !    Return the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
+!   \item[{[configFile]}]
+!    Return the configuration filename for this {\tt ESMF\_CplComp}.
+!   \item[{[clock]}]
+!    Return the private clock for this {\tt ESMF\_CplComp}.
+!   \item[{[vm]}]
+!    Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -783,7 +794,7 @@
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
-                                                  exportState, clock, phase, rc)
+                                   exportState, clock, phase, blockingFlag, rc)
 !
 !
 ! !ARGUMENTS:
@@ -792,6 +803,7 @@
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -823,6 +835,9 @@
 !      if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !      For multiple-phase child components, this is the integer phase 
 !      number to be invoked.
+!   \item[{[blockingFlag]}]
+!    Valid values are {\tt ESMF\_BLOCKING} (the default) 
+!    or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -830,8 +845,8 @@
 !EOP
 
         call ESMF_CompInitialize(cplcomp%compp, importState=importState, &
-                                 exportState=exportState, clock=clock,     &
-                                 phase=phase, rc=rc)
+                                 exportState=exportState, clock=clock,   &
+                                 phase=phase, blockingFlag=blockingFlag, rc=rc)
 
         end subroutine ESMF_CplCompInitialize
 
@@ -935,7 +950,7 @@
 !
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
-                                                              clock, phase, rc)
+                                         clock, phase, blockingFlag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: cplcomp
@@ -943,6 +958,7 @@
       type (ESMF_State), intent(inout), optional :: exportState
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -996,14 +1012,14 @@
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompSet(cplcomp, name, clock, configFile, config, rc)
+      subroutine ESMF_CplCompSet(cplcomp, name, config, configFile, clock, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: cplcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_Clock), intent(in), optional :: clock
-      character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
+      character(len=*), intent(in), optional :: configFile
+      type(ESMF_Clock), intent(in), optional :: clock
       integer, intent(out), optional :: rc             
 
 !
@@ -1020,12 +1036,12 @@
 !    {\tt ESMF\_CplComp} object to change.
 !   \item[{[name]}]
 !    Set the name of the {\tt ESMF\_CplComp}.
-!   \item[{[clock]}]
-!    Set the private clock for this {\tt ESMF\_CplComp}.
-!   \item[{[configFile]}]
-!    Set the configuration filename for this {\tt ESMF\_CplComp}.
 !   \item[{[config]}]
 !    Set the {\tt ESMF\_Config} object for this {\tt ESMF\_CplComp}.
+!   \item[{[configFile]}]
+!    Set the configuration filename for this {\tt ESMF\_CplComp}.
+!   \item[{[clock]}]
+!    Set the private clock for this {\tt ESMF\_CplComp}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompSetServ.F90,v 1.2 2004/05/25 12:11:54 nscollins Exp $
+! $Id: ESMF_CplCompSetServ.F90,v 1.3 2004/05/26 06:14:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 ! !DESCRIPTION:
 !  Intended to be called by an {\tt ESMF\_CplComp} during the 
 !  registration process.
-!  An {\tt ESMF\_CplComp} calls {\tt ESMF\_SetEntryPoint} for each of 
+!  An {\tt ESMF\_CplComp} calls {\tt ESMF\_CplCompSetEntryPoint} for each of 
 !  the predefined init, run, and finalize routines, 
 !  to assocate the internal subroutine to be
 !  called for each function.  If multiple phases for init, run, or finalize
@@ -131,7 +131,7 @@
 !  they need to share in common can either be module global data, or can
 !  be allocated in a private data block, and the address of that block
 !  can be registered with the framework and retrieved by subsequent calls.
-!  When running multiple instantiations of an {\tt ESMF\_CplComp} , 
+!  When running multiple instantiations of an {\tt ESMF\_CplComp}, 
 !  for example during
 !  ensemble runs, it may be simpler to maintain private data specific to 
 !  each run with private data blocks.  A corresponding 
@@ -180,7 +180,8 @@
 !   \item[cplcomp]
 !    An {\tt ESMF\_CplComp} object.
 !   \item[subroutineName]
-!    The public name of the CplComp's {\tt ESMF\_CplCompSetServices} call.  
+!    The public name of the {\tt cplcomp}'s 
+!    {\tt ESMF\_CplCompSetServices} call.  
 !    An {\tt ESMF\_CplComp} writer must provide this information.
 !    Note this is the actual subroutine, not a character string.
 !   \item[{[rc]}] 
