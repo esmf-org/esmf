@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.120 2004/12/21 00:58:40 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.121 2004/12/21 01:05:56 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -240,7 +240,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.120 2004/12/21 00:58:40 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.121 2004/12/21 01:05:56 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1966,6 +1966,7 @@ end function
 !EOPI
 
     integer :: status                     ! local error status
+    integer :: dummy
     logical :: rcpresent
     integer :: callrc
 
@@ -1999,13 +2000,14 @@ end function
       call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
                            compp%vm_cargo, callrc, status)
 
-      if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
-      if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
-
       ! TODO: what is the relationship between callrc and status and rc
       if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rc)) return
+
+      if (compp%isdel) call ESMF_StateDestroy(compp%is, rc=dummy)
+      if (compp%esdel) call ESMF_StateDestroy(compp%es, rc=dummy)
+
     else
       callrc = ESMF_SUCCESS
     endif
