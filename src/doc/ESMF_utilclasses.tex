@@ -195,40 +195,32 @@ It provides query methods to the Layout object, and some limited query methods
 may be available at the application level.
 \end{description}
 
-\subsubsection{Machine Model (ESMF\_MachineModel)}
-\label{sec:machinemodel} 
-\begin{description}
-\item [Description] A Machine Model describes the characteristics of memory and
-communication characteristics which influence choices for accomplishing a parallel 
-decomposition of a large problem.  For the most part the application does not
-interact with this class of object, although some query routines are provided.
-\item [Function] The MachineModel class encapsulates all hardware dependent information
-about the memory subsystem (e.g. physical shared memory, distributed shared memory, clustered
-memory), what communication transport mechanisms are available (MPI, OpenMP, etc), 
-whether the processors are homogeneous or heterogeneous, and 
-any other relevant hardware information (e.g. processor speed).
-It is aggregated into the Layout class (see Section~\ref{layout}), and provides
-methods for querying all characteristics needed by the Layout object to do 
-problem decomposition and distribution of work.
-The MachineModel class does expose some limited query methods to the application, 
-to allow for the possibility of making run-time choices of algorithms based on hardware type.
-\end{description}
-
 \subsubsection{Machine (ESMF\_Machine)} 
+\label{sec:machine} 
 \begin{description}
-\item [Note] << is this the same as my MachineModel above??  nsc. >>
 \item [Description] The Machine class provides a representation of 
 key features of computer hardware and system software.  These
 features include memory attributes and configuration, processor type and speed,
+communication semantics and performance, 
 interconnect attributes, and system library availability.
+For the most part the application does not
+interact directly with this class of object, although some 
+user-level query routines may be provided.
 \item [Function]
-The main purpose of the Machine is to store hardware and system software
+The purpose of the Machine is to store hardware and system software
 information needed by the framework or application programmer in a general
-form, but with little abstraction.  This information can be used to perform resource 
-allocation, data distribution, and dynamic load balancing.  The Machine can be queried
-for platform type(s), number of processors, number of threads, and number of 
-nodes.  It may optionally provide information on quantities such as bandwidth and 
+form, but with little abstraction.  This information can be used to 
+perform resource allocation, data distribution, and dynamic load balancing.  
+The Machine can be queried for information such as
+platform type(s), number of processors, number of threads, and number of 
+nodes.  It will provide information on system library availability,
+memory subsystem type (e.g. shared memory or not), 
+communcation semantics, and optionally
+may provide quantative information on actual bandwidth and 
 latency through active tests.  
+It is aggregated into the Layout class (see Section~\ref{layout}), and provides
+methods for querying all characteristics needed by the Layout object to do 
+problem decomposition and distribution of work.
 \end{description}
 
 \subsubsection{Basic Communications (ESMF\_BasicComm)}
