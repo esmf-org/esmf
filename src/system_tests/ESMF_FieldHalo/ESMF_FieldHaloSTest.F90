@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.5 2003/11/07 22:07:25 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.6 2004/01/30 00:19:02 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -220,8 +220,8 @@
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
+      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
@@ -242,16 +242,18 @@
       max(1) = 15.0
       min(2) = 0.0
       max(2) = 12.0
-      horz_gridtype = ESMF_GridType_XY
+      horz_gridkind = ESMF_GridKind_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreate(2, counts=counts, min=min, max=max, &
+      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=min, &
+                              maxGlobalCoordPerDim=max, &
                               layout=layout1, &
-                              horz_gridtype=horz_gridtype, &
-                              horz_stagger=horz_stagger, &
-                              horz_coord_system=horz_coord_system, &
+                              horzGridKind=horz_gridkind, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
                               name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 

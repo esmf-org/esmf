@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.4 2003/10/20 20:13:59 cdeluca Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.5 2004/01/30 00:19:02 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -31,8 +31,8 @@
     integer :: timestep, rowlen, rowi, rstart, rend
     integer :: result, len, de_id, ndes, rightvalue 
     integer :: counts(2)
-    integer :: horz_gridtype, vert_gridtype
-    integer :: horz_stagger, vert_stagger
+    type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+    type(ESMF_GridStagger) :: horz_stagger, vert_stagger
     type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
     integer :: status
     real(ESMF_KIND_R8) :: min(2), max(2)
@@ -95,17 +95,18 @@
       max(1) = 20.5
       min(2) = 0.0
       max(2) = 5.0
-      horz_gridtype = ESMF_GridType_XY
+      horz_gridkind = ESMF_GridKind_XY
       horz_stagger = ESMF_GridStagger_A
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreate(2, counts=counts, &
-                              min=min, max=max, &
+      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                              minGlobalCoordPerDim=min, &
+                              maxGlobalCoordPerDim=max, &
                               layout=layout1, &
-                              horz_gridtype=horz_gridtype, &
-                              horz_stagger=horz_stagger, &
-                              horz_coord_system=horz_coord_system, &
+                              horzGridKind=horz_gridkind, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
                               name=gname, rc=status)
 
       print *, "Grid Create returned ", status
@@ -117,7 +118,7 @@
 
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDE(grid1, local_cell_count=ni, rc=rc)
+    call ESMF_GridGetDE(grid1, localCellCount=ni, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "allocating", ni, " cells on DE", de_id
     allocate(idata(ni))
@@ -182,7 +183,7 @@
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDE(grid1, ai_global=index, rc=rc)
+    call ESMF_GridGetDE(grid1, globalAIPerDim=index, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE
