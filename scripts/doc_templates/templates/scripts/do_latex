@@ -22,7 +22,7 @@
 #===============================================================================
 
 if ($#argv != 2) then
-  echo "Usage: do_latex <component> <document type>
+  echo "Usage: do_latex <component> <document type>"
   exit
 else
   if (-r $1.bib) then
