@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.51 2004/04/29 16:42:11 nscollins Exp $
+#  $Id: common.mk,v 1.52 2004/05/14 20:18:06 theurich Exp $
 #===============================================================================
 #   common.mk
 #
@@ -96,6 +96,9 @@ endif
 # ESMF_LIB_INSTALL - Directory for install target to place libs.
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #-------------------------------------------------------------------------------
+
+# Comment out the following flag if you want to allow VM to use Pthreads
+CPPFLAGS        = -DVM_DONT_SPAWN_PTHREADS
 
 ifndef ESMF_BUILD
 export ESMF_BUILD := $(ESMF_TOP_DIR)
