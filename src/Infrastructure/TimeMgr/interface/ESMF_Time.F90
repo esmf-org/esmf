@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.47 2003/09/04 18:57:57 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.48 2003/09/11 00:03:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.47 2003/09/04 18:57:57 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.48 2003/09/11 00:03:47 eschwab Exp $'
 
 !==============================================================================
 !
@@ -278,11 +278,11 @@
                                     sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),        intent(inout)         :: time
+      type(ESMF_Time),       intent(inout)         :: time
       integer(ESMF_KIND_I4), intent(in),  optional :: yr
       integer(ESMF_KIND_I8), intent(in),  optional :: yr_i8
-      integer,                intent(in),  optional :: mm
-      integer,                intent(in),  optional :: dd
+      integer,               intent(in),  optional :: mm
+      integer,               intent(in),  optional :: dd
       integer(ESMF_KIND_I4), intent(in),  optional :: d
       integer(ESMF_KIND_I8), intent(in),  optional :: d_i8
       integer(ESMF_KIND_I4), intent(in),  optional :: h
@@ -301,9 +301,9 @@
       real(ESMF_KIND_R8),    intent(in),  optional :: ns_r8
       integer(ESMF_KIND_I4), intent(in),  optional :: sN
       integer(ESMF_KIND_I4), intent(in),  optional :: sD
-      type(ESMF_Calendar),    intent(in),  optional :: calendar
-      integer,                intent(in),  optional :: timeZone
-      integer,                intent(out), optional :: rc
+      type(ESMF_Calendar),   intent(in),  optional :: calendar
+      integer,               intent(in),  optional :: timeZone
+      integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Initializes an {\tt ESMF\_Time} with a set of user-specified units
@@ -402,36 +402,36 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time),         intent(in)            :: time
-      integer(ESMF_KIND_I4),  intent(out), optional :: yr
-      integer(ESMF_KIND_I8),  intent(out), optional :: yr_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: yr
+      integer(ESMF_KIND_I8),   intent(out), optional :: yr_i8
       integer,                 intent(out), optional :: mm
       integer,                 intent(out), optional :: dd
-      integer(ESMF_KIND_I4),  intent(out), optional :: d
-      integer(ESMF_KIND_I8),  intent(out), optional :: d_i8
-      integer(ESMF_KIND_I4),  intent(out), optional :: h
-      integer(ESMF_KIND_I4),  intent(out), optional :: m
-      integer(ESMF_KIND_I4),  intent(out), optional :: s
-      integer(ESMF_KIND_I8),  intent(out), optional :: s_i8
-      integer(ESMF_KIND_I4),  intent(out), optional :: ms
-      integer(ESMF_KIND_I4),  intent(out), optional :: us
-      integer(ESMF_KIND_I4),  intent(out), optional :: ns
-      real(ESMF_KIND_R8),     intent(out), optional :: d_r8
-      real(ESMF_KIND_R8),     intent(out), optional :: h_r8
-      real(ESMF_KIND_R8),     intent(out), optional :: m_r8
-      real(ESMF_KIND_R8),     intent(out), optional :: s_r8
-      real(ESMF_KIND_R8),     intent(out), optional :: ms_r8
-      real(ESMF_KIND_R8),     intent(out), optional :: us_r8
-      real(ESMF_KIND_R8),     intent(out), optional :: ns_r8
-      integer(ESMF_KIND_I4),  intent(out), optional :: sN
-      integer(ESMF_KIND_I4),  intent(out), optional :: sD
+      integer(ESMF_KIND_I4),   intent(out), optional :: d
+      integer(ESMF_KIND_I8),   intent(out), optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: h
+      integer(ESMF_KIND_I4),   intent(out), optional :: m
+      integer(ESMF_KIND_I4),   intent(out), optional :: s
+      integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms
+      integer(ESMF_KIND_I4),   intent(out), optional :: us
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD
       type(ESMF_Calendar),     intent(out), optional :: calendar
       integer,                 intent(out), optional :: timeZone
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: dayOfWeek
       integer,                 intent(out), optional :: dayOfMonth
       type(ESMF_Time),         intent(out), optional :: midMonth
-      integer(ESMF_KIND_I4),  intent(out), optional :: dayOfYear
-      real(ESMF_KIND_R8),     intent(out), optional :: dayOfYear_r8
+      integer(ESMF_KIND_I4),   intent(out), optional :: dayOfYear
+      real(ESMF_KIND_R8),      intent(out), optional :: dayOfYear_r8
       type(ESMF_TimeInterval), intent(out), optional :: dayOfYear_intvl
       integer,                 intent(out), optional :: rc
 
@@ -456,10 +456,11 @@
 !     and Generic calendars.  Not valid for Julian day or no calendar.
 !
 !     For timeString, convert {\tt ESMF\_Time}'s value into ISO 8601
-!     format YYYY-MM-DDThh:mm:ss.
+!     format YYYY-MM-DDThh:mm:ss.  See ~\cite{ISO}.
 !     
 !     For dayOfWeek, get the day of the week the given {\tt ESMF\_Time}
 !     instant falls on.  ISO 8601 standard:  Monday = 1 through Sunday = 7.
+!     See ~\cite{ISO}.
 !
 !     For dayOfMonth, get the day of the month the {\tt ESMF\_Time} instant
 !     falls on (1-31).
@@ -531,6 +532,7 @@
 !          Associated timezone (hours offset from GMT, e.g. EST = -5).
 !     \item[{[timeString]}]
 !          Convert time value to ISO 8601 format string YYYY-MM-DDThh:mm:ss.
+!          See ~\cite{ISO}.
 !     \item[{[dayOfWeek]}]
 !          Get the time instant's day of the week (1-7).
 !     \item[{[dayOfMonth]}]
@@ -970,13 +972,13 @@
       subroutine ESMF_TimeReadRestart(time, s, sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),        intent(out) :: time
+      type(ESMF_Time),       intent(out) :: time
       integer(ESMF_KIND_I8), intent(in)  :: s
       integer(ESMF_KIND_I4), intent(in)  :: sN
       integer(ESMF_KIND_I4), intent(in)  :: sD
-      type(ESMF_Calendar),    intent(in)  :: calendar
-      integer,                intent(in)  :: timeZone
-      integer,                intent(out), optional :: rc
+      type(ESMF_Calendar),   intent(in)  :: calendar
+      integer,               intent(in)  :: timeZone
+      integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Restores the contents of an {\tt ESMF\_Time} for restart.
@@ -1015,13 +1017,13 @@
       subroutine ESMF_TimeWriteRestart(time, s, sN, sD, calendar, timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),        intent(in)  :: time
+      type(ESMF_Time),       intent(in)  :: time
       integer(ESMF_KIND_I8), intent(out) :: s
       integer(ESMF_KIND_I4), intent(out) :: sN
       integer(ESMF_KIND_I4), intent(out) :: sD
-      type(ESMF_Calendar),    intent(out) :: calendar
-      integer,                intent(out) :: timeZone
-      integer,                intent(out), optional :: rc
+      type(ESMF_Calendar),   intent(out) :: calendar
+      integer,               intent(out) :: timeZone
+      integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Saves the contents of an {\tt ESMF\_Time} for restart.
@@ -1065,7 +1067,8 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check whether a {\tt time} is valid.
+!     Check whether a {\tt time} is valid.  The options control the type
+!     of validation.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1099,14 +1102,17 @@
 
 ! !DESCRIPTION:
 !     To support testing and debugging, this method prints out 
-!     the contents of an {\tt ESMF\_Time}.
+!     the contents of an {\tt ESMF\_Time}.  The options control
+!     the type of information and level of detail.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
 !          {\tt ESMF\_Time} instant to print out.
 !     \item[{[options]}]
-!          Print options.
+!          Print options.  If none specified, prints all Time property values.
+!          "string" - prints Time's value in ISO 8601 format
+!                     YYYY-MM-DDThh:mm:ss.  See ~\cite{ISO}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

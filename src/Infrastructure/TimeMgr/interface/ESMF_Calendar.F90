@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.30 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.31 2003/09/11 00:02:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -91,8 +91,8 @@
         integer(ESMF_KIND_I4) :: days  ! whole days per year
         integer(ESMF_KIND_I4) :: daysN ! fractional days per year numerator
         integer(ESMF_KIND_I4) :: daysD ! fractional days per year denominator
-      end type                          ! e.g. for Venus,
-                                        !   days=0, daysN=926, daysD=1000
+      end type                         ! e.g. for Venus,
+                                       !   days=0, daysN=926, daysD=1000
 !
 !------------------------------------------------------------------------------
 !     ! ESMF_Calendar
@@ -104,8 +104,8 @@
       private
         type(ESMF_CalendarType)             :: type
         integer, dimension(MONTHS_PER_YEAR) :: daysPerMonth
-        integer(ESMF_KIND_I4)              :: secondsPerDay
-        integer(ESMF_KIND_I4)              :: secondsPerYear
+        integer(ESMF_KIND_I4)               :: secondsPerDay
+        integer(ESMF_KIND_I4)               :: secondsPerYear
         type(ESMF_DaysPerYear)              :: daysPerYear
       end type
 !
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.30 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.31 2003/09/11 00:02:19 eschwab Exp $'
 
 !==============================================================================
 
@@ -192,10 +192,10 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),                 intent(inout) :: calendar
       integer, dimension(MONTHS_PER_YEAR), intent(in)    :: daysPerMonth
-      integer(ESMF_KIND_I4),              intent(in)    :: secondsPerDay
-      integer(ESMF_KIND_I4),              intent(in)    :: daysPerYear
-      integer(ESMF_KIND_I4),              intent(in)    :: daysPerYearDn
-      integer(ESMF_KIND_I4),              intent(in)    :: daysPerYearDd
+      integer(ESMF_KIND_I4),               intent(in)    :: secondsPerDay
+      integer(ESMF_KIND_I4),               intent(in)    :: daysPerYear
+      integer(ESMF_KIND_I4),               intent(in)    :: daysPerYearDn
+      integer(ESMF_KIND_I4),               intent(in)    :: daysPerYearDd
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -242,11 +242,11 @@
       type(ESMF_Calendar),     intent(in)            :: calendar
       type(ESMF_CalendarType), intent(out), optional :: type
       integer, dimension(MONTHS_PER_YEAR), intent(out), optional :: daysPerMonth
-      integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerDay
-      integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerYear
-      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYear
-      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDn
-      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDd
+      integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerDay
+      integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerYear
+      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYear
+      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDn
+      integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYearDd
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -305,11 +305,11 @@
       type(ESMF_Calendar),                 intent(out) :: calendar
       type(ESMF_CalendarType),             intent(in)  :: type
       integer, dimension(MONTHS_PER_YEAR), intent(in)  :: daysPerMonth
-      integer(ESMF_KIND_I4),              intent(in)  :: secondsPerDay
-      integer(ESMF_KIND_I4),              intent(in)  :: secondsPerYear
-      integer(ESMF_KIND_I4),              intent(in)  :: daysPerYear
-      integer(ESMF_KIND_I4),              intent(in)  :: daysPerYearDn
-      integer(ESMF_KIND_I4),              intent(in)  :: daysPerYearDd
+      integer(ESMF_KIND_I4),               intent(in)  :: secondsPerDay
+      integer(ESMF_KIND_I4),               intent(in)  :: secondsPerYear
+      integer(ESMF_KIND_I4),               intent(in)  :: daysPerYear
+      integer(ESMF_KIND_I4),               intent(in)  :: daysPerYearDn
+      integer(ESMF_KIND_I4),               intent(in)  :: daysPerYearDd
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -364,11 +364,11 @@
       type(ESMF_Calendar),                 intent(in)  :: calendar
       type(ESMF_CalendarType),             intent(out) :: type
       integer, dimension(MONTHS_PER_YEAR), intent(out) :: daysPerMonth
-      integer(ESMF_KIND_I4),              intent(out) :: secondsPerDay
-      integer(ESMF_KIND_I4),              intent(out) :: secondsPerYear
-      integer(ESMF_KIND_I4),              intent(out) :: daysPerYear
-      integer(ESMF_KIND_I4),              intent(out) :: daysPerYearDn
-      integer(ESMF_KIND_I4),              intent(out) :: daysPerYearDd
+      integer(ESMF_KIND_I4),               intent(out) :: secondsPerDay
+      integer(ESMF_KIND_I4),               intent(out) :: secondsPerYear
+      integer(ESMF_KIND_I4),               intent(out) :: daysPerYear
+      integer(ESMF_KIND_I4),               intent(out) :: daysPerYearDn
+      integer(ESMF_KIND_I4),               intent(out) :: daysPerYearDd
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -422,14 +422,15 @@
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check whether a {\tt calendar} is valid.
+!     Check whether a {\tt calendar} is valid.  The options control
+!     the type of validation.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
-!          {\tt ESMF\_Calendar} to validate
+!          {\tt ESMF\_Calendar} to validate.
 !     \item[{[options]}]
-!          Validate options
+!          Validate options.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -457,7 +458,8 @@
 
 ! !DESCRIPTION:
 !     To support testing and debugging, this method prints out 
-!     the contents of an {\tt ESMF\_Calendar}.
+!     the contents of an {\tt ESMF\_Calendar}.  The options control the
+!     type of information and level of detail.
 !
 !     The arguments are:
 !     \begin{description}

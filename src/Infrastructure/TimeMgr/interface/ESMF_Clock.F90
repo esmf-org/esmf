@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.29 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.30 2003/09/11 00:02:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@
         type(ESMF_Time)         :: refTime
         type(ESMF_Time)         :: currTime
         type(ESMF_Time)         :: prevTime
-        integer(ESMF_KIND_I8)  :: advanceCount
+        integer(ESMF_KIND_I8)   :: advanceCount
         integer                 :: numAlarms
         integer                 :: pad  ! to satisfy alpha compiler
         type(ESMF_Pointer), dimension(MAX_ALARMS) :: alarmList
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.29 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.30 2003/09/11 00:02:48 eschwab Exp $'
 
 !==============================================================================
 
@@ -171,7 +171,7 @@
       type(ESMF_Time),         intent(in),  optional :: stopTime
       type(ESMF_Time),         intent(in),  optional :: refTime
       type(ESMF_Time),         intent(in),  optional :: currTime
-      integer(ESMF_KIND_I8),  intent(in),  optional :: advanceCount
+      integer(ESMF_KIND_I8),   intent(in),  optional :: advanceCount
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -226,7 +226,7 @@
       type(ESMF_Time),         intent(out), optional :: prevTime
       type(ESMF_TimeInterval), intent(out), optional :: currSimTime
       type(ESMF_TimeInterval), intent(out), optional :: prevSimTime
-      integer(ESMF_KIND_I8),  intent(out), optional :: advanceCount
+      integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: numAlarms
       integer,                 intent(out), optional :: rc
     
@@ -249,9 +249,9 @@
 !          The current time.
 !     \item[{[prevTime]}]
 !          The previous time.
-!     \item[currSimTime]
-!          The current simulation time.
-!     \item[prevSimTime]
+!     \item[{[currSimTime]}]
+!          The current simulation time (currTime - refTime).
+!     \item[{[prevSimTime]}]
 !          The previous simulation time.
 !     \item[{[advanceCount]}]
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
@@ -510,7 +510,7 @@
       type(ESMF_Time),         intent(in)                 :: refTime
       type(ESMF_Time),         intent(in)                 :: currTime
       type(ESMF_Time),         intent(in)                 :: prevTime
-      integer(ESMF_KIND_I8),  intent(in)                 :: advanceCount
+      integer(ESMF_KIND_I8),   intent(in)                 :: advanceCount
       integer,                 intent(in)                 :: numAlarms
       type(ESMF_Alarm), dimension(MAX_ALARMS), intent(in) :: alarmList
       integer,                 intent(out), optional      :: rc
@@ -572,7 +572,7 @@
       type(ESMF_Time),         intent(out)                 :: refTime
       type(ESMF_Time),         intent(out)                 :: currTime
       type(ESMF_Time),         intent(out)                 :: prevTime
-      integer(ESMF_KIND_I8),  intent(out)                 :: advanceCount
+      integer(ESMF_KIND_I8),   intent(out)                 :: advanceCount
       integer,                 intent(out)                 :: numAlarms
       type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out) :: alarmList
       integer,                 intent(out), optional       :: rc
@@ -630,7 +630,8 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check whether a {\tt clock} is valid.
+!     Check whether a {\tt clock} is valid.  The options control
+!     the type of validation.
 !
 !     The arguments are:  
 !     \begin{description}
@@ -665,14 +666,25 @@
 
 ! !DESCRIPTION:
 !     To support testing and debugging, this method prints out 
-!     the contents of an {\tt ESMF\_Clock}.
+!     the contents of an {\tt ESMF\_Clock}.  The options control
+!     the type of information and level of detail.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          {\tt ESMF\_Clock} to print out.
 !     \item[{[options]}]
-!          Print options.
+!          Print options.  If none specified, prints all clock property values.
+!          "timestep"     - print the clock's time step.
+!          "starttime"    - print the clock's start time.
+!          "stoptime"     - print the clock's stop time.
+!          "reftime"      - print the clock's reference time.
+!          "currtime"     - print the current clock time.
+!          "prevtime"     - print the previous clock time.
+!          "advancecount" - print the number of times the clock has been
+!                           advanced.
+!          "numalarms"    - print the number of alarms in the clock's list.
+!          "alarmlist"    - print the clock's alarm list.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
