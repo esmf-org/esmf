@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/02 21:00:29 svasquez Exp $
+# $Id: makefile,v 1.9 2003/04/09 23:48:44 flanigan Exp $
 
 ALL:  tests
 
@@ -14,8 +14,26 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Route/tests
 
-TESTEXAMPLES_3  = 
-TESTEXAMPLES_9  = 
+
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_XPacketUTest \
+		$(ESMF_TESTDIR)/ESMC_XPacketUTest \
+		$(ESMF_TESTDIR)/ESMF_RouteUTest \
+		$(ESMC_TESTDIR)/ESMC_RouteUTest
+
+TESTS_RUN     = RUN_ESMF_XPacketUTest \
+		RUN_ESMC_XPacketUTest \
+		RUN_ESMF_RouteUTest \
+		RUN_ESMC_RouteUTest
+
+
+TESTS_RUN_UNI = RUN_ESMF_XPacketUTestUNI \
+		RUN_ESMC_XPacketUTestUNI \
+		RUN_ESMF_RouteUTestUNI \
+		RUN_ESMC_RouteUTestUNI
+
+
+TESTS_RM      = 
+
 
 include ${ESMF_DIR}/makefile
 
@@ -26,72 +44,69 @@ CLEANFILES  = *.o *.mod *.tmps
 CLOBBERDIRS =
 
 
-tests test: ESMF_RouteTest ESMC_RouteTest
+#
+#
+#
+$(ESMF_TESTDIR)/ESMF_XPacketUTest: chkopts ESMF_XPacketUTest.o
+	-$(SL_F_LINKER) -o $(ESMF_TESTDIR)/ESMF_XPacketUTest ESMF_XPacketUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_XPacketUTest.o
 
-#tests test: ESMF_XPacketTest ESMC_XPacketTest \
-#            ESMF_RTableTest ESMC_RTableTest \
-#            ESMF_CommTableTest ESMC_CommTableTest \
-#            ESMF_RouteTest ESMC_RouteTest
+RUN_ESMF_XPacketUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_XPacketUTest > $(ESMF_TESTDIR)/ESMF_XPacketUTest.stdout
 
-ESMF_RouteCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
+RUN_ESMF_XPacketUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_XPacketUTest > $(ESMF_TESTDIR)/ESMF_XPacketUTest.stdout
 
-ESMF_XPacketTest: chkopts ESMF_XPacketTest.o
-	-${F90CXXLD} -o ESMF_XPacketTest ESMF_XPacketTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_XPacketTest.o
+ESMF_XPacketUTest.rm:
+	echo "ESMF_XPacketUTest.rm target called here."
 
-RUN_ESMF_XPacketTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_XPacketTest.tmps
-	${MPIRUN} -np 4 ESMF_XPacketTest > ESMF_XPacketTest.stdout
+#
+#
+#
+$(ESMF_TESTDIR)/ESMC_XPacketUTest: chkopts ESMC_XPacketUTest.o
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_XPacketUTest ESMC_XPacketUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMC_XPacketUTest.o
 
-RUN_ESMF_XPacketTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_XPacketTest.tmps
-	${MPIRUN} -np 1 ESMF_XPacketTest > ESMF_XPacketTest.stdout
+RUN_ESMC_XPacketUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_XPacketUTest > $(ESMF_TESTDIR)/ESMC_XPacketUTest.stdout
 
-ESMF_XPacketTest.rm:
-	echo "ESMF_XPacketTest.rm target called here."
+RUN_ESMC_XPacketUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMC_XPacketUTest > $(ESMF_TESTDIR)/ESMC_XPacketUTest.stdout
 
-ESMC_XPacketTest: chkopts ESMC_XPacketTest.o
-	-${CXXF90LD} -o ESMC_XPacketTest ESMC_XPacketTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMC_XPacketTest.o
+ESMC_XPacketUTest.rm:
+	echo "ESMC_XPacketUTest.rm target called here."
 
-RUN_ESMC_XPacketTest:
-	-@rm -f testlog stdlog.* logfile.* ESMC_XPacketTest.tmps
-	${MPIRUN} -np 4 ESMC_XPacketTest > ESMC_XPacketTest.stdout
 
-RUN_ESMC_XPacketTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_XPacketTest.tmps
-	${MPIRUN} -np 1 ESMC_XPacketTest > ESMC_XPacketTest.stdout
+#
+#
+#
+$(ESMF_TESTDIR)/ESMF_RouteUTest: chkopts ESMF_RouteUTest.o
+	-$(SL_F_LINKER) -o $(ESMF_TESTDIR)/ESMF_RouteUTest ESMF_RouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_RouteUTest.o
 
-ESMC_XPacketTest.rm:
-	echo "ESMC_XPacketTest.rm target called here."
+RUN_ESMF_RouteUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RouteUTest > $(ESMF_TESTDIR)/ESMF_RouteUTest.stdout
 
-ESMF_RouteTest: chkopts ESMF_RouteTest.o
-	-${F90CXXLD} -o ESMF_RouteTest ESMF_RouteTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_RouteTest.o
+RUN_ESMF_RouteUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RouteUTest > $(ESMF_TESTDIR)/ESMF_RouteUTest.stdout
 
-RUN_ESMF_RouteTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_RouteTest.tmps
-	${MPIRUN} -np 4 ESMF_RouteTest > ESMF_RouteTest.stdout
+ESMF_RouteUTest.rm:
+	echo "ESMF_RouteUTest.rm target called here."
 
-RUN_ESMF_RouteTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_RouteTest.tmps
-	${MPIRUN} -np 1 ESMF_RouteTest > ESMF_RouteTest.stdout
 
-ESMF_RouteTest.rm:
-	echo "ESMF_RouteTest.rm target called here."
+#
+#
+#
+$(ESMF_TESTDIR)/ESMC_RouteUTest: chkopts ESMC_RouteUTest.o
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_RouteUTest ESMC_RouteUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMC_RouteUTest.o
 
-ESMC_RouteTest: chkopts ESMC_RouteTest.o
-	-${CXXF90LD} -o ESMC_RouteTest ESMC_RouteTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMC_RouteTest.o
+RUN_ESMC_RouteUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RouteUTest > $(ESMF_TESTDIR)/ESMC_RouteUTest.stdout
 
-RUN_ESMC_RouteTest:
-	-@rm -f testlog stdlog.* logfile.* ESMC_RouteTest.tmps
-	${MPIRUN} -np 4 ESMC_RouteTest > ESMC_RouteTest.stdout
+RUN_ESMC_RouteUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMC_RouteUTest > $(ESMF_TESTDIR)/ESMC_RouteUTest.stdout
 
-RUN_ESMC_RouteTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_RouteTest.tmps
-	${MPIRUN} -np 1 ESMC_RouteTest > ESMC_RouteTest.stdout
+ESMC_RouteUTest.rm:
+	echo "ESMC_RouteUTest.rm target called here."
 
-ESMC_RouteTest.rm:
-	echo "ESMC_RouteTest.rm target called here."

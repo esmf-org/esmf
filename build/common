@@ -1,4 +1,4 @@
-# $Id: common,v 1.37 2003/04/09 19:18:04 flanigan Exp $ 
+# $Id: common,v 1.38 2003/04/09 23:48:41 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -299,8 +299,8 @@ build_shared:
 	    mkdir tmp_$$LIBNAME ;\
 	    cd tmp_$$LIBNAME  ;\
             ar x ../$$LIBNAME.a ;\
-	    echo $(SL_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
-	    $(SL_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	    echo $(SL_C_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
+	    $(SL_C_LINKER) $(SL_LIBOPTS) -o $(LDIR)/$$LIBNAME.$(SL_SUFFIX) *.o ;\
 	    cd .. ;\
 	fi ;\
 	done 

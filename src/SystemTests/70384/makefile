@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/02 21:05:14 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/04/09 23:48:45 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -31,7 +31,7 @@ CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
 $(ESMC_TESTDIR)/ESMF_SysTest70384: ESMF_SysTest70384.o  chkopts
-	${F90CXXLD} -o ESMF_SysTest70384 ESMF_SysTest70384.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	$(SL_F_LINKER) -o ESMF_SysTest70384 ESMF_SysTest70384.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	mv -f ESMF_SysTest70384 $(ESMC_TESTDIR)
 	${RM} -f *.o *.mod
 

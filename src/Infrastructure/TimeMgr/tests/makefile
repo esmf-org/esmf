@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/04/02 21:02:21 svasquez Exp $
+# $Id: makefile,v 1.5 2003/04/09 23:48:44 flanigan Exp $
 
 ALL:  tests
 
@@ -31,8 +31,11 @@ include ${ESMF_DIR}/makefile
 
 DIRS	  = 
 
+#
+#
+#
 $(ESMC_TESTDIR)/ESMF_ClockUTest: chkopts ESMF_ClockUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_ClockUTest ESMF_ClockUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_ClockUTest ESMF_ClockUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_ClockUTest.o
 
 RUN_ESMF_ClockUTest:
@@ -46,9 +49,11 @@ RUN_ESMF_ClockUTestUNI:
 ESMF_ClockUTest.rm:
 	echo "ESMF_ClockTest.rm target called here."
 
-
+#
+#
+#
 $(ESMC_TESTDIR)/ESMC_ClockUTest: chkopts ESMC_ClockUTest.o
-	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ClockUTest ESMC_ClockUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_ClockUTest ESMC_ClockUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ClockUTest.o
 
 RUN_ESMC_ClockUTest:

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/04/02 20:51:40 svasquez Exp $ 
+# $Id: makefile,v 1.12 2003/04/09 23:48:43 flanigan Exp $ 
 
 ALL:  tests
 
@@ -15,24 +15,21 @@ LIBBASE	  =
 LOCDIR	  = src/Infrastructure/Data/tests
 
 
-TESTEXAMPLES_3  = \
-	ESMF_ArrayTest RUN_ESMF_ArrayTest ESMF_ArrayTest.rm \
-	ESMF_ArrayF90Ptr RUN_ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.rm \
-	ESMF_ArrayBasic RUN_ESMF_ArrayBasic ESMF_ArrayBasic.rm
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest \
+		$(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest \
+		$(ESMF_TESTDIR)/ESMF_ArrayUTest 
 
-TESTEXAMPLES_9  = \
-	ESMF_ArrayTest RUN_ESMF_ArrayTestUNI ESMF_ArrayTest.rm \
-	ESMF_ArrayF90Ptr RUN_ESMF_ArrayF90PtrUNI ESMF_ArrayF90Ptr.rm \
-	ESMF_ArrayBasic RUN_ESMF_ArrayBasicUNI ESMF_ArrayBasic.rm
+TESTS_RUN     = RUN_ESMF_ArrayBasicUTest \
+		RUN_ESMF_ArrayF90PtrUTest \
+		RUN_ESMF_ArrayUTest 
 
-TESTSF       = ESMF_ArrayTest.F90 ESMF_ArrayBasic.F90 ESMF_ArrayF90Ptr.F90
+TESTS_RUN_UNI = RUN_ESMF_ArrayBasicUTestUNI \
+		RUN_ESMF_ArrayF90PtrUTestUNI \
+		RUN_ESMF_ArrayUTestUNI
 
-test tests: chkdir_tests ESMF_ArrayF90Ptr ESMF_ArrayBasic ESMF_ArrayTest
 
-run: 
-	ESMF_ArrayF90Ptr 
-	ESMF_ArrayBasic 
-	ESMF_ArrayTest
+TESTS_RM      = 
+
 
 include $(ESMF_DIR)/makefile
 
@@ -45,51 +42,45 @@ CLOBBERDIRS =
 
 ##
 
-ESMF_ArrayF90Ptr: ESMF_ArrayF90Ptr.o  
-	-${F90CXXLD} -g -o ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_ArrayF90Ptr.o
+$(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest: ESMF_ArrayF90PtrUTest.o  
+	-$(SL_F_LINKER) -g -o $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest ESMF_ArrayF90PtrUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_ArrayF90PtrUTest.o
 
-RUN_ESMF_ArrayF90Ptr:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayF90Ptr.tmps
-	${MPIRUN} -np 4 ESMF_ArrayF90Ptr > ESMF_ArrayF90Ptr.stdout
+RUN_ESMF_ArrayF90PtrUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
 
-RUN_ESMF_ArrayF90PtrUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayF90Ptr.tmps
-	${MPIRUN} -np 1 ESMF_ArrayF90Ptr > ESMF_ArrayF90Ptr.stdout
+RUN_ESMF_ArrayF90PtrUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
 
-ESMF_ArrayF90Ptr.rm:
+ESMF_ArrayF90PtrUTest.rm:
 	-@echo "ESMF_ArrayF90Ptr.rm target called here."
 ##
 
 
-ESMF_ArrayTest: ESMF_ArrayTest.o  
-	-${F90CXXLD} -g -o ESMF_ArrayTest ESMF_ArrayTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_ArrayTest.o
+$(ESMF_TESTDIR)/ESMF_ArrayUTest: ESMF_ArrayUTest.o  
+	-$(SL_F_LINKER) -g -o $(ESMF_TESTDIR)/ESMF_ArrayUTest ESMF_ArrayUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_ArrayUTest.o
 
-RUN_ESMF_ArrayTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayTest.tmps
-	${MPIRUN} -np 4 ESMF_ArrayTest > ESMF_ArrayTest.stdout
+RUN_ESMF_ArrayTestUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
 
-RUN_ESMF_ArrayTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayTest.tmps
-	${MPIRUN} -np 1 ESMF_ArrayTest > ESMF_ArrayTest.stdout
+RUN_ESMF_ArrayTestUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
 
-ESMF_ArrayTest.rm:
+ESMF_ArrayTestUTest.rm:
 	-@echo "ESMF_ArrayTest.rm target called here."
 ##
 
 ##
-ESMF_ArrayBasic: ESMF_ArrayBasic.o  
-	-${F90CXXLD} -g -o ESMF_ArrayBasic ESMF_ArrayBasic.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} ESMF_ArrayBasic.o
+$(ESMF_TESTDIR)/ESMF_ArrayBasicUTest: ESMF_ArrayBasicUTest.o  
+	-$(SL_F_LINKER) -g -o $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest ESMF_ArrayBasicUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_ArrayBasicUTest.o
 
-RUN_ESMF_ArrayBasic:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayBasic.tmps
-	${MPIRUN} -np 4 ESMF_ArrayBasic > ESMF_ArrayBasic.stdout
+RUN_ESMF_ArrayBasicUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
 
-RUN_ESMF_ArrayBasicUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayBasic.tmps
-	${MPIRUN} -np 1 ESMF_ArrayBasic > ESMF_ArrayBasic.stdout
+RUN_ESMF_ArrayBasicUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
 
 ESMF_ArrayBasic.rm:
 	-@echo "ESMF_ArrayBasic.rm target called here."

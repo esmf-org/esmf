@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/04/02 20:58:34 svasquez Exp $
+# $Id: makefile,v 1.6 2003/04/09 23:48:44 flanigan Exp $
 
 ALL:  tests
 
@@ -14,19 +14,20 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Regrid/tests
 
-TESTEXAMPLES_3  =
-TESTEXAMPLES_9  = 
 
-#TESTEXAMPLES_3  = \
-#	ESMC_RegridTest RUN_ESMC_RegridTest ESMC_RegridTest.rm
-#
-#TESTEXAMPLES_9  = \
-#	ESMC_RegridTest RUN_ESMC_RegridTestUNI ESMC_RegridTest.rm
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMC_RegridUTest \
+		$(ESMC_TESTDIR)/ESMF_RegridUTest 
 
-EXAMPLESF       = ESMF_Regrid.F90
-EXAMPLESC       = ESMC_Regrid.F90
+TESTS_RUN     = RUN_ESMC_RegridUTest \
+		RUN_ESMF_RegridUTest 
 
-include ${ESMF_DIR}/makefile
+TESTS_RUN_UNI = RUN_ESMC_RegridUTestUNI \
+		RUN_ESMF_RegridUTestUNI 
+
+TESTS_RM      = 
+
+include $(ESMF_DIR)/makefile
+
 
 DIRS =
 
@@ -34,24 +35,35 @@ CLEANDIRS   =
 CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
 
-
-tests test:
-#tests test: ESMF_RegridTest ESMC_RegridTest
-
-ESMF_RegridCreateDir:
-	mkdir -p ${ESMC_TESTDIR}
-
-ESMC_RegridTest: chkopts ESMC_RegridTest.o
-	-${CXXF90LD} -o ESMC_RegridTest ESMC_RegridTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+#
+#
+#
+$(ESMF_TESTDIR)/ESMC_RegridUTest: chkopts ESMC_RegridUTest.o
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMC_RegridUTest ESMC_RegridUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_RegridTest.o
 
-RUN_ESMC_RegridTest:
-	-@rm -f testlog stdlog.* logfile.* ESMC_RegridTest.tmps
-	${MPIRUN} -np 4 ESMC_RegridTest > ESMC_RegridTest.stdout
+RUN_ESMC_RegridUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
 
-RUN_ESMC_RegridTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMC_RegridTest.tmps
-	${MPIRUN} -np 1 ESMC_RegridTest > ESMC_RegridTest.stdout
+RUN_ESMC_RegridUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
 
-ESMC_RegridTest.rm:
+ESMC_RegridUTest.rm:
 	echo "ESMC_RegridTest.rm target called here."
+
+
+#
+#
+#
+$(ESMF_TESTDIR)/ESMF_RegridUTest: chkopts ESMF_RegridUTest.o
+	-$(SL_C_LINKER) -o $(ESMF_TESTDIR)/ESMF_RegridUTest ESMF_RegridUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_RegridTest.o
+
+RUN_ESMF_RegridUTest:
+	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
+
+RUN_ESMF_RegridUTestUNI:
+	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
+
+ESMF_RegridUTest.rm:
+	echo "ESMF_RegridTest.rm target called here."

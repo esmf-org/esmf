@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2003/04/09 19:18:11 flanigan Exp $ 
+# $Id: base_variables,v 1.6 2003/04/09 23:48:41 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -67,6 +67,6 @@ PARCH		   = linux_intel
 SL_SUFFIX   = 
 SL_LIBOPTS  = 
 SL_LINKOPTS = 
-SL_LINKER   = 
+SL_LINKER   = $(F90CXXLD)
 
 include ${ESMF_DIR}/build/common_variables

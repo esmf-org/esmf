@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/04/04 23:24:51 jwolfe Exp $ 
+# $Id: makefile,v 1.3 2003/04/09 23:48:46 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -40,7 +40,7 @@ FlowMod.o:		ArraysGlobalMod.o
 
 $(ESMC_TESTDIR)/ESMF_SysTest74558: ESMF_SysTest74558.o FlowMod.o \
 				   ArraysGlobalMod.o chkopts
-	${F90CXXLD} -o ESMF_SysTest74558 ESMF_SysTest74558.o \
+	$(SL_F_LINKER) -o ESMF_SysTest74558 ESMF_SysTest74558.o \
 	    FlowMod.o ArraysGlobalMod.o -lesmf ${F90CXXLIBS} \
 	    ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} $(SL_LINKOPTS)
 	mv -f ESMF_SysTest74558 $(ESMC_TESTDIR)

@@ -1,4 +1,4 @@
-# $Id: base,v 1.6 2003/04/09 19:18:12 flanigan Exp $ 
+# $Id: base,v 1.7 2003/04/09 23:48:42 flanigan Exp $ 
 #
 include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base_variables
 include $(ESMF_BUILD_DIR)/common
@@ -60,7 +60,7 @@ libf: ${LIBNAME}(${OBJSF})
 #
 # Set shared dependent on build_shared to build .so lib.
 #
-shared: 
+shared: build_shared
 
 
 #

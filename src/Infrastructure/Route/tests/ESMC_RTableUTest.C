@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTableTest.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $
+// $Id: ESMC_RTableUTest.C,v 1.1 2003/04/09 23:48:44 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,13 +10,13 @@
 //
 //-----------------------------------------------------------------------------
 //BOP
-// !PROGRAM:  ESMF_CommTableTest - one line general statement about this test 
+// !PROGRAM:  ESMF_RTableTest - one line general statement about this test 
 //
 // !DESCRIPTION:
 //
-// The code in this file drives C++ CommTable unit tests.
-// The companion files ESMC\_CommTable.h and ESMC\_CommTable.C contain
-// the declarations and definitions for the CommTable methods.
+// The code in this file drives C++ RTable unit tests.
+// The companion files ESMC\_RTable.h and ESMC\_RTable.C contain
+// the declarations and definitions for the RTable methods.
 //
 // 
 //
@@ -28,7 +28,7 @@
  #include <ESMC.h>
 
  // associated class definition file
- #include <ESMC_CommTable.h>
+ #include <ESMC_RTable.h>
 
  // ESMC_Test function
  #include <ESMC_Test.h>
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CommTableTest.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_RTableUTest.C,v 1.1 2003/04/09 23:48:44 flanigan Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -53,101 +53,101 @@
    // individual test failure message
    char failMsg[ESMF_MAXSTR];
 
-   // for dynamically allocated CommTable's
-   ESMC_CommTable *commtable_ptr;
+   // for dynamically allocated RTable's
+   ESMC_RTable *rtable_ptr;
 
-   // for statically allocated CommTable's
+   // for statically allocated RTable's
    //  tests default constructor; add args to test other constructors
-   ESMC_CommTable commtable;
+   ESMC_RTable rtable;
 
-   // test dynamic allocation of ESMC_CommTable
+   // test dynamic allocation of ESMC_RTable
    //   also tests default constructor
-   commtable_ptr = ESMC_CommTableCreate(args, &rc);
-   sprintf(name, "ESMC_CommTableCreate"); 
-   sprintf(failMsg, "rc = %d, commtable_ptr = %p, args = %f",
-           rc, commtable_ptr, args);
-   ESMC_Test((commtable_ptr!=0 && rc==ESMF_SUCCESS),
+   rtable_ptr = ESMC_RTableCreate(args, &rc);
+   sprintf(name, "ESMC_RTableCreate"); 
+   sprintf(failMsg, "rc = %d, rtable_ptr = %p, args = %f",
+           rc, rtable_ptr, args);
+   ESMC_Test((rtable_ptr!=0 && rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
     
    // test internal dynamic allocation within statically allocated
-   //   ESMC_CommTable
-   rc = commtable_ptr->ESMC_CommTableConstruct(args);
-   sprintf(name, "ESMC_CommTableConstruct"); 
+   //   ESMC_RTable
+   rc = rtable_ptr->ESMC_RTableConstruct(args);
+   sprintf(name, "ESMC_RTableConstruct"); 
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 
-   // test initialization of members of statically allocated ESMC_CommTable
+   // test initialization of members of statically allocated ESMC_RTable
    //   may want to read back values via Get methods for comparison
-   rc = commtable_ptr->ESMC_CommTableInit(args);
-   sprintf(name, "ESMC_CommTableInit"); 
+   rc = rtable_ptr->ESMC_RTableInit(args);
+   sprintf(name, "ESMC_RTableInit"); 
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 
    // test setting of configuration values
-   ESMC_CommTableConfig config_set;
-   rc = commtable_ptr->ESMC_CommTableSetConfig(config_set);
-   sprintf(name, "ESMC_CommTableSetConfig"); 
+   ESMC_RTableConfig config_set;
+   rc = rtable_ptr->ESMC_RTableSetConfig(config_set);
+   sprintf(name, "ESMC_RTableSetConfig"); 
    sprintf(failMsg, "rc = %d, config_set = %f", rc, config_set);
    ESMC_Test((rc==ESMF_SUCCESS), 
               name, failMsg, &result, ESMF_SRCLINE);
 
    // test getting of configuration values,
    //  compare to values set previously
-   ESMC_CommTableConfig config_get;
-   rc = commtable_ptr->ESMC_CommTableGetConfig(&config_get);
-   sprintf(name, "ESMC_CommTableGetConfig"); 
+   ESMC_RTableConfig config_get;
+   rc = rtable_ptr->ESMC_RTableGetConfig(&config_get);
+   sprintf(name, "ESMC_RTableGetConfig"); 
    sprintf(failMsg, "rc = %d, config_get = %f", rc, config_get);
    ESMC_Test((rc==ESMF_SUCCESS && config_get == config_set),
               name, failMsg, &result, ESMF_SRCLINE);
 
-   // test setting of ESMC_CommTable members values
+   // test setting of ESMC_RTable members values
    <value type> value_set;
-   rc = commtable_ptr->ESMC_CommTableSet<Value>(value_set);
-   sprintf(name, "ESMC_CommTableSet<Value>"); 
+   rc = rtable_ptr->ESMC_RTableSet<Value>(value_set);
+   sprintf(name, "ESMC_RTableSet<Value>"); 
    sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 
-   // test getting of ESMC_CommTable members values,
+   // test getting of ESMC_RTable members values,
    //   compare to values set previously
    <value type> value_get;
-   rc = commtable_ptr->ESMC_CommTableGet<Value>(&value_get);
-   sprintf(name, "ESMC_CommTableGet<Value>"); 
+   rc = rtable_ptr->ESMC_RTableGet<Value>(&value_get);
+   sprintf(name, "ESMC_RTableGet<Value>"); 
    sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
    ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
               name, failMsg, &result, ESMF_SRCLINE);
     
    // test validate method via option string
    char validate_options[ESMF_MAXSTR];
-   rc = commtable_ptr->ESMC_CommTableValidate(validate_options);
-   sprintf(name, "ESMC_CommTableValidate"); 
+   rc = rtable_ptr->ESMC_RTableValidate(validate_options);
+   sprintf(name, "ESMC_RTableValidate"); 
    sprintf(failMsg, "rc = %d, validate_options = %s", rc, validate_options);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 
    // test print method via option string
    char print_options[ESMF_MAXSTR];
-   rc = commtable_ptr->ESMC_CommTablePrint(print_options);
-   sprintf(name, "ESMC_CommTablePrint"); 
+   rc = rtable_ptr->ESMC_RTablePrint(print_options);
+   sprintf(name, "ESMC_RTablePrint"); 
    sprintf(failMsg, "rc = %d, print_options = %s", rc, print_options);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 
    // test internal dynamic deallocation within statically allocated 
-   //   ESMC_CommTable
-   rc = commtable_ptr->ESMC_CommTableDestruct();
-   sprintf(name, "ESMC_CommTableDestruct"); 
+   //   ESMC_RTable
+   rc = rtable_ptr->ESMC_RTableDestruct();
+   sprintf(name, "ESMC_RTableDestruct"); 
    sprintf(failMsg, "rc = %d", rc);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 
-   // test dynamic deallocation of ESMC_CommTable
+   // test dynamic deallocation of ESMC_RTable
    //   also tests destructor
-   rc = ESMC_CommTableDestroy(commtable_ptr);
-   sprintf(name, "ESMC_CommTableDestroy"); 
-   sprintf(failMsg, "rc = %d, commtable_ptr = %p", rc, commtable_ptr);
+   rc = ESMC_RTableDestroy(rtable_ptr);
+   sprintf(name, "ESMC_RTableDestroy"); 
+   sprintf(failMsg, "rc = %d, rtable_ptr = %p", rc, rtable_ptr);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayTest.F90,v 1.4 2003/02/14 23:08:36 nscollins Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.1 2003/04/09 23:48:43 flanigan Exp $
 !
 ! Example/test code which creates new arrays.
 

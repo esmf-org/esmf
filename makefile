@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2003/04/09 19:18:02 flanigan Exp $
+# $Id: makefile,v 1.24 2003/04/09 23:48:40 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -23,8 +23,8 @@ DIRS = src
 
 include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
 
-CLEANDIRS = $(LDIR) $(ESMC_MODDIR) doc
-CLOBBERDIRS = lib mod test 
+CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) doc 
+CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test 
 
 
 #-------------------------------------------------------------------------------

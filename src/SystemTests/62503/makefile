@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/04/08 23:09:51 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/04/09 23:48:45 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -37,7 +37,7 @@ ESMF_SysTest62503.o: user_model1.o user_model2.o user_coupler.o
 
 $(ESMC_TESTDIR)/ESMF_SysTest62503: ESMF_SysTest62503.o user_model1.o \
 		user_model2.o user_coupler.o chkopts
-	${F90CXXLD} -o ESMF_SysTest62503 ESMF_SysTest62503.o user_model1.o \
+	$(SL_F_LINKER) -o ESMF_SysTest62503 ESMF_SysTest62503.o user_model1.o \
 	    user_model2.o user_coupler.o -lesmf ${F90CXXLIBS} \
 	    ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	mv -f ESMF_SysTest62503 $(ESMC_TESTDIR)

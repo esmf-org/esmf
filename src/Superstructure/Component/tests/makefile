@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/01 23:47:57 nscollins Exp $ 
+# $Id: makefile,v 1.9 2003/04/09 23:48:44 flanigan Exp $ 
 
 ALL:  tests
 
@@ -45,9 +45,8 @@ CLOBBERDIRS =
 #
 # Components
 #
-
 $(ESMC_TESTDIR)/ESMF_CompCreate: ESMF_CompCreate.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompCreate ESMF_CompCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_CompCreate.o
 
 RUN_ESMF_CompCreate:
@@ -61,11 +60,13 @@ RUN_ESMF_CompCreateUNI:
 ESMF_CompCreate.rm:
 	echo "ESMF_CompCreate.rm target called here."
 
-
+#
+#
+#
 ESMF_UserRun.o: ESMF_UserGComp.o ESMF_UserCComp.o
 
 $(ESMC_TESTDIR)/ESMF_CompRun: ESMF_UserGComp.o ESMF_UserCComp.o ESMF_CompRun.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_CompRun ESMF_CompRun.o \
          ESMF_UserGComp.o ESMF_UserCComp.o -lesmf ${F90CXXLIBS} ${MPI_LIB} \
          ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_CompRun.o ESMF_UserComp.o
@@ -87,7 +88,7 @@ ESMF_CompRun.rm:
 #
 
 $(ESMC_TESTDIR)/ESMF_StateCreate: ESMF_StateCreate.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateCreate ESMF_StateCreate.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_StateCreate.o
 
 RUN_ESMF_StateCreate:
@@ -109,7 +110,7 @@ ESMF_StateCreate.rm:
 #
 
 $(ESMC_TESTDIR)/ESMF_StateUTest: ESMF_StateUTest.o
-	${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StateUTest ESMF_StateUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_StateUTest.o
 
 RUN_ESMF_StateUTest:
