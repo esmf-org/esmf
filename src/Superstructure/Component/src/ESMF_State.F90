@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.7 2003/02/03 21:45:50 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.8 2003/02/04 15:19:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include "ESMF.h"
 !------------------------------------------------------------------------------
 !BOP
-! !MODULE: ESMF_StateMod - Manage data states uniformly between F90 and C++     
+! !MODULE: ESMF_StateMod - Data exchange between components
 !
 ! !DESCRIPTION:
 !
@@ -212,6 +212,7 @@
       public ESMF_StateGetInfo
       public ESMF_StateAddNameOnly 
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
+      public ESMF_StateIsNeeded
       !public ESMF_StateGetNeededList   ! returns an array of values
       !public ESMF_State{Get/Set}Ready  ! is data ready
       !public ESMF_State{Get/Set}Valid  ! has data been validated?
@@ -229,7 +230,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.7 2003/02/03 21:45:50 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.8 2003/02/04 15:19:44 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -972,6 +973,48 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_StateIsNeeded -- Return logical true if state needed
+!
+! !INTERFACE:
+      function ESMF_StateIsNeeded(state, dataname, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_StateIsNeeded
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(in) :: dataname
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns true if the status of the {\tt needed} flag for the data item
+!      named by {\tt dataname} in the {\tt State} is 
+!      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no state found 
+!      with the specified name or state unknown or not needed.
+!
+!  \begin{description}     
+!  \item[state]
+!    {\tt State} to query.
+!   \item[dataname]
+!    Name of the data item to query.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        ESMF_StateIsNeeded = .false.
+
+        end function ESMF_StateIsNeeded
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_StateGetNeeded -- Query whether a data item is needed
 !
 ! !INTERFACE:
@@ -1049,9 +1092,8 @@ end function
 !
 ! TODO: code goes here
 !
-        if (needed .ne. ESMF_STATEDATAISNEEDED) print *, "hi"
-        if (needed .eq. ESMF_STATEDATAISNEEDED) print *, "hi"
-        !state%statep%needed = needed
+        state%statep%datalist(1)%needed = needed
+
         end subroutine ESMF_StateSetNeeded
 
 !------------------------------------------------------------------------------
