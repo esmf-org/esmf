@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.57 2003/08/13 21:52:44 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.58 2003/08/13 23:00:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.57 2003/08/13 21:52:44 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.58 2003/08/13 23:00:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -306,20 +306,25 @@ static int maxroutes = 10;
         if (AI_rcv_count != ep->rcv_AI_count) continue; 
         for (j=0; j<rank; j++) {
             tf = ESMC_AxisIndexEqual(AI_snd_exc, ep->snd_AI_exc); 
-            if (tf == ESMF_TF_FALSE) continue;
+            if (tf == ESMF_TF_FALSE) goto next;
             tf = ESMC_AxisIndexEqual(AI_snd_tot, ep->snd_AI_tot); 
-            if (tf == ESMF_TF_FALSE) continue;
+            if (tf == ESMF_TF_FALSE) goto next;
             tf = ESMC_AxisIndexEqual(AI_rcv_exc, ep->rcv_AI_exc); 
-            if (tf == ESMF_TF_FALSE) continue;
+            if (tf == ESMF_TF_FALSE) goto next;
             tf = ESMC_AxisIndexEqual(AI_rcv_tot, ep->rcv_AI_tot); 
-            if (tf == ESMF_TF_FALSE) continue;
-            if (periodic[j] != ep->periodic[j]) continue;
+            if (tf == ESMF_TF_FALSE) goto next;
+            if (periodic[j] != ep->periodic[j]) goto next;
         }
 
         *hascachedroute = ESMF_TF_TRUE;
         *route = routetable.rcep[i]->theroute;
 
         return ESMF_SUCCESS;
+
+  next:  
+        ; // jump here from inner loop if no match (empty statement here
+          // becase some compilers now fuss if there are no executable lines
+          // between a label and the closing brace.)
     }
  
     *hascachedroute = ESMF_TF_FALSE;
@@ -824,7 +829,7 @@ static int maxroutes = 10;
         ct->ESMC_CommTableSetPartner(their_de);
       }
     }
-    ESMC_RoutePrint("");
+    //ESMC_RoutePrint("");
  
     // free unneeded XPs here
     delete my_XP;  
