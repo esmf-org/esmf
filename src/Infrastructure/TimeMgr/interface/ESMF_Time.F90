@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.24 2003/04/30 07:45:14 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.25 2003/04/30 18:48:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.24 2003/04/30 07:45:14 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.25 2003/04/30 18:48:22 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -147,7 +147,8 @@
       module procedure ESMF_TimeGetDayOfYearTimeInt
 
 ! !DESCRIPTION:
-!     This interface overloads the ESMF_GetDayOfYear for the {\tt Time} class
+!     This interface overloads the ESMF\_GetDayOfYear method
+!     for the {\tt Time} class
 !
 !EOP
       end interface
@@ -872,7 +873,7 @@
 !          The object instance to query
 !     \item[DayOfYear]
 !          The {\tt Time} instant's day of the year as a
-!            {\tt ESMC_TimeInterval}
+!            {\tt ESMC\_TimeInterval}
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
