@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.66 2004/02/26 16:48:52 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.67 2004/02/27 17:20:47 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.66 2004/02/26 16:48:52 svasquez Exp $'
+      '$Id: ESMF_Comp.F90,v 1.67 2004/02/27 17:20:47 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1584,7 +1584,7 @@ end function
 
 #ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompVMDefMaxThreads - Define a VM for this Component
 
 ! !INTERFACE:
@@ -1616,7 +1616,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
@@ -1646,7 +1646,7 @@ end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompVMDefMinThreads - Define a VM for this Component
 
 ! !INTERFACE:
@@ -1678,7 +1678,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
@@ -1708,7 +1708,7 @@ end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompVMDefMaxPEs - Define a VM for this Component
 
 ! !INTERFACE:
@@ -1740,7 +1740,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
@@ -1770,7 +1770,7 @@ end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompReturn - Wait for component to return
 
 ! !INTERFACE:
@@ -1794,7 +1794,7 @@ end function
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status

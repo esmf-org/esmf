@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.18 2004/02/26 16:36:03 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.19 2004/02/27 17:20:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.18 2004/02/26 16:36:03 svasquez Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.19 2004/02/27 17:20:48 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -364,7 +364,7 @@
 
 #ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompCreateVM -- Create a new Component. - VM enabled
 
 ! !INTERFACE:
@@ -426,7 +426,7 @@
 !
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
         ! local vars
@@ -997,7 +997,7 @@
 
 #ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompVMDefMaxThreads - Define a VM for this GridComp
 
 ! !INTERFACE:
@@ -1036,7 +1036,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
@@ -1065,7 +1065,7 @@
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompVMDefMinThreads - Define a VM for this GridComp
 
 ! !INTERFACE:
@@ -1105,7 +1105,7 @@
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
@@ -1134,7 +1134,7 @@
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompVMDefMaxPEs - Define a VM for this GridComp
 
 ! !INTERFACE:
@@ -1174,7 +1174,7 @@
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
@@ -1204,7 +1204,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridCompReturn - Wait for a GridComp to return
 
 ! !INTERFACE:
@@ -1228,7 +1228,7 @@
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
     integer :: status                     ! local error status
