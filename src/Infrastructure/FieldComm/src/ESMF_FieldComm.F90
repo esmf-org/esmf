@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.2 2004/02/05 00:06:41 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.3 2004/02/10 00:06:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.2 2004/02/05 00:06:41 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.3 2004/02/10 00:06:38 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1805,13 +1805,16 @@
       ! There are 3 possible cases - src+dst, src only, dst only
       !  (if both are false then we've already returned.)
       if ((hassrcdata) .and. (.not. hasdstdata)) then
-          !call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
+          !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
+          !                      dst_datamap, routehandle, &       
           !                        srcmask, dstmask, blocking, rc)
       else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          !call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
+          !call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
+          !                      dst_datamap, routehandle, &       
           !                        srcmask, dstmask, blocking, rc)
       else
-          call ESMF_ArrayRegrid(src_array, dst_array, routehandle, &       
+          call ESMF_ArrayRegrid(src_array, dst_array, src_datamap, &
+                                dst_datamap, routehandle, &       
                                 srcmask, dstmask, blocking, rc)
       endif
       if(status .NE. ESMF_SUCCESS) then 
