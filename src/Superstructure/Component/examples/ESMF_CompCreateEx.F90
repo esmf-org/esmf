@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateEx.F90,v 1.3 2003/01/23 20:59:19 nscollins Exp $
+! $Id: ESMF_CompCreateEx.F90,v 1.4 2003/01/29 23:36:05 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -55,7 +55,7 @@
     print *, "Comp Init returned"
 
 
-    !call ESMF_CompPrint(comp1, rc)
+    !call ESMF_CompPrint(comp1, rc=rc)
     !print *, "Comp Print returned"
 
     timestep = 1
