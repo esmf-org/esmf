@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.79 2004/07/22 14:46:56 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.80 2004/10/05 22:53:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -58,16 +58,16 @@
       type ESMF_PhysLocation
       sequence
 !      private
-        type (ESMF_Base)    :: base     ! ESMF Base object, including name
+        type(ESMF_Base)    :: base      ! ESMF Base object, including name
         ! One array per number of dimensions:
-        type (ESMF_Array), dimension(:), pointer :: compLocations
+        type(ESMF_Array), dimension(:), pointer :: compLocations
                                         ! the coordinates for each point in the
                                         ! grid.  If the coordinates are aligned,
                                         ! then this array is a simple vector of
                                         ! values along the axis.  Otherwise the
                                         ! Array must have the coordinates for
                                         ! all points in the Grid.
-        type (ESMF_Array), dimension(:), pointer :: totalLocations
+        type(ESMF_Array), dimension(:), pointer :: totalLocations
                                         ! same as above, but with an additional
                                         ! boundary layer of coordinates.  Only
                                         ! used internally, for example during
@@ -100,21 +100,21 @@
       type ESMF_PhysRegion
       sequence
 !      private
-        type (ESMF_Base) :: base  ! ESMF Base class object
-        type (ESMF_RegionType) :: regionType
+        type(ESMF_Base) :: base   ! ESMF Base class object
+        type(ESMF_RegionType) :: regionType
                                   ! what kind of region          
         integer :: numVertices    ! number of vertices for a polygonal region;
                                   ! if variable, set this to the largest number.
                                   ! Vertices can be degenerate.
         ! One array per number of dimensions:
-        type (ESMF_Array), dimension(:), pointer :: vertices
+        type(ESMF_Array), dimension(:), pointer :: vertices
                                   ! coordinates in each direction for each corner
                                   ! of each region.
-        type (ESMF_Array), dimension(:), pointer :: bbox 
+        type(ESMF_Array), dimension(:), pointer :: bbox 
                                   ! bounding box for each region to aid search
                                   ! methods.
 
-        type (ESMF_Array), dimension(2) :: ellipse
+        type(ESMF_Array), dimension(2) :: ellipse
                                   ! parameters of ellipse describing region
                                   ! around each point.  Note that the values can
                                   ! be equal, describing a circle or sphere
@@ -141,10 +141,10 @@
       type ESMF_GridMask
       sequence
 !      private
-        type (ESMF_Base) :: base  ! ESMF Base class object
-        type (ESMF_GridMaskType) :: maskType
+        type(ESMF_Base) :: base   ! ESMF Base class object
+        type(ESMF_GridMaskType) :: maskType
                                   ! type of mask
-        type (ESMF_Array) :: data ! mask data at each grid point
+        type(ESMF_Array) :: data  ! mask data at each grid point
       end type
 
 !------------------------------------------------------------------------------
@@ -174,38 +174,38 @@
       sequence
 !      private
 
-        type (ESMF_Base) :: base  ! ESMF Base class object
-        type (ESMF_RelLoc) :: relloc
+        type(ESMF_Base) :: base   ! ESMF Base class object
+        type(ESMF_RelLoc) :: relloc
                                   ! If this PhysGrid describes staggered part of
                                   ! a grid, this is the Relative Location for 
                                   ! easy determination of PhysGrid associated
                                   ! with a staggered location.
-        type (ESMF_CoordSystem) :: coordSystem
+        type(ESMF_CoordSystem) :: coordSystem
                                   ! Coordinate system 
                                   ! (eg Cartesian, Spherical, ...etc)
         integer :: numDims        ! Number of physical dimensions
-        type (ESMF_PhysGridOrientation) :: orientation
+        type(ESMF_PhysGridOrientation) :: orientation
                                   ! Orientation
                                   ! (eg Horizontal, Vertical, Unknown)
-        type (ESMF_PhysCoord), dimension(:), pointer :: coords
+        type(ESMF_PhysCoord), dimension(:), pointer :: coords
                                   ! Description of each physical coordinate axis,
                                   ! including extents for this grid.  
-        type (ESMF_PhysLocation) :: locations
+        type(ESMF_PhysLocation) :: locations
                                   ! Structure which holds the actual coordinates
                                   ! for the grid locations.
-        type (ESMF_PhysRegion) :: regions
+        type(ESMF_PhysRegion) :: regions
                                   ! Information about grid regions, which
                                   ! typically describe each grid cell, but can
                                   ! be either polygons or circles/spheres/ellipses
         integer :: numMasks
-        type (ESMF_GridMask), dimension(:), pointer :: masks
+        type(ESMF_GridMask), dimension(:), pointer :: masks
                                   ! Grid-based masks.  Includes both logical 
                                   ! and multiplicative masks.  Default mask 
                                   ! (for query) is the first one if no name
                                   ! given.  Region IDs can be encoded as a mask
                                   ! as well.
         integer :: numMetrics
-        type (ESMF_Array), dimension(:), pointer :: metrics
+        type(ESMF_Array), dimension(:), pointer :: metrics
                                   ! A place to store metrics for the grid.  
                                   ! There is no support for the Framework to use
                                   ! these metrics, but they can be set and
@@ -223,7 +223,7 @@
       type ESMF_PhysGrid
       sequence
 !     private
-        type (ESMF_PhysGridType), pointer :: ptr   ! pointer to a physgrid type
+        type(ESMF_PhysGridType), pointer :: ptr   ! pointer to a physgrid type
       end type
 
 !------------------------------------------------------------------------------
@@ -286,7 +286,7 @@
       !   XZ          = PhysGrid is a XZ (or zonal     ) slice out of 3-d space 
       !   YZ          = PhysGrid is a YZ (or meridional) slice out of 3-d space
 
-      type (ESMF_PhysGridOrientation), parameter, public :: &! grid direction
+      type(ESMF_PhysGridOrientation), parameter, public :: &! grid direction
          ESMF_PHYSGRID_ORIENT_UNKNOWN     = ESMF_PhysGridOrientation( 0), &
          ESMF_PHYSGRID_ORIENT_HORIZONTAL  = ESMF_PhysGridOrientation( 1), &
          ESMF_PHYSGRID_ORIENT_VERTICAL    = ESMF_PhysGridOrientation( 2), &
@@ -299,7 +299,7 @@
       !   POLYGON   = polygons defined by vertex coordinates
       !   ELLIPSE   = ellipse centered on grid point, defined by two params
 
-      type (ESMF_RegionType), parameter, public :: &! types of PhysGrid regions
+      type(ESMF_RegionType), parameter, public :: &! types of PhysGrid regions
          ESMF_REGION_TYPE_UNKNOWN      = ESMF_RegionType( 0), &
          ESMF_REGION_TYPE_POLYGON      = ESMF_RegionType( 1), &
          ESMF_REGION_TYPE_ELLIPSE      = ESMF_RegionType( 2)
@@ -310,7 +310,7 @@
       !   MULT      = multiplicative mask
       !   REGION_ID = integer assigning unique ID to each point
 
-      type (ESMF_GridMaskType), parameter, public :: &! types of grid masks
+      type(ESMF_GridMaskType), parameter, public :: &! types of grid masks
          ESMF_GRID_MASKTYPE_UNKNOWN        = ESMF_GridMaskType( 0), &
          ESMF_GRID_MASKTYPE_LOGICAL        = ESMF_GridMaskType( 1), &
          ESMF_GRID_MASKTYPE_MULT           = ESMF_GridMaskType( 2), &
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.79 2004/07/22 14:46:56 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.80 2004/10/05 22:53:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -457,10 +457,10 @@
 !
 ! !ARGUMENTS:
       integer, intent(in) :: numDims
-      type (ESMF_RelLoc), intent(in) :: relloc
+      type(ESMF_RelLoc), intent(in) :: relloc
       character (len = *), intent(in), optional :: name  
-      type (ESMF_CoordSystem), intent(in), optional :: coordSystem
-      type (ESMF_PhysGridOrientation), intent(in), optional :: orientation
+      type(ESMF_CoordSystem), intent(in), optional :: coordSystem
+      type(ESMF_PhysGridOrientation), intent(in), optional :: orientation
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -612,10 +612,10 @@
       subroutine ESMF_PhysGridSet(physgrid, name, coordSystem, orientation, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysGrid), intent(inout) :: physgrid
+      type(ESMF_PhysGrid), intent(inout) :: physgrid
       character (len = *), intent(in), optional :: name  
-      type (ESMF_CoordSystem), intent(in), optional :: coordSystem
-      type (ESMF_PhysGridOrientation), intent(in), optional :: orientation
+      type(ESMF_CoordSystem), intent(in), optional :: coordSystem
+      type(ESMF_PhysGridOrientation), intent(in), optional :: orientation
       integer, intent(out), optional :: rc               
 
 ! !DESCRIPTION:
@@ -679,12 +679,12 @@
                                   coordSystem, orientation, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysGrid), intent(in) :: physgrid
-      type (ESMF_RelLoc), intent(out), optional :: relloc
+      type(ESMF_PhysGrid), intent(in) :: physgrid
+      type(ESMF_RelLoc), intent(out), optional :: relloc
       character (len = *), intent(out), optional :: name  
       integer, intent(out), optional :: numDims
-      type (ESMF_CoordSystem), intent(out), optional :: coordSystem
-      type (ESMF_PhysGridOrientation), intent(out), optional :: orientation
+      type(ESMF_CoordSystem), intent(out), optional :: coordSystem
+      type(ESMF_PhysGridOrientation), intent(out), optional :: orientation
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -750,7 +750,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(inout) :: physgrid
-      type (ESMF_PhysCoord), intent(in) :: physCoord
+      type(ESMF_PhysCoord), intent(in) :: physCoord
       integer, intent(in), optional ::  dimOrder
       integer, intent(out), optional :: rc            
 !
@@ -826,7 +826,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(in) :: physgrid
-      type (ESMF_PhysCoord), intent(out) :: physCoord
+      type(ESMF_PhysCoord), intent(out) :: physCoord
       integer, intent(in), optional :: dimOrder
       character (*), intent(in), optional :: name
       integer, intent(out), optional :: rc            
@@ -991,7 +991,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(inout) :: physgrid
-      type (ESMF_Array), dimension(:), pointer :: locationArray
+      type(ESMF_Array), dimension(:), pointer :: locationArray
       character(*), intent(in), optional :: name
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
@@ -1192,9 +1192,9 @@
       type(ESMF_RegionType), intent(inout), optional :: regionType
       character(*), intent(inout), optional :: name
       integer, intent(inout), optional :: numVertices
-      type (ESMF_Array), dimension(:), intent(inout), optional :: vertexArray
-      type (ESMF_Array), dimension(2), intent(inout), optional :: ellipseArray
-      type (ESMF_Array), dimension(:), intent(inout), optional :: bboxArray
+      type(ESMF_Array), dimension(:), intent(inout), optional :: vertexArray
+      type(ESMF_Array), dimension(2), intent(inout), optional :: ellipseArray
+      type(ESMF_Array), dimension(:), intent(inout), optional :: bboxArray
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -2582,8 +2582,8 @@
       logical :: ESMF_GridMaskTypeEqual
 
 ! !ARGUMENTS:
-      type (ESMF_GridMaskType), intent(in) :: GridMaskType1
-      type (ESMF_GridMaskType), intent(in) :: GridMaskType2
+      type(ESMF_GridMaskType), intent(in) :: GridMaskType1
+      type(ESMF_GridMaskType), intent(in) :: GridMaskType2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid mask types to see if
@@ -2617,8 +2617,8 @@
 
 ! !ARGUMENTS:
 
-      type (ESMF_GridMaskType), intent(in) :: GridMaskType1
-      type (ESMF_GridMaskType), intent(in) :: GridMaskType2
+      type(ESMF_GridMaskType), intent(in) :: GridMaskType1
+      type(ESMF_GridMaskType), intent(in) :: GridMaskType2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid mask types to see if
@@ -2652,8 +2652,8 @@
 
 ! !ARGUMENTS:
 
-      type (ESMF_RegionType), intent(in) :: RegionType1
-      type (ESMF_RegionType), intent(in) :: RegionType2
+      type(ESMF_RegionType), intent(in) :: RegionType1
+      type(ESMF_RegionType), intent(in) :: RegionType2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid region types to see if
@@ -2687,8 +2687,8 @@
 
 ! !ARGUMENTS:
 
-      type (ESMF_RegionType), intent(in) :: RegionType1
-      type (ESMF_RegionType), intent(in) :: RegionType2
+      type(ESMF_RegionType), intent(in) :: RegionType1
+      type(ESMF_RegionType), intent(in) :: RegionType2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGrid region types to see if
@@ -2722,8 +2722,8 @@
 
 ! !ARGUMENTS:
 
-      type (ESMF_PhysGridOrientation), intent(in) :: Orientation1
-      type (ESMF_PhysGridOrientation), intent(in) :: Orientation2
+      type(ESMF_PhysGridOrientation), intent(in) :: Orientation1
+      type(ESMF_PhysGridOrientation), intent(in) :: Orientation2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGridOrientation types to see if
@@ -2756,8 +2756,8 @@
       logical :: ESMF_PhysGridOrientNotEqual
 
 ! !ARGUMENTS:
-      type (ESMF_PhysGridOrientation), intent(in) :: Orientation1
-      type (ESMF_PhysGridOrientation), intent(in) :: Orientation2
+      type(ESMF_PhysGridOrientation), intent(in) :: Orientation1
+      type(ESMF_PhysGridOrientation), intent(in) :: Orientation2
 
 ! !DESCRIPTION:
 !     This routine compares two ESMF PhysGridOrientation types to see if
