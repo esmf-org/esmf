@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.3 2004/03/08 16:03:26 nscollins Exp $
+! $Id: FlowArraysMod.F90,v 1.4 2004/03/15 17:54:45 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -18,7 +18,7 @@
       use ESMF_Mod
     
       implicit none
-      save
+      !save
 !
 ! arrays
 !
@@ -26,11 +26,11 @@
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: sie, u, v
-      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
-      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: p, q, flag, de
-      integer, dimension(4) :: nbc
-      integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: sie, u, v
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: rho, rhoi, rhou, rhov
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer, save :: p, q, flag, de
+      integer, dimension(4), save :: nbc
+      integer, dimension(50), save :: iobs_min, iobs_max, jobs_min, jobs_max
 !
 ! Fields
 !
@@ -59,7 +59,7 @@
       integer :: printout
       integer :: nobsdesc
       integer :: iflo_min, iflo_max
-      type(ESMF_TimeInterval) :: time_step
+      type(ESMF_TimeInterval), save :: time_step
       real(kind=ESMF_KIND_R4) :: dt, dx, dy
       real(kind=ESMF_KIND_R4) :: uin, rhoin, siein
       real(kind=ESMF_KIND_R4) :: vin2, rhoin2, siein2

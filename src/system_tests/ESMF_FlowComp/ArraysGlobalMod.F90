@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.3 2004/03/08 16:03:25 nscollins Exp $
+! $Id: ArraysGlobalMod.F90,v 1.4 2004/03/15 17:54:45 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -19,15 +19,15 @@
     use ESMF_Mod
     
     implicit none
-    save
+    !save
 !
 ! arrays
 !
     public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
     public :: nbc
 
-    real, dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
-    integer, dimension(4) :: nbc
+    real, dimension(:,:), pointer, save :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+    integer, dimension(4), save :: nbc
 !
 ! Fields
 !
@@ -47,7 +47,7 @@
     public :: q0, u0, v0, sie0, rho0
     integer :: imin, imax, jmin, jmax
     integer :: imin_t, imax_t, jmin_t, jmax_t
-    type(ESMF_TimeInterval) :: time_step
+    type(ESMF_TimeInterval), save :: time_step
     real :: dt, dx, dy
     real :: uin, rhoin, siein
     real :: gamma, akb

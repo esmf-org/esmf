@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.7 2004/03/08 16:03:25 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.8 2004/03/15 17:54:45 nscollins Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -29,7 +29,7 @@
       integer :: halo_width = 3
 
       ! route handle for stored halo communication patterns
-      type(ESMF_RouteHandle) :: routehandle(4)
+      type(ESMF_RouteHandle), save :: routehandle(4)
 
       public :: verbose, periodic, halo_width, routehandle
 
