@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.48 2003/09/11 00:03:47 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.49 2003/09/12 15:49:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.48 2003/09/11 00:03:47 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.49 2003/09/12 15:49:24 eschwab Exp $'
 
 !==============================================================================
 !
@@ -147,19 +147,6 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeDec
-
-! !DESCRIPTION:
-!     This interface overloads the - operator for the {\tt ESMF\_Time} class.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface operator(-)
-
-! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeDiff
 
 ! !DESCRIPTION:
