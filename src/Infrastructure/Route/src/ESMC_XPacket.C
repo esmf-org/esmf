@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.22 2003/03/24 22:05:50 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.23 2003/03/24 22:56:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.22 2003/03/24 22:05:50 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.23 2003/03/24 22:56:16 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -178,10 +178,10 @@
     this->rank = xpacket1->rank;
 
     // debug
-    printf("xpacket1: ");
-    xpacket1->ESMC_XPacketPrint();
-    printf("xpacket2: ");
-    xpacket2->ESMC_XPacketPrint();
+    //printf("xpacket1: ");
+    //xpacket1->ESMC_XPacketPrint();
+    //printf("xpacket2: ");
+    //xpacket2->ESMC_XPacketPrint();
 
     // check that the xpacket strides are the same
     if (this->rank > 0) { 
@@ -273,8 +273,8 @@
     } 
 
     // debug
-    printf("intersect: ");
-    this->ESMC_XPacketPrint();
+    //printf("intersect: ");
+    //this->ESMC_XPacketPrint();
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -320,8 +320,8 @@
           this->rank = 2;
           // calculate global lefts and rights for the index space
           for (i=0; i<size_axisindex; i++) {
-    printf("incoming AxisIndex: [%d] left=%d, right=%d, gstart=%d, max=%d\n",
-     i, indexlist[i].l, indexlist[i].r, indexlist[i].gstart, indexlist[i].max);
+   //printf("incoming AxisIndex: [%d] left=%d, right=%d, gstart=%d, max=%d\n",
+   // i, indexlist[i].l, indexlist[i].r, indexlist[i].gstart, indexlist[i].max);
             global_l[i] = indexlist[i].l + indexlist[i].gstart;
             global_r[i] = indexlist[i].r + indexlist[i].gstart;
           }
@@ -329,8 +329,8 @@
           this->right = global_l[1]*indexlist[0].max + global_r[0];
           this->strides[0] = indexlist[0].max;
           this->num[0] = indexlist[1].r - indexlist[1].l + 1;
-     printf("outgoing ");
-     this->ESMC_XPacketPrint();
+ //    printf("outgoing ");
+ //    this->ESMC_XPacketPrint();
         }
       break;
       case 3:

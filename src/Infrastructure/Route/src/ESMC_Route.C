@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.28 2003/03/24 22:05:36 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.29 2003/03/24 22:56:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.28 2003/03/24 22:05:36 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.29 2003/03/24 22:56:15 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -374,20 +374,20 @@
 
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
-        if (!needed) {
-            printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
-	    continue;
-        } else {
-           printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
-        }
+        //if (!needed) {
+        //    printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
+	//    continue;
+        //} else {
+        //   printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
+        //}
 
         // look up the corresponding send/recv xpackets in the rtables
         rc = sendRT->ESMC_RTableGetEntry(theirdeid, &xscount, &sendxp);
         if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
         if (xscount > 0) {
             rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
-            printf("RouteRun: sendxp\n");
-            sendxp->ESMC_XPacketPrint();
+            //printf("RouteRun: sendxp\n");
+            //sendxp->ESMC_XPacketPrint();
         } else {
             sendxp = NULL;
             srank = 0;
@@ -396,15 +396,15 @@
                 snums[j]=0;
                 sstrides[j]=0;
             }
-            printf("nothing to send\n");
+            //printf("nothing to send\n");
         }
 
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
         if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
         if (xrcount > 0) {
             rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
-            printf("RouteRun: recvxp\n");
-            recvxp->ESMC_XPacketPrint();
+            //printf("RouteRun: recvxp\n");
+            //recvxp->ESMC_XPacketPrint();
         } else {
             recvxp = NULL;
             rrank = 0;
@@ -413,33 +413,23 @@
                 rnums[j]=0;
                 rstrides[j]=0;
             }
-            printf("nothing to recv\n");
+            //printf("nothing to recv\n");
         }
         
        
-        // ready to call the comm routines - possibly multiple times, one for
-        //  each disjoint memory piece?
+        // ready to call the comm routines - multiple times, one for
+        //  each disjoint memory piece.
      
-        // TODO: this section isn't finished by a long shot.  we need to
-        //  call mpi with at least a source base addr and bytecount, 
-        // receive base addr & bytecount, receiving proc id - not sure 
-        // what else.  and can this be a V version of the call - which
-        // does arrays of addresses & counts?  because the chunks may be
-        // strided, which either means multiple single calls or a call
-        // which does multiples at one time.
-        // 
-  
         // if sendxp == NULL, nothing to send
         // if recvxp == NULL, nothing to recv
 
-        // how is this loop to be structured?  we've got to set up both
-        // a send and receive each time.  ranks must match?
+        // TODO: for now, ranks must match.
         mrank = MAX(srank, rrank);
-        printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
-        printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
-                             (long int)srcaddr, (long int)dstaddr);
+        //printf("srank=%d, rrank=%d, mrank=%d\n", srank, rrank, mrank);
+        //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
+        //                     (long int)srcaddr, (long int)dstaddr);
         for (j=0, srcbytes = sleft, rcvbytes = rleft; j<mrank-1; j++) {
-            printf("j=%d, snums[j]=%d, rnums[j]=%d\n", j, snums[j], rnums[j]);
+            //printf("j=%d, snums[j]=%d, rnums[j]=%d\n", j, snums[j], rnums[j]);
             for (l=0; l<snums[j] || l<rnums[j]; l++, 
                             srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
          
@@ -453,27 +443,24 @@
                  srccount = sendxp ? sright-sleft+1 : 0;
                  rcvcount = recvxp ? rright-rleft+1 : 0;
 
-                 printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
-                            srccount, (long int)srcmem, mydeid, theirdeid);
-                 printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
-                            rcvcount, (long int)rcvmem, mydeid, theirdeid);
+                 //printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
+                 //           srccount, (long int)srcmem, mydeid, theirdeid);
+                 //printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
+                 //           rcvcount, (long int)rcvmem, mydeid, theirdeid);
 
-                 printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
-                                 l, srcbytes, rcvbytes);
-                 printf("sleft=%d, sright=%d, rleft=%d, rright=%d)\n", 
-                                   sleft, sright, rleft, rright);
-                 printf(" (j=%d, sstrides[j]=%d, rstrides[j]=%d)\n", 
-                                    j, sstrides[j], rstrides[j]);
+                 //printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
+                 //                l, srcbytes, rcvbytes);
+                 //printf("sleft=%d, sright=%d, rleft=%d, rright=%d)\n", 
+                 //                  sleft, sright, rleft, rright);
+                 //printf(" (j=%d, sstrides[j]=%d, rstrides[j]=%d)\n", 
+                 //                   j, sstrides[j], rstrides[j]);
 
              
-                // TODO: here's where we're ready to make the call.
                 //  theirdeid  is the other processor de number
                 //  srcmem and rcvmem are the mem addresses 
                 //  srccount and rcvcount are the byte counts.  they are 0
                 //    if there is nothing to send or receive, respectively.
-                //  (i don't know the arg order, but here are all the things
-                //   i'm guessing it needs.  it probably doesn't need mydeid,
-                //   but if it does, that's the variable name.)
+
                 rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
                                                    srccount, rcvcount, 
                                                    theirdeid, theirdeid);
@@ -631,8 +618,8 @@
         }
     }
 
-    printf("end of RoutePrecompute:\n");
-    this->ESMC_RoutePrint("");
+    //printf("end of RoutePrecompute:\n");
+    //this->ESMC_RoutePrint("");
     return ESMF_SUCCESS;
 
  } // end ESMC_RoutePrecompute
