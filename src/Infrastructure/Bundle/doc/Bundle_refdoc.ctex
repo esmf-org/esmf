@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.3 2003/09/18 17:31:54 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.4 2003/10/20 19:54:37 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -56,11 +56,13 @@
 \input{../Infrastructure/Bundle/doc/Bundle_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Bundle_usage}
+\input{Bundle_fex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Bundle/doc/Bundle_usage}
+\input{../Infrastructure/Bundle/doc/Bundle_fex}
 #endif
 
 %\subsubsection{Restrictions}

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.1 2003/09/17 21:26:29 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.2 2003/10/20 19:54:37 cdeluca Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -9,12 +9,11 @@
 !
 ! !DESCRIPTION:
 ! See the following code fragments for examples of how to create new Bundles.
-! Also see the Programming Model section of this document.
-!
 !
 !\begin{verbatim}
 
 !   ! Example program showing various ways to create a Bundle object.
+
     program ESMF_BundleCreateEx
 
     ! ESMF Framework module
@@ -36,8 +35,6 @@
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
         
 !-------------------------------------------------------------------------
-!   ! Example 1:
-!   !
 !   !  Create several empty Fields and add them to a new Bundle.
  
     field(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
@@ -50,8 +47,6 @@
     print *, "Bundle example 1 returned"
 
 !-------------------------------------------------------------------------
-!   ! Example 2:
-!   !
 !   !  Create an empty Bundle and then add a single field to it.
 
 
@@ -67,8 +62,6 @@
     print *, "Bundle example 2 returned, fieldcount =", fieldcount
 
 !-------------------------------------------------------------------------
-!   ! Example 3:
-!   !
 !   !  Create an empty Bundle and then add multiple fields to it.
 
 
@@ -81,8 +74,6 @@
     print *, "Bundle example 3 returned, fieldcount =", fieldcount
 
 !-------------------------------------------------------------------------
-!   ! Example 4:
-!   !
 !   !  Get a Field back from a Bundle, first by name and then by index.
 !   !  Also get the Bundle name.
 
