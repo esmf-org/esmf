@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.1 2002/10/08 19:27:51 nscollins Exp $ 
+# $Id: makefile,v 1.2 2002/10/25 21:05:20 eschwab Exp $ 
 ALL: lib 
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = 
+SOURCEF	  = ESMC_Base.C
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
