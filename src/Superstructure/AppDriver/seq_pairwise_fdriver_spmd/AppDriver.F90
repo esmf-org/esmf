@@ -5,12 +5,13 @@
 !
 ! !DESCRIPTION:
 ! ESMF Application Driver for any Gridded Component.  Creates the top 
-!  Gridded Component and calls the Init, Run, and Finalize routines.  
+!  Gridded Component and calls the Initialize, Run, and Finalize routines
+!  for it.  
 !  This Gridded Component will most likely create and manage subcomponents
 !  internally, so that this generic file becomes the "Cap" or root 
 !  of a tree of components.
 !
-!  In the text below, USER should be replaced by the specific
+!  In the text below, {\tt USER\_APP} should be replaced by the specific
 !   module and setservices names.
 !
 !\begin{verbatim}
@@ -24,7 +25,7 @@
     ! ESMF Framework module, defines all ESMF data types and procedures
     use ESMF_Mod
     
-    ! Gridded Component registration routines.  Defined in "custom.F90"
+    ! Gridded Component registration routines.  Defined in "ChangeMe.F90"
     use USER_APP_Mod, only : SetServices => USER_APP_SetServices
 
     implicit none
@@ -229,3 +230,5 @@
 
 !\end{verbatim}    
 !EOP
+
+
