@@ -29,13 +29,13 @@
 #include <assert.h>
 // associated class definition file
 #include "ESMC_Array.h"
-#include "ESMC_DELayout.h"
+#include "ESMC_newDELayout.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.27 2004/02/11 19:03:47 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.28 2004/04/14 20:24:34 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //

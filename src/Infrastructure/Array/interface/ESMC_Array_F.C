@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.21 2004/02/11 21:55:36 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.22 2004/04/14 20:24:58 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
-#include "ESMC_DELayout.h"
+#include "ESMC_newDELayout.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
