@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.39 2005/02/07 23:35:41 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.40 2005/02/23 05:21:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -26,7 +26,7 @@
  // anything public or esmf-wide should be up higher at the top level
  // include files.
  #include <ESMF_TimeMgr.inc>
- #include <pthread.h>
+ #include "ESMF_Pthread.h"
 
 //-------------------------------------------------------------------------
 //BOP
