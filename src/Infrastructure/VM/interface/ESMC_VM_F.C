@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.23 2004/11/17 06:07:50 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.24 2004/11/17 22:02:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -197,18 +197,27 @@ extern "C" {
     int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmsendrecvnb()"
-    *commhandle = new vmk_commhandle;
+// gjt: took the following line out to use vmk's request queue
+//    *commhandle = new vmk_commhandle;
     (*ptr)->vmk_sendrecv(sendData, *sendSize, *dst, recvData, *recvSize, *src,
-      (vmk_commhandle *)*commhandle);
+      (vmk_commhandle **)commhandle);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
   
   void FTN(c_esmc_vmwait)(ESMC_VM **ptr, void **commhandle, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmwait()"
-    (*ptr)->vmk_wait((vmk_commhandle *)*commhandle);
-    delete (vmk_commhandle *)*commhandle;
-    *commhandle = NULL;
+    (*ptr)->vmk_wait((vmk_commhandle **)commhandle);
+// gjt: took the following twp lines out to use vmk's request queue
+//    delete (vmk_commhandle *)*commhandle;
+//    *commhandle = NULL;
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmwaitqueue)(ESMC_VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmwaitqueue()"
+    (*ptr)->vmk_waitqueue();
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
   }
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.12 2004/11/17 06:07:50 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.13 2004/11/17 22:02:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -241,6 +241,9 @@ void ESMC_VMK::vmk_init(void){
       commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
     }
   }
+  // set up the request queue
+  nhandles=0;
+  firsthandle=NULL;
   // set up physical machine info
   ncores=size;          // user is required to start with #processes=#cores!!!!
   cpuid = new int[ncores];
@@ -324,6 +327,10 @@ void ESMC_VMK::vmk_construct(int mypet, int npets, int *lpid, int *pid,
   this->pth_mutex = pth_mutex;
   this->pth_finish_count = pth_finish_count;
   this->commarray = commarray;
+  // initialize the request queue
+  this->nhandles=0;
+  this->firsthandle=NULL;
+  // preference dependent settings
   if (pref_intra_ssi == PREF_INTRA_SSI_POSIXIPC){
     // now set up the POSIX IPC shared memory resources between pets
     // that run within the same SSI but different PID
@@ -1809,6 +1816,64 @@ void ESMC_VMKPlan::vmkplan_print(void){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+void ESMC_VMK::vmk_commhandle_add(vmk_commhandle *commhandle){
+  vmk_commhandle *handle;
+  if (nhandles==0){
+    firsthandle=commhandle;
+    commhandle->prev_handle=NULL;
+    commhandle->next_handle=NULL;
+  }else{
+    handle=firsthandle;
+    while (handle->next_handle!=NULL)
+      handle=handle->next_handle;
+    handle->next_handle=commhandle;
+    commhandle->prev_handle=handle;
+    commhandle->next_handle=NULL;
+  }
+  ++nhandles;
+}
+
+int ESMC_VMK::vmk_commhandle_del(vmk_commhandle *commhandle){
+  vmk_commhandle *handle;
+  if (nhandles==0)
+    return 0;
+  else if(nhandles==1){
+    nhandles=0;
+    firsthandle=NULL;
+    return 1;
+  }else{
+    handle=firsthandle;
+    while (handle->next_handle!=NULL){
+//fprintf(stderr, "gjt in vmk_commhandle_del commhandle: %p handle: %p handle->next_handle=%p\n", commhandle, handle, handle->next_handle);
+      
+      if (handle==commhandle) break;
+      handle=handle->next_handle;
+    }
+    if (handle==commhandle){
+//fprintf(stderr, "gjt in vmk_commhandle_del found commhandle in queue\n");
+      --nhandles;
+      // found commhandle in queue
+      if (handle->prev_handle==NULL){
+//fprintf(stderr, "gjt in vmk_commhandle_del commhandle was firsthandle: %p\n",
+//         firsthandle);
+        
+        firsthandle=handle->next_handle;
+        firsthandle->prev_handle=NULL;
+        
+//fprintf(stderr, "gjt in vmk_commhandle_del now firsthandle: %p\n",
+//         firsthandle);
+        
+        
+      }else
+        handle->prev_handle->next_handle=handle->next_handle;
+      if (handle->next_handle!=NULL)
+        handle->next_handle->prev_handle=handle->prev_handle;
+    }
+  }
+  return 1;
+}
+
+
 void ESMC_VMK::vmk_send(void *message, int size, int dest){
   // p2p send
 #if (VERBOSITY > 9)
@@ -1925,8 +1990,9 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
 
 
 void ESMC_VMK::vmk_send(void *message, int size, int dest, 
-  vmk_commhandle *commhandle){
+  vmk_commhandle **commhandle){
   // p2p send
+//fprintf(stderr, "vmk_send: commhandle=%p\n", *commhandle);
 #if (VERBOSITY > 9)
   printf("sending to: %d, %d\n", dest, lpid[dest]);
 #endif
@@ -1937,17 +2003,23 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
   char *psrc;
   int i;
   char *mess;
+  // check if this needs a new entry in the request queue
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commhandle_add(*commhandle);
+  }
   // switch into the appropriate implementation
   switch(commarray[mypet][dest].comm_type){
   case VM_COMM_TYPE_MPI1:
-    commhandle->nelements=1;
-    commhandle->type=1;
-    commhandle->mpireq = new MPI_Request[1];
+    (*commhandle)->nelements=1;
+    (*commhandle)->type=1;
+    (*commhandle)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
     // not sure if I need to make this atomic if called multi-threaded?
     //pthread_mutex_lock(pth_mutex);
+//fprintf(stderr, "MPI_Isend: commhandle=%p\n", (*commhandle)->mpireq);
     MPI_Isend(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c, 
-       commhandle->mpireq);
+       (*commhandle)->mpireq);
     //pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -2164,8 +2236,9 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
 
 
 void ESMC_VMK::vmk_recv(void *message, int size, int source,
-  vmk_commhandle *commhandle){
+  vmk_commhandle **commhandle){
   // p2p recv
+//fprintf(stderr, "vmk_recv: commhandle=%p\n", *commhandle);
 #if (VERBOSITY > 9)
   printf("receiving from: %d, %d\n", source, lpid[source]);
 #endif
@@ -2176,17 +2249,23 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
   char *psrc;
   int i;
   char *mess;
+  // check if this needs a new entry in the request queue
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commhandle_add(*commhandle);
+  }
   // switch into the appropriate implementation
   switch(commarray[source][mypet].comm_type){
   case VM_COMM_TYPE_MPI1:
-    commhandle->nelements=1;
-    commhandle->type=1;
-    commhandle->mpireq = new MPI_Request[1];
+    (*commhandle)->nelements=1;
+    (*commhandle)->type=1;
+    (*commhandle)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
     // not sure if I need to make this atomic if called multi-threaded
     //pthread_mutex_lock(pth_mutex2);
+//fprintf(stderr, "MPI_Irecv: commhandle=%p\n", (*commhandle)->mpireq);
     MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
-      mpi_c, commhandle->mpireq);
+      mpi_c, (*commhandle)->mpireq);
     //pthread_mutex_unlock(pth_mutex2);
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -2355,44 +2434,27 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
 }
   
 void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
-  void *recvData, int recvSize, int src, vmk_commhandle *commhandle){
-  // p2p sendrecv
-  if (commhandle==NULL){
-    // blocking
-    if (mpionly){
-      MPI_Status mpi_s;
-      MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, 1000*mypet+dst, 
-        recvData, recvSize, MPI_BYTE, src, 1000*src+mypet, mpi_c, &mpi_s);
-    }else{
-      // A unique order of the send and receive is given by the PET index.
-      // This very simplistic implementation establishes a unique order by
-      // first transfering data to the smallest receiver PET and then to the
-      // other one. A sendrecv has two receiver PETs, one is the local PET and
-      // the other is rcv.
-      if (mypet<=dst){
-        // mypet is the first receiver
-        vmk_recv(recvData, recvSize, src);
-        vmk_send(sendData, sendSize, dst);
-      }else{
-        // dst is first receiver
-        vmk_send(sendData, sendSize, dst);
-        vmk_recv(recvData, recvSize, src);
-      }
-    }
+  void *recvData, int recvSize, int src, vmk_commhandle **commhandle){
+  // check if this needs a new entry in the request queue
+//fprintf(stderr, "vmk_sendrecv: commhandle=%p\n", *commhandle);
+  if (*commhandle==NULL){
+    *commhandle = new vmk_commhandle;
+    vmk_commhandle_add(*commhandle);
+  }
+  // p2p sendrecv non-blocking
+  (*commhandle)->nelements = 2; // 2 requests for send/recv
+  (*commhandle)->type=0; // subhandles
+  (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
+  for (int i=0; i<(*commhandle)->nelements; i++)
+    (*commhandle)->handles[i] = new vmk_commhandle;
+  if (mypet<=dst){
+    // mypet is the first receiver
+    vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[0]));
+    vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[1]));
   }else{
-    // non-blocking
-    commhandle->nelements = 2; // 2 requests for send/recv
-    commhandle->type=0; // subhandles
-    commhandle->handles = new vmk_commhandle[commhandle->nelements];
-    if (mypet<=dst){
-      // mypet is the first receiver
-      vmk_recv(recvData, recvSize, src, &(commhandle->handles[0]));
-      vmk_send(sendData, sendSize, dst, &(commhandle->handles[1]));
-    }else{
-      // dst is first receiver
-      vmk_send(sendData, sendSize, dst, &(commhandle->handles[0]));
-      vmk_recv(recvData, recvSize, src, &(commhandle->handles[1]));
-    }
+    // dst is first receiver
+    vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[0]));
+    vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[1]));
   }
 }
   
@@ -2699,27 +2761,50 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
 }
 
 
-void ESMC_VMK::vmk_wait(vmk_commhandle *commhandle){
-  if (commhandle!=NULL){
+void ESMC_VMK::vmk_wait(vmk_commhandle **commhandle){
+//fprintf(stderr, "vmk_wait: nhandles=%d\n", nhandles);
+//fprintf(stderr, "vmk_wait: commhandle=%p\n", (*commhandle));
+  if ((*commhandle)!=NULL){
     // wait for all non-blocking requests in commhandle to complete
-    if (commhandle->type==0){
+    if ((*commhandle)->type==0){
       // this is a commhandle container
-      for (int i=0; i<commhandle->nelements; i++)
-        vmk_wait(&(commhandle->handles[i]));  // recursive call
-      delete [] commhandle->handles;
-    }else if (commhandle->type==1){
+      for (int i=0; i<(*commhandle)->nelements; i++){
+        vmk_wait(&((*commhandle)->handles[i]));  // recursive call
+        delete (*commhandle)->handles[i];
+      }
+      delete [] (*commhandle)->handles;
+    }else if ((*commhandle)->type==1){
       // this commhandle contains MPI_Requests
       MPI_Status mpi_s;
-      for (int i=0; i<commhandle->nelements; i++){
-        MPI_Wait(&(commhandle->mpireq[i]), &mpi_s);
+      for (int i=0; i<(*commhandle)->nelements; i++){
+//fprintf(stderr, "MPI_Wait: commhandle=%p\n", &((*commhandle)->mpireq[i]));
+        MPI_Wait(&((*commhandle)->mpireq[i]), &mpi_s);
       }
-      delete [] commhandle->mpireq;
+      delete [] (*commhandle)->mpireq;
     }else{
       printf("ESMC_VMK: only MPI non-blocking implemented\n");
     }
+    // now look for this commhandle in the request queue and remove if found
+    if (vmk_commhandle_del(*commhandle)){ 
+      delete *commhandle;    
+      *commhandle = NULL;
+    }
+    
   }
 }
-  
+
+
+void ESMC_VMK::vmk_waitqueue(void){
+  int n=nhandles;
+  vmk_commhandle *fh;
+  for (int i=0; i<n; i++){
+//    printf("vmk_waitqueue: %d\n", nhandles);
+    fh = firsthandle;
+    vmk_wait(&fh);
+  }
+//  printf("vmk_waitqueue: %d\n", nhandles);
+}
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

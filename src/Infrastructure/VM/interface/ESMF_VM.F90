@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.40 2004/11/17 06:07:50 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.41 2004/11/17 22:02:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -138,6 +138,7 @@ module ESMF_VMMod
   public ESMF_VMSendRecv
   public ESMF_VMThreadBarrier
   public ESMF_VMWait
+  public ESMF_VMWaitQueue
 ! - ESMF-private methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
@@ -154,7 +155,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.40 2004/11/17 06:07:50 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.41 2004/11/17 22:02:33 theurich Exp $'
 
 !==============================================================================
 
@@ -3172,6 +3173,52 @@ module ESMF_VMMod
 !      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWait
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMWaitQueue()"
+!BOP
+! !IROUTINE: ESMF_VMWaitQueue - Wait for all non-blocking VM comms to complete
+
+! !INTERFACE:
+  subroutine ESMF_VMWaitQueue(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),          intent(in)              :: vm
+    integer,                intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Wait for non-blocking VM communication to complete.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface
+    call c_ESMC_VMWaitQueue(vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+!    if (ESMF_LogMsgFoundError(localrc, "Method not implemented", &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMWaitQueue
 !------------------------------------------------------------------------------
 
 
