@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.10 2003/09/17 21:26:29 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.11 2003/09/18 16:19:27 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -109,52 +109,6 @@
 \input{ESMF_Field_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
-#endif
-
-\section{DataMap Class}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{DataMap_desc}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/DataMap_desc}
-#endif
-
-\subsection{Usage}
-#ifdef STANDALONE
-\input{DataMap_usage}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/DataMap_usage}
-#endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{DataMap_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/DataMap_def}
-%#endif
-
-%\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{DataMap_rest}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/DataMap_rest}
-#endif
-
-%\section{DataMap F90 Interface}
-
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{../../Data/doc/DataMap_fex}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Data/doc/DataMap_fex}
-%#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{../../Data/doc/ESMF_DataMap_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Data/doc/ESMF_DataMap_fapi}
 #endif
 
 #ifdef STANDALONE

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/05/29 20:59:08 flanigan Exp $ 
+# $Id: makefile,v 1.7 2003/09/18 16:19:27 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -51,16 +51,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 REQDOC_DEP_FILES = Field_auth.tex Field_background.tex Field_terms.tex \
       Field_abbr.tex Field_req.tex Field_desdoc.ctex
 
-
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Bundle_ccex.tex Bundle_ccparam.tex \
-      Bundle_def.tex Bundle_desc.tex Bundle_design.tex \
-      Bundle_fex.tex Bundle_fparam.tex Bundle_rest.tex \
-      Field_abbr.tex Field_alg.tex Field_background.tex \
-      Field_ccex.tex Field_ccparam.tex Field_def.tex \
-      Field_desc.tex Field_design.tex \
-      Field_fex.tex Field_fparam.tex Field_glos.tex Field_prog.tex \
-      Field_obj.tex Field_req.tex Field_reqdoc.ctex Field_rest.tex \
-      Field_syn.tex Field_terms.tex fieldclass.eps bundleclass.eps 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
