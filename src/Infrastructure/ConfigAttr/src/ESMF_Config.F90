@@ -164,16 +164,16 @@
 !  ESMF_ConfigFindLabel( cf, label, unique, selects a label (key)
 !                        rc )  
 !
-!  ESMF_ConfigNextLine ( cf, end, rc )      selects next line (for 
+!  ESMF_ConfigNextLine ( cf, tend, rc )     selects next line (for 
 !                                           tables)
 !
-!  ESMF_ConfigGetFloat ( cf, label, size,   returns next float number 
+!  ESMF_ConfigGetFloat ( cf, label, nsize,   returns next float number 
 !                        default, rc )      (function)
 !
-!  ESMF_ConfigGetInt ( cf, label, size,     returns next integer number 
+!  ESMF_ConfigGetInt ( cf, label, nsize,     returns next integer number 
 !                      default, rc )        (function)
 ! 
-!  ESMF_ConfigGetChar ( cf, label, size,    returns next character or
+!  ESMF_ConfigGetChar ( cf, label, nsize,    returns next character or
 !                       default, rc )       character array
 !
 !  ESMF_ConfigGetString ( cf, string,        retutns next string (word) 
@@ -250,6 +250,13 @@
        public :: ESMF_Config     ! WHY DO WE NEED IT PUBLIC?
 !EOP
 
+       interface ESMF_ConfigGetFloat
+          module procedure ESMF_ConfigGetFloat_one
+          module procedure ESMF_ConfigGetFloat_array
+       end interface
+
+
+
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
@@ -310,8 +317,8 @@
 
       allocate(cf_local%buffer, cf_local%this_line, stat = iret)
       if(iret /= 0) then
-         ! SUBSITUTE:   call perr(myname,'allocate(...%..)', iret)
-         print *, myname,'allocate(...%..)', iret
+         ! SUBSITUTE:   call perr(myname_,'allocate(...%..)', iret)
+         print *, myname_,'allocate(...%..)', iret
       endif
 
       ESMF_ConfigCreate = cf_local
@@ -405,7 +412,7 @@
       endif
 
       if ( present (layout) ) then
-         print *, myname, ' DE layout is not used yet '
+         print *, myname_, ' DE layout is not used yet '
       endif
 
       if (present( rc )) rc = iret
@@ -453,12 +460,12 @@
 !EOP -------------------------------------------------------------------
       integer         lu, ios, loop, ls, ptr, iret
       character*256   line
-      character(len=*), parameter :: myname = 'ESMF_ConfigLoadFile_1proc'
+      character(len=*), parameter :: myname_= 'ESMF_ConfigLoadFile_1proc'
 
       iret = 0
 
       if ( unique ) then
-         print *, myname, ' Uniqueness of labels is not checked yet '
+         print *, myname_, ' Uniqueness of labels is not checked yet '
       endif
 
 !     Open file
@@ -475,7 +482,7 @@
 
       call opntext(lu,fname,'old',ios)
       if ( ios .ne. 0 ) then
-	 write(*,'(2a,i5)') myname,': opntext() error, ios =',ios
+	 write(*,'(2a,i5)') myname_,': opntext() error, ios =',ios
          iret = ios
          if ( present (rc )) rc = iret
          return
@@ -618,12 +625,12 @@
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigNextLine( cf, end, rc)
+    subroutine ESMF_ConfigNextLine( cf, tend, rc)
 
       implicit none
 
       type(ESMF_Config), intent(inout) :: cf     ! ESMF Configuration
-      logical, intent(out), optional :: end      ! if present, end of the
+      logical, intent(out), optional :: tend     ! if present, end of the
                                                  ! table mark (::) is checked
 
       integer, intent(out), optional:: rc        ! Error code
@@ -635,7 +642,7 @@
       integer :: i, j, iret
 
       iret = 0
-      end = .false.
+      tend = .false.
 
       if ( cf%next_line >= cf%nbuf ) then
          iret = -1
@@ -649,7 +656,7 @@
       
       if ( cf%this_line(1:2) .eq. '::' ) then
          iret = 0                    ! end of table. We set iret = 0
-         end = .true.                ! and end = .true. Used to be
+         tend = .true.                ! and end = .true. Used to be
       ! iret = 1  
          cf%next_line = cf%nbuf + 1
          if ( present (rc )) rc = iret
@@ -752,14 +759,11 @@
 !
 ! !INTERFACE:
 
-!!    real function ESMF_ConfigGetFloat( cf, label, size, default, rc )
-    real function ESMF_ConfigGetFloat( cf, label, default, rc )
+    real function ESMF_ConfigGetFloat_one( cf, label, default, rc )
       implicit none
 
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-!      integer, intent(in), optional          :: size     ! number of floating 
-!                                                         ! point numbers
+      character(len=*), intent(in), optional :: label    ! label 
       real, intent(in), optional             :: default  ! default value
 
       integer, intent(out), optional         :: rc       ! Error code
@@ -794,13 +798,77 @@
             x = 0.
          endif
       endif
-      ESMF_ConfigGetFloat = x
+      ESMF_ConfigGetFloat_one = x
       if( present( rc )) rc = iret 
       return
 
-    end function ESMF_ConfigGetFloat
+    end function ESMF_ConfigGetFloat_one
 
 
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetFloat - gets a floating point number/numbers
+
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetFloat_array( cf, array, label, nsize, &
+                                          default, rc )
+      
+      implicit none
+      real, intent(inout)                 :: array(*)    ! real array 
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+      integer, intent(in)                    :: nsize    ! number of floating 
+                                                         ! point numbers
+      real, intent(in), optional             :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !DESCRIPTION: Gets a floating point number/numbers
+!
+! !REVISION HISTORY:
+! 25anp2003  Zaslavsky  initial interface/prolog
+!      25apr2003  Zaslavsky  Coding
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
+      integer iret, i 
+      
+      iret = 0
+      
+      if (nsize<=0) then
+         print *,myname_,' invalid SIZE =', nsize
+         iret = -1
+         if(present( rc )) rc = iret
+         return
+      endif
+       
+      do i = 1, nsize
+         
+         if (present( label )) then
+            if(present( default )) then
+              array(i)  =  ESMF_ConfigGetFloat_one( cf, label, &
+                    default, iret)
+            else
+               array(i) =  ESMF_ConfigGetFloat_one( cf, label, &
+                    rc = iret)
+            endif
+         else
+            if(present( default )) then
+               array(i) =  ESMF_ConfigGetFloat_one( cf, &
+                    default = default, rc = iret)
+            else
+               array(i) =  ESMF_ConfigGetFloat_one( cf, rc = iret)
+            endif
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetFloat_array
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
@@ -873,14 +941,14 @@
 !
 ! !INTERFACE:
 !
-!!    character function ESMF_ConfigGetChar( cf, label, size, default, rc )
+!!    character function ESMF_ConfigGetChar( cf, label, nsize, default, rc )
     function ESMF_ConfigGetChar( cf, label, default, rc )
       implicit none
       character ESMF_ConfigGetChar
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
-!      integer, intent(in), optional          :: size     ! number of  
-!                                                         ! characters
+!      integer, intent(in), optional          :: nsize   ! number of  
+!                                                        ! characters
       character, intent(in), optional        :: default  ! default value
       integer, intent(out), optional         :: rc       ! Error code
 !
@@ -1053,7 +1121,7 @@
 !      23apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       integer n, iret
-      logical end
+      logical tend
 
       lines = 0
       columns = 0
@@ -1066,13 +1134,13 @@
       endif
 
       do 
-         call ESMF_ConfigNextLine( cf, end, rc = iret)
+         call ESMF_ConfigNextLine( cf, tend, rc = iret)
          if (iret /=0 ) then
             lines = 0
             columns = 0
             exit
          endif
-         if ( end ) then
+         if ( tend ) then
             exit
          else
             lines = lines + 1
