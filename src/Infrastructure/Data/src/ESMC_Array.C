@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.31 2003/02/25 20:04:28 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.32 2003/02/26 01:40:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.31 2003/02/25 20:04:28 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.32 2003/02/26 01:40:42 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -460,7 +460,7 @@
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
   
-    for (i=0; i<rank; i++)
+    for (i=1; i<rank; i++)
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
     fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
