@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.37 2004/11/03 16:52:37 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.38 2004/11/05 04:05:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.37 2004/11/03 16:52:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.38 2004/11/05 04:05:30 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -470,10 +470,11 @@
 // !REQUIREMENTS:  
 
     // TODO: should be implicit, but then won't support
-    //   F90 ESMF_Time & ESMF_TimeInterval ?
+    //   F90 ESMF_Time & ESMF_TimeInterval via ESMC_BaseTime_F.C interface
+    //   for increment/decrement
 
-    // use default = operator in ESMC_Fraction class
-    (ESMC_Fraction) *this = (ESMC_Fraction) fraction;
+    // use = operator in ESMC_Fraction class
+    ESMC_Fraction::operator=(fraction);
 
     return(*this);
 
