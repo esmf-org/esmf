@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.6 2003/02/13 15:11:09 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.7 2003/04/04 16:25:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,10 +19,6 @@
 ! class methods.
 !
 !------------------------------------------------------------------------------
-! INCLUDES
-!------------------------------------------------------------------------------
-#include "ESMF.h"
-!------------------------------------------------------------------------------
 !BOP
 ! !MODULE: ESMF_XformMod - Object to encapsulate lists of transformations
 !
@@ -35,7 +31,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
-      !use ESMF_ComponentMod
+      !use ESMF_CompMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -74,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.6 2003/02/13 15:11:09 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.7 2003/04/04 16:25:55 nscollins Exp $'
 
 !==============================================================================
 ! 
