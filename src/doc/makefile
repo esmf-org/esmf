@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002/09/09 21:56:37 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2003/01/21 18:17:03 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -17,6 +17,7 @@ LOCDIR	  = src/doc
 DVIFILES  = \
 		${ESMC_DOCDIR}/ESMF_reqdoc.dvi \
 		${ESMC_DOCDIR}/ESMF_usrdoc.dvi \
+		${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi \
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
@@ -27,9 +28,13 @@ HTMLFILES = \
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 # Dvi files
-${ESMC_DOCDIR}/ESMF_reqdoc.dvi:
+${ESMC_DOCDIR}/ESMF_reqdoc.dvi: ESMF_req.tex build_req.tex
 	${DO_LATEX} ESMF req
 	mv -f ESMF_reqdoc.dvi ${ESMC_DOCDIR}
+
+${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi: ESMF_buildreqdoc.tex build_req.tex
+	${DO_LATEX} ESMF buildreq
+	mv -f ESMF_buildreqdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi:
 	${DO_LATEX} ESMF usr
@@ -39,6 +44,9 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.dvi:
 # Pdf files
 ${ESMC_DOCDIR}/ESMF_reqdoc.pdf: ${ESMC_DOCDIR}/ESMF_reqdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/ESMF_reqdoc.dvi ${ESMC_DOCDIR}/ESMF_reqdoc.pdf
+
+${ESMC_DOCDIR}/ESMF_buildreqdoc.pdf: ${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi
+	dvipdf ${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi ${ESMC_DOCDIR}/ESMF_buildreqdoc.pdf
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ${ESMC_DOCDIR}/ESMF_usrdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf

@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.12 2002/11/26 20:59:03 jwolfe Exp $ 
+# $id: common_variables,v 1.12 2002/11/26 20:59:03 jwolfe Exp $ 
 #
 # LDIR (defined from $ESMF_DIR) determines the libraries that are linked.
 # PDIR (defined from $ESMF_DIR) determines where the libraries are built.
@@ -81,4 +81,7 @@ EXTERNAL_LIB	= ${MPE_LIB}        ${BLOCKSOLVE_LIB}        ${PVODE_LIB}        ${
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base.site
 # (This line MUST be present for certain machines (e.g., Cray T3D))
 include ${ESMF_DIR}/build/common_${BOPT}
+
+
+
 

@@ -1,0 +1,28 @@
+% $Id: build_req.tex,v 1.1 2003/01/21 18:17:03 flanigan Exp $
+
+\sreq{Build}
+
+\ssreq{Build system will use GNU Make}
+The build system will utilize the Build program Make from
+GNU.  Other vendors makes will not be supported.
+\begin{reqlist}
+{\bf Priority:} 1. \\
+{\bf Source:} ESMF/CSS. \\
+{\bf Status:} DRAFT. \\
+{\bf Verification:} Makefiles will test make being used and generate
+warning if GNU make not being used.
+\end{reqlist}
+
+\ssreq{Easily customize build for local machine}
+The ESMF shall have the ability to easily customize the build evironment. 
+System libraries that are required can be set easily, without modifying 
+the build files directly. If the paths to required system libraries 
+are not provided or incorrect the build system will let the user know 
+how to set them and die gracefully.
+\begin{reqlist}
+{\bf Priority:} 2. \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Set library paths correctly and incorrectly and test that 
+the build acts appropriately.
+\end{reqlist}

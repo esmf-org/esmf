@@ -98,21 +98,7 @@ The ESMF shall operate on the following platforms:
 {\bf Verification:} Unit test and system test.
 \end{reqlist}
 
-\sreq{Build}
-
-\ssreq{Easily customize build for local machine}
-The ESMF shall have the ability to easily customize the build evironment. 
-System libraries that are required can be set easily, without modifying 
-the build files directly. If the paths to required system libraries 
-are not provided or incorrect the build system will let the user know 
-how to set them and die gracefully.
-\begin{reqlist}
-{\bf Priority:} 2. \\
-{\bf Source:} CCSM-CPL. \\
-{\bf Status:} Approved-2. \\
-{\bf Verification:} Set library paths correctly and incorrectly and test that 
-the build acts appropriately.
-\end{reqlist}
+\input{build_req}
 
 \sreq{Performance} \label{perf}
 Fully compliant adoption of the framework shall not increase the execution time 
