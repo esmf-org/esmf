@@ -1,4 +1,4 @@
-% $Id: Regrid_reqdoc.ctex,v 1.2 2003/07/24 18:17:04 cdeluca Exp $
+% $Id: Regrid_reqdoc.ctex,v 1.3 2003/07/24 18:26:21 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -115,8 +115,12 @@
 %\addcontentsline{toc}{section}{Glossary}
 #endif
 
+#ifdef STANDALONE
 %\section{References}
-\bibliography{Regrid} 
+\bibliography{Regrid}
+#elif defined(CONSTITUENT)
+\bibliography{ESMF}
+#endif
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{References}
 endif
