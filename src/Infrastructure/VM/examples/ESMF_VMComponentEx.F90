@@ -1,5 +1,20 @@
-! Simple ESMF application demonstrating VM features
+! $Id: ESMF_VMComponentEx.F90,v 1.1 2004/06/18 19:46:08 theurich Exp $
 !
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+
+!==============================================================================
+!EXAMPLE        String used by test script to count examples.
+!==============================================================================
+
+!------------------------------------------------------------------------------
 !BOE
 !
 ! \subsubsection{VM Component Example}
@@ -8,13 +23,14 @@
 ! components. Here a single component is created in the main program and the
 ! default VM gives all its resources to the child component. When the child
 ! component code is entered through the registered methods (Initialize, Run or 
-! Finalize) the user code is executed in the childs VM.
+! Finalize) the user code will be executed in the childs VM.
 !
 !EOE
-!
+!------------------------------------------------------------------------------
 
 !BOC
-module ESMF_VMTest6Ex_gcomp_mod
+module ESMF_VMComponentEx_gcomp_mod
+!EOC
 
   ! modules
   use ESMF_Mod
@@ -25,13 +41,13 @@ module ESMF_VMTest6Ex_gcomp_mod
   private
   
   ! module procedures
+!BOC
   public mygcomp_register
-  
-  
+    
   contains !--------------------------------------------------------------------
-  
-  
+
   subroutine mygcomp_register(gcomp, rc)
+!EOC
     ! arguments
     type(ESMF_GridComp), intent(inout):: gcomp
     integer, intent(out):: rc
@@ -44,6 +60,7 @@ module ESMF_VMTest6Ex_gcomp_mod
     !    call ESMF_GridCompSetVMMinThreads(gcomp, ...)
     !    call ESMF_GridCompSetVMMaxPEs(gcomp, ...)
     
+!BOC
     ! register INIT method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, mygcomp_init, &
       ESMF_SINGLEPHASE, rc)
@@ -53,10 +70,10 @@ module ESMF_VMTest6Ex_gcomp_mod
     ! register FINAL method
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, mygcomp_final, &
       ESMF_SINGLEPHASE, rc)
-    
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_init(gcomp, istate, estate, clock, rc)
+!EOC
     ! arguments
     type(ESMF_GridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
@@ -68,18 +85,21 @@ module ESMF_VMTest6Ex_gcomp_mod
     
     print *, '*** hi from mygcomp_init ***'
     
-    ! get the vm    
+!BOC
+    ! get this component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
 
     call ESMF_VMPrint(vm, rc)
+!EOC
     
     rc = 0
 
+!BOC
   end subroutine !--------------------------------------------------------------
   
   recursive subroutine mygcomp_run(gcomp, istate, estate, clock, rc)
-    ! like mygcomp_init...
 !EOC
+    ! like mygcomp_init...
     ! arguments
     type(ESMF_GridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
@@ -91,18 +111,21 @@ module ESMF_VMTest6Ex_gcomp_mod
 
     print *, '*** hi from mygcomp_run ***'
     
-    ! get the vm    
+!BOC
+    ! get this component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
 
     call ESMF_VMPrint(vm, rc)
-
+!EOC
+    
     rc = 0
+
 !BOC
   end subroutine !--------------------------------------------------------------
 
   recursive subroutine mygcomp_final(gcomp, istate, estate, clock, rc)
-    ! like mygcomp_init...
 !EOC
+    ! like mygcomp_init...
     ! arguments
     type(ESMF_GridComp), intent(inout):: gcomp
     type(ESMF_State), intent(in):: istate, estate
@@ -114,12 +137,15 @@ module ESMF_VMTest6Ex_gcomp_mod
 
     print *, '*** hi from mygcomp_final ***'
 
-    ! get the vm    
+!BOC
+    ! get this component's vm    
     call ESMF_GridCompGet(gcomp, vm=vm)
 
     call ESMF_VMPrint(vm, rc)
-
+!EOC
+    
     rc = 0
+
 !BOC
   end subroutine !--------------------------------------------------------------
 
@@ -128,11 +154,12 @@ end module
 
 
 !BOC
-program ESMF_VMTest6Ex
-
+program ESMF_VMComponentEx
+!EOC
   use ESMF_Mod
-  use ESMF_VMTest6Ex_gcomp_mod
-  
+!BOC  
+  use ESMF_VMComponentEx_gcomp_mod
+!EOC  
   implicit none
   
   ! local variables
@@ -141,20 +168,51 @@ program ESMF_VMTest6Ex
   type(ESMF_GridComp):: gcomp
   type(ESMF_Clock):: clock
   type(ESMF_State):: dummystate
+  ! result code
+  integer :: finalrc
+  finalrc = ESMF_SUCCESS
 
   call ESMF_Initialize(vm=vm, rc=rc)
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC  
   gcomp = ESMF_GridCompCreate(vm, 'My gridded component', rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC  
   call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC  
   call ESMF_GridCompInitialize(gcomp, dummystate, dummystate, clock, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC  
   call ESMF_GridCompRun(gcomp, dummystate, dummystate, clock, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC  
   call ESMF_GridCompFinalize(gcomp, dummystate, dummystate, clock, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-  call ESMF_GridCompDestroy(gcomp)
+!BOC  
+  call ESMF_GridCompDestroy(gcomp, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   
-  call ESMF_Finalize(rc)
+!BOC  
+  call ESMF_Finalize(rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+  if (finalrc==ESMF_SUCCESS) then
+    print *, "PASS: ESMF_VMSendVMRecvEx.F90"
+  else
+    print *, "FAIL: ESMF_VMSendVMRecvEx.F90"
+  endif
   
+!BOC  
 end program
 !EOC

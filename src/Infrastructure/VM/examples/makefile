@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2004/06/17 19:19:22 theurich Exp $
+# $Id: makefile,v 1.11 2004/06/18 19:46:08 theurich Exp $
 
 ALL: build_examples
 
@@ -62,8 +62,8 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx \
                     $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx \
                     $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx \
-                    $(ESMF_EXDIR)/ESMF_VMTest5Ex \
-                    $(ESMF_EXDIR)/ESMF_VMTest6Ex
+                    $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx \
+                    $(ESMF_EXDIR)/ESMF_VMComponentEx
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -74,12 +74,16 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
 EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMGetMPICommunicatorEx \
                     run_ESMF_VMSendVMRecvEx \
-                    run_ESMF_VMScatterVMGatherEx
+                    run_ESMF_VMScatterVMGatherEx \
+                    run_ESMF_VMAllFullReduceEx \
+                    run_ESMF_VMComponentEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMTest1Ex_uni \
                     run_ESMF_VMGetMPICommunicatorEx_uni \
                     run_ESMF_VMSendVMRecvEx_uni \
-                    run_ESMF_VMScatterVMGatherEx_uni
+                    run_ESMF_VMScatterVMGatherEx_uni \
+                    run_ESMF_VMAllFullReduceEx_uni \
+                    run_ESMF_VMComponentEx_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -117,9 +121,15 @@ run_ESMF_VMScatterVMGatherEx:
 run_ESMF_VMScatterVMGatherEx_uni:
 	echo "ESMF_VMScatterVMGatherEx not set up to run on one processor."
 
+run_ESMF_VMAllFullReduceEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
 
+run_ESMF_VMAllFullReduceEx_uni:
+	echo "ESMF_VMAllFullReduceEx not set up to run on one processor."
 
+run_ESMF_VMComponentEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMComponentEx > $(ESMF_EXDIR)/ESMF_VMComponentEx.stdout
 
-
-
+run_ESMF_VMComponentEx_uni:
+	echo "ESMF_VMComponentEx not set up to run on one processor."
 
