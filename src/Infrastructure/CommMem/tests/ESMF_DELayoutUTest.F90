@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.4 2003/06/17 19:50:28 jwolfe Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.5 2003/07/01 14:52:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.4 2003/06/17 19:50:28 jwolfe Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.5 2003/07/01 14:52:42 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,14 +58,14 @@
       ! number of DEs in default 1D layout
       integer :: numDEs
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
 
       !NEX_UTest
       ! test dynamic allocation of default 1D ESMF_DELayout
@@ -111,7 +111,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+#ifdef EXHAUSTIVE
+      !EX_UTest
       layout1 = ESMF_DELayoutCreate(layout1D, 2, (/2,2/), (/0,0/), &
                                     de_indices=(/0,1,2,3/), rc=rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 1st call"
@@ -119,7 +120,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout1, numDEs, rc)
       !print *, "layout1 numDEs = ", numDEs
@@ -128,7 +129,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       layout2 = ESMF_DELayoutCreate(layout1D, 2, (/1,3/), (/0,0/), &
                                     de_indices=(/5,6,7/), rc=rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 2nd call"
@@ -136,7 +137,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout2, numDEs, rc)
       !print *, "layout2 numDEs = ", numDEs
@@ -145,7 +146,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       layout3 = ESMF_DELayoutCreate(layout1D, 2, (/1,1/), (/0,0/), &
                                     de_indices=(/4/), rc=rc)
       write(name, *) "ESMF_DELayoutCreate2D exclusive -- 3rd call"
@@ -153,7 +154,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       ! test getting of number of DEs in creating 2D layout
       call ESMF_DELayoutGetNumDEs(layout3, numDEs, rc)
       !print *, "layout3 numDEs = ", numDEs
@@ -162,7 +163,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef EXHAUSTIVE
       !EX_UTest
       ! test print method via option string
       call ESMF_DELayoutPrint(layout1D, rc=rc)
@@ -188,26 +188,28 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+#ifdef EXHAUSTIVE
+      !EX_UTest
       call ESMF_DELayoutDestroy(layout1, rc)
       write(name, *) "ESMF_DELayoutDestroy layout1"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       call ESMF_DELayoutDestroy(layout2, rc)
       write(name, *) "ESMF_DELayoutDestroy layout2"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-      !NEX_UTest
+      !EX_UTest
       call ESMF_DELayoutDestroy(layout3, rc)
       write(name, *) "ESMF_DELayoutDestroy layout3"
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+#endif
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
