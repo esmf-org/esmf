@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.5 2003/03/14 05:38:17 eschwab Exp $
+! $Id: ESMF_DELayout.F90,v 1.6 2003/03/24 15:45:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.5 2003/03/14 05:38:17 eschwab Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.6 2003/03/24 15:45:56 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -166,34 +166,35 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
+      
+!     Local variables.
+      type (ESMF_DELayout) :: layout      ! opaque pointer to new C++ DELayout
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       local vars
-        type (ESMF_DELayout) :: layout        ! opaque pointer to new C++ DELayout
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       Initialize the pointer to null.
-        layout%this = ESMF_NULL_POINTER
-
-!       Initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_DELayoutCreateDefault1D(layout, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "DELayout creation error"
-          return
-        endif
+!     Initialize the pointer to null.
+      layout%this = ESMF_NULL_POINTER
 
-!       set return values
-        ESMF_DELayoutCreateDefault1D = layout 
-        if (rcpresent) rc = ESMF_SUCCESS
+!     Routine which interfaces to the C++ creation routine.
+      call c_ESMC_DELayoutCreateDefault1D(layout, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "DELayout creation error"
+        return
+      endif
 
-        end function ESMF_DELayoutCreateDefault1D
+!     set return values
+      ESMF_DELayoutCreateDefault1D = layout 
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_DELayoutCreateDefault1D
 
 !------------------------------------------------------------------------------
 !BOP
@@ -216,7 +217,8 @@
 ! !DESCRIPTION:
 !  Create a new DELayout using a parent layout's DEs.  If exclusive, the parent's
 !  DE's are consumed; they are not available for subsequent calls to this
-!  method.  Typically, the parent layout will contain a 1D list of DEs avaliable!  for allocation to sub-layouts within components.
+!  method.  Typically, the parent layout will contain a 1D list of DEs avaliable
+!  for allocation to sub-layouts within components.
 !
 !  The return value is a new DELayout.
 !    
@@ -235,42 +237,43 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
-!       local vars
-        type (ESMF_DELayout) :: layout      ! opaque pointer to new C++ DELayout
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      type (ESMF_DELayout) :: layout      ! opaque pointer to new C++ DELayout
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       Initialize the pointer to null.
-        layout%this = ESMF_NULL_POINTER
+!     Initialize the pointer to null.
+      layout%this = ESMF_NULL_POINTER
 
-!       Initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ creation routine.
-        if (present(exclusive)) then
-          call c_ESMC_DELayoutCreateLayout2D(layout, nx, ny, parentLayout, &
+!     Routine which interfaces to the C++ creation routine.
+      if (present(exclusive)) then
+        call c_ESMC_DELayoutCreateLayout2D(layout, nx, ny, parentLayout, &
                                              commhint, exclusive, status)
-        else
-          call c_ESMC_DELayoutCreateLayout2Dne(layout, nx, ny, &
+      else
+        call c_ESMC_DELayoutCreateLayout2Dne(layout, nx, ny, &
                                                parentLayout, commhint, &
                                                status)
-        endif
+      endif
 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "DELayout creation error"
-          return
-        endif
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "DELayout creation error"
+        return
+      endif
 
-!       set return values
-        ESMF_DELayoutCreateLayout2D = layout 
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return values
+      ESMF_DELayoutCreateLayout2D = layout 
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_DELayoutCreateLayout2D
+      end function ESMF_DELayoutCreateLayout2D
 
 !------------------------------------------------------------------------------
 !BOP
@@ -308,32 +311,34 @@
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
-        type (ESMF_DELayout) :: layout        ! opaque pointer to new C++ DELayout
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      type (ESMF_DELayout) :: layout   ! opaque pointer to new C++ DELayout
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       Initialize the pointer to null.
-        layout%this = ESMF_NULL_POINTER
+!     Initialize the pointer to null.
+      layout%this = ESMF_NULL_POINTER
 
-!       Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_DELayoutCreate(layout, nx, ny, delist, commhint, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "DELayout creation error"
-          return
-        endif
+!     Routine which interfaces to the C++ creation routine.
+      call c_ESMC_DELayoutCreate(layout, nx, ny, delist, commhint, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "DELayout creation error"
+        return
+      endif
 
-!       set return values
-        ESMF_DELayoutCreateIntDE2D = layout 
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return values
+      ESMF_DELayoutCreateIntDE2D = layout 
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_DELayoutCreateIntDE2D
+      end function ESMF_DELayoutCreateIntDE2D
 
 !------------------------------------------------------------------------------
 !BOP
@@ -360,35 +365,35 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
+!     ! Local variables
+      type (ESMF_DELayout) :: layout        ! new class being created
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       ! Local variables
-        type (ESMF_DELayout) :: layout        ! new class being created
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     ! Initialize pointer
+      layout%this = ESMF_NULL_POINTER
 
-!       ! Initialize pointer
-        layout%this = ESMF_NULL_POINTER
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+!     ! C routine which interfaces to the C++ routine which does actual work
+      !call c_ESMC_DELayoutCreateNoData(layout, status)
+      !if (status .ne. ESMF_SUCCESS) then
+      !  print *, "DELayout construction error"
+      !  return
+      !endif
 
-!       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_DELayoutCreateNoData(layout, status)
-        !if (status .ne. ESMF_SUCCESS) then
-        !  print *, "DELayout construction error"
-        !  return
-        !endif
+!     set return values
+      ESMF_DELayoutCreateNoData = layout
+      if (rcpresent) rc = ESMF_SUCCESS
 
-!       set return values
-        ESMF_DELayoutCreateNoData = layout
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end function ESMF_DELayoutCreateNoData
+      end function ESMF_DELayoutCreateNoData
 
 !------------------------------------------------------------------------------
 !BOP
@@ -416,27 +421,29 @@
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       call Destroy to release resources on the C++ side
-        call c_ESMC_DELayoutDestroy(layout, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "DELayout destruction error"
-          return
-        endif
+!     call destroy to release resources on the C++ side
+      call c_ESMC_DELayoutDestroy(layout, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "DELayout destruction error"
+        return
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutDestroy
+      end subroutine ESMF_DELayoutDestroy
 
 !------------------------------------------------------------------------------
 !BOP
@@ -452,25 +459,25 @@
 !      DELayout and allows the Data to be specified later.
 !
 !EOP
-! !REQUIREMENTS:
-
 !
 ! TODO: code goes here
 !
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutSetData
+      end subroutine ESMF_DELayoutSetData
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -488,30 +495,30 @@
 
 !
 ! !DESCRIPTION:
-!      Returns information about the layout.  For queries where the caller
+!      Returns information about the {\tt DELayout}.  For queries where the caller
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the layout input are optional to facilitate this
 !
 !EOP
-! !REQUIREMENTS:
-
 !
 ! TODO: code goes here
 !
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutGet
+      end subroutine ESMF_DELayoutGet
 
 !------------------------------------------------------------------------------
 !BOP
@@ -529,7 +536,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
+!       Local variables.
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -567,29 +574,82 @@
 !      All the arguments after the layout input are optional to facilitate this.
 !
 !EOP
-! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ routine.
-        call c_ESMC_DELayoutGetSize(layout, nx, ny, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutGetSize error"
-          return
-        endif
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetSize(layout, nx, ny, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetSize error"
+        return
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutGetSize
+      end subroutine ESMF_DELayoutGetSize
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_DELayoutIsLocal - Is local DE part of DELayout
+
+! !INTERFACE:
+      function ESMF_DELayoutIsLocal(delayout, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_DELayoutIsLocal
+
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: delayout
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!  Return {\tt .TRUE.} if the local {\tt DE} is part of the {\tt DELayout} and 
+!  {\tt .FALSE.} if it is not.
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[delayout]
+!     A {\tt DELayout} object.
+!
+!  \end{description}
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutIsLocal(delayout, ESMF_DELayoutIsLocal, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutIsLocal error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_DELayoutIsLocal
 
 !------------------------------------------------------------------------------
 !BOP
@@ -602,39 +662,39 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!      Returns information about the layout.  For queries where the caller
+!      Returns information about the {\tt DELayout}.  For queries where the caller
 !      only wants a single value, specify the argument by name.
-!      All the arguments after the layout input are optional to facilitate this.
 !
 !EOP
-! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ routine.
-        call c_ESMC_DELayoutGetDEPosition(layout, x, y, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutGetDEPosition error"
-          return
-        endif
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetDEPosition(layout, x, y, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetDEPosition error"
+        return
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutGetDEPosition
+      end subroutine ESMF_DELayoutGetDEPosition
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_DELayoutGetDEid(layout, id, rc)
+      subroutine ESMF_DELayoutGetDEID(layout, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
@@ -642,34 +702,35 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!      Returns information about the layout.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the layout input are optional to facilitate this.
+!     Returns information about the {\tt DELayout}.  For queries where the caller
+!     only wants a single value, specify the argument by name.
 !
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ routine.
-        call c_ESMC_DELayoutGetDEid(layout, id, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutGetDEid error"
-          return
-        endif
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetDEID(layout, id, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetDEID error"
+        return
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutGetDEid
+      end subroutine ESMF_DELayoutGetDEID
 
 !------------------------------------------------------------------------------
 !BOP
@@ -685,39 +746,42 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!      Returns information about the layout.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the layout input are optional to facilitate this.
+!     Returns information about the layout.  For queries where the caller
+!     only wants a single value, specify the argument by name.
+!     All the arguments after the layout input are optional to facilitate this.
 !
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-        integer :: size_gcount              ! size of the global counts array
-        integer :: size_decomp              ! size of the decompids array
+!     Local variables.
+      integer :: size_gcount           ! size of the global counts array
+      integer :: size_decomp           ! size of the decompids array
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ routine.
-        size_gcount = size(global_counts)
-        size_decomp = size(decompids)
-        call c_ESMC_DELayoutSetAxisIndex(layout, global_counts, size_gcount, &
+!     Routine which interfaces to the C++ routine.
+      size_gcount = size(global_counts)
+      size_decomp = size(decompids)
+      call c_ESMC_DELayoutSetAxisIndex(layout, global_counts, size_gcount, &
                                        decompids, size_decomp, AIPtr, status)
-        if (status .ne. ESMF_SUCCESS) then
+      if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutSetAxisIndex error"
           return
-        endif
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutSetAxisIndex
+      end subroutine ESMF_DELayoutSetAxisIndex
 
 !------------------------------------------------------------------------------
 !BOP
@@ -735,19 +799,20 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!      Returns information about the layout.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the layout input are optional to facilitate this.
+!     Returns information about the layout.  For queries where the caller
+!     only wants a single value, specify the argument by name.
+!     All the arguments after the layout input are optional to facilitate this.
 !
 !EOP
 ! !REQUIREMENTS:
 
-!       local vars
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
+!       Local variables.
         integer :: size_decomp              ! size of the decompids array
         integer :: size_AI                  ! size of the axis indices arrays
         integer :: i
+
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
 
 !       initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -811,25 +876,23 @@
 !      select the fastest way to save data to disk.
 !
 !EOP
-! !REQUIREMENTS:
-
 !
-! TODO: code goes here
-!
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutCheckpoint
+      end subroutine ESMF_DELayoutCheckpoint
 
 
 !------------------------------------------------------------------------------
@@ -854,28 +917,29 @@
 ! !REQUIREMENTS:
 
 !
-! TODO: code goes here
-!
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      type (ESMF_DELayout) :: a 
 
-        type (ESMF_DELayout) :: a 
-!
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
+!
 
-!       ! add code here
+!     ! add code here
 
-        ESMF_DELayoutRestore = a 
+      ESMF_DELayoutRestore = a 
  
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_DELayoutRestore
+      end function ESMF_DELayoutRestore
 
 
 !------------------------------------------------------------------------------
@@ -889,31 +953,30 @@
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
-!      options specified in the IOSpec derived type. 
+!     Used to write data to persistent storage in a variety of formats.  
+!     (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
+!     options specified in the IOSpec derived type. 
 !
 !
 !EOP
-! !REQUIREMENTS:
 
 !
-! TODO: code goes here
-!
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_DELayoutWrite
+      end subroutine ESMF_DELayoutWrite
 
 
 !------------------------------------------------------------------------------
@@ -930,35 +993,33 @@
       integer, intent(out), optional :: rc                 ! return code
 !
 ! !DESCRIPTION:
-!      Used to read data from persistent storage in a variety of formats.
+!     Used to read data from persistent storage in a variety of formats.
 !
 !
 !EOP
-! !REQUIREMENTS:
-
 !
-! TODO: code goes here
-!
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      type (ESMF_DELayout) :: a
 
-        type (ESMF_DELayout) :: a
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       ! add code here
+!     ! add code here
 
-        ESMF_DELayoutRead = a 
+      ESMF_DELayoutRead = a 
  
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_DELayoutRead
+      end function ESMF_DELayoutRead
 
 
 !------------------------------------------------------------------------------
@@ -975,40 +1036,40 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a layout.
+!     Print contents of a {\tt DELayout}.
 !
 !EOP
-! !REQUIREMENTS:
 
-!
-! TODO: code goes here
-!
-       character (len=6) :: defaultopts="brief"
-       integer :: status=ESMF_FAILURE      ! local error status
-       logical :: rcpresent=.FALSE.
+!     Local variables.
+      character (len=6) :: defaultopts="brief"
 
-!      Initialize return code; assume failure until success is certain
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!      ! Interface to call the C++ print code
-       if(present(options)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     ! Interface to call the C++ print code
+      if(present(options)) then
            call c_ESMC_DELayoutPrint(layout, options, status) 
-       else
+      else
            call c_ESMC_DELayoutPrint(layout, defaultopts, status) 
-       endif
+      endif
 
-       if (status .ne. ESMF_SUCCESS) then
+      if (status .ne. ESMF_SUCCESS) then
          print *, "DELayout print error"
          return
-       endif
+      endif
 
-!      set return values
-       if (rcpresent) rc = ESMF_SUCCESS
+!     set return values
+      if (rcpresent) rc = ESMF_SUCCESS
 
-       end subroutine ESMF_DELayoutPrint
+      end subroutine ESMF_DELayoutPrint
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1031,29 +1092,73 @@
 !     Performs an MPI-like Allreduce for an integer array
 !
 !EOP
-! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ routine.
-        call c_ESMC_DELayoutAllReduce(layout, dataArray, result, arrayLen, op, &
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutAllReduce(layout, dataArray, result, arrayLen, op, &
                                     status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutAllReduce error"
-          return
-        endif
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutAllReduce error"
+        return
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-       end subroutine ESMF_DELayoutAllReduce
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutAllReduce
+
+!------------------------------------------------------------------------------
+!BOP
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutSendRecv(layout, sArray, rArray, arrayLen, &
+                                      sDE, rDE, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real(8), intent(in) :: sArray(:), rArray(:)
+      integer, intent(in) :: arrayLen
+      integer, intent(in) :: sDE, rDE
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!     Performs an MPI-like send-receive for an integer array.
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutSendRecv(layout, sArray, rArray, arrayLen, & 
+                                      sDE, rDE, rc)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutSendRecv error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutSendRecv
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1077,29 +1182,30 @@
 !     Perform an MPI-like Allgatherv for integer arrays across a layout
 !
 !EOP
-! !REQUIREMENTS:
 
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
 
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
-        endif
+      endif
 
-!       Routine which interfaces to the C++ routine.
-        call c_ESMC_DELayoutAllGatherVI(layout, sndArray, sndLen, &
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutAllGatherVI(layout, sndArray, sndLen, &
                                       rcvArray, rcvLen, rcvDispls, status)
-        if (status .ne. ESMF_SUCCESS) then
+      if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutAllGatherVI error"
           return
-        endif
+      endif
 
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-       end subroutine ESMF_DELayoutAllGatherVI
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutAllGatherVI
 
-       end module ESMF_DELayoutMod
+      end module ESMF_DELayoutMod
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.6 2003/03/14 17:16:04 eschwab Exp $
+// $Id: ESMC_DELayout.C,v 1.7 2003/03/24 15:45:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.6 2003/03/14 17:16:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.7 2003/03/24 15:45:57 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -108,7 +108,6 @@
 //  avaliable for allocation to sub-layouts within components.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
   ESMC_DELayout *layout;
 
@@ -148,13 +147,12 @@
       int *rc) {                    // out - return code
 //
 // !DESCRIPTION:
-//  Create a new DELayout using a parent layout's DEs.  Non exclusive;
-//  the parent's DE's are not consumed; they are available for subsequent
+//  Create a new {\tt DELayout} using a parent {\tt DELayout}'s {\tt DE}s.  
+//  Non exclusive; the parent's DE's are not consumed; they are available for subsequent
 //  calls to this method.  Typically, the parent layout will contain a 1D
 //  list of DEs avaliable for allocation to sub-layouts within components.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
 
   ESMC_DELayout *layout;
 
@@ -185,7 +183,7 @@
 //
 // !DESCRIPTION:
 //      Allocates memory for a new DELayout
-//      object and uses the internal routine ESMC\_DELayoutContruct to
+//      object and uses the internal routine ESMC\_DELayoutConstruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
@@ -228,13 +226,13 @@
       int *rc) {                 // out - return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new DELayout
-//      object and uses the internal routine ESMC\_DELayoutContruct to
+//      Allocates memory for a new {\tt DELayout}
+//      object and uses the internal routine {\tt ESMC\_DELayoutConstruct} to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
+
 
   ESMC_DELayout *layout;
 
@@ -290,7 +288,6 @@
 //      via an ESMC\_DELayoutCreate routine.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  
 
 //cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
   if (layout != 0) {
@@ -1287,10 +1284,10 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutGetDEid - get id of our DE
+// !IROUTINE:  ESMC_DELayoutGetDEID - get id of our DE
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutGetDEid(
+      int ESMC_DELayout::ESMC_DELayoutGetDEID(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1307,7 +1304,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   return(ESMF_SUCCESS);
 
- } // end ESMC_DELayoutGetDEid
+ } // end ESMC_DELayoutGetDEID
 
 //-----------------------------------------------------------------------------
 //BOP

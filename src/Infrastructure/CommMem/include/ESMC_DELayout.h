@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.5 2003/03/13 22:56:12 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.6 2003/03/24 15:45:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
     int ESMC_DELayoutGetDEPosition(int *x, int *y) const;
     int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
     int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;
-    int ESMC_DELayoutGetDEid(int *deid) const;
+    int ESMC_DELayoutGetDEID(int *deid) const;
     int ESMC_DELayoutSetAxisIndex(int global_counts[], int size_gcount,
                                 int decompids[], int size_decomp,
                                 ESMC_AxisIndex *AIPtr);
@@ -147,9 +147,11 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
   //       entry points from DELayout?
 
     int ESMC_DELayoutAllGatherVI(int *sndArray, int  sndLen, 
-                               int *rcvArray, int *rcvLen, int *rcvDispls);
+				 int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_DELayoutAllReduce(int *dataArray, int *result, int arrayLen,
-                             ESMC_Op_e op);
+			       ESMC_Op_e op);
+    int ESMC_DELayoutSendRecv(int *sarray, int *rarray, int arraylen, 
+			      int sde, int rde);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

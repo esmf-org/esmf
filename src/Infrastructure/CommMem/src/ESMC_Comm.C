@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.12 2003/03/13 22:56:13 cdeluca Exp $
+// $Id: ESMC_Comm.C,v 1.13 2003/03/24 15:45:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,7 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 //
- // insert any higher level, 3rd party or system includes here
+// insert any higher level, 3rd party or system includes here
 #include <iostream.h>
 //#include <iostream>  // TODO: use when namespaces consistently implemented
 //using std::cout;
@@ -31,18 +31,19 @@
 #include <mpi.h>
 
  // associated class definition file
- #include <ESMC_Comm.h>
+#include <ESMC_Comm.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.12 2003/03/13 22:56:13 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.13 2003/03/24 15:45:56 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
+#define ESMF_MPI_TAG 1
 
 pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with 
                               //  application main(), which needs it before
@@ -478,7 +479,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
 
   return(ESMF_SUCCESS);
 
@@ -503,7 +503,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
   //cout << "ESMC_Comm numDEs = " << numDEs << endl;
 
@@ -529,7 +528,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      with default or passed-in values
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //cout << "ESMC_Comm(void) constructor invoked\n";
 
@@ -559,7 +557,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      with default or passed-in values
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //cout << "ESMC_Comm(argc, argv, de, nthreadsperproc, nprocs, lbufsize, lbuftype) constructor invoked\n";
   ESMC_CommInit(argc, argv, de, nthreadsperproc, nprocs, lbufsize, lbuftype);
@@ -583,7 +580,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      Calls standard ESMF deep or shallow methods for destruction
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
 //cout << "~ESMC_Comm() invoked\n";
     if (!commFinal) {  // don't mutex lock -- will be done in ESMC_CommFinal()
@@ -619,7 +615,6 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
   int destpID;
 
@@ -797,6 +792,41 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   return(ESMF_SUCCESS);
 
  } // end ESMC_CommScatter
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CommSendRecv - Sends and receives a message
+//
+// !INTERFACE:
+      int ESMC_Comm::ESMC_CommSendRecv(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *sbuf,
+      void *rbuf,
+      int num,
+      int sde,
+      int rde,
+      ESMC_Type_e type) {
+//
+// !DESCRIPTION:
+//    Performs an MPI-style send and receive call.
+//      
+//
+//EOP
+
+#ifdef MPI
+
+  MPI_SendRecv(sbuf, num, ESMC_TypeToMPI[type], rrank, ESMF_MPI_TAG,
+               rbuf, num, ESMC_TypeToMPI[type], srank, MPI_ANY_TAG,
+               MPI_COMM_WORLD);
+#endif
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_CommSendRecv
 
 //-----------------------------------------------------------------------------
 //BOP
