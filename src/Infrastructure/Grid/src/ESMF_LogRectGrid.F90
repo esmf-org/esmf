@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.30 2004/03/05 18:20:49 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.31 2004/03/08 16:39:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.30 2004/03/05 18:20:49 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.31 2004/03/08 16:39:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3505,9 +3505,9 @@
       ! determine the largest input array size
       arraySize = 0
       if (present(global1D))   arraySize = max(arraySize, size(global1D))
-      if (present(global2D))   arraySize = max(arraySize, size(global2D,2))
+      if (present(global2D))   arraySize = max(arraySize, size(global2D,1))
       if (present(globalAI1D)) arraySize = max(arraySize, size(globalAI1D))
-      if (present(globalAI2D)) arraySize = max(arraySize, size(globalAI2D,2))
+      if (present(globalAI2D)) arraySize = max(arraySize, size(globalAI2D,1))
 
       ! Get the grid rank and check against size of input arrays
       gridRank = grid%ptr%numDims
@@ -3561,26 +3561,14 @@
 !     can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(global1D)) then
         call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
-                                             global1D=global1D(1:2), &
-                                             local1D=local1D(1:2), &
+                                             global1D=global1D, &
+                                             local1D=local1D, &
                                              dimOrder=dimOrderUse(1:2), &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
                    "distgrid global to local"
           return
-        endif
-        if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
-                                               global1D=global1D(3:3), &
-                                               local1D=local1D(3:3), &
-                                               dimOrder=dimOrderUse(3:3), &
-                                               rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
-                     "distgrid global to local"
-            return
-          endif
         endif
       endif
       if (present(global2D)) then
@@ -3609,26 +3597,14 @@
       endif
       if (present(globalAI1D)) then
         call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
-                                             globalAI1D=globalAI1D(1:2), &
-                                             localAI1D=localAI1D(1:2), &
+                                             globalAI1D=globalAI1D, &
+                                             localAI1D=localAI1D, &
                                              dimOrder=dimOrderUse(1:2), &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
                    "distgrid global to local"
           return
-        endif
-        if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
-                                               globalAI1D=globalAI1D(3:3), &
-                                               localAI1D=localAI1D(3:3), &
-                                               dimOrder=dimOrderUse(3:3), &
-                                               rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
-                     "distgrid global to local"
-            return
-          endif
         endif
       endif
       if (present(globalAI2D)) then
@@ -3750,9 +3726,9 @@
       ! determine the largest input array size
       arraySize = 0
       if (present(local1D))   arraySize = max(arraySize, size(local1D))
-      if (present(local2D))   arraySize = max(arraySize, size(local2D,2))
+      if (present(local2D))   arraySize = max(arraySize, size(local2D,1))
       if (present(localAI1D)) arraySize = max(arraySize, size(localAI1D))
-      if (present(localAI2D)) arraySize = max(arraySize, size(localAI2D,2))
+      if (present(localAI2D)) arraySize = max(arraySize, size(localAI2D,1))
 
       ! Get the grid rank and check against size of input arrays
       gridRank = grid%ptr%numDims
@@ -3796,24 +3772,13 @@
 !     can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(local1D)) then
         call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             local1D=local1D(1:2), &
-                                             global1D=global1D(1:2), &
+                                             local1D=local1D, &
+                                             global1D=global1D, &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
                    "distgrid global to local"
           return
-        endif
-        if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
-                                               local1D=local1D(3:3), &
-                                               global1D=global1D(3:3), &
-                                               rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
-                     "distgrid global to local"
-            return
-          endif
         endif
       endif
       if (present(local2D)) then
@@ -3840,24 +3805,13 @@
       endif
       if (present(localAI1D)) then
         call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             localAI1D=localAI1D(1:2), &
-                                             globalAI1D=globalAI1D(1:2), &
+                                             localAI1D=localAI1D, &
+                                             globalAI1D=globalAI1D, &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
                    "distgrid global to local"
           return
-        endif
-        if (vertDistIdUse.ne.-1) then
-          call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
-                                               localAI1D=localAI1D(3:3), &
-                                               globalAI1D=globalAI1D(3:3), &
-                                               rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
-                     "distgrid global to local"
-            return
-          endif
         endif
       endif
       if (present(localAI2D)) then
