@@ -44,7 +44,7 @@ ten years from now there will almost certainly be other feedbacks to
 incorporate. The component interface specification will provide generic
 mechanisms, with standard signatures and semantics that support
 extensible, flexible and self-describing component model interfaces.
-[my new text] There are conceptual parallels to such Web projects as the
+There are conceptual parallels to such Web projects as the
 Rseource Description Format (http://www.w3.org/RDF). Rather than
 attempting to fix domain-wide vocabularies, by enforcing standardized
 interfaces, the RDF provides a layer on which
@@ -181,12 +181,18 @@ transfer, and merging of data discretized on the following types of grids:
 \end{itemize}
 
 The supplied implementation will include highly-optimized versions of
-these operations for the most commonly-used grid types.
+these operations for the most commonly-used grid types. The detailed 
+requirements for this aspect of ESMF of given in parts \ref{part:Infrastructure_Fields_and_Grids:_Physical_Grids} and \ref{part:Infrastructure_Fields_and_Grids:_Distributed_Grids} of this document.
 
 \subsubsection{Grid operations}
 
-The ESMF provides interpolation algorithms for supported grids.  All
-interpolation algorithms included in ESMF are {\it linear} in the data
+The ESMF provides interpolation algorithms for supported grids.  
+The detailed requirements, with formal validation criteria
+and relative rankings, for this aspect of ESMF are given
+in part \ref{part:Infrastructure_Fields_and_Grids:_Regridding}.
+Here we provide a brief synopsis of the areas that are covered
+in that part of the document.
+All interpolation algorithms included in ESMF are {\it linear} in the data
 and will be accompanied by the associated adjoint.  Adaptive
 procedures are not planned at this stage. Thus, reconstruction of
 gridded data from observations (analysis) will not be a part of
@@ -201,16 +207,28 @@ Dynamic load balancing will be provided for standard decompositions,
 and general dynamic load-balancing tools for specialized decompositions.
 
 \subsection{Utility infrastructure}
-
 The ESMF includes general purpose utility routines for use by both 
-the ESMF coupler and application codes.  These utilities include 
+the ESMF coupler and application codes.
+The detailed requirements, with formal validation criteria
+and relative rankings, for this aspect of ESMF are given
+in parts \ref{part:Infrastructure_Utilities:_Time_Management} -
+ \ref{part:Infrastructure Utilities:_I/O} of this document.
+Here we provide a brief synopsis of the areas that are covered
+in that part of the document.
+These utilities include 
 but are not limited to:
 \begin{itemize}
-\item Communication primitives;
-\item A generic machine interface;
+\item communication primitives;
+\item a generic machine interface;
 \item I/O utilities;
 \item general message logging;
 \item mechanisms for publishing and querying component attributes;
+\footnote{Like many other elements under
+{\it Utility infrastructure}, the querying and publishing functions will be 
+fundamental to the superstructure control and coupling areas. Isolating the
+requirements here does not imply a particular system design organization
+or ranking.
+}
 \item performance profiling;
 \item time management; and
 \item error handling.
@@ -232,7 +250,7 @@ library primitives.
 
 The ESMF I/O utilities will include generic interfaces providing I/O
 in a variety of data formats including netCDF, HDF, binary, GRIB, and
-BUFR. As much as possible, the utilities will offer scalable
+BUFR. As much as possible, the utilities will offer scalable, parallel I/O,
 performance.
 
 \subsubsection{Performance profiling}
