@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.38 2003/04/29 19:35:23 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.39 2003/04/29 21:37:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.38 2003/04/29 19:35:23 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.39 2003/04/29 21:37:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -494,18 +494,24 @@
       int rank,                    // in  - rank of data in both Fields
       int my_DE_rcv,               // in  - DE identifier in the DELayout of
                                    //       the receiving Field
-      ESMC_AxisIndex *AI_rcv,      // in  - array of axis indices for all DE's
+      ESMC_AxisIndex *AI_rcv_exc,  // in  - array of axis indices for all DE's
                                    //       in the DELayout for the receiving
-                                   //       Field
+                                   //       Field - exclusive region only
+      ESMC_AxisIndex *AI_rcv_tot,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field - total region
       int AI_rcv_count,            // in  - number of sets of AI's in the rcv
                                    //       array (should be the same as the 
                                    //       number of DE's in the rcv layout)
       ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
       int my_DE_snd,               // in  - DE identifier in the DELayout of
                                    //       the sending Field
-      ESMC_AxisIndex *AI_snd,      // in  - array of axis indices for all DE's
+      ESMC_AxisIndex *AI_snd_exc,  // in  - array of axis indices for all DE's
                                    //       in the DELayout for the sending
-                                   //       Field
+                                   //       Field - exclusive region only
+      ESMC_AxisIndex *AI_snd_tot,  // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the sending
+                                   //       Field - total region
       int AI_snd_count,            // in  - number of sets of AI's in the snd
                                    //       array (should be the same as the
                                    //       number of DE's in the snd layout)
@@ -518,7 +524,8 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex my_AI[ESMF_MAXDIM], their_AI[ESMF_MAXDIM];
+    ESMC_AxisIndex my_AI_exc[ESMF_MAXDIM], their_AI_exc[ESMF_MAXDIM];
+    ESMC_AxisIndex my_AI_tot[ESMF_MAXDIM], their_AI_tot[ESMF_MAXDIM];
     ESMC_XPacket *my_XP = new ESMC_XPacket;
     ESMC_XPacket *their_XP = new ESMC_XPacket;
     ESMC_XPacket *intersect_XP = NULL;
@@ -533,11 +540,13 @@
       // TODO:  this is NOT going to work for data dims which are not
       //  equal the grid dims, e.g. a 2d grid with 4d data.
       for (k=0; k<rank; k++) {
-        my_AI[k] = AI_snd[my_DE_snd + k*AI_snd_count];
+        my_AI_exc[k] = AI_snd_exc[my_DE_snd + k*AI_snd_count];
+        my_AI_tot[k] = AI_snd_tot[my_DE_snd + k*AI_snd_count];
+        my_AI_exc[k].max = my_AI_tot[k].max;
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
-      my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
+      my_XP->ESMC_XPacketFromAxisIndex(my_AI_exc, rank);
 
       // loop over DE's from receiving layout to calculate send table
       layout_rcv->ESMC_DELayoutGetNumDEs(&their_decount);
@@ -554,11 +563,13 @@
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
-            their_AI[k] = AI_rcv[their_de + k*AI_rcv_count];
+            their_AI_exc[k] = AI_rcv_exc[their_de + k*AI_rcv_count];
+            their_AI_tot[k] = AI_rcv_tot[their_de + k*AI_rcv_count];
+            their_AI_exc[k].max = their_AI_tot[k].max;
           }
  
           // calculate "their" XPacket in the sense of the global data
-          their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
+          their_XP->ESMC_XPacketFromAxisIndex(their_AI_exc, rank);
 
           // calculate the intersection
           intersect_XP = new ESMC_XPacket;
@@ -572,7 +583,7 @@
           }
 
           // translate from global to local data space
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank);
+          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, rank);
 
           // load the intersecting XPacket into the sending RTable
           sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
@@ -587,11 +598,13 @@
  
       // get "my" AI out of the AI_rcv array
       for (k=0; k<rank; k++) {
-        my_AI[k] = AI_rcv[my_DE_rcv + k*AI_rcv_count];
+        my_AI_exc[k] = AI_rcv_exc[my_DE_rcv + k*AI_rcv_count];
+        my_AI_tot[k] = AI_rcv_tot[my_DE_rcv + k*AI_rcv_count];
+        my_AI_exc[k].max = my_AI_tot[k].max;
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
-      my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
+      my_XP->ESMC_XPacketFromAxisIndex(my_AI_exc, rank);
 
       // loop over DE's from sending layout to calculate receive table
       for (i=0; i<their_decount; i++) {
@@ -607,11 +620,13 @@
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
-            their_AI[k] = AI_snd[their_de + k*AI_snd_count];
+            their_AI_exc[k] = AI_snd_exc[their_de + k*AI_snd_count];
+            their_AI_tot[k] = AI_snd_tot[their_de + k*AI_snd_count];
+            their_AI_exc[k].max = their_AI_tot[k].max;
           }
  
           // calculate "their" XPacket in the sense of the global data
-          their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
+          their_XP->ESMC_XPacketFromAxisIndex(their_AI_exc, rank);
 
           // calculate the intersection
           intersect_XP = new ESMC_XPacket;
@@ -625,7 +640,7 @@
           }
 
           // translate from global to local
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank);
+          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, rank);
 
           // load the intersecting XPacket into the receiving RTable
           recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);

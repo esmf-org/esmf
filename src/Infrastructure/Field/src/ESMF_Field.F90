@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.23 2003/04/29 19:32:00 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.24 2003/04/29 21:37:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.23 2003/04/29 19:32:00 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.24 2003/04/29 21:37:27 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2529,7 +2529,8 @@
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -2625,14 +2626,14 @@
 
       ! set up things we need to find a cached route or precompute one
       if (hassrcdata) then
-          call ESMF_GridGetAllAxisIndex(stypep%grid, src_AI)
+          call ESMF_GridGetAllAxisIndex(stypep%grid, src_AI_exc, src_AI_tot)
           call ESMF_DELayoutGetSize(srclayout, nx, ny);
           AI_snd_count = nx * ny
       else
           AI_snd_count = 0
       endif
       if (hasdstdata) then
-          call ESMF_GridGetAllAxisIndex(dtypep%grid, dst_AI)
+          call ESMF_GridGetAllAxisIndex(dtypep%grid, dst_AI_exc, dst_AI_tot)
           call ESMF_DELayoutGetSize(dstlayout, nx, ny);
           AI_rcv_count = nx * ny
       else
@@ -2641,9 +2642,9 @@
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_dst_DE, dst_AI, &
+      call ESMF_RouteGetCached(datarank, my_dst_DE, dst_AI_exc, &
                                   AI_rcv_count, dstlayout, my_src_DE, &
-                                  src_AI, AI_snd_count, srclayout, &
+                                  src_AI_exc, AI_snd_count, srclayout, &
                                   hascachedroute, route, rc=status)
 
       if (.not. hascachedroute) then
@@ -2651,9 +2652,11 @@
           ! includes the DEs from both fields.
           route = ESMF_RouteCreate(parentlayout, rc) 
 
-          call ESMF_RoutePrecompute(route, datarank, my_dst_DE, dst_AI, &
+          call ESMF_RoutePrecompute(route, datarank, my_dst_DE, &
+                                   dst_AI_exc, dst_AI_tot, &
                                    AI_rcv_count, dstlayout, my_src_DE, &
-                                   src_AI, AI_snd_count, srclayout)
+                                   src_AI_exc, src_AI_tot, &
+                                   AI_snd_count, srclayout)
 
       endif
 
