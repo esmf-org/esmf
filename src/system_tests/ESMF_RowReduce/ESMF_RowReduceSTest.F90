@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.5 2004/01/30 00:19:02 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.6 2004/02/03 21:40:18 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -31,6 +31,7 @@
     integer :: timestep, rowlen, rowi, rstart, rend
     integer :: result, len, de_id, ndes, rightvalue 
     integer :: counts(2)
+    integer :: myDEx, myDEy, nDEx, nDEy
     type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
     type(ESMF_GridStagger) :: horz_stagger, vert_stagger
     type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
@@ -113,9 +114,12 @@
 
 
     ! figure out our local processor id
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+!    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    call ESMF_DELayoutGetSize(layout1, nDEx, nDEy, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-
+    call ESMF_DELayoutGetDEPosition(layout1, myDEx, myDEy, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    de_id = (myDEy-1)*nDEx + myDEx
 
     ! Allocate and set initial data values.  These are different on each DE.
     call ESMF_GridGetDE(grid1, localCellCount=ni, rc=rc)
