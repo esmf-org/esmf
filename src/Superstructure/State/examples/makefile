@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/08/03 19:33:52 nscollins Exp $ 
+# $Id: makefile,v 1.7 2004/12/14 22:09:48 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -57,7 +57,8 @@ LOCDIR	  = src/Superstructure/State/examples
 # depend on this naming convention being followed.
 #
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx 
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx \
+                 $(ESMF_EXDIR)/ESMF_StateReconcileEx 
 #                 $(ESMF_EXDIR)/ESMC_StateEx 
                  
 #
@@ -66,11 +67,13 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_StateEx
 # in this makefile.
 #
 
-EXAMPLES_RUN   = run_ESMF_StateEx 
+EXAMPLES_RUN   = run_ESMF_StateEx \
+                 run_ESMF_StateReconcileEx 
 #                 run_ESMC_StateEx 
                  
 
-EXAMPLES_RUN_UNI = run_ESMF_StateEx_uni 
+EXAMPLES_RUN_UNI = run_ESMF_StateEx_uni \
+                   run_ESMC_StateReconcileEx_uni 
 #                   run_ESMC_StateEx_uni 
                    
 include $(ESMF_DIR)/makefile
@@ -92,10 +95,22 @@ run_ESMC_StateEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_StateEx > $(ESMF_EXDIR)/ESMC_StateEx.stdout
 
 #
-# EMSF_StateEx
+# ESMF_StateEx
 #
 run_ESMF_StateEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_StateEx > $(ESMF_EXDIR)/ESMF_StateEx.stdout
 
 run_ESMF_StateEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_StateEx > $(ESMF_EXDIR)/ESMF_StateEx.stdout
+
+
+#
+# ESMF_StateReconcileEx
+#
+run_ESMF_StateReconcileEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_StateReconcileEx > $(ESMF_EXDIR)/ESMF_StateReconcileEx.stdout
+
+run_ESMF_StateReconcileEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_StateReconcileEx > $(ESMF_EXDIR)/ESMF_StateReconcileEx.stdout
+
+
