@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.51 2004/04/13 23:13:27 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.52 2004/04/14 20:43:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -97,13 +97,13 @@
 ! !PRIVATE MEMBER FUNCTIONS:
       private ESMF_AlarmEQ
       private ESMF_AlarmNE
-      private ESMF_AlarmCreateCopy
       private ESMF_AlarmCreateNew
+      private ESMF_AlarmCreateCopy
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.51 2004/04/13 23:13:27 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.52 2004/04/14 20:43:16 eschwab Exp $'
 
 !==============================================================================
 !
@@ -129,7 +129,8 @@
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Alarm} class.
 !     Compare two alarms for equality; return true if equal,
-!     false otherwise.  Comparison is based on IDs.
+!     false otherwise.  Comparison is based on IDs, which are distinct
+!     for newly created alarms and identical for alarms created as copies.
 !
 !     The arguments are:
 !     \begin{description}
@@ -168,7 +169,8 @@
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Alarm} class.
 !     Compare two alarms for inequality; return true if not equal,
-!     false otherwise.  Comparison is based on IDs.
+!     false otherwise.  Comparison is based on IDs, which are distinct
+!     for newly created alarms and identical for alarms created as copies.
 !
 !     The arguments are:
 !     \begin{description}
@@ -188,19 +190,21 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! !IROUTINE: ESMF_AlarmCreate - Create an ESMF Alarm
+!
 ! !INTERFACE:
       interface ESMF_AlarmCreate    
 
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_AlarmCreateCopy
       module procedure ESMF_AlarmCreateNew
+      module procedure ESMF_AlarmCreateCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Alarm} Create
 !     methods.
 !
-!EOP
+!EOPI
       end interface
 !
 !==============================================================================
@@ -209,45 +213,10 @@
 
 !==============================================================================
 !BOP
-! !IROUTINE: ESMF_AlarmCreateCopy - Create a copy of an Alarm
+! !IROUTINE: ESMF_AlarmCreate - Create a new ESMF Alarm
 
 ! !INTERFACE:
-      function ESMF_AlarmCreateCopy(alarm, rc)
-
-! !RETURN VALUE:
-      type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
-      integer,          intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Creates a copy of a given {\tt ESMF\_Alarm}.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_AlarmCreate()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!        The {\tt ESMF\_Alarm} to copy.
-!     \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!     invoke C to C++ entry point to copy alarm
-      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
-
-      end function ESMF_AlarmCreateCopy
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AlarmCreateNew - Create a new Alarm
-
-! !INTERFACE:
+      ! Private name; call using ESMF_AlarmCreate()
       function ESMF_AlarmCreateNew(name, clock, ringTime, ringInterval, &
                                    stopTime, ringDuration, &
                                    ringTimeStepCount, &
@@ -270,7 +239,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes an {\tt ESMF\_Alarm}'s properties.
+!     Creates and sets the initial values in a new {\tt ESMF\_Alarm}.
 !
 !     This is a private method; invoke via the public overloaded entry point
 !     {\tt ESMF\_AlarmCreate()}.
@@ -344,6 +313,43 @@
                                  enabled, sticky, rc)
 
       end function ESMF_AlarmCreateNew
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmCreate - Create a copy of an existing ESMF Alarm
+
+! !INTERFACE:
+      ! Private name; call using ESMF_AlarmCreate()
+      function ESMF_AlarmCreateCopy(alarm, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in)            :: alarm
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates a copy of a given {\tt ESMF\_Alarm}.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_AlarmCreate()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!        The {\tt ESMF\_Alarm} to copy.
+!     \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point to copy alarm
+      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
+
+      end function ESMF_AlarmCreateCopy
 
 !------------------------------------------------------------------------------
 !BOP

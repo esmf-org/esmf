@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.55 2004/04/14 20:43:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.55 2004/04/14 20:43:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -185,7 +185,7 @@ int ESMC_Calendar::count=0;
 
     return(calendar);
 
- } // end ESMC_CalendarCreate (new)
+ } // end ESMC_CalendarCreate (built-in)
 
 //-------------------------------------------------------------------------
 //BOP
@@ -588,7 +588,7 @@ int ESMC_Calendar::count=0;
     }
     return(rc);
 
-}  // end ESMC_CalendarSet (new)
+}  // end ESMC_CalendarSet (built-in)
 
 //-------------------------------------------------------------------------
 //BOP
@@ -1684,7 +1684,7 @@ int ESMC_Calendar::count=0;
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Calendar} with defaults for either
-//      C++ or F90, since {\tt ESMC_Calendar} is a deep, dynamically
+//      C++ or F90, since {\tt ESMC\_Calendar} is a deep, dynamically
 //      allocated class.
 //
 //EOP

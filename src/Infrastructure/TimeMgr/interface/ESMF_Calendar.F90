@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.61 2004/04/09 20:13:39 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.62 2004/04/14 20:43:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,18 +121,18 @@
       private ESMF_CalendarNE
       private ESMF_CalendarTypeEQ
       private ESMF_CalendarTypeNE
+      private ESMF_CalendarCreateBuiltIn
       private ESMF_CalendarCreateCopy
       private ESMF_CalendarCreateCustom
-      private ESMF_CalendarCreateNew
+      private ESMF_CalendarSetBuiltIn
       private ESMF_CalendarSetCustom
-      private ESMF_CalendarSetNew
-      private ESMF_CalendarSetDefaultCal
       private ESMF_CalendarSetDefaultType
+      private ESMF_CalendarSetDefaultCal
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.61 2004/04/09 20:13:39 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.62 2004/04/14 20:43:16 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -291,52 +291,58 @@
        end interface    
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! !IROUTINE: ESMF_CalendarCreate - Create an ESMF Calendar
+!
 ! !INTERFACE:
       interface ESMF_CalendarCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarCreateBuiltIn
       module procedure ESMF_CalendarCreateCopy
       module procedure ESMF_CalendarCreateCustom
-      module procedure ESMF_CalendarCreateNew
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Calendar}
 !     Create methods.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! !IROUTINE: ESMF_CalendarSet - Set properties of an ESMF Calendar
+!
 ! !INTERFACE:
       interface ESMF_CalendarSet
 
 ! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarSetBuiltIn
       module procedure ESMF_CalendarSetCustom
-      module procedure ESMF_CalendarSetNew
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Calendar}
 !     Set methods.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! !IROUTINE: ESMF_ClockSetDefault - Set the default ESMF Calendar
+!
 ! !INTERFACE:
       interface ESMF_CalendarSetDefault
 
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_CalendarSetDefaultCal
       module procedure ESMF_CalendarSetDefaultType
+      module procedure ESMF_CalendarSetDefaultCal
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Calendar}
 !     Set default methods.
 !
-!EOP
+!EOPI
       end interface
 !
 !==============================================================================
@@ -344,10 +350,69 @@
       contains
 
 !==============================================================================
-!BOP    
-! !IROUTINE: ESMF_CalendarCreateCopy - Create a copy of a Calendar
+!BOP
+! !IROUTINE: ESMF_CalendarCreate - Create a new ESMF Calendar of built-in type
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_CalendarCreate()
+      function ESMF_CalendarCreateBuiltIn(name, calendarType, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Calendar) :: ESMF_CalendarCreateBuiltIn
+
+! !ARGUMENTS:
+      character (len=*),       intent(in),  optional :: name
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates and sets a {\tt calendar} to the given built-in
+!     {\tt ESMF\_CalendarType}. 
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarCreate()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[name]}]
+!          The name for the newly created calendar.  If not specified, a
+!          default unique name will be generated: "CalendarNNN" where NNN
+!          is a unique sequence number from 001 to 999.
+!     \item[calendarType]
+!          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
+!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIANDAY},
+!            {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, and
+!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!          See the "Time Manager Reference" document for a description of
+!          each calendar type.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarCreateBuiltIn(ESMF_CalendarCreateBuiltIn, nameLen, &
+                                        name, calendarType, rc)
+    
+      end function ESMF_CalendarCreateBuiltIn
+    
+!------------------------------------------------------------------------------
+!BOP    
+! !IROUTINE: ESMF_CalendarCreate - Create a copy of an ESMF Calendar
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CalendarCreate()
       function ESMF_CalendarCreateCopy(calendar, rc)
 
 ! !RETURN VALUE:
@@ -381,9 +446,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarCreateCustom - Create a custom Calendar
+! !IROUTINE: ESMF_CalendarCreate - Create a new custom ESMF Calendar
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_CalendarCreate()
       function ESMF_CalendarCreateCustom(name, daysPerMonth, secondsPerDay, &
                                          daysPerYear, daysPerYearDn, &
                                          daysPerYearDd, rc)
@@ -479,63 +545,6 @@
       end if
     
       end function ESMF_CalendarCreateCustom
-    
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarCreateNew - Create a new Calendar
-
-! !INTERFACE:
-      function ESMF_CalendarCreateNew(name, calendarType, rc)
-
-! !RETURN VALUE:
-      type(ESMF_Calendar) :: ESMF_CalendarCreateNew
-
-! !ARGUMENTS:
-      character (len=*),       intent(in),  optional :: name
-      type(ESMF_CalendarType), intent(in)            :: calendarType
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Creates and sets a {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarCreate()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[name]}]
-!          The name for the newly created calendar.  If not specified, a
-!          default unique name will be generated: "CalendarNNN" where NNN
-!          is a unique sequence number from 001 to 999.
-!     \item[calendarType]
-!          The {\tt ESMF\_CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
-!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
-!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
-!            {\tt ESMF\_CAL\_NOCALENDAR}.
-!          See the "Time Manager Reference" document for a description of
-!          each calendar type.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!    
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-      ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
-
-      ! get length of given name for C++ validation
-      if (present(name)) then
-        nameLen = len_trim(name)
-      end if
-    
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarCreateNew(ESMF_CalendarCreateNew, nameLen, name, &
-                                    calendarType, rc)
-    
-      end function ESMF_CalendarCreateNew
     
 !------------------------------------------------------------------------------
 !BOP
@@ -828,9 +837,64 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSetCustom - Set a custom Calendar
+! !IROUTINE: ESMF_CalendarSet - Set a Calendar to a built-in type
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_CalendarSet()
+      subroutine ESMF_CalendarSetBuiltIn(calendar, name, calendarType, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),     intent(inout)         :: calendar
+      character (len=*),       intent(in),  optional :: name
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets {\tt calendar} to the given built-in {\tt ESMF\_CalendarType}. 
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSet()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          The object instance to initialize.
+!     \item[{[name]}]
+!          The new name for this calendar.
+!     \item[calendarType]
+!          The built-in {\tt CalendarType}.  Valid values are:
+!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIANDAY},
+!            {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, and
+!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!          See the "Time Manager Reference" document for a description of
+!          each calendar type.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarSetBuiltIn(calendar, nameLen, name, calendarType, rc)
+    
+      end subroutine ESMF_CalendarSetBuiltIn
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarSet - Set properties of a custom Calendar
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CalendarSet()
       subroutine ESMF_CalendarSetCustom(calendar, name, daysPerMonth, &
                                         secondsPerDay, &
                                         daysPerYear, daysPerYearDn, &
@@ -928,99 +992,10 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSetNew - Set the Calendar type
+! !IROUTINE: ESMF_CalendarSetDefault - Set the default Calendar type
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarSetNew(calendar, name, calendarType, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(inout)         :: calendar
-      character (len=*),       intent(in),  optional :: name
-      type(ESMF_CalendarType), intent(in)            :: calendarType
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSet()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          The object instance to initialize.
-!     \item[{[name]}]
-!          The new name for this calendar.
-!     \item[calendarType]
-!          The {\tt CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
-!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
-!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
-!            {\tt ESMF\_CAL\_NOCALENDAR}.
-!          See the "Time Manager Reference" document for a description of
-!          each calendar type.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!    
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-    
-      ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
-
-      ! get length of given name for C++ validation
-      if (present(name)) then
-        nameLen = len_trim(name)
-      end if
-    
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarSetNew(calendar, nameLen, name, calendarType, rc)
-    
-      end subroutine ESMF_CalendarSetNew
-    
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarSetDefaultCal - Set the default Calendar
-
-! !INTERFACE:
-      subroutine ESMF_CalendarSetDefaultCal(calendar, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(in)            :: calendar
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Sets the default {\tt calendar} to the one given.  Subsequent Time
-!     Manager operations requiring a calendar where one isn't specified will
-!     use this calendar.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSetDefault()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          The object instance to set the default to.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!    
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-    
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarSetDefaultCal(calendar, rc)
-    
-      end subroutine ESMF_CalendarSetDefaultCal
-    
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarSetDefaultType - Set the default Calendar type
-
-! !INTERFACE:
+      ! Private name; call using ESMF_CalendarSetDefault()
       subroutine ESMF_CalendarSetDefaultType(calendarType, rc)
 
 ! !ARGUMENTS:
@@ -1038,7 +1013,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[calendarType]
-!          The calendar type to set the default to.
+!          The calendar type to be the default.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1051,6 +1026,43 @@
       call c_ESMC_CalendarSetDefaultType(calendarType, rc)
     
       end subroutine ESMF_CalendarSetDefaultType
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarSetDefault - Set the default Calendar
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CalendarSetDefault()
+      subroutine ESMF_CalendarSetDefaultCal(calendar, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),     intent(in)            :: calendar
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the default {\tt calendar} to the one given.  Subsequent Time
+!     Manager operations requiring a calendar where one isn't specified will
+!     use this calendar.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSetDefault()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          The object instance to be the default.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarSetDefaultCal(calendar, rc)
+    
+      end subroutine ESMF_CalendarSetDefaultCal
     
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.55 2004/04/14 20:43:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.55 2004/04/14 20:43:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1230,7 +1230,7 @@ int ESMC_Clock::count=0;
 //    none
 //
 // !DESCRIPTION:
-//      Initializes for either C++ or F90, since ESMC_Clock is a deep,
+//      Initializes for either C++ or F90, since {\tt ESMC\_Clock} is a deep,
 //      dynamically allocated class.
 //
 //EOP

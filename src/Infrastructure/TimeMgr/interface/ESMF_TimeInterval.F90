@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.54 2004/04/09 20:13:56 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.55 2004/04/14 20:43:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.54 2004/04/09 20:13:56 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.55 2004/04/14 20:43:16 eschwab Exp $'
 
 !==============================================================================
 !
@@ -229,7 +229,9 @@
 !     TMG1.5.5, TMG7.2
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(/) - Divide a TimeInterval by an integer, return TimeInterval quotient 
 !
 ! !INTERFACE:
@@ -256,7 +258,7 @@
 !          Integer divisor.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalQuotI   ! internal implementation
 !
@@ -264,7 +266,9 @@
 !     TMG1.5.6, TMG5.3, TMG7.2
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(/) - Divide a TimeInterval by a double precision divisor, return TimeInterval quotient 
 !
 ! !INTERFACE:
@@ -291,7 +295,7 @@
 !          Double precision divisor.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalQuotR   ! internal implementation
 !
@@ -301,7 +305,9 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(.DIV.) - Divide two TimeIntervals, return fraction quotient
 !
 ! !INTERFACE:
@@ -336,7 +342,7 @@
 !          The divisor.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalFQuot   ! internal implementation
 !
@@ -457,7 +463,9 @@
 !     TMG1.5.7, TMG7.2     
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
 !
 ! !INTERFACE:
@@ -486,7 +494,7 @@
 !          The fraction multiplier.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdTF   ! internal implementation
 !
@@ -494,7 +502,9 @@
 !     TMG1.5.7, TMG7.2
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
 !
 ! !INTERFACE:
@@ -523,7 +533,7 @@
 !          The multiplicand.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdFT   ! internal implementation
 !
@@ -531,7 +541,9 @@
 !     TMG1.5.7, TMG7.2
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
 !
 ! !INTERFACE:
@@ -560,7 +572,7 @@
 !          The double precision multiplier.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdTR   ! internal implementation
 !
@@ -568,7 +580,9 @@
 !     TMG1.5.7, TMG7.2
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! TODO: when implemented, change to BOP/EOP
+!
 ! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
 !
 ! !INTERFACE:
@@ -597,7 +611,7 @@
 !          The multiplicand.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalProdRT   ! internal implementation
 !

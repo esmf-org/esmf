@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.34 2004/04/13 23:13:27 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.35 2004/04/14 20:43:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.34 2004/04/13 23:13:27 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.35 2004/04/14 20:43:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -1139,7 +1139,7 @@ int ESMC_Alarm::count=0;
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Alarm} with defaults for either
-//      C++ or F90, since {\tt ESMC_Alarm} is a deep, dynamically
+//      C++ or F90, since {\tt ESMC\_Alarm} is a deep, dynamically
 //      allocated class.
 //
 //EOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.51 2004/04/09 20:13:39 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.52 2004/04/14 20:43:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -87,13 +87,13 @@
 ! !PRIVATE MEMBER FUNCTIONS:
       private ESMF_ClockEQ
       private ESMF_ClockNE
-      private ESMF_ClockCreateCopy
       private ESMF_ClockCreateNew
+      private ESMF_ClockCreateCopy
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.51 2004/04/09 20:13:39 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.52 2004/04/14 20:43:16 eschwab Exp $'
 
 !==============================================================================
 !
@@ -119,7 +119,8 @@
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Clock} class.
 !     Compare two clocks for equality; return true if equal,
-!     false otherwise.  Comparison is based on IDs.
+!     false otherwise.  Comparison is based on IDs, which are distinct
+!     for newly created clocks and identical for clocks created as copies.
 !
 !     The arguments are:
 !     \begin{description}
@@ -158,7 +159,8 @@
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Clock} class.
 !     Compare two clocks for inequality; return true if not equal,
-!     false otherwise.  Comparison is based on IDs.
+!     false otherwise.  Comparison is based on IDs, which are distinct
+!     for newly created clocks and identical for clocks created as copies.
 !
 !     The arguments are:
 !     \begin{description}
@@ -178,19 +180,21 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! !IROUTINE: ESMF_ClockCreate - Create an ESMF Clock
+!
 ! !INTERFACE:
       interface ESMF_ClockCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_ClockCreateCopy
       module procedure ESMF_ClockCreateNew
+      module procedure ESMF_ClockCreateCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Clock} Create
 !     methods. 
 !
-!EOP
+!EOPI
       end interface
 !
 !==============================================================================
@@ -270,45 +274,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockCreateCopy - Create a copy of a Clock
+! !IROUTINE: ESMF_ClockCreate - Create a new ESMF Clock
 
 ! !INTERFACE:
-      function ESMF_ClockCreateCopy(clock, rc)
-
-! !RETURN VALUE:
-      type(ESMF_Clock) :: ESMF_ClockCreateCopy
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(in)            :: clock
-      integer,          intent(out), optional :: rc
-    
-! !DESCRIPTION:
-!     Creates a copy of a given {\tt ESMF\_Clock}.    
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_ClockCreate()}.
-!     
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!        The {\tt ESMF\_Clock} to copy.
-!     \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!     
-!EOP
-! !REQUIREMENTS:
-
-!     invoke C to C++ entry point to copy clock
-      call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, rc)
-
-      end function ESMF_ClockCreateCopy
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockCreateNew - Create a new Clock
-
-! !INTERFACE:
+      ! Private name; call using ESMF_ClockCreate()
       function ESMF_ClockCreateNew(name, timeStep, startTime, stopTime, &
                                    runDuration, runTimeStepCount, refTime, rc)
 
@@ -380,6 +349,43 @@
                                  runTimeStepCount, refTime, rc)
 
       end function ESMF_ClockCreateNew
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockCreate - Create a copy of an existing ESMF Clock
+
+! !INTERFACE:
+      ! Private name; call using ESMF_ClockCreate()
+      function ESMF_ClockCreateCopy(clock, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Clock) :: ESMF_ClockCreateCopy
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in)            :: clock
+      integer,          intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Creates a copy of a given {\tt ESMF\_Clock}.    
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_ClockCreate()}.
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!        The {\tt ESMF\_Clock} to copy.
+!     \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point to copy clock
+      call c_ESMC_ClockCreateCopy(ESMF_ClockCreateCopy, clock, rc)
+
+      end function ESMF_ClockCreateCopy
 
 !------------------------------------------------------------------------------
 !BOP

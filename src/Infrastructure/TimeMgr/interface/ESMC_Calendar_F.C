@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.31 2004/04/09 20:13:38 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.32 2004/04/14 20:43:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,11 +49,11 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarcreatenew)(ESMC_Calendar    **ptr,
-                                          int               *nameLen,
-                                          const char        *name,
-                                          ESMC_CalendarType *calendarType, 
-                                          int *status) {
+       void FTN(c_esmc_calendarcreatebuiltin)(ESMC_Calendar    **ptr,
+                                              int               *nameLen,
+                                              const char        *name,
+                                              ESMC_CalendarType *calendarType, 
+                                              int *status) {
           *ptr = ESMC_CalendarCreate(
                                            *nameLen,      // always present 
                                                           //  internal argument.
@@ -124,11 +124,11 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN(c_esmc_calendarsetnew)(ESMC_Calendar **ptr,
-                                       int *nameLen,
-                                       const char *name,
-                                       ESMC_CalendarType *calendarType, 
-                                       int *status) {
+       void FTN(c_esmc_calendarsetbuiltin)(ESMC_Calendar **ptr,
+                                           int *nameLen,
+                                           const char *name,
+                                           ESMC_CalendarType *calendarType, 
+                                           int *status) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->ESMC_CalendarSet(
                                              *nameLen,   // always present
