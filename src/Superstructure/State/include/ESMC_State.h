@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.4 2004/04/29 17:12:45 nscollins Exp $
+// $Id: ESMC_State.h,v 1.5 2004/11/30 23:48:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -117,8 +117,29 @@ typedef enum ESMC_Ready { ReadyToRead=1, ReadyToWrite=2 } ESMC_Ready;
  int ESMC_StateDestroy(ESMC_State *state);
 
  extern "C" {
-      void FTN(f_esmf_statecreate)(ESMC_State *state, char *statename, int *rc);
-      void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
+
+  void c_esmc_stateserialize(int *statestatus, int *st, int *needed_default, 
+              int *ready_default, int *stvalid_default, 
+              int *reqrestart_default, int *alloccount, int *datacount, 
+              void *buffer, int *length, int *offset, int *localrc);
+
+  void c_esmc_statedeserialize(int *statestatus, int *st, 
+              int *needed_default, int *ready_default, int *stvalid_default, 
+              int *reqrestart_default, int *alloccount, int *datacount, 
+              void *buffer, int *offset, int *localrc);
+
+  void c_esmc_stateitemserialize(int *otype, char *namep, int *indirect_index, 
+               int *needed, int *ready, int *valid, int *reqrestart, 
+               void *buffer, int *length, int *offset, int *localrc, int clen);
+
+  void c_esmc_stateitemdeserialize(int *otype, char *namep, 
+              int *indirect_index, int *needed, int *ready, int *valid, 
+              int *reqrestart, 
+              void *buffer, int *offset, int *localrc, int clen);
+
+  void FTN(f_esmf_statecreate)(ESMC_State *state, char *statename, int *rc);
+  void FTN(f_esmf_statedestroy)(ESMC_State *state, int *rc);
+
 #if 0
       TODO: finish these prototypes
       void FTN(f_esmf_statecreate)(char *statename, statetype, compname,

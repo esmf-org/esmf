@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.5 2004/11/30 21:01:55 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.6 2004/11/30 23:48:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,7 +52,8 @@
       use ESMF_StateMod
       implicit none
 
-      integer :: BIGBUF = 4096
+      integer :: bufsize = 8192
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
        private
@@ -68,17 +69,13 @@
         type(ESMF_StateItemInfo), dimension(:), pointer :: attrList
         type(ESMF_StateItemInfo), pointer :: originalObject
     ! TODO: these need to be folded in somehow.  temp test.
-    integer(ESMF_KIND_I4) :: sendcount, recvcount
+    integer(ESMF_KIND_I4) :: mycount, theircount
     integer(ESMF_KIND_I4), pointer, dimension(:) :: idsend, idrecv
     integer(ESMF_KIND_I4), pointer, dimension(:) :: objsend, objrecv
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: attrsend, attrrecv
-    character(len=ESMF_MAXSTR), pointer, dimension(:) :: namesend, namerecv
     integer(ESMF_KIND_I4), pointer, dimension(:,:) :: blindsend, blindrecv
-    !character(len=BIGBUF), pointer, dimension(:) :: blindsend, blindrecv
         integer :: blockType   ! new obj, dup, or end marker
         integer :: objType     ! ESMF object type
         integer :: objID       ! must be unique! (get from base class)
-        integer :: attrCount   ! count of number of attributes
         integer :: childCount  !
       end type
 
@@ -99,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.5 2004/11/30 21:01:55 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.6 2004/11/30 23:48:56 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -242,93 +239,81 @@
     ! shortname for use in the code below
     si => stateInfoList(1)
 
-    si%sendcount = state%statep%datacount 
-    if (si%sendcount .gt. 0) then
-        allocate(si%idsend(si%sendcount), stat=localrc)
+    si%mycount = state%statep%datacount 
+    if (si%mycount .gt. 0) then
+        allocate(si%idsend(si%mycount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local ID list", &
                                        ESMF_CONTEXT, rc)) return
-        allocate(si%objsend(si%sendcount), stat=localrc)
+        allocate(si%objsend(si%mycount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local obj list", &
                                        ESMF_CONTEXT, rc)) return
-        allocate(si%attrsend(si%sendcount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local attr counts", &
-                                       ESMF_CONTEXT, rc)) return
-        allocate(si%namesend(si%sendcount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                   "Allocating buffer for local name list", &
-                                       ESMF_CONTEXT, rc)) return
-        allocate(si%blindsend(BIGBUF, si%sendcount), stat=localrc)
+        allocate(si%blindsend(bufsize, si%mycount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local buf list", &
                                        ESMF_CONTEXT, rc)) return
     endif
 
-    si%sendcount = state%statep%datacount 
+    si%mycount = state%statep%datacount 
     do i=1, state%statep%datacount
         stateitem => state%statep%datalist(i)
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_BUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%bp%btypep, si%idsend(i), localrc)
-             call c_ESMC_AttributeGetCount(stateitem%datap%bp%btypep, &
-                                           si%attrsend(i), localrc)
-             call ESMF_BundleGet(stateitem%datap%bp, name=si%namesend(i), rc=localrc)
              si%objsend(i) = ESMF_ID_BUNDLE%objectID
              bptr => si%blindsend(:,i)
-             !call c_ESMC_BaseSerialize(stateitem%datap%bp%btypep, bptr(1), &
-             !                          BIGBUF, offset, rc)
-             call ESMF_BundleSerialize(stateitem%datap%bp, bptr, BIGBUF, &
+             call ESMF_BundleSerialize(stateitem%datap%bp, bptr, bufsize, &
                                        offset, localrc)
-            print *, "getting bundle, obj=", si%objsend(i), " id=", si%idsend(i)
+            print *, "setting bundle, obj=", si%objsend(i), " id=", si%idsend(i)
+
            case (ESMF_STATEITEM_FIELD%ot)
              call c_ESMC_GetID(stateitem%datap%fp%ftypep, si%idsend(i), localrc)
-             call c_ESMC_AttributeGetCount(stateitem%datap%fp%ftypep, si%attrsend(i), localrc)
-             call ESMF_FieldGet(stateitem%datap%fp, name=si%namesend(i), rc=localrc)
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldSerialize(stateitem%datap%fp, bptr, &
-                                       BIGBUF, offset, rc)
-            print *, "getting field, obj=", si%objsend(i), " id=", si%idsend(i)
+                                       bufsize, offset, rc)
+            print *, "setting field, obj=", si%objsend(i), " id=", si%idsend(i)
+
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
-             call c_ESMC_AttributeGetCount(stateitem%datap%ap, si%attrsend(i), localrc)
-             call ESMF_ArrayGet(stateitem%datap%ap, name=si%namesend(i), rc=localrc)
+             si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerialize(stateitem%datap%ap, bptr(1), &
-                                       BIGBUF, offset, rc)
-             si%objsend(i) = ESMF_ID_ARRAY%objectID
-            print *, "getting array, obj=", si%objsend(i), " id=", si%idsend(i)
+                                       bufsize, offset, rc)
+            print *, "setting array, obj=", si%objsend(i), " id=", si%idsend(i)
+
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, si%idsend(i), localrc)
-             call c_ESMC_AttributeGetCount(stateitem%datap%spp, si%attrsend(i), localrc)
-             si%namesend(i) = stateitem%namep
+             si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
-             call ESMF_StateSerialize(wrapper, bptr(1), BIGBUF, offset, rc)
-             si%objsend(i) = ESMF_ID_STATE%objectID
-            print *, "getting state, obj=", si%objsend(i), " id=", si%idsend(i)
+             call ESMF_StateSerialize(wrapper, bptr, bufsize, offset, rc)
+            print *, "setting state, obj=", si%objsend(i), " id=", si%idsend(i)
+
            case (ESMF_STATEITEM_NAME%ot)
              print *, "placeholder name"
              si%idsend(i) = -1
              si%objsend(i) = 0
-             si%attrsend(i) = 0
-             si%namesend(i) = stateitem%namep
+             bptr => si%blindsend(:,i)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, rc)
+            print *, "setting placeholder, name=", stateitem%namep
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_INDIRECT%ot)
              print *, "field inside a bundle"
              si%idsend(i) = -2
              si%objsend(i) = 0
-             si%attrsend(i) = 0
-             si%namesend(i) = stateitem%namep
+             bptr => si%blindsend(:,i)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, rc)
+            print *, "setting field-in-bundle, name=", stateitem%namep
              localrc = ESMF_SUCCESS
            case (ESMF_STATEITEM_UNKNOWN%ot)
              print *, "unknown type"
              si%idsend(i) = -3
              si%objsend(i) = 0
-             si%attrsend(i) = 0
-             si%namesend(i) = stateitem%namep
+             bptr => si%blindsend(:,i)
+             call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, rc)
+            print *, "setting unknown, name=", stateitem%namep
              localrc = ESMF_SUCCESS
         end select
         if (ESMF_LogMsgFoundError(localrc, &
@@ -370,7 +355,7 @@
     ! shortname for use in the code below
     si => stateInfoList(1)
 
-    if (si%sendcount .gt. 0) then
+    if (si%mycount .gt. 0) then
         deallocate(si%idsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                  "Deallocating buffer for local ID list", &
@@ -378,14 +363,6 @@
         deallocate(si%objsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                  "Deallocating buffer for local obj list", &
-                                       ESMF_CONTEXT, rc)) return
-        deallocate(si%attrsend, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                 "Deallocating buffer for local attr list", &
-                                       ESMF_CONTEXT, rc)) return
-        deallocate(si%namesend, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, &
-                                 "Deallocating buffer for local name list", &
                                        ESMF_CONTEXT, rc)) return
         deallocate(si%blindsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -447,7 +424,7 @@
     type(ESMF_Bundle) :: bundle
     type(ESMF_Field) :: field
     type(ESMF_Array) :: array
-    character(len=BIGBUF) :: thisname
+    character(len=bufsize) :: thisname
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     logical :: ihave
     type(ESMF_StateItemInfo), pointer :: si
@@ -468,7 +445,7 @@
                if (i .eq. j) cycle
                print *, "calling send to", i
                ! count must be integer array
-               count(1) = si%sendcount
+               count(1) = si%mycount
                call ESMF_VMSend(vm, count, 1, i, rc=localrc)
                if (ESMF_LogMsgFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &
@@ -477,208 +454,167 @@
                if (ESMF_LogMsgFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &
                                          ESMF_CONTEXT, rc)) return
-               si%recvcount = count(1)
-               if (si%recvcount .ne. si%sendcount) then
-                   print *, "object counts not same; more needed", &
-                          si%sendcount, " .ne. ", si%recvcount
+               si%theircount = count(1)
+               if (si%theircount .ne. si%mycount) then
+                   print *, "object counts not same; ", &
+                          si%mycount, " .ne. ", si%theircount
+               endif
 
-                   if (si%sendcount .gt. 0) then
-                       call ESMF_VMSend(vm, si%idsend, si%sendcount, i, rc=localrc)
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
-                       call ESMF_VMSend(vm, si%objsend, si%sendcount, i, rc=localrc)
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
-                       call ESMF_VMSend(vm, si%attrsend, si%sendcount, i, rc=localrc)
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
+               if (si%mycount .gt. 0) then
+                   call ESMF_VMSend(vm, si%idsend, si%mycount, i, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
+                   call ESMF_VMSend(vm, si%objsend, si%mycount, i, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
 
-                       do m = 1, si%sendcount
-                         thisname = si%namesend(m)
-                         print *, "ready to send name", m, "(", &
-                                   trim(si%namesend(m)), ") to", i
-                         call ESMF_VMSend(vm, thisname, ESMF_MAXSTR, i, rc=localrc)
-                         print *, "back from name send, localrc=", localrc
-                         if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
+                   do m = 1, si%mycount
+                     bptr => si%blindsend(:,m)
+                     call ESMF_VMSend(vm, bptr, bufsize, i, rc=localrc)
+                     print *, "back from buf send, localrc=", localrc
+                     if (ESMF_LogMsgFoundError(localrc, &
+                                               ESMF_ERR_PASSTHRU, &
+                                               ESMF_CONTEXT, rc)) return
 
-                       enddo
-                       do m = 1, si%sendcount
-                         !thisname = si%blindsend(m)
-                         !call ESMF_VMSend(vm, thisname, BIGBUF, i, rc=localrc)
-                         bptr => si%blindsend(:,m)
-                         call ESMF_VMSend(vm, bptr, BIGBUF, i, rc=localrc)
-                         print *, "back from buf send, localrc=", localrc
-                         if (ESMF_LogMsgFoundError(localrc, &
-                                                   ESMF_ERR_PASSTHRU, &
-                                                   ESMF_CONTEXT, rc)) return
-
-                       enddo
-                   endif
+                   enddo
                endif
            enddo
-       else
+       else  ! i was not the sender this time, so i am receiving
            print *, mypet, "receives from", j
            call ESMF_VMRecv(vm, count, 1, j, rc=localrc)
            if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
-           si%recvcount = count(1)
+           si%theircount = count(1)
 
-           count(1) = si%sendcount
+           count(1) = si%mycount
            call ESMF_VMSend(vm, count, 1, j, rc=localrc)
            if (ESMF_LogMsgFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rc)) return
 
-           if (si%recvcount .ne. si%sendcount) then
-               print *, "object counts not same; more needed", &
-                          si%sendcount, " .ne. ", si%recvcount
+           if (si%theircount .ne. si%mycount) then
+               print *, "object counts not same; ", &
+                          si%mycount, " .ne. ", si%theircount
+           endif
 
-               if (si%recvcount .gt. 0) then
-                   allocate(si%idrecv(si%recvcount), stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating buffer for local ID list", &
-                                       ESMF_CONTEXT, rc)) return
-                   allocate(si%objrecv(si%recvcount), stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating buffer for local obj list", &
-                                       ESMF_CONTEXT, rc)) return
-                   allocate(si%attrrecv(si%recvcount), stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating buffer for local attr list", &
-                                       ESMF_CONTEXT, rc)) return
-                   allocate(si%namerecv(si%recvcount), stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating buffer for local name list", &
-                                       ESMF_CONTEXT, rc)) return
-     
-                   allocate(si%blindrecv(BIGBUF, si%recvcount), stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                       "Allocating buffer for local buf list", &
-                                       ESMF_CONTEXT, rc)) return
-     
-                   call ESMF_VMRecv(vm, si%idrecv, si%recvcount, j, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-                   call ESMF_VMRecv(vm, si%objrecv, si%recvcount, j, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
-                   call ESMF_VMRecv(vm, si%attrrecv, si%recvcount, j, rc=localrc)
-                   if (ESMF_LogMsgFoundError(localrc, &
-                                             ESMF_ERR_PASSTHRU, &
-                                             ESMF_CONTEXT, rc)) return
+           if (si%theircount .gt. 0) then
+               allocate(si%idrecv(si%theircount), stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local ID list", &
+                                   ESMF_CONTEXT, rc)) return
+               allocate(si%objrecv(si%theircount), stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local obj list", &
+                                   ESMF_CONTEXT, rc)) return
+    
+               allocate(si%blindrecv(bufsize, si%theircount), stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local buf list", &
+                                   ESMF_CONTEXT, rc)) return
+   
+               call ESMF_VMRecv(vm, si%idrecv, si%theircount, j, rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                         ESMF_ERR_PASSTHRU, &
+                                         ESMF_CONTEXT, rc)) return
+               call ESMF_VMRecv(vm, si%objrecv, si%theircount, j, rc=localrc)
+               if (ESMF_LogMsgFoundError(localrc, &
+                                         ESMF_ERR_PASSTHRU, &
+                                         ESMF_CONTEXT, rc)) return
 
-                   do m = 1, si%recvcount
-                       print *, "ready to get recv name", m, "from", j
-                       call ESMF_VMRecv(vm, thisname, ESMF_MAXSTR, j, rc=localrc)
-                       si%namerecv(m) = thisname
-                       print *, "got name ", m, " localrc and val=", localrc, &
-                                    trim(si%namerecv(m))
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
-                   enddo
-                   do m = 1, si%recvcount
-                       bptr => si%blindrecv(:,m)
-                       call ESMF_VMRecv(vm, bptr, BIGBUF, j, rc=localrc)
-                       print *, "got buf ", m, " localrc=", localrc
-                       !!call ESMF_VMRecv(vm, thisname, BIGBUF, j, rc=localrc)
-                       !!si%blindrecv(m) = thisname
-                       if (ESMF_LogMsgFoundError(localrc, &
-                                                 ESMF_ERR_PASSTHRU, &
-                                                 ESMF_CONTEXT, rc)) return
-                   enddo
-               endif
-               do k=1, si%sendcount
-                 print *, "i am", mypet, " my send ids and objs are:", &
-                                k, si%idsend(k), si%objsend(k)
+               do m = 1, si%theircount
+                   bptr => si%blindrecv(:,m)
+                   call ESMF_VMRecv(vm, bptr, bufsize, j, rc=localrc)
+                   print *, "got buf ", m, " localrc=", localrc
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
                enddo
-               do k=1, si%recvcount
-                 print *, "i am", mypet, " my recv ids and objs are:", &
-                                k, si%idrecv(k), si%objrecv(k)
-               enddo
+           endif
 
-               offset = 0
-               do k=1, si%recvcount
-                 ihave = .false.
-                 do l=1, si%sendcount
-                     if (si%idrecv(k) .eq. si%idsend(l)) then 
-                         ihave = .true.
-                         exit
-                     endif
-                 enddo
-                 if (.not. ihave) then
-                    select case (si%objrecv(k))
-                       case (ESMF_ID_BUNDLE%objectID)
-                        print *, "need to create proxy bundle, id=", si%idrecv(k)
-                        !bundle = ESMF_BundleCreate(name=si%namerecv(k), rc=localrc)
-                        bptr => si%blindrecv(:,k)
-                        !call c_ESMC_BaseDeserialize(bundle%btypep, bptr(1), &
-                        !                            BIGBUF, offset, rc)
-                        !call c_ESMC_SetID(bundle%btypep, si%idrecv(k), localrc)
-                        bundle = ESMF_BundleDeserialize(bptr, offset, localrc)
-                        call ESMF_StateAddBundle(state, bundle, rc=localrc)
-                       case (ESMF_ID_FIELD%objectID)
-                        print *, "need to create proxy field, id=", si%idrecv(k)
-                        !!field = ESMF_FieldCreateNoData(name=si%namerecv(k), rc=localrc)
-                        bptr => si%blindrecv(:,k)
-                        field = ESMF_FieldDeserialize(bptr, offset, localrc)
-                        !call c_ESMC_SetID(field%ftypep, si%idrecv(k), localrc)
-                        call ESMF_StateAddField(state, field, rc=localrc)
-                       case (ESMF_ID_ARRAY%objectID)
-                        print *, "need to create proxy array, id=", si%idrecv(k)
-                        array = ESMF_ArrayCreate(2, ESMF_DATA_REAL, ESMF_R8, &
-                                                 (/ 2,2 /), rc=localrc) 
-                        call ESMF_ArraySet(array, name=si%namerecv(k), rc=localrc)
-                        bptr => si%blindrecv(:,k)
-                        call c_ESMC_BaseDeserialize(array, bptr(1), &
-                                                    BIGBUF, offset, rc)
-                        !call c_ESMC_SetID(array, si%idrecv(k), localrc)
-                        call ESMF_StateAddArray(state, array, rc=localrc)
-                       case (ESMF_ID_STATE%objectID)
-                        print *, "need to create proxy state, id=", si%idrecv(k)
-                        substate = ESMF_StateCreate(si%namerecv(k), rc=localrc)
-                        bptr => si%blindrecv(:,k)
-                        call c_ESMC_BaseDeserialize(substate%statep, bptr(1), &
-                                                    BIGBUF, offset, rc)
-                        !call c_ESMC_SetID(substate%statep, si%idrecv(k), localrc)
-                        call ESMF_StateAddState(state, substate, rc=localrc)
-                       case default
-                        print *, "not needed yet, id=", si%idrecv(k)
-                    end select
-                    if (si%attrrecv(k) .gt. 0) print *, "with", si%attrrecv(k), "attributes"
+           do k=1, si%mycount
+             print *, "i am", mypet, " my send ids and objs are:", &
+                            k, si%idsend(k), si%objsend(k)
+           enddo
+           do k=1, si%theircount
+             print *, "i am", mypet, " my recv ids and objs are:", &
+                            k, si%idrecv(k), si%objrecv(k)
+           enddo
+
+           offset = 0
+           do k=1, si%theircount
+             ihave = .false.
+             do l=1, si%mycount
+                 if (si%idrecv(k) .eq. si%idsend(l)) then 
+                     ihave = .true.
+                     exit
                  endif
-               enddo
+             enddo
+             if (.not. ihave) then
+                select case (si%objrecv(k))
+                   case (ESMF_ID_BUNDLE%objectID)
+                    print *, "need to create proxy bundle, id=", si%idrecv(k)
+                    bptr => si%blindrecv(:,k)
+                    bundle = ESMF_BundleDeserialize(bptr, offset, localrc)
+                    call ESMF_StateAddBundle(state, bundle, rc=localrc)
 
-               if (si%recvcount .gt. 0) then
-                   deallocate(si%idrecv, stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                  "Deallocating buffer for local ID list", &
-                                   ESMF_CONTEXT, rc)) return
-                   deallocate(si%objrecv, stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                  "Deallocating buffer for local obj list", &
-                                   ESMF_CONTEXT, rc)) return
-                   deallocate(si%attrrecv, stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                  "Deallocating buffer for local attr list", &
-                                   ESMF_CONTEXT, rc)) return
-                   deallocate(si%namerecv, stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                  "Deallocating buffer for local name list", &
-                                   ESMF_CONTEXT, rc)) return
-                   deallocate(si%blindrecv, stat=localrc)
-                   if (ESMF_LogMsgFoundAllocError(localrc, &
-                                  "Deallocating buffer for local buf list", &
-                                   ESMF_CONTEXT, rc)) return
-               endif
+                   case (ESMF_ID_FIELD%objectID)
+                    print *, "need to create proxy field, id=", si%idrecv(k)
+                    bptr => si%blindrecv(:,k)
+                    field = ESMF_FieldDeserialize(bptr, offset, localrc)
+                    call ESMF_StateAddField(state, field, rc=localrc)
+
+                   case (ESMF_ID_ARRAY%objectID)
+                    print *, "need to create proxy array, id=", si%idrecv(k)
+                    bptr => si%blindrecv(:,k)
+                    call c_ESMC_ArrayDeserialize(array, bptr, offset, localrc)
+                    call ESMF_StateAddArray(state, array, rc=localrc)
+
+                   case (ESMF_ID_STATE%objectID)
+                    print *, "need to create proxy state, id=", si%idrecv(k)
+                    bptr => si%blindrecv(:,k)
+                    substate = ESMF_StateDeserialize(bptr, offset, localrc)
+                    call ESMF_StateAddState(state, substate, rc=localrc)
+
+                   case (ESMF_STATEITEM_NAME%ot)
+                     print *, "placeholder name"
+                     call c_ESMC_StringDeserialize(thisname, &
+                                                   bptr(1), offset, localrc)
+                     call ESMF_StateAddNameOnly(state, thisname, rc=localrc)
+         
+                   case (ESMF_STATEITEM_INDIRECT%ot)
+                     print *, "field inside a bundle"
+                     call c_ESMC_StringDeserialize(thisname, &
+                                                   bptr(1), offset, localrc)
+                     ! do nothing here
+            
+                   case (ESMF_STATEITEM_UNKNOWN%ot)
+                     print *, "unknown type"
+                     call c_ESMC_StringDeserialize(thisname, &
+                                                   bptr(1), offset, localrc)
+                     ! do nothing here
+
+                   case default
+                    print *, "not needed yet, id=", si%idrecv(k)
+                end select
+             endif
+           enddo
+
+           if (si%theircount .gt. 0) then
+               deallocate(si%idrecv, stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                              "Deallocating buffer for local ID list", &
+                               ESMF_CONTEXT, rc)) return
+               deallocate(si%objrecv, stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                              "Deallocating buffer for local obj list", &
+                               ESMF_CONTEXT, rc)) return
+               deallocate(si%blindrecv, stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                              "Deallocating buffer for local buf list", &
+                               ESMF_CONTEXT, rc)) return
            endif
        endif
     enddo

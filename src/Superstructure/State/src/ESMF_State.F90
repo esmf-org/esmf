@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.75 2004/11/30 21:01:54 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.76 2004/11/30 23:48:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,13 +86,14 @@
 
       public ESMF_StateWrite
       public ESMF_StatePrint, ESMF_StateValidate
+      public ESMF_StateSerialize, ESMF_StateDeserialize
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.75 2004/11/30 21:01:54 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.76 2004/11/30 23:48:56 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -5212,7 +5213,8 @@ end interface
                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_StateSerialize(sp%statestatus, sp%st, sp%needed_default, &
-                                 sp%ready_default, sp%reqrestart_default, &
+                                 sp%ready_default, sp%stvalid_default, &
+                                 sp%reqrestart_default, &
                                  sp%alloccount, sp%datacount, &
                                  buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -5222,7 +5224,7 @@ end interface
       do i = 1, sp%datacount
           sip => sp%datalist(i)
 
-          call c_ESMC_StateTypeSerialize(sip%otype, sip%namep, &
+          call c_ESMC_StateItemSerialize(sip%otype, sip%namep, &
                                          sip%indirect_index, sip%needed, &
                                          sip%ready, sip%valid, sip%reqrestart, &
                                          buffer(1), length, offset, localrc)
@@ -5309,7 +5311,8 @@ end interface
                                  ESMF_CONTEXT, rc)) return
 
       call c_ESMC_StateDeserialize(sp%statestatus, sp%st, sp%needed_default, &
-                                 sp%ready_default, sp%reqrestart_default, &
+                                 sp%ready_default, sp%stvalid_default, &
+                                 sp%reqrestart_default, &
                                  sp%alloccount, sp%datacount, &
                                  buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -5323,7 +5326,7 @@ end interface
       do i = 1, sp%datacount
           sip => sp%datalist(i)
 
-          call c_ESMC_StateTypeDeserialize(sip%otype, sip%namep, &
+          call c_ESMC_StateItemDeserialize(sip%otype, sip%namep, &
                                          sip%indirect_index, sip%needed, &
                                          sip%ready, sip%valid, sip%reqrestart, &
                                          buffer(1), offset, localrc)
